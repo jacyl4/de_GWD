@@ -44,14 +44,14 @@ blue  "优化性能与网络 [完毕]"
 
 
 install_gatewayrouter(){
-    green "================="
+    green "==============="
     green " 本机地址"
-    green "================="
+    green "==============="
     read localaddr
 
-    green "================="
+    green "==============="
     green " 上级路由地址"
-    green "================="
+    green "==============="
     read gatewayaddr
 
 curl -sSL https://install.pi-hole.net | bash
@@ -257,24 +257,28 @@ blue  "更改DoH地址 [完毕]"
 
 
 change_staticip(){
-    green "================="
-    green " 本机地址"
-    green "================="
+    green "======================="
+    green " 本机地址（按回车跳过）"
+    green "======================="
     read localaddr
-
-    green "================="
-    green " 上级地址"
-    green "================="
-    read gatewayaddr
-
+if [ "$localaddr" != "" ]; then 
 sed -i "/address/c\address $localaddr"  /etc/network/interfaces
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
+fi
+
+    green "======================="
+    green " 上级地址（按回车跳过）"
+    green "======================="
+    read gatewayaddr
+if [ "$gatewayaddr" != "" ]; then 
 sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
+fi
+
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 
 sed -i '/static ip_address=/d'  /etc/dhcpcd.conf
 sed -i '/static routers=/d'  /etc/dhcpcd.conf
 sed -i '/static domain_name_servers=/d'  /etc/dhcpcd.conf
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl stop dhcpcd
 /lib/systemd/systemd-sysv-install disable dhcpcd
 blue  "更改静态IP [完毕]"
@@ -288,17 +292,17 @@ change_v2ray(){
     green "==============="
     read v2servn
     
-    green "==========================="
+    green "============================"
     green "输入v2ray uuid （按回车跳过）"
-    green "==========================="
+    green "============================"
     read uuidnum
 if [ "$uuidnum" != "" ]; then 
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 fi
 
-    green "====================="
+    green "======================"
     green "输入path （按回车跳过）"
-    green "====================="
+    green "======================"
     read v2path
 if [ "$v2path" != "" ]; then 
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
