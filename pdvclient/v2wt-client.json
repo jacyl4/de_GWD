@@ -1,0 +1,78 @@
+{
+  "log": {
+    "access": "/var/log/v2ray/access.log",
+    "error": "/var/log/v2ray/error.log",
+    "loglevel": "error"
+    },
+  "inbounds": [
+    {
+      "protocol":"socks",
+      "port":1081,
+      "listen":"127.0.0.1",
+      "settings":{
+         "auth":"noauth",
+         "network": "tcp,udp"
+          },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      }
+    },
+    {
+    "protocol": "dokodemo-door",
+    "port": 1080,
+    "settings": {
+      "auth":"noauth",
+      "network": "tcp,udp",
+      "followRedirect": true
+      },
+    "streamSettings": {
+      "sockopt": {
+        "tcpFastOpen": true,
+        "mark": 100,
+        "tproxy": "tproxy"
+      }
+    },
+    "sniffing": {
+      "enabled": true,
+      "destOverride": ["http", "tls"]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+    "mux": {
+      "enabled": true,
+      "concurrency": 8
+      },
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [{
+        "address": "xxx.xxx",
+        "port": 443,
+        "users": [{
+          "id": "00000000-0000-0000-0000-000000000000",
+          "level": 1,
+          "alterId": 64,
+          "security": "AES-128-GCM"
+          }]
+        }]
+    },
+    "streamSettings": {
+      "sockopt": { "mark": 255 },
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "xxx.xxx",
+        "allowInsecure": true
+        },
+      "wsSettings": {
+        "path": "/xxxx",
+        "headers": {
+          "Host": "xxx.xxx"
+          }
+        }
+      }
+    }
+  ]
+}

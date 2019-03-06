@@ -1,0 +1,18 @@
+[Unit]
+Description=DNS-over-HTTPS Client
+Documentation=https://github.com/m13253/dns-over-https
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
+LimitNOFILE=1048576
+Restart=always
+RestartSec=3
+Type=simple
+User=nobody
+
+[Install]
+WantedBy=multi-user.target
