@@ -51,7 +51,7 @@ wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-$architecture/doh-client.service
 mkdir /etc/dns-over-https
 mv doh-client /usr/local/bin/
-mv doh-client.conf /etc/dns-over-https/doh-client.conf
+mv doh-client.conf /etc/dns-over-https/
 mv doh-client.service /etc/systemd/system/
 chmod 777 /usr/local/bin/doh-client
 chmod 777 /etc/dns-over-https/doh-client.conf
@@ -63,7 +63,7 @@ systemctl enable doh-client
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 
-sed -i '/server='/d  /etc/dnsmasq.d/01-pihole.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=114.114.114.114#53" >> /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 
@@ -283,6 +283,11 @@ blue  "更改静态IP [完毕]"
 
 
 change_v2ray(){
+    green "==============="
+    green " v2ray节点域名"
+    green "==============="
+    read v2servn
+    
     green "====================="
     green " 是否更改 v2ray uuid?"
     green "====================="
@@ -306,11 +311,6 @@ if [ "$pathyn" == "y" ]; then
     read v2path
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
 fi
-
-    green "==============="
-    green " v2ray节点域名"
-    green "==============="
-    read v2servn
 
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
@@ -339,7 +339,6 @@ start_menu(){
     green  "  4. 更新Pi-hole"
     green  "   5. 更改DoH地址"
     green  "    6. 更改静态IP"
-    red    "7. 重启"
     yellow "0. 更改v2ray节点"
     yellow "CTRL+C退出"
     echo
@@ -368,9 +367,6 @@ start_menu(){
     6)
     change_staticip
     start_menu 
-    ;;
-    7)
-    reboot
     ;;
     0)
     change_v2ray
