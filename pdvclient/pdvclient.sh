@@ -38,6 +38,7 @@ if [[ $architecture = "aarch64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
+blue  "优化性能与网络 [完毕]"
 }
 
 
@@ -227,12 +228,14 @@ sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl stop dhcpcd
 /lib/systemd/systemd-sysv-install disable dhcpcd
+blue  "安装pihole+doh+v2ray+route [完毕]"
 }
 
 
 
 change_piholeadmin(){
 pihole -a -p
+blue  "更改Pi-hole密码 [完毕]"
 }
 
 
@@ -241,6 +244,7 @@ update_pihole(){
 pihole -up
 systemctl stop dhcpcd
 /lib/systemd/systemd-sysv-install disable dhcpcd
+blue  "更新Pi-hole [完毕]"
 }
 
 update_doh(){
@@ -248,6 +252,7 @@ read -p "输入DoH地址1:" doh1
 read -p "输入DoH地址2:" doh2
 
 sed -i '/upstream_ietf/{n;s/.*/"https:\/\/'$doh1',"/;n;s/.*/"https:\/\/'$doh2',"/}' /etc/dns-over-https/doh-client.conf
+blue  "更改DoH地址 [完毕]"
 }
 
 
@@ -272,6 +277,7 @@ sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl stop dhcpcd
 /lib/systemd/systemd-sysv-install disable dhcpcd
+blue  "更改静态IP [完毕]"
 }
 
 
@@ -310,6 +316,7 @@ sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
 systemctl restart v2ray
+blue  "更改v2ray节点 [完毕]"
 }
 
 
