@@ -30,7 +30,16 @@ sysctl -p
 
 
 install_nginx+tls+pihole+doh+v2ray(){
-cd /tmp
+    green "================="
+    green " 本机地址"
+    green "================="
+    read localaddr
+
+    green "================="
+    green " 网关地址"
+    green "================="
+    read gatewayaddr
+
     green "==========================="
     green " 输入此VPS的域名(不加www开头)"
     green "==========================="
@@ -279,6 +288,37 @@ sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl daemon-reload
 systemctl restart v2ray
 systemctl enable v2ray
+
+sed -i '/static ip_address='/d  /etc/dhcpcd.conf
+sed -i '/static routers='/d  /etc/dhcpcd.conf
+sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
+
+
+ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
+
+cat > /etc/network/interfaces << EOF
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+address $localaddr
+netmask 255.255.255.0
+gateway $gatewayaddr
+EOF
+
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
+}
+
+
+update_pihole(){
+  curl -sSL https://install.pi-hole.net | bash
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
 }
 
 
@@ -293,6 +333,7 @@ start_menu(){
     echo
     green  "1. 优化性能与网络"
     green  "2. 安装nginx+tls+pihole+doh+v2ray"
+    green  "3. 更新Pi-hole"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -303,6 +344,10 @@ start_menu(){
     ;;
     2)
     install_nginx+tls+pihole+doh+v2ray
+    start_menu
+    ;;
+    3)
+    update_pihole
     start_menu
     ;;
     *)

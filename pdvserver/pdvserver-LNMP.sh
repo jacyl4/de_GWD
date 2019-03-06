@@ -30,7 +30,16 @@ sysctl -p
 
 
 install_pihole+doh+v2ray(){
-cd /tmp
+    green "================="
+    green " 本机地址"
+    green "================="
+    read localaddr
+
+    green "================="
+    green " 网关地址"
+    green "================="
+    read gatewayaddr
+
     green "==========================="
     green " 输入此VPS的域名(不加www开头)"
     green "==========================="
@@ -259,6 +268,15 @@ systemctl enable v2ray
 }
 
 
+
+update_pihole(){
+  curl -sSL https://install.pi-hole.net | bash
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
+}
+
+
+
 start_menu(){
     green "========================================"
     green "              服务端                  "
@@ -270,6 +288,7 @@ start_menu(){
     echo
     green  "1. 优化性能与网络"
     green  "2. 安装pihole+doh+v2ray"
+    green  "3. 更新Pi-hole"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -280,6 +299,10 @@ start_menu(){
     ;;
     2)
     install_pihole+doh+v2ray
+    start_menu
+    ;;
+    3)
+    update_pihole
     start_menu
     ;;
     *)
