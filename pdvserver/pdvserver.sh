@@ -40,9 +40,9 @@ install_nginx+tls+pihole+doh+v2ray(){
     green "================="
     read gatewayaddr
 
-    green "==========================="
+    green "=============================="
     green " 输入此VPS的域名(不加www开头)"
-    green "==========================="
+    green "=============================="
     read vpsdomain
 
     green "================="
@@ -55,20 +55,20 @@ install_nginx+tls+pihole+doh+v2ray(){
     green "============"
     read uuidnum
 
-    green "========================"
+    green "========================="
     green " v2ray path (格式：/xxxx)"
-    green "========================"
+    green "========================="
     read v2path
 
 apt-get install -y nginx socat
 
 cat > /etc/nginx/nginx.conf << EOF
-user  www www;
+user  nginx;
 worker_processes $workprocess;
 
 events {
     use epoll;
-    worker_connections  51200;
+    worker_connections  8192;
     multi_accept on;
 }
 
@@ -106,7 +106,6 @@ http {
   gzip_proxied      expired no-cache no-store private auth;
   gzip_types        text/plain application/javascript application/x-javascript text/javascript text/css application/xml application/xml+rss;
   gzip_vary         on;
-  gzip_proxied      expired no-cache no-store private auth;
   gzip_disable      "MSIE [1-6]\.";
 
   access_log off;
