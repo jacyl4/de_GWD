@@ -288,27 +288,19 @@ change_v2ray(){
     green "==============="
     read v2servn
     
-    green "====================="
-    green " 是否更改 v2ray uuid?"
-    green "====================="
-    read -p "需要修改请按“y” ， 跳过按 回车:" uuidyn
-if [ "$uuidyn" == "y" ]; then 
-    green "=================="
-    green " 请输入 v2ray uuid"
-    green "=================="
+    green "==========================="
+    green "输入v2ray uuid （按回车跳过）"
+    green "==========================="
     read uuidnum
+if [ "$uuidnum" != "" ]; then 
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 fi
 
-    green "==============="
-    green " 是否更改 path?"
-    green "==============="
-    read -p "需要修改请按“y” ， 跳过按 回车:" pathyn
-if [ "$pathyn" == "y" ]; then 
-    green "==============="
-    green " 请输入 path"
-    green "==============="
+    green "====================="
+    green "输入path （按回车跳过）"
+    green "====================="
     read v2path
+if [ "$v2path" != "" ]; then 
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
 fi
 
