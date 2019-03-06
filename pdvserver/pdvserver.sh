@@ -248,6 +248,10 @@ systemctl restart nginx
 
 curl -sSL https://install.pi-hole.net | bash
 
+
+
+
+
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.conf
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.service
@@ -292,8 +296,6 @@ systemctl enable v2ray
 sed -i '/static ip_address='/d  /etc/dhcpcd.conf
 sed -i '/static routers='/d  /etc/dhcpcd.conf
 sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
-
-
 ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
 
 cat > /etc/network/interfaces << EOF
