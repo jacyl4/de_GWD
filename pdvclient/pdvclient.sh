@@ -44,6 +44,16 @@ blue  "优化性能与网络 [完毕]"
 
 
 install_gatewayrouter(){
+    green "================="
+    green " 本机地址"
+    green "================="
+    read localaddr
+
+    green "================="
+    green " 上级路由地址"
+    green "================="
+    read gatewayaddr
+
 curl -sSL https://install.pi-hole.net | bash
 
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-$architecture/doh-client
@@ -200,16 +210,6 @@ systemctl enable iptables-proxy.service
 sed -i '/static ip_address='/d  /etc/dhcpcd.conf
 sed -i '/static routers='/d  /etc/dhcpcd.conf
 sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
-
-    green "================="
-    green " 本机地址"
-    green "================="
-    read localaddr
-
-    green "================="
-    green " 上级路由地址"
-    green "================="
-    read gatewayaddr
 
 ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
 
