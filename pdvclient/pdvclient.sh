@@ -315,6 +315,19 @@ blue  "更改v2ray节点 [完毕]"
 }
 
 
+switch_ipotables_proxy(){
+    green "======================"
+    green "Y.启动代理 / N.停止代理"
+    green "======================"
+    read iptablesproxyyn
+if [ "$iptablesproxyyn" = "Y" ] & [ "$iptablesproxyyn" = "y" ]; then
+systemctl restart iptables-proxy
+blue  "[代理已启动]";
+elif [ "$iptablesproxyyn" = "N" ] & [ "$iptablesproxyyn" = "n" ]; then
+systemctl stop iptables-proxy
+blue  "[代理已关闭]";
+fi
+}
 
 
 
@@ -334,6 +347,7 @@ start_menu(){
     green  "  4. 更新Pi-hole"
     green  "   5. 更改DoH地址"
     green  "    6. 更改静态IP"
+    red    "9. 代理开关"
     yellow "0. 更改v2ray节点"
     yellow "CTRL+C退出"
     echo
@@ -361,6 +375,10 @@ start_menu(){
     ;;
     6)
     change_staticip
+    start_menu 
+    ;;
+    9)
+    switch_ipotables_proxy
     start_menu 
     ;;
     0)
