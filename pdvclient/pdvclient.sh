@@ -45,9 +45,9 @@ fi
 install_gatewayrouter(){
 curl -sSL https://install.pi-hole.net | bash
 
-wget http://seso.icu/pdvclient/doh-$architecture/doh-client
-wget http://seso.icu/pdvclient/doh-client.conf
-wget http://seso.icu/pdvclient/doh-$architecture/doh-client.service
+wget https://github.com/jacyl4/linux-router/raw/master/pdvclient/doh-$architecture/doh-client
+wget https://github.com/jacyl4/linux-router/raw/master/pdvclient/doh-client.conf
+wget https://github.com/jacyl4/linux-router/raw/master/pdvclient/doh-$architecture/doh-client.service
 mkdir /etc/dns-over-https
 mv doh-client /usr/local/bin/
 mv doh-client.conf /etc/dns-over-https/doh-client.conf
@@ -73,7 +73,7 @@ systemctl restart pihole-FTL
 
 bash <(curl -L -s https://install.direct/go.sh)
 echo "" > /etc/v2ray/config.json
-wget https://seso.icu/pdvclient/v2wt-client.json
+wget https://github.com/jacyl4/linux-router/raw/master/pdvclient/v2wt-client.json
 mv -f v2wt-client.json /etc/v2ray/config.json
 systemctl restart v2ray
 systemctl enable v2ray
