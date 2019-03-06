@@ -63,7 +63,7 @@ install_nginx+tls+pihole+doh+v2ray(){
 apt-get install -y nginx socat
 
 cat > /etc/nginx/nginx.conf << EOF
-user  nginx;
+user  root root;
 worker_processes $workprocess;
 
 events {
