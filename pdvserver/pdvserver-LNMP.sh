@@ -216,9 +216,9 @@ systemctl restart nginx
 
 curl -sSL https://install.pi-hole.net | bash
 
-wget https://github.com/jacyl4/linux-router/raw/master/pdvserver/doh-amd64/doh-server
-wget https://github.com/jacyl4/linux-router/raw/master/pdvserver/doh-amd64/doh-server.conf
-wget https://github.com/jacyl4/linux-router/raw/master/pdvserver/doh-amd64/doh-server.service
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.conf
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.service
 
 mkdir /etc/dns-over-https
 mv doh-server /usr/local/bin/
@@ -244,7 +244,7 @@ systemctl disable systemd-resolved
 
 bash <(curl -L -s https://install.direct/go.sh)
 echo "" > /etc/v2ray/config.json
-wget https://github.com/jacyl4/linux-router/raw/master/pdvserver/v2wt-server.json
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/v2wt-server.json
 mv -f v2wt-server.json /etc/v2ray/config.json
 
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
