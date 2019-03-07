@@ -225,6 +225,7 @@ iface lo inet loopback
 auto $ethernetnum
 iface $ethernetnum inet dhcp
 EOF
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl stop dhcpcd
 /lib/systemd/systemd-sysv-install disable dhcpcd
 systemctl stop systemd-resolved
@@ -241,6 +242,7 @@ mv doh-server.service /etc/systemd/system/
 chown -R root:staff /usr/local/nginx/conf/ssl/$vpsdomain
 sed -i '/cert =/c\cert = "/usr/local/nginx/conf/ssl/'$vpsdomain'/fullchain.cer"'  /etc/dns-over-https/doh-server.conf
 sed -i '/key =/c\key = "/usr/local/nginx/conf/ssl/'$vpsdomain'/'$vpsdomain'.key"'  /etc/dns-over-https/doh-server.conf
+sed -i '/path =/c\path = "'$v2path'"'  /etc/dns-over-https/doh-server.conf
 chmod 777 /usr/local/bin/doh-server
 chmod 777 /etc/dns-over-https/doh-server.conf
 chmod 777 /etc/systemd/system/doh-server.service

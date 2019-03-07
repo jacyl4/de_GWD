@@ -30,16 +30,6 @@ sysctl -p
 
 
 install_nginx+tls+pihole+doh+v2ray(){
-    green "================="
-    green " 本机地址"
-    green "================="
-    read localaddr
-
-    green "================="
-    green " 网关地址"
-    green "================="
-    read gatewayaddr
-
     green "=============================="
     green " 输入此VPS的域名(不加www开头)"
     green "=============================="
@@ -245,36 +235,43 @@ printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.s
 systemctl daemon-reload
 systemctl restart nginx
 
+
 curl -sSL https://install.pi-hole.net | bash
+sed -i '/static ip_address='/d  /etc/dhcpcd.conf
+sed -i '/static routers='/d  /etc/dhcpcd.conf
+sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
+ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
+cat > /etc/network/interfaces << EOF
+auto lo
+iface lo inet loopback
 
-
-
+auto $ethernetnum
+iface $ethernetnum inet dhcp
+EOF
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
 
 
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.conf
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.service
-
 mkdir /etc/dns-over-https
 mv doh-server /usr/local/bin/
 mv doh-server.conf /etc/dns-over-https/
 mv doh-server.service /etc/systemd/system/
-
+chown -R root:staff /var/www/ssl
 sed -i '/cert =/c\cert = "/var/www/ssl/'$vpsdomain'.key.pem"'  /etc/dns-over-https/doh-server.conf
 sed -i '/key =/c\key = "/var/www/ssl/'$vpsdomain'.key"'  /etc/dns-over-https/doh-server.conf
-
+sed -i '/path =/c\path = "'$v2path'"'  /etc/dns-over-https/doh-server.conf
 chmod 777 /usr/local/bin/doh-server
 chmod 777 /etc/dns-over-https/doh-server.conf
 chmod 777 /etc/systemd/system/doh-server.service
-
-chown -R root:staff /var/www/ssl
-
 systemctl daemon-reload
 systemctl restart doh-server
 systemctl enable doh-server
-
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
 
 
 bash <(curl -L -s https://install.direct/go.sh)
@@ -291,33 +288,11 @@ sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl daemon-reload
 systemctl restart v2ray
 systemctl enable v2ray
-
-sed -i '/static ip_address='/d  /etc/dhcpcd.conf
-sed -i '/static routers='/d  /etc/dhcpcd.conf
-sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
-ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
-
-cat > /etc/network/interfaces << EOF
-auto lo
-iface lo inet loopback
-
-auto $ethernetnum
-iface $ethernetnum inet static
-address $localaddr
-netmask 255.255.255.0
-gateway $gatewayaddr
-EOF
-
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
 }
 
 
 update_pihole(){
-  curl -sSL https://install.pi-hole.net | bash
+curl -sSL https://install.pi-hole.net | bash
 systemctl stop dhcpcd
 /lib/systemd/systemd-sysv-install disable dhcpcd
 }
