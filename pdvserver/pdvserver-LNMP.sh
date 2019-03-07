@@ -29,16 +29,6 @@ sysctl -p
 
 
 install_pihole+doh+v2ray(){
-    green "================="
-    green " 本机地址"
-    green "================="
-    read localaddr
-
-    green "================="
-    green " 网关地址"
-    green "================="
-    read gatewayaddr
-
     green "==========================="
     green " 输入此VPS的域名(不加www开头)"
     green "==========================="
