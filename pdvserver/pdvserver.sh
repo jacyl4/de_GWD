@@ -247,6 +247,7 @@ iface lo inet loopback
 
 auto $ethernetnum
 iface $ethernetnum inet dhcp
+mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl stop dhcpcd
@@ -265,7 +266,6 @@ mv doh-server.service /etc/systemd/system/
 chown -R root:staff /var/www/ssl
 sed -i '/cert =/c\cert = "/var/www/ssl/'$vpsdomain'.key.pem"'  /etc/dns-over-https/doh-server.conf
 sed -i '/key =/c\key = "/var/www/ssl/'$vpsdomain'.key"'  /etc/dns-over-https/doh-server.conf
-sed -i '/path =/c\path = "'$v2path'"'  /etc/dns-over-https/doh-server.conf
 chmod 777 /usr/local/bin/doh-server
 chmod 777 /etc/dns-over-https/doh-server.conf
 chmod 777 /etc/systemd/system/doh-server.service

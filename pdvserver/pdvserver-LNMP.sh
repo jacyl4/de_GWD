@@ -144,17 +144,45 @@ server {
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
 
+
+  include rewrite/none.conf;
+  #error_page   404   /404.html;
+
+  # Deny access to PHP files in specific directory
+  #location ~ /(wp-content|uploads|wp-includes|images)/.*\.php$ { deny all; }
+
+  include enable-php-pathinfo.conf;
+
+  location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
+  {
+      expires      30d;
+  }
+
+  location ~ .*\.(js|css)?$
+  {
+      expires      12h;
+  }
+
 location /dq {
-  proxy_set_header X-Real-IP \$remote_addr;
-  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_set_header Host \$http_host;
-  proxy_set_header X-NginX-Proxy true;
+  proxy_redirect off;
+  proxy_pass http://127.0.0.1:8053;
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
-  proxy_redirect off;
-  proxy_set_header        X-Forwarded-Proto \$scheme;
-  proxy_read_timeout 86400;
-  proxy_pass http://$vpsdomain/dq;
+  proxy_set_header Connection "Upgrade";
+  proxy_set_header Host "$vpsdomain";
+  proxy_set_header X-NginX-Proxy true;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_intercept_errors on;
+  proxy_connect_timeout 300;
+  proxy_send_timeout 300;
+  proxy_read_timeout 600;
+  proxy_buffer_size 512k;
+  proxy_buffers 8 512k;
+  proxy_busy_buffers_size 512k;
+  proxy_temp_file_write_size 512k;
+  proxy_max_temp_file_size 128m;
 }
 
 location $v2path {
@@ -177,23 +205,11 @@ location $v2path {
   proxy_max_temp_file_size 128m;
 }
 
-  include rewrite/none.conf;
-  #error_page   404   /404.html;
+location /admin {
+  root /var/www/html;
+  index index.php index.html index.htm;
+}
 
-  # Deny access to PHP files in specific directory
-  #location ~ /(wp-content|uploads|wp-includes|images)/.*\.php$ { deny all; }
-
-  include enable-php-pathinfo.conf;
-
-  location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
-  {
-      expires      30d;
-  }
-
-  location ~ .*\.(js|css)?$
-  {
-      expires      12h;
-  }
 
   location ~ /.well-known {
       allow all;
@@ -224,6 +240,7 @@ iface lo inet loopback
 
 auto $ethernetnum
 iface $ethernetnum inet dhcp
+mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl stop dhcpcd
@@ -239,10 +256,8 @@ mkdir /etc/dns-over-https
 mv doh-server /usr/local/bin/
 mv doh-server.conf /etc/dns-over-https/
 mv doh-server.service /etc/systemd/system/
-chown -R root:staff /usr/local/nginx/conf/ssl/$vpsdomain
 sed -i '/cert =/c\cert = "/usr/local/nginx/conf/ssl/'$vpsdomain'/fullchain.cer"'  /etc/dns-over-https/doh-server.conf
 sed -i '/key =/c\key = "/usr/local/nginx/conf/ssl/'$vpsdomain'/'$vpsdomain'.key"'  /etc/dns-over-https/doh-server.conf
-sed -i '/path =/c\path = "'$v2path'"'  /etc/dns-over-https/doh-server.conf
 chmod 777 /usr/local/bin/doh-server
 chmod 777 /etc/dns-over-https/doh-server.conf
 chmod 777 /etc/systemd/system/doh-server.service
