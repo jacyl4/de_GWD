@@ -223,7 +223,7 @@ auto lo
 iface lo inet loopback
 
 auto $ethernetnum
-iface $ethernetnum inet dhcp
+iface $ethernetnum inet static
   address $localaddr
   netmask 255.255.255.0
   gateway $gatewayaddr

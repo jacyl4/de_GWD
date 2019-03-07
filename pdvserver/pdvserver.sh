@@ -236,6 +236,7 @@ gatewayaddr="$(awk -F '[=]' 'NR==41{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1
 sed -i '/static ip_address=/d' /etc/dhcpcd.conf
 sed -i '/static routers=/d' /etc/dhcpcd.conf
 sed -i '/static domain_name_servers=/d' /etc/dhcpcd.conf
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
 
@@ -243,7 +244,7 @@ auto lo
 iface lo inet loopback
 
 auto $ethernetnum
-iface $ethernetnum inet dhcp
+iface $ethernetnum inet static
   address $localaddr
   netmask 255.255.255.0
   gateway $gatewayaddr
@@ -269,7 +270,7 @@ git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-server.conf
-mv -f doh-server.conf /etc/dns-over-https
+mv -f doh-server.conf /etc/dns-over-https/
 systemctl restart doh-server
 systemctl enable doh-server
 

@@ -13,7 +13,6 @@ case $(uname -m) in
 esac
 
 
-
 performance_mod(){
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
@@ -34,7 +33,7 @@ echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 sysctl -p
 
-if [[ $architecture = "aarch64" ]]; then
+if [ $architecture = "aarch64" ]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
@@ -54,40 +53,87 @@ install_gatewayrouter(){
     green "==============="
     read gatewayaddr
 
+bash <(curl -L -s https://install.direct/go.sh)
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/v2wt-client.json
+mv -f v2wt-client.json /etc/v2ray/config.json
+
+    green "==============="
+    green " v2ray节点域名"
+    green "==============="
+    read v2servn
+    
+    green "==============="
+    green "输入v2ray uuid"
+    green "==============="
+    read uuidnum
+
+    green "==============="
+    green "输入path"
+    green "==============="
+    read v2path
+
+sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
+systemctl restart v2ray
+systemctl enable v2ray
+
+
 curl -sSL https://install.pi-hole.net | bash
-
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-$architecture/doh-client
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-$architecture/doh-client.service
-mkdir /etc/dns-over-https
-mv doh-client /usr/local/bin/
-mv doh-client.conf /etc/dns-over-https/
-mv doh-client.service /etc/systemd/system/
-chmod 777 /usr/local/bin/doh-client
-chmod 777 /etc/dns-over-https/doh-client.conf
-chmod 777 /etc/systemd/system/doh-client.service
-systemctl daemon-reload
-systemctl restart doh-client
-systemctl enable doh-client
-
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=114.114.114.114#53" >> /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
+sed -i '/static ip_address=/d' /etc/dhcpcd.conf
+sed -i '/static routers=/d' /etc/dhcpcd.conf
+sed -i '/static domain_name_servers=/d' /etc/dhcpcd.conf
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
+ethernetnum="$(awk 'NR==39{print $2}' /etc/dhcpcd.conf)"
+cat > /etc/network/interfaces << EOF
+source /etc/network/interfaces.d/*
 
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+EOF
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+systemctl mask dhcpcd
+systemctl mask systemd-resolved
 pihole restartdns
 systemctl restart pihole-FTL
 
-bash <(curl -L -s https://install.direct/go.sh)
-echo "" > /etc/v2ray/config.json
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/v2wt-client.json
-mv -f v2wt-client.json /etc/v2ray/config.json
-systemctl restart v2ray
-systemctl enable v2ray
+
+apt-get install -y git make
+if [ $architecture = "aarch64" ]; then
+wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
+tar -xvf go1.11.5.linux-arm64.tar.gz
+elif [ $architecture = "amd64" ]; then
+wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+tar -xvf go1.11.5.linux-amd64.tar.gz
+fi
+mv go /usr/local
+mkdir ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+source ~/.profile
+git clone https://github.com/m13253/dns-over-https.git
+cd dns-over-https
+make && make install
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
+mv -f doh-client.conf /etc/dns-over-https/
+systemctl restart doh-client
+systemctl enable doh-client
 
 
 
@@ -97,7 +143,6 @@ cat > /etc/chnroute.sh << "EOF"
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /etc/chnroute.txt
 
 bash <(curl -L -s https://install.direct/go.sh)
-
 EOF
 chmod +x /etc/chnroute.sh
 /etc/chnroute.sh
@@ -204,29 +249,7 @@ ExecStop=/etc/iptables-proxy/iptables-proxy-down.sh
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl daemon-reload
 systemctl enable iptables-proxy.service
-
-sed -i '/static ip_address='/d  /etc/dhcpcd.conf
-sed -i '/static routers='/d  /etc/dhcpcd.conf
-sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
-ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
-
-cat > /etc/network/interfaces << EOF
-auto lo
-iface lo inet loopback
-
-auto $ethernetnum
-iface $ethernetnum inet static
-address $localaddr
-netmask 255.255.255.0
-gateway $gatewayaddr
-EOF
-
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
 blue  "安装pihole+doh+v2ray+route [完毕]"
 }
 
@@ -241,8 +264,8 @@ blue  "更改Pi-hole密码 [完毕]"
 
 update_pihole(){
 pihole -up
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
+systemctl mask systemd-resolved
 blue  "更新Pi-hole [完毕]"
 }
 
@@ -256,30 +279,29 @@ blue  "更改DoH地址 [完毕]"
 
 
 change_staticip(){
-    green "======================="
-    green " 本机地址（按回车跳过）"
-    green "======================="
+    green "====================="
+    green " 本机地址（回车跳过）"
+    green "====================="
     read localaddr
 if [ "$localaddr" != "" ]; then 
 sed -i "/address/c\address $localaddr"  /etc/network/interfaces
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 fi
 
-    green "======================="
-    green " 上级地址（按回车跳过）"
-    green "======================="
+    green "====================="
+    green " 上级地址（回车跳过）"
+    green "====================="
     read gatewayaddr
 if [ "$gatewayaddr" != "" ]; then 
 sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
 fi
 
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-
 sed -i '/static ip_address=/d'  /etc/dhcpcd.conf
 sed -i '/static routers=/d'  /etc/dhcpcd.conf
 sed -i '/static domain_name_servers=/d'  /etc/dhcpcd.conf
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
+systemctl mask systemd-resolved
 blue  "更改静态IP [完毕]"
 }
 
@@ -291,17 +313,17 @@ change_v2ray(){
     green "==============="
     read v2servn
     
-    green "============================"
-    green "输入v2ray uuid （按回车跳过）"
-    green "============================"
+    green "=========================="
+    green "输入v2ray uuid （回车跳过）"
+    green "=========================="
     read uuidnum
 if [ "$uuidnum" != "" ]; then 
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 fi
 
-    green "======================"
-    green "输入path （按回车跳过）"
-    green "======================"
+    green "===================="
+    green "输入path （回车跳过）"
+    green "===================="
     read v2path
 if [ "$v2path" != "" ]; then 
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
