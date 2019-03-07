@@ -168,11 +168,10 @@ location /dq {
   proxy_pass http://dns-backend;
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
-  proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-NginX-Proxy true;
-  proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_read_timeout 86400;
 }
@@ -184,11 +183,18 @@ location $v2path {
   proxy_set_header Upgrade "WebSocket";
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
-  proxy_set_header X-NginX-Proxy true;
   proxy_set_header X-Forwarded-Proto \$scheme;
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_read_timeout 86400;
+  proxy_intercept_errors on;
+  proxy_connect_timeout 300;
+  proxy_send_timeout 300;
+  proxy_read_timeout 600;
+  proxy_buffer_size 512k;
+  proxy_buffers 8 512k;
+  proxy_busy_buffers_size 512k;
+  proxy_temp_file_write_size 512k;
+  proxy_max_temp_file_size 128m;
 }
 
   location ~ /.well-known {
