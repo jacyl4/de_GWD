@@ -53,10 +53,6 @@ install_gatewayrouter(){
     green "==============="
     read gatewayaddr
 
-bash <(curl -L -s https://install.direct/go.sh)
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/v2wt-client.json
-mv -f v2wt-client.json /etc/v2ray/config.json
-
     green "==============="
     green " v2ray节点域名"
     green "==============="
@@ -72,6 +68,9 @@ mv -f v2wt-client.json /etc/v2ray/config.json
     green "==============="
     read v2path
 
+bash <(curl -L -s https://install.direct/go.sh)
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/v2wt-client.json
+mv -f v2wt-client.json /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
@@ -79,62 +78,6 @@ sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
 systemctl restart v2ray
 systemctl enable v2ray
-
-
-curl -sSL https://install.pi-hole.net | bash
-sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=114.114.114.114#53" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
-sed -i '/static ip_address=/d' /etc/dhcpcd.conf
-sed -i '/static routers=/d' /etc/dhcpcd.conf
-sed -i '/static domain_name_servers=/d' /etc/dhcpcd.conf
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-ethernetnum="$(awk 'NR==39{print $2}' /etc/dhcpcd.conf)"
-cat > /etc/network/interfaces << EOF
-source /etc/network/interfaces.d/*
-
-auto lo
-iface lo inet loopback
-
-auto $ethernetnum
-iface $ethernetnum inet static
-  address $localaddr
-  netmask 255.255.255.0
-  gateway $gatewayaddr
-EOF
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-systemctl mask dhcpcd
-systemctl mask systemd-resolved
-pihole restartdns
-systemctl restart pihole-FTL
-
-
-apt-get install -y git make
-if [ $architecture = "aarch64" ]; then
-wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
-tar -xvf go1.11.5.linux-arm64.tar.gz
-elif [ $architecture = "amd64" ]; then
-wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
-tar -xvf go1.11.5.linux-amd64.tar.gz
-fi
-mv go /usr/local
-mkdir ~/gopath
-cat >> ~/.profile << "EOF"
-export GOROOT=/usr/local/go
-export GOPATH=~/gopath
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-source ~/.profile
-git clone https://github.com/m13253/dns-over-https.git
-cd dns-over-https
-make && make install
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
-mv -f doh-client.conf /etc/dns-over-https/
-systemctl restart doh-client
-systemctl enable doh-client
-
 
 
 apt-get install -y net-tools ipset
@@ -250,6 +193,63 @@ ExecStop=/etc/iptables-proxy/iptables-proxy-down.sh
 WantedBy=multi-user.target
 EOF
 systemctl enable iptables-proxy.service
+
+
+
+apt-get install -y git make
+if [ $architecture = "aarch64" ]; then
+wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
+tar -xvf go1.11.5.linux-arm64.tar.gz
+elif [ $architecture = "amd64" ]; then
+wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+tar -xvf go1.11.5.linux-amd64.tar.gz
+fi
+mv go /usr/local
+mkdir ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+source ~/.profile
+git clone https://github.com/m13253/dns-over-https.git
+cd dns-over-https
+make && make install
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
+mv -f doh-client.conf /etc/dns-over-https/
+systemctl restart doh-client
+systemctl enable doh-client
+
+
+
+curl -sSL https://install.pi-hole.net | bash
+sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+echo "server=114.114.114.114#53" >> /etc/dnsmasq.d/01-pihole.conf
+echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
+sed -i '/static ip_address=/d' /etc/dhcpcd.conf
+sed -i '/static routers=/d' /etc/dhcpcd.conf
+sed -i '/static domain_name_servers=/d' /etc/dhcpcd.conf
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
+ethernetnum="$(awk 'NR==39{print $2}' /etc/dhcpcd.conf)"
+cat > /etc/network/interfaces << EOF
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+EOF
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+pihole restartdns
+systemctl restart pihole-FTL
+systemctl mask dhcpcd
+systemctl mask systemd-resolved
 blue  "安装pihole+doh+v2ray+route [完毕]"
 }
 
@@ -357,14 +357,14 @@ fi
 start_menu(){
     green "============================================"
     green "              客户端                       "
-    green "介绍：一条龙安装v2ray+doh+pihole+透明网关路由 "
+    green "介绍：一条龙安装v2ray+pihole+doh+透明网关路由 "
     green "系统：Debian9 (amd64 & aarch64)            "
     green "作者：jacyl4                               "
     green "网站：jacyl4.github.io                     "
     green "============================================"
     echo
     green  "1. 优化性能与网络"
-    green  "2. 安装pihole+doh+v2ray+route"
+    green  "2. 安装v2ray+doh+pihole+route"
     green  " 3. 更改Pi-hole密码"
     green  "  4. 更新Pi-hole"
     green  "   5. 更改DoH地址"
