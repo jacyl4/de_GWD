@@ -82,7 +82,7 @@ echo '0 0 * * * /usr/local/updatepdv.sh' >> now.cron
 crontab now.cron
 
 cat > /usr/local/nginx/conf/vhost/$vpsdomain.conf<< EOF
-upstream $vpsdomain {server 127.0.0.1:8053;}
+upstream dns-backend { server 127.0.0.1:8053; }
 
 server {
   listen 80;
@@ -165,7 +165,7 @@ server {
 
 location /dq {
   proxy_redirect off;
-  proxy_pass http://127.0.0.1:8053;
+  proxy_pass http://dns-backend/dq;
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "Upgrade";
@@ -174,15 +174,7 @@ location /dq {
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-Proto \$scheme;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_intercept_errors on;
-  proxy_connect_timeout 300;
-  proxy_send_timeout 300;
-  proxy_read_timeout 600;
-  proxy_buffer_size 512k;
-  proxy_buffers 8 512k;
-  proxy_busy_buffers_size 512k;
-  proxy_temp_file_write_size 512k;
-  proxy_max_temp_file_size 128m;
+  proxy_read_timeout 86400;
 }
 
 location $v2path {
@@ -223,6 +215,7 @@ location /admin {
   access_log off;
 }
 EOF
+
 mkdir /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
 systemctl daemon-reload
@@ -230,17 +223,24 @@ systemctl restart nginx
 
 
 curl -sSL https://install.pi-hole.net | bash
-sed -i '/static ip_address='/d  /etc/dhcpcd.conf
-sed -i '/static routers='/d  /etc/dhcpcd.conf
-sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
-ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
+ethernetnum="$(awk 'NR==39{print $2}' /etc/dhcpcd.conf)"
+localaddr="$(awk -F '[=]' 'NR==40{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
+gatewayaddr="$(awk -F '[=]' 'NR==41{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
+sed -i '/static ip_address=/d' /etc/dhcpcd.conf
+sed -i '/static routers=/d' /etc/dhcpcd.conf
+sed -i '/static domain_name_servers=/d' /etc/dhcpcd.conf
 cat > /etc/network/interfaces << EOF
+source /etc/network/interfaces.d/*
+
 auto lo
 iface lo inet loopback
 
 auto $ethernetnum
 iface $ethernetnum inet dhcp
-mtu 1488
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+  mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl stop dhcpcd
@@ -249,35 +249,35 @@ systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 
 
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.conf
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.service
-mkdir /etc/dns-over-https
-mv doh-server /usr/local/bin/
-mv doh-server.conf /etc/dns-over-https/
-mv doh-server.service /etc/systemd/system/
-sed -i '/cert =/c\cert = "/usr/local/nginx/conf/ssl/'$vpsdomain'/fullchain.cer"'  /etc/dns-over-https/doh-server.conf
-sed -i '/key =/c\key = "/usr/local/nginx/conf/ssl/'$vpsdomain'/'$vpsdomain'.key"'  /etc/dns-over-https/doh-server.conf
-chmod 777 /usr/local/bin/doh-server
-chmod 777 /etc/dns-over-https/doh-server.conf
-chmod 777 /etc/systemd/system/doh-server.service
-systemctl daemon-reload
+apt-get install -y git make net-tools
+wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+tar -xvf go1.11.5.linux-amd64.tar.gz
+mv go /usr/local
+mkdir ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+source ~/.profile
+git clone https://github.com/m13253/dns-over-https.git
+cd dns-over-https
+make && make install
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-server.conf
+mv -f doh-server.conf /etc/dns-over-https
 systemctl restart doh-server
 systemctl enable doh-server
+systemctl mask dhcpcd
 
 
 bash <(curl -L -s https://install.direct/go.sh)
-echo "" > /etc/v2ray/config.json
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/v2wt-server.json
 mv -f v2wt-server.json /etc/v2ray/config.json
-
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
-
-systemctl daemon-reload
 systemctl restart v2ray
 systemctl enable v2ray
 }
@@ -286,8 +286,7 @@ systemctl enable v2ray
 
 update_pihole(){
 curl -sSL https://install.pi-hole.net | bash
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
 }
 
 

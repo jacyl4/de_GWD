@@ -242,6 +242,8 @@ sed -i '/static routers='/d  /etc/dhcpcd.conf
 sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
 ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
 cat > /etc/network/interfaces << EOF
+source /etc/network/interfaces.d/*
+
 auto lo
 iface lo inet loopback
 
