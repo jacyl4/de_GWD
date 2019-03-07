@@ -53,7 +53,7 @@ install_nginx+tls+pihole+doh+v2ray(){
 apt-get install -y nginx socat
 
 cat > /etc/nginx/nginx.conf << EOF
-user  root root;
+user  www-data www-data;
 worker_processes $workprocess;
 
 events {
@@ -123,9 +123,7 @@ curl https://get.acme.sh | sh
                --keypath       /var/www/ssl/$vpsdomain.key  \
                --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
                --reloadcmd     "systemctl restart nginx"
-
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
-
 openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
 
 
@@ -160,13 +158,13 @@ echo '0 0 * * * /usr/local/updatepdv.sh' >> now.cron
 crontab now.cron
 
 cat > /etc/nginx/conf.d/default.conf<< EOF
-upstream $vpsdomain {server 127.0.0.1:8053;}
+upstream dns-backend { server 127.0.0.1:8053; }
 
 server {
   listen 80;
   server_name $vpsdomain www.$vpsdomain;
-  return 301 https://$vpsdomain\$request_uri;
-  add_header X-Frame-Options SAMEORIGIN;
+  root /var/www/html;
+  index index.html index.htm index.nginx-debian.html;
 
   access_log off;
 }
@@ -196,16 +194,17 @@ server {
   resolver_timeout 5s;
 
 location /dq {
-  proxy_set_header X-Real-IP \$remote_addr;
-  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_set_header Host \$http_host;
-  proxy_set_header X-NginX-Proxy true;
+  proxy_redirect off;
+  proxy_pass http://dns-backend/dq;
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
-  proxy_redirect off;
-  proxy_set_header        X-Forwarded-Proto \$scheme;
+  proxy_set_header Connection "Upgrade";
+  proxy_set_header Host "$vpsdomain";
+  proxy_set_header X-NginX-Proxy true;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_read_timeout 86400;
-  proxy_pass http://$vpsdomain/dq;
 }
 
 location $v2path {
@@ -215,12 +214,12 @@ location $v2path {
   proxy_set_header Upgrade "WebSocket";
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
+  proxy_set_header X-NginX-Proxy true;
+  proxy_set_header X-Forwarded-Proto \$scheme;
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_intercept_errors on;
-  proxy_connect_timeout 300;
-  proxy_send_timeout 300;
-  proxy_read_timeout 600;
+  proxy_read_timeout 86400;
   proxy_buffer_size 512k;
   proxy_buffers 8 512k;
   proxy_busy_buffers_size 512k;
@@ -237,10 +236,12 @@ systemctl restart nginx
 
 
 curl -sSL https://install.pi-hole.net | bash
-sed -i '/static ip_address='/d  /etc/dhcpcd.conf
-sed -i '/static routers='/d  /etc/dhcpcd.conf
-sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
-ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
+ethernetnum="$(awk 'NR==39{print $2}' /etc/dhcpcd.conf)"
+localaddr="$(awk -F '[=]' 'NR==40{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
+gatewayaddr="$(awk -F '[=]' 'NR==41{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
+sed -i '/static ip_address=/d' /etc/dhcpcd.conf
+sed -i '/static routers=/d' /etc/dhcpcd.conf
+sed -i '/static domain_name_servers=/d' /etc/dhcpcd.conf
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
 
@@ -249,44 +250,44 @@ iface lo inet loopback
 
 auto $ethernetnum
 iface $ethernetnum inet dhcp
-mtu 1488
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+  mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
+systemctl mask dhcpcd
+systemctl mask systemd-resolved
 
 
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.conf
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-amd64/doh-server.service
-mkdir /etc/dns-over-https
-mv doh-server /usr/local/bin/
-mv doh-server.conf /etc/dns-over-https/
-mv doh-server.service /etc/systemd/system/
-chown -R root:staff /var/www/ssl
-sed -i '/cert =/c\cert = "/var/www/ssl/'$vpsdomain'.key.pem"'  /etc/dns-over-https/doh-server.conf
-sed -i '/key =/c\key = "/var/www/ssl/'$vpsdomain'.key"'  /etc/dns-over-https/doh-server.conf
-chmod 777 /usr/local/bin/doh-server
-chmod 777 /etc/dns-over-https/doh-server.conf
-chmod 777 /etc/systemd/system/doh-server.service
-systemctl daemon-reload
+apt-get install -y git make
+wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+tar -xvf go1.11.5.linux-amd64.tar.gz
+mv go /usr/local
+mkdir ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+source ~/.profile
+git clone https://github.com/m13253/dns-over-https.git
+cd dns-over-https
+make && make install
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-server.conf
+mv -f doh-server.conf /etc/dns-over-https
 systemctl restart doh-server
 systemctl enable doh-server
 
 
 bash <(curl -L -s https://install.direct/go.sh)
-echo "" > /etc/v2ray/config.json
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/v2wt-server.json
 mv -f v2wt-server.json /etc/v2ray/config.json
-
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
-
 systemctl daemon-reload
 systemctl restart v2ray
 systemctl enable v2ray
@@ -295,8 +296,8 @@ systemctl enable v2ray
 
 update_pihole(){
 curl -sSL https://install.pi-hole.net | bash
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
+systemctl mask systemd-resolved
 }
 
 

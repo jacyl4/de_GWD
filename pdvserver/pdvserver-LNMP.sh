@@ -185,8 +185,8 @@ location $v2path {
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-NginX-Proxy true;
-  proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_intercept_errors on;
   proxy_read_timeout 86400;
@@ -209,7 +209,6 @@ location $v2path {
   access_log off;
 }
 EOF
-
 mkdir /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
 systemctl daemon-reload
@@ -237,10 +236,8 @@ iface $ethernetnum inet dhcp
   mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
+systemctl mask dhcpcd
+systemctl mask systemd-resolved
 
 
 apt-get install -y git make
@@ -261,7 +258,6 @@ wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-
 mv -f doh-server.conf /etc/dns-over-https
 systemctl restart doh-server
 systemctl enable doh-server
-systemctl mask dhcpcd
 
 
 bash <(curl -L -s https://install.direct/go.sh)
@@ -272,6 +268,7 @@ sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
+systemctl daemon-reload
 systemctl restart v2ray
 systemctl enable v2ray
 }
@@ -281,6 +278,7 @@ systemctl enable v2ray
 update_pihole(){
 curl -sSL https://install.pi-hole.net | bash
 systemctl mask dhcpcd
+systemctl mask systemd-resolved
 }
 
 
