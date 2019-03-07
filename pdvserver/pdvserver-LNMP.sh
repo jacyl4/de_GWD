@@ -87,8 +87,8 @@ upstream dns-backend { server 127.0.0.1:8053; }
 server {
   listen 80;
   server_name $vpsdomain www.$vpsdomain;
-  return 301 https://$vpsdomain\$request_uri;
-  add_header X-Frame-Options SAMEORIGIN;
+  root  /home/wwwroot/$vpsdomain;
+  index index.html index.htm index.php default.html default.htm default.php;
 
   include rewrite/none.conf;
   #error_page   404   /404.html;
@@ -184,24 +184,18 @@ location $v2path {
   proxy_set_header Upgrade "WebSocket";
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
+  proxy_set_header X-NginX-Proxy true;
   proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-Proto \$scheme;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_intercept_errors on;
-  proxy_connect_timeout 300;
-  proxy_send_timeout 300;
-  proxy_read_timeout 600;
+  proxy_read_timeout 86400;
   proxy_buffer_size 512k;
   proxy_buffers 8 512k;
   proxy_busy_buffers_size 512k;
   proxy_temp_file_write_size 512k;
   proxy_max_temp_file_size 128m;
 }
-
-location /admin {
-  root /var/www/html;
-  index index.php index.html index.htm;
-}
-
 
   location ~ /.well-known {
       allow all;
@@ -249,7 +243,7 @@ systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 
 
-apt-get install -y git make net-tools
+apt-get install -y git make
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
 mv go /usr/local
