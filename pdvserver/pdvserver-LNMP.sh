@@ -247,6 +247,27 @@ systemctl daemon-reload
 systemctl restart doh-server
 systemctl enable doh-server
 
+sed -i '/static ip_address='/d  /etc/dhcpcd.conf
+sed -i '/static routers='/d  /etc/dhcpcd.conf
+sed -i '/static domain_name_servers='/d  /etc/dhcpcd.conf
+ethernetnum="$(awk 'END {print $NF}' /etc/dhcpcd.conf)"
+
+cat > /etc/network/interfaces << EOF
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+address $localaddr
+netmask 255.255.255.0
+gateway $gatewayaddr
+EOF
+
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 
