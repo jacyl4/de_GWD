@@ -6,7 +6,6 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-
 performance_mod(){
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
