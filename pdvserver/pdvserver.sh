@@ -187,7 +187,7 @@ server {
 
 location /dq {
   proxy_redirect off;
-  proxy_pass http://dns-backend;
+  proxy_pass http://dns-backend/dq;
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Host "$vpsdomain";
