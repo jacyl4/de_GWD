@@ -44,17 +44,17 @@ blue  "优化性能与网络 [完毕]"
 
 install_gatewayrouter(){
     green "==============="
-    green " 本机地址"
+    green "本机地址"
     green "==============="
     read localaddr
 
     green "==============="
-    green " 上级路由地址"
+    green "上级路由地址"
     green "==============="
     read gatewayaddr
 
     green "==============="
-    green " v2ray节点域名"
+    green "v2ray节点域名"
     green "==============="
     read v2servn
     
@@ -250,7 +250,7 @@ pihole restartdns
 systemctl restart pihole-FTL
 systemctl mask dhcpcd
 systemctl mask systemd-resolved
-blue  "安装pihole+doh+v2ray+route [完毕]"
+blue  "安装v2ray+doh+pihole+route [完毕]"
 }
 
 
@@ -280,7 +280,7 @@ blue  "更改DoH地址 [完毕]"
 
 change_staticip(){
     green "====================="
-    green " 本机地址（回车跳过）"
+    green "本机地址（回车跳过）"
     green "====================="
     read localaddr
 if [ "$localaddr" != "" ]; then 
@@ -289,7 +289,7 @@ sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 fi
 
     green "====================="
-    green " 上级地址（回车跳过）"
+    green "上级地址（回车跳过）"
     green "====================="
     read gatewayaddr
 if [ "$gatewayaddr" != "" ]; then 
@@ -309,7 +309,7 @@ blue  "更改静态IP [完毕]"
 
 change_v2ray(){
     green "==============="
-    green " v2ray节点域名"
+    green "v2ray节点域名"
     green "==============="
     read v2servn
     
