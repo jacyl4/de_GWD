@@ -163,6 +163,15 @@ server {
       expires      12h;
   }
 
+  location ~ /.well-known {
+      allow all;
+  }
+
+  location ~ /\.
+  {
+      deny all;
+  }
+
 location /dq {
   proxy_redirect off;
   proxy_pass http://dns-backend/dq;
@@ -196,16 +205,6 @@ location $v2path {
   proxy_temp_file_write_size 512k;
   proxy_max_temp_file_size 128m;
 }
-
-  location ~ /.well-known {
-      allow all;
-  }
-
-  location ~ /\.
-  {
-      deny all;
-  }
-
   access_log off;
 }
 EOF
