@@ -273,7 +273,7 @@ update_doh(){
 read -p "输入DoH地址1:" doh1
 read -p "输入DoH地址2:" doh2
 
-sed -i '/upstream_ietf/{n;s/.*/"https:\/\/'$doh1'/dq,"/;n;s/.*/"https:\/\/'$doh2'/dq,"/}' /etc/dns-over-https/doh-client.conf
+sed -i '/upstream_ietf/{n;s/.*/"https:\/\/'$doh1'\/dq,"/;n;s/.*/"https:\/\/'$doh2'\/dq,"/}' /etc/dns-over-https/doh-client.conf
 blue  "更改DoH地址 [完毕]"
 }
 
