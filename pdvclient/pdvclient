@@ -268,9 +268,11 @@ blue  "更改Pi-hole密码 [完毕]"
 update_doh(){
 read -p "输入DoH地址1:" doh1
 read -p "输入DoH地址2:" doh2
+upstream_ietf1='url = "https:\/\/'$doh1'\/dq"'
+upstream_ietf2='url = "https:\/\/'$doh2'\/dq"'
 
-sed -i '/# DoH1/{n;n;s/.*/url = "https://'$doh1'/dq"/}' /etc/dns-over-https/doh-client.conf
-sed -i '/# DoH2/{n;n;s/.*/url = "https://'$doh2'/dq"/}' /etc/dns-over-https/doh-client.conf
+sed -i "21s/.*/$upstream_ietf1/" /etc/dns-over-https/doh-client.conf
+sed -i "26s/.*/$upstream_ietf2/" /etc/dns-over-https/doh-client.conf
 
 blue  "更改DoH地址 [完毕]"
 }
