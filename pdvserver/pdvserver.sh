@@ -119,7 +119,7 @@ openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
 
 
-cat > /var/www/ssl/update_ocsp_cache.sh << EOF
+cat > /var/www/ssl/update_ocsp_cache << EOF
 #!/bin/bash
 wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
 wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
@@ -136,21 +136,24 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
 EOF
-chmod +x /var/www/ssl/update_ocsp_cache.sh
-/var/www/ssl/update_ocsp_cache.sh
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
 
-cat > /usr/local/updatepdv.sh << EOF
+cat > /usr/local/updatepdv << EOF
 #!/bin/bash
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
+chmod +x /usr/local/updatepdv
 
 crontab -l > now.cron
-echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache.sh' >> now.cron
-echo '0 0 * * * /usr/local/updatepdv.sh' >> now.cron
+echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
+echo '0 0 * * * /usr/local/updatepdv' >> now.cron
 crontab now.cron
 
 cat > /etc/nginx/conf.d/default.conf<< EOF
-upstream dns-backend { server 127.0.0.1:8053; }
+upstream dns-backend {
+  server 127.0.0.1:8053;
+}
 
 server {
   listen 80;
@@ -186,36 +189,39 @@ server {
   resolver_timeout 5s;
 
 location /dq {
-  proxy_redirect off;
-  proxy_pass http://dns-backend/dq;
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
-  proxy_set_header X-NginX-Proxy true;
-  proxy_set_header X-Forwarded-Proto \$scheme;
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_read_timeout 86400;
+  sendfile                on;
+  tcp_nopush              on;
+  tcp_nodelay             on;
+  keepalive_requests      25600;
+  keepalive_timeout       300 300;
+  proxy_buffering         off;
+  proxy_buffer_size       8k;
+  proxy_intercept_errors  on;
+  proxy_pass http://dns-backend/dq;
 }
 
 location $v2path {
-  proxy_redirect off;
-  proxy_pass http://127.0.0.1:11811;
   proxy_http_version 1.1;
   proxy_set_header Upgrade "WebSocket";
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_intercept_errors on;
-  proxy_connect_timeout 300;
-  proxy_send_timeout 300;
-  proxy_read_timeout 600;
-  proxy_buffer_size 512k;
-  proxy_buffers 8 512k;
-  proxy_busy_buffers_size 512k;
-  proxy_temp_file_write_size 512k;
-  proxy_max_temp_file_size 128m;
+  sendfile                on;
+  tcp_nopush              on;
+  tcp_nodelay             on;
+  keepalive_requests      25600;
+  keepalive_timeout       300 300;
+  proxy_buffering         off;
+  proxy_buffer_size       8k;
+  proxy_intercept_errors  on;
+  proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;
 }
@@ -226,13 +232,57 @@ systemctl daemon-reload
 systemctl restart nginx
 
 
+
+bash <(curl -L -s https://install.direct/go.sh)
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/v2wt-server.json
+mv -f v2wt-server.json /etc/v2ray/config.json
+sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
+systemctl restart v2ray
+systemctl enable v2ray
+
+
+
 curl -sSL https://install.pi-hole.net | bash
+
+apt-get install -y git make gcc
+wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+tar -xvf go1.11.5.linux-amd64.tar.gz
+mv go /usr/local
+mkdir ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+source ~/.profile
+git clone https://github.com/m13253/dns-over-https.git
+cd dns-over-https
+make && make install
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-client.conf
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-server.conf
+mv -f doh-client.conf /etc/dns-over-https/
+mv -f doh-server.conf /etc/dns-over-https/
+systemctl restart doh-client
+systemctl enable doh-client
+systemctl restart doh-server
+systemctl enable doh-server
+
+sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
+pihole restartdns
+systemctl restart pihole-FTL
+
 ethernetnum="$(awk 'NR==39{print $2}' /etc/dhcpcd.conf)"
 localaddr="$(awk -F '[=]' 'NR==40{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
 gatewayaddr="$(awk -F '[=]' 'NR==41{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
-sed -i '/static ip_address=/d' /etc/dhcpcd.conf
-sed -i '/static routers=/d' /etc/dhcpcd.conf
-sed -i '/static domain_name_servers=/d' /etc/dhcpcd.conf
+sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
+sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
+sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
@@ -248,49 +298,8 @@ iface $ethernetnum inet static
   mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-systemctl mask dhcpcd
-systemctl mask systemd-resolved
-
-
-apt-get install -y git make
-wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
-tar -xvf go1.11.5.linux-amd64.tar.gz
-mv go /usr/local
-mkdir ~/gopath
-cat >> ~/.profile << "EOF"
-export GOROOT=/usr/local/go
-export GOPATH=~/gopath
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-source ~/.profile
-git clone https://github.com/m13253/dns-over-https.git
-cd dns-over-https
-make && make install
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-server.conf
-mv -f doh-server.conf /etc/dns-over-https/
-systemctl restart doh-server
-systemctl enable doh-server
-
-
-bash <(curl -L -s https://install.direct/go.sh)
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/v2wt-server.json
-mv -f v2wt-server.json /etc/v2ray/config.json
-sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
-sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
-systemctl daemon-reload
-systemctl restart v2ray
-systemctl enable v2ray
 }
 
-
-update_pihole(){
-curl -sSL https://install.pi-hole.net | bash
-systemctl mask dhcpcd
-systemctl mask systemd-resolved
-}
 
 
 start_menu(){
@@ -304,7 +313,6 @@ start_menu(){
     echo
     green  "1. 优化性能与网络"
     green  "2. 安装nginx+tls+pihole+doh+v2ray"
-    green  "3. 更新Pi-hole"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -315,10 +323,6 @@ start_menu(){
     ;;
     2)
     install_nginx+tls+pihole+doh+v2ray
-    start_menu
-    ;;
-    3)
-    update_pihole
     start_menu
     ;;
     *)
