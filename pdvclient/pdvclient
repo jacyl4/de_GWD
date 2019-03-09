@@ -92,6 +92,7 @@ bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /etc/chnroute
 /etc/chnroute
+
 crontab -l > now.cron
 echo '0 0 * * * /etc/chnroute' >> now.cron
 crontab now.cron
@@ -195,9 +196,13 @@ ExecStop=/etc/iptables-proxy/iptables-proxy-down
 [Install]
 WantedBy=multi-user.target
 EOF
+systemctl daemon-reload
 systemctl enable iptables-proxy.service
 
 
+
+
+curl -sSL https://install.pi-hole.net | bash
 
 apt-get install -y git make gcc
 if [ $architecture = "aarch64" ]; then
@@ -209,28 +214,20 @@ tar -xvf go1.11.5.linux-amd64.tar.gz
 fi
 mv go /usr/local
 mkdir ~/gopath
-
 cat >> ~/.profile << "EOF"
 export GOROOT=/usr/local/go
 export GOPATH=~/gopath
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 EOF
-
 source ~/.profile
-
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
 mv -f doh-client.conf /etc/dns-over-https/
-systemctl stop systemd-resolved
-systemctl start doh-client
-systemctl mask systemd-resolved
+systemctl restart doh-client
 systemctl enable doh-client
 
-
-
-curl -sSL https://install.pi-hole.net | bash
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
@@ -272,7 +269,9 @@ update_doh(){
 read -p "输入DoH地址1:" doh1
 read -p "输入DoH地址2:" doh2
 
-sed -i '/upstream_ietf/{n;s/.*/"https:\/\/'$doh1'\/dq",/;n;s/.*/"https:\/\/'$doh2'\/dq",/}' /etc/dns-over-https/doh-client.conf
+sed -i '/# DoH1/{n;n;s/.*/url = "https://'$doh1'/dq"/}' /etc/dns-over-https/doh-client.conf
+sed -i '/# DoH2/{n;n;s/.*/url = "https://'$doh2'/dq"/}' /etc/dns-over-https/doh-client.conf
+
 blue  "更改DoH地址 [完毕]"
 }
 
