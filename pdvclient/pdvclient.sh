@@ -80,6 +80,33 @@ systemctl restart v2ray
 systemctl enable v2ray
 
 
+
+apt-get install -y git make
+if [ $architecture = "aarch64" ]; then
+wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
+tar -xvf go1.11.5.linux-arm64.tar.gz
+elif [ $architecture = "amd64" ]; then
+wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+tar -xvf go1.11.5.linux-amd64.tar.gz
+fi
+mv go /usr/local
+mkdir ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+source ~/.profile
+git clone https://github.com/m13253/dns-over-https.git
+cd dns-over-https
+make && make install
+wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
+mv -f doh-client.conf /etc/dns-over-https/
+systemctl restart doh-client
+systemctl enable doh-client
+
+
+
 apt-get install -y net-tools ipset
 cat > /etc/chnroute.sh << "EOF"
 #!/bin/bash
@@ -193,33 +220,6 @@ ExecStop=/etc/iptables-proxy/iptables-proxy-down.sh
 WantedBy=multi-user.target
 EOF
 systemctl enable iptables-proxy.service
-
-
-
-apt-get install -y git make
-if [ $architecture = "aarch64" ]; then
-wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
-tar -xvf go1.11.5.linux-arm64.tar.gz
-elif [ $architecture = "amd64" ]; then
-wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
-tar -xvf go1.11.5.linux-amd64.tar.gz
-fi
-mv go /usr/local
-mkdir ~/gopath
-cat >> ~/.profile << "EOF"
-export GOROOT=/usr/local/go
-export GOPATH=~/gopath
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-source ~/.profile
-git clone https://github.com/m13253/dns-over-https.git
-cd dns-over-https
-make && make install
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
-mv -f doh-client.conf /etc/dns-over-https/
-systemctl restart doh-client
-systemctl enable doh-client
-
 
 
 curl -sSL https://install.pi-hole.net | bash

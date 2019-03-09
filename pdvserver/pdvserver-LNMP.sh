@@ -186,24 +186,21 @@ location /dq {
 }
 
 location $v2path {
-  proxy_redirect off;
-  proxy_pass http://127.0.0.1:11811;
   proxy_http_version 1.1;
   proxy_set_header Upgrade "WebSocket";
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host "$vpsdomain";
-  proxy_set_header X-Forwarded-Proto \$scheme;
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_intercept_errors on;
-  proxy_connect_timeout 300;
-  proxy_send_timeout 300;
-  proxy_read_timeout 600;
-  proxy_buffer_size 512k;
-  proxy_buffers 8 512k;
-  proxy_busy_buffers_size 512k;
-  proxy_temp_file_write_size 512k;
-  proxy_max_temp_file_size 128m;
+  sendfile                on;
+  tcp_nopush              on;
+  tcp_nodelay             on;
+  keepalive_requests      25600;
+  keepalive_timeout       300 300;
+  proxy_buffering         off;
+  proxy_buffer_size       8k;
+  proxy_intercept_errors  on;
+  proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;
 }
