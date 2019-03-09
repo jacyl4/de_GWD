@@ -115,6 +115,7 @@ mkdir /etc/iptables-proxy
 cat > /etc/iptables-proxy/iptables-proxy-up.sh << "EOF"
 #!/bin/bash
 
+ipset -X chnroute &>/dev/null
 ipset -N chnroute hash:net maxelem 65536
 
 for ip in $(cat '/etc/chnroute.txt'); do
@@ -132,9 +133,6 @@ iptables -t nat    -A OUTPUT     -j V2RAYOUT
 iptables -t nat    -A PREROUTING -j V2RAYPRE
 
 iptables -t mangle -N V2RAY
-iptables -t mangle -A V2RAY -p tcp -j RETURN -m mark --mark 0xff
-iptables -t mangle -A V2RAY -p udp -j RETURN -m mark --mark 0xff
-
 iptables -t mangle -A V2RAY -d 0.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAY -d 10.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAY -d 127.0.0.0/8 -j RETURN
@@ -145,6 +143,8 @@ iptables -t mangle -A V2RAY -d 224.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -d 240.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -p tcp -m set --match-set chnroute dst -j RETURN
 iptables -t mangle -A V2RAY -p udp -m set --match-set chnroute dst -j RETURN
+iptables -t mangle -A V2RAY -p tcp -j RETURN -m mark --mark 0xff
+iptables -t mangle -A V2RAY -p udp -j RETURN -m mark --mark 0xff
 
 iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 1
 iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 1
