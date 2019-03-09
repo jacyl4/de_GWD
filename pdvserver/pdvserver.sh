@@ -272,6 +272,7 @@ systemctl restart doh-server
 systemctl enable doh-server
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/d'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns

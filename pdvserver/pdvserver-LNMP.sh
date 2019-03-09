@@ -190,7 +190,7 @@ location /dq {
   proxy_buffering         off;
   proxy_buffer_size       8k;
   proxy_intercept_errors  on;
-  proxy_pass http://dns-backend/dq;
+  proxy_pass              http://dns-backend/dq;
 }
 
 location $v2path {
@@ -260,6 +260,7 @@ systemctl enable doh-server
 
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/d'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
