@@ -6,6 +6,7 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
+
 performance_mod(){
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
@@ -28,10 +29,10 @@ sysctl -p
 
 
 
-install_pihole+doh+v2ray(){
-    green "==========================="
+install_nginx+tls+pihole+doh+v2ray(){
+    green "=============================="
     green " 输入此VPS的域名(不加www开头)"
-    green "==========================="
+    green "=============================="
     read vpsdomain
 
     green "================="
@@ -44,32 +45,99 @@ install_pihole+doh+v2ray(){
     green "============"
     read uuidnum
 
-    green "========================"
+    green "========================="
     green " v2ray path (格式：/xxxx)"
-    green "========================"
+    green "========================="
     read v2path
 
-sed -i "/worker_processes auto;/c\worker_processes $workprocess;"  /usr/local/nginx/conf/nginx.conf
+apt-get install -y nginx socat
 
-cat > /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache << EOF
+cat > /etc/nginx/nginx.conf << EOF
+user  www-data www-data;
+worker_processes $workprocess;
+
+events {
+    use epoll;
+    worker_connections  8192;
+    multi_accept on;
+}
+
+http {
+  include mime.types;
+  default_type application/octet-stream;
+
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+
+  types_hash_max_size 2048;
+  server_names_hash_bucket_size 128;
+  large_client_header_buffers 4 32k;
+  client_header_buffer_size 32k;
+  client_header_timeout 12;
+  client_max_body_size 50m;
+  client_body_timeout 12;
+  keepalive_timeout 60;
+  send_timeout 10;
+
+  gzip              on;
+  gzip_comp_level   2;
+  gzip_min_length   1k;
+  gzip_buffers      4 16k;
+  gzip_http_version 1.1;
+  gzip_proxied      expired no-cache no-store private auth;
+  gzip_types        text/plain application/javascript application/x-javascript text/javascript text/css application/xml application/xml+rss;
+  gzip_vary         on;
+  gzip_disable      "MSIE [1-6]\.";
+
+  access_log off;
+  error_log off;
+
+  include /etc/nginx/conf.d/*.conf;
+}
+EOF
+
+cat > /etc/nginx/conf.d/default.conf<< EOF
+server {
+    listen       80;
+    server_name  $vpsdomain;
+    root /var/www/html;
+    index index.php index.html index.htm;
+}
+EOF
+
+systemctl restart nginx
+
+mkdir /var/www/ssl
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html
+~/.acme.sh/acme.sh --installcert -d $vpsdomain \
+               --keypath       /var/www/ssl/$vpsdomain.key  \
+               --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
+               --reloadcmd     "systemctl restart nginx"
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
+
+
+cat > /var/www/ssl/update_ocsp_cache << EOF
 #!/bin/bash
 wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
 wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
-mv -f intermediate.pem /usr/local/nginx/conf/ssl/$vpsdomain/
-mv -f root.pem /usr/local/nginx/conf/ssl/$vpsdomain/
-cat /usr/local/nginx/conf/ssl/$vpsdomain/intermediate.pem > /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem
-cat /usr/local/nginx/conf/ssl/$vpsdomain/root.pem >> /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem
+mv intermediate.pem /var/www/ssl
+mv root.pem /var/www/ssl
+cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
 
 openssl ocsp -no_nonce \
-    -issuer  /usr/local/nginx/conf/ssl/$vpsdomain/intermediate.pem \
-    -cert    /usr/local/nginx/conf/ssl/$vpsdomain/fullchain.cer \
-    -CAfile  /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem \
-    -VAfile  /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/$vpsdomain.key.pem \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
     -url     http://ocsp.int-x3.letsencrypt.org \
-    -respout /usr/local/nginx/conf/ssl/$vpsdomain/ocsp.resp
+    -respout /var/www/ssl/ocsp.resp
 EOF
-chmod +x /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache
-/usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
 
 cat > /usr/local/updatepdv << EOF
 #!/bin/bash
@@ -78,11 +146,11 @@ EOF
 chmod +x /usr/local/updatepdv
 
 crontab -l > now.cron
-echo '0 0 * * 7 /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache' >> now.cron
+echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
 echo '0 0 * * * /usr/local/updatepdv' >> now.cron
 crontab now.cron
 
-cat > /usr/local/nginx/conf/vhost/$vpsdomain.conf<< EOF
+cat > /etc/nginx/conf.d/default.conf<< EOF
 upstream dns-backend {
   server 127.0.0.1:8053;
 }
@@ -90,35 +158,8 @@ upstream dns-backend {
 server {
   listen 80;
   server_name $vpsdomain www.$vpsdomain;
-  root  /home/wwwroot/$vpsdomain;
-  index index.html index.htm index.php default.html default.htm default.php;
-
-  include rewrite/none.conf;
-  #error_page   404   /404.html;
-
-  # Deny access to PHP files in specific directory
-  #location ~ /(wp-content|uploads|wp-includes|images)/.*\.php$ { deny all; }
-
-  include enable-php-pathinfo.conf;
-
-  location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
-  {
-      expires      30d;
-  }
-
-  location ~ .*\.(js|css)?$
-  {
-      expires      12h;
-  }
-
-  location ~ /.well-known {
-      allow all;
-  }
-
-  location ~ /\.
-  {
-      deny all;
-  }
+  root /var/www/html;
+  index index.html index.htm index.nginx-debian.html;
 
   access_log off;
 }
@@ -126,54 +167,26 @@ server {
 server {
   listen 443 ssl http2;
   server_name $vpsdomain www.$vpsdomain;
-  root  /home/wwwroot/$vpsdomain;
-  index index.html index.htm index.php default.html default.htm default.php;
+  root /var/www/html;
+  index index.html index.htm index.nginx-debian.html;
 
   ssl on;
-  ssl_certificate /usr/local/nginx/conf/ssl/$vpsdomain/fullchain.cer;
-  ssl_certificate_key /usr/local/nginx/conf/ssl/$vpsdomain/$vpsdomain.key;
+  ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
+  ssl_certificate_key /var/www/ssl/$vpsdomain.key;
   ssl_session_timeout 5m;
   ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
   ssl_prefer_server_ciphers on;
   ssl_ciphers "EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5";
   ssl_session_cache builtin:1000 shared:SSL:10m;
-  ssl_dhparam /usr/local/nginx/conf/ssl/dhparam.pem;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
   
   # OCSP Stapling ---
   ssl_stapling on;
   ssl_stapling_verify on;
-  ssl_trusted_certificate /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem;
-  ssl_stapling_file /usr/local/nginx/conf/ssl/$vpsdomain/ocsp.resp;
+  ssl_trusted_certificate /var/www/ssl/bundle.pem;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
-
-
-  include rewrite/none.conf;
-  #error_page   404   /404.html;
-
-  # Deny access to PHP files in specific directory
-  #location ~ /(wp-content|uploads|wp-includes|images)/.*\.php$ { deny all; }
-
-  include enable-php-pathinfo.conf;
-
-  location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
-  {
-      expires      30d;
-  }
-
-  location ~ .*\.(js|css)?$
-  {
-      expires      12h;
-  }
-
-  location ~ /.well-known {
-      allow all;
-  }
-
-  location ~ /\.
-  {
-      deny all;
-  }
 
 location /dq {
   proxy_http_version 1.1;
@@ -190,7 +203,7 @@ location /dq {
   proxy_buffering         off;
   proxy_buffer_size       8k;
   proxy_intercept_errors  on;
-  proxy_pass              http://dns-backend/dq;
+  proxy_pass http://dns-backend/dq;
 }
 
 location $v2path {
@@ -258,9 +271,8 @@ systemctl enable doh-client
 systemctl restart doh-server
 systemctl enable doh-server
 
-
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/d'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2='  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
@@ -291,6 +303,29 @@ sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 
 
 
+change_pihole_upstream(){
+    green "========================="
+    green "1.使用8888 / 2.使用DoH"
+    green "========================="
+    read pihole_upstream
+if [[ $pihole_upstream = 1 ]]; then
+sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=8.8.8.8'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=8.8.4.4'  /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+echo "server=8.8.8.8" >> /etc/dnsmasq.d/01-pihole.conf
+echo "server=8.8.4.4" >> /etc/dnsmasq.d/01-pihole.conf
+blue  "Pi-hole上游解析已切换为 8.8.8.8"
+pihole restartdns
+elif [[ $pihole_upstream = 2 ]]; then
+sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2='  /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
+blue  "Pi-hole上游解析已切换为 DoH"
+fi
+}
+
+
 start_menu(){
     green "========================================"
     green "              服务端                  "
@@ -301,7 +336,8 @@ start_menu(){
     green "========================================"
     echo
     green  "1. 优化性能与网络"
-    green  "2. 安装pihole+doh+v2ray"
+    green  "2. 安装nginx+tls+pihole+doh+v2ray"
+    green  "3. 切换pihole上游"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -311,7 +347,11 @@ start_menu(){
     start_menu
     ;;
     2)
-    install_pihole+doh+v2ray
+    install_nginx+tls+pihole+doh+v2ray
+    start_menu
+    ;;
+    3)
+    change_pihole_upstream
     start_menu
     ;;
     *)
