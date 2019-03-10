@@ -159,9 +159,6 @@ iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
 iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 1 -j V2RAY
 iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 1 -j V2RAY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 1 --dport 53 -j TPROXY --on-ip 127.0.0.1 --on-port 5380
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 1 --dport 53 -j TPROXY --on-ip 127.0.0.1 --on-port 5380
-
 iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 1 -j TPROXY --on-ip 127.0.0.1 --on-port 1080
 iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 1 -j TPROXY --on-ip 127.0.0.1 --on-port 1080
 systemctl restart v2ray
