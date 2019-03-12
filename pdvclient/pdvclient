@@ -171,6 +171,8 @@ iptables -t mangle -A V2RAY -d 172.16.0.0/12 -j RETURN
 iptables -t mangle -A V2RAY -d 192.168.0.0/16 -j RETURN
 iptables -t mangle -A V2RAY -d 224.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -d 240.0.0.0/4 -j RETURN
+iptables -t mangle -A V2RAY -p tcp --dport 5380 -j RETURN
+iptables -t mangle -A V2RAY -p udp --dport 5380 -j RETURN
 iptables -t mangle -A V2RAY -p tcp -m set --match-set chnroute dst -j RETURN
 iptables -t mangle -A V2RAY -p udp -m set --match-set chnroute dst -j RETURN
 iptables -t mangle -A V2RAY -p tcp -j RETURN -m mark --mark 0xff
@@ -178,14 +180,15 @@ iptables -t mangle -A V2RAY -p udp -j RETURN -m mark --mark 0xff
 
 iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 1
 iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 1
-iptables -t mangle -A V2RAY -p tcp -m multiport --dports 53,5380 -j MARK --set-mark 0
-iptables -t mangle -A V2RAY -p udp -m multiport --dports 53,5380 -j MARK --set-mark 0
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2RAY
 iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
 
 iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 1 -j V2RAY
 iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 1 -j V2RAY
+
+iptables -t mangle -A V2RAYPRE -p tcp --dport 53 -m mark --mark 1 -j TPROXY --on-port 5380
+iptables -t mangle -A V2RAYPRE -p udp --dport 53 -m mark --mark 1 -j TPROXY --on-port 5380
 
 iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 1 -j TPROXY --on-port 1080
 iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 1 -j TPROXY --on-port 1080
