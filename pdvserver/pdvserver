@@ -10,20 +10,43 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 performance_mod(){
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
-echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_syn_retries = 2" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_max_syn_backlog = 16384" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_synack_retries = 2" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_fin_timeout = 10" >> /etc/sysctl.conf
+sed -i '/fs.file-max/d' /etc/sysctl.conf
+sed -i '/net.ipv4.ip_local_port_range/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_fastopen/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_syncookies/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_max_tw_buckets/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_tw_reuse/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_tw_recycle/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_syn_retries/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_max_syn_backlog/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_synack_retries/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_timestamps/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_fin_timeout/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_keepalive_time/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_keepalive_intvl/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_keepalive_probes/d' /etc/sysctl.conf
+sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
-echo "net.ipv4.tcp_keepalive_time = 600" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_intvl = 60" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_probes = 20" >> /etc/sysctl.conf
-
-echo "fs.file-max = 99000" >> /etc/sysctl.conf
-echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+cat >> /etc/sysctl.conf << EOF
+fs.file-max=2097152
+net.ipv4.ip_local_port_range=1024   65535
+net.ipv4.tcp_fastopen=3
+net.ipv4.tcp_syncookies=1
+net.ipv4.tcp_max_syn_backlog=8192 
+net.ipv4.tcp_tw_reuse=1
+net.ipv4.tcp_tw_recycle=1
+net.ipv4.tcp_syn_retries=2
+net.ipv4.tcp_max_syn_backlog=16384
+net.ipv4.tcp_synack_retries=2
+net.ipv4.tcp_timestamps=0
+net.ipv4.tcp_fin_timeout=10
+net.ipv4.tcp_keepalive_time=600
+net.ipv4.tcp_keepalive_intvl=60
+net.ipv4.tcp_keepalive_probes=20
+net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbrplus
+EOF
 sysctl -p
 }
 
@@ -299,21 +322,29 @@ iface $ethernetnum inet static
   mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
 }
 
 
 
 change_pihole_upstream(){
     green "========================="
-    green "1.使用8888 / 2.使用DoH"
+    green "1.使用8.8.8.8 / 2.使用DoH"
     green "========================="
     read pihole_upstream
 if [[ $pihole_upstream = 1 ]]; then
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=8.8.8.8'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=8.8.4.4'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=1.1.1.1'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=8.8.8.8" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=8.8.4.4" >> /etc/dnsmasq.d/01-pihole.conf
+echo "server=1.1.1.1" >> /etc/dnsmasq.d/01-pihole.conf
 blue  "Pi-hole 上游解析已切换为 8.8.8.8"
 pihole restartdns
 elif [[ $pihole_upstream = 2 ]]; then

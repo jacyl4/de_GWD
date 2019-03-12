@@ -178,6 +178,8 @@ iptables -t mangle -A V2RAY -p udp -j RETURN -m mark --mark 0xff
 
 iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 1
 iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 1
+iptables -t mangle -A V2RAY -p tcp -m multiport --dports 53,5380 -j MARK --set-mark 0
+iptables -t mangle -A V2RAY -p udp -m multiport --dports 53,5380 -j MARK --set-mark 0
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2RAY
 iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
@@ -185,13 +187,11 @@ iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
 iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 1 -j V2RAY
 iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 1 -j V2RAY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 1 --dport 53 -j TPROXY --on-ip 127.0.0.1 --on-port 5380
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 1 --dport 53 -j TPROXY --on-ip 127.0.0.1 --on-port 5380
-
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 1 -m multiport ! --dport 53 -j TPROXY --on-ip 127.0.0.1 --on-port 1080
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 1 -m multiport ! --dport 53 -j TPROXY --on-ip 127.0.0.1 --on-port 1080
+iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 1 -j TPROXY --on-port 1080
+iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 1 -j TPROXY --on-port 1080
 systemctl restart v2ray
 EOF
+
 chmod +x /etc/iptables-proxy/iptables-proxy-up
 
 cat > /etc/iptables-proxy/iptables-proxy-down << EOF
@@ -282,6 +282,15 @@ EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
 systemctl restart pihole-FTL
+
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
+
 blue  "安装v2ray+doh+pihole+route [完毕]"
 }
 
@@ -295,10 +304,17 @@ blue  "更改Pi-hole密码 [完毕]"
 
 
 update_doh(){
-read -p "输入DoH地址:" doh
-upstream_ietf='url = "https:\/\/'$doh'\/dq"'
+read -p "输入DoH地址1:" doh1
+read -p "输入DoH地址2:" doh2
+doh_upstream1='url = "https:\/\/'$doh1'\/dq"'
+doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 
-sed -i "21s/.*/$upstream_ietf/" /etc/dns-over-https/doh-client.conf
+sed -i "14s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
+sed -i "19s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
+
+sed -i "24s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
+sed -i "29s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
+
 systemctl restart doh-client
 
 blue  "更改DoH地址 [完毕]"
