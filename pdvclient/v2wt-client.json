@@ -12,7 +12,11 @@
       "settings":{
          "auth":"noauth",
          "network": "tcp,udp"
-          }
+          },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      }
     },
     {
     "protocol": "dokodemo-door",
@@ -26,7 +30,11 @@
       "sockopt": {
         "tcpFastOpen": true
       }
-    }
+    },
+    "sniffing": {
+      "enabled": true,
+      "destOverride": ["http", "tls"]
+      }
     }
   ],
   "outbounds": [
