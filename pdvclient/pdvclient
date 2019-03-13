@@ -176,8 +176,8 @@ iptables -t mangle -A V2RAY -d 224.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -d 240.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -m set --match-set chnroute dst -j RETURN
 iptables -t mangle -A V2RAY -m mark --mark 0xff -j RETURN
-iptables -t mangle -A V2RAY -p tcp -m multiport --dport 53,5380 -j RETURN
-iptables -t mangle -A V2RAY -p udp -m multiport --dport 53,5380 -j RETURN
+iptables -t mangle -A V2RAY -p tcp -m multiport --dports 53,5380 -j RETURN
+iptables -t mangle -A V2RAY -p udp -m multiport --dports 53,5380 -j RETURN
 
 iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 0x09
 iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 0x09
