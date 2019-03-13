@@ -135,8 +135,8 @@ cat > /etc/init.d/iptables-proxy-rr << "EOF"
 # Short-Description: iptables-proxy-rr
 # Description: iptables-proxy-rr
 ### END INIT INFO
-ip rule add fwmark 1 table 100
-ip route add local 0.0.0.0/0 dev lo table 100
+ip rule add fwmark 0x09 table 909
+ip route add local 0.0.0.0/0 dev lo table 909
 EOF
 chmod 755 /etc/init.d/iptables-proxy-rr
 update-rc.d iptables-proxy-rr defaults
@@ -163,6 +163,9 @@ iptables -t nat    -A OUTPUT     -j V2RAYOUT
 iptables -t nat    -A PREROUTING -j V2RAYPRE
 
 iptables -t mangle -N V2RAY
+iptables -t mangle -A V2RAY2 -d 103.94.185.19 -j RETURN
+iptables -t mangle -A V2RAY2 -d 149.129.93.5 -j RETURN
+
 iptables -t mangle -A V2RAY -d 0.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAY -d 10.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAY -d 127.0.0.0/8 -j RETURN
@@ -171,27 +174,22 @@ iptables -t mangle -A V2RAY -d 172.16.0.0/12 -j RETURN
 iptables -t mangle -A V2RAY -d 192.168.0.0/16 -j RETURN
 iptables -t mangle -A V2RAY -d 224.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -d 240.0.0.0/4 -j RETURN
-iptables -t mangle -A V2RAY -p tcp --dport 5380 -j RETURN
-iptables -t mangle -A V2RAY -p udp --dport 5380 -j RETURN
-iptables -t mangle -A V2RAY -p tcp -m set --match-set chnroute dst -j RETURN
-iptables -t mangle -A V2RAY -p udp -m set --match-set chnroute dst -j RETURN
-iptables -t mangle -A V2RAY -p tcp -j RETURN -m mark --mark 0xff
-iptables -t mangle -A V2RAY -p udp -j RETURN -m mark --mark 0xff
+iptables -t mangle -A V2RAY -m set --match-set chnroute dst -j RETURN
+iptables -t mangle -A V2RAY -m mark --mark 0xff -j RETURN
+iptables -t mangle -A V2RAY -p tcp -m multiport --dport 53,5380 -j RETURN
+iptables -t mangle -A V2RAY -p udp -m multiport --dport 53,5380 -j RETURN
 
-iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 1
-iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 1
+iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 0x09
+iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 0x09
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2RAY
 iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 1 -j V2RAY
-iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 1 -j V2RAY
+iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 0x09 -j V2RAY
+iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 0x09 -j V2RAY
 
-iptables -t mangle -A V2RAYPRE -p tcp --dport 53 -m mark --mark 1 -j TPROXY --on-port 5380
-iptables -t mangle -A V2RAYPRE -p udp --dport 53 -m mark --mark 1 -j TPROXY --on-port 5380
-
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 1 -j TPROXY --on-port 1080
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 1 -j TPROXY --on-port 1080
+iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 0x09 -j TPROXY --on-port 1080
+iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 0x09 -j TPROXY --on-port 1080
 systemctl restart v2ray
 EOF
 
@@ -314,9 +312,6 @@ doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 
 sed -i "14s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
 sed -i "19s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
-
-sed -i "24s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
-sed -i "29s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 
 systemctl restart doh-client
 

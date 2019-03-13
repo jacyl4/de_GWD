@@ -12,11 +12,7 @@
       "settings":{
          "auth":"noauth",
          "network": "tcp,udp"
-          },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": ["http", "tls"]
-      }
+          }
     },
     {
     "protocol": "dokodemo-door",
@@ -28,23 +24,13 @@
       },
     "streamSettings": {
       "sockopt": {
-        "tcpFastOpen": true,
-        "mark": 100,
-        "tproxy": "tproxy"
+        "tcpFastOpen": true
       }
-    },
-    "sniffing": {
-      "enabled": true,
-      "destOverride": ["http", "tls"]
-      }
+    }
     }
   ],
   "outbounds": [
     {
-    "mux": {
-      "enabled": true,
-      "concurrency": 8
-      },
     "protocol": "vmess",
     "settings": {
       "vnext": [{
