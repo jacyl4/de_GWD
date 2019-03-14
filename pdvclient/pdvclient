@@ -147,7 +147,6 @@ cat > /etc/iptables-proxy/iptables-proxy-up << "EOF"
 
 ipset -X chnroute &>/dev/null
 ipset -N chnroute hash:net maxelem 65536
-
 for ip in $(cat '/etc/chnroute.txt'); do
   ipset add chnroute $ip
 done
@@ -176,8 +175,10 @@ iptables -t mangle -A V2RAY -d 224.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -d 240.0.0.0/4 -j RETURN
 iptables -t mangle -A V2RAY -m set --match-set chnroute dst -j RETURN
 iptables -t mangle -A V2RAY -m mark --mark 0xff -j RETURN
-iptables -t mangle -A V2RAY -p tcp -m multiport --dports 53,5380 -j RETURN
-iptables -t mangle -A V2RAY -p udp -m multiport --dports 53,5380 -j RETURN
+iptables -t mangle -A V2RAY -p tcp --dport 53 -j RETURN
+iptables -t mangle -A V2RAY -p udp --dport 53 -j RETURN
+iptables -t mangle -A V2RAY -p tcp --dport 5380 -j RETURN
+iptables -t mangle -A V2RAY -p udp --dport 5380 -j RETURN
 
 iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 0x09
 iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 0x09
@@ -188,11 +189,10 @@ iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
 iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 0x09 -j V2RAY
 iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 0x09 -j V2RAY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 0x09 -j TPROXY --on-port 1080
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 0x09 -j TPROXY --on-port 1080
+iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 0x09 -j TPROXY --on-port 9896
+iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 0x09 -j TPROXY --on-port 9896
 systemctl restart v2ray
 EOF
-
 chmod +x /etc/iptables-proxy/iptables-proxy-up
 
 cat > /etc/iptables-proxy/iptables-proxy-down << EOF

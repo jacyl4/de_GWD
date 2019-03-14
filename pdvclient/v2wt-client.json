@@ -7,7 +7,7 @@
   "inbounds": [
     {
       "protocol":"socks",
-      "port":1081,
+      "port":9961,
       "listen":"127.0.0.1",
       "settings":{
          "auth":"noauth",
@@ -20,7 +20,7 @@
     },
     {
     "protocol": "dokodemo-door",
-    "port": 1080,
+    "port": 9960,
     "settings": {
       "auth":"noauth",
       "network": "tcp,udp",
