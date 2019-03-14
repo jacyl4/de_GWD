@@ -152,6 +152,8 @@ for ip in $(cat '/etc/chnroute.txt'); do
 done
 
 iptables -t nat -N V2RAYTCP
+iptables -t nat -A V2RAYTCP -p tcp -m tcp --dport 5380 -j ACCEPT
+iptables -t nat -A V2RAYTCP -p tcp -m tcp --dport 53 -j ACCEPT
 
 iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
 iptables -t nat -A V2RAYTCP -d 10.0.0.0/8 -j RETURN
@@ -170,6 +172,8 @@ iptables -t nat -A PREROUTING -p tcp -j V2RAYTCP
 iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
 
 iptables -t mangle -N V2RAYUDP
+iptables -t mangle -A V2RAYUDP -p udp -m udp --dport 5380 -j ACCEPT
+iptables -t mangle -A V2RAYUDP -p udp -m udp --dport 53 -j ACCEPT
 
 iptables -t mangle -A V2RAYUDP -d 0.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAYUDP -d 10.0.0.0/8 -j RETURN
@@ -188,6 +192,7 @@ iptables -t mangle -A V2RAYUDP -p udp -j TPROXY --on-port 9896 --tproxy-mark 9/9
 iptables -t mangle -A PREROUTING -p udp -j V2RAYUDP
 systemctl restart v2ray
 EOF
+
 chmod +x /etc/iptables-proxy/iptables-proxy-up
 
 cat > /etc/iptables-proxy/iptables-proxy-down << EOF
