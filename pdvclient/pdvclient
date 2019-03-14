@@ -151,46 +151,46 @@ for ip in $(cat '/etc/chnroute.txt'); do
   ipset add chnroute $ip
 done
 
-iptables -t mangle -N V2RAYOUT
-iptables -t mangle -N V2RAYPRE
-iptables -t nat    -N V2RAYOUT
-iptables -t nat    -N V2RAYPRE
+iptables -t nat -N V2RAY
+iptables -t nat -A V2RAY -d 103.94.185.19 -j RETURN
+iptables -t nat -A V2RAY -d 149.129.93.5 -j RETURN
 
-iptables -t mangle -A OUTPUT     -j V2RAYOUT
-iptables -t mangle -A PREROUTING -j V2RAYPRE
-iptables -t nat    -A OUTPUT     -j V2RAYOUT
-iptables -t nat    -A PREROUTING -j V2RAYPRE
+iptables -t nat -A V2RAY -d 0.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAY -d 10.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAY -d 127.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAY -d 169.254.0.0/16 -j RETURN
+iptables -t nat -A V2RAY -d 172.16.0.0/12 -j RETURN
+iptables -t nat -A V2RAY -d 192.168.0.0/16 -j RETURN
+iptables -t nat -A V2RAY -d 224.0.0.0/4 -j RETURN
+iptables -t nat -A V2RAY -d 240.0.0.0/4 -j RETURN
+iptables -t nat -A V2RAY -p tcp -m set --match-set chnroute dst -j RETURN
+iptables -t nat -A V2RAY -p tcp -m mark --mark 0xff -j RETURN
+iptables -t nat -A V2RAY -p tcp --dport 53 -j RETURN
+iptables -t nat -A V2RAY -p tcp --dport 5380 -j RETURN
 
-iptables -t mangle -N V2RAY
-iptables -t mangle -A V2RAY2 -d 103.94.185.19 -j RETURN
-iptables -t mangle -A V2RAY2 -d 149.129.93.5 -j RETURN
+iptables -t nat -A V2RAY -p tcp -j REDIRECT --to-ports 9896
+iptables -t nat -A PREROUTING -p tcp -j V2RAY
+iptables -t nat -A OUTPUT -p tcp -j V2RAY
 
-iptables -t mangle -A V2RAY -d 0.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAY -d 10.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAY -d 127.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAY -d 169.254.0.0/16 -j RETURN
-iptables -t mangle -A V2RAY -d 172.16.0.0/12 -j RETURN
-iptables -t mangle -A V2RAY -d 192.168.0.0/16 -j RETURN
-iptables -t mangle -A V2RAY -d 224.0.0.0/4 -j RETURN
-iptables -t mangle -A V2RAY -d 240.0.0.0/4 -j RETURN
-iptables -t mangle -A V2RAY -m set --match-set chnroute dst -j RETURN
-iptables -t mangle -A V2RAY -m mark --mark 0xff -j RETURN
-iptables -t mangle -A V2RAY -p tcp --dport 53 -j RETURN
-iptables -t mangle -A V2RAY -p udp --dport 53 -j RETURN
-iptables -t mangle -A V2RAY -p tcp --dport 5380 -j RETURN
-iptables -t mangle -A V2RAY -p udp --dport 5380 -j RETURN
+iptables -t mangle -N V2RAY_MASK
+iptables -t mangle -A V2RAY_MASK -d 103.94.185.19 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 149.129.93.5 -j RETURN
 
-iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 0x09
-iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 0x09
+iptables -t mangle -A V2RAY_MASK -d 0.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 10.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 127.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 169.254.0.0/16 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 172.16.0.0/12 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 192.168.0.0/16 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 224.0.0.0/4 -j RETURN
+iptables -t mangle -A V2RAY_MASK -d 240.0.0.0/4 -j RETURN
+iptables -t mangle -A V2RAY_MASK -p udp -m set --match-set chnroute dst -j RETURN
+iptables -t mangle -A V2RAY_MASK -p udp -m mark --mark 0xff -j RETURN
+iptables -t mangle -A V2RAY_MASK -p udp --dport 53 -j RETURN
+iptables -t mangle -A V2RAY_MASK -p udp --dport 5380 -j RETURN
 
-iptables -t mangle -A V2RAYOUT -p tcp -j V2RAY
-iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
-
-iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 0x09 -j V2RAY
-iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 0x09 -j V2RAY
-
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 0x09 -j TPROXY --on-port 9896
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 0x09 -j TPROXY --on-port 9896
+iptables -t mangle -A V2RAY_MASK -p udp -j TPROXY --on-port 9896 --tproxy-mark 0x09
+iptables -t mangle -A PREROUTING -p udp -j V2RAY_MASK
 systemctl restart v2ray
 EOF
 chmod +x /etc/iptables-proxy/iptables-proxy-up
