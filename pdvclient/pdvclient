@@ -135,7 +135,7 @@ cat > /etc/init.d/iptables-proxy-rr << "EOF"
 # Short-Description: iptables-proxy-rr
 # Description: iptables-proxy-rr
 ### END INIT INFO
-ip rule add fwmark 0x09 table 909
+ip rule add fwmark 9 table 909
 ip route add local 0.0.0.0/0 dev lo table 909
 EOF
 chmod 755 /etc/init.d/iptables-proxy-rr
@@ -151,46 +151,51 @@ for ip in $(cat '/etc/chnroute.txt'); do
   ipset add chnroute $ip
 done
 
-iptables -t nat -N V2RAY
-iptables -t nat -A V2RAY -d 103.94.185.19 -j RETURN
-iptables -t nat -A V2RAY -d 149.129.93.5 -j RETURN
+iptables -t nat -N V2RAYTCP
+iptables -t nat -A V2RAYTCP -p tcp -m tcp --dport 5380 -j ACCEPT
 
-iptables -t nat -A V2RAY -d 0.0.0.0/8 -j RETURN
-iptables -t nat -A V2RAY -d 10.0.0.0/8 -j RETURN
-iptables -t nat -A V2RAY -d 127.0.0.0/8 -j RETURN
-iptables -t nat -A V2RAY -d 169.254.0.0/16 -j RETURN
-iptables -t nat -A V2RAY -d 172.16.0.0/12 -j RETURN
-iptables -t nat -A V2RAY -d 192.168.0.0/16 -j RETURN
-iptables -t nat -A V2RAY -d 224.0.0.0/4 -j RETURN
-iptables -t nat -A V2RAY -d 240.0.0.0/4 -j RETURN
-iptables -t nat -A V2RAY -p tcp -m set --match-set chnroute dst -j RETURN
-iptables -t nat -A V2RAY -p tcp -m mark --mark 0xff -j RETURN
-iptables -t nat -A V2RAY -p tcp --dport 53 -j RETURN
-iptables -t nat -A V2RAY -p tcp --dport 5380 -j RETURN
+iptables -t nat -A V2RAYTCP -d 103.94.185.19 -j RETURN
+iptables -t nat -A V2RAYTCP -d 149.129.93.5 -j RETURN
 
-iptables -t nat -A V2RAY -p tcp -j REDIRECT --to-ports 9896
-iptables -t nat -A PREROUTING -p tcp -j V2RAY
-iptables -t nat -A OUTPUT -p tcp -j V2RAY
+iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAYTCP -d 10.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAYTCP -d 127.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAYTCP -d 169.254.0.0/16 -j RETURN
+iptables -t nat -A V2RAYTCP -d 172.16.0.0/12 -j RETURN
+iptables -t nat -A V2RAYTCP -d 192.168.0.0/16 -j RETURN
+iptables -t nat -A V2RAYTCP -d 224.0.0.0/4 -j RETURN
+iptables -t nat -A V2RAYTCP -d 240.0.0.0/4 -j RETURN
+iptables -t nat -A V2RAYTCP -p tcp -m set --match-set chnroute dst -j RETURN
+iptables -t nat -A V2RAYTCP -p tcp -m mark --mark 0xff -j RETURN
 
-iptables -t mangle -N V2RAY_MASK
-iptables -t mangle -A V2RAY_MASK -d 103.94.185.19 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 149.129.93.5 -j RETURN
+iptables -t nat -A V2RAYTCP -p tcp -m tcp --dport 53 -j ACCEPT
+iptables -t nat -A V2RAYTCP -p tcp -j REDIRECT --to-ports 9896
 
-iptables -t mangle -A V2RAY_MASK -d 0.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 10.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 127.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 169.254.0.0/16 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 172.16.0.0/12 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 192.168.0.0/16 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 224.0.0.0/4 -j RETURN
-iptables -t mangle -A V2RAY_MASK -d 240.0.0.0/4 -j RETURN
-iptables -t mangle -A V2RAY_MASK -p udp -m set --match-set chnroute dst -j RETURN
-iptables -t mangle -A V2RAY_MASK -p udp -m mark --mark 0xff -j RETURN
-iptables -t mangle -A V2RAY_MASK -p udp --dport 53 -j RETURN
-iptables -t mangle -A V2RAY_MASK -p udp --dport 5380 -j RETURN
+iptables -t nat -A PREROUTING -p tcp -j V2RAYTCP
+iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
 
-iptables -t mangle -A V2RAY_MASK -p udp -j TPROXY --on-port 9896 --tproxy-mark 0x09
-iptables -t mangle -A PREROUTING -p udp -j V2RAY_MASK
+iptables -t mangle -N V2RAYUDP
+iptables -t mangle -A V2RAYUDP -p udp -m udp --dport 5380 -j ACCEPT
+
+iptables -t mangle -A V2RAYUDP -d 103.94.185.19 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 149.129.93.5 -j RETURN
+
+iptables -t mangle -A V2RAYUDP -d 0.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 10.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 127.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 169.254.0.0/16 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 172.16.0.0/12 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 192.168.0.0/16 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 224.0.0.0/4 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 240.0.0.0/4 -j RETURN
+iptables -t mangle -A V2RAYUDP -p udp -m set --match-set chnroute dst -j RETURN
+iptables -t mangle -A V2RAYUDP -p udp -m mark --mark 0xff -j RETURN
+
+iptables -t mangle -A V2RAYUDP -p udp -j MARK --set-mark 9
+iptables -t mangle -A V2RAYUDP -p udp -m udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2RAYUDP -p udp -j TPROXY --on-port 9896 --tproxy-mark 9/9
+
+iptables -t mangle -A PREROUTING -p udp -j V2RAYUDP
 systemctl restart v2ray
 EOF
 chmod +x /etc/iptables-proxy/iptables-proxy-up
@@ -287,10 +292,6 @@ systemctl restart pihole-FTL
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
-
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
-systemctl mask dhcpcd
 
 blue  "安装v2ray+doh+pihole+route [完毕]"
 }
