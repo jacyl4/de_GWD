@@ -152,10 +152,6 @@ for ip in $(cat '/etc/chnroute.txt'); do
 done
 
 iptables -t nat -N V2RAYTCP
-iptables -t nat -A V2RAYTCP -p tcp -m tcp --dport 5380 -j ACCEPT
-
-iptables -t nat -A V2RAYTCP -d 103.94.185.19 -j RETURN
-iptables -t nat -A V2RAYTCP -d 149.129.93.5 -j RETURN
 
 iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
 iptables -t nat -A V2RAYTCP -d 10.0.0.0/8 -j RETURN
@@ -168,17 +164,12 @@ iptables -t nat -A V2RAYTCP -d 240.0.0.0/4 -j RETURN
 iptables -t nat -A V2RAYTCP -p tcp -m set --match-set chnroute dst -j RETURN
 iptables -t nat -A V2RAYTCP -p tcp -m mark --mark 0xff -j RETURN
 
-iptables -t nat -A V2RAYTCP -p tcp -m tcp --dport 53 -j ACCEPT
 iptables -t nat -A V2RAYTCP -p tcp -j REDIRECT --to-ports 9896
 
 iptables -t nat -A PREROUTING -p tcp -j V2RAYTCP
 iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
 
 iptables -t mangle -N V2RAYUDP
-iptables -t mangle -A V2RAYUDP -p udp -m udp --dport 5380 -j ACCEPT
-
-iptables -t mangle -A V2RAYUDP -d 103.94.185.19 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 149.129.93.5 -j RETURN
 
 iptables -t mangle -A V2RAYUDP -d 0.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAYUDP -d 10.0.0.0/8 -j RETURN
@@ -192,7 +183,6 @@ iptables -t mangle -A V2RAYUDP -p udp -m set --match-set chnroute dst -j RETURN
 iptables -t mangle -A V2RAYUDP -p udp -m mark --mark 0xff -j RETURN
 
 iptables -t mangle -A V2RAYUDP -p udp -j MARK --set-mark 9
-iptables -t mangle -A V2RAYUDP -p udp -m udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2RAYUDP -p udp -j TPROXY --on-port 9896 --tproxy-mark 9/9
 
 iptables -t mangle -A PREROUTING -p udp -j V2RAYUDP
