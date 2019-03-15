@@ -124,6 +124,9 @@ iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT
 iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT
 
 iptables -t nat -N V2RAYTCP
+iptables -t nat -A V2RAYTCP -d 103.94.185.19 -j RETURN
+iptables -t nat -A V2RAYTCP -d 149.129.93.5 -j RETURN
+
 iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
 iptables -t nat -A V2RAYTCP -d 10.0.0.0/8 -j RETURN
 iptables -t nat -A V2RAYTCP -d 100.64.0.0/10 -j RETURN
@@ -142,9 +145,12 @@ iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
 
 
 ip rule add fwmark 9 table 909
-ip route add local 0.0.0.0/0 dev ens192 table 909
+ip route add local 0.0.0.0/0 dev lo table 909
 
 iptables -t mangle -N V2RAYUDP
+iptables -t mangle -A V2RAYUDP -d 103.94.185.19 -j RETURN
+iptables -t mangle -A V2RAYUDP -d 149.129.93.5 -j RETURN
+
 iptables -t mangle -A V2RAYUDP -d 0.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAYUDP -d 10.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAYUDP -d 100.64.0.0/10 -j RETURN
@@ -226,14 +232,12 @@ cd dns-over-https
 make && make install
 wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvclient/doh-client.conf
 mv -f doh-client.conf /etc/dns-over-https/
-systemctl restart doh-client
-systemctl enable doh-client
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=223.5.5.5#53'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=114.114.114.114#53" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=223.5.5.5#53" >> /etc/dnsmasq.d/01-pihole.conf
+echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
@@ -252,13 +256,16 @@ iface $ethernetnum inet static
   gateway $gatewayaddr
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-pihole restartdns
-systemctl restart pihole-FTL
 
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 
+systemctl restart doh-client
+systemctl enable doh-client
+
+pihole restartdns
+systemctl restart pihole-FTL
 blue  "安装v2ray+doh+pihole+route [完毕]"
 }
 
@@ -278,8 +285,9 @@ doh_upstream1='url = "https:\/\/'$doh1'\/dq"'
 doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 
 sed -i "14s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
-sed -i "19s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
-
+sed -i "19s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
+sed -i "24s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
+sed -i "29s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 systemctl restart doh-client
 
 blue  "更改DoH地址 [完毕]"
