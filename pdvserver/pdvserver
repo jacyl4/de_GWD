@@ -295,9 +295,9 @@ echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
 systemctl restart pihole-FTL
 
-ethernetnum="$(awk 'NR==39{print $2}' /etc/dhcpcd.conf)"
-localaddr="$(awk -F '[=]' 'NR==40{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
-gatewayaddr="$(awk -F '[=]' 'NR==41{print $2}' /etc/dhcpcd.conf | cut -d '/' -f1)"
+ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
+localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
+gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
