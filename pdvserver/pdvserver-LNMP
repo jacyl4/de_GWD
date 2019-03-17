@@ -238,7 +238,7 @@ systemctl restart nginx
 
 
 bash <(curl -L -s https://install.direct/go.sh)
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/v2wt-server.json
+wget http://seso.icu/@site/linux-router/pdvserver/v2wt-server.json
 mv -f v2wt-server.json /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
@@ -266,8 +266,8 @@ source ~/.profile
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-client.conf
-wget https://raw.githubusercontent.com/jacyl4/linux-router/master/pdvserver/doh-server.conf
+wget http://seso.icu/@site/linux-router/pdvserver/doh-client.conf
+wget http://seso.icu/@site/linux-router/pdvserver/doh-server.conf
 mv -f doh-client.conf /etc/dns-over-https/
 mv -f doh-server.conf /etc/dns-over-https/
 systemctl restart doh-client
