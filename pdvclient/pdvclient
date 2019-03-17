@@ -83,11 +83,11 @@ install_gatewayrouter(){
 
 bash <(curl -L -s https://install.direct/go.sh)
 wget http://seso.icu/@site/linux-router/pdvclient/v2wt-client.json -O /etc/v2ray/config.json
-sed -i '/"address":/c\        "address": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"id":/c\          "id": "'$uuidnum'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\        "serverName": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"path":/c\        "path": "'$v2path'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\          "Host": "'$v2servn'"'  /etc/v2ray/config.json
+sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
 systemctl restart v2ray
 systemctl enable v2ray
 
