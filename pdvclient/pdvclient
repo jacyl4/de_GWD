@@ -381,7 +381,7 @@ start_menu(){
     green "============================================"
     green "              客户端                       "
     green "介绍：一条龙安装v2ray+pihole+doh+透明网关路由 "
-    green "系统：Debian9 (amd64 & aarch64)            "
+    green "系统：仅测于Debian9 (amd64 & aarch64)       "
     green "作者：jacyl4                               "
     green "网站：jacyl4.github.io                     "
     green "============================================"

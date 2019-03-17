@@ -351,7 +351,7 @@ start_menu(){
     green "========================================"
     green "              服务端                  "
     green "介绍：一条龙安装v2ray+ws+tls+doh+pihole "
-    green "系统：Debian9                         "
+    green "系统：仅测于Debian9                    "
     green "作者：jacyl4                          "
     green "网站：jacyl4.github.io                "
     green "========================================"
