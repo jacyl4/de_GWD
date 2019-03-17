@@ -316,10 +316,6 @@ iface $ethernetnum inet static
   mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 }
 
 
