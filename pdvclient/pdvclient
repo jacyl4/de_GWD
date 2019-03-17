@@ -82,13 +82,12 @@ install_gatewayrouter(){
     read v2path
 
 bash <(curl -L -s https://install.direct/go.sh)
-wget http://seso.icu/@site/linux-router/pdvclient/v2wt-client.json
-mv -f v2wt-client.json /etc/v2ray/config.json
-sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
-sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
+wget http://seso.icu/@site/linux-router/pdvclient/v2wt-client.json -O /etc/v2ray/config.json
+sed -i '/"address":/c\        "address": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"id":/c\          "id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\        "serverName": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\        "path": "'$v2path'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\          "Host": "'$v2servn'"'  /etc/v2ray/config.json
 systemctl restart v2ray
 systemctl enable v2ray
 
@@ -104,11 +103,16 @@ EOF
 chmod +x /etc/chnroute
 /etc/chnroute
 
-crontab -l > now.cron
-echo '0 0 * * * /etc/chnroute' >> now.cron
-crontab now.cron
+if [ ! -n "$(crontab -l | grep 'chnroute')" ]; then
+    crontab -l > now.cron
+    echo '0 0 * * * /etc/chnroute' >> now.cron
+    crontab now.cron
+fi
 
-mkdir /etc/iptables-proxy
+
+if [ ! -d "/etc/iptables-proxy" ]; then
+    mkdir /etc/iptables-proxy
+fi
 cat > /etc/iptables-proxy/iptables-proxy-up << "EOF"
 #!/bin/bash
 
@@ -208,14 +212,15 @@ systemctl enable iptables-proxy.service
 
 curl -sSL https://install.pi-hole.net | bash
 
-apt-get install -y git make gcc
-if [ $architecture = "aarch64" ]; then
-wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
-tar -xvf go1.11.5.linux-arm64.tar.gz
-elif [ $architecture = "amd64" ]; then
-wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
-tar -xvf go1.11.5.linux-amd64.tar.gz
-fi
+if [ ! -n "$(go version | grep 'go1.11.5')" ]; then
+    apt-get install -y git make gcc
+    if [ $architecture = "aarch64" ]; then
+        wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
+        tar -xvf go1.11.5.linux-arm64.tar.gz
+    elif [ $architecture = "amd64" ]; then
+        wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+        tar -xvf go1.11.5.linux-amd64.tar.gz
+    fi
 mv go /usr/local
 mkdir ~/gopath
 cat >> ~/.profile << "EOF"
@@ -224,11 +229,18 @@ export GOPATH=~/gopath
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 EOF
 source ~/.profile
+fi
+
+rm -rf ~/dns-over-https
+rm -rf /usr/local/bin/doh-client
+rm -rf /usr/local/bin/doh-server
+rm -rf /etc/NetworkManager/dispatcher.d
+rm -rf /usr/lib/systemd/system/doh-client.service
+rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
-wget http://seso.icu/@site/linux-router/pdvclient/doh-client.conf
-mv -f doh-client.conf /etc/dns-over-https/
+wget http://seso.icu/@site/linux-router/pdvclient/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
