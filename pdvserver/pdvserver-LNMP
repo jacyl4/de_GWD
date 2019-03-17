@@ -270,6 +270,9 @@ wget http://seso.icu/@site/linux-router/pdvserver/doh-client.conf
 wget http://seso.icu/@site/linux-router/pdvserver/doh-server.conf
 mv -f doh-client.conf /etc/dns-over-https/
 mv -f doh-server.conf /etc/dns-over-https/
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
 systemctl restart doh-client
 systemctl enable doh-client
 systemctl restart doh-server
