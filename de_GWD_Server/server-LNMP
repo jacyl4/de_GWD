@@ -280,21 +280,12 @@ cd dns-over-https
 make && make install
 wget http://seso.icu/@site/de_GWD/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget http://seso.icu/@site/de_GWD/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
-systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
-systemctl restart doh-client
-systemctl enable doh-client
 systemctl restart doh-server
 systemctl enable doh-server
 
 
-sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
-pihole restartdns
-systemctl restart pihole-FTL
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
@@ -317,6 +308,8 @@ iface $ethernetnum inet static
   mtu 1488
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+pihole restartdns
+systemctl restart pihole-FTL
 }
 
 
