@@ -125,6 +125,7 @@ EOF
 
 systemctl restart nginx
 
+if [ ! -d "/var/www/ssl" ]; then
 mkdir /var/www/ssl
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html
@@ -134,7 +135,7 @@ curl https://get.acme.sh | sh
                --reloadcmd     "systemctl restart nginx"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
-
+fi
 
 cat > /var/www/ssl/update_ocsp_cache << EOF
 #!/bin/bash
@@ -162,10 +163,13 @@ bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /usr/local/updateGWD
 
+if [ ! -n "$(crontab -l | grep 'update_ocsp_cache')" ]; then
 crontab -l > now.cron
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
 echo '0 0 * * * /usr/local/updateGWD' >> now.cron
 crontab now.cron
+rm -rf now.cron
+fi
 
 cat > /etc/nginx/conf.d/default.conf<< EOF
 upstream dns-backend {
@@ -265,6 +269,7 @@ systemctl enable v2ray
 curl -sSL https://install.pi-hole.net | bash
 
 apt-get install -y git make gcc net-tools
+if [ ! -n "$(go version | grep 'go1.11.5')" ]; then
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
 mv go /usr/local
@@ -275,6 +280,14 @@ export GOPATH=~/gopath
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 EOF
 source ~/.profile
+fi
+
+rm -rf ~/dns-over-https
+rm -rf /usr/local/bin/doh-client
+rm -rf /usr/local/bin/doh-server
+rm -rf /etc/NetworkManager/dispatcher.d
+rm -rf /usr/lib/systemd/system/doh-client.service
+rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
@@ -289,7 +302,7 @@ systemctl restart doh-server
 systemctl enable doh-server
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2='  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
@@ -335,7 +348,7 @@ blue  "Pi-hole 上游解析已切换为 8.8.8.8"
 pihole restartdns
 elif [[ $pihole_upstream = 2 ]]; then
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2='  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 blue  "Pi-hole 上游解析已切换为 DoH"

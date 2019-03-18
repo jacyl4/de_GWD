@@ -107,6 +107,7 @@ if [ ! -n "$(crontab -l | grep 'chnroute')" ]; then
     crontab -l > now.cron
     echo '0 0 * * * /etc/chnroute' >> now.cron
     crontab now.cron
+    rm -rf now.cron
 fi
 
 
