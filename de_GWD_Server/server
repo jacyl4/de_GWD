@@ -156,15 +156,15 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-cat > /usr/local/updatepdv << EOF
+cat > /usr/local/updateGWD << EOF
 #!/bin/bash
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
-chmod +x /usr/local/updatepdv
+chmod +x /usr/local/updateGWD
 
 crontab -l > now.cron
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
-echo '0 0 * * * /usr/local/updatepdv' >> now.cron
+echo '0 0 * * * /usr/local/updateGWD' >> now.cron
 crontab now.cron
 
 cat > /etc/nginx/conf.d/default.conf<< EOF
@@ -251,8 +251,7 @@ systemctl restart nginx
 
 
 bash <(curl -L -s https://install.direct/go.sh)
-wget http://seso.icu/@site/linux-router/pdvserver/v2wt-server.json
-mv -f v2wt-server.json /etc/v2ray/config.json
+wget http://seso.icu/@site/de_GWD/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
@@ -265,7 +264,7 @@ systemctl enable v2ray
 
 curl -sSL https://install.pi-hole.net | bash
 
-apt-get install -y git make gcc
+apt-get install -y git make gcc net-tools
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
 mv go /usr/local
@@ -279,10 +278,8 @@ source ~/.profile
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
-wget http://seso.icu/@site/linux-router/pdvserver/doh-client.conf
-wget http://seso.icu/@site/linux-router/pdvserver/doh-server.conf
-mv -f doh-client.conf /etc/dns-over-https/
-mv -f doh-server.conf /etc/dns-over-https/
+wget http://seso.icu/@site/de_GWD/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
+wget http://seso.icu/@site/de_GWD/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
