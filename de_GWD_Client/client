@@ -53,6 +53,7 @@ blue  "优化性能与网络 [完毕]"
 
 
 
+
 install_gatewayrouter(){
     green "==============="
     green "本机地址"
@@ -79,7 +80,16 @@ install_gatewayrouter(){
     green "==============="
     read v2path
 
+apt-get install -y net-tools ipset git make gcc
+
+cat > /etc/chnroute << "EOF"
+#!/bin/bash
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /etc/chnroute.txt
+
 bash <(curl -L -s https://install.direct/go.sh)
+EOF
+chmod +x /etc/chnroute
+/etc/chnroute
 wget http://seso.icu/@site/de_GWD/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
@@ -89,24 +99,12 @@ sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
 systemctl restart v2ray
 systemctl enable v2ray
 
-
-
-apt-get install -y net-tools ipset
-cat > /etc/chnroute << "EOF"
-#!/bin/bash
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /etc/chnroute.txt
-
-bash <(curl -L -s https://install.direct/go.sh)
-EOF
-chmod +x /etc/chnroute
-/etc/chnroute
-
-if [ ! -n "$(crontab -l | grep 'chnroute')" ]; then
+if [ "$(crontab -l | grep 'chnroute' | awk '{print $6}')" != "/etc/chnroute" ]; then
     crontab -l > now.cron
     echo '0 0 * * * /etc/chnroute' >> now.cron
     crontab now.cron
-    rm -rf now.cron
 fi
+rm -rf now.cron
 
 
 if [ ! -d "/etc/iptables-proxy" ]; then
@@ -204,15 +202,16 @@ ExecStop=/etc/iptables-proxy/iptables-proxy-down
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable iptables-proxy.service
-
+systemctl restart iptables-proxy
+systemctl enable iptables-proxy
 
 
 
 curl -sSL https://install.pi-hole.net | bash
 
-if [ ! -n "$(go version | grep 'go1.11.5')" ]; then
-    apt-get install -y git make gcc
+
+
+if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
     if [ $architecture = "aarch64" ]; then
         wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
         tar -xvf go1.11.5.linux-arm64.tar.gz
@@ -264,14 +263,13 @@ iface $ethernetnum inet static
   gateway $gatewayaddr
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
-systemctl restart doh-client
-systemctl enable doh-client
-
 pihole restartdns
 systemctl restart pihole-FTL
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+systemctl daemon-reload
+systemctl restart doh-client
+systemctl enable doh-client
 blue  "安装v2ray+doh+pihole+route [完毕]"
 }
 

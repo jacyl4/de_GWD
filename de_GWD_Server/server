@@ -67,7 +67,7 @@ install_nginx+tls+pihole+doh+v2ray(){
     green "========================="
     read v2path
 
-apt-get install -y nginx socat
+apt-get install -y nginx socat git make gcc net-tools
 
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
@@ -163,13 +163,13 @@ bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /usr/local/updateGWD
 
-if [ ! -n "$(crontab -l | grep 'update_ocsp_cache')" ]; then
+if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/updateGWD" ]; then
 crontab -l > now.cron
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
 echo '0 0 * * * /usr/local/updateGWD' >> now.cron
 crontab now.cron
-rm -rf now.cron
 fi
+rm -rf now.cron
 
 cat > /etc/nginx/conf.d/default.conf<< EOF
 upstream dns-backend {
@@ -268,8 +268,7 @@ systemctl enable v2ray
 
 curl -sSL https://install.pi-hole.net | bash
 
-apt-get install -y git make gcc net-tools
-if [ ! -n "$(go version | grep 'go1.11.5')" ]; then
+if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
 mv go /usr/local
