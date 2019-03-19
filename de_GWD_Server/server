@@ -265,7 +265,7 @@ EOF
 fi
 
 if [ -d "/usr/local/nginx/conf/ssl" ]; then
-  if [ "$(cd /home/wwwroot/ | ls www.$vpsdomain 2>&1 | awk '{print $5}')" = "No" ]; then
+  if [ "$(ls /home/wwwroot/www.$vpsdomain 2>&1 | awk '{print $5}')" = "No" ]; then
     nginxdomain="$vpsdomain";
   else
     nginxdomain="www.$vpsdomain";
