@@ -293,7 +293,7 @@ chmod +x /usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache
 
 if [ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/usr/local/nginx/conf/ssl/'$nginxdomain'/update_ocsp_cache" ]; then
 crontab -l > now.cron
-echo '0 0 * * 7 /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache' >> now.cron
+echo "0 0 * * 7 /usr/local/nginx/conf/ssl/'$nginxdomain'/update_ocsp_cache" >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
