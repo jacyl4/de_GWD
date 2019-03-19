@@ -243,7 +243,7 @@ systemctl restart nginx
 
 
 bash <(curl -L -s https://install.direct/go.sh)
-wget http://seso.icu/@site/de_GWD/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
@@ -278,8 +278,8 @@ rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
-wget http://seso.icu/@site/de_GWD/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
-wget http://seso.icu/@site/de_GWD/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-server

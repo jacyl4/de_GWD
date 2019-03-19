@@ -90,7 +90,7 @@ bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /etc/chnroute
 /etc/chnroute
-wget http://seso.icu/@site/de_GWD/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
@@ -238,7 +238,7 @@ rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
-wget http://seso.icu/@site/de_GWD/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
