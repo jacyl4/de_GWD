@@ -263,11 +263,12 @@ location $v2path {
 }
 EOF
 
-elif [ -d "/usr/local/nginx/conf/ssl" ]; then
+if [ -d "/usr/local/nginx/conf/ssl" ]; then
+
   if [ "$(cd /home/wwwroot/ | ls www.$vpsdomain 2>&1 | awk '{print $5}')" = "No"]; then
-    nginxdomain="$vpsdomain"
+    nginxdomain="$vpsdomain";
   else
-    nginxdomain="www.$vpsdomain"
+    nginxdomain="www.$vpsdomain";
   fi
 sed -i "/worker_processes auto;/c\worker_processes $workprocess;"  /usr/local/nginx/conf/nginx.conf
 cat > /usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache << EOF
