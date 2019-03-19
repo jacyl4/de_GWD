@@ -428,8 +428,12 @@ location $v2path {
 EOF
 
 fi
+
+if [ ! -d "/etc/systemd/system/nginx.service.d" ]; then
 mkdir /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
+fi
+
 systemctl daemon-reload
 systemctl restart nginx
 
