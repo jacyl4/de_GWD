@@ -67,9 +67,20 @@ install_v2ray+nginx+tls+pihole+doh(){
     green "========================="
     read v2path
 
-apt-get install -y net-tools
-
+cat > /usr/local/updateGWD << EOF
+#!/bin/bash
 bash <(curl -L -s https://install.direct/go.sh)
+EOF
+chmod +x /usr/local/updateGWD
+
+if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/updateGWD" ]; then
+crontab -l > now.cron
+echo '0 0 * * * /usr/local/updateGWD' >> now.cron
+crontab now.cron
+fi
+rm -rf now.cron
+
+/usr/local/updateGWD
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
@@ -136,7 +147,6 @@ server {
     index index.php index.html index.htm;
 }
 EOF
-
 systemctl restart nginx
 
 if [ ! -d "/var/www/ssl" ]; then
@@ -171,16 +181,9 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-cat > /usr/local/updateGWD << EOF
-#!/bin/bash
-bash <(curl -L -s https://install.direct/go.sh)
-EOF
-chmod +x /usr/local/updateGWD
-
-if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/updateGWD" ]; then
+if [ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]; then
 crontab -l > now.cron
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
-echo '0 0 * * * /usr/local/updateGWD' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
@@ -284,16 +287,10 @@ EOF
 chmod +x /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache
 /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache
 
-cat > /usr/local/updateGWD << EOF
-#!/bin/bash
-bash <(curl -L -s https://install.direct/go.sh)
-EOF
-chmod +x /usr/local/updateGWD
 
-if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/updateGWD" ]; then
+if [ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/usr/local/nginx/conf/ssl/'$vpsdomain'/update_ocsp_cache" ]; then
 crontab -l > now.cron
 echo '0 0 * * 7 /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache' >> now.cron
-echo '0 0 * * * /usr/local/updateGWD' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
@@ -470,7 +467,7 @@ systemctl restart doh-server
 systemctl enable doh-server
 
 
-
+apt-get install -y net-tools
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
 gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
@@ -478,6 +475,7 @@ sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
 
@@ -502,23 +500,56 @@ change_pihole_upstream(){
     green "========================="
     green "1.使用8.8.8.8 / 2.使用DoH"
     green "========================="
-    read pihole_upstream
+    read -p "请输入1/2:" pihole_upstream
 if [[ $pihole_upstream = 1 ]]; then
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=8.8.8.8'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=1.1.1.1'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=8.8.4.4'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=8.8.8.8" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=1.1.1.1" >> /etc/dnsmasq.d/01-pihole.conf
-blue  "Pi-hole 上游解析已切换为 8.8.8.8"
+echo "server=8.8.4.4" >> /etc/dnsmasq.d/01-pihole.conf
+systemctl stop doh-client
+systemctl disable doh-client
 pihole restartdns
+blue  "Pi-hole 上游解析已切换为 8.8.8.8"
 elif [[ $pihole_upstream = 2 ]]; then
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
+systemctl restart doh-client
+systemctl enable doh-client
+pihole restartdns
 blue  "Pi-hole 上游解析已切换为 DoH"
 fi
 }
+
+
+
+change_staticip(){
+    green "====================="
+    green "本机地址（留空回车跳过）"
+    green "====================="
+    read localaddr
+if [ "$localaddr" != "" ]; then 
+sed -i "/address/c\address $localaddr"  /etc/network/interfaces
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
+fi
+
+    green "====================="
+    green "网关地址（留空回车跳过）"
+    green "====================="
+    read gatewayaddr
+if [ "$gatewayaddr" != "" ]; then 
+sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
+fi
+
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
+sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
+sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
+blue  "更改静态IP [完毕]"
+}
+
 
 
 start_menu(){
@@ -533,6 +564,7 @@ start_menu(){
     green  "1. 优化性能与网络"
     green  "2. 安装v2ray+nginx+tls+pihole+doh"
     green  "3. 切换pihole上游"
+    green  "4. 更改静态IP"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -548,6 +580,10 @@ start_menu(){
     3)
     change_pihole_upstream
     start_menu
+    ;;
+    4)
+    change_staticip
+    start_menu 
     ;;
     *)
     clear

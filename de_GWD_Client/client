@@ -299,7 +299,7 @@ blue  "更改DoH地址 [完毕]"
 
 change_staticip(){
     green "====================="
-    green "本机地址（回车跳过）"
+    green "本机地址（留空回车跳过）"
     green "====================="
     read localaddr
 if [ "$localaddr" != "" ]; then 
@@ -308,7 +308,7 @@ sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 fi
 
     green "====================="
-    green "上级地址（回车跳过）"
+    green "上级地址（留空回车跳过）"
     green "====================="
     read gatewayaddr
 if [ "$gatewayaddr" != "" ]; then 
