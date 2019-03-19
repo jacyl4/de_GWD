@@ -82,14 +82,20 @@ install_gatewayrouter(){
 
 apt-get install -y net-tools ipset git make gcc
 
-cat > /etc/chnroute << "EOF"
+cat > /etc/updateGWD << "EOF"
 #!/bin/bash
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /etc/chnroute.txt
 
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
-chmod +x /etc/chnroute
-/etc/chnroute
+chmod +x /etc/updateGWD
+if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/etc/updateGWD" ]; then
+    crontab -l > now.cron
+    echo '0 0 * * * /etc/updateGWD' >> now.cron
+    crontab now.cron
+fi
+rm -rf now.cron
+/etc/updateGWD
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
@@ -99,12 +105,6 @@ sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
 systemctl restart v2ray
 systemctl enable v2ray
 
-if [ "$(crontab -l | grep 'chnroute' | awk '{print $6}')" != "/etc/chnroute" ]; then
-    crontab -l > now.cron
-    echo '0 0 * * * /etc/chnroute' >> now.cron
-    crontab now.cron
-fi
-rm -rf now.cron
 
 
 if [ ! -d "/etc/iptables-proxy" ]; then

@@ -72,14 +72,12 @@ cat > /usr/local/updateGWD << EOF
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /usr/local/updateGWD
-
 if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/updateGWD" ]; then
 crontab -l > now.cron
 echo '0 0 * * * /usr/local/updateGWD' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
-
 /usr/local/updateGWD
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
@@ -266,36 +264,41 @@ location $v2path {
 EOF
 
 elif [ -d "/usr/local/nginx/conf/ssl" ]; then
+  if [ $(cd /home/wwwroot/ | ls www* 2>&1 | awk '{print $5}') = "No"]; then
+    nginxdomain="$vpsdomain"
+  else
+    nginxdomain="www.$vpsdomain"
+  fi
 sed -i "/worker_processes auto;/c\worker_processes $workprocess;"  /usr/local/nginx/conf/nginx.conf
-cat > /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache << EOF
+cat > /usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache << EOF
 #!/bin/bash
 wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
 wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
-mv -f intermediate.pem /usr/local/nginx/conf/ssl/$vpsdomain/
-mv -f root.pem /usr/local/nginx/conf/ssl/$vpsdomain/
-cat /usr/local/nginx/conf/ssl/$vpsdomain/intermediate.pem > /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem
-cat /usr/local/nginx/conf/ssl/$vpsdomain/root.pem >> /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem
+mv -f intermediate.pem /usr/local/nginx/conf/ssl/$nginxdomain/
+mv -f root.pem /usr/local/nginx/conf/ssl/$nginxdomain/
+cat /usr/local/nginx/conf/ssl/$nginxdomain/intermediate.pem > /usr/local/nginx/conf/ssl/$nginxdomain/bundle.pem
+cat /usr/local/nginx/conf/ssl/$nginxdomain/root.pem >> /usr/local/nginx/conf/ssl/$nginxdomain/bundle.pem
 
 openssl ocsp -no_nonce \
-    -issuer  /usr/local/nginx/conf/ssl/$vpsdomain/intermediate.pem \
-    -cert    /usr/local/nginx/conf/ssl/$vpsdomain/fullchain.cer \
-    -CAfile  /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem \
-    -VAfile  /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem \
+    -issuer  /usr/local/nginx/conf/ssl/$nginxdomain/intermediate.pem \
+    -cert    /usr/local/nginx/conf/ssl/$nginxdomain/fullchain.cer \
+    -CAfile  /usr/local/nginx/conf/ssl/$nginxdomain/bundle.pem \
+    -VAfile  /usr/local/nginx/conf/ssl/$nginxdomain/bundle.pem \
     -url     http://ocsp.int-x3.letsencrypt.org \
-    -respout /usr/local/nginx/conf/ssl/$vpsdomain/ocsp.resp
+    -respout /usr/local/nginx/conf/ssl/$nginxdomain/ocsp.resp
 EOF
-chmod +x /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache
-/usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache
+chmod +x /usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache
+/usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache
 
 
-if [ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/usr/local/nginx/conf/ssl/'$vpsdomain'/update_ocsp_cache" ]; then
+if [ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/usr/local/nginx/conf/ssl/'$nginxdomain'/update_ocsp_cache" ]; then
 crontab -l > now.cron
 echo '0 0 * * 7 /usr/local/nginx/conf/ssl/$vpsdomain/update_ocsp_cache' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
 
-cat > /usr/local/nginx/conf/vhost/$vpsdomain.conf<< EOF
+cat > /usr/local/nginx/conf/vhost/$nginxdomain.conf<< EOF
 upstream dns-backend {
   server 127.0.0.1:8053;
 }
@@ -303,7 +306,7 @@ upstream dns-backend {
 server {
   listen 80;
   server_name $vpsdomain www.$vpsdomain;
-  root  /home/wwwroot/$vpsdomain;
+  root  /home/wwwroot/$nginxdomain;
   index index.html index.htm index.php default.html default.htm default.php;
 
   include rewrite/none.conf;
@@ -339,12 +342,12 @@ server {
 server {
   listen 443 ssl http2;
   server_name $vpsdomain www.$vpsdomain;
-  root  /home/wwwroot/$vpsdomain;
+  root  /home/wwwroot/$nginxdomain;
   index index.html index.htm index.php default.html default.htm default.php;
 
   ssl on;
-  ssl_certificate /usr/local/nginx/conf/ssl/$vpsdomain/fullchain.cer;
-  ssl_certificate_key /usr/local/nginx/conf/ssl/$vpsdomain/$vpsdomain.key;
+  ssl_certificate /usr/local/nginx/conf/ssl/$nginxdomain/fullchain.cer;
+  ssl_certificate_key /usr/local/nginx/conf/ssl/$nginxdomain/$nginxdomain.key;
   ssl_session_timeout 5m;
   ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
   ssl_prefer_server_ciphers on;
@@ -355,8 +358,8 @@ server {
   # OCSP Stapling ---
   ssl_stapling on;
   ssl_stapling_verify on;
-  ssl_trusted_certificate /usr/local/nginx/conf/ssl/$vpsdomain/bundle.pem;
-  ssl_stapling_file /usr/local/nginx/conf/ssl/$vpsdomain/ocsp.resp;
+  ssl_trusted_certificate /usr/local/nginx/conf/ssl/$nginxdomain/bundle.pem;
+  ssl_stapling_file /usr/local/nginx/conf/ssl/$nginxdomain/ocsp.resp;
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
 
@@ -426,14 +429,12 @@ location $v2path {
   access_log off;
 }
 EOF
-
 fi
 
 if [ ! -d "/etc/systemd/system/nginx.service.d" ]; then
 mkdir /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
 fi
-
 systemctl daemon-reload
 systemctl restart nginx
 
