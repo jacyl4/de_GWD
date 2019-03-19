@@ -263,7 +263,7 @@ location $v2path {
 }
 EOF
 
-if [ -d "/usr/local/nginx/conf/ssl" ]; then
+elif [ -d "/usr/local/nginx/conf/ssl" ]; then
 
   if [ "$(cd /home/wwwroot/ | ls www.$vpsdomain 2>&1 | awk '{print $5}')" = "No"]; then
     nginxdomain="$vpsdomain"
