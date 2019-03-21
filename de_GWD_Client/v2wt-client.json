@@ -4,15 +4,13 @@
     "error": "/var/log/v2ray/error.log",
     "loglevel": "error"
     },
-  "inbounds": [
-    {
-      "protocol":"socks",
-      "port":9897,
-      "listen":"127.0.0.1",
-      "settings":{
-         "auth":"noauth",
-         "network": "tcp,udp"
-          },
+  "inbounds": [{
+    "protocol":"socks",
+    "port":9897,
+    "settings":{
+      "auth":"noauth",
+      "network": "tcp,udp"
+      },
       "sniffing": {
         "enabled": true,
         "destOverride": ["http", "tls"]
@@ -27,18 +25,16 @@
       "followRedirect": true
       },
     "streamSettings": {
-      "sockopt": {
-        "tcpFastOpen": true
-      }
+      "sockopt": {"tcpFastOpen": true }
     },
     "sniffing": {
       "enabled": true,
       "destOverride": ["http", "tls"]
       }
-    }
-  ],
+    }],
   "outbounds": [
     {
+    "mux": {"enabled": true},
     "protocol": "vmess",
     "settings": {
       "vnext": [{
@@ -53,18 +49,21 @@
         }]
     },
     "streamSettings": {
-      "sockopt": { "mark": 255 },
       "network": "ws",
       "security": "tls",
       "tlsSettings": {
         "serverName": "xxx.xxx",
-        "allowInsecure": true
+        "allowInsecure": false
         },
       "wsSettings": {
         "path": "/xxxx",
         "headers": {
           "Host": "xxx.xxx"
           }
+        },
+      "sockopt": {
+        "mark": 255,
+        "tcpFastOpen": true
         }
       }
     }

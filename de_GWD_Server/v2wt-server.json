@@ -18,17 +18,19 @@
       },
     "streamSettings": {
       "network": "ws",
-      "security": "auto",
+      "security": "none",
       "wsSettings": {
         "path": "/0000"
-        }
+        },
+      "sockopt": {"tcpFastOpen": true }
       }
     }
   ],
   "outbounds": [
     {
       "protocol": "freedom",
-      "settings": {}
+      "settings": {},
+      "streamSettings": {"sockopt": {"tcpFastOpen": true }}
     }
   ]
 }
