@@ -24,9 +24,6 @@
       "network": "tcp,udp",
       "followRedirect": true
       },
-    "streamSettings": {
-      "sockopt": {"tcpFastOpen": true }
-    },
     "sniffing": {
       "enabled": true,
       "destOverride": ["http", "tls"]
@@ -34,7 +31,7 @@
     }],
   "outbounds": [
     {
-    "mux": {"enabled": true},
+    "mux": { "enabled": true },
     "protocol": "vmess",
     "settings": {
       "vnext": [{
@@ -58,12 +55,12 @@
       "wsSettings": {
         "path": "/xxxx",
         "headers": {
+          "Accept-Encoding": "gzip",
           "Host": "xxx.xxx"
           }
         },
       "sockopt": {
-        "mark": 255,
-        "tcpFastOpen": true
+        "mark": 255
         }
       }
     }

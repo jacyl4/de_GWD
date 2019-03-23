@@ -21,16 +21,14 @@
       "security": "none",
       "wsSettings": {
         "path": "/0000"
-        },
-      "sockopt": {"tcpFastOpen": true }
+        }
       }
     }
   ],
   "outbounds": [
     {
       "protocol": "freedom",
-      "settings": {},
-      "streamSettings": {"sockopt": {"tcpFastOpen": true }}
+      "settings": {}
     }
   ]
 }
