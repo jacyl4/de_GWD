@@ -123,8 +123,7 @@ iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT
 iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT
 
 iptables -t nat -N V2RAYTCP
-iptables -t nat -A V2RAYTCP -d 103.94.185.19 -j RETURN
-iptables -t nat -A V2RAYTCP -d 149.129.93.5 -j RETURN
+
 
 iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
 iptables -t nat -A V2RAYTCP -d 10.0.0.0/8 -j RETURN
@@ -146,8 +145,7 @@ iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
 ip rule add fwmark 9 table 909
 ip route add local 0.0.0.0/0 dev lo table 909
 iptables -t mangle -N V2RAYUDP
-iptables -t mangle -A V2RAYUDP -d 103.94.185.19 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 149.129.93.5 -j RETURN
+
 
 iptables -t mangle -A V2RAYUDP -d 0.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAYUDP -d 10.0.0.0/8 -j RETURN
