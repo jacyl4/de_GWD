@@ -91,7 +91,7 @@ systemctl enable v2ray
 
 
 if [ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]; then
-apt-get install -y nginx socat
+apt-get install -y nginx socat curl
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes $workprocess;

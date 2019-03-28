@@ -80,7 +80,7 @@ install_gatewayrouter(){
     green "==============="
     read v2path
 
-apt-get install -y net-tools ipset git make gcc
+apt-get install -y net-tools ipset git make gcc curl
 
 cat > /etc/updateGWD << "EOF"
 #!/bin/bash
