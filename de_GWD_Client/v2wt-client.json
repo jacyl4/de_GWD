@@ -55,7 +55,6 @@
       "wsSettings": {
         "path": "/xxxx",
         "headers": {
-          "Accept-Encoding": "gzip",
           "Host": "xxx.xxx"
           }
         },

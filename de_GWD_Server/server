@@ -67,14 +67,14 @@ install_v2ray+nginx+tls+pihole+doh(){
     green "========================="
     read v2path
 
-cat > /usr/local/updateGWD << EOF
+cat > /usr/local/etc/updateGWD << EOF
 #!/bin/bash
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
-chmod +x /usr/local/updateGWD
-if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/updateGWD" ]; then
+chmod +x /usr/local/etc/updateGWD
+if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]; then
 crontab -l > now.cron
-echo '0 0 * * * /usr/local/updateGWD' >> now.cron
+echo '0 0 * * * /usr/local/etc/updateGWD' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
@@ -231,14 +231,11 @@ location /dq {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  sendfile                on;
-  tcp_nopush              on;
-  tcp_nodelay             on;
+  proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_buffering         off;
   proxy_buffer_size       8k;
-  proxy_intercept_errors  on;
   proxy_pass http://dns-backend;
 }
 
@@ -249,14 +246,11 @@ location $v2path {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  sendfile                on;
-  tcp_nopush              on;
-  tcp_nodelay             on;
+  proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_buffering         off;
   proxy_buffer_size       8k;
-  proxy_intercept_errors  on;
   proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;
@@ -398,14 +392,11 @@ location /dq {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  sendfile                on;
-  tcp_nopush              on;
-  tcp_nodelay             on;
+  proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_buffering         off;
   proxy_buffer_size       8k;
-  proxy_intercept_errors  on;
   proxy_pass              http://dns-backend;
 }
 
@@ -416,14 +407,11 @@ location $v2path {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  sendfile                on;
-  tcp_nopush              on;
-  tcp_nodelay             on;
+  proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_buffering         off;
   proxy_buffer_size       8k;
-  proxy_intercept_errors  on;
   proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;

@@ -82,20 +82,20 @@ install_gatewayrouter(){
 
 apt-get install -y net-tools ipset git make gcc curl
 
-cat > /etc/updateGWD << "EOF"
+cat > /usr/local/etc/updateGWD << "EOF"
 #!/bin/bash
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /etc/chnroute.txt
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
 
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /etc/updateGWD
-if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/etc/updateGWD" ]; then
+if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]; then
     crontab -l > now.cron
-    echo '0 2 * * * /etc/updateGWD' >> now.cron
+    echo '0 2 * * * /usr/local/etc/updateGWD' >> now.cron
     crontab now.cron
 fi
 rm -rf now.cron
-/etc/updateGWD
+/usr/local/etc/updateGWD
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
@@ -107,15 +107,15 @@ systemctl enable v2ray
 
 
 
-if [ ! -d "/etc/iptables-proxy" ]; then
-    mkdir /etc/iptables-proxy
+if [ ! -d "/usr/local/etc/iptables-proxy" ]; then
+    mkdir /usr/local/etc/iptables-proxy
 fi
-cat > /etc/iptables-proxy/iptables-proxy-up << "EOF"
+cat > /usr/local/etc/iptables-proxy/iptables-proxy-up << "EOF"
 #!/bin/bash
 
 ipset -X chnroute &>/dev/null
 ipset -N chnroute hash:net maxelem 65536
-for ip in $(cat '/etc/chnroute.txt'); do
+for ip in $(cat '/usr/local/etc/chnroute.txt'); do
   ipset add chnroute $ip
 done
 
@@ -163,9 +163,9 @@ iptables -t mangle -A V2RAYUDP -p udp -j TPROXY --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A PREROUTING -p udp -j V2RAYUDP
 systemctl restart v2ray
 EOF
-chmod +x /etc/iptables-proxy/iptables-proxy-up
+chmod +x /usr/local/etc/iptables-proxy/iptables-proxy-up
 
-cat > /etc/iptables-proxy/iptables-proxy-down << EOF
+cat > /usr/local/etc/iptables-proxy/iptables-proxy-down << EOF
 #!/bin/bash
 systemctl stop v2ray
 
@@ -181,9 +181,9 @@ iptables -t mangle -X
 
 ipset destroy chnroute
 EOF
-chmod +x /etc/iptables-proxy/iptables-proxy-down
+chmod +x /usr/local/etc/iptables-proxy/iptables-proxy-down
 
-cat > /etc/systemd/system/iptables-proxy.service << EOF
+cat > /usr/local/etc/systemd/system/iptables-proxy.service << EOF
 [Unit]
 Description=iptables-proxy
 Requires=network.target network-online.target
@@ -193,8 +193,8 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/etc/iptables-proxy/iptables-proxy-up
-ExecStop=/etc/iptables-proxy/iptables-proxy-down
+ExecStart=/usr/local/etc/iptables-proxy/iptables-proxy-up
+ExecStop=/usr/local/etc/iptables-proxy/iptables-proxy-down
 
 [Install]
 WantedBy=multi-user.target
