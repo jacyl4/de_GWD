@@ -94,6 +94,13 @@ deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contri
 deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
 
+cat > /etc/locale.gen << EOF
+en_US.UTF-8 UTF-8
+zh_CN.GBK GBK
+zh_CN.UTF-8 UTF-8
+EOF
+locale-gen
+
 apt-get update
 
 apt-get install -y unzip ipset net-tools ipset git make gcc curl
@@ -269,12 +276,7 @@ systemctl restart doh-client
 systemctl enable doh-client
 rm -rf ~/dns-over-https
 
-cat > /etc/locale.gen << EOF
-en_US.UTF-8 UTF-8
-zh_CN.GBK GBK
-zh_CN.UTF-8 UTF-8
-EOF
-locale-gen
+
 curl -sSL https://install.pi-hole.net | bash
 
 
