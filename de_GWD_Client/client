@@ -83,31 +83,56 @@ install_gatewayrouter(){
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 
 
-
-apt-get install -y net-tools ipset git make gcc curl
-
-cat > /usr/local/etc/updateGWD << "EOF"
-#!/bin/bash
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
-
-bash <(curl -L -s https://install.direct/go.sh)
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.163.com/debian/ stretch main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
-chmod +x /usr/local/etc/updateGWD
-if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]; then
-    crontab -l > now.cron
-    echo '0 2 * * * /usr/local/etc/updateGWD' >> now.cron
-    crontab now.cron
+
+apt-get update
+
+apt-get install -y unzip ipset net-tools ipset git make gcc curl
+
+mkdir -p /etc/v2ray
+mkdir -p /usr/bin/v2ray
+mkdir -p /var/log/v2ray
+if [ $architecture = "aarch64" ]; then
+wget --no-check-certificate https://accaly.ooo/v2aarch64.zip -O ~/v2aarch64.zip
+unzip v2aarch64.zip
+mv -f ~/v2aarch64/v2ray /usr/bin/v2ray/v2ray
+mv -f ~/v2aarch64/v2ctl /usr/bin/v2ray/v2ctl
+mv -f ~/v2aarch64/v2ray.service /etc/systemd/system/v2ray.service
+mv -f ~/v2aarch64/v2wt-client.json /etc/v2ray/config.json
+mv -f ~/v2aarch64/chnroute.txt /usr/local/etc/chnroute.txt
+rm -rf ~/v2aarch64
+rm -rf ~/v2aarch64.zip
+elif [ $architecture = "amd64" ]; then
+wget --no-check-certificate https://accaly.ooo/v2amd64.zip -O ~/v2amd64.zip
+unzip v2amd64.zip
+mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
+mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
+mv -f ~/v2amd64/v2ray.service /etc/systemd/system/v2ray.service
+mv -f ~/v2amd64/v2wt-client.json /etc/v2ray/config.json
+mv -f ~/v2amd64/chnroute.txt /usr/local/etc/chnroute.txt
+rm -rf ~/v2amd64
+rm -rf ~/v2amd64.zip
 fi
-rm -rf now.cron
-/usr/local/etc/updateGWD
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
+chmod +x /usr/bin/v2ray/v2ray
+chmod +x /usr/bin/v2ray/v2ctl
 systemctl restart v2ray
 systemctl enable v2ray
+
+
 
 
 mkdir -p /usr/local/etc/iptables-proxy
@@ -124,7 +149,6 @@ iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT
 iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT
 
 iptables -t nat -N V2RAYTCP
-
 
 iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
 iptables -t nat -A V2RAYTCP -d 10.0.0.0/8 -j RETURN
@@ -146,7 +170,6 @@ iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
 ip rule add fwmark 9 table 909
 ip route add local 0.0.0.0/0 dev lo table 909
 iptables -t mangle -N V2RAYUDP
-
 
 iptables -t mangle -A V2RAYUDP -d 0.0.0.0/8 -j RETURN
 iptables -t mangle -A V2RAYUDP -d 10.0.0.0/8 -j RETURN
@@ -203,7 +226,7 @@ EOF
 systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
-
+systemctl restart v2ray
 
 
 if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
@@ -277,6 +300,23 @@ route add default gw $gatewayaddr $ethernetnum
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
 systemctl restart pihole-FTL
+
+
+cat > /usr/local/etc/updateGWD << "EOF"
+#!/bin/bash
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
+
+bash <(curl -L -s https://install.direct/go.sh)
+EOF
+chmod +x /usr/local/etc/updateGWD
+if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]; then
+    crontab -l > now.cron
+    echo '0 2 * * * /usr/local/etc/updateGWD' >> now.cron
+    crontab now.cron
+fi
+rm -rf now.cron
+
+
 blue  "安装v2ray+doh+pihole+route [完毕]"
 }
 
