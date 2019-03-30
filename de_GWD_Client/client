@@ -80,6 +80,10 @@ install_gatewayrouter(){
     green "==============="
     read v2path
 
+ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
+
+
+
 apt-get install -y net-tools ipset git make gcc curl
 
 cat > /usr/local/etc/updateGWD << "EOF"
@@ -106,10 +110,7 @@ systemctl restart v2ray
 systemctl enable v2ray
 
 
-
-if [ ! -d "/usr/local/etc/iptables-proxy" ]; then
-    mkdir /usr/local/etc/iptables-proxy
-fi
+mkdir -p /usr/local/etc/iptables-proxy
 cat > /usr/local/etc/iptables-proxy/iptables-proxy-up << "EOF"
 #!/bin/bash
 
@@ -205,10 +206,6 @@ systemctl enable iptables-proxy
 
 
 
-curl -sSL https://install.pi-hole.net | bash
-
-
-
 if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
     if [ $architecture = "aarch64" ]; then
         wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
@@ -237,6 +234,15 @@ git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
+sed -i "14s/.*/$v2servn/" /etc/dns-over-https/doh-client.conf
+sed -i "19s/.*/$v2servn/" /etc/dns-over-https/doh-client.conf
+sed -i "24s/.*/$v2servn/" /etc/dns-over-https/doh-client.conf
+sed -i "29s/.*/$v2servn/" /etc/dns-over-https/doh-client.conf
+systemctl restart doh-client
+
+
+curl -sSL https://install.pi-hole.net | bash
+
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
@@ -247,7 +253,7 @@ sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
+
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
 
@@ -260,6 +266,10 @@ iface $ethernetnum inet static
   netmask 255.255.255.0
   gateway $gatewayaddr
 EOF
+
+route del default
+route add default gw $gatewayaddr $ethernetnum
+
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
