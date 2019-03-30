@@ -49,7 +49,9 @@ if [ $architecture = "aarch64" ]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
+blue "---------------------"
 blue  "优化性能与网络 [完毕]"
+blue "---------------------"
 }
 
 
@@ -330,7 +332,7 @@ statusgod=$(green "✔︎")
 statusbad=$(red "✘")
 
 blue "---------------------------------"
-blue "安装v2ray+doh+pihole+route [完毕]"
+blue "安装v2ray+route+doh+pihole [完毕]"
 blue "---------------------------------"
 if [ $(systemctl is-active v2ray) = "active" ]; then
     echo "[$statusgod] v2ray     进程正常"
@@ -481,7 +483,7 @@ start_menu(){
     green "============================================"
     echo
     green  "1. 优化性能与网络"
-    green  "2. 安装v2ray+doh+pihole+route"
+    green  "2. 安装v2ray+route+doh+pihole"
     green  "3. 更改Pi-hole密码"
     green  "4. 更改静态IP"
     red    "8. 代理开关"
