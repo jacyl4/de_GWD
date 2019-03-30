@@ -105,7 +105,7 @@ locale-gen
 
 apt-get update
 
-apt-get install -y unzip ipset net-tools ipset git make gcc curl
+apt-get install -y unzip ipset net-tools ipset git make gcc curl ca-certificates
 
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
 
@@ -113,7 +113,7 @@ mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
 if [ $architecture = "aarch64" ]; then
-wget --no-check-certificate https://accaly.ooo/v2aarch64.zip -O ~/v2aarch64.zip
+wget https://accaly.ooo/v2aarch64.zip -O ~/v2aarch64.zip
 unzip v2aarch64.zip
 mv -f ~/v2aarch64/v2ray /usr/bin/v2ray/v2ray
 mv -f ~/v2aarch64/v2ctl /usr/bin/v2ray/v2ctl
@@ -122,7 +122,7 @@ mv -f ~/v2aarch64/v2wt-client.json /etc/v2ray/config.json
 rm -rf ~/v2aarch64
 rm -rf ~/v2aarch64.zip
 elif [ $architecture = "amd64" ]; then
-wget --no-check-certificate https://accaly.ooo/v2amd64.zip -O ~/v2amd64.zip
+wget https://accaly.ooo/v2amd64.zip -O ~/v2amd64.zip
 unzip v2amd64.zip
 mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
 mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
