@@ -13,6 +13,7 @@ case $(uname -m) in
 esac
 
 
+
 performance_mod(){
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
@@ -50,7 +51,6 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 fi
 blue  "优化性能与网络 [完毕]"
 }
-
 
 
 
