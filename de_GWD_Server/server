@@ -82,7 +82,7 @@ echo '0 0 * * * /usr/local/etc/updateGWD' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
-/usr/local/updateGWD
+/usr/local/etc/updateGWD
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
