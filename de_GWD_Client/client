@@ -456,13 +456,13 @@ switch_ipotables_proxy(){
     green "Y.启动代理 / N.停止代理"
     green "======================"
     read iptablesproxyyn
-if [ "$iptablesproxyyn" = "Y" ] & [ "$iptablesproxyyn" = "y" ]; then
+if [ "$iptablesproxyyn" = "Y" ] || [ "$iptablesproxyyn" = "y" ]; then
 echo "[...] 耐心等待代理启动"
 systemctl restart iptables-proxy
 blue "-------------"
 blue  "[代理已启动]"
 blue "-------------"
-elif [ "$iptablesproxyyn" = "N" ] & [ "$iptablesproxyyn" = "n" ]; then
+elif [ "$iptablesproxyyn" = "N" ] || [ "$iptablesproxyyn" = "n" ]; then
 systemctl stop iptables-proxy
 blue "-------------"
 blue  "[代理已关闭]"
