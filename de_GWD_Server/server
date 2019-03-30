@@ -58,6 +58,9 @@ install_v2ray+nginx+tls+pihole+doh(){
     green "========================="
     read v2path
 
+apt-get install -y curl
+
+
 cat > /usr/local/etc/updateGWD << EOF
 #!/bin/bash
 bash <(curl -L -s https://install.direct/go.sh)
@@ -82,7 +85,7 @@ systemctl enable v2ray
 
 
 if [ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]; then
-apt-get install -y nginx socat curl
+apt-get install -y nginx socat
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes auto;

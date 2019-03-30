@@ -133,8 +133,6 @@ systemctl restart v2ray
 systemctl enable v2ray
 
 
-
-
 mkdir -p /usr/local/etc/iptables-proxy
 cat > /usr/local/etc/iptables-proxy/iptables-proxy-up << "EOF"
 #!/bin/bash
@@ -233,9 +231,11 @@ if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
     if [ $architecture = "aarch64" ]; then
         wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
         tar -xvf go1.11.5.linux-arm64.tar.gz
+        rm -rf ~/go1.11.5.linux-arm64.tar.gz
     elif [ $architecture = "amd64" ]; then
         wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
         tar -xvf go1.11.5.linux-amd64.tar.gz
+        rm -rf ~/go1.11.5.linux-amd64.tar.gz
     fi
 mv go /usr/local
 mkdir ~/gopath
@@ -266,8 +266,14 @@ systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-client
 systemctl enable doh-client
+rm -rf ~/dns-over-https
 
-
+cat > /etc/locale.gen << EOF
+en_US.UTF-8 UTF-8
+zh_CN.GBK GBK
+zh_CN.UTF-8 UTF-8
+EOF
+locale-gen
 curl -sSL https://install.pi-hole.net | bash
 
 
