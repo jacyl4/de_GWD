@@ -38,6 +38,9 @@ net.ipv4.tcp_timestamps=0
 net.ipv4.tcp_fin_timeout=30
 EOF
 sysctl -p
+blue "---------------------"
+blue  "优化性能与网络 [完毕]"
+blue "---------------------"
 }
 
 
@@ -58,7 +61,14 @@ install_v2ray+nginx+tls+pihole+doh(){
     green "========================="
     read v2path
 
-apt-get install -y curl
+cat > /etc/locale.gen << EOF
+en_US.UTF-8 UTF-8
+zh_CN.GBK GBK
+zh_CN.UTF-8 UTF-8
+EOF
+locale-gen
+
+apt-get install -y git make gcc curl net-tools ca-certificates
 
 
 cat > /usr/local/etc/updateGWD << EOF
@@ -84,7 +94,7 @@ systemctl enable v2ray
 
 
 
-if [ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]; then
+if [ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ] || [ -d "/etc/nginx" ]; then
 apt-get install -y nginx socat
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
@@ -141,17 +151,17 @@ server {
 EOF
 systemctl restart nginx
 
-if [ ! -d "/var/www/ssl" ]; then
-mkdir /var/www/ssl
+
+mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
-~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html
+~/.acme.sh/acme.sh --issue -d $vpsdomain -d www.$vpsdomain -w /var/www/html
 ~/.acme.sh/acme.sh --installcert -d $vpsdomain \
                --keypath       /var/www/ssl/$vpsdomain.key  \
                --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
-               --reloadcmd     "systemctl restart nginx"
+               --reloadcmd     "systemctl force-reload nginx"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
-fi
+
 
 cat > /var/www/ssl/update_ocsp_cache << EOF
 #!/bin/bash
@@ -251,7 +261,7 @@ location $v2path {
 }
 EOF
 
-elif [ -d "/usr/local/nginx/conf/ssl" ]; then
+elif [ -d "/usr/local/nginx" ]; then
 nginxdomain="$(cd /home/wwwroot && ls | grep $vpsdomain)"
 
 cat > /usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache << EOF
@@ -409,17 +419,16 @@ location $v2path {
 EOF
 fi
 
-if [ ! -d "/etc/systemd/system/nginx.service.d" ]; then
-mkdir /etc/systemd/system/nginx.service.d
+mkdir -p /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
-fi
 systemctl daemon-reload
 systemctl restart nginx
-
+systemctl enable nginx
 
 
 curl -sSL https://install.pi-hole.net | bash
-apt-get install -y git make gcc
+
+
 if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
@@ -442,15 +451,16 @@ rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
+cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-server
 systemctl enable doh-server
+rm -rf ~/dns-over-https
 
 
-apt-get install -y net-tools
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
 gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
@@ -476,6 +486,39 @@ sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
 systemctl restart pihole-FTL
 
+
+statusgod=$(green "✔︎") 
+statusbad=$(red "✘")
+
+blue "---------------------------------------"
+blue  "安装v2ray+nginx+tls+pihole+doh [完毕]"
+blue "---------------------------------------"
+if [ $(systemctl is-active v2ray) = "active" ]; then
+    echo "[$statusgod] v2ray     进程正常"
+else
+    echo "[$statusbad] v2ray     进程出错"
+fi
+
+
+if [ $(systemctl is-active nginx) = "active" ]; then
+    echo "[$statusgod] nginx     进程正常"
+else
+    echo "[$statusbad] nginx     进程出错"
+fi
+
+
+if [ $(systemctl is-active doh-server) = "active" ]; then
+    echo "[$statusgod] DoH服务端 进程正常"
+else
+    echo "[$statusbad] DoH服务端 进程出错"
+fi
+
+
+if [ $(systemctl is-active pihole-FTL) = "active" ]; then
+    echo "[$statusgod] pihole    进程正常"
+else
+    echo "[$statusbad] pihole    进程出错"
+fi
 }
 
 
@@ -494,7 +537,9 @@ echo "server=8.8.4.4" >> /etc/dnsmasq.d/01-pihole.conf
 systemctl stop doh-client
 systemctl disable doh-client
 pihole restartdns
+blue "--------------------------------"
 blue  "Pi-hole 上游解析已切换为 8.8.8.8"
+blue "--------------------------------"
 elif [[ $pihole_upstream = 2 ]]; then
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
@@ -503,7 +548,9 @@ echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 systemctl restart doh-client
 systemctl enable doh-client
 pihole restartdns
+blue "----------------------------"
 blue  "Pi-hole 上游解析已切换为 DoH"
+blue "----------------------------"
 fi
 }
 
@@ -531,7 +578,9 @@ sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
+blue "------------------"
 blue  "更改静态IP [完毕]"
+blue "------------------"
 }
 
 
