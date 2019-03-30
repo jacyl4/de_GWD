@@ -136,6 +136,7 @@ systemctl enable v2ray
 mkdir -p /usr/local/etc/iptables-proxy
 cat > /usr/local/etc/iptables-proxy/iptables-proxy-up << "EOF"
 #!/bin/bash
+systemctl restart v2ray
 
 ipset -X chnroute &>/dev/null
 ipset -N chnroute hash:net maxelem 65536
@@ -224,7 +225,6 @@ EOF
 systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
-systemctl restart v2ray
 
 
 if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
