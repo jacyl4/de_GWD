@@ -48,11 +48,6 @@ install_v2ray+nginx+tls+pihole+doh(){
     green "=============================="
     read vpsdomain
 
-    green "================="
-    green " 此VPS有几个线程"
-    green "================="
-    read workprocess
-
     green "============"
     green " v2ray uuid"
     green "============"
@@ -90,7 +85,7 @@ if [ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]; then
 apt-get install -y nginx socat curl
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
-worker_processes $workprocess;
+worker_processes auto;
 
 events {
     use epoll;
@@ -227,7 +222,6 @@ location /dq {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  tcp_nopush              on;
   tcp_nodelay             on;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
@@ -244,7 +238,6 @@ location $v2path {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  tcp_nopush              on;
   tcp_nodelay             on;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
@@ -260,7 +253,6 @@ EOF
 elif [ -d "/usr/local/nginx/conf/ssl" ]; then
 nginxdomain="$(cd /home/wwwroot && ls | grep $vpsdomain)"
 
-sed -i "/worker_processes auto;/c\worker_processes $workprocess;"  /usr/local/nginx/conf/nginx.conf
 cat > /usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache << EOF
 #!/bin/bash
 wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
@@ -389,7 +381,6 @@ location /dq {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  tcp_nopush              on;
   tcp_nodelay             on;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
@@ -406,7 +397,6 @@ location $v2path {
   proxy_set_header Host "$vpsdomain";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  tcp_nopush              on;
   tcp_nodelay             on;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
