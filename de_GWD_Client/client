@@ -455,6 +455,7 @@ switch_ipotables_proxy(){
     green "======================"
     read iptablesproxyyn
 if [ "$iptablesproxyyn" = "Y" ] & [ "$iptablesproxyyn" = "y" ]; then
+echo "[...] 耐心等待代理启动"
 systemctl restart iptables-proxy
 blue "-------------"
 blue  "[代理已启动]"
