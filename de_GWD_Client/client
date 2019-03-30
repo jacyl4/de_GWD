@@ -311,7 +311,7 @@ EOF
 chmod +x /usr/local/etc/updateGWD
 if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]; then
     crontab -l > now.cron
-    echo '0 2 * * * /usr/local/etc/updateGWD' >> now.cron
+    echo '0 4 * * * /usr/local/etc/updateGWD' >> now.cron
     crontab now.cron
 fi
 rm -rf now.cron
