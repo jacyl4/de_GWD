@@ -183,7 +183,7 @@ ipset destroy chnroute
 EOF
 chmod +x /usr/local/etc/iptables-proxy/iptables-proxy-down
 
-cat > /usr/local/etc/systemd/system/iptables-proxy.service << EOF
+cat > /etc/systemd/system/iptables-proxy.service << EOF
 [Unit]
 Description=iptables-proxy
 Requires=network.target network-online.target
