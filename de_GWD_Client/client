@@ -256,6 +256,7 @@ rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
+cd ~/
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 doh_upstream='url = "https:\/\/'$v2servn'\/dq"'
 sed -i "14s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
@@ -266,7 +267,6 @@ systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-client
 systemctl enable doh-client
-cd ~/
 rm -rf ~/dns-over-https
 
 cat > /etc/locale.gen << EOF
