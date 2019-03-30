@@ -326,14 +326,47 @@ fi
 rm -rf now.cron
 
 
-blue  "安装v2ray+doh+pihole+route [完毕]"
+statusgod=$(green "✔︎") 
+statusbad=$(red "✘")
+
+blue "---------------------------------"
+blue "安装v2ray+doh+pihole+route [完毕]"
+blue "---------------------------------"
+if [ $(systemctl is-active v2ray) = "active" ]; then
+    echo "[$statusgod] v2ray     进程正常"
+else
+    echo "[$statusbad] v2ray     进程出错"
+fi
+
+
+if [ $(systemctl is-active iptables-proxy) = "active" ]; then
+    echo "[$statusgod] 代理规则  进程正常"
+else
+    echo "[$statusbad] 代理规则  进程出错"
+fi
+
+
+if [ $(systemctl is-active doh-client) = "active" ]; then
+    echo "[$statusgod] DoH客户端 进程正常"
+else
+    echo "[$statusbad] DoH客户端 进程出错"
+fi
+
+
+if [ $(systemctl is-active pihole-FTL) = "active" ]; then
+    echo "[$statusgod] pihole    进程正常"
+else
+    echo "[$statusbad] pihole    进程出错"
+fi
 }
 
 
 
 change_piholeadmin(){
 pihole -a -p
+blue "-----------------------"
 blue  "更改Pi-hole密码 [完毕]"
+blue "-----------------------"
 }
 
 
@@ -349,8 +382,9 @@ sed -i "19s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 sed -i "24s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
 sed -i "29s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 systemctl restart doh-client
-
+blue "-------------------"
 blue  "更改DoH地址 [完毕]"
+blue "-------------------"
 }
 
 
@@ -376,7 +410,9 @@ sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
+blue "------------------"
 blue  "更改静态IP [完毕]"
+blue "------------------"
 }
 
 
@@ -407,7 +443,9 @@ sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
 systemctl restart v2ray
+blue "---------------------"
 blue  "更改v2ray节点 [完毕]"
+blue "---------------------"
 }
 
 
@@ -418,10 +456,14 @@ switch_ipotables_proxy(){
     read iptablesproxyyn
 if [ "$iptablesproxyyn" = "Y" ] & [ "$iptablesproxyyn" = "y" ]; then
 systemctl restart iptables-proxy
-blue  "[代理已启动]";
+blue "-------------"
+blue  "[代理已启动]"
+blue "-------------"
 elif [ "$iptablesproxyyn" = "N" ] & [ "$iptablesproxyyn" = "n" ]; then
 systemctl stop iptables-proxy
-blue  "[代理已关闭]";
+blue "-------------"
+blue  "[代理已关闭]"
+blue "-------------"
 fi
 }
 
