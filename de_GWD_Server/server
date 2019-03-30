@@ -68,7 +68,7 @@ zh_CN.UTF-8 UTF-8
 EOF
 locale-gen
 
-apt-get install -y git make gcc curl net-tools ca-certificates
+apt-get install -y git make gcc net-tools ca-certificates
 
 
 cat > /usr/local/etc/updateGWD << EOF
