@@ -93,23 +93,24 @@ mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
 if [ $architecture = "aarch64" ]; then
-wget http://accaly.ooo/v2aarch64.zip -O ~/v2aarch64.zip
-unzip v2aarch64.zip
-mv -f ~/v2aarch64/v2ray /usr/bin/v2ray/v2ray
-mv -f ~/v2aarch64/v2ctl /usr/bin/v2ray/v2ctl
-mv -f ~/v2aarch64/v2ray.service /etc/systemd/system/v2ray.service
-mv -f ~/v2aarch64/v2wt-client.json /etc/v2ray/config.json
-rm -rf ~/v2aarch64
-rm -rf ~/v2aarch64.zip
+    wget http://accaly.ooo/v2aarch64.zip -O ~/v2aarch64.zip
+    unzip v2aarch64.zip
+    mv -f ~/v2aarch64/v2ray /usr/bin/v2ray/v2ray
+    mv -f ~/v2aarch64/v2ctl /usr/bin/v2ray/v2ctl
+    mv -f ~/v2aarch64/v2ray.service /etc/systemd/system/v2ray.service
+    mv -f ~/v2aarch64/v2wt-client.json /etc/v2ray/config.json
+    rm -rf ~/v2aarch64
+    rm -rf ~/v2aarch64.zip
+    
 elif [ $architecture = "amd64" ]; then
-wget http://accaly.ooo/v2amd64.zip -O ~/v2amd64.zip
-unzip v2amd64.zip
-mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
-mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
-mv -f ~/v2amd64/v2ray.service /etc/systemd/system/v2ray.service
-mv -f ~/v2amd64/v2wt-client.json /etc/v2ray/config.json
-rm -rf ~/v2amd64
-rm -rf ~/v2amd64.zip
+    wget http://accaly.ooo/v2amd64.zip -O ~/v2amd64.zip
+    unzip v2amd64.zip
+    mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
+    mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
+    mv -f ~/v2amd64/v2ray.service /etc/systemd/system/v2ray.service
+    mv -f ~/v2amd64/v2wt-client.json /etc/v2ray/config.json
+    rm -rf ~/v2amd64
+    rm -rf ~/v2amd64.zip
 
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.163.com/debian/ stretch main non-free contrib
