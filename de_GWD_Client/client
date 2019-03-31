@@ -333,38 +333,9 @@ fi
 rm -rf now.cron
 
 
-statusgod=$(green "✔︎") 
-statusbad=$(red "✘")
-
 blue "---------------------------------"
 blue "安装v2ray+route+doh+pihole [完毕]"
 blue "---------------------------------"
-if [ $(systemctl is-active v2ray) = "active" ]; then
-    echo "[$statusgod] v2ray     进程正常"
-else
-    echo "[$statusbad] v2ray     进程出错"
-fi
-
-
-if [ $(systemctl is-active iptables-proxy) = "active" ]; then
-    echo "[$statusgod] 代理规则  进程正常"
-else
-    echo "[$statusbad] 代理规则  进程出错"
-fi
-
-
-if [ $(systemctl is-active doh-client) = "active" ]; then
-    echo "[$statusgod] DoH客户端 进程正常"
-else
-    echo "[$statusbad] DoH客户端 进程出错"
-fi
-
-
-if [ $(systemctl is-active pihole-FTL) = "active" ]; then
-    echo "[$statusgod] pihole    进程正常"
-else
-    echo "[$statusbad] pihole    进程出错"
-fi
 }
 
 
@@ -479,6 +450,44 @@ fi
 
 
 start_menu(){
+statusgod=$(green "✔︎") 
+statusbad=$(red "✘")
+
+if [ $(systemctl is-active v2ray) = "active" ]; then
+    echo "[$statusgod] v2ray     进程正常"
+elif [ ! -d "/usr/bin/v2ray/v2ray" ]; then
+    echo "[$statusgod] v2ray     进程未安装"
+else
+    echo "[$statusbad] v2ray     进程出错"
+fi
+
+
+if [ $(systemctl is-active iptables-proxy) = "active" ]; then
+    echo "[$statusgod] 代理规则  进程正常"
+elif [ ! -d "/usr/local/etc/iptables-proxy/" ]; then
+    echo "[$statusgod] 代理规则  进程未安装"
+else
+    echo "[$statusbad] 代理规则  进程出错"
+fi
+
+
+if [ $(systemctl is-active doh-client) = "active" ]; then
+    echo "[$statusgod] DoH客户端 进程正常"
+elif [ ! -d "/usr/local/bin/doh-client" ]; then
+    echo "[$statusgod] DoH服务端 进程未安装"
+else
+    echo "[$statusbad] DoH客户端 进程出错"
+fi
+
+
+if [ $(systemctl is-active pihole-FTL) = "active" ]; then
+    echo "[$statusgod] pihole    进程正常"
+elif [ ! -d "/usr/local/bin/pihole" ]; then
+    echo "[$statusgod] pihole    进程未安装"
+else
+    echo "[$statusbad] pihole    进程出错"
+fi
+
     green "============================================"
     green "              客户端                       "
     green "介绍：一条龙安装v2ray+pihole+doh+透明网关路由 "

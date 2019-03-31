@@ -6,7 +6,6 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-
 performance_mod(){
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
@@ -489,39 +488,9 @@ sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
 systemctl restart pihole-FTL
 
-
-statusgod=$(green "✔︎") 
-statusbad=$(red "✘")
-
 blue "---------------------------------------"
 blue  "安装v2ray+nginx+tls+pihole+doh [完毕]"
 blue "---------------------------------------"
-if [ $(systemctl is-active v2ray) = "active" ]; then
-    echo "[$statusgod] v2ray     进程正常"
-else
-    echo "[$statusbad] v2ray     进程出错"
-fi
-
-
-if [ $(systemctl is-active nginx) = "active" ]; then
-    echo "[$statusgod] nginx     进程正常"
-else
-    echo "[$statusbad] nginx     进程出错"
-fi
-
-
-if [ $(systemctl is-active doh-server) = "active" ]; then
-    echo "[$statusgod] DoH服务端 进程正常"
-else
-    echo "[$statusbad] DoH服务端 进程出错"
-fi
-
-
-if [ $(systemctl is-active pihole-FTL) = "active" ]; then
-    echo "[$statusgod] pihole    进程正常"
-else
-    echo "[$statusbad] pihole    进程出错"
-fi
 }
 
 
@@ -589,6 +558,44 @@ blue "------------------"
 
 
 start_menu(){
+statusgod=$(green "✔︎") 
+statusbad=$(red "✘")
+
+if [ $(systemctl is-active v2ray) = "active" ]; then
+    echo "[$statusgod] v2ray     进程正常"
+elif [ ! -d "/usr/bin/v2ray/v2ray" ]; then
+    echo "[$statusgod] v2ray     进程未安装"
+else
+    echo "[$statusbad] v2ray     进程出错"
+fi
+
+
+if [ $(systemctl is-active nginx) = "active" ]; then
+    echo "[$statusgod] nginx     进程正常"
+elif [ ! -d "/usr/local/nginx" ] && [ ! -d "/etc/nginx" ]; then
+    echo "[$statusgod] nginx     进程未安装"
+else
+    echo "[$statusbad] nginx     进程出错"
+fi
+
+
+if [ $(systemctl is-active doh-server) = "active" ]; then
+    echo "[$statusgod] DoH服务端 进程正常"
+elif [ ! -d "/usr/local/bin/doh-server" ]; then
+    echo "[$statusgod] DoH服务端 进程未安装"
+else
+    echo "[$statusbad] DoH服务端 进程出错"
+fi
+
+
+if [ $(systemctl is-active pihole-FTL) = "active" ]; then
+    echo "[$statusgod] pihole    进程正常"
+elif [ ! -d "/usr/local/bin/pihole" ]; then
+    echo "[$statusgod] pihole    进程未安装"
+else
+    echo "[$statusbad] pihole    进程出错"
+fi
+
     green "========================================"
     green "              服务端                  "
     green "介绍：一条龙安装v2ray+ws+tls+doh+pihole "
