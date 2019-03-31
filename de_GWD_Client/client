@@ -95,7 +95,7 @@ deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free co
 EOF
 apt-get update
 fi
-
+apt-get -y upgrade
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
 zh_CN.GBK GBK
