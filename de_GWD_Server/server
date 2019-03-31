@@ -61,8 +61,6 @@ install_v2ray+nginx+tls+pihole+doh(){
     green "========================="
     read v2path
 
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
 zh_CN.GBK GBK
