@@ -61,6 +61,8 @@ install_v2ray+nginx+tls+pihole+doh(){
     green "========================="
     read v2path
 
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
 zh_CN.GBK GBK
@@ -73,6 +75,8 @@ apt-get install -y curl git make gcc net-tools ca-certificates
 
 cat > /usr/local/etc/updateGWD << EOF
 #!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /usr/local/etc/updateGWD
