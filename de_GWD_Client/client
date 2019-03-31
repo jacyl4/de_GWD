@@ -102,7 +102,7 @@ locale-gen
 
 apt-get update
 
-apt-get install -y unzip ipset net-tools ipset git make gcc ca-certificates
+apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
 
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
 
