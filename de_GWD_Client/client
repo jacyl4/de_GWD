@@ -82,6 +82,13 @@ install_gatewayrouter(){
     green "==============="
     read v2path
 
+cat > /etc/locale.gen << EOF
+en_US.UTF-8 UTF-8
+zh_CN.GBK GBK
+zh_CN.UTF-8 UTF-8
+EOF
+locale-gen
+
 if [ $architecture = "amd64" ]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.163.com/debian/ stretch main non-free contrib
@@ -95,13 +102,8 @@ deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free co
 EOF
 apt-get update
 fi
+
 apt-get -y upgrade
-cat > /etc/locale.gen << EOF
-en_US.UTF-8 UTF-8
-zh_CN.GBK GBK
-zh_CN.UTF-8 UTF-8
-EOF
-locale-gen
 
 apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
 
