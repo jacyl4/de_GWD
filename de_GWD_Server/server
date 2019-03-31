@@ -13,7 +13,7 @@ update-grub
 sed -i '/fs.file-max/d' /etc/sysctl.conf
 sed -i '/net.ipv4.ip_local_port_range/d' /etc/sysctl.conf
 sed -i '/net.ipv4.ip_forward/d' /etc/sysctl.conf
-sed -i '/net.ipv6.conf.all.forwarding/d' /etc/sysctl.conf
+sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_fastopen/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_syncookies/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_tw_reuse/d' /etc/sysctl.conf
@@ -27,7 +27,7 @@ cat >> /etc/sysctl.conf << EOF
 fs.file-max=99999
 net.ipv4.ip_local_port_range=1024   65535
 net.ipv4.ip_forward=1
-net.ipv6.conf.all.forwarding=1
+net.ipv6.conf.all.disable_ipv6=1
 net.ipv4.tcp_fastopen=3
 net.ipv4.tcp_syncookies=1
 net.ipv4.tcp_tw_reuse=1
