@@ -155,9 +155,6 @@ for ip in $(cat '/usr/local/etc/chnroute.txt'); do
   ipset add chnroute $ip
 done
 
-iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT --to-port 53
-iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT --to-port 53
-
 iptables -t nat -N V2RAYTCP
 
 iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
@@ -272,8 +269,6 @@ wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-cl
 doh_upstream='url = "https:\/\/'$v2servn'\/dq"'
 sed -i "14s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 sed -i "19s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "24s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "29s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-client
@@ -357,8 +352,7 @@ doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 
 sed -i "14s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
 sed -i "19s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
-sed -i "24s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
-sed -i "29s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
+
 systemctl restart doh-client
 blue "-------------------"
 blue  "更改DoH地址 [完毕]"
