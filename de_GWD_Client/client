@@ -155,8 +155,8 @@ for ip in $(cat '/usr/local/etc/chnroute.txt'); do
   ipset add chnroute $ip
 done
 
-iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT
-iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT
+iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT --to-port 53
+iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT --to-port 53
 
 iptables -t nat -N V2RAYTCP
 
