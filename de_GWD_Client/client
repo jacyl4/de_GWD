@@ -455,7 +455,7 @@ statusbad=$(red "✘")
 
 if [ $(systemctl is-active v2ray) = "active" ]; then
     echo "[$statusgod] v2ray     进程正常"
-elif [ ! -d "/usr/bin/v2ray/v2ray" ]; then
+elif [ ! -d "/usr/bin/v2ray" ]; then
     echo "[$statusbad] v2ray     进程未安装"
 else
     echo "[$statusbad] v2ray     进程出错"
