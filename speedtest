@@ -101,24 +101,41 @@ echo "========================================================"
 
 
 iotest1=$((LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//')
-	siotest1=$(green "$iotest1")
+    siotest1=$(green "$iotest1")
 echo "第一次磁盘测速: $siotest1"
 
 iotest2=$((LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//')
-	siotest2=$(green "$iotest2")
+    siotest2=$(green "$iotest2")
 echo "第二次磁盘测速: $siotest2"
 
 iotest3=$((LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//')
-	siotest3=$(green "$iotest3")
+    siotest3=$(green "$iotest3")
 echo "第三次磁盘测速: $siotest3"
 
+if [ "$(echo $iotest1 | awk '{print $2}')" = "GB/s" ]; then
+    ioraw1=$(awk "BEGIN{print "$(echo $iotest1 | awk '{print $1}')"*1024}")
+else
 ioraw1=$(echo $iotest1 | awk 'NR==1 {print $1}')
+fi
+
+if [ "$(echo $iotest2 | awk '{print $2}')" = "GB/s" ]; then
+    ioraw2=$(awk "BEGIN{print "$(echo $iotest2 | awk '{print $1}')"*1024}")
+else
 ioraw2=$(echo $iotest2 | awk 'NR==1 {print $1}')
+fi
+
+if [ "$(echo $iotest3 | awk '{print $2}')" = "GB/s" ]; then
+    ioraw3=$(awk "BEGIN{print "$(echo $iotest3 | awk '{print $1}')"*1024}")
+else
 ioraw3=$(echo $iotest3 | awk 'NR==1 {print $1}')
+fi
+
+
 ioall=$( awk 'BEGIN{print '$ioraw1' + '$ioraw2' + '$ioraw3'}' )
 ioavg=$( awk 'BEGIN{printf "%.1f", '$ioall' / 3}' )
 echo -
 echo "磁盘平均速度: $(green "$ioavg MB/s")"
+
 
 echo "========================================================"
 printf "%-20s%-22s%-24s\n" "Node Name" "IPv4 address" "Download Speed"
