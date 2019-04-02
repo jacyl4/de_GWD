@@ -1,0 +1,127 @@
+#!/bin/bash
+clear
+function cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+#测速节点
+speed_v4() {
+    speed_test_v4 'http://w41.gubo.org/LookingGlass/w41.gubo.org.test' 'rfc伯力'
+    speed_test_v4 'http://w80.gubo.org/LookingGlass/w80.gubo.org.test' 'zeptovm伯力'
+    speed_test_v4 'http://w81.gubo.org/LookingGlass/10MB.test' 'vp77法兰克福'
+    speed_test_v4 'http://w91.gubo.org/LookingGlass/100MB.test' 'cloudcone洛杉矶'
+    speed_test_v4 'http://w93.gubo.org/LookingGlass/10MB.test' '搬瓦工洛杉矶'
+    speed_test_v4 'http://w107.gubo.org/LookingGlass/10MB.test' 'anynode洛杉矶'
+    speed_test_v4 'http://w46.gubo.org/LookingGlass/w46.gubo.org.test' '搬瓦工洛杉矶c3cn2'
+    speed_test_v4 'http://w54.gubo.org/LookingGlass/w54.gubo.org.test' 'rfc洛杉矶cn2gia'
+    speed_test_v4 'http://w60.gubo.org/LookingGlass/10MB.test' 'rfc洛杉矶c3'
+    speed_test_v4 'http://w67.gubo.org/LookingGlass/10MB.test' '魔方云cn2gia'
+    speed_test_v4 'http://w68.gubo.org/LookingGlass/10MB.test' '魔方云新加坡pccw'
+    speed_test_v4 'http://w76.gubo.org/LookingGlass/100MB.test' 'GGC pccw'
+    speed_test_v4 'http://w77.gubo.org/LookingGlass/10MB.test' 'GGC 洛杉矶cn2gia'
+    speed_test_v4 'http://w37.gubo.org/LookingGlass/10MB.test' 'vultr ntt'
+
+}
+
+speed_test_v4() {
+    local output=$(LANG=C wget -4O /dev/null -T300 $1 2>&1)
+    local speedtest=$(printf '%s' "$output" | awk '/\/dev\/null/ {speed=$3 $4} END {gsub(/\(|\)/,"",speed); print speed}')
+    local ipaddress=$(printf '%s' "$output" | awk -F'|' '/Connecting to .*\|([^\|]+)\|/ {print $2}')
+    local nodeName=$2
+    printf "%-20s%-25s%-25s\n" "${nodeName}" "${ipaddress}" "$(yellow "${speedtest}")"
+}
+
+# CPU Model Name
+cpumodel=$( awk -F: '/model name/ {name=$2} END {print name}' /proc/cpuinfo )
+	scpu=$(cyan "$cpumodel")
+
+# CPU Cores
+cores=$( awk -F: '/model name/ {core++} END {print core}' /proc/cpuinfo )
+freq=$( awk -F: ' /cpu MHz/ {freq=$2} END {print freq}' /proc/cpuinfo )
+if [[ $cores == "1" ]]; then
+	score=$(cyan "$cores core @ $freq MHz")
+else
+	score=$(cyan "$cores cores @ $freq MHz")
+fi
+
+# Swap Information
+tswap="$( free -m | awk '/Swap/ {print $2}' ) MB"
+uswap="$( free -m | awk '/Swap/ {print $3}' ) MB"
+tswap0=$( grep SwapTotal < /proc/meminfo | awk 'NR=1 {print $2$3}' )
+if [[ "$tswap0" == "0kB" ]]; then
+	sswap=$(cyan "SWAP not enabled")
+else
+	sswap=$(cyan "已用 $uswap ( $tswap )")
+fi
+
+# RAM Information
+tram="$( free -m | awk '/Mem/ {print $2}' ) MB"
+uram="$( free -m | awk '/Mem/ {print $3}' ) MB"
+	sram=$(cyan "已用 $uram ( $tram )")
+
+# HDD information
+hdd=$( df -h --total --local -x tmpfs | grep 'total' | awk '{print $2}' )B
+hddfree=$( df -h --total | grep 'total' | awk '{print $5}' )
+	shdd=$(cyan "已用 $hddfree ( $hdd )")
+
+# Uptime
+uptime=$( awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60} {printf("%d 天, %d 小时 %d 分\n",a,b,c)}' /proc/uptime )
+	suptime=$(cyan "$uptime")
+
+#系统
+get_opsy() {
+    [ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
+    [ -f /etc/os-release ] && awk -F'[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
+    [ -f /etc/lsb-release ] && awk -F'[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
+}
+	sopsy=$(cyan "$( get_opsy )")
+
+#架构
+arch=$( uname -m )
+	sarch=$(cyan "$arch")
+
+#内核
+kern=$( uname -r )
+	skernel=$(cyan "$kern")
+
+
+echo "========================================================"
+echo " CPU Model   :$scpu"
+echo " CPU Cores   : $score"
+echo " SWAP        : $sswap"
+echo " 内存        : $sram"
+echo " 磁盘        : $shdd"
+echo " 开机        : $suptime"
+echo " 系统        : $sopsy"
+echo " 架构        : $sarch"
+echo " 内核        : $skernel"
+echo "========================================================"
+
+
+iotest1=$((LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//')
+	siotest1=$(green "$iotest1")
+echo "第一次磁盘测速: $siotest1"
+
+iotest2=$((LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//')
+	siotest2=$(green "$iotest2")
+echo "第二次磁盘测速: $siotest2"
+
+iotest3=$((LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//')
+	siotest3=$(green "$iotest3")
+echo "第三次磁盘测速: $siotest3"
+
+ioraw1=$(echo $iotest1 | awk 'NR==1 {print $1}')
+ioraw2=$(echo $iotest2 | awk 'NR==1 {print $1}')
+ioraw3=$(echo $iotest3 | awk 'NR==1 {print $1}')
+ioall=$( awk 'BEGIN{print '$ioraw1' + '$ioraw2' + '$ioraw3'}' )
+ioavg=$( awk 'BEGIN{printf "%.1f", '$ioall' / 3}' )
+echo -
+echo "磁盘平均速度: $(green "$ioavg MB/s")"
+
+echo "========================================================"
+printf "%-20s%-22s%-24s\n" "Node Name" "IPv4 address" "Download Speed"
+speed_v4
+
+
