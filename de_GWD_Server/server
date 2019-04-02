@@ -428,6 +428,9 @@ systemctl enable nginx
 
 
 curl -sSL https://install.pi-hole.net | bash
+echo "" > /etc/pihole/adlists.list
+pihole -g
+
 
 
 if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
