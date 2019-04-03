@@ -8,19 +8,18 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 #测速节点
 speed_v4() {
-    speed_test_v4 'http://w41.gubo.org/LookingGlass/w41.gubo.org.test' 'rfc伯力'
-    speed_test_v4 'http://w80.gubo.org/LookingGlass/w80.gubo.org.test' 'zeptovm伯力'
-    speed_test_v4 'http://w81.gubo.org/LookingGlass/10MB.test' 'vp77法兰克福'
-    speed_test_v4 'http://w91.gubo.org/LookingGlass/100MB.test' 'cloudcone洛杉矶'
-    speed_test_v4 'http://w93.gubo.org/LookingGlass/10MB.test' '搬瓦工洛杉矶'
-    speed_test_v4 'http://w107.gubo.org/LookingGlass/10MB.test' 'anynode洛杉矶'
-    speed_test_v4 'http://w46.gubo.org/LookingGlass/w46.gubo.org.test' '搬瓦工洛杉矶c3cn2'
-    speed_test_v4 'http://w54.gubo.org/LookingGlass/w54.gubo.org.test' 'rfc洛杉矶cn2gia'
-    speed_test_v4 'http://w60.gubo.org/LookingGlass/10MB.test' 'rfc洛杉矶c3'
-    speed_test_v4 'http://w67.gubo.org/LookingGlass/10MB.test' '魔方云cn2gia'
-    speed_test_v4 'http://w68.gubo.org/LookingGlass/10MB.test' '魔方云新加坡pccw'
+    speed_test_v4 'http://w80.gubo.org/LookingGlass/w80.gubo.org.test' 'zeptovm Khabarovsk'
+    speed_test_v4 'http://w81.gubo.org/LookingGlass/10MB.test' 'vp77 Frankfurt'
+    speed_test_v4 'http://w91.gubo.org/LookingGlass/100MB.test' 'cloudcone Los Angeles'
+    speed_test_v4 'http://w93.gubo.org/LookingGlass/10MB.test' 'Bandwagon Los Angeles'
+    speed_test_v4 'http://w107.gubo.org/LookingGlass/10MB.test' 'anynode Los Angeles'
+    speed_test_v4 'http://w46.gubo.org/LookingGlass/w46.gubo.org.test' 'Bandwagon Los Angeles c3cn2'
+    speed_test_v4 'http://w54.gubo.org/LookingGlass/w54.gubo.org.test' 'rfcLos Angeles cn2gia'
+    speed_test_v4 'http://w60.gubo.org/LookingGlass/10MB.test' 'rfc Los Angele sc3'
+    speed_test_v4 'http://w67.gubo.org/LookingGlass/10MB.test' 'cubecloud cn2gia'
+    speed_test_v4 'http://w68.gubo.org/LookingGlass/10MB.test' 'cubecloud Singapore pccw'
     speed_test_v4 'http://w76.gubo.org/LookingGlass/100MB.test' 'GGC pccw'
-    speed_test_v4 'http://w77.gubo.org/LookingGlass/10MB.test' 'GGC 洛杉矶cn2gia'
+    speed_test_v4 'http://w77.gubo.org/LookingGlass/10MB.test' 'GGC Los Angeles cn2gia'
     speed_test_v4 'http://w37.gubo.org/LookingGlass/10MB.test' 'vultr ntt'
 
 }
