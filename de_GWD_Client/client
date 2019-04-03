@@ -14,7 +14,32 @@ esac
 
 
 
-performance_mod(){
+install_gatewayrouter(){
+    green "==============="
+    green "本机地址"
+    green "==============="
+    read localaddr
+
+    green "==============="
+    green "上级路由地址"
+    green "==============="
+    read gatewayaddr
+
+    green "==============="
+    green "v2ray节点域名"
+    green "==============="
+    read v2servn
+    
+    green "==============="
+    green "输入v2ray uuid"
+    green "==============="
+    read uuidnum
+
+    green "==============="
+    green "输入path"
+    green "==============="
+    read v2path
+
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
 sed -i '/fs.file-max/d' /etc/sysctl.conf
@@ -49,38 +74,6 @@ if [ $architecture = "aarch64" ]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
-blue "---------------------"
-blue  "优化性能与网络 [完毕]"
-blue "---------------------"
-}
-
-
-
-install_gatewayrouter(){
-    green "==============="
-    green "本机地址"
-    green "==============="
-    read localaddr
-
-    green "==============="
-    green "上级路由地址"
-    green "==============="
-    read gatewayaddr
-
-    green "==============="
-    green "v2ray节点域名"
-    green "==============="
-    read v2servn
-    
-    green "==============="
-    green "输入v2ray uuid"
-    green "==============="
-    read uuidnum
-
-    green "==============="
-    green "输入path"
-    green "==============="
-    read v2path
 
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
@@ -490,10 +483,9 @@ fi
     green "网站：jacyl4.github.io                     "
     green "============================================"
     echo
-    green  "1. 优化性能与网络"
-    green  "2. 安装v2ray+route+doh+pihole"
-    green  "3. 更改Pi-hole密码"
-    green  "4. 更改静态IP"
+    green  "1. 安装v2ray+route+doh+pihole"
+    green  "2. 更改Pi-hole密码"
+    green  "3. 更改静态IP"
     red    "8. 代理开关"
     green  "9. 更改DoH地址"
     yellow "0. 更改v2ray节点"
@@ -502,18 +494,14 @@ fi
     read -p "请输入数字:" num
     case "$num" in
     1)
-    performance_mod
-    start_menu
-    ;;
-    2)
     install_gatewayrouter
     start_menu
     ;;
-    3)
+    2)
     change_piholeadmin
     start_menu 
     ;;
-    4)
+    3)
     change_staticip
     start_menu 
     ;;

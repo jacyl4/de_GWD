@@ -6,7 +6,23 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-performance_mod(){
+
+install_v2ray+nginx+tls+pihole+doh(){
+    green "=============================="
+    green " 输入此VPS的域名(不加www开头)"
+    green "=============================="
+    read vpsdomain
+
+    green "============"
+    green " v2ray uuid"
+    green "============"
+    read uuidnum
+
+    green "========================="
+    green " v2ray path (格式：/xxxx)"
+    green "========================="
+    read v2path
+
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
 sed -i '/fs.file-max/d' /etc/sysctl.conf
@@ -37,28 +53,6 @@ net.ipv4.tcp_timestamps=0
 net.ipv4.tcp_fin_timeout=30
 EOF
 sysctl -p
-blue "---------------------"
-blue  "优化性能与网络 [完毕]"
-blue "---------------------"
-}
-
-
-
-install_v2ray+nginx+tls+pihole+doh(){
-    green "=============================="
-    green " 输入此VPS的域名(不加www开头)"
-    green "=============================="
-    read vpsdomain
-
-    green "============"
-    green " v2ray uuid"
-    green "============"
-    read uuidnum
-
-    green "========================="
-    green " v2ray path (格式：/xxxx)"
-    green "========================="
-    read v2path
 
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
@@ -607,27 +601,22 @@ fi
     green "网站：jacyl4.github.io                "
     green "========================================"
     echo
-    green  "1. 优化性能与网络"
-    green  "2. 安装v2ray+nginx+tls+pihole+doh"
-    green  "3. 切换pihole上游"
-    green  "4. 更改静态IP"
+    green  "1. 安装v2ray+nginx+tls+pihole+doh"
+    green  "2. 切换pihole上游"
+    green  "3. 更改静态IP"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
     case "$num" in
     1)
-    performance_mod
-    start_menu
-    ;;
-    2)
     install_v2ray+nginx+tls+pihole+doh
     start_menu
     ;;
-    3)
+    2)
     change_pihole_upstream
     start_menu
     ;;
-    4)
+    3)
     change_staticip
     start_menu 
     ;;
