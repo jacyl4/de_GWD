@@ -30,7 +30,7 @@ speed_test_v4() {
     local speedtest=$(printf '%s' "$output" | awk '/\/dev\/null/ {speed=$3 $4} END {gsub(/\(|\)/,"",speed); print speed}')
     local ipaddress=$(printf '%s' "$output" | awk -F'|' '/Connecting to .*\|([^\|]+)\|/ {print $2}')
     local nodeName=$2
-    printf "%-20s%-25s%-25s\n" "${nodeName}" "${ipaddress}" "$(yellow "${speedtest}")"
+    printf "%-22s%-25s%10s\n" "${nodeName}" "${ipaddress}" "$(yellow "${speedtest}")"
 }
 
 # CPU Model Name
