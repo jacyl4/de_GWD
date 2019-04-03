@@ -593,13 +593,13 @@ else
     echo "[$statusbad] pihole    进程出错"
 fi
 
-    green "====================================="
-    green "              服务端                  "
-    green "介绍：一键安装v2ray+ws+tls+doh+pihole  "
-    green "系统：仅测于Debian9                    "
-    green "作者：jacyl4                          "
-    green "网站：jacyl4.github.io                "
-    green "====================================="
+    green "======================================"
+    green "              服务端                   "
+    green "介绍：一键安装v2ray+ws+tls+doh+pihole   "
+    green "系统：仅测于Debian9                     "
+    green "作者：jacyl4                           "
+    green "网站：jacyl4.github.io                 "
+    green "======================================"
     echo
     green  "1. 安装v2ray+nginx+tls+pihole+doh"
     green  "2. 切换pihole上游"
