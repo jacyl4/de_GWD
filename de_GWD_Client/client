@@ -144,43 +144,44 @@ for ip in $(cat '/usr/local/etc/chnroute.txt'); do
   ipset add chnroute $ip
 done
 
-iptables -t nat -N V2RAYTCP
-
-iptables -t nat -A V2RAYTCP -d 0.0.0.0/8 -j RETURN
-iptables -t nat -A V2RAYTCP -d 10.0.0.0/8 -j RETURN
-iptables -t nat -A V2RAYTCP -d 100.64.0.0/10 -j RETURN
-iptables -t nat -A V2RAYTCP -d 127.0.0.0/8 -j RETURN
-iptables -t nat -A V2RAYTCP -d 169.254.0.0/16 -j RETURN
-iptables -t nat -A V2RAYTCP -d 172.16.0.0/12 -j RETURN
-iptables -t nat -A V2RAYTCP -d 192.168.0.0/16 -j RETURN
-iptables -t nat -A V2RAYTCP -d 224.0.0.0/4 -j RETURN
-iptables -t nat -A V2RAYTCP -d 240.0.0.0/4 -j RETURN
-iptables -t nat -A V2RAYTCP -p tcp -m set --match-set chnroute dst -j RETURN
-iptables -t nat -A V2RAYTCP -p tcp -m mark --mark 0xff -j RETURN
-
-iptables -t nat -A V2RAYTCP -p tcp -j REDIRECT --to-ports 9896
-iptables -t nat -A PREROUTING -p tcp -j V2RAYTCP
-iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
-
-
 ip rule add fwmark 9 table 909
 ip route add local 0.0.0.0/0 dev lo table 909
 iptables -t mangle -N V2RAYUDP
 
-iptables -t mangle -A V2RAYUDP -d 0.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 10.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 100.64.0.0/10 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 127.0.0.0/8 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 169.254.0.0/16 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 172.16.0.0/12 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 192.168.0.0/16 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 224.0.0.0/4 -j RETURN
-iptables -t mangle -A V2RAYUDP -d 240.0.0.0/4 -j RETURN
-iptables -t mangle -A V2RAYUDP -p udp -m set --match-set chnroute dst -j RETURN
-iptables -t mangle -A V2RAYUDP -p udp -m mark --mark 0xff -j RETURN
+iptables -t mangle -N V2RAYOUT
+iptables -t mangle -N V2RAYPRE
+iptables -t nat    -N V2RAYOUT
+iptables -t nat    -N V2RAYPRE
 
-iptables -t mangle -A V2RAYUDP -p udp -j TPROXY --on-port 9896 --tproxy-mark 0x9/0x9
-iptables -t mangle -A PREROUTING -p udp -j V2RAYUDP
+iptables -t mangle -A OUTPUT     -j V2RAYOUT
+iptables -t mangle -A PREROUTING -j V2RAYPRE
+iptables -t nat    -A OUTPUT     -j V2RAYOUT
+iptables -t nat    -A PREROUTING -j V2RAYPRE
+
+iptables -t mangle -N V2RAY
+
+iptables -t mangle -A V2RAY -d 0.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAY -d 10.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAY -d 127.0.0.0/8 -j RETURN
+iptables -t mangle -A V2RAY -d 169.254.0.0/16 -j RETURN
+iptables -t mangle -A V2RAY -d 172.16.0.0/12 -j RETURN
+iptables -t mangle -A V2RAY -d 192.168.0.0/16 -j RETURN
+iptables -t mangle -A V2RAY -d 224.0.0.0/4 -j RETURN
+iptables -t mangle -A V2RAY -d 240.0.0.0/4 -j RETURN
+iptables -t mangle -A V2RAY -m set --match-set chnroute dst -j RETURN
+iptables -t mangle -A V2RAY -m mark --mark 0xff -j RETURN
+
+iptables -t mangle -A V2RAY -p tcp -j MARK --set-mark 9
+iptables -t mangle -A V2RAY -p udp -j MARK --set-mark 9
+
+iptables -t mangle -A V2RAYOUT -p tcp -j V2RAY
+iptables -t mangle -A V2RAYOUT -p udp -j V2RAY
+
+iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 9 -j V2RAY
+iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 9 -j V2RAY
+
+iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 9 -j TPROXY --on-port 9896
+iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 9 -j TPROXY --on-port 9896
 systemctl restart v2ray
 EOF
 chmod +x /usr/local/etc/iptables-proxy/iptables-proxy-up
