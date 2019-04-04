@@ -268,10 +268,10 @@ rm -rf ~/dns-over-https
 curl -sSL https://install.pi-hole.net | bash
 
 
-sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114#53'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=119.29.29.29#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=114.114.114.114#53" >> /etc/dnsmasq.d/01-pihole.conf
+echo "server=119.29.29.29#53" >> /etc/dnsmasq.d/01-pihole.conf
 echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
