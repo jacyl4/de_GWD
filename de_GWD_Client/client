@@ -146,7 +146,6 @@ done
 
 ip rule add fwmark 9 table 909
 ip route add local 0.0.0.0/0 dev lo table 909
-iptables -t mangle -N V2RAYUDP
 
 iptables -t mangle -N V2RAYOUT
 iptables -t mangle -N V2RAYPRE
