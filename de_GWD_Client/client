@@ -9,7 +9,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
-    aarch64)  architecture="aarch64" ;;
+    aarch64)  architecture="arm64" ;;
 esac
 
 
@@ -70,7 +70,7 @@ net.ipv4.tcp_fin_timeout=30
 EOF
 sysctl -p
 
-if [ $architecture = "aarch64" ]; then
+if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
@@ -82,7 +82,7 @@ zh_CN.UTF-8 UTF-8
 EOF
 locale-gen
 
-if [ $architecture = "amd64" ]; then
+if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.163.com/debian/ stretch main non-free contrib
 deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
@@ -93,10 +93,9 @@ deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
 deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
-apt-get update
 fi
 
-apt-get -y upgrade
+apt-get update && apt-get -y upgrade
 
 apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
 
@@ -105,16 +104,16 @@ curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
-if [ $architecture = "aarch64" ]; then
-    wget http://accaly.ooo/v2aarch64.zip -O ~/v2aarch64.zip
-    unzip v2aarch64.zip
-    mv -f ~/v2aarch64/v2ray /usr/bin/v2ray/v2ray
-    mv -f ~/v2aarch64/v2ctl /usr/bin/v2ray/v2ctl
-    mv -f ~/v2aarch64/v2ray.service /etc/systemd/system/v2ray.service
-    mv -f ~/v2aarch64/v2wt-client.json /etc/v2ray/config.json
-    rm -rf ~/v2aarch64
-    rm -rf ~/v2aarch64.zip
-elif [ $architecture = "amd64" ]; then
+if [[ $architecture = "arm64" ]]; then
+    wget http://accaly.ooo/v2arm64.zip -O ~/v2arm64.zip
+    unzip v2arm64.zip
+    mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
+    mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
+    mv -f ~/v2arm64/v2ray.service /etc/systemd/system/v2ray.service
+    mv -f ~/v2arm64/v2wt-client.json /etc/v2ray/config.json
+    rm -rf ~/v2arm64
+    rm -rf ~/v2arm64.zip
+elif [[ $architecture = "amd64" ]]; then
     wget http://accaly.ooo/v2amd64.zip -O ~/v2amd64.zip
     unzip v2amd64.zip
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
@@ -133,9 +132,6 @@ chmod +x /usr/bin/v2ray/v2ray
 chmod +x /usr/bin/v2ray/v2ctl
 systemctl restart v2ray
 systemctl enable v2ray
-
-
-
 
 
 
@@ -228,12 +224,12 @@ systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
 
-if [ "$(go version | awk '{print $3}')" != "go1.11.5" ]; then
-    if [ $architecture = "aarch64" ]; then
+if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
+    if [[ $architecture = "arm64" ]]; then
         wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
         tar -xvf go1.11.5.linux-arm64.tar.gz
         rm -rf ~/go1.11.5.linux-arm64.tar.gz
-    elif [ $architecture = "amd64" ]; then
+    elif [[ $architecture = "amd64" ]]; then
         wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
         tar -xvf go1.11.5.linux-amd64.tar.gz
         rm -rf ~/go1.11.5.linux-amd64.tar.gz
@@ -309,11 +305,12 @@ cat > /usr/local/etc/updateGWD << "EOF"
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
 
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /usr/local/etc/updateGWD
-if [ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]; then
+if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]]; then
     crontab -l > now.cron
     echo '0 4 * * * /usr/local/etc/updateGWD' >> now.cron
     crontab now.cron
@@ -358,7 +355,7 @@ change_staticip(){
     green "本机地址（留空回车跳过）"
     green "====================="
     read localaddr
-if [ "$localaddr" != "" ]; then 
+if [[ "$localaddr" != "" ]]; then 
 sed -i "/address/c\address $localaddr"  /etc/network/interfaces
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 fi
@@ -367,7 +364,7 @@ fi
     green "上级地址（留空回车跳过）"
     green "====================="
     read gatewayaddr
-if [ "$gatewayaddr" != "" ]; then 
+if [[ "$gatewayaddr" != "" ]]; then 
 sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
 fi
 
@@ -392,7 +389,7 @@ change_v2ray(){
     green "输入v2ray uuid （回车跳过）"
     green "=========================="
     read uuidnum
-if [ "$uuidnum" != "" ]; then 
+if [[ "$uuidnum" != "" ]]; then 
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 fi
 
@@ -400,7 +397,7 @@ fi
     green "输入path （回车跳过）"
     green "===================="
     read v2path
-if [ "$v2path" != "" ]; then 
+if [[ "$v2path" != "" ]]; then 
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
 fi
 
@@ -419,13 +416,13 @@ switch_ipotables_proxy(){
     green "Y.启动代理 / N.停止代理"
     green "======================"
     read iptablesproxyyn
-if [ "$iptablesproxyyn" = "Y" ] || [ "$iptablesproxyyn" = "y" ]; then
+if [[ "$iptablesproxyyn" = "Y" ]] || [[ "$iptablesproxyyn" = "y" ]]; then
 echo "[...] 耐心等待代理启动"
 systemctl restart iptables-proxy
 blue "-------------"
 blue  "[代理已启动]"
 blue "-------------"
-elif [ "$iptablesproxyyn" = "N" ] || [ "$iptablesproxyyn" = "n" ]; then
+elif [[ "$iptablesproxyyn" = "N" ]] || [[ "$iptablesproxyyn" = "n" ]]; then
 systemctl stop iptables-proxy
 blue "-------------"
 blue  "[代理已关闭]"
@@ -440,34 +437,34 @@ start_menu(){
 statusgod=$(green "✔︎") 
 statusbad=$(red "✘")
 
-if [ $(systemctl is-active v2ray) = "active" ]; then
+if [[ $(systemctl is-active v2ray) = "active" ]]; then
     echo "[$statusgod] v2ray     进程正常"
-elif [ ! -d "/usr/bin/v2ray" ]; then
+elif [[ ! -d "/usr/bin/v2ray" ]]; then
     echo "[$statusbad] v2ray     进程未安装"
 else
     echo "[$statusbad] v2ray     进程出错"
 fi
 
 
-if [ $(systemctl is-active iptables-proxy) = "active" ]; then
+if [[ $(systemctl is-active iptables-proxy) = "active" ]]; then
     echo "[$statusgod] 代理规则  进程正常"
-elif [ ! -d "/usr/local/etc/iptables-proxy/" ]; then
+elif [[ ! -d "/usr/local/etc/iptables-proxy/" ]]; then
     echo "[$statusbad] 代理规则  进程未安装"
 else
     echo "[$statusbad] 代理规则  进程出错"
 fi
 
 
-if [ $(systemctl is-active doh-client) = "active" ]; then
+if [[ $(systemctl is-active doh-client) = "active" ]]; then
     echo "[$statusgod] DoH客户端 进程正常"
-elif [ ! -d "/usr/local/bin/doh-client" ]; then
+elif [[ ! -d "/usr/local/bin/doh-client" ]]; then
     echo "[$statusbad] DoH客户端 进程未安装"
 else
     echo "[$statusbad] DoH客户端 进程出错"
 fi
 
 
-if [ $(systemctl is-active pihole-FTL) = "active" ]; then
+if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusgod] pihole    进程正常"
 elif [ ! -d "/usr/local/bin/pihole" ]; then
     echo "[$statusbad] pihole    进程未安装"
@@ -478,7 +475,7 @@ fi
     green "==========================================="
     green "              客户端                        "
     green "介绍：一键安装v2ray+pihole+doh+透明路由网关    "
-    green "系统：仅测于Debian9 (amd64 & aarch64)        "
+    green "系统：仅测于Debian9 (amd64 & arm64)        "
     green "作者：jacyl4                                "
     green "网站：jacyl4.github.io                      "
     green "==========================================="
