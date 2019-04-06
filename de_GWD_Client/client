@@ -71,6 +71,34 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
 
+
+
+cat > /etc/locale.gen << EOF
+en_US.UTF-8 UTF-8
+zh_CN.GBK GBK
+zh_CN.UTF-8 UTF-8
+EOF
+locale-gen
+
+if [[ $architecture = "amd64" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.163.com/debian/ stretch main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+EOF
+fi
+
+apt-get update && apt-get -y upgrade
+
+apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
+
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
+
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
@@ -102,34 +130,6 @@ chmod +x /usr/bin/v2ray/v2ray
 chmod +x /usr/bin/v2ray/v2ctl
 systemctl restart v2ray
 systemctl enable v2ray
-
-
-cat > /etc/locale.gen << EOF
-en_US.UTF-8 UTF-8
-zh_CN.GBK GBK
-zh_CN.UTF-8 UTF-8
-EOF
-locale-gen
-
-if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian/ stretch main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-EOF
-fi
-
-apt-get update && apt-get -y upgrade
-
-apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
-
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/etc/chnroute.txt
-
 
 
 
