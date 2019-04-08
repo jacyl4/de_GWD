@@ -54,7 +54,6 @@ apt-get update && apt-get -y upgrade
 
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
-zh_CN.GBK GBK
 zh_CN.UTF-8 UTF-8
 EOF
 locale-gen
@@ -147,7 +146,7 @@ systemctl restart nginx
 
 mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
-~/.acme.sh/acme.sh --issue -d $vpsdomain -d www.$vpsdomain -w /var/www/html
+~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html
 ~/.acme.sh/acme.sh --installcert -d $vpsdomain \
                --keypath       /var/www/ssl/$vpsdomain.key  \
                --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
