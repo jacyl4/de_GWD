@@ -104,13 +104,11 @@ wget http://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 unzip ui-script.zip
 mv -f ~/ui-script/* /usr/local/bin
 chmod +x ~/usr/local/bin/*
-rm -rf ~/ui-script
-rm -rf ~/ui-script.zip
+
 
 unzip ui-web.zip
 mv -f ~/ui-web/* /var/www/html
-rm -rf ~/ui-web
-rm -rf ~/ui-web.zip
+
 
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
@@ -353,7 +351,10 @@ rm -rf now.cron
 
 
 sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
-
+rm -rf ~/ui-script
+rm -rf ~/ui-script.zip
+rm -rf ~/ui-web
+rm -rf ~/ui-web.zip
 blue "---------------------------------"
 blue "安装v2ray+route+doh+pihole [完毕]"
 blue "---------------------------------"
