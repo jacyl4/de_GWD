@@ -344,7 +344,7 @@ fi
 rm -rf now.cron
 
 mv -f ~/ui-script/* /usr/local/bin
-chmod +x ~/usr/local/bin/*
+chmod +x /usr/local/bin/*
 mv -f ~/ui-web/* /var/www/html
 sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
 rm -rf ~/ui-script
