@@ -101,6 +101,17 @@ curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4
 wget http://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
 wget http://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 
+unzip ui-script.zip
+mv -f ~/ui-script/* /usr/local/bin
+chmod +x ~/ui-script/*
+rm -rf ~/ui-script
+rm -rf ~/ui-script.zip
+
+unzip ui-web.zip
+mv -f ~/ui-web/* /var/www/html
+rm -rf ~/ui-web
+rm -rf ~/ui-web.zip
+
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
@@ -136,6 +147,8 @@ systemctl enable v2ray
 
 
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
+#!/bin/bash
+
 ipset -X chnroute &>/dev/null
 ipset -X listw &>/dev/null
 ipset -X listb &>/dev/null
@@ -338,18 +351,6 @@ if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/u
 fi
 rm -rf now.cron
 
-
-
-unzip ui-script.zip
-mv -f ~/ui-script/* /usr/local/bin
-chmod +x ~/ui-script/*
-rm -rf ~/ui-script
-rm -rf ~/ui-script.zip
-
-unzip ui-web.zip
-mv -f ~/ui-web/* /var/www/html
-rm -rf ~/ui-web
-rm -rf ~/ui-web.zip
 
 sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
 
