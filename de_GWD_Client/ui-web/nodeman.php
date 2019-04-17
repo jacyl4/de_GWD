@@ -79,7 +79,7 @@
           <span>捐赠</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="index.php" onclick="logout()">
+        <a class="nav-link" href="#" onclick="logout()">
           <i class="fas fa-fw fa-sign-out-alt"></i>
           <span>注销</span></a>
       </li>

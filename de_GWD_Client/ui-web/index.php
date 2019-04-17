@@ -78,7 +78,7 @@
           <span>捐赠</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="index.php" onclick="logout()">
+        <a class="nav-link" href="#" onclick="logout()">
           <i class="fas fa-fw fa-sign-out-alt"></i>
           <span>注销</span></a>
       </li>
@@ -574,7 +574,6 @@ function submitstaticip () {
 staticip1=$("#localip").val();
 staticip2=$("#upstreamip").val();
 $.get("changestaticip.php", {localip:staticip1, upstreamip:staticip2});
-alert("静态地址已提交");
 }
 </script>
           </div>
