@@ -1,0 +1,12 @@
+#!/bin/bash
+v2servn="$(cat /var/www/html/nodepre.txt | awk 'NR==1{print}')"
+uuidnum="$(cat /var/www/html/nodepre.txt | awk 'NR==2{print}')"
+v2path="$(cat /var/www/html/nodepre.txt | awk 'NR==3{print}')"
+
+sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
+systemctl restart v2ray
+rm -rf /var/www/html/nodepre.txt

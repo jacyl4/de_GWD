@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ "$(curl --connect-timeout 3 -4skI -o /dev/null -w %{http_code} www.google.com/ncr | awk 'NR==1{print $1}')" = "302" ]]; then
+    echo "✓ 国外线路畅通"
+else
+    echo "✗ 国外线路不通"
+fi
