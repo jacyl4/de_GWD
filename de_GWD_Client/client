@@ -347,7 +347,7 @@ rm -rf ~/ui-script
 rm -rf ~/ui-script.zip
 
 unzip ui-web.zip
-mv -f ~/ui-web/* /usr/local/bin
+mv -f ~/ui-web/* /var/www/html
 rm -rf ~/ui-web
 rm -rf ~/ui-web.zip
 
