@@ -102,13 +102,7 @@ wget http://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
 wget http://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 
 unzip ui-script.zip
-mv -f ~/ui-script/* /usr/local/bin
-chmod +x ~/usr/local/bin/*
-
-
 unzip ui-web.zip
-mv -f ~/ui-web/* /var/www/html
-
 
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
@@ -349,7 +343,9 @@ if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/u
 fi
 rm -rf now.cron
 
-
+mv -f ~/ui-script/* /usr/local/bin
+chmod +x ~/usr/local/bin/*
+mv -f ~/ui-web/* /var/www/html
 sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
 rm -rf ~/ui-script
 rm -rf ~/ui-script.zip
