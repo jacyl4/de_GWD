@@ -96,7 +96,7 @@ apt-get update && apt-get -y upgrade
 
 apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
 
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
+wget http://gwdbase.xyz/cnr.txt -O /usr/local/bin/chnroute.txt
 
 wget http://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
 wget http://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
