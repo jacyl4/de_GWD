@@ -103,7 +103,7 @@ wget http://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 
 unzip ui-script.zip
 mv -f ~/ui-script/* /usr/local/bin
-chmod +x ~/ui-script/*
+chmod +x ~/usr/local/bin/*
 rm -rf ~/ui-script
 rm -rf ~/ui-script.zip
 
