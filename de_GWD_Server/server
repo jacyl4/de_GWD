@@ -550,6 +550,92 @@ blue "------------------"
 
 
 
+modify_upstream(){
+    green "==============================="
+    green "Y.修改上级跃点 / N.删除上级跃点"
+    green "==============================="
+    read v2rayupstreamyn
+if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
+sed -i '/"outbounds":/,$d' /etc/v2ray/config.json
+
+    green "============"
+    green "上级跃点域名"
+    green "============"
+    read upstreamdomain
+
+    green "============"
+    green "上级跃点UUID"
+    green "============"
+    read upstreamuuid
+
+    green "============"
+    green "上级跃点path"
+    green "============"
+    read upstreampath
+
+cat >> /etc/v2ray/config.json << EOF
+  "outbounds": [
+    {
+    "mux": { "enabled": true },
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [{
+        "address": "$upstreamdomain",
+        "port": 443,
+        "users": [{
+          "id": "$upstreamuuid",
+          "level": 1,
+          "alterId": 64,
+          "security": "AES-128-GCM"
+          }]
+        }]
+    },
+    "streamSettings": {
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "$upstreamdomain",
+        "allowInsecure": false
+        },
+      "wsSettings": {
+        "path": "$upstreampath",
+        "headers": {
+          "Host": "$upstreamdomain"
+          }
+        },
+      "sockopt": {
+        "mark": 255
+        }
+      }
+    }
+  ]
+}
+EOF
+systemctl restart v2ray
+blue "----------------"
+blue  "[上级跃点已修改]"
+blue "----------------"
+
+elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
+sed -i '/"outbounds":/,$d' /etc/v2ray/config.json
+cat >> /etc/v2ray/config.json << EOF
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}
+EOF
+systemctl restart v2ray
+blue "----------------"
+blue  "[上级跃点已删除]"
+blue "----------------"
+fi
+}
+
+
+
 start_menu(){
 statusgod=$(green "✔︎") 
 statusbad=$(red "✘")
@@ -600,6 +686,7 @@ fi
     green  "1. 安装v2ray+nginx+tls+pihole+doh"
     green  "2. 切换pihole上游"
     green  "3. 更改静态IP"
+    green  "0. 设置v2ray上级跃点"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -616,7 +703,10 @@ fi
     change_staticip
     start_menu 
     ;;
-    *)
+    0)
+    modify_upstream
+    start_menu 
+    ;;    *)
     clear
     red "请输入正确数字"
     sleep 1s
