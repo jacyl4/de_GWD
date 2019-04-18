@@ -367,104 +367,6 @@ blue "-----------------------"
 
 
 
-update_doh(){
-read -p "输入DoH地址1:" doh1
-read -p "输入DoH地址2:" doh2
-doh_upstream1='url = "https:\/\/'$doh1'\/dq"'
-doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
-
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
-
-systemctl restart doh-client
-blue "-------------------"
-blue  "更改DoH地址 [完毕]"
-blue "-------------------"
-}
-
-
-change_staticip(){
-    green "====================="
-    green "本机地址（留空回车跳过）"
-    green "====================="
-    read localaddr
-if [[ "$localaddr" != "" ]]; then 
-sed -i "/address/c\address $localaddr"  /etc/network/interfaces
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-fi
-
-    green "====================="
-    green "上级地址（留空回车跳过）"
-    green "====================="
-    read gatewayaddr
-if [[ "$gatewayaddr" != "" ]]; then 
-sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
-fi
-
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
-sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
-sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
-blue "------------------"
-blue  "更改静态IP [完毕]"
-blue "------------------"
-}
-
-
-
-change_v2ray(){
-    green "==============="
-    green "v2ray节点域名"
-    green "==============="
-    read v2servn
-    
-    green "=========================="
-    green "输入v2ray uuid （回车跳过）"
-    green "=========================="
-    read uuidnum
-if [[ "$uuidnum" != "" ]]; then 
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
-fi
-
-    green "===================="
-    green "输入path （回车跳过）"
-    green "===================="
-    read v2path
-if [[ "$v2path" != "" ]]; then 
-sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
-fi
-
-sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
-systemctl restart v2ray
-blue "---------------------"
-blue  "更改v2ray节点 [完毕]"
-blue "---------------------"
-}
-
-
-switch_ipotables_proxy(){
-    green "======================"
-    green "Y.启动代理 / N.停止代理"
-    green "======================"
-    read iptablesproxyyn
-if [[ "$iptablesproxyyn" = "Y" ]] || [[ "$iptablesproxyyn" = "y" ]]; then
-echo "[...] 耐心等待代理启动"
-systemctl restart iptables-proxy
-blue "-------------"
-blue  "[代理已启动]"
-blue "-------------"
-elif [[ "$iptablesproxyyn" = "N" ]] || [[ "$iptablesproxyyn" = "n" ]]; then
-systemctl stop iptables-proxy
-blue "-------------"
-blue  "[代理已关闭]"
-blue "-------------"
-fi
-}
-
-
-
 
 start_menu(){
 statusgod=$(green "✔︎") 
@@ -515,10 +417,6 @@ fi
     echo
     green  "1. 安装v2ray+route+doh+pihole"
     green  "2. 更改Pi-hole密码"
-    green  "3. 更改静态IP"
-    red    "8. 代理开关"
-    green  "9. 更改DoH地址"
-    yellow "0. 更改v2ray节点"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -530,22 +428,6 @@ fi
     2)
     change_piholeadmin
     start_menu 
-    ;;
-    3)
-    change_staticip
-    start_menu 
-    ;;
-    8)
-    switch_ipotables_proxy
-    start_menu 
-    ;;
-    9)
-    update_doh
-    start_menu 
-    ;;
-    0)
-    change_v2ray
-    start_menu
     ;;
     *)
     clear
