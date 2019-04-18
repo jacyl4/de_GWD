@@ -247,9 +247,6 @@ systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
-route del default
-route add default gw $gatewayaddr $ethernetnum
-
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
     if [[ $architecture = "arm64" ]]; then
         wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
@@ -294,6 +291,11 @@ unzip ui-script.zip
 unzip ui-web.zip
 
 curl -sSL https://install.pi-hole.net | bash
+
+
+route del default
+route add default gw $gatewayaddr $ethernetnum
+
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=119.29.29.29#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
