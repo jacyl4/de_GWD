@@ -550,6 +550,28 @@ blue "------------------"
 
 
 
+change_v2rayverify(){
+    green "========="
+    green "新的UUID"
+    green "========="
+    read v2raynuuid
+
+    green "========="
+    green "新的path"
+    green "========="
+    read v2raynpath
+
+sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$v2raynuuid'"'",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2raynpath'"'"/" /etc/v2ray/config.json
+systemctl restart v2ray
+
+blue "--------------------------"
+blue  "新的v2ray接入信息 [完毕]"
+blue "--------------------------"
+}
+
+
+
 modify_upstream(){
     green "==============================="
     green "Y.修改上级跃点 / N.删除上级跃点"
@@ -686,6 +708,7 @@ fi
     green  "1. 安装v2ray+nginx+tls+pihole+doh"
     green  "2. 切换pihole上游"
     green  "3. 更改静态IP"
+    green  "9. 修改v2ray接入信息"
     green  "0. 设置v2ray上级跃点"
     yellow "CTRL+C退出"
     echo
@@ -701,6 +724,10 @@ fi
     ;;
     3)
     change_staticip
+    start_menu 
+    ;;
+    9)
+    change_v2rayverify
     start_menu 
     ;;
     0)
