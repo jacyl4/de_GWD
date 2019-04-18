@@ -566,7 +566,7 @@ alert("DoH已提交");
 </form>
 
 <span class="float-right">
-<button id="submitdoh" type="button" class="btn btn-primary" onclick="submitstaticip()">应用</button>
+<button id="submitdoh" type="button" class="btn btn-danger" onclick="submitstaticip()">应用</button>
 </span>
 
 <script>
