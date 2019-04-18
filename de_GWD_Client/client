@@ -247,7 +247,8 @@ systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
-
+route del default
+route add default gw $gatewayaddr $ethernetnum
 
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
     if [[ $architecture = "arm64" ]]; then
@@ -317,9 +318,6 @@ iface $ethernetnum inet static
   netmask 255.255.255.0
   gateway $gatewayaddr
 EOF
-
-route del default
-route add default gw $gatewayaddr $ethernetnum
 
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
