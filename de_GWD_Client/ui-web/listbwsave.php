@@ -16,6 +16,6 @@ fwrite($listbtxt, "");
 fwrite($listbtxt, $txt);
 fclose($listbtxt);
 
-system('sudo systemctl restart iptables-proxy');
+shell_exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

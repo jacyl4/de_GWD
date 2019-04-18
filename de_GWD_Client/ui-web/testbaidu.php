@@ -1,3 +1,5 @@
+<?php ob_start(ob_gzhandler); ?> 
 <?php
-system('/usr/local/bin/ui-testbaidu');
+echo shell_exec('/usr/local/bin/ui-testbaidu');
 ?>
+<?php ob_end_flush(); ?> 
