@@ -95,16 +95,16 @@ apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
 
 
 
-wget http://gwdbase.xyz/cnr.txt -O /usr/local/bin/chnroute.txt
+wget http://acccc.ooo/cnr.txt -O /usr/local/bin/chnroute.txt
 
-wget http://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
-wget http://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
+wget http://acccc.ooo/ui-script.zip -O ~/ui-script.zip
+wget http://acccc.ooo/ui-web.zip -O ~/ui-web.zip
 
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
 if [[ $architecture = "arm64" ]]; then
-    wget http://gwdbase.xyz/v2arm64.zip -O ~/v2arm64.zip
+    wget http://acccc.ooo/v2arm64.zip -O ~/v2arm64.zip
     unzip v2arm64.zip
     mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
@@ -113,7 +113,7 @@ if [[ $architecture = "arm64" ]]; then
     rm -rf ~/v2arm64
     rm -rf ~/v2arm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget http://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
+    wget http://acccc.ooo/v2amd64.zip -O ~/v2amd64.zip
     unzip v2amd64.zip
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
