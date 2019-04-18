@@ -73,36 +73,10 @@ fi
 
 
 
-cat > /etc/locale.gen << EOF
-en_US.UTF-8 UTF-8
-zh_CN.UTF-8 UTF-8
-EOF
-locale-gen
-
-if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian/ stretch main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-EOF
-fi
-
-apt-get update && apt-get -y upgrade
-
-apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
-
 wget http://gwdbase.xyz/cnr.txt -O /usr/local/bin/chnroute.txt
 
 wget http://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
 wget http://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
-
-unzip ui-script.zip
-unzip ui-web.zip
 
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
@@ -138,6 +112,33 @@ systemctl enable v2ray
 
 
 
+
+cat > /etc/locale.gen << EOF
+en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8
+EOF
+locale-gen
+
+if [[ $architecture = "amd64" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.163.com/debian/ stretch main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+EOF
+fi
+
+apt-get update && apt-get -y upgrade
+
+apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
+
+
+
+
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 
@@ -159,7 +160,6 @@ ipset -N listw hash:net maxelem 65536
 for ip in $(cat '/var/www/html/listw.txt'); do
   ipset add listw $ip
 done
-
 
 iptables -t nat -N V2RAYTCP
 
@@ -248,6 +248,7 @@ systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
 
+
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
     if [[ $architecture = "arm64" ]]; then
         wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
@@ -288,9 +289,10 @@ systemctl restart doh-client
 systemctl enable doh-client
 rm -rf ~/dns-over-https
 
+unzip ui-script.zip
+unzip ui-web.zip
 
 curl -sSL https://install.pi-hole.net | bash
-
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=119.29.29.29#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
@@ -342,6 +344,7 @@ if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/u
     crontab now.cron
 fi
 rm -rf now.cron
+
 
 mv -f ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
