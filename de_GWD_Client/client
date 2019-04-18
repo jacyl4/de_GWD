@@ -73,19 +73,11 @@ fi
 
 
 
-wget http://acccc.ooo/cnr.txt -O /usr/local/bin/chnroute.txt
-
-wget http://acccc.ooo/ui-script.zip -O ~/ui-script.zip
-wget http://acccc.ooo/ui-web.zip -O ~/ui-web.zip
-
-
-
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
 zh_CN.UTF-8 UTF-8
 EOF
 locale-gen
-
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.163.com/debian/ stretch main non-free contrib
@@ -98,12 +90,15 @@ deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contri
 deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
-
 apt-get update && apt-get -y upgrade
-
 apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
 
 
+
+wget http://acccc.ooo/cnr.txt -O /usr/local/bin/chnroute.txt
+
+wget http://acccc.ooo/ui-script.zip -O ~/ui-script.zip
+wget http://acccc.ooo/ui-web.zip -O ~/ui-web.zip
 
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
@@ -247,6 +242,11 @@ systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
+route del default
+route add default gw $gatewayaddr $ethernetnum
+
+
+
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
     if [[ $architecture = "arm64" ]]; then
         wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
@@ -287,15 +287,8 @@ systemctl restart doh-client
 systemctl enable doh-client
 rm -rf ~/dns-over-https
 
-unzip ui-script.zip
-unzip ui-web.zip
 
 curl -sSL https://install.pi-hole.net | bash
-
-
-route del default
-route add default gw $gatewayaddr $ethernetnum
-
 
 sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=119.29.29.29#53'  /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
@@ -326,6 +319,19 @@ pihole restartdns
 systemctl restart pihole-FTL
 
 
+unzip ui-script.zip
+unzip ui-web.zip
+
+
+mv -f ~/ui-script/* /usr/local/bin
+chmod +x /usr/local/bin/*
+mv -f ~/ui-web/* /var/www/html
+sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
+rm -rf ~/ui-script
+rm -rf ~/ui-script.zip
+rm -rf ~/ui-web
+rm -rf ~/ui-web.zip
+
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
@@ -345,15 +351,6 @@ if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/u
 fi
 rm -rf now.cron
 
-
-mv -f ~/ui-script/* /usr/local/bin
-chmod +x /usr/local/bin/*
-mv -f ~/ui-web/* /var/www/html
-sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
-rm -rf ~/ui-script
-rm -rf ~/ui-script.zip
-rm -rf ~/ui-web
-rm -rf ~/ui-web.zip
 blue "---------------------------------"
 blue "安装v2ray+route+doh+pihole [完毕]"
 blue "---------------------------------"
