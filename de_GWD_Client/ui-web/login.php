@@ -1,3 +1,4 @@
+<?php ob_start(ob_gzhandler); ?> 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -68,3 +69,4 @@ window.location.href="index.php";
 </body>
 
 </html>
+<?php ob_end_flush(); ?> 
