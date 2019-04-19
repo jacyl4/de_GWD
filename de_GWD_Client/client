@@ -153,11 +153,6 @@ for ipchnroute in $(cat '/usr/local/bin/chnroute.txt'); do
   ipset add chnroute $ipchnroute
 done
 
-ipset -N listb hash:net maxelem 65536
-for iplistb in $(cat '/var/www/html/listb.txt'); do
-  ipset add listb $iplistb
-done
-
 ipset -N listw hash:net maxelem 65536
 for iplistw in $(cat '/var/www/html/listw.txt'); do
   ipset add listw $iplistw
@@ -166,9 +161,13 @@ for ipdomaian in $(cat '/var/www/html/domain.txt'); do
   ipset add listw $ipdomaian
 done
 
+ipset -N listb hash:net maxelem 65536
+for iplistb in $(cat '/var/www/html/listb.txt'); do
+  ipset add listb $iplistb
+done
+
 ip rule add fwmark 9 table 909
 ip route add local 0.0.0.0/0 dev lo table 909
-
 
 iptables -t mangle -N V2RAYOUT
 iptables -t mangle -N V2RAYPRE
@@ -185,10 +184,10 @@ iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j RETURN
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j RETURN
 iptables -t mangle -A V2PROXY -m set --match-set listw dst -j RETURN
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j RETURN
-iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 9
-iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 9
 iptables -t mangle -A V2PROXY -p tcp -m set --match-set listb dst -j MARK --set-mark 9
 iptables -t mangle -A V2PROXY -p udp -m set --match-set listb dst -j MARK --set-mark 9
+iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 9
+iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 9
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
 iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
