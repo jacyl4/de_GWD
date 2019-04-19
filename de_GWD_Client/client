@@ -153,17 +153,17 @@ for ipchnroute in $(cat '/usr/local/bin/chnroute.txt'); do
   ipset add chnroute $ipchnroute
 done
 
+ipset -N listb hash:net maxelem 65536
+for iplistb in $(cat '/var/www/html/listb.txt'); do
+  ipset add listb $iplistb
+done
+
 ipset -N listw hash:net maxelem 65536
 for iplistw in $(cat '/var/www/html/listw.txt'); do
   ipset add listw $iplistw
 done
 for ipdomaian in $(cat '/var/www/html/domain.txt'); do
   ipset add listw $ipdomaian
-done
-
-ipset -N listb hash:net maxelem 65536
-for iplistb in $(cat '/var/www/html/listb.txt'); do
-  ipset add listb $iplistb
 done
 
 ip rule add fwmark 9 table 100 pref 100
