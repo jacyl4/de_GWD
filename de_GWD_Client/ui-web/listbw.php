@@ -138,11 +138,10 @@ window.location.href="login.php"
   <small>
 注：<br>
 应用后，需等待数秒生效，因重整所有的线路规则。<br>
-所有vps节点域名/ip也最好填进白名单里。<br>
 尽量填写ip，域名也是解析到ip来实现的，有些域名会有cdn加速，就不会太好用。<br>
 一行一个地址，格式如下：<br>
-169.169.169.169<br>
-baidu.com<br>
+163.163.163.163<br>
+domain.com<br>
   </small>
 </span>
 

@@ -4,17 +4,17 @@
 $listb = $_GET['listb'];
 $listw = $_GET['listw'];
 
-$listwtxt = fopen("listw.txt", "w");
-$txt = "$listw\n";
-fwrite($listwtxt, "");
-fwrite($listwtxt, $txt);
-fclose($listwtxt);
-
 $listbtxt = fopen("listb.txt", "w");
 $txt = "$listb\n";
 fwrite($listbtxt, "");
 fwrite($listbtxt, $txt);
 fclose($listbtxt);
+
+$listwtxt = fopen("listw.txt", "w");
+$txt = "$listw\n";
+fwrite($listwtxt, "");
+fwrite($listwtxt, $txt);
+fclose($listwtxt);
 
 shell_exec('sudo systemctl restart iptables-proxy');
 ?>
