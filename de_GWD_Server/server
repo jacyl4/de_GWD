@@ -573,7 +573,7 @@ sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk '
 systemctl restart nginx
 fi
 blue "--------------------------"
-blue  "新的v2ray接入信息 [完毕]"
+blue  "修改本机UUID&path [完毕]"
 blue "--------------------------"
 }
 
@@ -641,9 +641,9 @@ cat >> /etc/v2ray/config.json << EOF
 }
 EOF
 systemctl restart v2ray
-blue "----------------"
-blue  "[上级跃点已修改]"
-blue "----------------"
+blue "--------------------"
+blue  "修改上级跃点 [完毕]"
+blue "--------------------"
 
 elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/v2ray/config.json
@@ -657,9 +657,9 @@ cat >> /etc/v2ray/config.json << EOF
 }
 EOF
 systemctl restart v2ray
-blue "----------------"
-blue  "[上级跃点已删除]"
-blue "----------------"
+blue "--------------------"
+blue  "删除上级跃点 [完毕]"
+blue "--------------------"
 fi
 }
 
