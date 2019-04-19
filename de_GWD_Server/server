@@ -571,6 +571,7 @@ elif [[ -d "/usr/local/nginx" ]]; then
 nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
 sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
 systemctl restart nginx
+fi
 blue "--------------------------"
 blue  "新的v2ray接入信息 [完毕]"
 blue "--------------------------"
