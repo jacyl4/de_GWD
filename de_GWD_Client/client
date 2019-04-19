@@ -166,8 +166,8 @@ for iplistb in $(cat '/var/www/html/listb.txt'); do
   ipset add listb $iplistb
 done
 
-ip rule add fwmark 9 table 909
-ip route add local 0.0.0.0/0 dev lo table 909
+ip rule add fwmark 9 table 100 pref 100
+ip route add local 0.0.0.0/0 dev lo table 100
 
 iptables -t mangle -N V2RAYOUT
 iptables -t mangle -N V2RAYPRE
@@ -205,7 +205,7 @@ cat > /usr/local/bin/iptables-proxy-down << EOF
 #!/bin/bash
 systemctl stop v2ray
 
-ip route flush table 909
+ip route flush table 100
 ip rule delete fwmark 9
 
 iptables -F

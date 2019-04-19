@@ -27,8 +27,14 @@
     "sniffing": {
       "enabled": true,
       "destOverride": ["http", "tls"]
+      },
+    "streamSettings": {
+      "sockopt": {
+        "mark": 100,
+        "tproxy": "tproxy"
+        }
       }
-    }],
+      }],
   "outbounds": [
     {
     "mux": { "enabled": true },
