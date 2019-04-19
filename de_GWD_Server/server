@@ -716,8 +716,8 @@ fi
     green  "1. 安装v2ray+nginx+tls+pihole+doh"
     green  "2. 切换pihole上游"
     green  "3. 更改静态IP"
-    green  "9. 修改本机UUID&path"
-    green  "0. 设置v2ray上级跃点"
+    yellow  "9. 修改本机UUID&path"
+    yellow  "0. 设置v2ray上级跃点"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num

@@ -173,9 +173,7 @@ iptables -t nat -A V2RAYTCP -p tcp -m mark --mark 0xff -j RETURN
 
 iptables -t nat -A V2RAYTCP -p tcp -j REDIRECT --to-ports 9896
 iptables -t nat -A PREROUTING -p tcp -j V2RAYTCP
-iptables -t nat -A PREROUTING -p tcp -m set --match-set listb dst -j REDIRECT --to-ports 9896
 iptables -t nat -A OUTPUT -p tcp -j V2RAYTCP
-iptables -t nat -A OUTPUT -p tcp -m set --match-set listb dst -j REDIRECT --to-ports 9896
 
 ip rule add fwmark 9 table 909
 ip route add local 0.0.0.0/0 dev lo table 909
@@ -197,7 +195,6 @@ iptables -t mangle -A V2RAYUDP -p udp -m mark --mark 0xff -j RETURN
 
 iptables -t mangle -A V2RAYUDP -p udp -j TPROXY --on-port 9896 --tproxy-mark 0x9/0x9
 iptables -t mangle -A PREROUTING -p udp -j V2RAYUDP
-iptables -t mangle -A PREROUTING -p udp -m set --match-set listb dst -j TPROXY --on-port 9896 --tproxy-mark 0x9/0x9
 systemctl restart v2ray
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
