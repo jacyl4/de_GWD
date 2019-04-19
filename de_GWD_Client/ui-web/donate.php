@@ -115,7 +115,6 @@ window.location.href="login.php"
   <a href="https://github.com/jacyl4/de_GWD" class="list-group-item list-group-item-action">项目发布页</a>
   <a href="https://jacyl4.github.io/post/debian-gateway/" class="list-group-item list-group-item-action">项目说明页</a>
   <a class="list-group-item list-group-item-action"> - </a>
-  <a href="https://ip.skk.moe/" class="list-group-item list-group-item-action">国内国外分流测试</a>
   <a href="https://fast.com/" class="list-group-item list-group-item-action">Fast测速</a>
   <a href="https://www.speedtest.net/" class="list-group-item list-group-item-action">Speedtest测速</a>
 </div>
