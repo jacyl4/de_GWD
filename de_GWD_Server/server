@@ -565,6 +565,12 @@ sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/
 sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2raynpath'"'"/" /etc/v2ray/config.json
 systemctl restart v2ray
 
+if [[ -d "/etc/nginx" ]]; then
+sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
+elif [[ -d "/usr/local/nginx" ]]; then
+nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
+sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
+systemctl restart nginx
 blue "--------------------------"
 blue  "新的v2ray接入信息 [完毕]"
 blue "--------------------------"
