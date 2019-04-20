@@ -189,7 +189,7 @@ iptables -t mangle -A V2PROXY -p udp -m set --match-set listb dst -j MARK --set-
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 9
 
-iptables -t mangle -A V2RAYPRE -p udp --dport 53 -m mark ! --mark 9 -j ACCEPT
+iptables -t nat -A V2RAYPRE -p udp --dport 53 -m mark ! --mark 9 -j REDIRECT --to-port 53
 
 iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 9 -j V2PROXY
 iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 9 -j V2PROXY
