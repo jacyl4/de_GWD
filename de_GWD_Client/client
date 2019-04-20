@@ -153,17 +153,17 @@ for ipchnroute in $(cat '/usr/local/bin/chnroute.txt'); do
   ipset add chnroute $ipchnroute
 done
 
-ipset -N listb hash:net maxelem 65536
-for iplistb in $(cat '/var/www/html/listb.txt'); do
-  ipset add listb $iplistb
-done
-
 ipset -N listw hash:net maxelem 65536
 for iplistw in $(cat '/var/www/html/listw.txt'); do
   ipset add listw $iplistw
 done
 for ipdomaian in $(cat '/var/www/html/domain.txt'); do
   ipset add listw $ipdomaian
+done
+
+ipset -N listb hash:net maxelem 65536
+for iplistb in $(cat '/var/www/html/listb.txt'); do
+  ipset add listb $iplistb
 done
 
 ip rule add fwmark 9 table 100 pref 100
@@ -189,11 +189,13 @@ iptables -t mangle -A V2PROXY -p udp -m set --match-set listb dst -j MARK --set-
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 9
 
+iptables -t mangle -A V2RAYPRE -p udp --dport 53 -m mark ! --mark 9 -j ACCEPT
+
 iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 9 -j V2PROXY
 iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 9 -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 9 -j TPROXY --on-port 9896
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 9 -j TPROXY --on-port 9896
+iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896
+iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
 iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
