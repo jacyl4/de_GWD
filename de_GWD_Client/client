@@ -189,14 +189,14 @@ iptables -t mangle -A V2PROXY -p udp -m set --match-set listb dst -j MARK --set-
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 9
 
-iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
-iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
-
 iptables -t mangle -A V2RAYPRE -p tcp -m mark ! --mark 9 -j V2PROXY
 iptables -t mangle -A V2RAYPRE -p udp -m mark ! --mark 9 -j V2PROXY
 
 iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 9 -j TPROXY --on-port 9896
 iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 9 -j TPROXY --on-port 9896
+
+iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
+iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
 systemctl restart v2ray
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
