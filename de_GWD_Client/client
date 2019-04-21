@@ -166,7 +166,7 @@ for ipdomaian in $(cat '/var/www/html/domain.txt'); do
   ipset add listw $ipdomaian
 done
 
-ip rule add fwmark 9 table 100 pref 100
+ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
 
 iptables -t mangle -N V2RAYOUT
@@ -185,16 +185,16 @@ iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
-iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 9
-iptables -t mangle -A V2PROXY -j MARK --set-mark 9
+iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
 iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -m mark ! --mark 9 -j V2PROXY
+iptables -t mangle -A V2RAYPRE -m mark ! --mark 0x9 -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
+iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 0x9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
+iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 0x9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
 systemctl restart v2ray
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
