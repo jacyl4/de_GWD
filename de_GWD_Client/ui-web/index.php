@@ -266,7 +266,7 @@ $("#ping9").html(data);
 </script>
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-bordered table-hover text-center" id="dataTable">
+              <table class="table table-bordered table-hover text-center text-nowrap" id="dataTable">
                 <thead>
                   <tr>
                     <th>#</th>
@@ -280,74 +280,74 @@ $("#ping9").html(data);
                 <tbody>
                   <tr>
                     <td>1</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==1{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==1{print}'"); ?></h6></td>
-                    <td><h6 id="ping1" class='mt-1 mb-n2 align-middle text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch1()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==1{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==1{print}'"); ?></span></td>
+                    <td><span id="ping1" class='text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch1()">切换</button></td>
                     <td id="testnode1"></td>
                   </tr>
                   <tr>
                     <td>2</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==2{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==2{print}'"); ?></h6></td>
-                    <td><h6 id="ping2" class='mt-1 mb-n2 align-middle text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch2()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==2{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==2{print}'"); ?></span></td>
+                    <td><span id="ping2" class='text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch2()">切换</button></td>
                     <td id="testnode2"></td>
                   </tr>
                   <tr>
                     <td>3</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==3{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==3{print}'"); ?></h6></td>
-                    <td><h6 id="ping3" class='mb-0 text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch3()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==3{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==3{print}'"); ?></span></td>
+                    <td><span id="ping3" class='mb-0 text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch3()">切换</button></td>
                     <td id="testnode3"></td>
                   </tr>
                   <tr>
                     <td>4</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==4{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==4{print}'"); ?></h6></td>
-                    <td><h6 id="ping4" class='mb-0 text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch4()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==4{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==4{print}'"); ?></span></td>
+                    <td><span id="ping4" class='mb-0 text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch4()">切换</button></td>
                     <td id="testnode4"></td>
                   </tr>
                   <tr>
                     <td>5</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==5{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==5{print}'"); ?></h6></td>
-                    <td><h6 id="ping5" class='mb-0 text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch5()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==5{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==5{print}'"); ?></span></td>
+                    <td><span id="ping5" class='mb-0 text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch5()">切换</button></td>
                     <td id="testnode5"></td>
                   </tr>
                   <tr>
                     <td>6</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==6{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==6{print}'"); ?></h6></td>
-                    <td><h6 id="ping6" class='mb-0 text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch6()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==6{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==6{print}'"); ?></span></td>
+                    <td><span id="ping6" class='mb-0 text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch6()">切换</button></td>
                     <td id="testnode6"></td>
                   </tr>
                   <tr>
                     <td>7</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==7{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==7{print}'"); ?></h6></td>
-                    <td><h6 id="ping7" class='mb-0 text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch7()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==7{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==7{print}'"); ?></span></td>
+                    <td><span id="ping7" class='mb-0 text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch7()">切换</button></td>
                     <td id="testnode7"></td>
                   </tr>
                   <tr>
                     <td>8</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==8{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==8{print}'"); ?></h6></td>
-                    <td><h6 id="ping8" class='mb-0 text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch8()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==8{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==8{print}'"); ?></span></td>
+                    <td><span id="ping8" class='mb-0 text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch8()">切换</button></td>
                     <td id="testnode8"></td>
                   </tr>
                   <tr>
                     <td>9</td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==9{print}'"); ?></h6></td>
-                    <td><h6 class="mt-1 mb-n2 align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==9{print}'"); ?></h6></td>
-                    <td><h6 id="ping9" class='mb-0 text-success'></h6></td>
-                    <td><button type="button" class="btn btn-success btn-xs text-nowrap" onclick="switch9()">切换</button></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/nodename.txt | awk 'NR==9{print}'"); ?></span></td>
+                    <td><span class="align-middle"><?php echo shell_exec("cat /var/www/html/domain.txt | awk 'NR==9{print}'"); ?></span></td>
+                    <td><span id="ping9" class='mb-0 text-success'></span></td>
+                    <td><button type="button" class="btn btn-success btn-xs" onclick="switch9()">切换</button></td>
                     <td id="testnode9"></td>
                   </tr>
                 </tbody>
