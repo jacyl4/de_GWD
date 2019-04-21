@@ -283,8 +283,8 @@ make && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 doh_upstream='url = "https:\/\/'$v2servn'\/dq"'
-sed -i "14s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "19s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-client
