@@ -180,23 +180,21 @@ iptables -t nat    -A OUTPUT     -j V2RAYOUT
 iptables -t nat    -A PREROUTING -j V2RAYPRE
 
 iptables -t mangle -N V2PROXY
-iptables -t nat -N V2PROXY
-iptables -t nat -A V2RAYPRE -p all --dport 53 -j RETURN
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
-iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j RETURN
-iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j RETURN
-iptables -t mangle -A V2PROXY -m set --match-set listw dst -j RETURN
-iptables -t mangle -A V2PROXY -m mark --mark 0xff -j RETURN
 iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 9
 iptables -t mangle -A V2PROXY -j MARK --set-mark 9
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
 iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -p all -m mark ! --mark 9 -j V2PROXY
+iptables -t mangle -A V2RAYPRE -m mark ! --mark 9 -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 9 -j TPROXY --on-port 9896
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 9 -j TPROXY --on-port 9896
+iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
+iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
 systemctl restart v2ray
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
@@ -376,8 +374,23 @@ blue  "更改Pi-hole密码 [完毕]"
 blue "----------------------"
 }
 
+updatepihole(){
+pihole -up
 
-
+sed -i '/"Google (ECS)"/c\"114" => ["v4_1" => "114.114.114.114","v4_2" => "114.114.115.115"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"OpenDNS (ECS)"/c\"DNSpod" => ["v4_1" => "119.29.29.29","v4_2" => "119.28.28.28"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Level3"/c\"阿里DNS" => ["v4_1" => "223.5.5.5","v4_2" => "223.6.6.6"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Norton"/c\"PdomoDNS" => ["v4_1" => "101.132.183.99","v4_2" => "193.112.15.186"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Comodo"/c\"OneDNS" => ["v4_1" => "117.50.10.10","v4_2" => "117.50.20.20"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"DNS.WATCH"/c\"DNS派 电信" => ["v4_1" => "101.226.4.6","v4_2" => "218.30.118.6"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Quad9 (filtered, DNSSEC)"/c\"DNS派 联通" => ["v4_1" => "123.125.81.6","v4_2" => "140.207.198.6"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Quad9 (unfiltered, no DNSSEC)"/c\"P站DNS" => ["v4_1" => "123.207.137.88","v4_2" => "115.159.220.214"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Quad9 (filtered + ECS)"/c\"中科大防污染DNS" => ["v4_1" => "202.141.162.123","v4_2" => "202.141.176.93"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Cloudflare"/c\"XsicoDNS" => ["v4_1" => "182.254.242.15"]'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+blue "-------------------"
+blue  "Pi-hole更新 [完毕]"
+blue "-------------------"
+}
 
 start_menu(){
 statusgod=$(green "✔︎") 
@@ -428,6 +441,7 @@ fi
     echo
     green  "1. 安装v2ray+route+doh+pihole"
     green  "2. 更改Pi-hole密码"
+    green  "3. 更新Pi-hole"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -438,6 +452,10 @@ fi
     ;;
     2)
     change_piholeadmin
+    start_menu 
+    ;;
+    3)
+    updatepihole
     start_menu 
     ;;
     *)
