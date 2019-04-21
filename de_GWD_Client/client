@@ -300,11 +300,11 @@ sed -i '/"Quad9 (filtered + ECS)"/c\"XsicoDNS" => ["v4_1" => "182.254.242.15"],'
 sed -i '/"Cloudflare"/c\"DoH" => ["v4_1" => "127.0.0.1#5380"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=127.0.0.1#5380'  /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=114.114.114.114'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_1=/c\PIHOLE_DNS_1=114.114.114.114'  /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_2=/c\PIHOLE_DNS_2=127.0.0.1#5380'  /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 echo "server=114.114.114.114" >> /etc/dnsmasq.d/01-pihole.conf
+echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
