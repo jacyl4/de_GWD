@@ -30,7 +30,7 @@
       },
     "streamSettings": {
       "sockopt": {
-        "mark": 100,
+        "mark": 255,
         "tproxy": "tproxy"
         }
       }
