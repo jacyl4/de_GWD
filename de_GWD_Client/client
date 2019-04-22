@@ -435,7 +435,7 @@ fi
 
     green "==========================================="
     green "              客户端                        "
-    green "介绍：一键安装v2ray+pihole+doh+透明路由网关    "
+    green "介绍：一键安装v2ray+doh+pihole+透明路由网关    "
     green "系统：仅测于Debian9 (amd64 & arm64)        "
     green "作者：jacyl4                                "
     green "网站：jacyl4.github.io                      "
