@@ -100,8 +100,6 @@ wget --no-check-certificate https://gwdbase.xyz/cnr.txt -O /usr/local/bin/chnrou
 wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
 wget --no-check-certificate https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
-
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
@@ -111,6 +109,7 @@ if [[ $architecture = "arm64" ]]; then
     mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
     mv -f ~/v2arm64/v2ray.service /etc/systemd/system/v2ray.service
+    mv -f ~/v2arm64/v2wt-client.json /etc/v2ray/config.json
     rm -rf ~/v2arm64
     rm -rf ~/v2arm64.zip
 elif [[ $architecture = "amd64" ]]; then
@@ -119,6 +118,7 @@ elif [[ $architecture = "amd64" ]]; then
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
     mv -f ~/v2amd64/v2ray.service /etc/systemd/system/v2ray.service
+    mv -f ~/v2amd64/v2wt-client.json /etc/v2ray/config.json
     rm -rf ~/v2amd64
     rm -rf ~/v2amd64.zip
 fi
