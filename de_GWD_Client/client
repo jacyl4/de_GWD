@@ -97,9 +97,9 @@ apt-get install -y curl unzip ipset net-tools ipset git make gcc ca-certificates
 
 wget https://gwdbase.xyz/cnr.txt -O /usr/local/bin/chnroute.txt
 
-wget https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
-wget https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
+wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
+wget --no-check-certificate https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
 
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
