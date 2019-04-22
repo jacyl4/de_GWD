@@ -290,6 +290,14 @@ rm -rf ~/dns-over-https
 
 curl -sSL https://install.pi-hole.net | bash
 
+cat > /etc/pihole/adlists.list << EOF
+https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+https://hosts.nfz.moe/127.0.0.1/full/hosts
+https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&sho%20wintro=0&mimetype=plaintext
+EOF
+pihole -g
+
+
 sed -i '/"Google (ECS)"/c\"114" => ["v4_1" => "114.114.114.114","v4_2" => "114.114.115.115"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 sed -i '/"OpenDNS (ECS)"/c\"DNSpod" => ["v4_1" => "119.29.29.29","v4_2" => "119.28.28.28"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 sed -i '/"Level3"/c\"阿里DNS" => ["v4_1" => "223.5.5.5","v4_2" => "223.6.6.6"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
@@ -378,6 +386,13 @@ blue "----------------------"
 
 updatepihole(){
 pihole -up
+
+cat > /etc/pihole/adlists.list << EOF
+https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+https://hosts.nfz.moe/127.0.0.1/full/hosts
+https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&sho%20wintro=0&mimetype=plaintext
+EOF
+pihole -g
 
 sed -i '/"Google (ECS)"/c\"114" => ["v4_1" => "114.114.114.114","v4_2" => "114.114.115.115"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 sed -i '/"OpenDNS (ECS)"/c\"DNSpod" => ["v4_1" => "119.29.29.29","v4_2" => "119.28.28.28"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
