@@ -613,7 +613,7 @@ cat >> /etc/v2ray/config.json << EOF
         "users": [{
           "id": "$upstreamuuid",
           "level": 1,
-          "alterId": 64,
+          "alterId": 32,
           "security": "AES-128-GCM"
           }]
         }]
