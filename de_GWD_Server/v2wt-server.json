@@ -12,8 +12,7 @@
       "clients": [{
         "id": "00000000-0000-0000-0000-000000000000",
         "level": 1,
-        "alterId": 32,
-        "security": "AES-128-GCM"
+        "alterId": 32
         }]
       },
     "streamSettings": {
