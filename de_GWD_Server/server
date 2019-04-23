@@ -603,6 +603,7 @@ sed -i '/"outbounds":/,$d' /etc/v2ray/config.json
 cat >> /etc/v2ray/config.json << EOF
   "outbounds": [
     {
+    "mux": { "enabled": true },
     "protocol": "vmess",
     "settings": {
       "vnext": [{
@@ -612,7 +613,6 @@ cat >> /etc/v2ray/config.json << EOF
           "id": "$upstreamuuid",
           "level": 1,
           "alterId": 32,
-          "security": "none"
           }]
         }]
     },
