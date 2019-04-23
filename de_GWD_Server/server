@@ -630,9 +630,6 @@ cat >> /etc/v2ray/config.json << EOF
         "headers": {
           "Host": "$upstreamdomain"
           }
-        },
-      "sockopt": {
-        "mark": 255
         }
       }
     }
