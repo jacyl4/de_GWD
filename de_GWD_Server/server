@@ -49,32 +49,31 @@ net.ipv4.tcp_fin_timeout=30
 EOF
 sysctl -p
 
-apt-get update && apt-get -y upgrade
 
 cat > /etc/locale.gen << EOF
 en_US.UTF-8 UTF-8
 zh_CN.UTF-8 UTF-8
 EOF
 locale-gen
+apt-get update && apt-get -y upgrade
+apt-get install -y curl git make gcc ca-certificates unzip net-tools
 
-apt-get install -y curl git make gcc net-tools ca-certificates
 
-
-cat > /usr/local/etc/updateGWD << EOF
+cat > /usr/local/bin/updateGWD << EOF
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
-chmod +x /usr/local/etc/updateGWD
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/etc/updateGWD" ]]; then
+chmod +x /usr/local/bin/updateGWD
+if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
 crontab -l > now.cron
-echo '0 0 * * * /usr/local/etc/updateGWD' >> now.cron
+echo '0 0 * * * /usr/local/bin/updateGWD' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
-/usr/local/etc/updateGWD
+/usr/local/bin/updateGWD
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
@@ -652,10 +651,10 @@ cat >> /etc/v2ray/config.json << EOF
 }
 EOF
 systemctl restart v2ray
+fi
 blue "--------------------"
 blue  "删除上级跃点 [完毕]"
 blue "--------------------"
-fi
 }
 
 
