@@ -139,9 +139,10 @@ systemctl enable v2ray
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 
+ipset -X lanip &>/dev/null
 ipset -X chnroute &>/dev/null
-ipset -X listw &>/dev/null
 ipset -X listb &>/dev/null
+ipset -X listw &>/dev/null
 
 lanip="0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16 224.0.0.0/4 240.0.0.0/4 223.5.5.5 223.6.6.6 114.114.114.114 114.114.115.115 1.2.4.8 210.2.4.8 112.124.47.27 114.215.126.16 112.124.47.27 180.76.76.76 119.29.29.29 182.254.116.116"
 
