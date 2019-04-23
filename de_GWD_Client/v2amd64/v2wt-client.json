@@ -37,7 +37,6 @@
       }],
   "outbounds": [
     {
-    "mux": { "enabled": true },
     "protocol": "vmess",
     "settings": {
       "vnext": [{
