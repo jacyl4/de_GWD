@@ -196,8 +196,8 @@ iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
 
 iptables -t mangle -A V2RAYPRE -m mark ! --mark 0x9 -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -p tcp -m mark --mark 0x9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
-iptables -t mangle -A V2RAYPRE -p udp -m mark --mark 0x9 -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
+iptables -t mangle -A V2RAYPRE -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
+iptables -t mangle -A V2RAYPRE -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9/0x9
 systemctl restart v2ray
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
