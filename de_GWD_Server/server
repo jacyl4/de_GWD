@@ -648,10 +648,10 @@ cat >> /etc/v2ray/config.json << EOF
 }
 EOF
 systemctl restart v2ray
-fi
 blue "--------------------"
 blue  "删除上级跃点 [完毕]"
 blue "--------------------"
+fi
 }
 
 
