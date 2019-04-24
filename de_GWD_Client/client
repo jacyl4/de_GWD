@@ -183,12 +183,11 @@ iptables -t nat    -A OUTPUT     -j V2RAYOUT
 iptables -t nat    -A PREROUTING -j V2RAYPRE
 
 iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
-
-iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
@@ -199,6 +198,7 @@ iptables -t mangle -A V2RAYPRE -m mark ! --mark 0x9 -j V2PROXY
 iptables -t mangle -A V2RAYPRE -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A V2RAYPRE -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 systemctl restart v2ray
+
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
