@@ -116,7 +116,7 @@ window.location.href="login.php"
                     <th>#</th>
                     <th class="text-nowrap text-center"><———— 节点名 ————></th>
                     <th class="text-nowrap text-center"><———— 域名 ————></th>
-                    <th class="text-nowrap text-center"><—————— UUID ——————></th>
+                    <th class="text-nowrap text-center"><———————— UUID ————————></th>
                     <th class="text-nowrap text-center"><—— PATH ——></th>
                   </tr>
                 </thead>

@@ -165,8 +165,8 @@ ipset -N listw hash:net maxelem 65536
 for iplistw in $(cat '/var/www/html/listw.txt'); do
   ipset add listw $iplistw
 done
-for ipdomaian in $(cat '/var/www/html/domain.txt'); do
-  ipset add listw $ipdomaian
+for ipdomain in $(cat '/var/www/html/domain.txt'); do
+  ipset add listw $ipdomain
 done
 
 ip rule add fwmark 0x9 table 100 pref 100
