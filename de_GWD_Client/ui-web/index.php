@@ -55,7 +55,7 @@
   <div id="wrapper">
 
     <!-- Sidebar -->
-    <ul class="sidebar navbar-nav toggled">
+    <ul class="sidebar navbar-nav">
       <li class="nav-item active">
         <a class="nav-link" href="index.php">
           <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -494,6 +494,8 @@ nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>�
 nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
 window.onload = function() {
+$("body").toggleClass("sidebar-toggled");
+$(".sidebar").toggleClass("toggled");
 $.get("nodenfcheck.php", function(data) { 
 $('#nodenfshow').html(data);
 });
