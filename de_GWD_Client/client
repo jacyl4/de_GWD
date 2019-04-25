@@ -52,6 +52,14 @@ sed -i '/net.ipv4.tcp_syn_retries/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_synack_retries/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_timestamps/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_fin_timeout/d' /etc/sysctl.conf
+
+sed -i '/65536/d' /etc/security/limits.conf
+sed -i '/# End of file/i\* soft nproc 65536' /etc/security/limits.conf
+sed -i '/# End of file/i\* hard nproc 65536' /etc/security/limits.conf
+sed -i '/# End of file/i\* soft nofile 65536' /etc/security/limits.conf
+sed -i '/# End of file/i\* hard nofile 65536' /etc/security/limits.conf
+echo "ulimit -n 65536" > .bash_profile
+
 cat >> /etc/sysctl.conf << EOF
 fs.file-max=65536
 net.ipv4.ip_forward=1
