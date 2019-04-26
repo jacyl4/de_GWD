@@ -6,14 +6,14 @@
 
 2-26 始
 
-#### 服务端：
+## 服务端：
 ```
 apt-get install -y curl
 curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server && chmod +x server && ./server
 ```
 ![Snipaste_2019-04-19_20-05-25](https://i.loli.net/2019/04/19/5cb9b9980b216.png)
 
-#### 客户端：
+## 客户端：
 ```
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/client -O ~/client && chmod +x client && ./client
 ```
