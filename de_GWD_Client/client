@@ -98,8 +98,8 @@ deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contri
 deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
-apt-get update && apt-get -y upgrade
-apt-get install -y curl git make gcc ca-certificates unzip ipset net-tools
+apt update && apt -y upgrade
+apt install -y curl git make gcc ca-certificates unzip ipset net-tools
 
 
 

@@ -59,8 +59,8 @@ en_US.UTF-8 UTF-8
 zh_CN.UTF-8 UTF-8
 EOF
 locale-gen
-apt-get update && apt-get -y upgrade
-apt-get install -y curl git make gcc ca-certificates unzip net-tools
+apt update && apt -y upgrade
+apt install -y curl git make gcc ca-certificates unzip net-tools
 
 
 cat > /usr/local/bin/updateGWD << EOF
@@ -89,7 +89,7 @@ systemctl enable v2ray
 
 
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
-apt-get install -y nginx socat
+apt install -y nginx socat
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes auto;
