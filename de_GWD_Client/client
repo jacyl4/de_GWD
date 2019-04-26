@@ -358,12 +358,15 @@ systemctl restart pihole-FTL
 
 
 unzip ui-script.zip
+
 unzip ui-web.zip
 
-
 mv -f ~/ui-script/* /usr/local/bin
+
 chmod +x /usr/local/bin/*
+
 mv -f ~/ui-web/* /var/www/html
+
 sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
 rm -rf ~/ui-script
 rm -rf ~/ui-script.zip
