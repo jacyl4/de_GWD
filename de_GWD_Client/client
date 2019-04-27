@@ -154,6 +154,11 @@ ipset -X listw &>/dev/null
 
 lanip="0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16 224.0.0.0/4 240.0.0.0/4 223.5.5.5 223.6.6.6 114.114.114.114 114.114.115.115 1.2.4.8 210.2.4.8 112.124.47.27 114.215.126.16 112.124.47.27 180.76.76.76 119.29.29.29 182.254.116.116"
 
+ipset -N listb hash:net maxelem 65536
+for iplistb in $(cat '/var/www/html/listb.txt'); do
+  ipset add listb $iplistb
+done
+
 ipset -N lanip hash:net maxelem 65536
 for iplanip in $lanip; do
   ipset add lanip $iplanip
@@ -162,11 +167,6 @@ done
 ipset -N chnroute hash:net maxelem 65536
 for ipchnroute in $(cat '/usr/local/bin/chnroute.txt'); do
   ipset add chnroute $ipchnroute
-done
-
-ipset -N listb hash:net maxelem 65536
-for iplistb in $(cat '/var/www/html/listb.txt'); do
-  ipset add listb $iplistb
 done
 
 ipset -N listw hash:net maxelem 65536
@@ -215,7 +215,7 @@ cat > /usr/local/bin/iptables-proxy-down << EOF
 systemctl stop v2ray
 
 ip route flush table 100
-ip rule delete fwmark 9
+ip rule delete fwmark 0x9
 
 iptables -F
 iptables -X
@@ -224,9 +224,9 @@ iptables -t nat -X
 iptables -t mangle -F
 iptables -t mangle -X
 
+ipset destroy listb
 ipset destroy lanip
 ipset destroy chnroute
-ipset destroy listb
 ipset destroy listw
 EOF
 chmod +x /usr/local/bin/iptables-proxy-down
