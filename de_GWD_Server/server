@@ -111,6 +111,26 @@ http {
   tcp_nodelay on;
   keepalive_timeout 300;
 
+  gzip              on;
+  gzip_comp_level   4;
+  gzip_min_length   256;
+  gzip_buffers      16 8k;
+  gzip_http_version 1.0;
+  gzip_types    text/plain
+          text/javascript
+          text/css
+          text/js
+          text/xml
+          application/javascript
+          application/x-javascript
+          application/json
+          application/xml
+          application/xml+rss
+          image/svg+xml/javascript;
+  gzip_proxied      any;
+  gzip_vary         on;
+  gzip_disable      "MSIE [1-6]\.";
+
   server_tokens off;
   access_log off;
   error_log off;
