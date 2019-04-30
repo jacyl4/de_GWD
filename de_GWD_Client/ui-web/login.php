@@ -26,34 +26,32 @@
     <div class="card card-login mx-auto mt-5">
       <div class="card-header">登入</div>
       <div class="card-body">
-        <form>
+<form>
           <div class="form-group">
-            <div class="form-label-group">
-              <input type="password" id="inputpassword" class="form-control" placeholder="密码" autofocus="autofocus" onkeydown="keyLogin()"/>
-              <label for="inputpassword">密码</label>
-            </div>
+                <div class="form-label-group">
+                  <input type="password" id="gwdpasswd" class="form-control" placeholder="密码" required="required" value="" autofocus="autofocus" onkeydown="keysubmitpw()">
+                  <label for="gwdpasswd">密码</label>
+                </div>
           </div>
-          <button id=“login” type="button" class="btn btn-primary btn-block" onclick="login()">登入</button>
-        </form>
+</form>
+<button type="button" class="btn btn-primary btn-block" onclick="submitpw()">登入</button>
       </div>
     </div>
   </div>
 
 <script>
-function login () {
-GWDpassword=$("input#inputpassword").val();
-$.get("auth.php", {GWDpw:GWDpassword});
-window.location.href="index.php";
-};
+function submitpw () {
+gwdpasswdtext=$('#gwdpasswd').val();
+$.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href="index.php"; });
+}
 </script>
 
 <script>
-function keyLogin () {
+function keysubmitpw () {
     if(event.keyCode == 13) {
 event.preventDefault();
-GWDpassword=$("input#inputpassword").val();
-$.get("auth.php", {GWDpw:GWDpassword});
-window.location.href="index.php";
+gwdpasswdtext=$('#gwdpasswd').val();
+$.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href="index.php"; });
 }
 };
 </script>

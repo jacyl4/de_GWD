@@ -86,8 +86,7 @@
     </ul>
 <script>
 function logout () {
-$.get("auth.php", {logout:"true"});
-window.location.href="login.php"
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php"; });
 }
 </script>
 

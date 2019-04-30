@@ -33,9 +33,9 @@
             setcookie('persistentlogin', '');
         }
     }
-    else if(isset($_GET['GWDpw']))
+    else if(isset($_GET['gwdpw']))
     {
-        $logininput = hash('sha256',hash('sha256',$_GET['GWDpw']));
+        $logininput = hash('sha256',hash('sha256',$_GET['gwdpw']));
         if( $GWDpwhash === $logininput )
         {
             $_SESSION["GWDhash"] = $GWDpwhash;

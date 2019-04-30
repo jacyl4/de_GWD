@@ -1,5 +1,7 @@
 ![Snipaste_2019-04-26_03-18-37](https://i.loli.net/2019/04/26/5cc212af2a0d4.png)
 
+4-30 修复Firefox下不能登录的问题
+
 4-26 更新netflix节点固定功能
 
 4-14 更新web ui
