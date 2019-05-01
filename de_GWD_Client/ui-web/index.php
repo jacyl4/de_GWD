@@ -271,12 +271,13 @@ $('#ping9').html(data);
               <table class="table table-bordered table-hover text-center text-nowrap" id="dataTable">
                 <thead>
 
+<span class="float-left mr-4">
 <div class="input-group mb-3">
   <div class="input-group-prepend">
     <label class="input-group-text">Netflix 分流节点</label>
   </div>
   <div class="input-group-append">
-    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="nodenfshow"></button>
+    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
     <div class="dropdown-menu">
       <a class="dropdown-item" onclick="nfswitch1()" href="#" id="nodenfshow1"></a>
       <a class="dropdown-item" onclick="nfswitch2()" href="#" id="nodenfshow2"></a>
@@ -290,6 +291,29 @@ $('#ping9').html(data);
     </div>
   </div>
 </div>
+</span>
+
+<span class="float-left mr-4">
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <label class="input-group-text">BT 分流节点</label>
+  </div>
+  <div class="input-group-append">
+    <button id="nodebtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+    <div class="dropdown-menu">
+      <a class="dropdown-item" onclick="btswitch1()" href="#" id="nodebtshow1"></a>
+      <a class="dropdown-item" onclick="btswitch2()" href="#" id="nodebtshow2"></a>
+      <a class="dropdown-item" onclick="btswitch3()" href="#" id="nodebtshow3"></a>
+      <a class="dropdown-item" onclick="btswitch4()" href="#" id="nodebtshow4"></a>
+      <a class="dropdown-item" onclick="btswitch5()" href="#" id="nodebtshow5"></a>
+      <a class="dropdown-item" onclick="btswitch6()" href="#" id="nodebtshow6"></a>
+      <a class="dropdown-item" onclick="btswitch7()" href="#" id="nodebtshow7"></a>
+      <a class="dropdown-item" onclick="btswitch8()" href="#" id="nodebtshow8"></a>
+      <a class="dropdown-item" onclick="btswitch9()" href="#" id="nodebtshow9"></a>
+    </div>
+  </div>
+</div>
+</span>
 
                     <tr>
                     <th>#</th>
@@ -303,7 +327,7 @@ $('#ping9').html(data);
                 <tbody>
                   <tr>
                     <td>1</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow1" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==1{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping1" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch1()">切换</button></td>
@@ -311,7 +335,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>2</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow2" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==2{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping2" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch2()">切换</button></td>
@@ -319,7 +343,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>3</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow3" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==3{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping3" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch3()">切换</button></td>
@@ -327,7 +351,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>4</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==4{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow4" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==4{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping4" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch4()">切换</button></td>
@@ -335,7 +359,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>5</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==5{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow5" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==5{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping5" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch5()">切换</button></td>
@@ -343,7 +367,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>6</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==6{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow6" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==6{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping6" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch6()">切换</button></td>
@@ -351,7 +375,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>7</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow7" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==7{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping7" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch7()">切换</button></td>
@@ -359,7 +383,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>8</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow8" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==8{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping8" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch8()">切换</button></td>
@@ -367,7 +391,7 @@ $('#ping9').html(data);
                   </tr>
                   <tr>
                     <td>9</td>
-                    <td><span class="align-middle"><?php echo shell_exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?></span></td>
+                    <td><span id="nodeshow9" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo shell_exec("awk 'NR==9{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping9" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch9()">切换</button></td>
@@ -478,15 +502,16 @@ $.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2});
   </div>
   <!-- /#wrapper -->
 <script> 
-nodenf1 = "<?php echo exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>";
-nodenf2 = "<?php echo exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>";
-nodenf3 = "<?php echo exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>";
-nodenf4 = "<?php echo exec("awk 'NR==4{print}' /var/www/html/nodename.txt"); ?>";
-nodenf5 = "<?php echo exec("awk 'NR==5{print}' /var/www/html/nodename.txt"); ?>";
-nodenf6 = "<?php echo exec("awk 'NR==6{print}' /var/www/html/nodename.txt"); ?>";
-nodenf7 = "<?php echo exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?>";
-nodenf8 = "<?php echo exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?>";
-nodenf9 = "<?php echo exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?>";
+node1 = "<?php echo exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>";
+node2 = "<?php echo exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>";
+node3 = "<?php echo exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>";
+node4 = "<?php echo exec("awk 'NR==4{print}' /var/www/html/nodename.txt"); ?>";
+node5 = "<?php echo exec("awk 'NR==5{print}' /var/www/html/nodename.txt"); ?>";
+node6 = "<?php echo exec("awk 'NR==6{print}' /var/www/html/nodename.txt"); ?>";
+node7 = "<?php echo exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?>";
+node8 = "<?php echo exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?>";
+node9 = "<?php echo exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?>";
+
 
 nodenum = "nodecheck<?php echo exec('/usr/local/bin/ui-nodecheck');?>" ;
 nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
@@ -495,19 +520,42 @@ nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
-$.get("nodenfcheck.php", function(data) { 
+$.get("nodechecknf.php", function(data) { 
 $('#nodenfshow').html(data);
 });
+$.get("nodecheckbt.php", function(data) { 
+$('#nodebtshow').html(data);
+});
 
-$('#nodenfshow1').text(nodenf1);
-$('#nodenfshow2').text(nodenf2);
-$('#nodenfshow3').text(nodenf3);
-$('#nodenfshow4').text(nodenf4);
-$('#nodenfshow5').text(nodenf5);
-$('#nodenfshow6').text(nodenf6);
-$('#nodenfshow7').text(nodenf7);
-$('#nodenfshow8').text(nodenf8);
-$('#nodenfshow9').text(nodenf9);
+$('#nodenfshow1').text(node1);
+$('#nodenfshow2').text(node2);
+$('#nodenfshow3').text(node3);
+$('#nodenfshow4').text(node4);
+$('#nodenfshow5').text(node5);
+$('#nodenfshow6').text(node6);
+$('#nodenfshow7').text(node7);
+$('#nodenfshow8').text(node8);
+$('#nodenfshow9').text(node9);
+
+$('#nodebtshow1').text(node1);
+$('#nodebtshow2').text(node2);
+$('#nodebtshow3').text(node3);
+$('#nodebtshow4').text(node4);
+$('#nodebtshow5').text(node5);
+$('#nodebtshow6').text(node6);
+$('#nodebtshow7').text(node7);
+$('#nodebtshow8').text(node8);
+$('#nodebtshow9').text(node9);
+
+$('#nodeshow1').text(node1);
+$('#nodeshow2').text(node2);
+$('#nodeshow3').text(node3);
+$('#nodeshow4').text(node4);
+$('#nodeshow5').text(node5);
+$('#nodeshow6').text(node6);
+$('#nodeshow7').text(node7);
+$('#nodeshow8').text(node8);
+$('#nodeshow9').text(node9);
 
 $('#nodecheck1').html(nodestatusf);
 $('#nodecheck2').html(nodestatusf);
@@ -524,48 +572,97 @@ $("#"+nodenum).html(nodestatust);
 
 function nfswitch1 () {
 $.get("changenodenf.php", {nodenfnum:"1"});
-$('#nodenfshow').html(nodenf1);
+$('#nodenfshow').html(node1);
 };
 
 function nfswitch2 () {
 $.get("changenodenf.php", {nodenfnum:"2"});
-$('#nodenfshow').html(nodenf2);
+$('#nodenfshow').html(node2);
 };
 
 function nfswitch3 () {
 $.get("changenodenf.php", {nodenfnum:"3"});
-$('#nodenfshow').html(nodenf3);
+$('#nodenfshow').html(node3);
 };
 
 function nfswitch4 () {
 $.get("changenodenf.php", {nodenfnum:"4"});
-$('#nodenfshow').html(nodenf4);
+$('#nodenfshow').html(node4);
 };
 
 function nfswitch5 () {
 $.get("changenodenf.php", {nodenfnum:"5"});
-$('#nodenfshow').html(nodenf5);
+$('#nodenfshow').html(node5);
 };
 
 function nfswitch6 () {
 $.get("changenodenf.php", {nodenfnum:"6"});
-$('#nodenfshow').html(nodenf6);
+$('#nodenfshow').html(node6);
 };
 
 function nfswitch7 () {
 $.get("changenodenf.php", {nodenfnum:"7"});
-$('#nodenfshow').html(nodenf7);
+$('#nodenfshow').html(node7);
 };
 
 function nfswitch8 () {
 $.get("changenodenf.php", {nodenfnum:"8"});
-$('#nodenfshow').html(nodenf8);
+$('#nodenfshow').html(node8);
 };
 
 function nfswitch9 () {
 $.get("changenodenf.php", {nodenfnum:"9"});
-$('#nodenfshow').html(nodenf9);
+$('#nodenfshow').html(node9);
 };
+
+
+
+function btswitch1 () {
+$.get("changenodebt.php", {nodebtnum:"1"});
+$('#nodebtshow').html(node1);
+};
+
+function btswitch2 () {
+$.get("changenodebt.php", {nodebtnum:"2"});
+$('#nodebtshow').html(node2);
+};
+
+function btswitch3 () {
+$.get("changenodebt.php", {nodebtnum:"3"});
+$('#nodebtshow').html(node3);
+};
+
+function btswitch4 () {
+$.get("changenodebt.php", {nodebtnum:"4"});
+$('#nodebtshow').html(node4);
+};
+
+function btswitch5 () {
+$.get("changenodebt.php", {nodebtnum:"5"});
+$('#nodebtshow').html(node5);
+};
+
+function btswitch6 () {
+$.get("changenodebt.php", {nodebtnum:"6"});
+$('#nodebtshow').html(node6);
+};
+
+function btswitch7 () {
+$.get("changenodebt.php", {nodebtnum:"7"});
+$('#nodebtshow').html(node7);
+};
+
+function btswitch8 () {
+$.get("changenodebt.php", {nodebtnum:"8"});
+$('#nodebtshow').html(node8);
+};
+
+function btswitch9 () {
+$.get("changenodebt.php", {nodebtnum:"9"});
+$('#nodebtshow').html(node9);
+};
+
+
 
 function switch1 () {
 $('#nodecheck1').html(nodestatusf);
