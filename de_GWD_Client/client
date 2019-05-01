@@ -103,7 +103,7 @@ apt install -y curl git make gcc ca-certificates unzip ipset net-tools
 
 
 
-wget --no-check-certificate https://gwdbase.xyz/cnr.txt -O /usr/local/bin/chnroute.txt
+wget --no-check-certificate https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
 
 wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
 wget --no-check-certificate https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
