@@ -146,12 +146,12 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
               </div>
               <a class="card-footer text-white clearfix small z-1">
                 <span class="float-left">
-<input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border" data-size="xs">
+<input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border mt-n1" data-size="xs" onclick="switchproxy()">
                 </span>
                 <span class="float-right">
-<button type="button" class="btn btn-light btn-xs" onclick="proxyon()">ON</button>
-<span>  -  </span>
-<button type="button" class="btn btn-dark btn-xs" onclick="proxyoff()">OFF</button>
+<button type="button" class="btn btn-light btn-xs mt-n1" onclick="proxyon()">ON</button>
+&#160
+<button type="button" class="btn btn-dark btn-xs mt-n1" onclick="proxyoff()">OFF</button>
 <script>
 function proxyon () {
     $.get('proxyon.php');
@@ -164,6 +164,28 @@ function proxyoff () {
               </a>
             </div>
           </div>
+
+          <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card text-white bg-warning o-hidden h-100">
+              <div class="card-body">
+                <div class="card-body-icon">
+                  <i class="fas fa-fw fa-network-wired"></i>
+                </div>
+                <div class="mr-5">版本检测</div>
+              </div>
+              <a class="card-footer text-white clearfix small z-1">
+                <span class="float-left">
+<?php $version = file_get_contents('version.php');echo "$version （本机）";?>
+                </span>
+                <span class="float-right">
+<?php $version = file_get_contents('https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php');echo "$version （发布）";?>
+                </span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
 <script> 
 function uptime() { 
 $.get('uptime.php', function(data) { 
@@ -185,7 +207,7 @@ $('span#testgoogle').text(data);
 
 function testproxy() { 
 $.get('testproxy.php', function(data) {
-    $('#proxy-toggle').bootstrapToggle(String(data));
+$('#proxy-toggle').bootstrapToggle(String(data));
 })
 };
 
@@ -194,30 +216,8 @@ uptime();
 chlink1();
 chlink2();
 testproxy();
-}, 1000)
+}, 1000);
 </script>
-
-          <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-warning o-hidden h-100">
-              <div class="card-body">
-                <div class="card-body-icon">
-                  <i class="fas fa-fw fa-network-wired"></i>
-                </div>
-                <div class="mr-5">上级地址</div>
-              </div>
-              <a class="card-footer text-white clearfix small z-1">
-                <span class="float-left">
-<?php
-echo shell_exec("route -n |  awk 'NR==3{print $2}'")
-?>
-                </span>
-              </a>
-            </div>
-          </div>
-
-        </div>
-
-
 
         <!-- DataTables Example -->
         <div class="card mb-3">
@@ -273,7 +273,7 @@ $('#ping9').html(data);
 
 <div class="input-group mb-3">
   <div class="input-group-prepend">
-    <label class="input-group-text">Netflix固定节点</label>
+    <label class="input-group-text">Netflix 分流节点</label>
   </div>
   <div class="input-group-append">
     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="nodenfshow"></button>
