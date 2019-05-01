@@ -373,6 +373,8 @@ rm -rf ~/ui-script.zip
 rm -rf ~/ui-web
 rm -rf ~/ui-web.zip
 
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php -O /var/www/html/version.php
+
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
