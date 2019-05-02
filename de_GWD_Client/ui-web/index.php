@@ -271,13 +271,13 @@ $('#ping9').html(data);
               <table class="table table-bordered table-hover text-center text-nowrap" id="dataTable">
                 <thead>
 
-<span class="float-left mr-4">
-<div class="input-group mb-3">
+<span class="float-left">
+<div class="input-group ml-4 mb-4 mt-1">
   <div class="input-group-prepend">
-    <label class="input-group-text">Netflix 分流节点</label>
+    <label class="input-group-text">Netflix 分流</label>
   </div>
   <div class="input-group-append">
-    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"></button>
     <div class="dropdown-menu">
       <a class="dropdown-item" onclick="nfswitch1()" href="#" id="nodenfshow1"></a>
       <a class="dropdown-item" onclick="nfswitch2()" href="#" id="nodenfshow2"></a>
@@ -288,28 +288,6 @@ $('#ping9').html(data);
       <a class="dropdown-item" onclick="nfswitch7()" href="#" id="nodenfshow7"></a>
       <a class="dropdown-item" onclick="nfswitch8()" href="#" id="nodenfshow8"></a>
       <a class="dropdown-item" onclick="nfswitch9()" href="#" id="nodenfshow9"></a>
-    </div>
-  </div>
-</div>
-</span>
-
-<span class="float-left mr-4">
-<div class="input-group mb-3">
-  <div class="input-group-prepend">
-    <label class="input-group-text">BT 分流节点</label>
-  </div>
-  <div class="input-group-append">
-    <button id="nodebtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-    <div class="dropdown-menu">
-      <a class="dropdown-item" onclick="btswitch1()" href="#" id="nodebtshow1"></a>
-      <a class="dropdown-item" onclick="btswitch2()" href="#" id="nodebtshow2"></a>
-      <a class="dropdown-item" onclick="btswitch3()" href="#" id="nodebtshow3"></a>
-      <a class="dropdown-item" onclick="btswitch4()" href="#" id="nodebtshow4"></a>
-      <a class="dropdown-item" onclick="btswitch5()" href="#" id="nodebtshow5"></a>
-      <a class="dropdown-item" onclick="btswitch6()" href="#" id="nodebtshow6"></a>
-      <a class="dropdown-item" onclick="btswitch7()" href="#" id="nodebtshow7"></a>
-      <a class="dropdown-item" onclick="btswitch8()" href="#" id="nodebtshow8"></a>
-      <a class="dropdown-item" onclick="btswitch9()" href="#" id="nodebtshow9"></a>
     </div>
   </div>
 </div>
@@ -400,6 +378,46 @@ $('#ping9').html(data);
                 </tbody>
               </table>
 
+<span class="float-left">
+<div class="input-group ml-4 mt-1 mb-1">
+  <div class="input-group-prepend">
+    <label class="input-group-text">内网设备分流</label>
+  </div>
+  <div class="input-group-append">
+    <button id="nodedtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"></button>
+    <div class="dropdown-menu">
+      <a class="dropdown-item" onclick="dtswitch1()" href="#" id="nodedtshow1"></a>
+      <a class="dropdown-item" onclick="dtswitch2()" href="#" id="nodedtshow2"></a>
+      <a class="dropdown-item" onclick="dtswitch3()" href="#" id="nodedtshow3"></a>
+      <a class="dropdown-item" onclick="dtswitch4()" href="#" id="nodedtshow4"></a>
+      <a class="dropdown-item" onclick="dtswitch5()" href="#" id="nodedtshow5"></a>
+      <a class="dropdown-item" onclick="dtswitch6()" href="#" id="nodedtshow6"></a>
+      <a class="dropdown-item" onclick="dtswitch7()" href="#" id="nodedtshow7"></a>
+      <a class="dropdown-item" onclick="dtswitch8()" href="#" id="nodedtshow8"></a>
+      <a class="dropdown-item" onclick="dtswitch9()" href="#" id="nodedtshow9"></a>
+    </div>
+  </div>
+</div>
+</span>
+
+<span class="float-right">
+<div class="input-group mt-1 mr-4">
+  <div class="input-group-prepend">
+  <input id="nodedttext" type="text" class="w-auto" aria-label="" placeholder="内网设备IP" value="<?php echo shell_exec('awk "/[Rs]ource/" /etc/v2ray/config.json | cut -d"\"" -f4'); ?>">
+  </div>
+  <div class="input-group-append">
+    <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
+  </div>
+</div>
+</span>
+
+<script>
+function submitlocalip () {
+localiptxt=$('#nodedttext').val();
+$.get('changelocalip.php', {localip:localiptxt}, function(result){ location.reload(); });
+}
+</script>
+
             </div>
           </div>
         </div>
@@ -415,13 +433,15 @@ $('#ping9').html(data);
             <div class="form-row">
               <div class="col-md-6">
                 <div class="form-label-group">
-                  <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk -F'//' 'NR==14{print $2}' /etc/dns-over-https/doh-client.conf | cut -d'/' -f1"); ?>">
+                  <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/[Rh]ttps:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1
+"); ?>">
                   <label for="DoH1">DoH1</label>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-label-group">
-                  <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk -F'//' 'NR==19{print $2}' /etc/dns-over-https/doh-client.conf | cut -d'/' -f1"); ?>">
+                  <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/[Rh]ttps:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1
+"); ?>">
                   <label for="DoH2">DoH2</label>
                 </div>
               </div>
@@ -437,8 +457,7 @@ $('#ping9').html(data);
 function submitdoh () {
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2});
-alert('DoH已提交');
+$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload(); });
 }
 </script>
           </div>
@@ -523,8 +542,8 @@ $(".sidebar").toggleClass("toggled");
 $.get("nodechecknf.php", function(data) { 
 $('#nodenfshow').html(data);
 });
-$.get("nodecheckbt.php", function(data) { 
-$('#nodebtshow').html(data);
+$.get("nodecheckdt.php", function(data) { 
+$('#nodedtshow').html(data);
 });
 
 $('#nodenfshow1').text(node1);
@@ -537,15 +556,15 @@ $('#nodenfshow7').text(node7);
 $('#nodenfshow8').text(node8);
 $('#nodenfshow9').text(node9);
 
-$('#nodebtshow1').text(node1);
-$('#nodebtshow2').text(node2);
-$('#nodebtshow3').text(node3);
-$('#nodebtshow4').text(node4);
-$('#nodebtshow5').text(node5);
-$('#nodebtshow6').text(node6);
-$('#nodebtshow7').text(node7);
-$('#nodebtshow8').text(node8);
-$('#nodebtshow9').text(node9);
+$('#nodedtshow1').text(node1);
+$('#nodedtshow2').text(node2);
+$('#nodedtshow3').text(node3);
+$('#nodedtshow4').text(node4);
+$('#nodedtshow5').text(node5);
+$('#nodedtshow6').text(node6);
+$('#nodedtshow7').text(node7);
+$('#nodedtshow8').text(node8);
+$('#nodedtshow9').text(node9);
 
 $('#nodeshow1').text(node1);
 $('#nodeshow2').text(node2);
@@ -617,49 +636,49 @@ $('#nodenfshow').html(node9);
 
 
 
-function btswitch1 () {
-$.get("changenodebt.php", {nodebtnum:"1"});
-$('#nodebtshow').html(node1);
+function dtswitch1 () {
+$.get("changenodedt.php", {nodedtnum:"1"});
+$('#nodedtshow').html(node1);
 };
 
-function btswitch2 () {
-$.get("changenodebt.php", {nodebtnum:"2"});
-$('#nodebtshow').html(node2);
+function dtswitch2 () {
+$.get("changenodedt.php", {nodedtnum:"2"});
+$('#nodedtshow').html(node2);
 };
 
-function btswitch3 () {
-$.get("changenodebt.php", {nodebtnum:"3"});
-$('#nodebtshow').html(node3);
+function dtswitch3 () {
+$.get("changenodedt.php", {nodedtnum:"3"});
+$('#nodedtshow').html(node3);
 };
 
-function btswitch4 () {
-$.get("changenodebt.php", {nodebtnum:"4"});
-$('#nodebtshow').html(node4);
+function dtswitch4 () {
+$.get("changenodedt.php", {nodedtnum:"4"});
+$('#nodedtshow').html(node4);
 };
 
-function btswitch5 () {
-$.get("changenodebt.php", {nodebtnum:"5"});
-$('#nodebtshow').html(node5);
+function dtswitch5 () {
+$.get("changenodedt.php", {nodedtnum:"5"});
+$('#nodedtshow').html(node5);
 };
 
-function btswitch6 () {
-$.get("changenodebt.php", {nodebtnum:"6"});
-$('#nodebtshow').html(node6);
+function dtswitch6 () {
+$.get("changenodedt.php", {nodedtnum:"6"});
+$('#nodedtshow').html(node6);
 };
 
-function btswitch7 () {
-$.get("changenodebt.php", {nodebtnum:"7"});
-$('#nodebtshow').html(node7);
+function dtswitch7 () {
+$.get("changenodedt.php", {nodedtnum:"7"});
+$('#nodedtshow').html(node7);
 };
 
-function btswitch8 () {
-$.get("changenodebt.php", {nodebtnum:"8"});
-$('#nodebtshow').html(node8);
+function dtswitch8 () {
+$.get("changenodedt.php", {nodedtnum:"8"});
+$('#nodedtshow').html(node8);
 };
 
-function btswitch9 () {
-$.get("changenodebt.php", {nodebtnum:"9"});
-$('#nodebtshow').html(node9);
+function dtswitch9 () {
+$.get("changenodedt.php", {nodedtnum:"9"});
+$('#nodedtshow').html(node9);
 };
 
 
