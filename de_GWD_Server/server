@@ -435,15 +435,15 @@ curl -sSL https://install.pi-hole.net | bash
 echo "" > /etc/pihole/adlists.list
 pihole -g
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.0.0.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=8.8.8.8" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=8.8.4.4" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=1.1.1.1" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=1.0.0.1" >> /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
 
 
@@ -518,15 +518,15 @@ change_pihole_upstream(){
     read -p "请输入1/2:" pihole_upstream
 if [[ $pihole_upstream = 1 ]]; then
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.0.0.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=8.8.8.8" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=8.8.4.4" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=1.1.1.1" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=1.0.0.1" >> /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
 systemctl stop doh-client
 systemctl disable doh-client
 pihole restartdns
@@ -585,15 +585,15 @@ echo "" > /etc/pihole/adlists.list
 pihole -g
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.0.0.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=8.8.8.8" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=8.8.4.4" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=1.1.1.1" >> /etc/dnsmasq.d/01-pihole.conf
-echo "server=1.0.0.1" >> /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
 
 blue "-------------------"
