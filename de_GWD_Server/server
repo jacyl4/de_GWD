@@ -6,7 +6,6 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-
 install_v2ray+nginx+tls+pihole+doh(){
     green "=============================="
     green " 输入此VPS的域名(不加www开头)"
