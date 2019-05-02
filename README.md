@@ -4,7 +4,7 @@
 
 ### 服务端：
 ```
-apt-get install -y curl
+apt install -y curl
 curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server && chmod +x server && ./server
 ```
 ![Snipaste_2019-04-19_20-05-25](https://i.loli.net/2019/04/19/5cb9b9980b216.png)
