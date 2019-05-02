@@ -62,7 +62,7 @@ apt update && apt -y upgrade
 apt install -y curl git make gcc ca-certificates unzip net-tools
 
 
-cat > /usr/local/bin/updateGWD << EOF
+cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
@@ -496,9 +496,9 @@ sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
 systemctl restart pihole-FTL
 
-blue "---------------------------------------"
+blue "-------------------------------------"
 blue  "安装v2ray+nginx+tls+pihole+doh [完毕]"
-blue "---------------------------------------"
+blue "-------------------------------------"
 }
 
 
