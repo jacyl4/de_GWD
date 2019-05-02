@@ -381,12 +381,12 @@ wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/versio
 
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
-
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
 rm -rf /var/www/html/log.log
+
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
 
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
