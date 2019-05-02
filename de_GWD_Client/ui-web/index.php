@@ -403,7 +403,7 @@ $('#ping9').html(data);
 <span class="float-right">
 <div class="input-group mt-1 mr-4">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="w-auto" aria-label="" placeholder="内网设备IP" value="<?php echo shell_exec('awk "/[Rs]ource/" /etc/v2ray/config.json | cut -d"\"" -f4'); ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo shell_exec('awk "/[Rs]ource/" /etc/v2ray/config.json | cut -d"\"" -f4'); ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
