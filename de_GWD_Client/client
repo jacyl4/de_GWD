@@ -413,12 +413,11 @@ blue "----------------------"
 }
 
 updatepihole(){
-pihole -up
+curl -sSL https://install.pi-hole.net | bash
 
 cat > /etc/pihole/adlists.list << EOF
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 https://hosts.nfz.moe/127.0.0.1/full/hosts
-https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&sho%20wintro=0&mimetype=plaintext
 EOF
 pihole -g
 

@@ -577,6 +577,30 @@ blue "------------------"
 
 
 
+updatepihole(){
+curl -sSL https://install.pi-hole.net | bash
+
+echo "" > /etc/pihole/adlists.list
+
+pihole -g
+
+sed -i '/"Google (ECS)"/c\"114" => ["v4_1" => "114.114.114.114","v4_2" => "114.114.115.115"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"OpenDNS (ECS)"/c\"DNSpod" => ["v4_1" => "119.29.29.29","v4_2" => "119.28.28.28"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Level3"/c\"阿里DNS" => ["v4_1" => "223.5.5.5","v4_2" => "223.6.6.6"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Norton"/c\"PdomoDNS" => ["v4_1" => "101.132.183.99","v4_2" => "193.112.15.186"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Comodo"/c\"中科大防污染DNS" => ["v4_1" => "202.141.162.123","v4_2" => "202.141.176.93"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"DNS.WATCH"/c\"OneDNS" => ["v4_1" => "117.50.10.10","v4_2" => "117.50.20.20"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Quad9 (filtered, DNSSEC)"/c\"DNS派 电信" => ["v4_1" => "101.226.4.6","v4_2" => "218.30.118.6"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Quad9 (unfiltered, no DNSSEC)"/c\"DNS派 联通" => ["v4_1" => "123.125.81.6","v4_2" => "140.207.198.6"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Quad9 (filtered + ECS)"/c\"XsicoDNS" => ["v4_1" => "182.254.242.15"],'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i '/"Cloudflare"/c\"DNS over Https" => ["v4_1" => "127.0.0.1#5380"]'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+blue "-------------------"
+blue  "Pi-hole更新 [完毕]"
+blue "-------------------"
+}
+
+
+
 change_v2rayverify(){
     green "========="
     green "新的UUID"
@@ -737,8 +761,9 @@ fi
     green "======================================"
     echo
     green  "1. 安装v2ray+nginx+tls+pihole+doh"
-    green  "2. 切换pihole上游"
-    green  "3. 更改静态IP"
+    green  "2. 切换Pi-hole上游"
+    red  "3. 更改静态IP"
+    yellow  "8. 更新Pi-hole"
     yellow  "9. 修改本机UUID&path"
     yellow  "0. 设置v2ray上级跃点"
     yellow "CTRL+C退出"
@@ -755,6 +780,10 @@ fi
     ;;
     3)
     change_staticip
+    start_menu 
+    ;;
+    8)
+    updatepihole
     start_menu 
     ;;
     9)
