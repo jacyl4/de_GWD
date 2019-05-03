@@ -489,7 +489,7 @@ $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
 </form>
 
 <span class="float-right">
-<button id="submitdoh" type="button" class="btn btn-danger" onclick="submitstaticip()">应用</button>
+<button id="submitdoh" type="button" class="btn btn-danger" onclick="submitstaticip()">应用&重启</button>
 </span>
 
 <script>
