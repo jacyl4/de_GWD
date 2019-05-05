@@ -7,7 +7,6 @@
 <head>
 
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="de_GWD">
   <meta name="author" content="JacyL4">
@@ -85,8 +84,8 @@
     </ul>
 <script>
 function logout () {
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php"; });
-}
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+};
 </script>
 
     <div id="content-wrapper">
@@ -154,11 +153,11 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 <button type="button" class="btn btn-dark btn-xs mt-n1" onclick="proxyoff()">OFF</button>
 <script>
 function proxyon () {
-    $.get('proxyon.php');
-}
+    $.get('proxyon.php', function(result){});
+};
 function proxyoff () {
-    $.get('proxyoff.php');
-}
+    $.get('proxyoff.php', function(result){});
+};
 </script>
                 </span>
               </a>
@@ -188,27 +187,19 @@ function proxyoff () {
 
 <script> 
 function uptime() { 
-$.get('uptime.php', function(data) { 
-$('span#uptime').text(data);
-})
+$.get('uptime.php', function(data) { $('span#uptime').text(data) });
 };
 
 function chlink1() { 
-$.get('testbaidu.php', function(data) { 
-$('span#testbaidu').text(data);
-})
+$.get('testbaidu.php', function(data) { $('span#testbaidu').text(data) });
 };
 
 function chlink2() { 
-$.get('testgoogle.php', function(data) { 
-$('span#testgoogle').text(data);
-})
+$.get('testgoogle.php', function(data) { $('span#testgoogle').text(data) });
 };
 
 function testproxy() { 
-$.get('testproxy.php', function(data) {
-$('#proxy-toggle').bootstrapToggle(String(data));
-})
+$.get('testproxy.php', function(data) { $('#proxy-toggle').bootstrapToggle(String(data)) });
 };
 
 window.onload = setInterval(function() {
@@ -226,41 +217,23 @@ testproxy();
             节点列表</div><button type="button" class="btn btn-outline-success btn-sm" style="border-Radius: 0px;" onclick="pingtest()">Ping</button>
 <script>
 function pingtest () {
-$.get('ping1.php', function(data) { 
-$('#ping1').html(data);
-});
+$.get('ping1.php', function(data) { $('#ping1').html(data) });
 
-$.get("ping2.php", function(data) { 
-$('#ping2').html(data);
-});
+$.get("ping2.php", function(data) { $('#ping2').html(data) });
 
-$.get("ping3.php", function(data) { 
-$('#ping3').html(data);
-});
+$.get("ping3.php", function(data) { $('#ping3').html(data) });
 
-$.get("ping4.php", function(data) { 
-$('#ping4').html(data);
-});
+$.get("ping4.php", function(data) { $('#ping4').html(data) });
 
-$.get("ping5.php", function(data) { 
-$('#ping5').html(data);
-});
+$.get("ping5.php", function(data) { $('#ping5').html(data) });
 
-$.get("ping6.php", function(data) { 
-$('#ping6').html(data);
-});
+$.get("ping6.php", function(data) { $('#ping6').html(data) });
 
-$.get("ping7.php", function(data) { 
-$('#ping7').html(data);
-});
+$.get("ping7.php", function(data) { $('#ping7').html(data) });
 
-$.get("ping8.php", function(data) { 
-$('#ping8').html(data);
-});
+$.get("ping8.php", function(data) { $('#ping8').html(data) });
 
-$.get("ping9.php", function(data) { 
-$('#ping9').html(data);
-});
+$.get("ping9.php", function(data) { $('#ping9').html(data) });
 };
 </script>
 
@@ -457,7 +430,7 @@ $.get('changelocalip.php', {localip:localiptxt}, function(result){ location.relo
 function submitdoh () {
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload(); });
+$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
 }
 </script>
           </div>
@@ -496,7 +469,7 @@ $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
 function submitstaticip () {
 staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
-$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2});
+$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
 }
 </script>
           </div>
@@ -539,12 +512,8 @@ nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
-$.get("nodechecknf.php", function(data) { 
-$('#nodenfshow').html(data);
-});
-$.get("nodecheckdt.php", function(data) { 
-$('#nodedtshow').html(data);
-});
+$.get("nodechecknf.php", function(data) { $('#nodenfshow').html(data) });
+$.get("nodecheckdt.php", function(data) { $('#nodedtshow').html(data) });
 
 $('#nodenfshow1').text(node1);
 $('#nodenfshow2').text(node2);
@@ -590,95 +559,77 @@ $("#"+nodenum).html(nodestatust);
 };
 
 function nfswitch1 () {
-$.get("changenodenf.php", {nodenfnum:"1"});
-$('#nodenfshow').html(node1);
+$.get("changenodenf.php", {nodenfnum:"1"}, function(result){ $('#nodenfshow').html(node1) });
 };
 
 function nfswitch2 () {
-$.get("changenodenf.php", {nodenfnum:"2"});
-$('#nodenfshow').html(node2);
+$.get("changenodenf.php", {nodenfnum:"2"}, function(result){ $('#nodenfshow').html(node2) });
 };
 
 function nfswitch3 () {
-$.get("changenodenf.php", {nodenfnum:"3"});
-$('#nodenfshow').html(node3);
+$.get("changenodenf.php", {nodenfnum:"3"}, function(result){ $('#nodenfshow').html(node3) });
 };
 
 function nfswitch4 () {
-$.get("changenodenf.php", {nodenfnum:"4"});
-$('#nodenfshow').html(node4);
+$.get("changenodenf.php", {nodenfnum:"4"}, function(result){ $('#nodenfshow').html(node4) });
 };
 
 function nfswitch5 () {
-$.get("changenodenf.php", {nodenfnum:"5"});
-$('#nodenfshow').html(node5);
+$.get("changenodenf.php", {nodenfnum:"5"}, function(result){ $('#nodenfshow').html(node5) });
 };
 
 function nfswitch6 () {
-$.get("changenodenf.php", {nodenfnum:"6"});
-$('#nodenfshow').html(node6);
+$.get("changenodenf.php", {nodenfnum:"6"}, function(result){ $('#nodenfshow').html(node6) });
 };
 
 function nfswitch7 () {
-$.get("changenodenf.php", {nodenfnum:"7"});
-$('#nodenfshow').html(node7);
+$.get("changenodenf.php", {nodenfnum:"7"}, function(result){ $('#nodenfshow').html(node7) });
 };
 
 function nfswitch8 () {
-$.get("changenodenf.php", {nodenfnum:"8"});
-$('#nodenfshow').html(node8);
+$.get("changenodenf.php", {nodenfnum:"8"}, function(result){ $('#nodenfshow').html(node8) });
 };
 
 function nfswitch9 () {
-$.get("changenodenf.php", {nodenfnum:"9"});
-$('#nodenfshow').html(node9);
+$.get("changenodenf.php", {nodenfnum:"9"}, function(result){ $('#nodenfshow').html(node9) });
 };
 
 
 
 function dtswitch1 () {
-$.get("changenodedt.php", {nodedtnum:"1"});
-$('#nodedtshow').html(node1);
+$.get("changenodedt.php", {nodedtnum:"1"}, function(result){ $('#nodedtshow').html(node1) });
 };
 
 function dtswitch2 () {
-$.get("changenodedt.php", {nodedtnum:"2"});
-$('#nodedtshow').html(node2);
+$.get("changenodedt.php", {nodedtnum:"2"}, function(result){ $('#nodedtshow').html(node2) });
 };
 
 function dtswitch3 () {
-$.get("changenodedt.php", {nodedtnum:"3"});
-$('#nodedtshow').html(node3);
+$.get("changenodedt.php", {nodedtnum:"3"}, function(result){ $('#nodedtshow').html(node3) });
 };
 
 function dtswitch4 () {
-$.get("changenodedt.php", {nodedtnum:"4"});
-$('#nodedtshow').html(node4);
+$.get("changenodedt.php", {nodedtnum:"4"}, function(result){ $('#nodedtshow').html(node4) });
 };
 
 function dtswitch5 () {
-$.get("changenodedt.php", {nodedtnum:"5"});
-$('#nodedtshow').html(node5);
+$.get("changenodedt.php", {nodedtnum:"5"}, function(result){ $('#nodedtshow').html(node5) });
 };
 
 function dtswitch6 () {
-$.get("changenodedt.php", {nodedtnum:"6"});
-$('#nodedtshow').html(node6);
+$.get("changenodedt.php", {nodedtnum:"6"}, function(result){ $('#nodedtshow').html(node6) });
 };
 
 function dtswitch7 () {
-$.get("changenodedt.php", {nodedtnum:"7"});
-$('#nodedtshow').html(node7);
+$.get("changenodedt.php", {nodedtnum:"7"}, function(result){ $('#nodedtshow').html(node7) });
 };
 
 function dtswitch8 () {
-$.get("changenodedt.php", {nodedtnum:"8"});
-$('#nodedtshow').html(node8);
+$.get("changenodedt.php", {nodedtnum:"8"}, function(result){ $('#nodedtshow').html(node8) });
 };
 
 function dtswitch9 () {
-$.get("changenodedt.php", {nodedtnum:"9"});
-$('#nodedtshow').html(node9);
+$.get("changenodedt.php", {nodedtnum:"9"}, function(result){ $('#nodedtshow').html(node9) });
 };
 
 
@@ -693,8 +644,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"1"});
-$('#nodecheck1').html(nodestatust);
+    $.get("changenode.php", {nodenum:"1"}, function(result){ $('#nodecheck1').html(nodestatust) });
 };
 
 function switch2 () {
@@ -707,8 +657,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"2"});
-$('#nodecheck2').html(nodestatust);
+    $.get("changenode.php", {nodenum:"2"}, function(result){ $('#nodecheck2').html(nodestatust) });
 };
 
 function switch3 () {
@@ -721,8 +670,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"3"});
-$('#nodecheck3').html(nodestatust);
+    $.get("changenode.php", {nodenum:"3"}, function(result){ $('#nodecheck3').html(nodestatust) });
 };
 
 function switch4 () {
@@ -735,8 +683,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"4"});
-$('#nodecheck4').html(nodestatust);
+    $.get("changenode.php", {nodenum:"4"}, function(result){ $('#nodecheck4').html(nodestatust) });
 };
 
 function switch5 () {
@@ -749,8 +696,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"5"});
-$('#nodecheck5').html(nodestatust);
+    $.get("changenode.php", {nodenum:"5"}, function(result){ $('#nodecheck5').html(nodestatust) });
 };
 
 function switch6 () {
@@ -763,8 +709,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"6"});
-$('#nodecheck6').html(nodestatust);
+    $.get("changenode.php", {nodenum:"6"}, function(result){ $('#nodecheck6').html(nodestatust) });
 };
 
 function switch7 () {
@@ -777,8 +722,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"7"});
-$('#nodecheck7').html(nodestatust);
+    $.get("changenode.php", {nodenum:"7"}, function(result){ $('#nodecheck7').html(nodestatust) });
 };
 
 function switch8 () {
@@ -791,8 +735,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"8"});
-$('#nodecheck8').html(nodestatust);
+    $.get("changenode.php", {nodenum:"8"}, function(result){ $('#nodecheck8').html(nodestatust) });
 };
 
 function switch9 () {
@@ -805,8 +748,7 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"9"});
-$('#nodecheck9').html(nodestatust);
+    $.get("changenode.php", {nodenum:"9"}, function(result){ $('#nodecheck9').html(nodestatust) });
 };
 </script>
   <!-- Scroll to Top Button-->

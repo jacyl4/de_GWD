@@ -8,7 +8,6 @@
 <head>
 
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
@@ -85,7 +84,7 @@
     </ul>
 <script>
 function logout () {
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php"; });
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
 }
 </script>
 
@@ -152,7 +151,7 @@ domain.com<br>
 function submitlistbw () {
 listb=$("#listb").val();
 listw=$("#listw").val();
-$.get("listbwsave.php", {listb:listb, listw:listw});
+$.get("listbwsave.php", {listb:listb, listw:listw}, function(result){});
 alert("黑白名单已提交");
 }
 </script>
