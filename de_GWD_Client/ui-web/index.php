@@ -104,22 +104,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="row">
 
           <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-danger o-hidden h-100">
-              <div class="card-body">
-                <div class="card-body-icon">
-                  <i class="fas fa-fw fa-clock"></i>
-                </div>
-                <div class="mr-5">运行时长</div>
-              </div>
-              <a class="card-footer text-white clearfix small z-1">
-                <span id="uptime" class="float-left">
-                </span>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-primary o-hidden h-100">
+            <div class="card text-white bg-dark o-hidden h-100">
               <div class="card-body">
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-rocket"></i>
@@ -136,7 +121,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           </div>
 
           <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-success o-hidden h-100">
+            <div class="card text-white bg-dark o-hidden h-100">
               <div class="card-body">
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-toggle-on"></i>
@@ -145,12 +130,12 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
               </div>
               <a class="card-footer text-white clearfix small z-1">
                 <span class="float-left">
-<input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border mt-n1" data-size="xs" onclick="switchproxy()">
+<input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border mt-n1" data-size="xs">
                 </span>
                 <span class="float-right">
 <button type="button" class="btn btn-light btn-xs mt-n1" onclick="proxyon()">ON</button>
 &#160
-<button type="button" class="btn btn-dark btn-xs mt-n1" onclick="proxyoff()">OFF</button>
+<button type="button" class="btn btn-secondary btn-xs mt-n1" onclick="proxyoff()">OFF</button>
 <script>
 function proxyon () {
     $.get('proxyon.php', function(result){});
@@ -165,19 +150,30 @@ function proxyoff () {
           </div>
 
           <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-warning o-hidden h-100">
+            <div class="card text-white bg-dark o-hidden h-100">
               <div class="card-body">
                 <div class="card-body-icon">
-                  <i class="fas fa-fw fa-network-wired"></i>
+                  <i class="fas fa-fw fa-bell"></i>
                 </div>
                 <div class="mr-5">版本检测</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <span class="float-left">
-<?php $version = file_get_contents('version.php');echo "$version （本机）";?>
-                </span>
-                <span class="float-right">
-<?php $version = file_get_contents('https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php');echo "$version （发布）";?>
+                <h6><span id="currentver" class="badge badge-pill badge-light float-left mb-n2"></span></h6>
+                <h6><span id="remotever" class=""></span></h6>
+              </a>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card text-white bg-dark o-hidden h-100">
+              <div class="card-body">
+                <div class="card-body-icon">
+                  <i class="fas fa-fw fa-clock"></i>
+                </div>
+                <div class="mr-5">运行时长</div>
+              </div>
+              <a class="card-footer text-white clearfix small z-1">
+                <span id="uptime" class="float-right">
                 </span>
               </a>
             </div>
@@ -510,6 +506,28 @@ nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>�
 nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
 window.onload = function() {
+$.get("version.php", function(data) {
+var strver=data;
+var currentvernum = strver.split("-")[0].substring(0);
+var remotevernum = strver.split("-")[1].substring(0);
+$('#currentver').html(currentvernum+'本机');
+$('#remotever').html(remotevernum+' 发布');
+
+var vera = $.trim(currentvernum);
+var verb = $.trim(remotevernum);
+if (vera == verb) {
+$('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
+} 
+else {
+$('#remotever').addClass('badge badge-pill badge-danger float-right mt-n2');
+};
+
+});
+
+
+
+
+
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
 $.get("nodechecknf.php", function(data) { $('#nodenfshow').html(data) });
