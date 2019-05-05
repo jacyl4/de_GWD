@@ -1,4 +1,4 @@
-![de_GWD](https://i.loli.net/2019/05/06/5ccf4902d4310.png)
+![de_GWD](https://i.loli.net/2019/05/06/5ccf4c9de48fa.png)
 
 版本更新方式，就是重复运行下面客户端脚本安装一遍，重复部分会自动略过，关键部份会覆盖。
 
