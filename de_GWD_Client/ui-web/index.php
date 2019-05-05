@@ -130,16 +130,25 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
               </div>
               <a class="card-footer text-white clearfix small z-1">
                 <span class="float-left">
-<input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border mt-n1" data-size="xs">
+<input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border mt-n1 mb-n1" data-size="xs">
                 </span>
                 <span class="float-right">
-<button type="button" class="btn btn-light btn-xs" onclick="proxyon()">ON</button>
+<button type="button" class="btn btn-light btn-xs mt-n1 mb-n1" onclick="proxyon()">ON</button>
 &#160
-<button type="button" class="btn btn-secondary btn-xs" onclick="proxyoff()">OFF</button>
+<button type="button" class="btn btn-secondary btn-xs mt-n1 mb-n1" onclick="proxyoff()">OFF</button>
                 </span>
               </a>
             </div>
           </div>
+
+<script> 
+function proxyon () {
+    $.get('proxyon.php', function(result){});
+};
+function proxyoff () {
+    $.get('proxyoff.php', function(result){});
+};
+</script> 
 
           <div class="col-xl-3 col-sm-6 mb-3">
             <div class="card text-white bg-dark o-hidden h-100">
@@ -174,13 +183,6 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         </div>
 
 <script> 
-function proxyon () {
-    $.get('proxyon.php', function(result){});
-};
-function proxyoff () {
-    $.get('proxyoff.php', function(result){});
-};
-
 function uptime() { 
 $.get('uptime.php', function(data) { $('span#uptime').text(data) });
 };
