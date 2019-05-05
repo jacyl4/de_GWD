@@ -204,7 +204,7 @@ uptime();
 chlink1();
 chlink2();
 testproxy();
-}, 1000);
+}, 2400);
 </script>
 
         <!-- DataTables Example -->
