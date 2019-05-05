@@ -1,0 +1,189 @@
+{
+  "log": {
+    "access": "/var/log/v2ray/access.log",
+    "error": "/var/log/v2ray/error.log",
+    "loglevel": "error"
+  },
+  "inbounds": [
+    {
+    "protocol": "socks",
+    "port": 9897,
+    "settings": {
+      "auth": "noauth",
+      "network": "tcp,udp"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+        }
+    },
+    {
+    "tag": "proxyin",
+    "protocol": "dokodemo-door",
+    "port": 9896,
+    "listen": "127.0.0.1",
+    "settings": {
+      "auth": "noauth",
+      "network": "tcp,udp",
+      "followRedirect": true
+      },
+    "sniffing": {
+      "enabled": true,
+      "destOverride": ["http", "tls"]
+      },
+    "streamSettings": {
+      "sockopt": {
+        "mark": 255,
+        "tproxy": "tproxy"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+    "tag": "proxyout",
+    "mux": { "enabled": true, "concurrency": 8 },
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+        {
+        "address": "xxxx.ooo",
+        "port": 443,
+        "users": [
+          {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "level": 1,
+          "alterId": 64,
+          "security": "AES-128-GCM"
+          }
+        ]
+        }
+      ]
+      },
+    "streamSettings": {
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+      "serverName": "xxxx.ooo",
+        "allowInsecure": false
+        },
+      "wsSettings": {
+        "path": "/000000",
+        "headers": {
+          "Host": "xxxx.ooo"
+          }
+        },
+      "sockopt": {
+        "mark": 255
+        }
+      }
+    },
+    {
+    "tag": "netflix",
+    "mux": { "enabled": true, "concurrency": 8 },
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+        {
+        "address": "xxxx.ooo",
+        "port": 443,
+        "users": [
+          {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "level": 0,
+          "alterId": 64,
+          "security": "AES-128-GCM"
+          }
+        ]
+        }
+      ]
+      },
+    "streamSettings": {
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+      "serverName": "xxxx.ooo",
+        "allowInsecure": false
+        },
+      "wsSettings": {
+        "path": "/000000",
+        "headers": {
+          "Host": "xxxx.ooo"
+          }
+        },
+      "sockopt": {
+        "mark": 255
+        }
+      }
+    },
+    {
+    "tag": "diverttraffic",
+    "mux": { "enabled": true, "concurrency": 112 },
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+        {
+        "address": "xxxx.ooo",
+        "port": 443,
+        "users": [
+          {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "level": 0,
+          "alterId": 64,
+          "security": "AES-128-GCM"
+          }
+        ]
+        }
+      ]
+      },
+    "streamSettings": {
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+      "serverName": "xxxx.ooo",
+        "allowInsecure": false
+        },
+      "wsSettings": {
+        "path": "/000000",
+        "headers": {
+          "Host": "xxxx.ooo"
+          }
+        },
+      "sockopt": {
+        "mark": 255
+        }
+      }
+    }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules":[
+      {
+        "type": "field",
+        "domain": [
+          "domain:netflix.com",
+          "domain:nflxvideo.net",
+          "domain:nflxso.net",
+          "domain:nflximg.net",
+          "domain:netflix.net",
+          "domain:netflixdnstest0.com",
+          "domain:netflixdnstest1.com",
+          "domain:netflixdnstest2.com",
+          "domain:netflixdnstest3.com",
+          "domain:netflixdnstest4.com",
+          "domain:netflixdnstest5.com",
+          "domain:netflixdnstest6.com",
+          "domain:netflixdnstest7.com",
+          "domain:netflixdnstest8.com",
+          "domain:netflixdnstest9.com"
+        ],
+        "outboundTag": "netflix"
+      },
+      {
+        "type": "field",
+        "source": [ "10.10.10.10" ],
+        "outboundTag": "diverttraffic"
+      }
+    ]
+  }
+}

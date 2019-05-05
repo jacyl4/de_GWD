@@ -134,7 +134,7 @@ elif [[ $architecture = "amd64" ]]; then
     rm -rf ~/v2amd64
     rm -rf ~/v2amd64.zip
 fi
-
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
 
 sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
