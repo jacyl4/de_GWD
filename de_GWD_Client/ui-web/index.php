@@ -519,7 +519,7 @@ if (vera == verb) {
 $('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
 } 
 else {
-$('#remotever').addClass('badge badge-pill badge-danger float-right mt-n2');
+$('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
 };
 
 });
