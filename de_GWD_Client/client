@@ -106,7 +106,6 @@ apt update && apt -y upgrade
 apt install -y curl git make gcc ca-certificates unzip ipset net-tools
 
 
-
 wget --no-check-certificate https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
 
 wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
@@ -321,7 +320,9 @@ sed -i '/"Quad9 (filtered + ECS)"/c\"XsicoDNS" => ["v4_1" => "182.254.242.15"],'
 sed -i '/"Cloudflare"/c\"DNS over Https" => ["v4_1" => "127.0.0.1#5380"]'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=127.0.0.1#5380' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_9=127.0.0.1#5380' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_8=202.141.176.93' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=202.141.162.123' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
@@ -335,6 +336,8 @@ sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=202.141.162.123' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=202.141.176.93' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
@@ -435,7 +438,9 @@ sed -i '/"Quad9 (filtered + ECS)"/c\"XsicoDNS" => ["v4_1" => "182.254.242.15"],'
 sed -i '/"Cloudflare"/c\"DNS over Https" => ["v4_1" => "127.0.0.1#5380"]'  /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=127.0.0.1#5380' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_9=127.0.0.1#5380' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_8=202.141.176.93' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=202.141.162.123' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
@@ -449,6 +454,8 @@ sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=202.141.162.123' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=202.141.176.93' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
 
