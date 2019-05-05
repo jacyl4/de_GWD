@@ -133,17 +133,9 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 <input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border mt-n1" data-size="xs">
                 </span>
                 <span class="float-right">
-<button type="button" class="btn btn-light btn-xs mt-n1" onclick="proxyon()">ON</button>
+<button type="button" class="btn btn-light btn-xs" onclick="proxyon()">ON</button>
 &#160
-<button type="button" class="btn btn-secondary btn-xs mt-n1" onclick="proxyoff()">OFF</button>
-<script>
-function proxyon () {
-    $.get('proxyon.php', function(result){});
-};
-function proxyoff () {
-    $.get('proxyoff.php', function(result){});
-};
-</script>
+<button type="button" class="btn btn-secondary btn-xs" onclick="proxyoff()">OFF</button>
                 </span>
               </a>
             </div>
@@ -182,6 +174,13 @@ function proxyoff () {
         </div>
 
 <script> 
+function proxyon () {
+    $.get('proxyon.php', function(result){});
+};
+function proxyoff () {
+    $.get('proxyoff.php', function(result){});
+};
+
 function uptime() { 
 $.get('uptime.php', function(data) { $('span#uptime').text(data) });
 };
