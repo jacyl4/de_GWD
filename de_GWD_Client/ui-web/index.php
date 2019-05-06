@@ -143,10 +143,10 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 
 <script> 
 function proxyon () {
-    $.get('proxyon.php', function(result){});
+    $.get('proxyon.php');
 };
 function proxyoff () {
-    $.get('proxyoff.php', function(result){});
+    $.get('proxyoff.php');
 };
 </script> 
 
@@ -204,7 +204,7 @@ uptime();
 chlink1();
 chlink2();
 testproxy();
-}, 2400);
+}, 1800);
 </script>
 
         <!-- DataTables Example -->
@@ -215,21 +215,13 @@ testproxy();
 <script>
 function pingtest () {
 $.get('ping1.php', function(data) { $('#ping1').html(data) });
-
 $.get("ping2.php", function(data) { $('#ping2').html(data) });
-
 $.get("ping3.php", function(data) { $('#ping3').html(data) });
-
 $.get("ping4.php", function(data) { $('#ping4').html(data) });
-
 $.get("ping5.php", function(data) { $('#ping5').html(data) });
-
 $.get("ping6.php", function(data) { $('#ping6').html(data) });
-
 $.get("ping7.php", function(data) { $('#ping7').html(data) });
-
 $.get("ping8.php", function(data) { $('#ping8').html(data) });
-
 $.get("ping9.php", function(data) { $('#ping9').html(data) });
 };
 </script>
@@ -427,7 +419,7 @@ $.get('changelocalip.php', {localip:localiptxt}, function(result){ location.relo
 function submitdoh () {
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2});
+$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
 }
 </script>
           </div>
