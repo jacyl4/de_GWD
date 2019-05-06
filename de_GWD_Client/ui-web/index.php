@@ -427,7 +427,7 @@ $.get('changelocalip.php', {localip:localiptxt}, function(result){ location.relo
 function submitdoh () {
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
+$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2});
 }
 </script>
           </div>
@@ -466,7 +466,7 @@ $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
 function submitstaticip () {
 staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
-$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
+$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2});
 }
 </script>
           </div>
