@@ -118,7 +118,7 @@
     },
     {
     "tag": "diverttraffic",
-    "mux": { "enabled": true, "concurrency": 18 },
+    "mux": { "enabled": true, "concurrency": 100 },
     "protocol": "vmess",
     "settings": {
       "vnext": [
