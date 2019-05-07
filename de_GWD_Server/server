@@ -436,7 +436,7 @@ systemctl daemon-reload
 systemctl restart nginx
 systemctl enable nginx
 
-
+if [[ ! -f "/usr/local/bin/pihole" ]]; then
 curl -sSL https://install.pi-hole.net | bash
 
 echo "" > /etc/pihole/adlists.list
@@ -456,6 +456,7 @@ pihole restartdns
 systemctl stop lighttpd
 systemctl disable lighttpd
 systemctl mask lighttpd
+fi
 
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
@@ -471,6 +472,7 @@ EOF
 source ~/.profile
 fi
 
+if [[ ! -f "/usr/local/bin/doh-server" ]]; then
 rm -rf ~/dns-over-https
 rm -rf /usr/local/bin/doh-client
 rm -rf /usr/local/bin/doh-server
@@ -489,7 +491,7 @@ systemctl mask systemd-resolved
 systemctl restart doh-server
 systemctl enable doh-server
 rm -rf ~/dns-over-https
-
+fi
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
