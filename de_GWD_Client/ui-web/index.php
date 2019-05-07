@@ -143,10 +143,10 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 
 <script> 
 function proxyon () {
-    $.get('proxyon.php');
+    $.get('proxyon.php', function(result){});
 };
 function proxyoff () {
-    $.get('proxyoff.php');
+    $.get('proxyoff.php', function(result){});
 };
 </script> 
 
@@ -184,15 +184,15 @@ function proxyoff () {
 
 <script> 
 function uptime() { 
-$.get('uptime.php', function(data) { $('span#uptime').text(data) });
+$.get('uptime.php', function(data) { $('#uptime').text(data) });
 };
 
 function chlink1() { 
-$.get('testbaidu.php', function(data) { $('span#testbaidu').text(data) });
+$.get('testbaidu.php', function(data) { $('#testbaidu').text(data) });
 };
 
 function chlink2() { 
-$.get('testgoogle.php', function(data) { $('span#testgoogle').text(data) });
+$.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
 };
 
 function testproxy() { 
@@ -211,18 +211,32 @@ testproxy();
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-stream"></i>
-            节点列表</div><button type="button" class="btn btn-outline-success btn-sm" style="border-Radius: 0px;" onclick="pingtest()">Ping</button>
+            节点列表
+         <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="shownodedt()">启用内网设备分流</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="hidenodedt()">禁用内网设备分流</button>
+          </span>
+          </div>
+            <button type="button" class="btn btn-outline-success btn-sm" style="border-Radius: 0px;" onclick="pingtest()">Ping</button>
 <script>
 function pingtest () {
-$.get('ping1.php', function(data) { $('#ping1').html(data) });
-$.get("ping2.php", function(data) { $('#ping2').html(data) });
-$.get("ping3.php", function(data) { $('#ping3').html(data) });
-$.get("ping4.php", function(data) { $('#ping4').html(data) });
-$.get("ping5.php", function(data) { $('#ping5').html(data) });
-$.get("ping6.php", function(data) { $('#ping6').html(data) });
-$.get("ping7.php", function(data) { $('#ping7').html(data) });
-$.get("ping8.php", function(data) { $('#ping8').html(data) });
-$.get("ping9.php", function(data) { $('#ping9').html(data) });
+$.get('ping1.php', function(data) { $('#ping1').text(data) });
+$.get("ping2.php", function(data) { $('#ping2').text(data) });
+$.get("ping3.php", function(data) { $('#ping3').text(data) });
+$.get("ping4.php", function(data) { $('#ping4').text(data) });
+$.get("ping5.php", function(data) { $('#ping5').text(data) });
+$.get("ping6.php", function(data) { $('#ping6').text(data) });
+$.get("ping7.php", function(data) { $('#ping7').text(data) });
+$.get("ping8.php", function(data) { $('#ping8').text(data) });
+$.get("ping9.php", function(data) { $('#ping9').text(data) });
+};
+
+function shownodedt(){
+$.get('nodedtswitch.php', {nodedtswitch:"nodedtshow"}, function(result){ location.reload(); });
+};
+
+function hidenodedt(){
+$.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ location.reload(); });
 };
 </script>
 
@@ -340,6 +354,7 @@ $.get("ping9.php", function(data) { $('#ping9').html(data) });
                 </tbody>
               </table>
 
+<div id="shnodedt" style="display:none">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -372,11 +387,12 @@ $.get("ping9.php", function(data) { $('#ping9').html(data) });
   </div>
 </div>
 </span>
+</div>
 
 <script>
 function submitlocalip () {
 localiptxt=$('#nodedttext').val();
-$.get('changelocalip.php', {localip:localiptxt}, function(result){ location.reload(); });
+$.get('changelocalip.php', {localip:localiptxt}, function(result){ });
 }
 </script>
 
@@ -458,7 +474,7 @@ $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
 function submitstaticip () {
 staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
-$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2});
+$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
 }
 </script>
           </div>
@@ -483,10 +499,6 @@ $.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2});
   </div>
   <!-- /#wrapper -->
 <script> 
-nodenum = "nodecheck<?php echo exec('/usr/local/bin/ui-nodecheck');?>" ;
-nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
-nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
-
 node1 = "<?php echo exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>";
 node2 = "<?php echo exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>";
 node3 = "<?php echo exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>";
@@ -496,6 +508,10 @@ node6 = "<?php echo exec("awk 'NR==6{print}' /var/www/html/nodename.txt"); ?>";
 node7 = "<?php echo exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?>";
 node8 = "<?php echo exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?>";
 node9 = "<?php echo exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?>";
+
+nodenum = "nodecheck<?php echo exec('/usr/local/bin/ui-nodecheck');?>" ;
+nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
+nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
@@ -564,28 +580,27 @@ $('#nodecheck9').html(nodestatusf);
 $("#"+nodenum).html(nodestatust);
 };
 
-function nfswitch1 () { $.get("changenodenf.php", {nodenfnum:"1"}); $('#nodenfshow').html(node1)};
-function nfswitch2 () { $.get("changenodenf.php", {nodenfnum:"2"}); $('#nodenfshow').html(node2)};
-function nfswitch3 () { $.get("changenodenf.php", {nodenfnum:"3"}); $('#nodenfshow').html(node3)};
-function nfswitch4 () { $.get("changenodenf.php", {nodenfnum:"4"}); $('#nodenfshow').html(node4)};
-function nfswitch5 () { $.get("changenodenf.php", {nodenfnum:"5"}); $('#nodenfshow').html(node5)};
-function nfswitch6 () { $.get("changenodenf.php", {nodenfnum:"6"}); $('#nodenfshow').html(node6)};
-function nfswitch7 () { $.get("changenodenf.php", {nodenfnum:"7"}); $('#nodenfshow').html(node7)};
-function nfswitch8 () { $.get("changenodenf.php", {nodenfnum:"8"}); $('#nodenfshow').html(node8)};
-function nfswitch9 () { $.get("changenodenf.php", {nodenfnum:"9"}); $('#nodenfshow').html(node9)};
+function nfswitch1 () {$('#nodenfshow').html(node1); $.get("changenodenf.php", {nodenfnum:"1"}, function(result){ })};
+function nfswitch2 () {$('#nodenfshow').html(node2); $.get("changenodenf.php", {nodenfnum:"2"}, function(result){ })};
+function nfswitch3 () {$('#nodenfshow').html(node3); $.get("changenodenf.php", {nodenfnum:"3"}, function(result){ })};
+function nfswitch4 () {$('#nodenfshow').html(node4); $.get("changenodenf.php", {nodenfnum:"4"}, function(result){ })};
+function nfswitch5 () {$('#nodenfshow').html(node5); $.get("changenodenf.php", {nodenfnum:"5"}, function(result){ })};
+function nfswitch6 () {$('#nodenfshow').html(node6); $.get("changenodenf.php", {nodenfnum:"6"}, function(result){ })};
+function nfswitch7 () {$('#nodenfshow').html(node7); $.get("changenodenf.php", {nodenfnum:"7"}, function(result){ })};
+function nfswitch8 () {$('#nodenfshow').html(node8); $.get("changenodenf.php", {nodenfnum:"8"}, function(result){ })};
+function nfswitch9 () {$('#nodenfshow').html(node9); $.get("changenodenf.php", {nodenfnum:"9"}, function(result){ })};
 
-function dtswitch1 () { $.get("changenodedt.php", {nodedtnum:"1"}); $('#nodedtshow').html(node1)};
-function dtswitch2 () { $.get("changenodedt.php", {nodedtnum:"2"}); $('#nodedtshow').html(node2)};
-function dtswitch3 () { $.get("changenodedt.php", {nodedtnum:"3"}); $('#nodedtshow').html(node3)};
-function dtswitch4 () { $.get("changenodedt.php", {nodedtnum:"4"}); $('#nodedtshow').html(node4)};
-function dtswitch5 () { $.get("changenodedt.php", {nodedtnum:"5"}); $('#nodedtshow').html(node5)};
-function dtswitch6 () { $.get("changenodedt.php", {nodedtnum:"6"}); $('#nodedtshow').html(node6)};
-function dtswitch7 () { $.get("changenodedt.php", {nodedtnum:"7"}); $('#nodedtshow').html(node7)};
-function dtswitch8 () { $.get("changenodedt.php", {nodedtnum:"8"}); $('#nodedtshow').html(node8)};
-function dtswitch9 () { $.get("changenodedt.php", {nodedtnum:"9"}); $('#nodedtshow').html(node9)};
+function dtswitch1 () {$('#nodedtshow').html(node1); $.get("changenodedt.php", {nodedtnum:"1"}, function(result){ })};
+function dtswitch2 () {$('#nodedtshow').html(node2); $.get("changenodedt.php", {nodedtnum:"2"}, function(result){ })};
+function dtswitch3 () {$('#nodedtshow').html(node3); $.get("changenodedt.php", {nodedtnum:"3"}, function(result){ })};
+function dtswitch4 () {$('#nodedtshow').html(node4); $.get("changenodedt.php", {nodedtnum:"4"}, function(result){ })};
+function dtswitch5 () {$('#nodedtshow').html(node5); $.get("changenodedt.php", {nodedtnum:"5"}, function(result){ })};
+function dtswitch6 () {$('#nodedtshow').html(node6); $.get("changenodedt.php", {nodedtnum:"6"}, function(result){ })};
+function dtswitch7 () {$('#nodedtshow').html(node7); $.get("changenodedt.php", {nodedtnum:"7"}, function(result){ })};
+function dtswitch8 () {$('#nodedtshow').html(node8); $.get("changenodedt.php", {nodedtnum:"8"}, function(result){ })};
+function dtswitch9 () {$('#nodedtshow').html(node9); $.get("changenodedt.php", {nodedtnum:"9"}, function(result){ })};
 
 function switch1 () {
-$('#nodecheck1').html(nodestatusf);
 $('#nodecheck2').html(nodestatusf);
 $('#nodecheck3').html(nodestatusf);
 $('#nodecheck4').html(nodestatusf);
@@ -594,12 +609,11 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"1"});
 $('#nodecheck1').html(nodestatust);
+$.get("changenode.php", {nodenum:"1"}, function(result){});
 };
 function switch2 () {
 $('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
 $('#nodecheck3').html(nodestatusf);
 $('#nodecheck4').html(nodestatusf);
 $('#nodecheck5').html(nodestatusf);
@@ -607,47 +621,44 @@ $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"2"});
 $('#nodecheck2').html(nodestatust);
+$.get("changenode.php", {nodenum:"2"}, function(result){});
 };
 function switch3 () {
 $('#nodecheck1').html(nodestatusf);
 $('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
 $('#nodecheck4').html(nodestatusf);
 $('#nodecheck5').html(nodestatusf);
 $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"3"});
 $('#nodecheck3').html(nodestatust);
+$.get("changenode.php", {nodenum:"3"}, function(result){});
 };
 function switch4 () {
 $('#nodecheck1').html(nodestatusf);
 $('#nodecheck2').html(nodestatusf);
 $('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
 $('#nodecheck5').html(nodestatusf);
 $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"4"});
 $('#nodecheck4').html(nodestatust);
+$.get("changenode.php", {nodenum:"4"}, function(result){});
 };
 function switch5 () {
 $('#nodecheck1').html(nodestatusf);
 $('#nodecheck2').html(nodestatusf);
 $('#nodecheck3').html(nodestatusf);
 $('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
 $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"5"});
 $('#nodecheck5').html(nodestatust);
+$.get("changenode.php", {nodenum:"5"}, function(result){});
 };
 function switch6 () {
 $('#nodecheck1').html(nodestatusf);
@@ -655,12 +666,11 @@ $('#nodecheck2').html(nodestatusf);
 $('#nodecheck3').html(nodestatusf);
 $('#nodecheck4').html(nodestatusf);
 $('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"6"});
 $('#nodecheck6').html(nodestatust);
+$.get("changenode.php", {nodenum:"6"}, function(result){});
 };
 function switch7 () {
 $('#nodecheck1').html(nodestatusf);
@@ -669,11 +679,10 @@ $('#nodecheck3').html(nodestatusf);
 $('#nodecheck4').html(nodestatusf);
 $('#nodecheck5').html(nodestatusf);
 $('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"7"});
 $('#nodecheck7').html(nodestatust);
+$.get("changenode.php", {nodenum:"7"}, function(result){});
 };
 function switch8 () {
 $('#nodecheck1').html(nodestatusf);
@@ -683,10 +692,9 @@ $('#nodecheck4').html(nodestatusf);
 $('#nodecheck5').html(nodestatusf);
 $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"8"});
 $('#nodecheck8').html(nodestatust);
+$.get("changenode.php", {nodenum:"8"}, function(result){});
 };
 function switch9 () {
 $('#nodecheck1').html(nodestatusf);
@@ -697,9 +705,8 @@ $('#nodecheck5').html(nodestatusf);
 $('#nodecheck6').html(nodestatusf);
 $('#nodecheck7').html(nodestatusf);
 $('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-    $.get("changenode.php", {nodenum:"9"});
 $('#nodecheck9').html(nodestatust);
+$.get("changenode.php", {nodenum:"9"}, function(result){});
 };
 </script>
   <!-- Scroll to Top Button-->
