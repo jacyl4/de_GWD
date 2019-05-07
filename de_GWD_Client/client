@@ -255,7 +255,7 @@ cat > /etc/v2ray/config.json << EOF
     }
   ],
   "routing": {
-    "domainStrategy": "AsIs",
+    "domainStrategy": "IPIfNonMatch",
     "rules":[
       {
         "type": "field",
