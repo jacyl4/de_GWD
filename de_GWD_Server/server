@@ -230,7 +230,7 @@ server {
   # OCSP Stapling ---
   ssl_stapling on;
   ssl_stapling_verify on;
-  ssl_trusted_certificate /var/www/ssl/bundle.pem;
+  ssl_trusted_certificate /var/www/ssl/$vpsdomain.key.pem;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
@@ -362,7 +362,7 @@ server {
   # OCSP Stapling ---
   ssl_stapling on;
   ssl_stapling_verify on;
-  ssl_trusted_certificate /usr/local/nginx/conf/ssl/$nginxdomain/bundle.pem;
+  ssl_trusted_certificate /usr/local/nginx/conf/ssl/$nginxdomain/fullchain.cer;
   ssl_stapling_file /usr/local/nginx/conf/ssl/$nginxdomain/ocsp.resp;
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
@@ -457,6 +457,10 @@ systemctl stop lighttpd
 systemctl disable lighttpd
 systemctl mask lighttpd
 
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
@@ -483,9 +487,6 @@ make && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 systemctl restart doh-server
 systemctl enable doh-server
 rm -rf ~/dns-over-https
