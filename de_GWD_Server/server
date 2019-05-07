@@ -206,6 +206,9 @@ server {
   index index.html index.htm index.nginx-debian.html;
 
   access_log off;
+  error_log off;
+
+  return 301 https://\$server_name\$request_uri;
 }
 
 server {
@@ -262,6 +265,7 @@ location $v2path {
   proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;
+  error_log off;
 }
 EOF
 
@@ -306,6 +310,7 @@ server {
   server_name $vpsdomain www.$vpsdomain;
   root  /home/wwwroot/$nginxdomain;
   index index.html index.htm index.php default.html default.htm default.php;
+  return 301 https://\$server_name\$request_uri;
 
   include rewrite/none.conf;
   #error_page   404   /404.html;
@@ -335,6 +340,7 @@ server {
   }
 
   access_log off;
+  error_log off;
 }
 
 server {
@@ -419,6 +425,7 @@ location $v2path {
   proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;
+  error_log off;
 }
 EOF
 fi
@@ -446,6 +453,9 @@ sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
 
+systemctl stop lighttpd
+systemctl disable lighttpd
+systemctl mask lighttpd
 
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
@@ -473,6 +483,7 @@ make && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
+systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-server
@@ -595,6 +606,10 @@ sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
+
+systemctl stop lighttpd
+systemctl disable lighttpd
+systemctl mask lighttpd
 
 blue "-------------------"
 blue  "Pi-hole更新 [完毕]"
