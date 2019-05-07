@@ -403,6 +403,7 @@ curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /usr/local/bin/updateGWD
+
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
     crontab -l > now.cron
     echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron

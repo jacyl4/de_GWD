@@ -69,19 +69,16 @@ hwclock -w
 
 bash <(curl -L -s https://install.direct/go.sh)
 EOF
-
 chmod +x /usr/local/bin/updateGWD
 
+
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-
 crontab -l > now.cron
-
 echo '0 0 * * * /usr/local/bin/updateGWD' >> now.cron
-
 crontab now.cron
 fi
-
 rm -rf now.cron
+
 
 /usr/local/bin/updateGWD
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
