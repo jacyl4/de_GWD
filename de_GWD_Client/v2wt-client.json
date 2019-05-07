@@ -18,7 +18,6 @@
         }
     },
     {
-    "tag": "proxyin",
     "protocol": "dokodemo-door",
     "port": 9896,
     "listen": "127.0.0.1",
@@ -41,8 +40,7 @@
   ],
   "outbounds": [
     {
-    "tag": "proxyout",
-    "mux": { "enabled": true, "concurrency": 8 },
+    "mux": { "enabled": true },
     "protocol": "vmess",
     "settings": {
       "vnext": [
@@ -80,7 +78,6 @@
     },
     {
     "tag": "netflix",
-    "mux": { "enabled": true, "concurrency": 8 },
     "protocol": "vmess",
     "settings": {
       "vnext": [
