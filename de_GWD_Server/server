@@ -114,7 +114,7 @@ http {
   types_hash_max_size 2048;
 
   gzip              on;
-  gzip_comp_level   4;
+  gzip_comp_level   2;
   gzip_min_length   1000;
   gzip_buffers      16 8k;
   gzip_http_version 1.0;
