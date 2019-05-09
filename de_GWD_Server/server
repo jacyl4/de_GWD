@@ -127,7 +127,7 @@ http {
                 application/x-javascript
                 application/json
                 application/xml
-                application/xml+rss
+                application/xml+rss;
   gzip_proxied      any;
   gzip_vary         on;
   gzip_disable      "MSIE [1-6]\.";
