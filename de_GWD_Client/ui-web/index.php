@@ -7,6 +7,7 @@
 <head>
 
   <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="de_GWD">
   <meta name="author" content="JacyL4">
@@ -354,7 +355,7 @@ $.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ locatio
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:none">
+<div id="shnodedt" style="display:block">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
