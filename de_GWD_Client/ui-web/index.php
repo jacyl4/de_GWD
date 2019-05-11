@@ -355,7 +355,7 @@ $.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ locatio
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:block">
+<div id="shnodedt" style="display:none">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
