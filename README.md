@@ -1,6 +1,6 @@
 ![de_GWD](https://i.loli.net/2019/05/08/5cd295163b73a.png)
 
-[稍详细些的安装说明](https://jacyl4.github.io/post/debian-gateway/)
+[详情](https://jacyl4.github.io/post/debian-gateway/)
 
 版本更新方式，就是重复运行下面客户端脚本安装一遍，重复部分会自动略过，关键部份会覆盖。
 
