@@ -84,12 +84,12 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 fi
 
 
+export LANGUAGE=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+locale-gen en_US.UTF-8
 
-cat > /etc/locale.gen << EOF
-en_US.UTF-8 UTF-8
-zh_CN.UTF-8 UTF-8
-EOF
-locale-gen
+
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.163.com/debian/ stretch main non-free contrib
