@@ -20,6 +20,7 @@
     {
     "protocol": "dokodemo-door",
     "port": 9896,
+    "listen": "127.0.0.1",
     "settings": {
       "auth": "noauth",
       "network": "tcp,udp",
