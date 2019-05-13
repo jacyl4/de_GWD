@@ -96,10 +96,12 @@ cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes auto;
 
+    worker_rlimit_nofile 65535;
+
 events {
     use epoll;
-    worker_connections  8192;
     multi_accept on;
+    worker_connections  65535;
 }
 
 http {
@@ -126,7 +128,8 @@ http {
                 application/x-javascript
                 application/json
                 application/xml
-                application/xml+rss;
+                application/xml+rss
+                image/svg+xml/javascript;
   gzip_proxied      any;
   gzip_vary         on;
   gzip_disable      "MSIE [1-6]\.";
