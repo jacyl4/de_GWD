@@ -145,6 +145,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 <script> 
 function proxyon () {
     $.get('proxyon.php', function(result){});
+    alert ('正在重启代理，耐心等待');
 };
 function proxyoff () {
     $.get('proxyoff.php', function(result){});
