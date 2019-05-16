@@ -411,7 +411,7 @@ if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/u
     crontab now.cron
 fi
 rm -rf now.cron
-
+rm -rf /var/www/html/donate.php
 blue "---------------------------------"
 blue "安装v2ray+route+doh+pihole [完毕]"
 blue "---------------------------------"

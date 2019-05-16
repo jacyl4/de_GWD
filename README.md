@@ -16,15 +16,3 @@ curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/ser
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/client -O ~/client && chmod +x client && ./client
 ```
 ![Snipaste_2019-04-26_03-45-20](https://i.loli.net/2019/04/26/5cc20e5e9d6f7.png)
-
-### Changelog:
-
-5-2   BT分流功能不完美 已取消，另更新内网设备分流功能。 
-
-4-30 修复Firefox下不能登录的问题。
-
-4-26 更新netflix节点固定功能。
-
-4-14 更新web ui。
-
-2-26 始。
