@@ -84,22 +84,16 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 fi
 
 
-export LANGUAGE=en_US.UTF-8
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-locale-gen en_US.UTF-8
-
-
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian/ stretch main
-deb-src http://mirrors.163.com/debian/ stretch main
-
-deb http://security.debian.org/debian-security stretch/updates main
-deb-src http://security.debian.org/debian-security stretch/updates main
-
-deb http://mirrors.163.com/debian/ stretch-updates main
-deb-src http://mirrors.163.com/debian/ stretch-updates main
+deb http://mirrors.163.com/debian/ stretch main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
 apt update && apt -y upgrade
