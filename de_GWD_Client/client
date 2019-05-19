@@ -40,6 +40,12 @@ install_gatewayrouter(){
     green "==============="
     read v2path
 
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_TYPE=en_US.UTF-8
+export LANG=en_US.UTF-8
+locale-gen en_US.UTF-8
+
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
 sed -i '/fs.file-max/d' /etc/sysctl.conf
