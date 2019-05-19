@@ -249,6 +249,8 @@ systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
+ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')"
+
 route del default
 route add default gw $gatewayaddr $ethernetnum
 
@@ -302,8 +304,6 @@ fi
 if [[ ! -f "/usr/local/bin/pihole" ]]; then
 curl -sSL https://install.pi-hole.net | bash
 
-sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
-
 cat > /etc/pihole/adlists.list << EOF
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 https://hosts.nfz.moe/127.0.0.1/full/hosts
@@ -311,16 +311,16 @@ EOF
 pihole -g
 
 cat > /etc/pihole/dns-servers.conf << EOF
--114DNS;114.114.114.114;114.114.115.115
--DNSpod;119.29.29.29;119.28.28.28
--阿里DNS;223.5.5.5;223.6.6.6
--中科大防污染DNS;202.141.162.123;202.141.176.93
--PdomoDNS;101.132.183.99;47.98.124.222
--OneDNS;117.50.10.10;117.50.20.20
--DNS派_电信;101.226.4.6;218.30.118.6
--DNS派_联通;123.125.81.6;140.207.198.6
--XsicoDNS;182.254.242.15
--DNS_over_Https;127.0.0.1#5380
+ 114DNS;114.114.114.114;114.114.115.115
+ DNSpod;119.29.29.29;119.28.28.28
+ 阿里DNS;223.5.5.5;223.6.6.6
+ 中科大防污染DNS;202.141.162.123;202.141.176.93
+ PdomoDNS;101.132.183.99;47.98.124.222
+ OneDNS;117.50.10.10;117.50.20.20
+ DNS派_电信;101.226.4.6;218.30.118.6
+ DNS派_联通;123.125.81.6;140.207.198.6
+ XsicoDNS;182.254.242.15
+ DNS_over_Https;127.0.0.1#5380
 EOF
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
@@ -351,7 +351,6 @@ sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
 
-ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')"
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
@@ -385,6 +384,8 @@ rm -rf ~/ui-script
 rm -rf ~/ui-script.zip
 rm -rf ~/ui-web
 rm -rf ~/ui-web.zip
+
+sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php -O /var/www/html/version.php
 
@@ -436,16 +437,16 @@ EOF
 pihole -g
 
 cat > /etc/pihole/dns-servers.conf << EOF
--114DNS;114.114.114.114;114.114.115.115
--DNSpod;119.29.29.29;119.28.28.28
--阿里DNS;223.5.5.5;223.6.6.6
--中科大防污染DNS;202.141.162.123;202.141.176.93
--PdomoDNS;101.132.183.99;47.98.124.222
--OneDNS;117.50.10.10;117.50.20.20
--DNS派_电信;101.226.4.6;218.30.118.6
--DNS派_联通;123.125.81.6;140.207.198.6
--XsicoDNS;182.254.242.15
--DNS_over_Https;127.0.0.1#5380
+ 114DNS;114.114.114.114;114.114.115.115
+ DNSpod;119.29.29.29;119.28.28.28
+ 阿里DNS;223.5.5.5;223.6.6.6
+ 中科大防污染DNS;202.141.162.123;202.141.176.93
+ PdomoDNS;101.132.183.99;47.98.124.222
+ OneDNS;117.50.10.10;117.50.20.20
+ DNS派_电信;101.226.4.6;218.30.118.6
+ DNS派_联通;123.125.81.6;140.207.198.6
+ XsicoDNS;182.254.242.15
+ DNS_over_Https;127.0.0.1#5380
 EOF
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
