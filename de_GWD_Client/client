@@ -255,7 +255,8 @@ systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
-ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')"
+
+ethernetnum=$(awk '/[Ri]face/' /etc/network/interfaces | awk 'NR==2{print$2}')
 
 route del default
 route add default gw $gatewayaddr $ethernetnum
@@ -372,7 +373,9 @@ iface $ethernetnum inet static
 EOF
 
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+
 pihole restartdns
+
 systemctl restart pihole-FTL
 
 
