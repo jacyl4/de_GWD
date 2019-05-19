@@ -427,6 +427,7 @@ blue "----------------------"
 }
 
 updatepihole(){
+rm -rf /var/www/html/admin
 curl -sSL https://install.pi-hole.net | bash
 
 cat > /etc/pihole/adlists.list << EOF
