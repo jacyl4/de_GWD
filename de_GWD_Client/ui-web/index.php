@@ -449,7 +449,7 @@ $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
             <div class="form-row">
               <div class="col-md-6">
                 <div class="form-label-group">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo shell_exec("ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1"); ?>">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo shell_exec("awk '/[RI]PV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
                   <label for="localip">本机地址</label>
                 </div>
               </div>
