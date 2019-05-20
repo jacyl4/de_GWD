@@ -256,12 +256,6 @@ systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
 
-ethernetnum=$(awk '/[Ri]face/' /etc/network/interfaces | awk 'NR==2{print$2}')
-
-route del default
-route add default gw $gatewayaddr $ethernetnum
-
-
 source ~/.profile
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
     if [[ $architecture = "arm64" ]]; then
@@ -358,6 +352,10 @@ sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
 
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+
+route del default
+route add default gw $gatewayaddr $ethernetnum
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
