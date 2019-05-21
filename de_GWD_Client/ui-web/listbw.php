@@ -126,6 +126,18 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             <textarea id="listw" class="form-control" aria-label="listw" rows="11"><?php echo shell_exec("cat /var/www/html/listw.txt"); ?></textarea>
           </div>
           </div>
+
+          <div class="form-group">
+          <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">
+            内网设备白名单<br>
+          （走国内线路）<br>
+            </span>
+          </div>
+            <textarea id="listwlan" class="form-control" aria-label="listwlan" rows="11"><?php echo shell_exec("cat /var/www/html/listwlan.txt"); ?></textarea>
+          </div>
+          </div>
 </form>
 
 <span class="float-left text-secondary">
@@ -147,7 +159,8 @@ domain.com<br>
 function submitlistbw () {
 listb=$("#listb").val();
 listw=$("#listw").val();
-$.get("listbwsave.php", {listb:listb, listw:listw}, function(result){});
+listwlan=$("#listwlan").val();
+$.get("listbwsave.php", {listb:listb, listw:listw, listwlan:listwlan}, function(result){});
 alert("黑白名单已提交");
 }
 </script>

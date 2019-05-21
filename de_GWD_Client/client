@@ -168,9 +168,9 @@ for iplanip in $lanip; do
   ipset add lanip $iplanip
 done
 
-ipset -N chnroute hash:net maxelem 65536
-for ipchnroute in $(cat '/usr/local/bin/chnroute.txt'); do
-  ipset add chnroute $ipchnroute
+ipset -N listwlan hash:net maxelem 65536
+for iplistwlan in $(cat '/var/www/html/listwlan.txt'); do
+  ipset add listwlan $iplistwlan
 done
 
 ipset -N listw hash:net maxelem 65536
@@ -180,6 +180,12 @@ done
 for ipdomain in $(cat '/var/www/html/domain.txt'); do
   ipset add listw $ipdomain
 done
+
+ipset -N chnroute hash:net maxelem 65536
+for ipchnroute in $(cat '/usr/local/bin/chnroute.txt'); do
+  ipset add chnroute $ipchnroute
+done
+
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
@@ -197,8 +203,9 @@ iptables -t nat    -A PREROUTING -j V2RAYPRE
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 iptables -t mangle -A V2PROXY -j MARK --set-mark 0x9
 
