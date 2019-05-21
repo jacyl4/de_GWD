@@ -451,6 +451,7 @@ blue "----------------------"
 
 updatepihole(){
 installpihole
+pihole restartdns
 blue "-------------------"
 blue  "Pi-hole更新 [完毕]"
 blue "-------------------"
