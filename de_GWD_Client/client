@@ -427,6 +427,8 @@ if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/u
 fi
 rm -rf now.cron
 
+sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
+
 echo -e "$v2servn" > /var/www/html/nodename.txt
 echo -e "$v2servn" > /var/www/html/domain.txt
 echo -e "$uuidnum" > /var/www/html/uuid.txt
@@ -468,7 +470,9 @@ sed -i '/"id":/c\"id": "'$(awk 'NR==1{print}' /var/www/html/uuid.txt)'",'  /etc/
 sed -i '/"serverName":/c\"serverName": "'$(awk 'NR==1{print}' /var/www/html/domain.txt)'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$(awk 'NR==1{print}' /var/www/html/path.txt)'",'  /etc/v2ray/config.json
 sed -i '/"Host":/c\"Host": "'$(awk 'NR==1{print}' /var/www/html/domain.txt)'"'  /etc/v2ray/config.json
+systemctl daemon-reload
 systemctl restart v2ray
+systemctl enable v2ray
 
 installiptablesproxy
 
