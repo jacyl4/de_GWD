@@ -58,20 +58,16 @@ net.ipv4.tcp_fin_timeout=30
 EOF
 sysctl -p
 
-
 apt update && apt -y upgrade
 apt install -y curl git make gcc ca-certificates unzip net-tools
-
 
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
-
-bash <(curl -L -s https://install.direct/go.sh)
 EOF
 chmod +x /usr/local/bin/updateGWD
-
+/usr/local/bin/updateGWD
 
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
 crontab -l > now.cron
@@ -81,7 +77,7 @@ fi
 rm -rf now.cron
 
 
-/usr/local/bin/updateGWD
+bash <(curl -L -s https://install.direct/go.sh)
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
@@ -435,7 +431,8 @@ systemctl enable nginx
 
 if [[ ! -f "/usr/local/bin/pihole" ]]; then
 curl -sSL https://install.pi-hole.net | bash
-
+systemctl disable lighttpd
+systemctl mask lighttpd
 echo "" > /etc/pihole/adlists.list
 pihole -g
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
@@ -449,12 +446,9 @@ sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
-
-systemctl stop lighttpd
-systemctl disable lighttpd
-systemctl mask lighttpd
 fi
 
+source ~/.profile
 if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
@@ -482,7 +476,6 @@ make && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
-systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-server
@@ -512,7 +505,6 @@ iface $ethernetnum inet static
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
-systemctl restart pihole-FTL
 
 blue "-------------------------------------"
 blue  "安装v2ray+nginx+tls+pihole+doh [完毕]"
