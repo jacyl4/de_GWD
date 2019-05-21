@@ -483,7 +483,7 @@ systemctl restart doh-client
 systemctl enable doh-client
 
 postinstall
-
+sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
 blue "------------------"
 blue  "de_GWD更新 [完毕]"
 blue "------------------"
