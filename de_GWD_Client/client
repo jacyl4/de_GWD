@@ -13,33 +13,7 @@ case $(uname -m) in
 esac
 
 
-
-install_gatewayrouter(){
-    green "==============="
-    green "本机地址"
-    green "==============="
-    read localaddr
-
-    green "==============="
-    green "上级路由地址"
-    green "==============="
-    read gatewayaddr
-
-    green "==============="
-    green "v2ray节点域名"
-    green "==============="
-    read v2servn
-    
-    green "==============="
-    green "输入v2ray uuid"
-    green "==============="
-    read uuidnum
-
-    green "==============="
-    green "输入path"
-    green "==============="
-    read v2path
-
+function preinstall(){
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LC_TYPE=en_US.UTF-8
@@ -89,7 +63,6 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
 
-
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.163.com/debian/ stretch main non-free contrib
@@ -102,15 +75,19 @@ deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contri
 deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
-apt update && apt -y upgrade
+apt -y update && apt -y upgrade
 apt install -y curl git make gcc ca-certificates unzip ipset net-tools
+}
 
 
+function predownload(){
 wget --no-check-certificate https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
-
 wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
 wget --no-check-certificate https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
+}
 
+
+function installv2ray(){
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
@@ -133,21 +110,13 @@ elif [[ $architecture = "amd64" ]]; then
     rm -rf ~/v2amd64
     rm -rf ~/v2amd64.zip
 fi
-
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
-
-sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
-sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
 chmod +x /usr/bin/v2ray/v2ray
 chmod +x /usr/bin/v2ray/v2ctl
-systemctl restart v2ray
-systemctl enable v2ray
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/v2wt-client.json -O /etc/v2ray/config.json
+}
 
 
-
+function installiptablesproxy(){
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 
@@ -261,31 +230,11 @@ EOF
 systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
+}
 
 
+function installdoh(){
 source ~/.profile
-if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
-    if [[ $architecture = "arm64" ]]; then
-        wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
-        tar -xvf go1.11.5.linux-arm64.tar.gz
-        rm -rf ~/go1.11.5.linux-arm64.tar.gz
-    elif [[ $architecture = "amd64" ]]; then
-        wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
-        tar -xvf go1.11.5.linux-amd64.tar.gz
-        rm -rf ~/go1.11.5.linux-amd64.tar.gz
-    fi
-mv go /usr/local
-mkdir -p ~/gopath
-cat >> ~/.profile << "EOF"
-export GOROOT=/usr/local/go
-export GOPATH=~/gopath
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-source ~/.profile
-fi
-
-
-if [[ ! -f "/usr/local/bin/doh-client" ]]; then
 rm -rf ~/dns-over-https
 rm -rf /usr/local/bin/doh-client
 rm -rf /usr/local/bin/doh-server
@@ -297,147 +246,10 @@ cd dns-over-https
 make && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
-doh_upstream='url = "https:\/\/'$v2servn'\/dq"'
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
-systemctl restart doh-client
-systemctl enable doh-client
-rm -rf ~/dns-over-https
-fi
-
-
-
-if [[ ! -f "/usr/local/bin/pihole" ]]; then
-curl -sSL https://install.pi-hole.net | bash
-
-cat > /etc/pihole/adlists.list << EOF
-https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-https://hosts.nfz.moe/127.0.0.1/full/hosts
-EOF
-pihole -g
-
-cat > /etc/pihole/dns-servers.conf << EOF
- 114DNS;114.114.114.114;114.114.115.115
- DNSpod;119.29.29.29;119.28.28.28
- 阿里DNS;223.5.5.5;223.6.6.6
- 中科大防污染DNS;202.141.162.123;202.141.176.93
- PdomoDNS;101.132.183.99;47.98.124.222
- OneDNS;117.50.10.10;117.50.20.20
- DNS派_电信;101.226.4.6;218.30.118.6
- DNS派_联通;123.125.81.6;140.207.198.6
- XsicoDNS;182.254.242.15
- DNS_over_Https;127.0.0.1#5380
-EOF
-
-sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_9=127.0.0.1#5380' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_8=202.141.176.93' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=202.141.162.123' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=119.29.29.29' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=114.114.115.115' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=114.114.114.114' /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=114.114.114.114' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=114.114.115.115' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=202.141.162.123' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=202.141.176.93' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
-fi
-
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-
-sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
-sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
-sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
-
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
-
-route del default
-route add default gw $gatewayaddr $ethernetnum
-
-cat > /etc/network/interfaces << EOF
-source /etc/network/interfaces.d/*
-
-auto lo
-iface lo inet loopback
-
-auto $ethernetnum
-iface $ethernetnum inet static
-  address $localaddr
-  netmask 255.255.255.0
-  gateway $gatewayaddr
-EOF
-
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-
-pihole restartdns
-
-systemctl restart pihole-FTL
-
-
-unzip ui-script.zip
-
-unzip ui-web.zip
-
-mv -f ~/ui-script/* /usr/local/bin
-
-chmod +x /usr/local/bin/*
-
-mv -f ~/ui-web/* /var/www/html
-
-rm -rf ~/ui-script
-rm -rf ~/ui-script.zip
-rm -rf ~/ui-web
-rm -rf ~/ui-web.zip
-
-sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
-
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php -O /var/www/html/version.php
-
-cat > /usr/local/bin/updateGWD << "EOF"
-#!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
-rm -rf /var/www/html/log.log
-
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
-
-bash <(curl -L -s https://install.direct/go.sh)
-EOF
-chmod +x /usr/local/bin/updateGWD
-
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-    crontab -l > now.cron
-    echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
-    crontab now.cron
-fi
-rm -rf now.cron
-rm -rf /var/www/html/donate.php
-blue "---------------------------------"
-blue "安装v2ray+route+doh+pihole [完毕]"
-blue "---------------------------------"
 }
 
 
-
-change_piholeadmin(){
-pihole -a -p
-blue "----------------------"
-blue  "更改Pi-hole密码 [完毕]"
-blue "----------------------"
-}
-
-updatepihole(){
+function installpihole(){
 rm -rf /var/www/html/admin
 
 echo "稍稍等待。。。"
@@ -483,12 +295,198 @@ sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=202.141.162.123' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=202.141.176.93' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
-pihole restartdns
+}
 
+
+function postinstall(){
+cat > /usr/local/bin/updateGWD << "EOF"
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+rm -rf /var/www/html/log.log
+
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
+
+bash <(curl -L -s https://install.direct/go.sh)
+EOF
+chmod +x /usr/local/bin/updateGWD
+
+rm -rf /usr/local/bin/ui-*
+unzip ui-script.zip
+unzip ui-web.zip
+mv -f ~/ui-script/* /usr/local/bin
+chmod +x /usr/local/bin/*
+mv -f ~/ui-web/* /var/www/html
+rm -rf ~/dns-over-https
+rm -rf ~/ui-script
+rm -rf ~/ui-script.zip
+rm -rf ~/ui-web
+rm -rf ~/ui-web.zip
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php -O /var/www/html/version.php
+}
+
+
+
+installgwd(){
+    green "==============="
+    green "本机地址"
+    green "==============="
+    read localaddr
+
+    green "==============="
+    green "上级路由地址"
+    green "==============="
+    read gatewayaddr
+
+    green "==============="
+    green "v2ray节点域名"
+    green "==============="
+    read v2servn
+    
+    green "==============="
+    green "输入v2ray uuid"
+    green "==============="
+    read uuidnum
+
+    green "==============="
+    green "输入path"
+    green "==============="
+    read v2path
+
+preinstall
+
+predownload
+
+installv2ray
+sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
+systemctl restart v2ray
+systemctl enable v2ray
+
+installiptablesproxy
+
+if [[ $architecture = "arm64" ]]; then
+    wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
+    tar -xvf go1.11.5.linux-arm64.tar.gz
+    rm -rf ~/go1.11.5.linux-arm64.tar.gz
+elif [[ $architecture = "amd64" ]]; then
+    wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+    tar -xvf go1.11.5.linux-amd64.tar.gz
+    rm -rf ~/go1.11.5.linux-amd64.tar.gz
+fi
+mv go /usr/local
+mkdir -p ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+
+installdoh
+doh_upstream='url = "https:\/\/'$v2servn'\/dq"'
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+systemctl restart doh-client
+systemctl enable doh-client
+
+installpihole
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
+sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
+sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
+sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+route del default
+route add default gw $gatewayaddr $ethernetnum
+cat > /etc/network/interfaces << EOF
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+EOF
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+pihole restartdns
+systemctl restart pihole-FTL
+
+postinstall
+if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
+    crontab -l > now.cron
+    echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
+    crontab now.cron
+fi
+rm -rf now.cron
+
+echo -e "$v2servn" > /var/www/html/nodename.txt
+echo -e "$v2servn" > /var/www/html/domain.txt
+echo -e "$uuidnum" > /var/www/html/uuid.txt
+echo -e "$v2path" > /var/www/html/path.txt
+chown -R www-data:www-data /var/www/html/nodename.txt
+chown -R www-data:www-data /var/www/html/domain.txt
+chown -R www-data:www-data /var/www/html/uuid.txt
+chown -R www-data:www-data /var/www/html/path.txt
+blue "---------------------------------"
+blue "安装v2ray+route+doh+pihole [完毕]"
+blue "---------------------------------"
+}
+
+
+change_piholeadmin(){
+pihole -a -p
+blue "----------------------"
+blue  "更改Pi-hole密码 [完毕]"
+blue "----------------------"
+}
+
+
+updatepihole(){
+installpihole
 blue "-------------------"
 blue  "Pi-hole更新 [完毕]"
 blue "-------------------"
 }
+
+
+updategwd(){
+preinstall
+
+predownload
+
+installv2ray
+sed -i '/"address":/c\"address": "'$(awk 'NR==1{print}' /var/www/html/domain.txt)'",'  /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$(awk 'NR==1{print}' /var/www/html/uuid.txt)'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$(awk 'NR==1{print}' /var/www/html/domain.txt)'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$(awk 'NR==1{print}' /var/www/html/path.txt)'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$(awk 'NR==1{print}' /var/www/html/domain.txt)'"'  /etc/v2ray/config.json
+systemctl restart v2ray
+
+installiptablesproxy
+
+installdoh
+doh_upstream='url = "https:\/\/'$(awk 'NR==1{print}' /var/www/html/domain.txt)'\/dq"'
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+systemctl daemon-reload
+systemctl restart doh-client
+systemctl enable doh-client
+
+postinstall
+
+blue "------------------"
+blue  "de_GWD更新 [完毕]"
+blue "------------------"
+}
+
 
 start_menu(){
 statusgod=$(green "✔︎") 
@@ -540,12 +538,13 @@ fi
     green  "1. 安装v2ray+route+doh+pihole"
     green  "2. 更改Pi-hole密码"
     green  "3. 更新Pi-hole"
+    green  "0. 更新de_GWD"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
     case "$num" in
     1)
-    install_gatewayrouter
+    installgwd
     start_menu
     ;;
     2)
@@ -554,6 +553,10 @@ fi
     ;;
     3)
     updatepihole
+    start_menu 
+    ;;
+    0)
+    updategwd
     start_menu 
     ;;
     *)
