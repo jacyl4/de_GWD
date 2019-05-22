@@ -1,0 +1,12 @@
+#!/bin/bash
+doh1="$(awk 'NR==1{print}' /var/www/html/doh.txt)"
+doh2="$(awk 'NR==2{print}' /var/www/html/doh.txt)"
+
+doh_upstream1='url = "https:\/\/'$doh1'\/dq"'
+doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
+
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
+
+systemctl restart doh-client
+rm -rf /var/www/html/doh.txt

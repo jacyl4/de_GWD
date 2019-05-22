@@ -6,22 +6,7 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-install_v2ray+nginx+tls+pihole+doh(){
-    green "=============================="
-    green " 输入此VPS的域名(不加www开头)"
-    green "=============================="
-    read vpsdomain
-
-    green "============"
-    green " v2ray uuid"
-    green "============"
-    read uuidnum
-
-    green "========================="
-    green " v2ray path (格式：/xxxx)"
-    green "========================="
-    read v2path
-
+function preinstall(){
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LC_TYPE=en_US.UTF-8
@@ -60,43 +45,26 @@ sysctl -p
 
 apt update && apt -y upgrade
 apt install -y curl git make gcc ca-certificates unzip net-tools
-
-cat > /usr/local/bin/updateGWD << "EOF"
-#!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-EOF
-chmod +x /usr/local/bin/updateGWD
-/usr/local/bin/updateGWD
-
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-crontab -l > now.cron
-echo '0 0 * * * /usr/local/bin/updateGWD' >> now.cron
-crontab now.cron
-fi
-rm -rf now.cron
+}
 
 
+function installv2ray(){
+mkdir -p /etc/v2ray
+mkdir -p /usr/bin/v2ray
+mkdir -p /var/log/v2ray
 wget --no-check-certificate https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
 unzip v2amd64.zip
 mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
 mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
 mv -f ~/v2amd64/v2ray.service /etc/systemd/system/v2ray.service
-chmod +x /usr/bin/v2ray/v2ray
-chmod +x /usr/bin/v2ray/v2ctl
 rm -rf ~/v2amd64
 rm -rf ~/v2amd64.zip
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
-sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
-sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
-systemctl restart v2ray
-systemctl enable v2ray
+chmod +x /usr/bin/v2ray/v2ray
+chmod +x /usr/bin/v2ray/v2ctl
+}
 
 
-if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
+function installnginxpure(){
 apt install -y nginx socat
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
@@ -121,7 +89,7 @@ http {
   types_hash_max_size 2048;
 
   gzip              on;
-  gzip_comp_level   4;
+  gzip_comp_level   6;
   gzip_min_length   1000;
   gzip_buffers      16 8k;
   gzip_http_version 1.0;
@@ -270,8 +238,10 @@ location $v2path {
   error_log off;
 }
 EOF
+}
 
-elif [[ -d "/usr/local/nginx" ]]; then
+
+function installnginxlnmp(){
 nginxdomain="$(cd /home/wwwroot && ls | grep $vpsdomain)"
 
 cat > /usr/local/nginx/conf/ssl/$nginxdomain/update_ocsp_cache << EOF
@@ -429,16 +399,12 @@ location $v2path {
   error_log off;
 }
 EOF
-fi
+}
 
-mkdir -p /etc/systemd/system/nginx.service.d
-printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
-systemctl daemon-reload
-systemctl restart nginx
-systemctl enable nginx
 
-if [[ ! -f "/usr/local/bin/pihole" ]]; then
+function installpihole(){
 curl -sSL https://install.pi-hole.net | bash
+systemctl stop lighttpd
 systemctl disable lighttpd
 systemctl mask lighttpd
 echo "" > /etc/pihole/adlists.list
@@ -454,24 +420,11 @@ sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
-fi
+}
 
-source ~/.profile
-if [[ "$(go version | awk '{print $3}')" != "go1.11.5" ]]; then
-wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
-tar -xvf go1.11.5.linux-amd64.tar.gz
-rm -rf ~/go1.11.5.linux-amd64.tar.gz
-mv go /usr/local
-mkdir ~/gopath
-cat >> ~/.profile << "EOF"
-export GOROOT=/usr/local/go
-export GOPATH=~/gopath
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-source ~/.profile
-fi
 
-if [[ ! -f "/usr/local/bin/doh-server" ]]; then
+function installdoh(){
+source ~/.profile
 rm -rf ~/dns-over-https
 rm -rf /usr/local/bin/doh-client
 rm -rf /usr/local/bin/doh-server
@@ -484,12 +437,90 @@ make && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
+systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl restart doh-server
 systemctl enable doh-server
 rm -rf ~/dns-over-https
+}
+
+
+function postinstall(){
+cat > /usr/local/bin/updateGWD << "EOF"
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+EOF
+chmod +x /usr/local/bin/updateGWD
+/usr/local/bin/updateGWD
+
+if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
+crontab -l > now.cron
+echo '0 0 * * * /usr/local/bin/updateGWD' >> now.cron
+crontab now.cron
 fi
+rm -rf now.cron
+}
+
+
+
+installgwd(){
+    green "=============================="
+    green " 输入此VPS的域名(不加www开头)"
+    green "=============================="
+    read vpsdomain
+
+    green "=============================="
+    green " v2ray uuid"
+    green "=============================="
+    read uuidnum
+
+    green "=============================="
+    green " v2ray path (格式：/xxxx)"
+    green "=============================="
+    read v2path
+
+preinstall
+
+installv2ray
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
+sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
+systemctl restart v2ray
+systemctl enable v2ray
+
+
+if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
+installnginxpure
+
+elif [[ -d "/usr/local/nginx" ]]; then
+installnginxlnmp
+fi
+
+mkdir -p /etc/systemd/system/nginx.service.d
+printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
+systemctl daemon-reload
+systemctl restart nginx
+systemctl enable nginx
+
+installpihole
+
+wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+tar -xvf go1.11.5.linux-amd64.tar.gz
+rm -rf ~/go1.11.5.linux-amd64.tar.gz
+mv go /usr/local
+mkdir ~/gopath
+cat >> ~/.profile << "EOF"
+export GOROOT=/usr/local/go
+export GOPATH=~/gopath
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+
+installdoh
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
@@ -514,9 +545,11 @@ EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
 
-blue "-------------------------------------"
-blue  "安装v2ray+nginx+tls+pihole+doh [完毕]"
-blue "-------------------------------------"
+postinstall
+
+blue "------------------"
+blue  "安装de_GWD [完毕]"
+blue "------------------"
 }
 
 
@@ -584,64 +617,6 @@ sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /et
 blue "------------------"
 blue  "更改静态IP [完毕]"
 blue "------------------"
-}
-
-
-
-updatepihole(){
-curl -sSL https://install.pi-hole.net | bash
-
-echo "" > /etc/pihole/adlists.list
-pihole -g
-
-sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
-pihole restartdns
-
-systemctl stop lighttpd
-systemctl disable lighttpd
-systemctl mask lighttpd
-
-blue "-------------------"
-blue  "Pi-hole更新 [完毕]"
-blue "-------------------"
-}
-
-
-
-change_v2rayverify(){
-    green "========="
-    green "新的UUID"
-    green "========="
-    read v2raynuuid
-
-    green "========="
-    green "新的path"
-    green "========="
-    read v2raynpath
-
-if [[ -d "/etc/nginx" ]]; then
-sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
-elif [[ -d "/usr/local/nginx" ]]; then
-nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
-sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
-fi
-systemctl restart nginx
-
-sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$v2raynuuid'"'",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2raynpath'"'"/" /etc/v2ray/config.json
-systemctl restart v2ray
-blue "--------------------------"
-blue  "修改本机UUID&path [完毕]"
-blue "--------------------------"
 }
 
 
@@ -729,6 +704,63 @@ fi
 
 
 
+change_v2rayverify(){
+    green "========="
+    green "新的UUID"
+    green "========="
+    read v2raynuuid
+
+    green "========="
+    green "新的path"
+    green "========="
+    read v2raynpath
+
+if [[ -d "/etc/nginx" ]]; then
+sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
+elif [[ -d "/usr/local/nginx" ]]; then
+nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
+sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
+fi
+systemctl restart nginx
+
+sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$v2raynuuid'"'",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2raynpath'"'"/" /etc/v2ray/config.json
+systemctl restart v2ray
+blue "-------------------------"
+blue  "修改本机UUID&path [完毕]"
+blue "-------------------------"
+}
+
+
+
+updatepihole(){
+installpihole
+
+blue "-------------------"
+blue  "Pi-hole更新 [完毕]"
+blue "-------------------"
+}
+
+
+
+updategwd(){
+uuidnum=$(awk "/[Ri]d/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+
+installv2ray
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
+sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
+systemctl restart v2ray
+systemctl enable v2ray
+
+installdoh
+
+postinstall
+}
+
+
+
 start_menu(){
 statusgod=$(green "✔︎") 
 statusbad=$(red "✘")
@@ -768,48 +800,54 @@ else
     echo "[$statusbad] pihole    进程出错"
 fi
 
-    green "======================================"
-    green "              服务端                   "
-    green "介绍：一键安装v2ray+ws+tls+doh+pihole   "
-    green "系统：仅测于Debian9                     "
-    green "作者：jacyl4                           "
-    green "网站：jacyl4.github.io                 "
-    green "======================================"
+    green "========================"
+    green "         服务端          "
+    green "介绍：一键安装de_GWD      "
+    green "系统：仅测于Debian9       "
+    green "作者：jacyl4             "
+    green "网站：jacyl4.github.io   "
+    green "========================"
     echo
-    green  "1. 安装v2ray+nginx+tls+pihole+doh"
+    green  "1. 安装de_GWD"
     green  "2. 切换Pi-hole上游"
-    red  "7. 更改静态IP"
-    yellow  "8. 更新Pi-hole"
-    yellow  "9. 设置v2ray上级跃点"
-    yellow  "0. 修改本机UUID&path"
-    yellow "CTRL+C退出"
+    red    "6. 更改静态IP"
+    yellow "7. 设置v2ray上级跃点"
+    yellow "8. 修改本机UUID&path"
+    yellow "9. 更新Pi-hole"
+    yellow "0. 更新de_GWD"
+    red    "CTRL+C退出"
     echo
     read -p "请输入数字:" num
     case "$num" in
     1)
-    install_v2ray+nginx+tls+pihole+doh
+    installgwd
     start_menu
     ;;
     2)
     change_pihole_upstream
     start_menu
     ;;
-    7)
+    6)
     change_staticip
     start_menu 
     ;;
-    8)
-    updatepihole
-    start_menu 
-    ;;
-    9)
+    7)
     modify_upstream
     start_menu 
     ;;
-    0)
+    8)
     change_v2rayverify
     start_menu 
-    ;;    *)
+    ;;
+    9)
+    updatepihole
+    start_menu 
+    ;;
+    0)
+    updategwd
+    start_menu 
+    ;;
+    *)
     clear
     red "请输入正确数字"
     sleep 1s

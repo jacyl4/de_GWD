@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')/=" /var/www/html/domain.txt

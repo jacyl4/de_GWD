@@ -1,0 +1,13 @@
+#!/bin/bash
+v2servn="$(awk 'NR==1{print}' /var/www/html/nodedtpre.txt)"
+uuidnum="$(awk 'NR==2{print}' /var/www/html/nodedtpre.txt)"
+v2path="$(awk 'NR==3{print}' /var/www/html/nodedtpre.txt)"
+
+sed -i "$(sed -n -e '/"address":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"address"'": "'"'$v2servn'"'",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"serverName":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"serverName"'": "'"'$v2servn'"'",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"Host":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"Host"'": "'"'$v2servn'"'"/" /etc/v2ray/config.json
+
+sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"id"'": "'"'$uuidnum'"'",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"path"'": "'"\'$v2path'"'",/" /etc/v2ray/config.json
+systemctl restart v2ray
+rm -rf /var/www/html/nodedtpre.txt

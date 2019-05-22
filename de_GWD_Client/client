@@ -166,7 +166,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 1,
           "alterId": 64,
-          "security": "auto"
+          "security": "aes-128-gcm"
           }
         ]
         }
@@ -203,7 +203,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 0,
           "alterId": 64,
-          "security": "auto"
+          "security": "aes-128-gcm"
           }
         ]
         }
@@ -578,9 +578,9 @@ chown -R www-data:www-data /var/www/html/nodename.txt
 chown -R www-data:www-data /var/www/html/domain.txt
 chown -R www-data:www-data /var/www/html/uuid.txt
 chown -R www-data:www-data /var/www/html/path.txt
-blue "---------------------------------"
-blue "安装v2ray+route+doh+pihole [完毕]"
-blue "---------------------------------"
+blue "------------------"
+blue  "安装de_GWD [完毕]"
+blue "------------------"
 }
 
 
@@ -596,7 +596,7 @@ updatepihole(){
 installpihole
 pihole restartdns
 blue "-------------------"
-blue  "Pi-hole更新 [完毕]"
+blue  "更新Pi-hole [完毕]"
 blue "-------------------"
 }
 
@@ -629,7 +629,7 @@ systemctl enable doh-client
 postinstall
 
 blue "------------------"
-blue  "de_GWD更新 [完毕]"
+blue  "更新de_GWD [完毕]"
 blue "------------------"
 }
 
@@ -673,19 +673,19 @@ else
     echo "[$statusbad] pihole    进程出错"
 fi
 
-    green "==========================================="
-    green "              客户端                        "
-    green "介绍：一键安装v2ray+doh+pihole+透明路由网关    "
-    green "系统：仅测于Debian9 (amd64 & arm64)        "
-    green "作者：jacyl4                                "
-    green "网站：jacyl4.github.io                      "
-    green "==========================================="
+    green "===================================="
+    green "              客户端                 "
+    green "介绍：一键安装de_GWD                  "
+    green "系统：仅测于Debian9 (amd64 & arm64)   "
+    green "作者：jacyl4                         "
+    green "网站：jacyl4.github.io               "
+    green "===================================="
     echo
-    green  "1. 安装v2ray+route+doh+pihole"
+    green  "1. 安装de_GWD"
     green  "2. 更改Pi-hole密码"
-    green  "3. 更新Pi-hole"
-    green  "0. 更新de_GWD"
-    yellow "CTRL+C退出"
+    yellow "9. 更新Pi-hole"
+    yellow "0. 更新de_GWD"
+    red    "CTRL+C退出"
     echo
     read -p "请输入数字:" num
     case "$num" in
@@ -697,7 +697,7 @@ fi
     change_piholeadmin
     start_menu 
     ;;
-    3)
+    9)
     updatepihole
     start_menu 
     ;;

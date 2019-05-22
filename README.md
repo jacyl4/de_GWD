@@ -11,6 +11,6 @@ curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/ser
 
 ### 客户端：
 ```
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/client -O ~/client && chmod +x client && ./client
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/client -O ~/client && chmod +x ~/client && ~/client
 ```
 ![客户端](https://i.loli.net/2019/05/21/5ce3cf2519a1866460.png)
