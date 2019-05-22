@@ -77,7 +77,15 @@ fi
 rm -rf now.cron
 
 
-bash <(curl -L -s https://install.direct/go.sh)
+wget --no-check-certificate https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
+unzip v2amd64.zip
+mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
+mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
+mv -f ~/v2amd64/v2ray.service /etc/systemd/system/v2ray.service
+chmod +x /usr/bin/v2ray/v2ray
+chmod +x /usr/bin/v2ray/v2ctl
+rm -rf ~/v2amd64
+rm -rf ~/v2amd64.zip
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
 sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
