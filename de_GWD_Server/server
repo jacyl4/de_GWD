@@ -745,6 +745,7 @@ blue "-------------------"
 
 
 updategwd(){
+preinstall
 uuidnum=$(awk "/[Ri]d/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
