@@ -738,7 +738,7 @@ updatepihole(){
 installpihole
 
 blue "-------------------"
-blue  "Pi-hole更新 [完毕]"
+blue "更新Pi-hole [完毕]"
 blue "-------------------"
 }
 
@@ -760,6 +760,9 @@ systemctl enable v2ray
 installdoh
 
 postinstall
+blue "------------------"
+blue  "更新de_GWD [完毕]"
+blue "------------------"
 }
 
 
