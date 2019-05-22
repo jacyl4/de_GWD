@@ -440,6 +440,7 @@ wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-se
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
+systemctl daemon-reload
 systemctl restart doh-server
 systemctl enable doh-server
 rm -rf ~/dns-over-https
@@ -751,6 +752,7 @@ installv2ray
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
+systemctl daemon-reload
 systemctl restart v2ray
 systemctl enable v2ray
 
