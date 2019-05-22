@@ -770,10 +770,10 @@ fi
     echo
     green  "1. 安装v2ray+nginx+tls+pihole+doh"
     green  "2. 切换Pi-hole上游"
-    red  "3. 更改静态IP"
+    red  "7. 更改静态IP"
     yellow  "8. 更新Pi-hole"
-    yellow  "9. 修改本机UUID&path"
-    yellow  "0. 设置v2ray上级跃点"
+    yellow  "9. 设置v2ray上级跃点"
+    yellow  "0. 修改本机UUID&path"
     yellow "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -786,7 +786,7 @@ fi
     change_pihole_upstream
     start_menu
     ;;
-    3)
+    7)
     change_staticip
     start_menu 
     ;;
@@ -795,11 +795,11 @@ fi
     start_menu 
     ;;
     9)
-    change_v2rayverify
+    modify_upstream
     start_menu 
     ;;
     0)
-    modify_upstream
+    change_v2rayverify
     start_menu 
     ;;    *)
     clear
