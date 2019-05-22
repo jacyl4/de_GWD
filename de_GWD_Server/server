@@ -52,7 +52,7 @@ function installv2ray(){
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
-wget --no-check-certificate https://acccmi.cf/v2amd64.zip -O ~/v2amd64.zip
+wget --no-check-certificate https://github.com/jacyl4/de_GWD/raw/master/de_GWD_Client/v2amd64.zip -O ~/v2amd64.zip
 unzip v2amd64.zip
 mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
 mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
