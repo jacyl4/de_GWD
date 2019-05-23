@@ -260,7 +260,6 @@ EOF
 
 
 function installiptablesproxy(){
-systemctl stop iptables-proxy
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 
@@ -498,6 +497,10 @@ installgwd(){
     read v2path
 
 cd ~
+systemctl stop iptables-proxy
+
+sed -i '/nameserver/c\nameserver 119.29.29.29'  /etc/resolv.conf
+
 preinstall
 
 predownload
