@@ -404,7 +404,6 @@ EOF
 
 function installpihole(){
 curl -sSL https://install.pi-hole.net | bash
-systemctl stop lighttpd
 systemctl disable lighttpd
 systemctl mask lighttpd
 echo "" > /etc/pihole/adlists.list
@@ -437,7 +436,6 @@ make && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
-systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl daemon-reload
