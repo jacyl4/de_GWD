@@ -481,9 +481,6 @@ preinstall
 
 installv2ray
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
-sed -i '/"address":/c\"address": "'$vpsdomain'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$vpsdomain'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$vpsdomain'"'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl restart v2ray
@@ -754,10 +751,9 @@ systemctl restart v2ray
 systemctl enable v2ray
 
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
-installnginxpure
+vpsdomain=$(awk "/[Rs]erver_name/" /etc/nginx/conf.d/default.conf | awk '{print$2}' | cut -d ';' -f 1)
 
-elif [[ -d "/usr/local/nginx" ]]; then
-installnginxlnmp
+installnginxpure
 fi
 
 installdoh
