@@ -482,6 +482,7 @@ installgwd(){
     green "=============================="
     read v2path
 
+cd ~
 preinstall
 
 installv2ray
@@ -745,6 +746,7 @@ blue "-------------------"
 
 
 updategwd(){
+cd ~
 preinstall
 uuidnum=$(awk "/[Ri]d/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)

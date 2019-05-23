@@ -497,6 +497,7 @@ installgwd(){
     green "==============="
     read v2path
 
+cd ~
 preinstall
 
 predownload
@@ -605,6 +606,7 @@ blue "-------------------"
 
 
 updategwd(){
+cd ~
 preinstall
 
 predownload
