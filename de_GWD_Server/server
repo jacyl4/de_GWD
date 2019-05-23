@@ -124,7 +124,6 @@ server {
 EOF
 systemctl restart nginx
 
-rm -rf /var/www/ssl
 mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html
