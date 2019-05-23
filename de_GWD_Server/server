@@ -105,8 +105,7 @@ http {
                 application/xml+rss
                 image/svg+xml/javascript;
   gzip_proxied      any;
-  gzip_vary         on;
-  gzip_disable      "MSIE [1-6]\.";
+  gzip_disable      “MSIE [1-6].”;
 
   server_tokens off;
   access_log off;
