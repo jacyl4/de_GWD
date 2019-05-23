@@ -64,8 +64,7 @@ chmod +x /usr/bin/v2ray/v2ctl
 }
 
 
-function installnginxpure(){
-apt install -y nginx socat
+function nginxpureconf(){
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes auto;
@@ -114,6 +113,12 @@ http {
   include /etc/nginx/conf.d/*.conf;
 }
 EOF
+}
+
+
+function installnginxpure(){
+apt install -y nginx socat
+nginxpureconf
 
 cat > /etc/nginx/conf.d/default.conf<< EOF
 server {
@@ -751,9 +756,8 @@ systemctl restart v2ray
 systemctl enable v2ray
 
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
-vpsdomain="$(awk "/[Rs]erver_name/" /etc/nginx/conf.d/default.conf | awk '{print$2}' | cut -d ';' -f 1)"
-
-installnginxpure
+nginxpureconf
+systemctl restart nginx
 fi
 
 installdoh
