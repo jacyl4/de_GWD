@@ -751,7 +751,7 @@ systemctl restart v2ray
 systemctl enable v2ray
 
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
-vpsdomain=$(awk "/[Rs]erver_name/" /etc/nginx/conf.d/default.conf | awk '{print$2}' | cut -d ';' -f 1)
+vpsdomain="$(awk "/[Rs]erver_name/" /etc/nginx/conf.d/default.conf | awk '{print$2}' | cut -d ';' -f 1)"
 
 installnginxpure
 fi
