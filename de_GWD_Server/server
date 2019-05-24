@@ -77,30 +77,36 @@ cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes auto;
 
-    worker_rlimit_nofile 65535;
+    worker_rlimit_nofile 51200;
 
 events {
     use epoll;
+    worker_connections  51200;
     multi_accept on;
-    worker_connections  65535;
 }
 
 http {
   include mime.types;
   default_type application/octet-stream;
 
+  server_names_hash_bucket_size 128;
+  client_header_buffer_size 32k;
+  large_client_header_buffers 4 32k;
+  client_max_body_size 1024m;
+  client_body_buffer_size 10m;
+
   sendfile on;
   tcp_nopush on;
+  keepalive_timeout 120;
+  server_tokens off;
   tcp_nodelay on;
-  keepalive_timeout 60;
-  types_hash_max_size 2048;
-  
+
   gzip              on;
-  gzip_disable      "msie6";
+  gzip_disable      "MSIE [1-6]\.(?!.*SV1)";
   gzip_vary         on;
   gzip_proxied      any;
   gzip_comp_level   4;
-  gzip_min_length   1k;
+  gzip_min_length   256;
   gzip_buffers      4 16k;
   gzip_http_version 1.0;
   gzip_types    text/plain
@@ -108,14 +114,22 @@ http {
                 text/css
                 text/js
                 text/xml
+                text/x-component
+                text/x-json
+                font/opentype
+                application/x-font-ttf 
                 application/javascript
                 application/x-javascript
+                application/x-web-app-manifest+json
                 application/json
+                application/atom+xml
                 application/xml
                 application/xml+rss
-                image/svg+xml/javascript;
+                application/xhtml+xml
+                application/vnd.ms-fontobject
+                image/svg+xml
+                image/x-icon;
 
-  server_tokens off;
   access_log off;
   error_log off;
 
@@ -199,14 +213,15 @@ server {
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
 
-  ssl on;
   ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
-  ssl_session_timeout 5m;
-  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
-  ssl_ciphers "EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5";
+  ssl_ciphers TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+  ssl_session_timeout 10m;
   ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 1400;
+  add_header Strict-Transport-Security max-age=15768000;
   ssl_dhparam /var/www/ssl/dhparam.pem;
   
   # OCSP Stapling ---
@@ -333,7 +348,6 @@ server {
   root  /home/wwwroot/$nginxdomain;
   index index.html index.htm index.php default.html default.htm default.php;
 
-  ssl on;
   ssl_certificate /usr/local/nginx/conf/ssl/$nginxdomain/fullchain.cer;
   ssl_certificate_key /usr/local/nginx/conf/ssl/$nginxdomain/$nginxdomain.key;
   ssl_session_timeout 5m;
