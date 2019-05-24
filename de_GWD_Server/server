@@ -43,6 +43,14 @@ net.ipv4.tcp_fin_timeout=30
 EOF
 sysctl -p
 
+if [ `grep -c nginx /etc/apt/sources.list` -ne 2 ];then
+cat >> /etc/apt/sources.list << EOF
+deb http://nginx.org/packages/debian/ stretch nginx
+deb-src http://nginx.org/packages/debian/ stretch nginx
+EOF
+wget http://nginx.org/keys/nginx_signing.key && apt-key add nginx_signing.key
+fi
+
 apt update && apt -y upgrade
 apt install -y curl git make gcc ca-certificates unzip net-tools
 }
@@ -177,7 +185,7 @@ server {
   listen 80;
   server_name $vpsdomain www.$vpsdomain;
   root /var/www/html;
-  index index.html index.htm index.nginx-debian.html;
+  index index.php index.html index.htm index.nginx-debian.html;
 
   access_log off;
   error_log off;
@@ -189,7 +197,7 @@ server {
   listen 443 ssl http2;
   server_name $vpsdomain www.$vpsdomain;
   root /var/www/html;
-  index index.html index.htm index.nginx-debian.html;
+  index index.php index.html index.htm index.nginx-debian.html;
 
   ssl on;
   ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
