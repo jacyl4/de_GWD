@@ -123,9 +123,15 @@ pushd ngx_brotli
 git submodule update --init
 cd ~
 
+mkdir -p /usr/lib64/nginx/modules
+mkdir -p /etc/nginx/conf.d
+mkdir -p /var/log/nginx
+mkdir -p /var/cache/nginx/client_temp
+mkdir -p /var/cache/nginx/proxy_temp
+mkdir -p /var/cache/nginx/fastcgi_temp
+mkdir -p /var/cache/nginx/uwsgi_temp
+mkdir -p /var/cache/nginx/scgi_temp
 
-
-cd ~
 wget --no-check-certificate https://nginx.org/download/nginx-1.17.0.tar.gz
 tar zxvf nginx-1.17.0.tar.gz
 sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' ~/nginx-1.17.0/auto/cc/gcc
@@ -139,8 +145,15 @@ patch -p1 < nginx.patch
 --sbin-path=/usr/sbin/nginx \
 --modules-path=/usr/lib64/nginx/modules \
 --conf-path=/etc/nginx/nginx.conf \
+--error-log-path=/var/log/nginx/error.log \
+--http-log-path=/var/log/nginx/access.log \
 --pid-path=/var/run/nginx.pid \
 --lock-path=/var/run/nginx.lock \
+--http-client-body-temp-path=/var/cache/nginx/client_temp \
+--http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+--http-scgi-temp-path=/var/cache/nginx/scgi_temp \
 --user=www-data \
 --group=www-data \
 --with-compat \
@@ -173,8 +186,8 @@ patch -p1 < nginx.patch
 --with-pcre=../pcre-8.43 \
 --with-pcre-jit \
 --with-http_degradation_module \
---with-cc-opt='-g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fPIC' \
---with-ld-opt='-ljemalloc -Wl,-z,relro -Wl,-z,now -pie' \
+--with-cc-opt='-DTCP_FASTOPEN=23 -g -O2 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fPIC' \
+--with-ld-opt='-ljemalloc -Wl,-z,relro' \
 --with-http_spdy_module \
 --with-http_v2_hpack_enc \
 --add-module=../ngx_brotli
@@ -310,7 +323,6 @@ systemctl enable nginx
 
 
 function confignginxpure(){
-mkdir -p /etc/nginx/conf.d/
 cat > /etc/nginx/conf.d/default.conf<< EOF
 server {
     listen       80;
