@@ -61,14 +61,6 @@ net.ipv4.tcp_max_orphans = 32768
 EOF
 sysctl -p
 
-if [ `grep -c nginx /etc/apt/sources.list` -ne 2 ];then
-cat >> /etc/apt/sources.list << EOF
-deb http://nginx.org/packages/debian/ stretch nginx
-deb-src http://nginx.org/packages/debian/ stretch nginx
-EOF
-wget http://nginx.org/keys/nginx_signing.key && apt-key add nginx_signing.key
-fi
-
 apt update && apt -y upgrade
 apt install -y curl net-tools ca-certificates unzip git make gcc build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libatomic-ops-dev socat
 }
