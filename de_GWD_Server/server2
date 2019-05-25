@@ -311,7 +311,7 @@ function confignginxpure(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 server {
     listen       80;
-    server_name  $vpsdomain;
+    server_name $vpsdomain www.$vpsdomain;
     root /var/www/html;
     index index.php index.html index.htm;
 }
@@ -418,6 +418,7 @@ location /dq {
   proxy_buffering         off;
   proxy_buffer_size       8k;
   proxy_intercept_errors  on;
+  proxy_redirect          off;
   proxy_pass http://dns-backend;
 }
 
@@ -439,6 +440,7 @@ location $v2path {
   proxy_buffering         off;
   proxy_buffer_size       8k;
   proxy_intercept_errors  on;
+  proxy_redirect          off;
   proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;
