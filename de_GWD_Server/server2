@@ -186,7 +186,7 @@ patch -p1 < nginx.patch
 --with-pcre=../pcre-8.43 \
 --with-pcre-jit \
 --with-http_degradation_module \
---with-cc-opt='-DTCP_FASTOPEN=23 -g -O2 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fPIC' \
+--with-cc-opt='-DTCP_FASTOPEN=23' \
 --with-ld-opt='-ljemalloc -Wl,-z,relro' \
 --with-http_spdy_module \
 --with-http_v2_hpack_enc \
