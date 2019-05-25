@@ -93,17 +93,6 @@ deb-src http://mirrors.aliyun.com/debian stretch-updates main contrib non-free
 
 deb http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free contrib
 deb-src http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free contrib
-
-deb http://mirrors.aliyuncs.com/debian stretch main contrib non-free
-deb http://mirrors.aliyuncs.com/debian stretch-proposed-updates main contrib non-free
-deb http://mirrors.aliyuncs.com/debian stretch-updates main contrib non-free
-
-deb-src http://mirrors.aliyuncs.com/debian stretch main contrib non-free
-deb-src http://mirrors.aliyuncs.com/debian stretch-proposed-updates main contrib non-free
-deb-src http://mirrors.aliyuncs.com/debian stretch-updates main contrib non-free
-
-deb http://mirrors.aliyuncs.com/debian-security/ stretch/updates main non-free contrib
-deb-src http://mirrors.aliyuncs.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
 apt update && apt -y upgrade
