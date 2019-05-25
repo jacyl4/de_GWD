@@ -83,14 +83,27 @@ fi
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian/ stretch main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+deb http://mirrors.aliyun.com/debian stretch main contrib non-free
+deb http://mirrors.aliyun.com/debian stretch-proposed-updates main contrib non-free
+deb http://mirrors.aliyun.com/debian stretch-updates main contrib non-free
+
+deb-src http://mirrors.aliyun.com/debian stretch main contrib non-free
+deb-src http://mirrors.aliyun.com/debian stretch-proposed-updates main contrib non-free
+deb-src http://mirrors.aliyun.com/debian stretch-updates main contrib non-free
+
+deb http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free contrib
+deb-src http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free contrib
+
+deb http://mirrors.aliyuncs.com/debian stretch main contrib non-free
+deb http://mirrors.aliyuncs.com/debian stretch-proposed-updates main contrib non-free
+deb http://mirrors.aliyuncs.com/debian stretch-updates main contrib non-free
+
+deb-src http://mirrors.aliyuncs.com/debian stretch main contrib non-free
+deb-src http://mirrors.aliyuncs.com/debian stretch-proposed-updates main contrib non-free
+deb-src http://mirrors.aliyuncs.com/debian stretch-updates main contrib non-free
+
+deb http://mirrors.aliyuncs.com/debian-security/ stretch/updates main non-free contrib
+deb-src http://mirrors.aliyuncs.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
 apt update && apt -y upgrade
@@ -404,7 +417,7 @@ rm -rf /usr/lib/systemd/system/doh-client.service
 rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
-make && make install
+make -j $(nproc --all) && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 }
