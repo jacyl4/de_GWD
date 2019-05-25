@@ -848,7 +848,7 @@ else
 fi
 
     green "========================"
-    green "         服务端          "
+    green "     服务端（技术概念版）  "
     green "介绍：一键安装de_GWD      "
     green "系统：仅测于Debian9       "
     green "作者：jacyl4             "
