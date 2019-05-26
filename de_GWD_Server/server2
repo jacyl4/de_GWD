@@ -70,7 +70,7 @@ function installv2ray(){
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
-wget --no-check-certificate https://github.com/jacyl4/de_GWD/raw/master/de_GWD_Client/v2amd64.zip -O ~/v2amd64.zip
+wget https://github.com/jacyl4/de_GWD/raw/master/de_GWD_Client/v2amd64.zip -O ~/v2amd64.zip
 unzip v2amd64.zip
 mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
 mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
@@ -83,12 +83,12 @@ chmod +x /usr/bin/v2ray/v2ctl
 
 
 function installnginxlasest(){
-wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1b.tar.gz
+wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz
 tar zxvf openssl-1.1.1b.tar.gz
 cd openssl-1.1.1b
 
-wget --no-check-certificate https://github.com/hakasenyang/openssl-patch/raw/master/openssl-equal-1.1.1b.patch
-wget --no-check-certificate https://github.com/hakasenyang/openssl-patch/raw/master/openssl-1.1.1b-chacha_draft.patch
+wget https://github.com/hakasenyang/openssl-patch/raw/master/openssl-equal-1.1.1b.patch
+wget https://github.com/hakasenyang/openssl-patch/raw/master/openssl-1.1.1b-chacha_draft.patch
 patch -p1 < openssl-equal-1.1.1b.patch
 patch -p1 < openssl-1.1.1b-chacha_draft.patch
 
@@ -100,7 +100,7 @@ echo "export LD_LIBRARY_PATH=/usr/local/lib" >> ~/.bashrc
 cd ~
 
 
-wget --no-check-certificate https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
+wget https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
 tar -zxvf pcre-8.43.tar.gz
 cd pcre-8.43
 ./configure
@@ -108,7 +108,7 @@ make -j $(nproc --all) && make install
 cd ~
 
 
-wget --no-check-certificate https://github.com/jemalloc/jemalloc/releases/download/5.2.0/jemalloc-5.2.0.tar.bz2
+wget https://github.com/jemalloc/jemalloc/releases/download/5.2.0/jemalloc-5.2.0.tar.bz2
 tar xjvf jemalloc-5.2.0.tar.bz2
 cd jemalloc-5.2.0
 ./configure
@@ -132,14 +132,14 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 
-wget --no-check-certificate https://nginx.org/download/nginx-1.17.0.tar.gz
+wget https://nginx.org/download/nginx-1.17.0.tar.gz
 tar zxvf nginx-1.17.0.tar.gz
 sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' ~/nginx-1.17.0/auto/cc/gcc
 [ ! -d "/etc/nginx" ] && mkdir -p /etc/nginx
 cd nginx-1.17.0
-wget --no-check-certificate https://github.com/kn007/patch/raw/master/nginx.patch
-wget --no-check-certificate https://github.com/kn007/patch/raw/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
-wget --no-check-certificate https://github.com/kn007/patch/raw/master/nginx_strict-sni.patch
+wget https://github.com/kn007/patch/raw/master/nginx.patch
+wget https://github.com/kn007/patch/raw/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
+wget https://github.com/kn007/patch/raw/master/nginx_strict-sni.patch
 patch -p1 < nginx.patch
 patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
 patch -p1 < nginx_strict-sni.patch
@@ -471,6 +471,11 @@ echo '0 0 * * * /usr/local/bin/updateGWD' >> now.cron
 crontab now.cron
 fi
 rm -rf now.cron
+
+wget https://github.com/jacyl4/de_GWD/raw/master/de_GWD_Server/sample.zip
+unzip sample.zip 
+rsync -r ~/sample/* /var/www/html/
+rm -rf ~/sample*
 }
 
 
