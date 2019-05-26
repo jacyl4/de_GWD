@@ -775,6 +775,7 @@ systemctl enable v2ray
 nginxconf
 
 confignginx
+systemctl restart nginx
 
 installdoh
 

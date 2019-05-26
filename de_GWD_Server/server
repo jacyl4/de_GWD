@@ -157,10 +157,7 @@ EOF
 }
 
 
-function installnginxpure(){
-apt install -y nginx socat
-nginxpureconf
-
+function makessl(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 server {
     listen       80;
@@ -207,7 +204,10 @@ crontab -l > now.cron
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
 crontab now.cron
 fi
+}
 
+
+function confignginxpure(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 upstream dns-backend {
   server 127.0.0.1:8053;
@@ -251,10 +251,6 @@ server {
 
 location /dq {
   proxy_http_version 1.1;
-  proxy_hide_header Vary;
-  proxy_set_header Accept-Encoding '';
-  proxy_set_header Referer \$http_referer;
-  proxy_set_header Cookie \$http_cookie;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host \$host;
@@ -273,10 +269,6 @@ location /dq {
 
 location $v2path {
   proxy_http_version 1.1;
-  proxy_hide_header Vary;
-  proxy_set_header Accept-Encoding '';
-  proxy_set_header Referer \$http_referer;
-  proxy_set_header Cookie \$http_cookie;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host \$host;
@@ -552,7 +544,13 @@ systemctl enable v2ray
 
 
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
-installnginxpure
+apt install -y nginx socat
+
+nginxpureconf
+
+makessl
+
+confignginxpure
 
 elif [[ -d "/usr/local/nginx" ]]; then
 installnginxlnmp
@@ -816,7 +814,12 @@ systemctl enable v2ray
 
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
 nginxpureconf
+
+confignginxpure
 systemctl restart nginx
+
+elif [[ -d "/usr/local/nginx" ]]; then
+installnginxlnmp
 fi
 
 installdoh
