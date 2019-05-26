@@ -94,7 +94,7 @@ deb-src http://mirrors.aliyun.com/debian/ stretch-updates main
 EOF
 fi
 apt update && apt -y upgrade
-apt install -y curl git make gcc ca-certificates unzip ipset net-tools
+apt install -y net-tools curl ca-certificates unzip git build-essential ipset
 }
 
 
