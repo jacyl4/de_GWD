@@ -16,7 +16,7 @@ apt-get install -y curl
 curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
 ```
 
-![服务端](https://i.loli.net/2019/05/23/5ce5a57babc6669781.png)
+![服务端](https://i.loli.net/2019/05/27/5ceb25f6cbf0929497.png)
 
 ### 客户端：
 ```
