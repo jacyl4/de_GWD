@@ -329,7 +329,7 @@ fi
 }
 
 
-function confignginx(){
+function nginxwebconf(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 upstream dns-backend {
   server 127.0.0.1:8053;
@@ -512,7 +512,7 @@ nginxconf
 
 makessl
 
-confignginx
+nginxwebconf
 
 mkdir -p /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
@@ -731,8 +731,8 @@ change_v2rayverify(){
 if [[ -d "/etc/nginx" ]]; then
 sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
 elif [[ -d "/usr/local/nginx" ]]; then
-nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
-sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
+nginxconfname="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
+sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconfname | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconfname
 fi
 systemctl restart nginx
 
@@ -774,7 +774,8 @@ systemctl enable v2ray
 
 nginxconf
 
-confignginx
+nginxwebconf
+
 systemctl restart nginx
 
 installdoh

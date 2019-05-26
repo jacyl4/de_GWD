@@ -90,7 +90,7 @@ chmod +x /usr/bin/v2ray/v2ctl
 }
 
 
-function nginxpureconf(){
+function purenginxconf(){
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes auto;
@@ -207,7 +207,7 @@ fi
 }
 
 
-function confignginxpure(){
+function purenginxwebconf(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 upstream dns-backend {
   server 127.0.0.1:8053;
@@ -546,11 +546,11 @@ systemctl enable v2ray
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
 apt install -y nginx socat
 
-nginxpureconf
+purenginxconf
 
 makessl
 
-confignginxpure
+purenginxwebconf
 
 elif [[ -d "/usr/local/nginx" ]]; then
 installnginxlnmp
@@ -815,14 +815,14 @@ systemctl enable v2ray
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 
-nginxpureconf
+purenginxconf
 
-confignginxpure
-systemctl restart nginx
+purenginxwebconf
 
 elif [[ -d "/usr/local/nginx" ]]; then
 installnginxlnmp
 fi
+systemctl restart nginx
 
 installdoh
 
