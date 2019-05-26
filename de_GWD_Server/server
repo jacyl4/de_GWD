@@ -561,7 +561,6 @@ installpihole
 
 wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
 tar -xvf go1.11.5.linux-amd64.tar.gz
-rm -rf ~/go1.11.5.linux-amd64.tar.gz
 mv go /usr/local
 mkdir ~/gopath
 cat >> ~/.profile << "EOF"
@@ -569,6 +568,7 @@ export GOROOT=/usr/local/go
 export GOPATH=~/gopath
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 EOF
+rm -rf ~/go1.11.5.linux-amd64.tar.gz
 
 installdoh
 systemctl disable systemd-resolved
