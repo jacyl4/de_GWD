@@ -11,7 +11,7 @@ curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/ser
 ```
 
 ```
-进阶编译版
+大力编译版
 apt-get install -y curl
 curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
 ```
