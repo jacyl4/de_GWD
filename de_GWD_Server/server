@@ -614,44 +614,6 @@ blue "------------------"
 
 
 
-change_pihole_upstream(){
-    green "========================="
-    green "1.使用8.8.8.8 / 2.使用DoH"
-    green "========================="
-    read -p "请输入1/2:" pihole_upstream
-if [[ $pihole_upstream = 1 ]]; then
-sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
-pihole restartdns
-systemctl stop doh-client
-systemctl disable doh-client
-blue "--------------------------------"
-blue  "Pi-hole 上游解析已切换为 8.8.8.8"
-blue "--------------------------------"
-elif [[ $pihole_upstream = 2 ]]; then
-sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_=127.0.0.1#5380' /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-echo "server=127.0.0.1#5380" >> /etc/dnsmasq.d/01-pihole.conf
-pihole restartdns
-systemctl restart doh-client
-systemctl enable doh-client
-blue "----------------------------"
-blue  "Pi-hole 上游解析已切换为 DoH"
-blue "----------------------------"
-fi
-}
-
-
-
 change_staticip(){
     green "====================="
     green "本机地址（留空回车跳过）"
@@ -890,7 +852,6 @@ fi
     green "=========================="
     echo
     green  "1. 安装de_GWD"
-    green  "2. 切换Pi-hole上游"
     red    "6. 更改静态IP"
     yellow "7. 设置v2ray上级跃点"
     yellow "8. 修改本机UUID&path"
@@ -902,10 +863,6 @@ fi
     case "$num" in
     1)
     installgwd
-    start_menu
-    ;;
-    2)
-    change_pihole_upstream
     start_menu
     ;;
     6)
