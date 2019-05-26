@@ -728,12 +728,8 @@ change_v2rayverify(){
     green "========="
     read v2raynpath
 
-if [[ -d "/etc/nginx" ]]; then
 sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
-elif [[ -d "/usr/local/nginx" ]]; then
-nginxconfname="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
-sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconfname | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconfname
-fi
+
 systemctl restart nginx
 
 sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$v2raynuuid'"'",/" /etc/v2ray/config.json
