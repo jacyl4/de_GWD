@@ -486,11 +486,6 @@ make -j $(nproc --all) && make install
 cd ~
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
-systemctl daemon-reload
-systemctl restart doh-server
-systemctl enable doh-server
 rm -rf ~/dns-over-https
 }
 
@@ -576,6 +571,11 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 EOF
 
 installdoh
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+systemctl daemon-reload
+systemctl restart doh-server
+systemctl enable doh-server
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
@@ -825,6 +825,9 @@ fi
 systemctl restart nginx
 
 installdoh
+systemctl daemon-reload
+systemctl restart doh-server
+systemctl enable doh-server
 
 postinstall
 blue "------------------"
