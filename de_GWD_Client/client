@@ -99,9 +99,9 @@ apt install -y net-tools curl ca-certificates unzip git build-essential ipset
 
 
 function predownload(){
-wget --no-check-certificate https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
-wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
-wget --no-check-certificate https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
+wget https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
+wget https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
+wget https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 }
 
 
@@ -110,7 +110,7 @@ mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
 if [[ $architecture = "arm64" ]]; then
-    wget --no-check-certificate https://gwdbase.xyz/v2arm64.zip -O ~/v2arm64.zip
+    wget https://gwdbase.xyz/v2arm64.zip -O ~/v2arm64.zip
     unzip v2arm64.zip
     mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
@@ -118,7 +118,7 @@ if [[ $architecture = "arm64" ]]; then
     rm -rf ~/v2arm64
     rm -rf ~/v2arm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget --no-check-certificate https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
+    wget https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
     unzip v2amd64.zip
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
@@ -184,7 +184,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 1,
           "alterId": 64,
-          "security": "auto"
+          "security": "none"
           }
         ]
         }
@@ -221,7 +221,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 0,
           "alterId": 64,
-          "security": "auto"
+          "security": "none"
           }
         ]
         }
@@ -477,9 +477,9 @@ chmod +x /usr/local/bin/updateGWD
 rm -rf /usr/local/bin/ui-*
 unzip ui-script.zip
 unzip ui-web.zip
-mv -f ~/ui-script/* /usr/local/bin
+rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
-mv -f ~/ui-web/* /var/www/html
+rsync -r ~/ui-web/* /var/www/html
 
 rm -rf ~/ui-*
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php -O /var/www/html/version.php
