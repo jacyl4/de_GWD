@@ -101,9 +101,9 @@ apt install -y curl git make gcc ca-certificates unzip ipset net-tools
 
 
 function predownload(){
-wget --no-check-certificate https://accaly.ooo/ui-cnr.txt -O /usr/local/bin/chnroute.txt
-wget --no-check-certificate https://accaly.ooo/ui-script.zip -O ~/ui-script.zip
-wget --no-check-certificate https://accaly.ooo/ui-web.zip -O ~/ui-web.zip
+wget --no-check-certificate https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
+wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
+wget --no-check-certificate https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 }
 
 
@@ -112,7 +112,7 @@ mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
 if [[ $architecture = "arm64" ]]; then
-    wget --no-check-certificate https://accaly.ooo/v2arm64.zip -O ~/v2arm64.zip
+    wget --no-check-certificate https://gwdbase.xyz/v2arm64.zip -O ~/v2arm64.zip
     unzip v2arm64.zip
     mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
@@ -120,7 +120,7 @@ if [[ $architecture = "arm64" ]]; then
     rm -rf ~/v2arm64
     rm -rf ~/v2arm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget --no-check-certificate https://accaly.ooo/v2amd64.zip -O ~/v2amd64.zip
+    wget --no-check-certificate https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
     unzip v2amd64.zip
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
