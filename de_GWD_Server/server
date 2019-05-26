@@ -813,6 +813,8 @@ systemctl restart v2ray
 systemctl enable v2ray
 
 if [[ "$(nginx -v 2>&1 | awk  '{print $3}' | cut -d'/' -f1)" != "nginx" ]] || [[ -d "/etc/nginx" ]]; then
+vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
+
 nginxpureconf
 
 confignginxpure
