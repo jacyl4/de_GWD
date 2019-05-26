@@ -70,7 +70,7 @@ wget http://nginx.org/keys/nginx_signing.key && apt-key add nginx_signing.key
 fi
 
 apt update && apt -y upgrade
-apt install -y curl git make gcc ca-certificates unzip net-tools
+apt install -y net-tools curl ca-certificates unzip git build-essential ipset
 }
 
 
