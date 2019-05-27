@@ -85,17 +85,18 @@ http {
 
   sendfile on;
   tcp_nopush on;
-  keepalive_timeout 120;
-  server_tokens off;
   tcp_nodelay on;
+  keepalive_timeout 60;
+  types_hash_max_size 2048;
+  server_tokens off;
 
   gzip              on;
-  gzip_disable      "MSIE [1-6]\.(?!.*SV1)";
+  gzip_disable      "MSIE [1-6]\.";
   gzip_vary         on;
   gzip_proxied      any;
   gzip_comp_level   4;
   gzip_min_length   256;
-  gzip_buffers      4 16k;
+  gzip_buffers      16 8k;
   gzip_http_version 1.0;
   gzip_types    text/plain
                 text/javascript
@@ -216,40 +217,40 @@ server {
   resolver_timeout 5s;
 
 location /dq {
+  proxy_http_version      1.1;
   proxy_redirect          off;
   proxy_set_header Upgrade \$http_upgrade;
-  proxy_set_header Connection "Upgrade";
   proxy_set_header Host \$http_host;
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-Forwarded-Proto https;
+  proxy_set_header X-NginX-Proxy true;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_buffering         off;
   proxy_buffer_size       8k;
-  proxy_intercept_errors  on;
-  proxy_pass http://dns-backend;
+  proxy_pass              http://dns-backend;
 }
 
 location $v2path {
+  proxy_http_version      1.1;
   proxy_redirect          off;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host \$http_host;
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-Forwarded-Proto https;
+  proxy_set_header X-NginX-Proxy true;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_buffering         off;
   proxy_buffer_size       8k;
-  proxy_intercept_errors  on;
   proxy_pass              http://127.0.0.1:11811;
 }
-  access_log off;
-  error_log off;
+
 }
 EOF
 }
