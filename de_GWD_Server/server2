@@ -259,10 +259,10 @@ http {
   tcp_nodelay on;
 
   brotli             on;
-  brotli_static      on;
-  brotli_comp_level  8;
-  brotli_window      16m;
+  brotli_static      always;
+  brotli_comp_level  7;
   brotli_min_length  20;
+  brotli_window      512k;
   brotli_types       *;
 
   access_log off;
@@ -348,10 +348,10 @@ server {
   ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
   ssl_ciphers TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
-  ssl_session_timeout 10m;
-  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_session_timeout 1440m;
+  ssl_session_cache shared:le_nginx_SSL:1m;
   ssl_buffer_size 1400;
-  add_header Strict-Transport-Security max-age=15768000;
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
   ssl_dhparam /var/www/ssl/dhparam.pem;
 
   ssl_early_data on;
