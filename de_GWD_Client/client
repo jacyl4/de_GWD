@@ -531,7 +531,6 @@ systemctl enable v2ray
 
 installiptablesproxy
 
-cd ~
 if [[ $architecture = "arm64" ]]; then
     wget https://mirrors.ustc.edu.cn/golang/go1.11.5.linux-arm64.tar.gz
     tar -xvf go*linux-arm64.tar.gz
@@ -556,6 +555,7 @@ sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
+systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
 
@@ -646,8 +646,6 @@ installdoh
 doh_upstream='url = "https:\/\/'$(awk 'NR==1{print}' /var/www/html/domain.txt)'\/dq"'
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
