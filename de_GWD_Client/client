@@ -64,7 +64,7 @@ deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free co
 EOF
 fi
 apt update && apt -y upgrade
-apt install -y net-tools curl ca-certificates unzip git build-essential ipset
+apt install -y net-tools curl rsync ca-certificates unzip git build-essential ipset
 }
 
 

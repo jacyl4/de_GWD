@@ -38,7 +38,7 @@ EOF
 sysctl -p
 
 apt update && apt -y upgrade
-apt install -y net-tools curl ca-certificates unzip git build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libatomic-ops-dev socat
+apt install -y net-tools curl rsync ca-certificates unzip git build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libatomic-ops-dev socat
 }
 
 

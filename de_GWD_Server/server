@@ -46,7 +46,7 @@ wget http://nginx.org/keys/nginx_signing.key && apt-key add nginx_signing.key
 fi
 
 apt update && apt -y upgrade
-apt install -y net-tools curl ca-certificates unzip git build-essential ipset
+apt install -y net-tools curl rsync ca-certificates unzip git build-essential ipset
 }
 
 
