@@ -648,6 +648,7 @@ sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
+systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
 
