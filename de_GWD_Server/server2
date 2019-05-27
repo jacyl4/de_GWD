@@ -260,7 +260,7 @@ http {
 
   brotli             on;
   brotli_static      on;
-  brotli_comp_level  6;
+  brotli_comp_level  8;
   brotli_window      16m;
   brotli_min_length  20;
   brotli_types       *;
