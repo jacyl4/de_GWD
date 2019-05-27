@@ -107,12 +107,6 @@ http {
   include mime.types;
   default_type application/octet-stream;
 
-  server_names_hash_bucket_size 128;
-  client_header_buffer_size 32k;
-  large_client_header_buffers 4 32k;
-  client_max_body_size 1024m;
-  client_body_buffer_size 10m;
-
   sendfile on;
   tcp_nopush on;
   keepalive_timeout 120;
@@ -250,7 +244,7 @@ server {
   resolver_timeout 5s;
 
 location /dq {
-  proxy_http_version 1.1;
+  proxy_redirect          off;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host \$host;
@@ -263,12 +257,11 @@ location /dq {
   proxy_buffering         off;
   proxy_buffer_size       8k;
   proxy_intercept_errors  on;
-  proxy_redirect          off;
   proxy_pass http://dns-backend;
 }
 
 location $v2path {
-  proxy_http_version 1.1;
+  proxy_redirect          off;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "Upgrade";
   proxy_set_header Host \$host;
@@ -281,7 +274,6 @@ location $v2path {
   proxy_buffering         off;
   proxy_buffer_size       8k;
   proxy_intercept_errors  on;
-  proxy_redirect          off;
   proxy_pass              http://127.0.0.1:11811;
 }
   access_log off;
