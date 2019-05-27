@@ -259,11 +259,11 @@ http {
   tcp_nodelay on;
 
   brotli             on;
-  brotli_static      on;
   brotli_comp_level  5;
-  brotli_min_length  20;
   brotli_buffers     16 8k;
-  brotli_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript image/svg+xml;
+  brotli_window      16m;
+  brotli_min_length  20;
+  brotli_types       *;
 
   access_log off;
   error_log off;
