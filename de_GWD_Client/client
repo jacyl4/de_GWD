@@ -99,9 +99,9 @@ apt install -y net-tools curl ca-certificates unzip git build-essential ipset
 
 
 function predownload(){
-wget https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
-wget https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
-wget https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
+wget --no-check-certificate https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
+wget --no-check-certificate https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
+wget --no-check-certificate https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
 }
 
 
@@ -110,7 +110,7 @@ mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
 if [[ $architecture = "arm64" ]]; then
-    wget https://gwdbase.xyz/v2arm64.zip -O ~/v2arm64.zip
+    wget --no-check-certificate https://gwdbase.xyz/v2arm64.zip -O ~/v2arm64.zip
     unzip v2arm64.zip
     mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
@@ -118,7 +118,7 @@ if [[ $architecture = "arm64" ]]; then
     rm -rf ~/v2arm64
     rm -rf ~/v2arm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
+    wget --no-check-certificate https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
     unzip v2amd64.zip
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
@@ -407,7 +407,7 @@ cd dns-over-https
 make -j $(nproc --all) && make install
 cd ~
 rm -rf ~/dns-over-https
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
 }
 
 
@@ -482,7 +482,7 @@ chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 
 rm -rf ~/ui-*
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php -O /var/www/html/version.php
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php -O /var/www/html/version.php
 }
 
 
@@ -534,11 +534,11 @@ systemctl enable v2ray
 installiptablesproxy
 
 if [[ $architecture = "arm64" ]]; then
-    wget https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
+    wget --no-check-certificate https://dl.google.com/go/go1.11.5.linux-arm64.tar.gz
     tar -xvf go1.11.5.linux-arm64.tar.gz
     rm -rf ~/go1.11.5.linux-arm64.tar.gz
 elif [[ $architecture = "amd64" ]]; then
-    wget https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+    wget --no-check-certificate https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
     tar -xvf go1.11.5.linux-amd64.tar.gz
     rm -rf ~/go1.11.5.linux-amd64.tar.gz
 fi
