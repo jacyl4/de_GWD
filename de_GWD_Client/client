@@ -154,7 +154,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 1,
           "alterId": 64,
-          "security": "aes-128-gcm"
+          "security": "none"
           }
         ]
         }
@@ -191,7 +191,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 0,
           "alterId": 64,
-          "security": "aes-128-gcm"
+          "security": "none"
           }
         ]
         }
