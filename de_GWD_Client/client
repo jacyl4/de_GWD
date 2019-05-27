@@ -368,6 +368,7 @@ iptables -t mangle -X
 ipset destroy listb
 ipset destroy lanip
 ipset destroy chnroute
+ipset destroy listwlan
 ipset destroy listw
 EOF
 chmod +x /usr/local/bin/iptables-proxy-down
