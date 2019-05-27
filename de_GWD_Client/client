@@ -404,7 +404,7 @@ rm -rf /usr/lib/systemd/system/doh-client.service
 rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
-make -j $(nproc --all) && make install
+make && make install
 cd ~
 rm -rf ~/dns-over-https
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
