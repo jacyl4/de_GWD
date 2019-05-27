@@ -532,11 +532,11 @@ systemctl enable v2ray
 installiptablesproxy
 
 if [[ $architecture = "arm64" ]]; then
-    wget --no-check-certificate https://mirrors.ustc.edu.cn/golang/go1.11.5.linux-arm64.tar.gz
+    wget --no-check-certificate https://mirrors.ustc.edu.cn/golang/go1.11.9.linux-arm64.tar.gz
     tar -xvf go1.11.5.linux-arm64.tar.gz
     rm -rf ~/go1.11.5.linux-arm64.tar.gz
 elif [[ $architecture = "amd64" ]]; then
-    wget --no-check-certificate https://mirrors.ustc.edu.cn/golang/go1.11.5.linux-amd64.tar.gz
+    wget --no-check-certificate https://mirrors.ustc.edu.cn/golang/go1.11.9.linux-amd64.tar.gz
     tar -xvf go1.11.5.linux-amd64.tar.gz
     rm -rf ~/go1.11.5.linux-amd64.tar.gz
 fi
