@@ -259,8 +259,8 @@ http {
   tcp_nodelay on;
 
   brotli             on;
-  brotli_comp_level  5;
-  brotli_buffers     16 8k;
+  brotli_static      on;
+  brotli_comp_level  6;
   brotli_window      16m;
   brotli_min_length  20;
   brotli_types       *;
