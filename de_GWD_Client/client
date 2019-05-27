@@ -83,14 +83,14 @@ fi
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian/  stretch main non-free contrib
-deb http://mirrors.163.com/debian/  stretch-updates main non-free contrib
-deb http://mirrors.163.com/debian/  stretch-backports main non-free contrib
-deb-src http://mirrors.163.com/debian/  stretch main non-free contrib
-deb-src http://mirrors.163.com/debian/  stretch-updates main non-free contrib
-deb-src http://mirrors.163.com/debian/  stretch-backports main non-free contrib
-deb http://mirrors.163.com/debian-security/  stretch/updates main non-free contrib
-deb-src http://mirrors.163.com/debian-security/  stretch/updates main non-free contrib
+deb http://mirrors.163.com/debian/ stretch main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
+deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
+deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
+deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
 apt update && apt -y upgrade
@@ -184,7 +184,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 1,
           "alterId": 64,
-          "security": "none"
+          "security": "aes-128-gcm"
           }
         ]
         }
@@ -221,7 +221,7 @@ cat > /etc/v2ray/config.json << EOF
           "id": "00000000-0000-0000-0000-000000000000",
           "level": 0,
           "alterId": 64,
-          "security": "none"
+          "security": "aes-128-gcm"
           }
         ]
         }

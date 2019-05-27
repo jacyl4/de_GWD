@@ -43,21 +43,12 @@ echo "ulimit -n 65536" > .bash_profile
 cat >> /etc/sysctl.conf << EOF
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv4.tcp_fastopen = 3
-fs.file-max = 1000000
-fs.inotify.max_user_instances = 8192
-net.ipv4.tcp_syncookies = 1
-net.ipv4.tcp_fin_timeout = 30
-net.ipv4.tcp_tw_reuse = 1
-net.ipv4.ip_local_port_range = 1024 65000
-net.ipv4.tcp_max_syn_backlog = 16384
-net.ipv4.tcp_max_tw_buckets = 6000
-net.ipv4.route.gc_timeout = 100
-net.ipv4.tcp_syn_retries = 1
-net.ipv4.tcp_synack_retries = 1
-net.core.somaxconn = 32768
-net.core.netdev_max_backlog = 32768
-net.ipv4.tcp_timestamps = 0
-net.ipv4.tcp_max_orphans = 32768
+fs.file-max=65536
+net.ipv4.tcp_syncookies=1
+net.ipv4.tcp_syn_retries=2
+net.ipv4.tcp_synack_retries=2
+net.ipv4.tcp_timestamps=0
+net.ipv4.tcp_fin_timeout=30
 EOF
 sysctl -p
 
@@ -254,9 +245,10 @@ http {
 
   sendfile on;
   tcp_nopush on;
+  tcp_nodelay on;
   keepalive_timeout 120;
   server_tokens off;
-  tcp_nodelay on;
+  types_hash_max_size 2048;
 
   brotli             on;
   brotli_static      on;
@@ -366,13 +358,14 @@ server {
   resolver_timeout 5s;
 
 location /dq {
+  proxy_http_version 1.1;
   proxy_redirect          off;
   proxy_set_header Upgrade \$http_upgrade;
-  proxy_set_header Connection "Upgrade";
   proxy_set_header Host \$http_host;
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-NginX-Proxy true;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
@@ -383,6 +376,7 @@ location /dq {
 }
 
 location $v2path {
+  proxy_http_version 1.1;
   proxy_redirect          off;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "Upgrade";
@@ -390,6 +384,7 @@ location $v2path {
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_set_header X-Forwarded-Proto \$scheme;
+  proxy_set_header X-NginX-Proxy true;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
