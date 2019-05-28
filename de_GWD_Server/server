@@ -23,7 +23,7 @@ sed -i '/# End of file/i\* soft nofile 65535' /etc/security/limits.conf
 sed -i '/# End of file/i\* hard nofile 65535' /etc/security/limits.conf
 echo "ulimit -n 65535" > .bash_profile
 
-cat >> /etc/sysctl.conf << EOF
+cat > /etc/sysctl.conf << EOF
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv4.tcp_fastopen = 3
 fs.file-max=65535
@@ -530,7 +530,15 @@ tar -xvf go*linux-amd64.tar.gz
 rm -rf ~/go*linux-amd64.tar.gz
 rsync -r ~/go /usr/local
 mkdir ~/gopath
-cat >> ~/.profile << "EOF"
+cat > ~/.profile << "EOF"
+if [ "$BASH" ]; then
+  if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+  fi
+fi
+
+mesg n || true
+
 export GOROOT=/usr/local/go
 export GOPATH=~/gopath
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
