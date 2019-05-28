@@ -348,7 +348,7 @@ location /dq {
   proxy_pass              http://dns-backend;
 }
 
-location /d45062 {
+location $v2path {
   proxy_http_version      1.1;
   proxy_set_header Host \$http_host;
   proxy_set_header Upgrade WebSocket;
