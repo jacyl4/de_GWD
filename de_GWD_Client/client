@@ -28,7 +28,7 @@ sed -i '/# End of file/i\* soft nproc 65535' /etc/security/limits.conf
 sed -i '/# End of file/i\* hard nproc 65535' /etc/security/limits.conf
 sed -i '/# End of file/i\* soft nofile 65535' /etc/security/limits.conf
 sed -i '/# End of file/i\* hard nofile 65535' /etc/security/limits.conf
-echo "ulimit -n 65535" > .bash_profile
+echo "ulimit -n 65535" > ~/.bash_profile
 
 cat > /etc/sysctl.conf << EOF
 net.ipv4.ip_forward = 1
