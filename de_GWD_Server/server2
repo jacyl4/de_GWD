@@ -220,34 +220,34 @@ pid   /run/nginx.pid;
 
 events {
     use epoll;
-    worker_connections  65535;
     multi_accept on;
+    worker_connections  65535;
 }
 
 http {
   include mime.types;
   default_type application/octet-stream;
 
-  sendfile on;
-  tcp_nopush on;
-  tcp_nodelay on;
-  keepalive_timeout 120;
-  server_tokens off;
-  types_hash_max_size 2048;
+  sendfile            on;
+  tcp_nodelay         on;
+  tcp_nopush          on;
+  keepalive_timeout   120;
+  server_tokens       off;
 
-  brotli             on;
-  brotli_static      on;
-  brotli_comp_level  6;
-  brotli_buffers     16 8k;
-  brotli_min_length  20;
-  brotli_window      16m;
-  brotli_types       *;
+  brotli              on;
+  brotli_static       on;
+  brotli_comp_level   6;
+  brotli_buffers      16 8k;
+  brotli_min_length   20;
+  brotli_window       16m;
+  brotli_types        *;
 
   access_log off;
   error_log off;
 
   include /etc/nginx/conf.d/*.conf;
 }
+
 EOF
 }
 
@@ -303,27 +303,23 @@ fi
 
 function nginxwebconf(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
-upstream dns-backend {
-  server 127.0.0.1:8053;
-}
+upstream dns-backend { server 127.0.0.1:8053; }
 
 server {
   listen 80;
   server_name $vpsdomain www.$vpsdomain;
-  root /var/www/html;
-  index index.php index.html index.htm index.nginx-debian.html;
   return 301 https://\$server_name\$request_uri;
 }
 
 server {
-  listen 443 ssl http2;
+  listen 443 ssl spdy http2 fastopen=128 reuseport;
   server_name $vpsdomain www.$vpsdomain;
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
 
   ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
-  ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+  ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
   ssl_ciphers TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
   ssl_session_timeout 1440m;
@@ -335,8 +331,6 @@ server {
   ssl_early_data on;
   proxy_set_header Early-Data \$ssl_early_data;
 
-  
-  # OCSP Stapling ---
   ssl_stapling on;
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
@@ -345,31 +339,25 @@ server {
 
 location /dq {
   proxy_http_version      1.1;
-  proxy_set_header Upgrade \$http_upgrade;
-  proxy_set_header Connection "Upgrade";
-  proxy_set_header Host \$host;
+  proxy_set_header Host \$http_host;
+  proxy_set_header Upgrade "";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_read_timeout      86400;
-  keepalive_requests      25600;
-  keepalive_timeout       300 300;
+  proxy_redirect          off;
   proxy_buffering         off;
-  proxy_buffer_size       8k;
   proxy_pass              http://dns-backend;
 }
 
-location $v2path {
+location /d45062 {
   proxy_http_version      1.1;
-  proxy_set_header Upgrade \$http_upgrade;
-  proxy_set_header Connection "Upgrade";
-  proxy_set_header Host \$host;
-  proxy_set_header X-Real-IP \$remote_addr;
-  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header Host \$http_host;
+  proxy_set_header Upgrade WebSocket;
+  proxy_set_header Connection Upgrade;
   proxy_read_timeout      86400;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
+  proxy_redirect          off;
   proxy_buffering         off;
-  proxy_buffer_size       8k;
   proxy_pass              http://127.0.0.1:11811;
 }
 
