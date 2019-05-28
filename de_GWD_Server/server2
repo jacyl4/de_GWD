@@ -149,7 +149,7 @@ patch -p1 < nginx_strict-sni.patch
 --with-http_random_index_module \
 --with-libatomic \
 --with-openssl=../openssl-1.1.1b \
---with-openssl-opt='-ljemalloc' \
+--with-openssl-opt='zlib -march=native -ljemalloc -Wl,-flto' \
 --with-http_realip_module \
 --with-http_secure_link_module \
 --with-http_slice_module \
@@ -166,8 +166,8 @@ patch -p1 < nginx_strict-sni.patch
 --with-pcre=../pcre-8.43 \
 --with-pcre-jit \
 --with-http_degradation_module \
---with-cc-opt='-DTCP_FASTOPEN=23' \
---with-ld-opt='-ljemalloc' \
+--with-cc-opt='-DTCP_FASTOPEN=23 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fPIC' \
+--with-ld-opt='-ljemalloc -Wl,-z,relro -Wl,-z,now -pie' \
 --with-http_spdy_module \
 --with-http_v2_hpack_enc \
 --add-module=../ngx_brotli
