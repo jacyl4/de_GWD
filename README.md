@@ -3,10 +3,17 @@
 [详情](https://jacyl4.github.io/post/debian-gateway/)
 
 ### 服务端：
+两种服务端，任选其一。
 ```
 快速安装版
 apt-get install -y curl
 curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server && chmod +x server && ./server
+```
+
+```
+大力编译版
+apt-get install -y curl
+curl -O https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
 ```
 
 ![服务端](https://i.loli.net/2019/05/27/5ceb25f6cbf0929497.png)
