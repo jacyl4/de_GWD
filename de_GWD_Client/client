@@ -625,11 +625,9 @@ crontab -l > ~/now.cron
 echo '@reboot sleep 10 ; ~/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-reboot
 
-blue "----------------------"
-blue  "安装低延迟内核 [完毕]"
-blue "----------------------"
+
+reboot
 }
 
 
