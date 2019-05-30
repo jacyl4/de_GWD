@@ -551,8 +551,8 @@ cat > ~/bbrkernel/clearkernel <<EOF
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 cd ~/bbrkernel
-wget -O Makefile https://raw.githubusercontent.com/nanqinlang-tcp/tcp_nanqinlang/master/Makefile/Makefile-Debian9
-wget https://github.com/tcp-nanqinlang/general/raw/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
+wget -O Makefile https://github.com/jacyl4/tcp-nanqinlang/raw/master/Makefile/Makefile-Debian9
+wget https://github.com/jacyl4/tcp-nanqinlang/raw/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
 make -j \$(nproc --all) && make install
 
 sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
