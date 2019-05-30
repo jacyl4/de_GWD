@@ -580,6 +580,97 @@ blue "------------------"
 
 
 
+installlowlatencybbr(){
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
+wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-image-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+dpkg -i linux-headers-*_all.deb
+dpkg -i linux-headers-*-lowlatency_*_amd64.deb
+dpkg -i linux-image-*-lowlatency_*_amd64.deb
+
+cat > ~/bbrkernel/clearkernel <<EOF
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+cd ~/bbrkernel
+wget -O Makefile https://raw.githubusercontent.com/nanqinlang-tcp/tcp_nanqinlang/master/Makefile/Makefile-Debian9
+wget https://github.com/tcp-nanqinlang/general/raw/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
+make -j \$(nproc --all) && make install
+
+sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = nanqinlang" >> /etc/sysctl.conf
+sysctl -p
+
+/usr/bin/apt purge -y linux-image-*-amd64
+/usr/bin/apt purge -y linux-image-*-bbrplus
+update-grub
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+reboot
+EOF
+chmod +x ~/bbrkernel/clearkernel
+crontab -l > ~/now.cron
+echo '@reboot sleep 10 ; ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "-------------------------------"
+blue  "安装低延迟内核+南琴浪bbr [完毕]"
+blue "-------------------------------"
+reboot
+}
+
+
+
+installbbrplus(){
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget -N --no-check-certificate http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
+wget -N --no-check-certificate http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+cat > ~/bbrkernel/clearkernel <<EOF
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+
+/usr/bin/apt purge -y linux-image-*-amd64
+/usr/bin/apt purge -y linux-image-*-lowlatency
+update-grub
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+reboot
+EOF
+chmod +x ~/bbrkernel/clearkernel
+crontab -l > ~/now.cron
+echo '@reboot sleep 10 ; ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "------------------"
+blue  "安装bbrplus [完毕]"
+blue "------------------"
+reboot
+}
+
+
+
 change_staticip(){
     green "====================="
     green "本机地址（留空回车跳过）"
@@ -818,6 +909,8 @@ fi
     green "=========================="
     echo
     green  "1. 安装de_GWD"
+    green  "2. 安装低延迟内核+南琴浪bbr并重启生效"
+    green  "3. 安装bbrplus并重启生效"
     red    "6. 更改静态IP"
     yellow "7. 设置v2ray上级跃点"
     yellow "8. 修改本机UUID&path"
@@ -829,6 +922,14 @@ fi
     case "$num" in
     1)
     installgwd
+    start_menu
+    ;;
+    2)
+    installlowlatencybbr
+    start_menu
+    ;;
+    3)
+    installbbrplus
     start_menu
     ;;
     6)

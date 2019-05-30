@@ -445,6 +445,13 @@ EOF
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
 
+if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
+    crontab -l > now.cron
+    echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
+    crontab now.cron
+fi
+rm -rf now.cron
+
 rm -rf /usr/local/bin/ui-*
 unzip ui-script.zip
 unzip ui-web.zip
@@ -563,12 +570,6 @@ pihole restartdns
 systemctl restart pihole-FTL
 
 postinstall
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-    crontab -l > now.cron
-    echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
-    crontab now.cron
-fi
-rm -rf now.cron
 
 sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
 
@@ -590,6 +591,44 @@ change_piholeadmin(){
 pihole -a -p
 blue "----------------------"
 blue  "更改Pi-hole密码 [完毕]"
+blue "----------------------"
+}
+
+
+installlowlatency(){
+mkdir -p ~/bbrkernel && cd bbrkernel
+wget http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
+wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-image-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+
+dpkg -i linux-headers-*_all.deb
+dpkg -i linux-headers-*-lowlatency_*_amd64.deb
+dpkg -i linux-image-*-lowlatency_*_amd64.deb
+rm -rf ~/bbrkernel
+
+cat > ~/clearkernel <<EOF
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+/usr/bin/apt purge -y linux-image-*-amd64
+update-grub
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/clearkernel
+reboot
+EOF
+chmod +x ~/clearkernel
+crontab -l > ~/now.cron
+echo '@reboot sleep 10 ; ~/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+reboot
+
+blue "----------------------"
+blue  "安装低延迟内核 [完毕]"
 blue "----------------------"
 }
 
@@ -686,6 +725,7 @@ fi
     echo
     green  "1. 安装de_GWD"
     green  "2. 更改Pi-hole密码"
+    green  "3. 安装低延迟内核并重启"
     yellow "9. 更新Pi-hole"
     yellow "0. 更新de_GWD"
     red    "CTRL+C退出"
@@ -698,6 +738,10 @@ fi
     ;;
     2)
     change_piholeadmin
+    start_menu 
+    ;;
+    3)
+    installlowlatency
     start_menu 
     ;;
     9)
