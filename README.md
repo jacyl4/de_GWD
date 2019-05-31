@@ -28,4 +28,4 @@ wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/mast
 * * *  
 
 
-<center>![捐赠](https://i.loli.net/2019/05/31/5cf097e6e115651472.jpg)</center >
+![捐赠](https://i.loli.net/2019/05/31/5cf097e6e115651472.jpg)
