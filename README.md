@@ -3,7 +3,7 @@
 [详情](https://jacyl4.github.io/post/debian-gateway/)
 
 ### 服务端：
-两种服务端，任选其一。
+
 ```
 快速安装版
 apt-get install -y curl
