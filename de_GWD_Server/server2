@@ -34,9 +34,16 @@ net.ipv4.tcp_timestamps = 0
 net.ipv4.tcp_fin_timeout = 30
 net.ipv4.ip_local_port_range = 1024 65535
 net.core.default_qdisc = fq
-net.ipv4.tcp_congestion_control = bbr
 EOF
 sysctl -p
+
+if [[ $(uname -r) = "4.16.2-041602-lowlatency" ]]; then
+echo "net.ipv4.tcp_congestion_control = nanqinlang" >> /etc/sysctl.conf
+elif [[ $(uname -r) = "4.14.91-bbrplus" ]]; then
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+else
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+fi
 
 apt update && apt -y upgrade
 apt install -y net-tools curl rsync ca-certificates unzip git build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libatomic-ops-dev socat
@@ -556,9 +563,7 @@ wget -O Makefile https://github.com/jacyl4/tcp-nanqinlang/raw/master/Makefile/Ma
 wget https://github.com/jacyl4/tcp-nanqinlang/raw/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
 make -j \$(nproc --all) && make install
 
-sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = nanqinlang" >> /etc/sysctl.conf
 sysctl -p
 
@@ -597,9 +602,7 @@ cat > ~/bbrkernel/clearkernel <<EOF
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
-sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 sysctl -p
 
@@ -833,7 +836,7 @@ fi
 
 if [[ $(systemctl is-active doh-server) = "active" ]]; then
     echo "[$statusgod] DoH服务端 进程正常"
-elif [ ! -d "/usr/local/bin/doh-server" ]; then
+elif [[ ! -d "/usr/local/bin/doh-server" ]]; then
     echo "[$statusbad] DoH服务端 进程未安装"
 else
     echo "[$statusbad] DoH服务端 进程出错"
@@ -842,7 +845,7 @@ fi
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusgod] pihole    进程正常"
-elif [ ! -d "/usr/local/bin/pihole" ]; then
+elif [[ ! -d "/usr/local/bin/pihole" ]]; then
     echo "[$statusbad] pihole    进程未安装"
 else
     echo "[$statusbad] pihole    进程出错"
