@@ -35,7 +35,6 @@ net.ipv4.tcp_fin_timeout = 30
 net.ipv4.ip_local_port_range = 1024 65535
 net.core.default_qdisc = fq
 EOF
-sysctl -p
 
 if [[ $(uname -r) = "4.16.2-041602-lowlatency" ]]; then
 echo "net.ipv4.tcp_congestion_control = nanqinlang" >> /etc/sysctl.conf
@@ -44,7 +43,7 @@ echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 else
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
-
+sysctl -p
 apt update && apt -y upgrade
 apt install -y net-tools curl rsync ca-certificates unzip git build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libatomic-ops-dev socat
 }
