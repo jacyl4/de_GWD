@@ -904,6 +904,10 @@ else
     echo "[$statusbad] pihole    进程出错"
 fi
 
+blue "--------------------------"
+blue  "当前bbr方案：$(awk 'END{print $3}' /etc/sysctl.conf)"
+blue "--------------------------"
+
     green "=========================="
     green "         服务端            "
     green "介绍：一键安装de_GWD        "
