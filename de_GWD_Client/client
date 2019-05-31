@@ -36,12 +36,12 @@ net.ipv4.ip_forward = 1
 net.ipv4.conf.all.route_localnet = 1
 net.ipv4.tcp_fastopen = 3
 fs.file-max = 1000000
-net.ipv4.ip_local_port_range = 1024 65535
 net.ipv4.tcp_syncookies = 1
 net.ipv4.tcp_syn_retries = 1
 net.ipv4.tcp_synack_retries = 1
 net.ipv4.tcp_timestamps = 0
 net.ipv4.tcp_fin_timeout = 30
+net.ipv4.ip_local_port_range = 1024 65535 
 net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 EOF
