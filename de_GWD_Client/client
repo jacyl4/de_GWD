@@ -14,11 +14,12 @@ esac
 
 
 function preinstall(){
-export LANGUAGE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export LC_TYPE=en_US.UTF-8
-export LANG=en_US.UTF-8
-locale-gen en_US.UTF-8
+cat > /etc/default/locale << EOF
+LANGUAGE=en_US.UTF-8
+LC_ALL=en_US.UTF-8
+LC_TYPE=en_US.UTF-8
+LANG=en_US.UTF-8
+EOF
 
 sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
 update-grub
