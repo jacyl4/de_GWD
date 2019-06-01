@@ -25,11 +25,3 @@ wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/mast
 ![客户端](https://i.loli.net/2019/05/31/5cf04ea736faf86947.png)
 
 
-* * *  
-
-<p align="center">
-<img src="https://i.loli.net/2019/05/31/5cf09b2102df023402.jpg">
-</p>
-<p align="center">
-<img width="360" src="https://i.loli.net/2019/05/31/5cf09cae0e15a99033.png">
-</p>
