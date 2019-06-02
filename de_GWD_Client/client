@@ -14,6 +14,10 @@ esac
 
 
 function preinstall(){
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_TYPE=en_US.UTF-8
+export LANG=en_US.UTF-8
 cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
