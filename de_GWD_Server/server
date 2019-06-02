@@ -866,9 +866,9 @@ systemctl restart doh-server
 systemctl enable doh-server
 
 postinstall
-blue "------------------"
+blue "-----------------"
 blue  "更新de_GWD [完毕]"
-blue "------------------"
+blue "-----------------"
 }
 
 
