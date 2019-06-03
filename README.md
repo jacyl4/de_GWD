@@ -1,6 +1,5 @@
 ![de_GWD](https://i.loli.net/2019/05/08/5cd295163b73a.png)
 
-[Details](https://jacyl4.github.io/post/debian-gateway/)
 
 ### Server：
 Quick install version
