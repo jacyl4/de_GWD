@@ -716,8 +716,6 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 
 purenginxconf
 
-purenginxwebconf
-
 systemctl restart nginx
 
 installdoh
