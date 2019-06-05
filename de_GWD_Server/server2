@@ -7,8 +7,6 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-
 cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
