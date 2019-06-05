@@ -593,7 +593,7 @@ systemctl restart pihole-FTL
 
 postinstall
 
-sed -e "/(ALL:ALL)/a\www-data ALL=(root)  NOPASSWD:ALL" -i /etc/sudoers
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
 echo -e "$v2servn" > /var/www/html/nodename.txt
 echo -e "$v2servn" > /var/www/html/domain.txt
