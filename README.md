@@ -4,11 +4,15 @@
 ### Server：
 Quick install version
 ```
+apt update && apt -y upgrade
+
 wget -N --no-check-certificate https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/server && chmod +x server && ./server
 ```
 
 Run-time compilation version
 ```
+apt update && apt -y upgrade
+
 wget -N --no-check-certificate https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
 ```
 
