@@ -12,7 +12,7 @@ Run-time compilation version
 wget -N --no-check-certificate https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
 ```
 
-![server](https://i.loli.net/2019/05/31/5cf04ea75135163355.png)
+![server](https://i.loli.net/2019/06/06/5cf8081f98ec452639.png)
 
 ### Client：
 ```

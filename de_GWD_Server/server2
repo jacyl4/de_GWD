@@ -443,6 +443,181 @@ EOF
 }
 
 
+function nginxnextcloudconf(){
+cat > /etc/nginx/conf.d/default.conf<< EOF
+upstream dns-backend { server 127.0.0.1:8053; }
+
+upstream php-handler {
+    server unix:/run/php/php7.3-fpm.sock;
+}
+
+server {
+  listen 80;
+  server_name $vpsdomain www.$vpsdomain;
+  return 301 https://\$server_name\$request_uri;
+}
+
+server {
+  listen 443 ssl http2 spdy fastopen=64 reuseport;
+  server_name $vpsdomain www.$vpsdomain;
+  root /var/www/html;
+  index index.php index.html index.htm index.nginx-debian.html;
+
+  ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
+  ssl_certificate_key /var/www/ssl/$vpsdomain.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
+  ssl_session_timeout 10m;
+  ssl_session_cache shared:le_nginx_SSL:10m;
+  ssl_buffer_size 1400;
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
+  resolver 8.8.8.8 valid=600s;
+  resolver_timeout 5s;
+
+
+  location ~ [^/]\.php(/|$) {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    fastcgi_index index.php;
+  }
+
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Robots-Tag none;
+    add_header X-Download-Options noopen;
+    add_header X-Permitted-Cross-Domain-Policies none;
+    add_header Referrer-Policy no-referrer;
+
+    fastcgi_hide_header X-Powered-By;
+
+    location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+    }
+
+    location = /.well-known/carddav {
+      return 301 \$scheme://\$host/nextcloud/remote.php/dav;
+    }
+    location = /.well-known/caldav {
+      return 301 \$scheme://\$host/nextcloud/remote.php/dav;
+    }
+
+    location /.well-known/acme-challenge { }
+
+    location ^~ /nextcloud {
+    
+    # set max upload size
+    client_max_body_size 10G;
+    fastcgi_buffers 64 4K;
+
+        # Uncomment if your server is build with the ngx_pagespeed module
+        # This module is currently not supported.
+        #pagespeed off;
+
+        location /nextcloud {
+            rewrite ^ /nextcloud/index.php\$request_uri;
+        }
+
+        location ~ ^\/nextcloud\/(?:build|tests|config|lib|3rdparty|templates|data)\/ {
+            deny all;
+        }
+        location ~ ^\/nextcloud\/(?:\.|autotest|occ|issue|indie|db_|console) {
+            deny all;
+        }
+
+        location ~ ^\/nextcloud\/(?:index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|oc[ms]-provider\/.+)\.php(?:$|\/) {
+            fastcgi_split_path_info ^(.+?\.php)(\/.*|)$;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+            fastcgi_param PATH_INFO \$fastcgi_path_info;
+            fastcgi_param HTTPS on;
+            #Avoid sending the security headers twice
+            fastcgi_param modHeadersAvailable true;
+            fastcgi_param front_controller_active true;
+            fastcgi_pass php-handler;
+            fastcgi_intercept_errors on;
+            fastcgi_request_buffering off;
+        }
+
+        location ~ ^\/nextcloud\/(?:updater|oc[ms]-provider)(?:$|\/) {
+            try_files \$uri/ =404;
+            index index.php;
+        }
+
+        # Adding the cache control header for js and css files
+        # Make sure it is BELOW the PHP block
+        location ~ ^\/nextcloud\/.+[^\/]\.(?:css|js|woff2?|svg|gif)$ {
+            try_files \$uri /nextcloud/index.php\$request_uri;
+            add_header Cache-Control "public, max-age=15778463";
+            # Add headers to serve security related headers  (It is intended
+            # to have those duplicated to the ones above)
+            # Before enabling Strict-Transport-Security headers please read
+            # into this topic first.
+            # add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;";
+            add_header X-Content-Type-Options nosniff;
+            add_header X-XSS-Protection "1; mode=block";
+            add_header X-Robots-Tag none;
+            add_header X-Download-Options noopen;
+            add_header X-Permitted-Cross-Domain-Policies none;
+            add_header Referrer-Policy no-referrer;
+
+            # Optional: Don't log access to assets
+            access_log off;
+        }
+
+        location ~ ^\/nextcloud\/.+[^\/]\.(?:png|html|ttf|ico|jpg|jpeg)$ {
+            try_files \$uri /nextcloud/index.php\$request_uri;
+            # Optional: Don't log access to other assets
+            access_log off;
+        }
+    }
+
+
+location /dq {
+  proxy_http_version      1.1;
+  proxy_set_header Host \$http_host;
+  proxy_set_header Upgrade "";
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_read_timeout      86400;
+  keepalive_requests      25600;
+  keepalive_timeout       300 300;
+  proxy_redirect          off;
+  proxy_buffering         off;
+  proxy_pass              http://dns-backend;
+}
+
+location $v2path {
+  proxy_http_version      1.1;
+  proxy_set_header Host \$http_host;
+  proxy_set_header Upgrade WebSocket;
+  proxy_set_header Connection Upgrade;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_read_timeout      86400;
+  keepalive_requests      25600;
+  keepalive_timeout       300 300;
+  proxy_redirect          off;
+  proxy_buffering         off;
+  proxy_pass              http://127.0.0.1:11811;
+}
+
+}
+EOF
+}
+
+
 function installpihole(){
 curl -sSL https://install.pi-hole.net | bash
 systemctl disable lighttpd
@@ -503,6 +678,7 @@ unzip sample.zip
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
 }
+
 
 
 
@@ -694,6 +870,182 @@ reboot
 
 
 
+installnextcloud(){
+    green "=============="
+    green " 数据库用户名"
+    green "=============="
+    read psqluser
+
+    green "=============="
+    green " 数据库密码"
+    green "=============="
+    read psqlpw
+
+    green "=============="
+    green " 数据库名称"
+    green "=============="
+    read psqlname
+
+apt -y install software-properties-common apt-transport-https lsb-release
+
+wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ stretch main" > /etc/apt/sources.list.d/php7.3.list
+
+apt update && apt -y upgrade
+
+apt install -y postgresql postgresql-contrib
+
+
+sed -i "/local   all             postgres                                peer/c\local   all             postgres                                trust"  /etc/postgresql/11/main/pg_hba.conf
+/etc/init.d/postgresql restart
+
+psql -U postgres -w -c "CREATE USER $psqluser WITH PASSWORD '$psqlpw';"
+psql -U postgres -w -c "CREATE DATABASE $psqlname OWNER $psqluser;"
+psql -U postgres -w -c "GRANT ALL PRIVILEGES ON DATABASE $psqlname TO $psqluser;"
+
+sed -i "/local   all             postgres                                trust/c\local   all             postgres                                peer"  /etc/postgresql/11/main/pg_hba.conf
+/etc/init.d/postgresql restart
+
+apt install -y php7.3 php7.3-fpm php7.3-pgsql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
+
+cat > /etc/php/7.3/fpm/php-fpm.conf <<EOF
+;;;;;;;;;;;;;;;;;;;;;
+; FPM Configuration ;
+;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;
+; Global Options ;
+;;;;;;;;;;;;;;;;;;
+
+[global]
+pid = /run/php/php7.3-fpm.pid
+error_log = /var/log/php7.3-fpm.log
+log_level = warning
+
+emergency_restart_threshold = 30
+emergency_restart_interval = 60s
+process_control_timeout = 5s
+daemonize = yes
+
+rlimit_files = 65535
+rlimit_core = 0
+
+include=/etc/php/7.3/fpm/pool.d/*.conf
+EOF
+
+cat > /etc/php/7.3/fpm/pool.d/www.conf <<EOF
+;;;;;;;;;;;;;;;;;;;;
+; Pool Definitions ;
+;;;;;;;;;;;;;;;;;;;;
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php7.3-fpm.sock
+listen.allowed_clients = 127.0.0.1
+listen.owner = www-data
+listen.group = www-data
+
+pm = dynamic
+pm.max_children = 16
+pm.start_servers = 11
+pm.min_spare_servers = 8
+pm.max_spare_servers = 16
+pm.max_requests = 2048
+pm.process_idle_timeout = 10s
+request_terminate_timeout = 120
+request_slowlog_timeout = 0
+
+pm.status_path = /status
+slowlog = var/log/slow.log
+
+catch_workers_output = yes
+env[HOSTNAME] = \$HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+EOF
+
+sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
+echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
+
+systemctl restart php7.3-fpm
+
+vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
+
+v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+
+nginxnextcloudconf
+
+systemctl restart nginx
+
+wget -N --no-check-certificate https://download.nextcloud.com/server/installer/setup-nextcloud.php
+mv -f ~/setup-nextcloud.php /var/www/html/
+
+blue "------------------------------------"
+blue "##数据库用户名："
+blue "$psqluser"
+blue "##数据库密码："
+blue "$psqlpw"
+blue "##数据库名称："
+blue "$psqlname"
+blue "##Nextcloud安装地址："
+blue "$vpsdomain/setup-nextcloud.php"
+blue "------------------------------------"
+}
+
+
+
+setnextcloudcache(){
+sed -i "/port 6379/c\port 0" /etc/redis/redis.conf
+sed -i "/unixsocket \/var\/run\/redis\/redis.sock/c\unixsocket \/run\/redis\/redis.sock" /etc/redis/redis.conf
+sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
+usermod -aG redis www-data
+
+chown -R redis:www-data /run/redis
+
+systemctl restart redis-server
+
+systemctl restart php7.3-fpm
+
+sed -i '/installed/,$d' /var/www/html/nextcloud/config/config.php
+cat >> /var/www/html/nextcloud/config/config.php << EOF
+  'installed' => true,
+
+  'enabledPreviewProviders' =>
+  array (
+    0 => 'OC\\Preview\\PNG',
+    1 => 'OC\\Preview\\JPEG',
+    2 => 'OC\\Preview\\GIF',
+    3 => 'OC\\Preview\\HEIC',
+    4 => 'OC\\Preview\\BMP',
+    5 => 'OC\\Preview\\XBitmap',
+    6 => 'OC\\Preview\\MP3',
+    7 => 'OC\\Preview\\TXT',
+    8 => 'OC\\Preview\\MarkDown',
+    9 => 'OC\\Preview\\Movie',
+    10 => 'OC\\Preview\\PDF',
+  ),
+
+'memcache.local' => '\OC\Memcache\APCu',
+'memcache.distributed' => '\OC\Memcache\Redis',
+'redis' => [
+     'host'     => '/var/run/redis/redis.sock',
+     'port'     => 0,
+],
+);
+EOF
+
+blue "------------------------"
+blue "配置Nextcloud缓存 [完毕]"
+blue "------------------------"
+}
+
+
+
 change_staticip(){
     green "====================="
     green "本机地址（留空回车跳过）"
@@ -859,6 +1211,12 @@ systemctl enable v2ray
 
 nginxconf
 
+if [[ -d "/var/www/html/nextcloud" ]]; then
+  nginxnextcloudconf
+else
+  nginxwebconf
+fi
+
 systemctl restart nginx
 
 installdoh
@@ -926,8 +1284,10 @@ blue "--------------------------"
     green "=========================="
     echo
     green  "1. 安装de_GWD"
-    green  "2. 安装低延迟内核+南琴浪bbr并重启生效"
-    green  "3. 安装bbrplus并重启生效"
+    green  "2. 切换至低延迟内核+南琴浪bbr并重启生效"
+    green  "3. 切换至bbrplus并重启生效"
+    blue   "4. 安装Postgres数据库+安装PHP+安装Nextcloud"
+    blue   "5. 配置Nextcloud缓存"
     red    "6. 更改静态IP"
     yellow "7. 设置v2ray上级跃点"
     yellow "8. 修改本机UUID&path"
@@ -947,6 +1307,14 @@ blue "--------------------------"
     ;;
     3)
     installbbrplus
+    start_menu
+    ;;
+    4)
+    installnextcloud
+    start_menu
+    ;;
+    5)
+    setnextcloudcache
     start_menu
     ;;
     6)
