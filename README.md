@@ -4,12 +4,14 @@
 ### Server：
 Quick install version
 ```
-wget -4 -N --no-check-certificate https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server && chmod +x server && ./server
+apt-get install -y curl
+curl -4 -O https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server && chmod +x server && ./server
 ```
 
 Run-time compilation version
 ```
-wget -4 -N --no-check-certificate https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
+apt-get install -y curl
+curl -4 -O https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
 ```
 
 ![server](https://i.loli.net/2019/06/06/5cf80b7f5406d24591.png)
