@@ -600,11 +600,7 @@ echo -e "$v2servn" > /var/www/html/domain.txt
 echo -e "$uuidnum" > /var/www/html/uuid.txt
 echo -e "$v2path" > /var/www/html/path.txt
 echo -e "cdninstagram.com" > /var/www/html/listb.txt
-chown -R www-data:www-data /var/www/html/nodename.txt
-chown -R www-data:www-data /var/www/html/domain.txt
-chown -R www-data:www-data /var/www/html/uuid.txt
-chown -R www-data:www-data /var/www/html/path.txt
-chown -R www-data:www-data /var/www/html/listb.txt
+chown -R www-data:www-data /var/www/html/*.txt
 
 blue "------------------"
 blue  "安装de_GWD [完毕]"
