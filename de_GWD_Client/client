@@ -740,8 +740,8 @@ fi
     green "              客户端                 "
     green "介绍：一键安装de_GWD                  "
     green "系统：仅测于Debian9 (amd64 & arm64)   "
-    green "作者：jacyl4                         "
-    green "网站：jacyl4.github.io               "
+    green "作者：GWDburst                       "
+    green "网站：GWDburst.github.io             "
     green "===================================="
     echo
     green  "1. 安装de_GWD"
