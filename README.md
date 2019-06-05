@@ -18,6 +18,6 @@ wget -N --no-check-certificate https://github.com/gwdburst/de_GWD/raw/master/de_
 ```
 wget -N --no-check-certificate https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Client/client && chmod +x ~/client && ~/client
 ```
-![client](https://i.loli.net/2019/05/31/5cf04ea736faf86947.png)
+![client](https://i.loli.net/2019/06/06/5cf80a3302a5843947.png)
 
 
