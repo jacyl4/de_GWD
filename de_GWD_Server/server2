@@ -7,6 +7,8 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+
 cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
@@ -74,7 +76,7 @@ function installv2ray(){
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
-wget https://github.com/jacyl4/de_GWD/raw/master/de_GWD_Client/v2amd64.zip -O ~/v2amd64.zip
+wget -O ~/v2amd64.zip https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Client/v2amd64.zip
 unzip v2amd64.zip
 mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
 mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
@@ -87,12 +89,12 @@ chmod +x /usr/bin/v2ray/v2ctl
 
 
 function installnginxlasest(){
-wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz
+wget -N https://www.openssl.org/source/openssl-1.1.1b.tar.gz
 tar zxvf openssl-1.1.1b.tar.gz
 cd openssl-1.1.1b
 
-wget https://github.com/hakasenyang/openssl-patch/raw/master/openssl-equal-1.1.1b.patch
-wget https://github.com/hakasenyang/openssl-patch/raw/master/openssl-1.1.1b-chacha_draft.patch
+wget -N https://github.com/hakasenyang/openssl-patch/raw/master/openssl-equal-1.1.1b.patch
+wget -N https://github.com/hakasenyang/openssl-patch/raw/master/openssl-1.1.1b-chacha_draft.patch
 patch -p1 < openssl-equal-1.1.1b.patch
 patch -p1 < openssl-1.1.1b-chacha_draft.patch
 
@@ -104,7 +106,7 @@ echo "export LD_LIBRARY_PATH=/usr/local/lib" >> ~/.bashrc
 cd ~
 
 
-wget https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
+wget -N https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
 tar -zxvf pcre-8.43.tar.gz
 cd pcre-8.43
 ./configure
@@ -112,7 +114,7 @@ make -j $(nproc --all) && make install
 cd ~
 
 
-wget https://github.com/jemalloc/jemalloc/releases/download/5.2.0/jemalloc-5.2.0.tar.bz2
+wget -N https://github.com/jemalloc/jemalloc/releases/download/5.2.0/jemalloc-5.2.0.tar.bz2
 tar xjvf jemalloc-5.2.0.tar.bz2
 cd jemalloc-5.2.0
 ./configure
@@ -136,14 +138,14 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 
-wget https://nginx.org/download/nginx-1.17.0.tar.gz
+wget -N https://nginx.org/download/nginx-1.17.0.tar.gz
 tar zxvf nginx-1.17.0.tar.gz
 sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' ~/nginx-1.17.0/auto/cc/gcc
 [ ! -d "/etc/nginx" ] && mkdir -p /etc/nginx
 cd nginx-1.17.0
-wget https://github.com/kn007/patch/raw/master/nginx.patch
-wget https://github.com/kn007/patch/raw/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
-wget https://github.com/kn007/patch/raw/master/nginx_strict-sni.patch
+wget -N https://github.com/kn007/patch/raw/master/nginx.patch
+wget -N https://github.com/kn007/patch/raw/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
+wget -N https://github.com/kn007/patch/raw/master/nginx_strict-sni.patch
 patch -p1 < nginx.patch
 patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
 patch -p1 < nginx_strict-sni.patch
@@ -650,7 +652,7 @@ git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make -j $(nproc --all) && make install
 cd ~
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf -O /etc/dns-over-https/doh-server.conf
+wget -O /etc/dns-over-https/doh-server.conf https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/doh-server.conf
 rm -rf ~/dns-over-https
 }
 
@@ -664,7 +666,6 @@ hwclock -w
 rm -rf ~/server*
 EOF
 chmod +x /usr/local/bin/updateGWD
-/usr/local/bin/updateGWD
 
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
 crontab -l > now.cron
@@ -673,7 +674,7 @@ crontab now.cron
 fi
 rm -rf now.cron
 
-wget https://github.com/jacyl4/de_GWD/raw/master/de_GWD_Server/sample.zip
+wget -N https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/sample.zip
 unzip sample.zip 
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
@@ -702,7 +703,7 @@ cd ~
 preinstall
 
 installv2ray
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
+wget -O /etc/v2ray/config.json https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/v2wt-server.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl restart v2ray
@@ -724,7 +725,7 @@ systemctl enable nginx
 
 installpihole
 
-wget https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz
+wget -N https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz
 tar -xvf go*linux-amd64.tar.gz
 rm -rf ~/go*linux-amd64.tar.gz
 rsync -r ~/go /usr/local
@@ -785,11 +786,11 @@ blue "------------------"
 
 installlowlatencybbr(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+wget -N http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
-wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
-wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
-wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-image-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
+wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-image-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
 dpkg -i linux-headers-*_all.deb
 dpkg -i linux-headers-*-lowlatency_*_amd64.deb
 dpkg -i linux-image-*-lowlatency_*_amd64.deb
@@ -799,8 +800,8 @@ cat > ~/bbrkernel/clearkernel <<EOF
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 cd ~/bbrkernel
-wget -O Makefile https://github.com/jacyl4/tcp-nanqinlang/raw/master/Makefile/Makefile-Debian9
-wget https://github.com/jacyl4/tcp-nanqinlang/raw/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
+wget -O Makefile https://github.com/gwdburst/general/raw/master/Makefile/Makefile-Debian9
+wget -N https://github.com/gwdburst/general/raw/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
 make -j \$(nproc --all) && make install
 
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
@@ -833,8 +834,8 @@ reboot
 
 installbbrplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N --no-check-certificate http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
-wget -N --no-check-certificate http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
+wget -N http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
+wget -N http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
@@ -982,7 +983,7 @@ nginxnextcloudconf
 
 systemctl restart nginx
 
-wget -N --no-check-certificate https://download.nextcloud.com/server/installer/setup-nextcloud.php
+wget -N https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
 
 blue "------------------------------------"
@@ -1202,7 +1203,7 @@ uuidnum=$(awk "/[Ri]d/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"'
 v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
 installv2ray
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json -O /etc/v2ray/config.json
+wget -O /etc/v2ray/config.json https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/v2wt-server.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl daemon-reload
