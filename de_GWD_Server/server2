@@ -986,13 +986,13 @@ wget -N --no-check-certificate https://download.nextcloud.com/server/installer/s
 mv -f ~/setup-nextcloud.php /var/www/html/
 
 blue "------------------------------------"
-blue "##数据库用户名："
+blue "  数据库用户名："
 blue "$psqluser"
-blue "##数据库密码："
+blue "  数据库密码："
 blue "$psqlpw"
-blue "##数据库名称："
+blue "  数据库名称："
 blue "$psqlname"
-blue "##Nextcloud安装地址："
+blue "  Nextcloud安装地址："
 blue "$vpsdomain/setup-nextcloud.php"
 blue "------------------------------------"
 }
