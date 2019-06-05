@@ -83,7 +83,7 @@ function installv2ray(){
 mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
-wget -O ~/v2amd64.zip https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Client/v2amd64.zip
+wget -O ~/v2amd64.zip https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/v2amd64.zip
 unzip v2amd64.zip
 mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
 mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
@@ -326,7 +326,7 @@ git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make -j $(nproc --all) && make install
 cd ~
-wget -O /etc/dns-over-https/doh-server.conf https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/doh-server.conf
+wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
 rm -rf ~/dns-over-https
 }
 
@@ -348,7 +348,7 @@ crontab now.cron
 fi
 rm -rf now.cron
 
-wget -N https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/sample.zip
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/sample.zip
 unzip sample.zip 
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
@@ -376,7 +376,7 @@ cd ~
 preinstall
 
 installv2ray
-wget -O /etc/v2ray/config.json https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/v2wt-server.json
+wget -O /etc/v2ray/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl restart v2ray
@@ -475,8 +475,8 @@ cat > ~/bbrkernel/clearkernel <<EOF
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 cd ~/bbrkernel
-wget -O Makefile https://github.com/gwdburst/tcp-nanqinlang/raw/master/Makefile/Makefile-Debian9
-wget https://github.com/gwdburst/tcp-nanqinlang/raw/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
+wget -O Makefile https://raw.githubusercontent.com/gwdburst/general/master/Makefile/Makefile-Debian9
+wget -N https://raw.githubusercontent.com/gwdburst/general/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
 make -j \$(nproc --all) && make install
 
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
@@ -509,8 +509,8 @@ reboot
 
 installbbrplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
-wget -N http://github.com/cx9208/Linux-NetSpeed/raw/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
+wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
+wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
@@ -704,7 +704,7 @@ uuidnum=$(awk "/[Ri]d/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"'
 v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
 installv2ray
-wget -O /etc/v2ray/config.json https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Server/v2wt-server.json
+wget -O /etc/v2ray/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl daemon-reload
