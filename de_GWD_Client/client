@@ -91,9 +91,9 @@ apt install -y net-tools curl rsync ca-certificates unzip git build-essential ip
 
 
 function predownload(){
-wget https://gwdbase.xyz/ui-cnr.txt -O /usr/local/bin/chnroute.txt
-wget https://gwdbase.xyz/ui-script.zip -O ~/ui-script.zip
-wget https://gwdbase.xyz/ui-web.zip -O ~/ui-web.zip
+wget -O /usr/local/bin/chnroute.txt https://gwdbase.xyz/ui-cnr.txt
+wget -O ~/ui-script.zip https://gwdbase.xyz/ui-script.zip
+wget -O ~/ui-web.zip https://gwdbase.xyz/ui-web.zip
 }
 
 
@@ -620,9 +620,9 @@ installlowlatency(){
 mkdir -p ~/bbrkernel && cd bbrkernel
 wget http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
-wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
-wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
-wget -N --no-check-certificate https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-image-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
+wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
+wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-image-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
 
 dpkg -i linux-headers-*_all.deb
 dpkg -i linux-headers-*-lowlatency_*_amd64.deb
