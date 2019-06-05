@@ -102,7 +102,7 @@ mkdir -p /etc/v2ray
 mkdir -p /usr/bin/v2ray
 mkdir -p /var/log/v2ray
 if [[ $architecture = "arm64" ]]; then
-    wget https://gwdbase.xyz/v2arm64.zip -O ~/v2arm64.zip
+    wget -O ~/v2arm64.zip https://gwdbase.xyz/v2arm64.zip
     unzip v2arm64.zip
     mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
@@ -110,7 +110,7 @@ if [[ $architecture = "arm64" ]]; then
     rm -rf ~/v2arm64
     rm -rf ~/v2arm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget https://gwdbase.xyz/v2amd64.zip -O ~/v2amd64.zip
+    wget -O ~/v2amd64.zip https://gwdbase.xyz/v2amd64.zip
     unzip v2amd64.zip
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
@@ -400,7 +400,7 @@ cd dns-over-https
 make && make install
 cd ~
 rm -rf ~/dns-over-https
-wget https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Client/doh-client.conf -O /etc/dns-over-https/doh-client.conf
+wget -O /etc/dns-over-https/doh-client.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doh-client.conf
 }
 
 
@@ -482,7 +482,7 @@ chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 
 rm -rf ~/ui-*
-wget https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Client/version.php -O /var/www/html/version.php
+wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
 }
 
 
