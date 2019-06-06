@@ -1245,6 +1245,8 @@ else
   nginxwebconf
 fi
 
+systemctl restart nginx
+
 installdoh
 systemctl daemon-reload
 systemctl restart doh-server
@@ -1254,8 +1256,6 @@ postinstall
 blue "-----------------"
 blue  "更新de_GWD [完毕]"
 blue "-----------------"
-
-systemctl restart nginx
 }
 
 
