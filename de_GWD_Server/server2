@@ -1256,7 +1256,6 @@ blue  "更新de_GWD [完毕]"
 blue "-----------------"
 
 systemctl restart nginx
-
 }
 
 
