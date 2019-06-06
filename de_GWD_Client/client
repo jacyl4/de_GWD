@@ -281,7 +281,7 @@ ipset -X listw &>/dev/null
 lanip="0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16 224.0.0.0/4 240.0.0.0/4 223.5.5.5 223.6.6.6 114.114.114.114 114.114.115.115 1.2.4.8 210.2.4.8 112.124.47.27 114.215.126.16 112.124.47.27 180.76.76.76 119.29.29.29 182.254.116.116"
 
 ipset -N listb hash:net maxelem 65535
-for iplistb in $(cat '/var/www/html/listb.txt'); do
+for iplistb in $(cat /var/www/html/listb.txt); do
   ipset add listb $iplistb
 done
 
@@ -291,20 +291,20 @@ for iplanip in $lanip; do
 done
 
 ipset -N listwlan hash:net maxelem 65535
-for iplistwlan in $(cat '/var/www/html/listwlan.txt'); do
+for iplistwlan in $(cat /var/www/html/listwlan.txt); do
   ipset add listwlan $iplistwlan
 done
 
 ipset -N listw hash:net maxelem 65535
-for iplistw in $(cat '/var/www/html/listw.txt'); do
+for iplistw in $(cat /var/www/html/listw.txt); do
   ipset add listw $iplistw
 done
-for ipdomain in $(cat '/var/www/html/domain.txt'); do
+for ipdomain in $(cat /var/www/html/domain.txt); do
   ipset add listw $ipdomain
 done
 
 ipset -N chnroute hash:net maxelem 65535
-for ipchnroute in $(cat '/usr/local/bin/chnroute.txt'); do
+for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
   ipset add chnroute $ipchnroute
 done
 
@@ -431,9 +431,7 @@ cat > /etc/pihole/dns-servers.conf << EOF
 EOF
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_9=127.0.0.1#5380' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_8=202.141.176.93' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=202.141.162.123' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=127.0.0.1#5380' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
@@ -447,8 +445,6 @@ sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=202.141.162.123' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=202.141.176.93' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 }
 
@@ -532,11 +528,11 @@ systemctl enable v2ray
 installiptablesproxy
 
 if [[ $architecture = "arm64" ]]; then
-    wget https://dl.google.com/go/go1.11.9.linux-arm64.tar.gz
+    wget -N https://dl.google.com/go/go1.11.9.linux-arm64.tar.gz
     tar -xvf go*linux-arm64.tar.gz
     rm -rf ~/go*linux-arm64.tar.gz
 elif [[ $architecture = "amd64" ]]; then
-    wget https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz
+    wget -N https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz
     tar -xvf go*linux-amd64.tar.gz
     rm -rf ~/go*linux-amd64.tar.gz
 fi
@@ -618,7 +614,7 @@ blue "----------------------"
 
 installlowlatency(){
 mkdir -p ~/bbrkernel && cd bbrkernel
-wget http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+wget -N http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
 wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
