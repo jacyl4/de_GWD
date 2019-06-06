@@ -546,7 +546,7 @@ reboot
 
 
 
-change_staticip(){
+changestaticip(){
     green "====================="
     green "本机地址（留空回车跳过）"
     green "====================="
@@ -575,7 +575,36 @@ blue "------------------"
 
 
 
-modify_upstream(){
+changev2rayverify(){
+    green "========="
+    green "新的UUID"
+    green "========="
+    read v2raynuuid
+
+    green "========="
+    green "新的path"
+    green "========="
+    read v2raynpath
+
+if [[ -d "/etc/nginx" ]]; then
+sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
+elif [[ -d "/usr/local/nginx" ]]; then
+nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
+sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
+fi
+systemctl restart nginx
+
+sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$v2raynuuid'"'",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2raynpath'"'"/" /etc/v2ray/config.json
+systemctl restart v2ray
+blue "-------------------------"
+blue  "修改本机UUID&path [完毕]"
+blue "-------------------------"
+}
+
+
+
+changev2rayupstream(){
     green "==============================="
     green "Y.修改上级跃点 / N.删除上级跃点"
     green "==============================="
@@ -654,35 +683,6 @@ blue "--------------------"
 blue  "删除上级跃点 [完毕]"
 blue "--------------------"
 fi
-}
-
-
-
-change_v2rayverify(){
-    green "========="
-    green "新的UUID"
-    green "========="
-    read v2raynuuid
-
-    green "========="
-    green "新的path"
-    green "========="
-    read v2raynpath
-
-if [[ -d "/etc/nginx" ]]; then
-sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
-elif [[ -d "/usr/local/nginx" ]]; then
-nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
-sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
-fi
-systemctl restart nginx
-
-sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$v2raynuuid'"'",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2raynpath'"'"/" /etc/v2ray/config.json
-systemctl restart v2ray
-blue "-------------------------"
-blue  "修改本机UUID&path [完毕]"
-blue "-------------------------"
 }
 
 
@@ -785,8 +785,8 @@ blue "--------------------------"
     green  "2. 切换至低延迟内核+南琴浪bbr并重启生效"
     green  "3. 切换至bbrplus并重启生效"
     red    "6. 更改静态IP"
-    yellow "7. 设置v2ray上级跃点"
-    yellow "8. 修改本机UUID&path"
+    yellow "7. 更换v2ray UUID & path"
+    yellow "8. 设置v2ray 上级跃点"
     yellow "9. 更新Pi-hole"
     yellow "0. 更新de_GWD"
     red    "CTRL+C退出"
@@ -806,15 +806,15 @@ blue "--------------------------"
     start_menu
     ;;
     6)
-    change_staticip
+    changestaticip
     start_menu 
     ;;
     7)
-    modify_upstream
+    changev2rayverify
     start_menu 
     ;;
     8)
-    change_v2rayverify
+    changev2rayupstream
     start_menu 
     ;;
     9)
