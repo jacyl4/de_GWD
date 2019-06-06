@@ -184,6 +184,12 @@ alert("黑白名单已提交");
 
   </div>
   <!-- /#wrapper -->
+<script> 
+window.onload = function() {
+$("body").toggleClass("sidebar-toggled");
+$(".sidebar").toggleClass("toggled");
+}
+</script>
 
   <!-- Scroll to Top Button-->
   <a class="scroll-to-top rounded" href="#page-top">

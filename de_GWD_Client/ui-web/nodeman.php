@@ -292,6 +292,12 @@ alert("节点信息已保存");
 
   </div>
   <!-- /#wrapper -->
+<script> 
+window.onload = function() {
+$("body").toggleClass("sidebar-toggled");
+$(".sidebar").toggleClass("toggled");
+}
+</script>
 
   <!-- Scroll to Top Button-->
   <a class="scroll-to-top rounded" href="#page-top">
