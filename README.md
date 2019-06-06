@@ -14,7 +14,7 @@ apt-get install -y curl
 curl -4 -O https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server2 && chmod +x server2 && ./server2
 ```
 
-![server](https://i.loli.net/2019/06/07/5cf985f1d545343116.png)
+![server](https://i.loli.net/2019/06/07/5cf9870d1905160227.png)
 
 ### Client：
 ```
