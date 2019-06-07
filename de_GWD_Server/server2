@@ -973,7 +973,7 @@ mv -f ~/setup-nextcloud.php /var/www/html/
 
 apt install -y mariadb-server
 
-green "输入数据库root用户密码，临时存档以供自动建立nextcloud数库库"
+green"输入数据库root用户密码，临时存档以供自动建立nextcloud数库库"
 read sqlrootpw
 
 cat > ~/.my.cnf << EOF
