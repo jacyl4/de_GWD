@@ -984,7 +984,7 @@ psql -U postgres -w -c "GRANT ALL PRIVILEGES ON DATABASE $sqlname TO $sqluser;"
 sed -i "/local   all             postgres                                trust/c\local   all             postgres                                peer"  /etc/postgresql/11/main/pg_hba.conf
 /etc/init.d/postgresql restart
 
-green "为Postgres默认用户建立密码"
+green "为PostgreSQL默认用户建立密码"
 passwd postgres
 
 blue "------------------------------------"
@@ -1317,7 +1317,7 @@ blue "--------------------------"
     green  " 1. 安装de_GWD"
     green  " 2. 切换至低延迟内核+南琴浪bbr并重启生效"
     green  " 3. 切换至bbrplus并重启生效"
-    blue   " 4. 安装PHP+安装Postgres+安装Nextcloud"
+    blue   " 4. 安装PHP+安装PostgreSQL+安装Nextcloud"
     blue   " 5. 配置Nextcloud缓存"
     red    "66. 更改静态IP"
     red    " 6. 更换域名并重新制作证书"
