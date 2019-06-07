@@ -873,42 +873,29 @@ installnextcloud(){
     green "=============="
     green " 数据库用户名"
     green "=============="
-    read psqluser
+    read sqluser
 
     green "=============="
     green " 数据库密码"
     green "=============="
-    read psqlpw
+    read sqlpw
 
     green "=============="
     green " 数据库名称"
     green "=============="
-    read psqlname
+    read sqlname
 
-apt -y install software-properties-common apt-transport-https lsb-release
+apt install -y software-properties-common apt-transport-https lsb-release dirmngr
 
-wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
-echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
+add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://mariadb.nethub.com.hk/repo/10.3/debian stretch main'
 
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ stretch main" > /etc/apt/sources.list.d/php7.3.list
 
 apt update && apt -y upgrade
 
-apt install -y postgresql postgresql-contrib
-
-
-sed -i "/local   all             postgres                                peer/c\local   all             postgres                                trust"  /etc/postgresql/11/main/pg_hba.conf
-/etc/init.d/postgresql restart
-
-psql -U postgres -w -c "CREATE USER $psqluser WITH PASSWORD '$psqlpw';"
-psql -U postgres -w -c "CREATE DATABASE $psqlname OWNER $psqluser;"
-psql -U postgres -w -c "GRANT ALL PRIVILEGES ON DATABASE $psqlname TO $psqluser;"
-
-sed -i "/local   all             postgres                                trust/c\local   all             postgres                                peer"  /etc/postgresql/11/main/pg_hba.conf
-/etc/init.d/postgresql restart
-
-apt install -y php7.3 php7.3-fpm php7.3-pgsql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
+apt install -y php7.3 php7.3-fpm php7.3-mysql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
 
 cat > /etc/php/7.3/fpm/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -984,13 +971,31 @@ systemctl restart nginx
 wget -N https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
 
+apt install -y mariadb-server
+
+green "输入数据库root用户密码，临时存档以供自动建立nextcloud数库库"
+read sqlrootpw
+
+cat > ~/.my.cnf << EOF
+[client]
+user=root
+password=$sqlrootpw
+EOF
+
+mysql -e "create database $sqlname default charset utf8 collate utf8_general_ci;"
+mysql -e "CREATE USER '$sqluser'@'localhost' IDENTIFIED BY '$sqlpw';"
+mysql -e "grant all privileges on $sqlname.* TO '$sqluser'@'localhost';"
+
+rm -rf ~/.my.cnf
+green "数据库root用户密码临时存档用完已删"
+
 blue "------------------------------------"
 blue "  数据库用户名："
-blue "$psqluser"
+blue "$sqluser"
 blue "  数据库密码："
-blue "$psqlpw"
+blue "$sqlpw"
 blue "  数据库名称："
-blue "$psqlname"
+blue "$sqlname"
 blue "  Nextcloud安装地址："
 blue "$vpsdomain/setup-nextcloud.php"
 blue "------------------------------------"
@@ -1314,7 +1319,7 @@ blue "--------------------------"
     green  " 1. 安装de_GWD"
     green  " 2. 切换至低延迟内核+南琴浪bbr并重启生效"
     green  " 3. 切换至bbrplus并重启生效"
-    blue   " 4. 安装Postgres数据库+安装PHP+安装Nextcloud"
+    blue   " 4. 安装MariaDB+安装PHP+安装Nextcloud"
     blue   " 5. 配置Nextcloud缓存"
     red    "66. 更改静态IP"
     red    " 6. 更换域名并重新制作证书"
