@@ -974,7 +974,27 @@ EOF
 sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
 echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
 
+cat > /lib/systemd/system/php7.3-fpm.service <<EOF
+[Unit]
+Description=The PHP 7.3 FastCGI Process Manager
+Documentation=man:php-fpm7.3(8)
+After=network.target
+
+[Service]
+Type=notify
+PIDFile=/run/php/php7.3-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+ExecReload=/bin/kill -USR2 \$MAINPID
+TimeoutStopSec=5
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
 systemctl restart php7.3-fpm
+systemctl enable php7.3-fpm
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 
