@@ -664,6 +664,7 @@ hwclock -w
 rm -rf ~/server*
 EOF
 chmod +x /usr/local/bin/updateGWD
+/usr/local/bin/updateGWD
 
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
 crontab -l > now.cron
