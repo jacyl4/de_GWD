@@ -886,10 +886,10 @@ installnextcloud(){
     green "=============="
     read sqlname
 
-apt install -y software-properties-common apt-transport-https lsb-release dirmngr
+apt install -y software-properties-common apt-transport-https lsb-release
 
-apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
-add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://mariadb.nethub.com.hk/repo/10.3/debian stretch main'
+wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ stretch main" > /etc/apt/sources.list.d/php7.3.list
@@ -972,23 +972,20 @@ systemctl restart nginx
 wget -N https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
 
-apt install -y mariadb-server
+apt install -y postgresql postgresql-contrib
 
-green "输入数据库root用户密码，临时存档以供自动建立nextcloud数库库"
-read sqlrootpw
+sed -i "/local   all             postgres                                peer/c\local   all             postgres                                trust"  /etc/postgresql/11/main/pg_hba.conf
+/etc/init.d/postgresql restart
 
-cat > ~/.my.cnf << EOF
-[client]
-user=root
-password=$sqlrootpw
-EOF
+psql -U postgres -w -c "CREATE USER $sqluser WITH PASSWORD '$sqlpw';"
+psql -U postgres -w -c "CREATE DATABASE $sqlname OWNER $sqluser;"
+psql -U postgres -w -c "GRANT ALL PRIVILEGES ON DATABASE $sqlname TO $sqluser;"
 
-mysql -e "create database $sqlname default charset utf8 collate utf8_general_ci;"
-mysql -e "CREATE USER '$sqluser'@'localhost' IDENTIFIED BY '$sqlpw';"
-mysql -e "grant all privileges on $sqlname.* TO '$sqluser'@'localhost';"
+sed -i "/local   all             postgres                                trust/c\local   all             postgres                                peer"  /etc/postgresql/11/main/pg_hba.conf
+/etc/init.d/postgresql restart
 
-rm -rf ~/.my.cnf
-green "数据库root用户密码临时存档用完已删"
+green "为Postgres默认用户建立密码"
+passwd postgres
 
 blue "------------------------------------"
 blue "  数据库用户名："
@@ -1320,7 +1317,7 @@ blue "--------------------------"
     green  " 1. 安装de_GWD"
     green  " 2. 切换至低延迟内核+南琴浪bbr并重启生效"
     green  " 3. 切换至bbrplus并重启生效"
-    blue   " 4. 安装PHP+安装MariaDB+安装Nextcloud"
+    blue   " 4. 安装PHP+安装Postgres+安装Nextcloud"
     blue   " 5. 配置Nextcloud缓存"
     red    "66. 更改静态IP"
     red    " 6. 更换域名并重新制作证书"
