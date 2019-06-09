@@ -216,10 +216,12 @@ systemctl restart nginx
 systemctl enable nginx
 
 rm -rf ~/nginx*
-rm -rf ~/jemalloc*
 rm -rf ~/openssl*
 rm -rf ~/pcre*
+rm -rf ~/zlib-cf
 rm -rf ~/ngx_brotli
+rm -rf ~/ngx_devel_kit
+rm -rf ~/headers-more-nginx-module
 }
 
 
