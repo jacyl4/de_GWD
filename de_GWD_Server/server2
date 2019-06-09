@@ -66,7 +66,7 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
 apt update && apt -y upgrade
-apt install -y net-tools curl rsync ca-certificates unzip git socat build-essential libpcre3-dev zlib1g-dev libatomic-ops-dev libjemalloc-dev
+apt install -y net-tools curl rsync ca-certificates unzip git socat build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic1 libatomic-ops-dev libjemalloc1 libjemalloc-dev expat
 }
 
 
@@ -98,14 +98,12 @@ cd ~
 wget -N https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
 tar -zxvf pcre-8.43.tar.gz
 cd pcre-8.43
-./configure
-make -j $(nproc --all) && make install
+autoreconf -f -i
 
 cd ~
 git clone https://github.com/cloudflare/zlib.git zlib-cf
 cd zlib-cf
-./configure
-make -f Makefile.in distclean
+./configure --64
 
 cd ~
 git clone https://github.com/eustas/ngx_brotli.git
@@ -124,7 +122,7 @@ cd ~
 wget -N https://nginx.org/download/nginx-1.17.0.tar.gz
 tar zxvf nginx-1.17.0.tar.gz
 sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.0/auto/cc/gcc
-[ ! -d "/etc/nginx" ] && mkdir -p /etc/nginx
+mkdir -p /etc/nginx
 cd nginx-1.17.0
 curl https://raw.githubusercontent.com/kn007/patch/master/nginx.patch | patch -p1
 curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_strict-sni.patch | patch -p1
@@ -176,8 +174,8 @@ curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_st
 --with-pcre-jit \
 --with-zlib=../zlib-cf \
 --with-openssl=../openssl-1.1.1b \
---with-openssl-opt='zlib enable-tls1_3 enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
---with-cc-opt='-DTCP_FASTOPEN=23 -m64 -flto -lm -g -O3 -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2 -gsplit-dwarf' \
+--with-openssl-opt='zlib enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
+--with-cc-opt='-DTCP_FASTOPEN=23 -m64 -g -O3 -flto -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2 -gsplit-dwarf' \
 --with-ld-opt='-lrt -ljemalloc -Wl,-z,relro -Wl,-z,now -fPIC -flto' \
 --add-module=../ngx_brotli \
 
