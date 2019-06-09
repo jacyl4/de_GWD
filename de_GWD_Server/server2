@@ -66,7 +66,7 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
 apt update && apt -y upgrade
-apt install -y net-tools curl rsync ca-certificates unzip git build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libatomic-ops-dev socat
+apt install -y net-tools curl rsync ca-certificates unzip git socat build-essential libpcre3-dev zlib1g-dev libatomic-ops-dev libjemalloc-dev
 }
 
 
@@ -87,71 +87,56 @@ chmod +x /usr/bin/v2ray/v2ctl
 
 
 function installnginxlasest(){
+cd ~
 wget -N https://www.openssl.org/source/openssl-1.1.1b.tar.gz
 tar zxvf openssl-1.1.1b.tar.gz
 cd openssl-1.1.1b
+curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-equal-1.1.1b.patch | patch -p1
+curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-1.1.1b-chacha_draft.patch | patch -p1
 
-wget -N https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-equal-1.1.1b.patch
-wget -N https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-1.1.1b-chacha_draft.patch
-patch -p1 < openssl-equal-1.1.1b.patch
-patch -p1 < openssl-1.1.1b-chacha_draft.patch
-
-./config -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)'
-make -j $(nproc --all) && make install
-cp /usr/local/bin/openssl /usr/bin/
-export LD_LIBRARY_PATH=/usr/local/lib
-echo "export LD_LIBRARY_PATH=/usr/local/lib" >> ~/.bashrc
 cd ~
-
-
 wget -N https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
 tar -zxvf pcre-8.43.tar.gz
 cd pcre-8.43
 ./configure
 make -j $(nproc --all) && make install
+
 cd ~
-
-
-wget -N https://github.com/jemalloc/jemalloc/releases/download/5.2.0/jemalloc-5.2.0.tar.bz2
-tar xjvf jemalloc-5.2.0.tar.bz2
-cd jemalloc-5.2.0
+git clone https://github.com/cloudflare/zlib.git zlib-cf
+cd zlib-cf
 ./configure
-make -j $(nproc --all) && make install
-echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
-ldconfig
+make -f Makefile.in distclean
+
 cd ~
-
-
 git clone https://github.com/eustas/ngx_brotli.git
-pushd ngx_brotli
-git submodule update --init
-cd ~
+cd ngx_brotli
+git submodule update --init --recursive
 
-mkdir -p /usr/lib64/nginx/modules
+cd ~
+git clone https://github.com/simpl/ngx_devel_kit.git
+cd ~
+git clone https://github.com/openresty/headers-more-nginx-module.git
+
 mkdir -p /etc/nginx/conf.d
 mkdir -p /var/log/nginx
 mkdir -p /var/cache/nginx/client_temp
 mkdir -p /var/cache/nginx/proxy_temp
 mkdir -p /var/cache/nginx/fastcgi_temp
-mkdir -p /var/cache/nginx/uwsgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
+mkdir -p /var/cache/nginx/uwsgi_temp
 
+cd ~
 wget -N https://nginx.org/download/nginx-1.17.0.tar.gz
 tar zxvf nginx-1.17.0.tar.gz
-sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' ~/nginx-1.17.0/auto/cc/gcc
+sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.0/auto/cc/gcc
 [ ! -d "/etc/nginx" ] && mkdir -p /etc/nginx
 cd nginx-1.17.0
-wget -N https://raw.githubusercontent.com/kn007/patch/master/nginx.patch
-wget -N https://raw.githubusercontent.com/kn007/patch/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
-wget -N https://raw.githubusercontent.com/kn007/patch/master/nginx_strict-sni.patch
-patch -p1 < nginx.patch
-patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
-patch -p1 < nginx_strict-sni.patch
+curl https://raw.githubusercontent.com/kn007/patch/master/nginx.patch | patch -p1
+curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_strict-sni.patch | patch -p1
 
 ./configure \
 --prefix=/etc/nginx \
 --sbin-path=/usr/sbin/nginx \
---modules-path=/usr/lib64/nginx/modules \
 --conf-path=/etc/nginx/nginx.conf \
 --error-log-path=/var/log/nginx/error.log \
 --http-log-path=/var/log/nginx/access.log \
@@ -160,67 +145,67 @@ patch -p1 < nginx_strict-sni.patch
 --http-client-body-temp-path=/var/cache/nginx/client_temp \
 --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
 --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
---http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
 --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
 --user=www-data \
 --group=www-data \
 --with-compat \
 --with-file-aio \
 --with-threads \
---with-http_addition_module \
---with-http_auth_request_module \
---with-http_dav_module \
---with-http_flv_module \
---with-http_gunzip_module \
---with-http_gzip_static_module \
---with-http_mp4_module \
---with-http_random_index_module \
 --with-libatomic \
---with-openssl=../openssl-1.1.1b \
---with-openssl-opt='zlib -march=native -ljemalloc -Wl,-flto' \
---with-http_realip_module \
---with-http_secure_link_module \
---with-http_slice_module \
---with-http_ssl_module \
---with-http_stub_status_module \
---with-http_sub_module \
---with-http_v2_module \
 --with-mail \
 --with-mail_ssl_module \
+--with-http_realip_module \
+--with-http_ssl_module \
+--with-http_addition_module \
+--with-http_sub_module \
+--with-http_dav_module \
+--with-http_stub_status_module \
+--with-http_flv_module \
+--with-http_mp4_module \
+--with-http_gunzip_module \
+--with-http_slice_module \
+--with-http_gzip_static_module \
+--with-http_auth_request_module \
+--with-http_random_index_module \
+--with-http_secure_link_module \
+--with-http_degradation_module \
+--with-http_spdy_module \
+--with-http_v2_module \
+--with-http_v2_hpack_enc \
 --with-stream \
 --with-stream_realip_module \
 --with-stream_ssl_module \
 --with-stream_ssl_preread_module \
 --with-pcre=../pcre-8.43 \
 --with-pcre-jit \
---with-http_degradation_module \
---with-cc-opt='-DTCP_FASTOPEN=23 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fPIC' \
---with-ld-opt='-ljemalloc -Wl,-z,relro -Wl,-z,now -pie' \
---with-http_spdy_module \
---with-http_v2_hpack_enc \
---add-module=../ngx_brotli
+--with-zlib=../zlib-cf \
+--with-openssl=../openssl-1.1.1b \
+--with-openssl-opt='zlib enable-tls1_3 enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
+--with-cc-opt='-DTCP_FASTOPEN=23 -m64 -flto -lm -g -O3 -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2 -gsplit-dwarf' \
+--with-ld-opt='-lrt -ljemalloc -Wl,-z,relro -Wl,-z,now -fPIC -flto' \
+--add-module=../ngx_devel_kit \
+--add-module=../ngx_brotli \
+--add-module=../headers-more-nginx-module
 
 make -j $(nproc --all) && make install
-cd ~
 
-cat > /lib/systemd/system/nginx.service << EOF
+cd ~
+cat > /lib/systemd/system/nginx.service << "EOF"
 [Unit]
-Description=nginx - high performance web server
-Documentation=http://nginx.org/en/docs/
-Requires=network.target network-online.target
-After=syslog.target network.target network-online.target remote-fs.target nss-lookup.target
-Wants=network-online.target
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=forking
 PIDFile=/run/nginx.pid
-ExecStartPre=/usr/sbin/nginx -t -c /etc/nginx/nginx.conf -g 'daemon on; master_process on;'
-ExecStart=/usr/sbin/nginx -g 'daemon on; master_process on;'
-ExecReload=/usr/sbin/nginx -s reload -g 'daemon on; master_process on;'
-ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/sbin/nginx
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
 TimeoutStopSec=5
 Restart=always
-KillMode=mixed
 
 [Install]
 WantedBy=multi-user.target
@@ -384,7 +369,7 @@ server {
 }
 
 server {
-  listen 443 ssl http2 spdy fastopen=64 reuseport;
+  listen 443 ssl spdy http2 fastopen=64 reuseport;
   server_name $vpsdomain www.$vpsdomain;
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
@@ -393,12 +378,12 @@ server {
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
-  ssl_ciphers TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
-  ssl_session_timeout 10m;
+  ssl_ciphers [TLS13+AESGCM+AES128|TLS13+AESGCM+AES256|TLS13+CHACHA20]:[EECDH+ECDSA+AESGCM+AES128|EECDH+ECDSA+CHACHA20]:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:[EECDH+aRSA+AESGCM+AES128|EECDH+aRSA+CHACHA20]:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_session_timeout : 64800 (< TLSv1.3)
+  ssl_session_timeout_tls13 : 172800 (TLSv1.3 only)
   ssl_session_cache shared:le_nginx_SSL:10m;
   ssl_buffer_size 1400;
   add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-  ssl_dhparam /var/www/ssl/dhparam.pem;
 
   ssl_early_data on;
   proxy_set_header Early-Data \$ssl_early_data;
@@ -458,7 +443,7 @@ server {
 }
 
 server {
-  listen 443 ssl http2 spdy fastopen=64 reuseport;
+  listen 443 ssl spdy http2 fastopen=64 reuseport;
   server_name $vpsdomain www.$vpsdomain;
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
@@ -467,12 +452,12 @@ server {
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
-  ssl_ciphers TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
-  ssl_session_timeout 10m;
+  ssl_ciphers [TLS13+AESGCM+AES128|TLS13+AESGCM+AES256|TLS13+CHACHA20]:[EECDH+ECDSA+AESGCM+AES128|EECDH+ECDSA+CHACHA20]:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:[EECDH+aRSA+AESGCM+AES128|EECDH+aRSA+CHACHA20]:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_session_timeout : 64800 (< TLSv1.3)
+  ssl_session_timeout_tls13 : 172800 (TLSv1.3 only)
   ssl_session_cache shared:le_nginx_SSL:10m;
   ssl_buffer_size 1400;
   add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-  ssl_dhparam /var/www/ssl/dhparam.pem;
 
   ssl_early_data on;
   proxy_set_header Early-Data \$ssl_early_data;
