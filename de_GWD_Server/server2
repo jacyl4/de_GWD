@@ -112,11 +112,6 @@ git clone https://github.com/eustas/ngx_brotli.git
 cd ngx_brotli
 git submodule update --init --recursive
 
-cd ~
-git clone https://github.com/simpl/ngx_devel_kit.git
-cd ~
-git clone https://github.com/openresty/headers-more-nginx-module.git
-
 mkdir -p /etc/nginx/conf.d
 mkdir -p /var/log/nginx
 mkdir -p /var/cache/nginx/client_temp
@@ -184,9 +179,7 @@ curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_st
 --with-openssl-opt='zlib enable-tls1_3 enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
 --with-cc-opt='-DTCP_FASTOPEN=23 -m64 -flto -lm -g -O3 -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2 -gsplit-dwarf' \
 --with-ld-opt='-lrt -ljemalloc -Wl,-z,relro -Wl,-z,now -fPIC -flto' \
---add-module=../ngx_devel_kit \
 --add-module=../ngx_brotli \
---add-module=../headers-more-nginx-module
 
 make -j $(nproc --all) && make install
 
@@ -220,8 +213,6 @@ rm -rf ~/openssl*
 rm -rf ~/pcre*
 rm -rf ~/zlib-cf
 rm -rf ~/ngx_brotli
-rm -rf ~/ngx_devel_kit
-rm -rf ~/headers-more-nginx-module
 }
 
 
