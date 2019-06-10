@@ -1153,31 +1153,30 @@ cat >> /etc/v2ray/config.json << EOF
     {
     "mux": { "enabled": true },
     "protocol": "vmess",
-    "settings": {
-      "vnext": [{
-        "address": "$upstreamdomain",
-        "port": 443,
-        "users": [{
-          "id": "$upstreamuuid",
-          "level": 1,
-          "alterId": 64,
-          "security": "none"
-          }]
+    "settings": { "vnext": [{
+      "address": "$upstreamdomain",
+      "port": 443,
+      "users": [{
+        "id": "$upstreamuuid",
+        "level": 1,
+        "alterId": 64,
+        "security": "none"
         }]
-    },
+      }]},
     "streamSettings": {
       "network": "ws",
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "$upstreamdomain",
-        "allowInsecure": false
-        },
       "wsSettings": {
         "path": "$upstreampath",
         "headers": {
           "Host": "$upstreamdomain"
           }
-        }
+        },
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "$upstreamdomain",
+        "allowInsecure": false
+        },
+      "sockopt": { "mark": 255 }
       }
     }
   ]
