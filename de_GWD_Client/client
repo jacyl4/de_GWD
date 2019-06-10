@@ -130,111 +130,77 @@ cat > /etc/v2ray/config.json << EOF
   },
   "inbounds": [
     {
-    "protocol": "socks",
     "port": 9897,
-    "settings": {
-      "auth": "noauth",
-      "network": "tcp,udp"
-      },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": ["http", "tls"]
-        }
+    "protocol": "socks",
+    "settings": { "auth": "noauth", "network": "tcp,udp" },
+    "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
     },
     {
-    "protocol": "dokodemo-door",
     "port": 9896,
     "listen": "127.0.0.1",
-    "settings": {
-      "auth": "noauth",
-      "network": "tcp,udp",
-      "followRedirect": true
-      },
-    "sniffing": {
-      "enabled": true,
-      "destOverride": ["http", "tls"]
-      },
-    "streamSettings": {
-      "sockopt": {
-        "mark": 255,
-        "tproxy": "tproxy"
-        }
-      }
+    "protocol": "dokodemo-door",
+    "settings": { "auth": "noauth", "network": "tcp,udp", "followRedirect": true },
+    "sniffing": { "enabled": true, "destOverride": ["http", "tls"] },
+    "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
     }
   ],
   "outbounds": [
     {
     "mux": { "enabled": true },
     "protocol": "vmess",
-    "settings": {
-      "vnext": [
-        {
-        "address": "xxxx.ooo",
-        "port": 443,
-        "users": [
-          {
-          "id": "00000000-0000-0000-0000-000000000000",
-          "level": 1,
-          "alterId": 64,
-          "security": "aes-128-gcm"
-          }
-        ]
-        }
-      ]
-      },
+    "settings": { "vnext": [{
+      "address": "xxxx.ooo",
+      "port": 443,
+      "users": [{
+        "id": "00000000-0000-0000-0000-000000000000",
+        "level": 1,
+        "alterId": 64,
+        "security": "aes-128-gcm"
+        }]
+      }]},
     "streamSettings": {
       "network": "ws",
-      "security": "tls",
-      "tlsSettings": {
-      "serverName": "xxxx.ooo",
-        "allowInsecure": false
-        },
       "wsSettings": {
         "path": "/000000",
         "headers": {
           "Host": "xxxx.ooo"
           }
         },
-      "sockopt": {
-        "mark": 255
-        }
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "xxxx.ooo",
+        "allowInsecure": false
+        },
+      "sockopt": { "mark": 255 }
       }
     },
     {
     "tag": "netflix",
     "protocol": "vmess",
-    "settings": {
-      "vnext": [
-        {
-        "address": "xxxx.ooo",
-        "port": 443,
-        "users": [
-          {
-          "id": "00000000-0000-0000-0000-000000000000",
-          "level": 0,
-          "alterId": 64,
-          "security": "aes-128-gcm"
-          }
-        ]
-        }
-      ]
-      },
+    "settings": { "vnext": [{
+      "address": "xxxx.ooo",
+      "port": 443,
+      "users": [{
+        "id": "00000000-0000-0000-0000-000000000000",
+        "level": 0,
+        "alterId": 64,
+        "security": "aes-128-gcm"
+        }]
+      }]},
     "streamSettings": {
       "network": "ws",
-      "security": "tls",
-      "tlsSettings": {
-      "serverName": "xxxx.ooo",
-        "allowInsecure": false
-        },
       "wsSettings": {
         "path": "/000000",
         "headers": {
           "Host": "xxxx.ooo"
           }
         },
-      "sockopt": {
-        "mark": 255
-        }
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "xxxx.ooo",
+        "allowInsecure": false
+        },
+      "sockopt": { "mark": 255 }
       }
     }
   ],

@@ -6,9 +6,9 @@
     },
   "inbounds": [
     {
-    "protocol": "vmess",
     "port": 11811,
     "listen": "127.0.0.1",
+    "protocol": "vmess",
     "settings": {
       "clients": [{
         "id": "00000000-0000-0000-0000-000000000000",
@@ -18,17 +18,17 @@
       },
     "streamSettings": {
       "network": "ws",
-      "security": "none",
       "wsSettings": {
         "path": "/0000"
-        }
+        },
+      "security": "none"
       }
     }
   ],
   "outbounds": [
     {
-      "protocol": "freedom",
-      "settings": {}
+    "protocol": "freedom",
+    "settings": {}
     }
   ]
 }
