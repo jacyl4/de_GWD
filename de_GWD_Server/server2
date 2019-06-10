@@ -773,8 +773,8 @@ cat > ~/bbrkernel/clearkernel <<EOF
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 cd ~/bbrkernel
-wget -O Makefile https://raw.githubusercontent.com/gwdburst/general/master/Makefile/Makefile-Debian9
-wget -N https://raw.githubusercontent.com/gwdburst/general/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
+wget -O Makefile https://raw.githubusercontent.com/tcp-nanqinlang/general/master/Makefile/Makefile-Debian9
+wget -N https://raw.githubusercontent.com/tcp-nanqinlang/general/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
 make -j \$(nproc --all) && make install
 
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
