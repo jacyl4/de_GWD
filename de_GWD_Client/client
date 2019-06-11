@@ -422,7 +422,6 @@ ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
   ipset add chnroute $ipchnroute
 done
-
 EOF
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
