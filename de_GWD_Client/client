@@ -238,17 +238,17 @@ EOF
 function installiptablesproxy(){
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
-
-ipset -X lanip &>/dev/null
-ipset -X chnroute &>/dev/null
-ipset -X listb &>/dev/null
-ipset -X listw &>/dev/null
+ipset -X chnroute
+ipset -X lanip
+ipset -X listwlan
+ipset -X listw
+ipset -X listb
 
 lanip="0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16 224.0.0.0/4 240.0.0.0/4 223.5.5.5 223.6.6.6 114.114.114.114 114.114.115.115 1.2.4.8 210.2.4.8 112.124.47.27 114.215.126.16 112.124.47.27 180.76.76.76 119.29.29.29 182.254.116.116"
 
-ipset -N listb hash:net maxelem 65535
-for iplistb in $(cat /var/www/html/listb.txt); do
-  ipset add listb $iplistb
+ipset -N chnroute hash:net maxelem 65535
+for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
+  ipset add chnroute $ipchnroute
 done
 
 ipset -N lanip hash:net maxelem 65535
@@ -269,11 +269,10 @@ for ipdomain in $(cat /var/www/html/domain.txt); do
   ipset add listw $ipdomain
 done
 
-ipset -N chnroute hash:net maxelem 65535
-for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
+ipset -N listb hash:net maxelem 65535
+for iplistb in $(cat /var/www/html/listb.txt); do
+  ipset add listb $iplistb
 done
-
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
@@ -305,7 +304,6 @@ iptables -t mangle -A V2RAYPRE -m mark ! --mark 0x9 -j V2PROXY
 iptables -t mangle -A V2RAYPRE -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A V2RAYPRE -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 systemctl restart v2ray
-
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
@@ -316,18 +314,18 @@ systemctl stop v2ray
 ip route flush table 100
 ip rule delete fwmark 0x9
 
-iptables -F
-iptables -X
 iptables -t nat -F
 iptables -t nat -X
 iptables -t mangle -F
 iptables -t mangle -X
+iptables -F
+iptables -X
 
-ipset destroy listb
-ipset destroy lanip
-ipset destroy chnroute
-ipset destroy listwlan
-ipset destroy listw
+ipset -F chnroute
+ipset -F lanip
+ipset -F listwlan
+ipset -F listw
+ipset -F listb
 EOF
 chmod +x /usr/local/bin/iptables-proxy-down
 
@@ -418,22 +416,38 @@ sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
-rm -rf ~/client
-rm -rf /var/www/html/log.log
-
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
+
+ipset -F chnroute
+for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
+  ipset add chnroute $ipchnroute
+done
+
 EOF
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
 
+cat > /usr/local/bin/clearcache << "EOF"
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+rm -rf /var/log/*1
+rm -rf /var/log/*2
+rm -rf /var/log/*gz
+rm -rf ~/client
+rm -rf /var/www/html/log.log
+EOF
+chmod +x /usr/local/bin/clearcache
+
+crontab -l > now.cron
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-    crontab -l > now.cron
-    echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
-    crontab now.cron
+  echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
 fi
+if [[ "$(crontab -l | grep 'clearcache' | awk '{print $6}')" != "/usr/local/bin/clearcache" ]]; then
+  echo '0 */4 * * * /usr/local/bin/clearcache' >> now.cron
+fi
+crontab now.cron
 rm -rf now.cron
 
 rm -rf /usr/local/bin/ui-*

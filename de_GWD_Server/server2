@@ -341,11 +341,11 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]]; then
 crontab -l > now.cron
+if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]]; then
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
-crontab now.cron
 fi
+crontab now.cron
 }
 
 
@@ -636,15 +636,18 @@ date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' 
 hwclock -w
 
 rm -rf ~/server*
+rm -rf /var/log/*1
+rm -rf /var/log/*2
+rm -rf /var/log/*gz
 EOF
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
 
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
 crontab -l > now.cron
+if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
 echo '0 */4 * * * /usr/local/bin/updateGWD' >> now.cron
-crontab now.cron
 fi
+crontab now.cron
 rm -rf now.cron
 
 wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/sample.zip
