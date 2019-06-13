@@ -122,13 +122,27 @@ cat > /etc/v2ray/config.json << EOF
         "address": "127.0.0.1",
         "port": 5380,
         "network": "udp,tcp"
-      },
-      "sockopt": { "mark": 255 }
+      }
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {}
     }
   ],
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules":[
+      {
+        "type": "field",
+        "ip": ["geoip:cn"],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": ["geosite:cn"],
+        "outboundTag": "direct"
+      },
       {
         "type": "field",
         "domain": [
