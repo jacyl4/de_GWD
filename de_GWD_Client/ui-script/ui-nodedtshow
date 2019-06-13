@@ -57,20 +57,6 @@ cat > /etc/v2ray/config.json << EOF
       }
     },
     {
-      "tag": "dns-out",
-      "protocol": "dns",
-      "settings": {
-        "address": "127.0.0.1",
-        "port": 5380,
-        "network": "udp,tcp"
-      }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {}
-    },
-    {
     "tag": "netflix",
     "protocol": "vmess",
     "settings": { "vnext": [{
@@ -128,28 +114,21 @@ cat > /etc/v2ray/config.json << EOF
         },
       "sockopt": { "mark": 255 }
       }
+    },
+    {
+      "tag": "dns-out",
+      "protocol": "dns",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 5380,
+        "network": "udp,tcp"
+      }
+      "sockopt": { "mark": 255 }
     }
   ],
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules":[
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "ip": ["geoip:cn"],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "domain": ["geosite:cn"],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "network": "tcp,udp",
-        "port": "53",
-        "outboundTag": "dns-out"
-      },
       {
         "type": "field",
         "domain": [
@@ -175,6 +154,12 @@ cat > /etc/v2ray/config.json << EOF
         "type": "field",
         "source": [ "10.10.10.10" ],
         "outboundTag": "diverttraffic"
+      },
+      {
+        "type": "field",
+        "network": "tcp,udp",
+        "port": "53",
+        "outboundTag": "dns-out"
       }
     ]
   }
