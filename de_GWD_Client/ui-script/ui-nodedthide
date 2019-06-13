@@ -84,6 +84,16 @@ cat > /etc/v2ray/config.json << EOF
         },
       "sockopt": { "mark": 255 }
       }
+    },
+    {
+      "tag": "dns-out",
+      "protocol": "dns",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 5380,
+        "network": "udp,tcp"
+      },
+      "sockopt": { "mark": 255 }
     }
   ],
   "routing": {
