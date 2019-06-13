@@ -98,11 +98,6 @@ cat > /etc/v2ray/config.json << EOF
         },
       "sockopt": { "mark": 255 }
       }
-    },
-    {
-    "tag": "direct",
-    "protocol": "freedom",
-    "settings": {}
     }
   ],
   "routing": {
