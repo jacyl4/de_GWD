@@ -624,11 +624,12 @@ rm -rf /usr/lib/systemd/system/doh-client.service
 rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
-make -j $(nproc --all) && make install
+make && make install
 cd ~
-wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
 rm -rf ~/dns-over-https
+wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
 }
+
 
 
 function postinstall(){
