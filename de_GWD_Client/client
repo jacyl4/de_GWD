@@ -206,35 +206,11 @@ cat > /etc/v2ray/config.json << EOF
         },
       "sockopt": { "mark": 255 }
       }
-    },
-    {
-      "tag": "dns-out",
-      "protocol": "dns",
-      "settings": {
-        "address": "127.0.0.1",
-        "port": 5380,
-        "network": "udp,tcp"
-      }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {}
     }
   ],
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules":[
-      {
-        "type": "field",
-        "ip": ["geoip:cn"],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "domain": ["geosite:cn"],
-        "outboundTag": "direct"
-      },
       {
         "type": "field",
         "domain": [
@@ -255,12 +231,6 @@ cat > /etc/v2ray/config.json << EOF
           "domain:netflixdnstest9.com"
         ],
         "outboundTag": "netflix"
-      },
-      {
-        "type": "field",
-        "network": "tcp,udp",
-        "port": "53",
-        "outboundTag": "dns-out"
       }
     ]
   }
@@ -322,6 +292,10 @@ iptables -t nat    -A OUTPUT     -j V2RAYOUT
 iptables -t nat    -A PREROUTING -j V2RAYPRE
 
 iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -p tcp -dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp -dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
@@ -424,27 +398,21 @@ cat > /etc/pihole/dns-servers.conf << EOF
  阿里DNS;223.5.5.5;223.6.6.6
  中科大防污染DNS;202.141.162.123;202.141.176.93
  PdomoDNS;101.132.183.99;47.98.124.222
- OneDNS;117.50.10.10;117.50.20.20
+ DNS_SB;185.222.222.222;185.184.222.222
  DNS派_电信;101.226.4.6;218.30.118.6
  DNS派_联通;123.125.81.6;140.207.198.6
  XsicoDNS;182.254.242.15
- DNS_SB;185.222.222.222;185.184.222.222
+ Dns-over-https;127.0.0.1#5380
 EOF
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=119.29.29.29' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=114.114.115.115' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=114.114.114.114' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=127.0.0.1#5380' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=119.28.28.28' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=119.29.29.29' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=114.114.114.114' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=114.114.115.115' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 }
 
 

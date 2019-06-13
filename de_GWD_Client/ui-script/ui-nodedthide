@@ -84,35 +84,11 @@ cat > /etc/v2ray/config.json << EOF
         },
       "sockopt": { "mark": 255 }
       }
-    },
-    {
-      "tag": "dns-out",
-      "protocol": "dns",
-      "settings": {
-        "address": "127.0.0.1",
-        "port": 5380,
-        "network": "udp,tcp"
-      }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {}
     }
   ],
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules":[
-      {
-        "type": "field",
-        "ip": ["geoip:cn"],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "domain": ["geosite:cn"],
-        "outboundTag": "direct"
-      },
       {
         "type": "field",
         "domain": [
@@ -133,12 +109,6 @@ cat > /etc/v2ray/config.json << EOF
           "domain:netflixdnstest9.com"
         ],
         "outboundTag": "netflix"
-      },
-      {
-        "type": "field",
-        "network": "tcp,udp",
-        "port": "53",
-        "outboundTag": "dns-out"
       }
     ]
   }
