@@ -12,10 +12,10 @@ Run-time compilation version
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server2)
 ```
 
-![server](https://i.loli.net/2019/06/14/5d03889bbce7c93227.png)
+![server](https://i.loli.net/2019/06/14/5d03ad95b24e979626.png)
 
 ### Client：
 ```
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/client)
 ```
-![client](https://i.loli.net/2019/06/06/5cf80b8da7ed137743.png)
+![client](https://i.loli.net/2019/06/14/5d03acb0d7c8a12948.png)
