@@ -763,7 +763,46 @@ blue "------------------"
 
 
 
-installlowlatencybbr(){
+installbbrplus(){
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
+wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+cat > ~/bbrkernel/clearkernel <<EOF
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+
+/usr/bin/apt purge -y linux-image-*-amd64
+/usr/bin/apt purge -y linux-image-*-lowlatency
+update-grub
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+reboot
+EOF
+chmod +x ~/bbrkernel/clearkernel
+crontab -l > ~/now.cron
+echo '@reboot sleep 10 ; ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "------------------"
+blue  "安装bbrplus [完毕]"
+blue "------------------"
+reboot
+}
+
+
+
+installnanqinlangbbr(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget -N http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
@@ -806,45 +845,6 @@ rm -rf ~/now.cron
 blue "-------------------------------"
 blue  "安装低延迟内核+南琴浪bbr [完毕]"
 blue "-------------------------------"
-reboot
-}
-
-
-
-installbbrplus(){
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
-wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-cat > ~/bbrkernel/clearkernel <<EOF
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-sysctl -p
-
-/usr/bin/apt purge -y linux-image-*-amd64
-/usr/bin/apt purge -y linux-image-*-lowlatency
-update-grub
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-reboot
-EOF
-chmod +x ~/bbrkernel/clearkernel
-crontab -l > ~/now.cron
-echo '@reboot sleep 10 ; ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-blue "------------------"
-blue  "安装bbrplus [完毕]"
-blue "------------------"
 reboot
 }
 
@@ -1314,8 +1314,8 @@ blue "--------------------------"
     green "=========================="
     echo
     green  " 1. 安装de_GWD"
-    green  " 2. 切换至低延迟内核+南琴浪bbr并重启生效"
-    green  " 3. 切换至bbrplus并重启生效"
+    green  " 2. 切换至bbrplus并重启生效"
+    green  " 3. 切换至低延迟内核+南琴浪bbr并重启生效"
     blue   " 4. 安装PHP+安装PostgreSQL+安装Nextcloud"
     blue   " 5. 配置Nextcloud缓存"
     red    "66. 更改静态IP"
@@ -1333,11 +1333,11 @@ blue "--------------------------"
     start_menu
     ;;
     2)
-    installlowlatencybbr
+    installbbrplus
     start_menu
     ;;
     3)
-    installbbrplus
+    installnanqinlangbbr
     start_menu
     ;;
     4)
