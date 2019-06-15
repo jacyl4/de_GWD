@@ -582,7 +582,6 @@ iface $ethernetnum inet static
   netmask 255.255.255.0
   gateway $gatewayaddr
 EOF
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
 systemctl restart pihole-FTL
 
