@@ -302,6 +302,10 @@ iptables -t nat    -A OUTPUT     -j V2RAYOUT
 iptables -t nat    -A PREROUTING -j V2RAYPRE
 
 iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -p tcp -dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp -dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
