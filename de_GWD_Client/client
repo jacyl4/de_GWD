@@ -14,6 +14,8 @@ esac
 
 
 function preinstall(){
+sed -i '/nameserver/c\nameserver 119.29.29.29'  /etc/resolv.conf
+
 cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
@@ -472,6 +474,7 @@ rsync -r ~/ui-web/* /var/www/html
 
 rm -rf ~/ui-*
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 }
 
 
