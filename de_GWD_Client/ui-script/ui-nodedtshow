@@ -114,26 +114,11 @@ cat > /etc/v2ray/config.json << EOF
         },
       "sockopt": { "mark": 255 }
       }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {}
     }
   ],
   "routing": {
     "domainStrategy": "AsIs",
     "rules":[
-      {
-        "type": "field",
-        "ip": ["geoip:cn"],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "domain": ["geosite:cn"],
-        "outboundTag": "direct"
-      },
       {
         "type": "field",
         "domain": [
