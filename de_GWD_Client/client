@@ -411,20 +411,28 @@ cat > /etc/pihole/dns-servers.conf << EOF
  中科大防污染DNS;202.141.162.123;202.141.176.93
  PdomoDNS;101.132.183.99;47.98.124.222
  DNS_SB;185.222.222.222;185.184.222.222
- DNS派_电信;101.226.4.6;218.30.118.6
- DNS派_联通;123.125.81.6;140.207.198.6
  XsicoDNS;182.254.242.15
+ Google;8.8.8.8;8.8.4.4
+ Cloudflare;1.1.1.1;1.0.0.1
  Dns-over-https;127.0.0.1#5380
 EOF
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=119.28.28.28' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=119.29.29.29' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=1.1.1.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=119.28.28.28' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.29.29.29' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=114.114.115.115' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=114.114.114.114' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=127.0.0.1#5380' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=114.114.114.114' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=114.114.115.115' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
 }
 
 
