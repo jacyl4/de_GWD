@@ -1,36 +1,34 @@
 {
-  "inbounds": [
-    {
-      "listen": "127.0.0.1",
-      "port": 11811,
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "alterId": 64,
-            "id": "00000000-0000-0000-0000-000000000000",
-            "level": 1
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "path": "/0000"
-        }
-      }
-    }
-  ],
   "log": {
     "access": "/var/log/v2ray/access.log",
     "error": "/var/log/v2ray/error.log",
     "loglevel": "error"
-  },
+    },
+  "inbounds": [
+    {
+    "port": 11811,
+    "listen": "127.0.0.1",
+    "protocol": "vmess",
+    "settings": {
+      "clients": [{
+        "id": "00000000-0000-0000-0000-000000000000",
+        "level": 1,
+        "alterId": 64
+        }]
+      },
+    "streamSettings": {
+      "network": "ws",
+      "wsSettings": {
+        "path": "/0000"
+        },
+      "security": "none"
+      }
+    }
+  ],
   "outbounds": [
     {
-      "protocol": "freedom",
-      "settings": {}
+    "protocol": "freedom",
+    "settings": {}
     }
   ]
 }
