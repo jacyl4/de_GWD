@@ -45,7 +45,7 @@ echo "ulimit -n 65535" > ~/.bash_profile
 
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
-kernel.pid_max = 65536
+kernel.pid_max = 65535
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 8192
 net.ipv6.conf.all.disable_ipv6 = 1
