@@ -96,6 +96,14 @@ cat > /etc/v2ray/config.json << EOF
     "rules":[
       {
         "type": "field",
+        "ip": [
+          "geoip:private",
+          "geoip:cn"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
         "domain": ["geosite:cn"],
         "outboundTag": "direct"
       },
