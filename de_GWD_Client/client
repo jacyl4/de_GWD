@@ -373,6 +373,7 @@ $(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt) | awk '/Address/' | aw
 EOF
 
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
+
 }
 
 
