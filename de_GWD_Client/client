@@ -362,6 +362,14 @@ chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 
 rm -rf ~/ui-*
+
+sed -i '/doh/,$d' /etc/hosts
+cat >> /etc/hosts << EOF
+#doh static dns
+$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
+$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
+EOF
+
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
 }
 
@@ -473,8 +481,6 @@ EOF
 pihole restartdns
 systemctl restart pihole-FTL
 
-postinstall
-
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
 echo -e "$v2servn" > /var/www/html/nodename.txt
@@ -482,6 +488,8 @@ echo -e "$v2servn" > /var/www/html/domain.txt
 echo -e "$uuidnum" > /var/www/html/uuid.txt
 echo -e "$v2path" > /var/www/html/path.txt
 chown -R www-data:www-data /var/www/html/*.txt
+
+postinstall
 
 blue "-----------------"
 blue  "安装de_GWD [完毕]"

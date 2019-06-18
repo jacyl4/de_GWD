@@ -1,4 +1,4 @@
-<?php ob_start(ob_gzhandler); ?> 
+<?php ob_start(ob_gzhandler); ?>
 <?php require_once('auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <!DOCTYPE html>
@@ -137,7 +137,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             </div>
           </div>
 
-<script> 
+<script>
 function proxyon () {
     $.get('proxyon.php', function(result){});
     alert ('正在重启代理，耐心等待');
@@ -145,7 +145,7 @@ function proxyon () {
 function proxyoff () {
     $.get('proxyoff.php', function(result){});
 };
-</script> 
+</script>
 
           <div class="col-xl-3 col-sm-6 mb-3">
             <div class="card text-white bg-dark o-hidden h-100">
@@ -179,20 +179,20 @@ function proxyoff () {
 
         </div>
 
-<script> 
-function uptime() { 
+<script>
+function uptime() {
 $.get('uptime.php', function(data) { $('#uptime').text(data) });
 };
 
-function chlink1() { 
+function chlink1() {
 $.get('testbaidu.php', function(data) { $('#testbaidu').text(data) });
 };
 
-function chlink2() { 
+function chlink2() {
 $.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
 };
 
-function testproxy() { 
+function testproxy() {
 $.get('testproxy.php', function(data) { $('#proxy-toggle').bootstrapToggle(String(data)) });
 };
 
@@ -377,7 +377,7 @@ $.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ locatio
 <span class="float-right">
 <div class="input-group mt-1 mr-4">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo shell_exec('awk "/[Rs]ource/" /etc/v2ray/config.json | cut -d"\"" -f4'); ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo shell_exec('awk "/source/" /etc/v2ray/config.json | cut -d"\"" -f4'); ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
@@ -404,28 +404,33 @@ $.get('changelocalip.php', {localip:localiptxt}, function(result){ });
             Dns over Https</div>
           <div class="card-body">
 <form>
-          <div class="form-group">
-            <div class="form-row">
-              <div class="col-md-6">
-                <div class="form-label-group">
-                  <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/[Rh]ttps:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1
-"); ?>">
-                  <label for="DoH1">DoH1</label>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-label-group">
-                  <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/[Rh]ttps:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1
-"); ?>">
-                  <label for="DoH2">DoH2</label>
-                </div>
-              </div>
-            </div>
-          </div>
+  <div class="form-group">
+    <div class="form-row">
+      <div class="col-md-6 input-group">
+        <div class="form-label-group input-group-prepend w-50">
+          <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
+          <label for="DoH1">DoH1</label>
+        </div>
+        <div class="form-label-group input-group-append w-50">
+          <span class="input-group-text justify-content-center w-100" id="basic-addon3"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==2{print}' | cut -d' ' -f1"); ?></span>
+        </div>
+      </div>
+
+      <div class="col-md-6 input-group">
+        <div class="form-label-group input-group-prepend w-50">
+          <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
+          <label for="DoH2">DoH2</label>
+        </div>
+        <div class="form-label-group input-group-append w-50">
+          <span class="input-group-text justify-content-center w-100" id="basic-addon3"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==3{print}' | cut -d' ' -f1"); ?></span>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 
 <span class="float-right">
-<button id="submitdoh" type="button" class="btn btn-primary" onclick="submitdoh()">应用</button>
+  <button id="submitdoh" type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
 </span>
 
 <script>
@@ -449,7 +454,7 @@ $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
             <div class="form-row">
               <div class="col-md-6">
                 <div class="form-label-group">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo shell_exec("awk '/[RI]PV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo shell_exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
                   <label for="localip">本机地址</label>
                 </div>
               </div>
@@ -495,7 +500,7 @@ $.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(
 
   </div>
   <!-- /#wrapper -->
-<script> 
+<script>
 node1 = "<?php echo exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>";
 node2 = "<?php echo exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>";
 node3 = "<?php echo exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>";
@@ -525,7 +530,7 @@ var vera = $.trim(currentvernum);
 var verb = $.trim(remotevernum);
 if (vera == verb) {
 $('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
-} 
+}
 else {
 $('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
 };
@@ -735,4 +740,4 @@ $.get("changenode.php", {nodenum:"9"}, function(result){});
 <?php }?>
 <?php  if(!$auth){ ?>
 <?php header('Location: login.php');} ?>
-<?php ob_end_flush(); ?> 
+<?php ob_end_flush(); ?>
