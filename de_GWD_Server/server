@@ -26,9 +26,6 @@ LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
 
-sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
-update-grub
-
 sed -i '/65535/d' /etc/security/limits.conf
 sed -i '/# End of file/i\* soft nproc 65535' /etc/security/limits.conf
 sed -i '/# End of file/i\* hard nproc 65535' /etc/security/limits.conf
@@ -38,44 +35,38 @@ echo "ulimit -n 65535" > ~/.bash_profile
 
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
-net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv4.tcp_fastopen = 3
+kernel.pid_max = 65535
 fs.file-max = 1000000
+fs.inotify.max_user_instances = 8192
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv4.ip_local_port_range = 1024 65535
+net.ipv4.tcp_window_scaling = 1
+net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_syncookies = 1
 net.ipv4.tcp_syn_retries = 1
 net.ipv4.tcp_synack_retries = 1
 net.ipv4.tcp_timestamps = 0
 net.ipv4.tcp_fin_timeout = 30
-fs.inotify.max_user_instances = 8192
-net.ipv4.ip_local_port_range = 1024 65535 
 net.ipv4.tcp_max_syn_backlog = 16384
 net.ipv4.tcp_max_tw_buckets = 6000
-net.ipv4.route.gc_timeout = 100
-net.core.somaxconn = 32768
 net.ipv4.tcp_max_orphans = 32768
+net.ipv4.tcp_rmem = 4096 87380 8388608
+net.ipv4.tcp_wmem = 4096 87380 8388608
+net.core.rmem_max = 8388608
+net.core.wmem_max = 8388608
+net.core.somaxconn = 32768
 net.core.netdev_max_backlog = 32768
 net.core.default_qdisc = fq
 EOF
 
-if [[ $(uname -r) = "4.16.2-041602-lowlatency" ]]; then
-echo "net.ipv4.tcp_congestion_control = nanqinlang" >> /etc/sysctl.conf
-elif [[ $(uname -r) = "4.14.91-bbrplus" ]]; then
+if [[ $(uname -r) = "4.14.91-bbrplus" ]]; then
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 else
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
-
-if [ `grep -c nginx /etc/apt/sources.list` -ne 2 ];then
-cat >> /etc/apt/sources.list << EOF
-deb http://nginx.org/packages/debian/ stretch nginx
-deb-src http://nginx.org/packages/debian/ stretch nginx
-EOF
-wget -N http://nginx.org/keys/nginx_signing.key && apt-key add nginx_signing.key
-fi
-
 apt update && apt -y upgrade
-apt install -y net-tools curl rsync ca-certificates unzip git build-essential ipset
+apt install -y net-tools curl rsync ca-certificates unzip git socat build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic1 libatomic-ops-dev libjemalloc1 libjemalloc-dev expat
 }
 
 
@@ -95,10 +86,139 @@ chmod +x /usr/bin/v2ray/v2ctl
 }
 
 
-function purenginxconf(){
+function installnginxlasest(){
+cd ~
+wget -N https://www.openssl.org/source/openssl-1.1.1b.tar.gz
+tar zxvf openssl-1.1.1b.tar.gz
+cd openssl-1.1.1b
+curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-equal-1.1.1b.patch | patch -p1
+curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-1.1.1b-chacha_draft.patch | patch -p1
+
+cd ~
+wget -N https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
+tar -zxvf pcre-8.43.tar.gz
+cd pcre-8.43
+autoreconf -f -i
+
+cd ~
+git clone https://github.com/cloudflare/zlib.git zlib-cf
+cd zlib-cf
+./configure --64
+
+cd ~
+git clone https://github.com/eustas/ngx_brotli.git
+cd ngx_brotli
+git submodule update --init --recursive
+
+mkdir -p /etc/nginx/conf.d
+mkdir -p /var/log/nginx
+mkdir -p /var/cache/nginx/client_temp
+mkdir -p /var/cache/nginx/proxy_temp
+mkdir -p /var/cache/nginx/fastcgi_temp
+mkdir -p /var/cache/nginx/scgi_temp
+mkdir -p /var/cache/nginx/uwsgi_temp
+
+cd ~
+wget -N https://nginx.org/download/nginx-1.17.0.tar.gz
+tar zxvf nginx-1.17.0.tar.gz
+sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.0/auto/cc/gcc
+mkdir -p /etc/nginx
+cd nginx-1.17.0
+curl https://raw.githubusercontent.com/kn007/patch/master/nginx.patch | patch -p1
+curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_strict-sni.patch | patch -p1
+
+./configure \
+--prefix=/etc/nginx \
+--sbin-path=/usr/sbin/nginx \
+--conf-path=/etc/nginx/nginx.conf \
+--error-log-path=/var/log/nginx/error.log \
+--http-log-path=/var/log/nginx/access.log \
+--pid-path=/run/nginx.pid \
+--lock-path=/run/nginx.lock \
+--http-client-body-temp-path=/var/cache/nginx/client_temp \
+--http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+--http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+--user=www-data \
+--group=www-data \
+--with-compat \
+--with-file-aio \
+--with-threads \
+--with-libatomic \
+--with-mail \
+--with-mail_ssl_module \
+--with-http_realip_module \
+--with-http_ssl_module \
+--with-http_addition_module \
+--with-http_sub_module \
+--with-http_dav_module \
+--with-http_stub_status_module \
+--with-http_flv_module \
+--with-http_mp4_module \
+--with-http_gunzip_module \
+--with-http_slice_module \
+--with-http_gzip_static_module \
+--with-http_auth_request_module \
+--with-http_random_index_module \
+--with-http_secure_link_module \
+--with-http_degradation_module \
+--with-http_spdy_module \
+--with-http_v2_module \
+--with-http_v2_hpack_enc \
+--with-stream \
+--with-stream_realip_module \
+--with-stream_ssl_module \
+--with-stream_ssl_preread_module \
+--with-pcre=../pcre-8.43 \
+--with-pcre-jit \
+--with-zlib=../zlib-cf \
+--with-openssl=../openssl-1.1.1b \
+--with-openssl-opt='zlib enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
+--with-cc-opt='-DTCP_FASTOPEN=23 -m64 -g -O3 -flto -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2 -gsplit-dwarf' \
+--with-ld-opt='-lrt -ljemalloc -Wl,-z,relro -Wl,-z,now -fPIC -flto' \
+--add-module=../ngx_brotli \
+
+make -j $(nproc --all) && make install
+
+cd ~
+cat > /lib/systemd/system/nginx.service << "EOF"
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/sbin/nginx
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart nginx
+systemctl enable nginx
+
+rm -rf ~/nginx*
+rm -rf ~/openssl*
+rm -rf ~/pcre*
+rm -rf ~/zlib-cf
+rm -rf ~/ngx_brotli
+}
+
+
+function nginxconf(){
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
 worker_processes auto;
+pid   /run/nginx.pid;
 
     worker_rlimit_nofile 65535;
 
@@ -126,7 +246,7 @@ http {
   fastcgi_busy_buffers_size 128k;
   fastcgi_temp_file_write_size 128k;
   fastcgi_intercept_errors on;
-  
+
   sendfile            on;
   tcp_nodelay         on;
   tcp_nopush          on;
@@ -149,7 +269,7 @@ http {
                 text/x-component
                 text/x-json
                 font/opentype
-                application/x-font-ttf 
+                application/x-font-ttf
                 application/javascript
                 application/x-javascript
                 application/x-web-app-manifest+json
@@ -162,11 +282,20 @@ http {
                 image/svg+xml
                 image/x-icon;
 
+  brotli              on;
+  brotli_static       on;
+  brotli_comp_level   6;
+  brotli_buffers      16 8k;
+  brotli_min_length   20;
+  brotli_window       16m;
+  brotli_types        *;
+
   access_log off;
   error_log off;
 
   include /etc/nginx/conf.d/*.conf;
 }
+
 EOF
 }
 
@@ -175,7 +304,7 @@ function makessl(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 server {
     listen       80;
-    server_name  $vpsdomain;
+    server_name $vpsdomain www.$vpsdomain;
     root /var/www/html;
     index index.php index.html index.htm;
 }
@@ -191,7 +320,6 @@ curl https://get.acme.sh | sh
                --reloadcmd     "systemctl force-reload nginx"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
-
 
 cat > /var/www/ssl/update_ocsp_cache << EOF
 #!/bin/bash
@@ -213,46 +341,43 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]]; then
 crontab -l > now.cron
+if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]]; then
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
-crontab now.cron
 fi
+crontab now.cron
 }
 
 
-function purenginxwebconf(){
+function nginxwebconf(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
-upstream dns-backend {
-  server 127.0.0.1:8053;
-}
+upstream dns-backend { server 127.0.0.1:8053; }
 
 server {
   listen 80;
   server_name $vpsdomain www.$vpsdomain;
-  root /var/www/html;
-  index index.php index.html index.htm index.nginx-debian.html;
   return 301 https://\$server_name\$request_uri;
 }
 
 server {
-  listen 443 ssl http2;
+  listen 443 ssl spdy http2 fastopen=64 reuseport;
   server_name $vpsdomain www.$vpsdomain;
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
 
   ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
-  ssl_protocols TLSv1.1 TLSv1.2;
+  ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
-  ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
   ssl_session_timeout 10m;
-  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_session_cache shared:le_nginx_SSL:10m;
   ssl_buffer_size 1400;
-  add_header Strict-Transport-Security max-age=15768000;
-  ssl_dhparam /var/www/ssl/dhparam.pem;
-  
-  # OCSP Stapling ---
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
   ssl_stapling on;
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
@@ -262,7 +387,8 @@ server {
 location /dq {
   proxy_http_version      1.1;
   proxy_set_header Host \$http_host;
-  proxy_set_header Upgrade "";
+  proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Connection "upgrade";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_read_timeout      86400;
@@ -277,7 +403,7 @@ location $v2path {
   proxy_http_version      1.1;
   proxy_set_header Host \$http_host;
   proxy_set_header Upgrade WebSocket;
-  proxy_set_header Connection Upgrade;
+  proxy_set_header Connection "upgrade";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_read_timeout      86400;
@@ -292,6 +418,180 @@ location $v2path {
 EOF
 }
 
+
+function nginxnextcloudconf(){
+cat > /etc/nginx/conf.d/default.conf<< EOF
+upstream dns-backend { server 127.0.0.1:8053; }
+
+upstream php-handler {
+    server unix:/run/php/php7.3-fpm.sock;
+}
+
+server {
+  listen 80;
+  server_name $vpsdomain www.$vpsdomain;
+  return 301 https://\$server_name\$request_uri;
+}
+
+server {
+  listen 443 ssl spdy http2 fastopen=64 reuseport;
+  server_name $vpsdomain www.$vpsdomain;
+  root /var/www/html;
+  index index.php index.html index.htm index.nginx-debian.html;
+
+  ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
+  ssl_certificate_key /var/www/ssl/$vpsdomain.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_session_timeout 10m;
+  ssl_session_cache shared:le_nginx_SSL:10m;
+  ssl_buffer_size 1400;
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
+  resolver 8.8.8.8 valid=600s;
+  resolver_timeout 5s;
+
+
+  location ~ [^/]\.php(/|$) {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    fastcgi_index index.php;
+  }
+
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Robots-Tag none;
+    add_header X-Download-Options noopen;
+    add_header X-Permitted-Cross-Domain-Policies none;
+    add_header Referrer-Policy no-referrer;
+
+    fastcgi_hide_header X-Powered-By;
+
+    location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+    }
+
+    location = /.well-known/carddav {
+      return 301 \$scheme://\$host/nextcloud/remote.php/dav;
+    }
+    location = /.well-known/caldav {
+      return 301 \$scheme://\$host/nextcloud/remote.php/dav;
+    }
+
+    location /.well-known/acme-challenge { }
+
+    location ^~ /nextcloud {
+
+    # set max upload size
+    client_max_body_size 10G;
+    fastcgi_buffers 64 4K;
+
+        # Uncomment if your server is build with the ngx_pagespeed module
+        # This module is currently not supported.
+        #pagespeed off;
+
+        location /nextcloud {
+            rewrite ^ /nextcloud/index.php\$request_uri;
+        }
+
+        location ~ ^\/nextcloud\/(?:build|tests|config|lib|3rdparty|templates|data)\/ {
+            deny all;
+        }
+        location ~ ^\/nextcloud\/(?:\.|autotest|occ|issue|indie|db_|console) {
+            deny all;
+        }
+
+        location ~ ^\/nextcloud\/(?:index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|oc[ms]-provider\/.+)\.php(?:$|\/) {
+            fastcgi_split_path_info ^(.+?\.php)(\/.*|)$;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+            fastcgi_param PATH_INFO \$fastcgi_path_info;
+            fastcgi_param HTTPS on;
+            #Avoid sending the security headers twice
+            fastcgi_param modHeadersAvailable true;
+            fastcgi_param front_controller_active true;
+            fastcgi_pass php-handler;
+            fastcgi_intercept_errors on;
+            fastcgi_request_buffering off;
+        }
+
+        location ~ ^\/nextcloud\/(?:updater|oc[ms]-provider)(?:$|\/) {
+            try_files \$uri/ =404;
+            index index.php;
+        }
+
+        # Adding the cache control header for js and css files
+        # Make sure it is BELOW the PHP block
+        location ~ ^\/nextcloud\/.+[^\/]\.(?:css|js|woff2?|svg|gif)$ {
+            try_files \$uri /nextcloud/index.php\$request_uri;
+            add_header Cache-Control "public, max-age=15778463";
+            # Add headers to serve security related headers  (It is intended
+            # to have those duplicated to the ones above)
+            # Before enabling Strict-Transport-Security headers please read
+            # into this topic first.
+            # add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;";
+            add_header X-Content-Type-Options nosniff;
+            add_header X-XSS-Protection "1; mode=block";
+            add_header X-Robots-Tag none;
+            add_header X-Download-Options noopen;
+            add_header X-Permitted-Cross-Domain-Policies none;
+            add_header Referrer-Policy no-referrer;
+
+            # Optional: Don't log access to assets
+            access_log off;
+        }
+
+        location ~ ^\/nextcloud\/.+[^\/]\.(?:png|html|ttf|ico|jpg|jpeg)$ {
+            try_files \$uri /nextcloud/index.php\$request_uri;
+            # Optional: Don't log access to other assets
+            access_log off;
+        }
+    }
+
+
+location /dq {
+  proxy_http_version      1.1;
+  proxy_set_header Host \$http_host;
+  proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Connection "upgrade";
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_read_timeout      86400;
+  keepalive_requests      25600;
+  keepalive_timeout       300 300;
+  proxy_redirect          off;
+  proxy_buffering         off;
+  proxy_pass              http://dns-backend;
+}
+
+location $v2path {
+  proxy_http_version      1.1;
+  proxy_set_header Host \$http_host;
+  proxy_set_header Upgrade WebSocket;
+  proxy_set_header Connection "upgrade";
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_read_timeout      86400;
+  keepalive_requests      25600;
+  keepalive_timeout       300 300;
+  proxy_redirect          off;
+  proxy_buffering         off;
+  proxy_pass              http://127.0.0.1:11811;
+}
+
+}
+EOF
+}
 
 
 function installpihole(){
@@ -324,11 +624,12 @@ rm -rf /usr/lib/systemd/system/doh-client.service
 rm -rf /usr/lib/systemd/system/doh-server.service
 git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
-make -j $(nproc --all) && make install
+make && make install
 cd ~
-wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
 rm -rf ~/dns-over-https
+wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
 }
+
 
 
 function postinstall(){
@@ -338,22 +639,26 @@ date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' 
 hwclock -w
 
 rm -rf ~/server*
+rm -rf /var/log/*1
+rm -rf /var/log/*2
+rm -rf /var/log/*gz
 EOF
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
 
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
 crontab -l > now.cron
-echo '0 0 * * * /usr/local/bin/updateGWD' >> now.cron
-crontab now.cron
+if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
+echo '0 */4 * * * /usr/local/bin/updateGWD' >> now.cron
 fi
+crontab now.cron
 rm -rf now.cron
 
 wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/sample.zip
-unzip sample.zip 
+unzip sample.zip
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
 }
+
 
 
 
@@ -383,15 +688,13 @@ sed -i '/"path":/c\"path": "'$v2path'"'  /etc/v2ray/config.json
 systemctl restart v2ray
 systemctl enable v2ray
 
+installnginxlasest
 
-apt install -y nginx socat
-
-purenginxconf
+nginxconf
 
 makessl
 
-purenginxwebconf
-
+nginxwebconf
 
 mkdir -p /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
@@ -460,54 +763,6 @@ blue "------------------"
 
 
 
-installlowlatencybbr(){
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N http://ftp.br.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
-dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
-wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602_4.16.2-041602.201804121130_all.deb
-wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-headers-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
-wget -N https://kernel.ubuntu.com/~kernel-ppa/mainline/v4.16.2/linux-image-4.16.2-041602-lowlatency_4.16.2-041602.201804121130_amd64.deb
-dpkg -i linux-headers-*_all.deb
-dpkg -i linux-headers-*-lowlatency_*_amd64.deb
-dpkg -i linux-image-*-lowlatency_*_amd64.deb
-
-cat > ~/bbrkernel/clearkernel <<EOF
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-cd ~/bbrkernel
-wget -O Makefile https://raw.githubusercontent.com/gwdburst/general/master/Makefile/Makefile-Debian9
-wget -N https://raw.githubusercontent.com/gwdburst/general/master/General/Debian/source/kernel-v4.16/tcp_nanqinlang.c
-make -j \$(nproc --all) && make install
-
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = nanqinlang" >> /etc/sysctl.conf
-sysctl -p
-
-/usr/bin/apt purge -y linux-image-*-amd64
-/usr/bin/apt purge -y linux-image-*-bbrplus
-update-grub
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-reboot
-EOF
-chmod +x ~/bbrkernel/clearkernel
-crontab -l > ~/now.cron
-echo '@reboot sleep 10 ; ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-blue "-------------------------------"
-blue  "安装低延迟内核+南琴浪bbr [完毕]"
-blue "-------------------------------"
-reboot
-}
-
-
-
 installbbrplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
@@ -547,12 +802,210 @@ reboot
 
 
 
+installnextcloud(){
+    green "=============="
+    green " 数据库用户名"
+    green "=============="
+    read sqluser
+
+    green "=============="
+    green " 数据库密码"
+    green "=============="
+    read sqlpw
+
+    green "=============="
+    green " 数据库名称"
+    green "=============="
+    read sqlname
+
+apt install -y software-properties-common apt-transport-https lsb-release
+
+wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ stretch main" > /etc/apt/sources.list.d/php7.3.list
+
+apt update && apt -y upgrade
+
+apt install -y postgresql postgresql-contrib
+
+sed -i "/local   all             postgres                                peer/c\local   all             postgres                                trust"  /etc/postgresql/11/main/pg_hba.conf
+/etc/init.d/postgresql restart
+
+psql -U postgres -w -c "CREATE USER $sqluser WITH PASSWORD '$sqlpw';"
+psql -U postgres -w -c "CREATE DATABASE $sqlname OWNER $sqluser;"
+psql -U postgres -w -c "GRANT ALL PRIVILEGES ON DATABASE $sqlname TO $sqluser;"
+
+sed -i "/local   all             postgres                                trust/c\local   all             postgres                                peer"  /etc/postgresql/11/main/pg_hba.conf
+/etc/init.d/postgresql restart
+
+green "为PostgreSQL默认用户建立密码"
+passwd postgres
+
+apt install -y php7.3 php7.3-fpm php7.3-pgsql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
+
+cat > /etc/php/7.3/fpm/php-fpm.conf <<EOF
+;;;;;;;;;;;;;;;;;;;;;
+; FPM Configuration ;
+;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;
+; Global Options ;
+;;;;;;;;;;;;;;;;;;
+
+[global]
+pid = /run/php/php7.3-fpm.pid
+error_log = /var/log/php7.3-fpm.log
+log_level = warning
+
+emergency_restart_threshold = 30
+emergency_restart_interval = 60s
+process_control_timeout = 5s
+daemonize = yes
+
+rlimit_files = 65535
+rlimit_core = 0
+
+include=/etc/php/7.3/fpm/pool.d/*.conf
+EOF
+
+cat > /etc/php/7.3/fpm/pool.d/www.conf <<EOF
+;;;;;;;;;;;;;;;;;;;;
+; Pool Definitions ;
+;;;;;;;;;;;;;;;;;;;;
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php7.3-fpm.sock
+listen.allowed_clients = 127.0.0.1
+listen.owner = www-data
+listen.group = www-data
+
+pm = dynamic
+pm.max_children = 16
+pm.start_servers = 11
+pm.min_spare_servers = 8
+pm.max_spare_servers = 16
+pm.max_requests = 2048
+pm.process_idle_timeout = 10s
+request_terminate_timeout = 120
+request_slowlog_timeout = 0
+
+pm.status_path = /status
+slowlog = var/log/slow.log
+
+catch_workers_output = yes
+env[HOSTNAME] = \$HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+EOF
+
+sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
+echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
+
+cat > /lib/systemd/system/php7.3-fpm.service <<EOF
+[Unit]
+Description=The PHP 7.3 FastCGI Process Manager
+Documentation=man:php-fpm7.3(8)
+After=network.target
+
+[Service]
+Type=notify
+PIDFile=/run/php/php7.3-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+ExecReload=/bin/kill -USR2 \$MAINPID
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart php7.3-fpm
+systemctl enable php7.3-fpm
+
+vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
+
+v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+
+nginxnextcloudconf
+
+systemctl restart nginx
+
+wget -N https://download.nextcloud.com/server/installer/setup-nextcloud.php
+mv -f ~/setup-nextcloud.php /var/www/html/
+
+blue "------------------------------------"
+blue "  数据库用户名："
+blue "$sqluser"
+blue "  数据库密码："
+blue "$sqlpw"
+blue "  数据库名称："
+blue "$sqlname"
+blue "  Nextcloud安装地址："
+blue "$vpsdomain/setup-nextcloud.php"
+blue "------------------------------------"
+}
+
+
+
+setnextcloudcache(){
+sed -i "/port 6379/c\port 0" /etc/redis/redis.conf
+sed -i "/unixsocket \/var\/run\/redis\/redis.sock/c\unixsocket \/run\/redis\/redis.sock" /etc/redis/redis.conf
+sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
+usermod -aG redis www-data
+
+chown -R redis:www-data /run/redis
+
+systemctl restart redis-server
+
+systemctl restart php7.3-fpm
+
+sed -i '/installed/,$d' /var/www/html/nextcloud/config/config.php
+cat >> /var/www/html/nextcloud/config/config.php << EOF
+  'installed' => true,
+
+  'enabledPreviewProviders' =>
+  array (
+    0 => 'OC\\Preview\\PNG',
+    1 => 'OC\\Preview\\JPEG',
+    2 => 'OC\\Preview\\GIF',
+    3 => 'OC\\Preview\\HEIC',
+    4 => 'OC\\Preview\\BMP',
+    5 => 'OC\\Preview\\XBitmap',
+    6 => 'OC\\Preview\\MP3',
+    7 => 'OC\\Preview\\TXT',
+    8 => 'OC\\Preview\\MarkDown',
+    9 => 'OC\\Preview\\Movie',
+    10 => 'OC\\Preview\\PDF',
+  ),
+
+'memcache.local' => '\OC\Memcache\APCu',
+'memcache.distributed' => '\OC\Memcache\Redis',
+'redis' => [
+     'host'     => '/var/run/redis/redis.sock',
+     'port'     => 0,
+],
+);
+EOF
+
+blue "------------------------"
+blue "配置Nextcloud缓存 [完毕]"
+blue "------------------------"
+}
+
+
+
 changestaticip(){
     green "====================="
     green "本机地址（留空回车跳过）"
     green "====================="
     read localaddr
-if [[ "$localaddr" != "" ]]; then 
+if [[ "$localaddr" != "" ]]; then
 sed -i "/address/c\address $localaddr"  /etc/network/interfaces
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 fi
@@ -561,7 +1014,7 @@ fi
     green "网关地址（留空回车跳过）"
     green "====================="
     read gatewayaddr
-if [[ "$gatewayaddr" != "" ]]; then 
+if [[ "$gatewayaddr" != "" ]]; then
 sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
 fi
 
@@ -572,6 +1025,35 @@ sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /et
 blue "------------------"
 blue  "更改静态IP [完毕]"
 blue "------------------"
+}
+
+
+
+changedomain(){
+    green "=============================="
+    green " 输入新的VPS的域名(不加www开头)"
+    green "=============================="
+    read vpsdomain
+
+v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+
+rm -rf /var/www/ssl
+
+makessl
+
+if [[ -d "/var/www/html/nextcloud" ]]; then
+  nginxnextcloudconf
+else
+  nginxwebconf
+fi
+
+systemctl restart nginx
+
+/usr/local/bin/updateGWD
+
+blue "-----------------------------"
+blue "更换域名并重新制作证书 [完毕]"
+blue "-----------------------------"
 }
 
 
@@ -587,20 +1069,16 @@ changev2rayverify(){
     green "========="
     read v2raynpath
 
-if [[ -d "/etc/nginx" ]]; then
 sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$v2raynpath''" {/" /etc/nginx/conf.d/default.conf
-elif [[ -d "/usr/local/nginx" ]]; then
-nginxconf="$(rev <<< $(cd /usr/local/nginx/conf/vhost/ && ls) | cut -d"." -f2- | rev).conf"
-sed -i "$(sed -n -e '/location/=' /usr/local/nginx/conf/vhost/$nginxconf | awk 'NR==12{print}')s/.*/location "'\'$v2raynpath''" {/" /usr/local/nginx/conf/vhost/$nginxconf
-fi
+
 systemctl restart nginx
 
 sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$v2raynuuid'"'",/" /etc/v2ray/config.json
 sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2raynpath'"'"/" /etc/v2ray/config.json
 systemctl restart v2ray
-blue "-------------------------"
-blue  "修改本机UUID&path [完毕]"
-blue "-------------------------"
+blue "--------------------------"
+blue  "更换v2ray UUID&path [完毕]"
+blue "--------------------------"
 }
 
 
@@ -633,31 +1111,30 @@ cat >> /etc/v2ray/config.json << EOF
     {
     "mux": { "enabled": true },
     "protocol": "vmess",
-    "settings": {
-      "vnext": [{
-        "address": "$upstreamdomain",
-        "port": 443,
-        "users": [{
-          "id": "$upstreamuuid",
-          "level": 1,
-          "alterId": 64,
-          "security": "none"
-          }]
+    "settings": { "vnext": [{
+      "address": "$upstreamdomain",
+      "port": 443,
+      "users": [{
+        "id": "$upstreamuuid",
+        "level": 1,
+        "alterId": 64,
+        "security": "none"
         }]
-    },
+      }]},
     "streamSettings": {
       "network": "ws",
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "$upstreamdomain",
-        "allowInsecure": false
-        },
       "wsSettings": {
         "path": "$upstreampath",
         "headers": {
           "Host": "$upstreamdomain"
           }
-        }
+        },
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "$upstreamdomain",
+        "allowInsecure": false
+        },
+      "sockopt": { "mark": 255 }
       }
     }
   ]
@@ -701,6 +1178,8 @@ blue "-------------------"
 updategwd(){
 cd ~
 preinstall
+vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
+
 uuidnum=$(awk "/[Ri]d/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/[Rp]ath/" /etc/v2ray/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
@@ -712,9 +1191,13 @@ systemctl daemon-reload
 systemctl restart v2ray
 systemctl enable v2ray
 
-vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
+nginxconf
 
-purenginxconf
+if [[ -d "/var/www/html/nextcloud" ]]; then
+  nginxnextcloudconf
+else
+  nginxwebconf
+fi
 
 systemctl restart nginx
 
@@ -732,7 +1215,7 @@ blue "-----------------"
 
 
 start_menu(){
-statusgod=$(green "✔︎") 
+statusgod=$(green "✔︎")
 statusbad=$(red "✘")
 
 if [[ $(systemctl is-active v2ray) = "active" ]]; then
@@ -775,7 +1258,7 @@ blue  "当前bbr方案：$(awk 'END{print $3}' /etc/sysctl.conf)"
 blue "--------------------------"
 
     green "=========================="
-    green "         服务端            "
+    green "     服务端（编译版）        "
     green "介绍：一键安装de_GWD        "
     green "系统：仅测于Debian9         "
     green "作者：GWDburst             "
@@ -783,9 +1266,11 @@ blue "--------------------------"
     green "=========================="
     echo
     green  "1. 安装de_GWD"
-    green  "2. 切换至低延迟内核+南琴浪bbr并重启生效"
-    green  "3. 切换至bbrplus并重启生效"
-    red    "6. 更改静态IP"
+    green  "2. 切换至bbrplus并重启生效"
+    blue   "3. 安装PHP+安装PostgreSQL+安装Nextcloud"
+    blue   "4. 配置Nextcloud缓存"
+    red    "5. 更改静态IP"
+    red    "6. 更换域名并重新制作证书"
     yellow "7. 更换v2ray UUID & path"
     yellow "8. 设置v2ray 上级跃点"
     yellow "9. 更新Pi-hole"
@@ -799,32 +1284,40 @@ blue "--------------------------"
     start_menu
     ;;
     2)
-    installlowlatencybbr
-    start_menu
-    ;;
-    3)
     installbbrplus
     start_menu
     ;;
-    6)
+    3)
+    installnextcloud
+    start_menu
+    ;;
+    4)
+    setnextcloudcache
+    start_menu
+    ;;
+    5)
     changestaticip
-    start_menu 
+    start_menu
+    ;;
+    6)
+    changedomain
+    start_menu
     ;;
     7)
     changev2rayverify
-    start_menu 
+    start_menu
     ;;
     8)
     changev2rayupstream
-    start_menu 
+    start_menu
     ;;
     9)
     updatepihole
-    start_menu 
+    start_menu
     ;;
     0)
     updategwd
-    start_menu 
+    start_menu
     ;;
     *)
     clear
