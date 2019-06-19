@@ -234,9 +234,7 @@ chmod +x /usr/local/bin/iptables-proxy-down
 cat > /etc/systemd/system/iptables-proxy.service << EOF
 [Unit]
 Description=iptables-proxy
-Requires=network.target network-online.target
-After=network-online.target
-Wants=network-online.target
+After=network.target
 
 [Service]
 Type=oneshot

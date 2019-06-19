@@ -632,6 +632,42 @@ wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gw
 
 
 
+function installiptablesrules(){
+cat > /usr/local/bin/iptablesrules-up << EOF
+#!/bin/bash
+iptables -t nat -A PREROUTING -p udp --dport 53 -j DNAT --to 127.0.0.1
+iptables -t nat -A PREROUTING -p tcp --dport 53 -j DNAT --to 127.0.0.1
+EOF
+chmod +x /usr/local/bin/iptablesrules-up
+
+cat > /usr/local/bin/iptablesrules-down << EOF
+#!/bin/bash
+iptables -t nat -F
+iptables -t nat -X
+EOF
+chmod +x /usr/local/bin/iptablesrules-down
+
+cat > /etc/systemd/system/iptablesrules.service << EOF
+[Unit]
+Description=iptablesrules
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/iptablesrules-up
+ExecStop=/usr/local/bin/iptablesrules-down
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl restart iptablesrules
+systemctl enable iptablesrules
+}
+
+
+
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
@@ -753,6 +789,8 @@ iface $ethernetnum inet static
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
+
+installiptablesrules
 
 postinstall
 
@@ -1205,6 +1243,8 @@ installdoh
 systemctl daemon-reload
 systemctl restart doh-server
 systemctl enable doh-server
+
+installiptablesrules
 
 postinstall
 blue "-----------------"
