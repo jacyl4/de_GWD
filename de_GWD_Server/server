@@ -635,6 +635,8 @@ wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gw
 function installiptablesrules(){
 cat > /usr/local/bin/iptablesrules-up << EOF
 #!/bin/bash
+iptables -t nat -F
+iptables -t nat -X
 iptables -t nat -A PREROUTING -p udp --dport 53 -j DNAT --to 127.0.0.1
 iptables -t nat -A PREROUTING -p tcp --dport 53 -j DNAT --to 127.0.0.1
 EOF
