@@ -1,4 +1,4 @@
-![de_GWD](https://i.loli.net/2019/06/20/5d0a6c86bdce324166.png)
+![de_GWD](https://i.loli.net/2019/06/05/5cf78011df0b260138.png)
 
 
 ### Server：
