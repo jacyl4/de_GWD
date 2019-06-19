@@ -33,9 +33,6 @@ LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
 
-sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
-update-grub
-
 sed -i '/65535/d' /etc/security/limits.conf
 sed -i '/# End of file/i\* soft nproc 65535' /etc/security/limits.conf
 sed -i '/# End of file/i\* hard nproc 65535' /etc/security/limits.conf

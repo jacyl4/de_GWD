@@ -26,7 +26,7 @@ LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
 
-sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=lz4"'  /etc/default/grub
+sed -i '/GRUB_CMDLINE_LINUX_DEFAULT=/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet"'  /etc/default/grub
 update-grub
 
 sed -i '/65535/d' /etc/security/limits.conf
