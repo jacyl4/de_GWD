@@ -291,8 +291,8 @@ cat > /etc/pihole/dns-servers.conf << EOF
  DNS派;101.226.4.6;218.30.118.6
  中科大防污染DNS;202.141.162.123;202.141.176.93
  PdomoDNS;101.132.183.99;47.98.124.222
- 清华TUNA_DNS;101.6.6.6
  Hi!XNS;40.73.101.101
+ Cloudflare;1.1.1.1;1.0.0.1
  Dns-over-https;127.0.0.1#5380
 EOF
 
