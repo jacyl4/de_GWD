@@ -132,14 +132,6 @@
     "rules": [
       {
         "type": "field",
-        "ip": [
-          "geoip:private",
-          "geoip:cn"
-        ],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
         "domain": [
           "geosite:cn"
         ],

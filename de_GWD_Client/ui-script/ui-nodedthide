@@ -93,15 +93,7 @@ cat > /etc/v2ray/config.json << EOF
   ],
   "routing": {
     "domainStrategy": "AsIs",
-    "rules":[
-      {
-        "type": "field",
-        "ip": [
-          "geoip:private",
-          "geoip:cn"
-        ],
-        "outboundTag": "direct"
-      },
+    "rules": [
       {
         "type": "field",
         "domain": ["geosite:cn"],
