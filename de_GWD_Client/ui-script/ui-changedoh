@@ -19,5 +19,4 @@ $doh2ip $doh2
 EOF
 
 systemctl restart doh-client
-pihole -f
 rm -rf /var/www/html/doh.txt
