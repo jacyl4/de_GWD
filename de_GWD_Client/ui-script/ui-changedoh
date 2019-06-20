@@ -8,5 +8,16 @@ doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 
+doh1ip=$(nslookup $doh1 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+doh2ip=$(nslookup $doh2 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+
+sed -i '/doh/,$d' /etc/hosts
+cat >> /etc/hosts << EOF
+#doh static dns
+$doh1ip $doh1
+$doh2ip $doh2
+EOF
+
 systemctl restart doh-client
+pihole -f
 rm -rf /var/www/html/doh.txt
