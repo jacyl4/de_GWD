@@ -138,12 +138,6 @@
       },
       {
         "type": "field",
-        "ip": ["geoip:private"],
-        "ip": ["geoip:cn"],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
         "domain": ["geosite:cn"],
         "outboundTag": "direct"
       },
