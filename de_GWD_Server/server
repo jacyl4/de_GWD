@@ -66,7 +66,7 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
 apt update && apt -y upgrade
-apt install -y net-tools curl rsync ca-certificates unzip git socat build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic1 libatomic-ops-dev libjemalloc1 libjemalloc-dev expat
+apt install -y net-tools curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic1 libatomic-ops-dev libjemalloc1 libjemalloc-dev expat
 }
 
 
