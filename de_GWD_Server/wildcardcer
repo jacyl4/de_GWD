@@ -1,0 +1,80 @@
+#!/bin/bash
+clear
+function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+    green "==========================="
+    green " 输入VPS的域名(不加www开头)"
+    green "==========================="
+    read vpsdomain
+
+    green "==========================="
+    green " 输入Cloudflare API KEY"
+    green "==========================="
+    read CFapikey
+
+    green "==========================="
+    green " 输入Cloudflare Email"
+    green "==========================="
+    read CFemail
+
+mv -f /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
+
+cat > /etc/nginx/conf.d/default.conf<< EOF
+server {
+    listen       80;
+    server_name $vpsdomain www.$vpsdomain;
+    root /var/www/html;
+    index index.php index.html index.htm;
+}
+EOF
+
+rm -rf /var/www/ssl
+
+mkdir -p /var/www/ssl
+
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --issue --dns dns_cf -d $vpsdomain -d *.$vpsdomain
+~/.acme.sh/acme.sh --installcert -d $vpsdomain \
+               --keypath       /var/www/ssl/$vpsdomain.key  \
+               --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
+               --reloadcmd     "systemctl force-reload nginx"
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
+
+cat > /var/www/ssl/update_ocsp_cache << EOF
+#!/bin/bash
+wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+mv intermediate.pem /var/www/ssl
+mv root.pem /var/www/ssl
+cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/$vpsdomain.key.pem \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://ocsp.int-x3.letsencrypt.org \
+    -respout /var/www/ssl/ocsp.resp
+EOF
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+
+crontab -l > now.cron
+if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]]; then
+echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
+fi
+crontab now.cron
+
+mv -f /etc/nginx/conf.d/default.conf.bak /etc/nginx/conf.d/default.conf
+
+systemctl restart nginx
+
+/usr/local/bin/updateGWD
