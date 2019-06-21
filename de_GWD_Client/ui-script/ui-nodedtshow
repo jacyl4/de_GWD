@@ -1,8 +1,4 @@
 #!/bin/bash
-v2servn="$(sed -n -e '/"address":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
-uuidnum="$(sed -n -e '/"id":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
-v2path="$(sed -n -e '/"path":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
-
 cat > /etc/v2ray/config.json << EOF
 {
   "log": {
@@ -166,10 +162,27 @@ cat > /etc/v2ray/config.json << EOF
 }
 EOF
 
-sed -i '/"address":/c\"address": "'$v2servn'",'  /etc/v2ray/config.json
+v2servn="$(sed -n -e '/"address":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
+uuidnum="$(sed -n -e '/"id":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
+v2path="$(sed -n -e '/"path":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
+
+domain=$(echo -e $v2servn | cut -d : -f1)
+port=$(echo -e $v2servn | cut -d : -f2)
+
+if [[ $port =~ ^[1-9]+$ ]]; then
+sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
+else
+sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "443",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/v2ray/config.json
+fi
+
+sed -i '/"address":/c\"address": "'$domain'",'  /etc/v2ray/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$v2servn'",'  /etc/v2ray/config.json
+sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/v2ray/config.json
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$v2servn'"'  /etc/v2ray/config.json
+sed -i '/"Host":/c\"Host": "'$domain'"'  /etc/v2ray/config.json
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php
