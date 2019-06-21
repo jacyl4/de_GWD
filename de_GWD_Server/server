@@ -869,6 +869,8 @@ echo "deb https://packages.sury.org/php/ stretch main" > /etc/apt/sources.list.d
 
 apt update && apt -y upgrade
 
+apt autoremove -y
+
 apt install -y postgresql postgresql-contrib
 
 sed -i "/local   all             postgres                                peer/c\local   all             postgres                                trust"  /etc/postgresql/11/main/pg_hba.conf
