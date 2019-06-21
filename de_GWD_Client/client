@@ -267,6 +267,18 @@ make && make install
 cd ~
 rm -rf ~/dns-over-https
 wget -O /etc/dns-over-https/doh-client.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doh-client.conf
+doh_upstream='url = "https:\/\/'$doh'\/dq"'
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+
+dohip=$(nslookup $(echo -e $doh | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+
+sed -i '/doh/,$d' /etc/hosts
+cat >> /etc/hosts << EOF
+#doh static dns
+$dohip $doh
+$dohip $doh
+EOF
 }
 
 
@@ -448,10 +460,8 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 EOF
 rm -rf ~/go
 
+doh=$v2servn
 installdoh
-doh_upstream='url = "https:\/\/'$v2servn'\/dq"'
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl daemon-reload
@@ -553,10 +563,8 @@ systemctl enable v2ray
 
 installiptablesproxy
 
+doh=$(awk 'NR==1{print}' /var/www/html/domain.txt)
 installdoh
-doh_upstream='url = "https:\/\/'$(awk 'NR==1{print}' /var/www/html/domain.txt)'\/dq"'
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
