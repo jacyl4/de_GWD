@@ -359,8 +359,8 @@ rm -rf ~/ui-*
 sed -i '/doh/,$d' /etc/hosts
 cat >> /etc/hosts << EOF
 #doh static dns
-$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
-$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
+$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
+$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
 EOF
 
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
