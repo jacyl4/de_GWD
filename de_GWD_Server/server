@@ -886,7 +886,7 @@ sed -i "/local   all             postgres                                trust/c
 green "为PostgreSQL默认用户建立密码"
 passwd postgres
 
-apt install -y php7.3 php7.3-fpm php7.3-pgsql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
+apt install -y php7.3 php7.3-fpm php7.3-pgsql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
 
 cat > /etc/php/7.3/fpm/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
