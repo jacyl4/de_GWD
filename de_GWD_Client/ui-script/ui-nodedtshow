@@ -1,4 +1,8 @@
 #!/bin/bash
+v2servn="$(sed -n -e '/"address":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
+uuidnum="$(sed -n -e '/"id":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
+v2path="$(sed -n -e '/"path":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
+
 cat > /etc/v2ray/config.json << EOF
 {
   "log": {
@@ -161,10 +165,6 @@ cat > /etc/v2ray/config.json << EOF
   }
 }
 EOF
-
-v2servn="$(sed -n -e '/"address":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
-uuidnum="$(sed -n -e '/"id":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
-v2path="$(sed -n -e '/"path":/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')"
 
 domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
