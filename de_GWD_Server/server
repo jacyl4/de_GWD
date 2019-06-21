@@ -110,6 +110,7 @@ git clone https://github.com/eustas/ngx_brotli.git
 cd ngx_brotli
 git submodule update --init --recursive
 
+cd ~
 mkdir -p /etc/nginx/conf.d
 mkdir -p /var/log/nginx
 mkdir -p /var/cache/nginx/client_temp
@@ -118,7 +119,6 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-cd ~
 wget -N https://nginx.org/download/nginx-1.17.0.tar.gz
 tar zxvf nginx-1.17.0.tar.gz
 sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.0/auto/cc/gcc
@@ -203,8 +203,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl restart nginx
-systemctl enable nginx
+systemctl start nginx
 
 rm -rf ~/nginx*
 rm -rf ~/openssl*
