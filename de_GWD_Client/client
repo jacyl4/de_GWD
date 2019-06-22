@@ -47,8 +47,6 @@ fs.file-max = 1000000
 fs.inotify.max_user_instances = 8192
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv4.conf.all.route_localnet = 1
-net.ipv4.conf.all.accept_source_route = 1
-net.ipv4.conf.default.accept_source_route = 1
 net.ipv4.ip_forward = 1
 net.ipv4.ip_local_port_range = 1024 65535
 net.ipv4.tcp_window_scaling = 1
@@ -254,6 +252,7 @@ systemctl enable iptables-proxy
 
 
 function installdoh(){
+mkdir -p ~/gopath
 source ~/.profile
 rm -rf ~/dns-over-https
 rm -rf /usr/local/bin/doh-client
@@ -278,6 +277,7 @@ cat >> /etc/hosts << EOF
 $dohip $doh
 $dohip $doh
 EOF
+rm -rf ~/gopath
 }
 
 
@@ -443,7 +443,6 @@ elif [[ $architecture = "amd64" ]]; then
     rm -rf ~/go*linux-amd64.tar.gz
 fi
 rsync -r ~/go /usr/local
-mkdir -p ~/gopath
 cat > ~/.profile << "EOF"
 if [ "$BASH" ]; then
   if [ -f ~/.bashrc ]; then

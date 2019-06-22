@@ -39,6 +39,7 @@ kernel.pid_max = 65535
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 8192
 net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv4.conf.all.route_localnet = 1
 net.ipv4.ip_local_port_range = 1024 65535
 net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_fastopen = 3
@@ -615,6 +616,7 @@ pihole restartdns
 
 
 function installdoh(){
+mkdir -p ~/gopath
 source ~/.profile
 rm -rf ~/dns-over-https
 rm -rf /usr/local/bin/doh-client
@@ -628,6 +630,7 @@ make && make install
 cd ~
 rm -rf ~/dns-over-https
 wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
+rm -rf ~/gopath
 }
 
 
@@ -746,7 +749,6 @@ wget -N https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz
 tar -xvf go*linux-amd64.tar.gz
 rm -rf ~/go*linux-amd64.tar.gz
 rsync -r ~/go /usr/local
-mkdir ~/gopath
 cat > ~/.profile << "EOF"
 if [ "$BASH" ]; then
   if [ -f ~/.bashrc ]; then
