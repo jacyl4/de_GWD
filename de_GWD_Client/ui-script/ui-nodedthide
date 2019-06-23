@@ -1,5 +1,11 @@
 #!/bin/bash
-nodenum=$(sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')/=" /var/www/html/domain.txt)
+mainport=$(awk '/port/' /etc/v2ray/config.json | awk 'NR==3{print$2}' | cut -d , -f1)
+
+if [[ $mainport == 443 ]]; then
+nodenum=$(cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')/=")
+else
+nodenum=$(sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}'):$port/=" /var/www/html/domain.txt)
+fi
 
 cat > /etc/v2ray/config.json << EOF
 {
