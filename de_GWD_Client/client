@@ -184,17 +184,7 @@ for iplistb in $(cat /var/www/html/listb.txt); do
 done
 
 ip rule add fwmark 0x9 table 100 pref 100
-ip route add local 0.0.0.0/0 dev lo table 100
-
-iptables -t mangle -N V2RAYOUT
-iptables -t mangle -N V2RAYPRE
-iptables -t nat    -N V2RAYOUT
-iptables -t nat    -N V2RAYPRE
-
-iptables -t mangle -A OUTPUT     -j V2RAYOUT
-iptables -t mangle -A PREROUTING -j V2RAYPRE
-iptables -t nat    -A OUTPUT     -j V2RAYOUT
-iptables -t nat    -A PREROUTING -j V2RAYPRE
+ip route add local default dev lo table 100
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp -dport 4711 -j ACCEPT
@@ -207,15 +197,16 @@ iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
-iptables -t mangle -A V2PROXY -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
 
-iptables -t mangle -A V2RAYOUT -p tcp -j V2PROXY
-iptables -t mangle -A V2RAYOUT -p udp -j V2PROXY
+iptables -t mangle -A OUTPUT -p tcp -j V2PROXY
+iptables -t mangle -A OUTPUT -p udp -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -m mark ! --mark 0x9 -j V2PROXY
 
-iptables -t mangle -A V2RAYPRE -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
-iptables -t mangle -A V2RAYPRE -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 systemctl restart v2ray
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
