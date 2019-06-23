@@ -196,8 +196,7 @@ ExecStart=/usr/sbin/nginx
 ExecReload=/usr/sbin/nginx -s reload
 ExecStop=/bin/kill -s QUIT $MAINPID
 PrivateTmp=true
-Restart=on-failure
-RestartSec=5s
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
@@ -950,7 +949,7 @@ EOF
 sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
 echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
 
-cat > /lib/systemd/system/php7.3-fpm.service <<EOF
+cat > /lib/systemd/system/php7.3-fpm.service << "EOF"
 [Unit]
 Description=The PHP 7.3 FastCGI Process Manager
 Documentation=man:php-fpm7.3(8)
@@ -960,9 +959,9 @@ After=network.target
 Type=notify
 PIDFile=/run/php/php7.3-fpm.pid
 ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
-ExecReload=/bin/kill -USR2 \$MAINPID
-Restart=on-failure
-RestartSec=5s
+ExecReload=/bin/kill -USR2 $MAINPID
+PrivateTmp=true
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
