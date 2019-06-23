@@ -132,8 +132,8 @@ cat > /etc/v2ray/config.json << EOF
 }
 EOF
 
-domain=$(awk 'NR=='$nodenum'{print}' /var/www/html/domain.txt | cut -d : -f1)
-port=$(awk 'NR=='$nodenum'{print}' /var/www/html/domain.txt | cut -d : -f2)
+domain=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f1)
+port=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f2)
 
 if [[ $port =~ ^[1-9]+$ ]]; then
 sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
