@@ -132,7 +132,7 @@
     "rules": [
       {
         "type": "field",
-        "port": "53,5380,4711",
+        "port": "5380,4711",
         "network": "tcp,udp",
         "outboundTag": "direct"
       },
