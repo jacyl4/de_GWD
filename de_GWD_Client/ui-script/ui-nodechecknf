@@ -1,3 +1,8 @@
 #!/bin/bash
+port=$(awk '/port/' /etc/v2ray/config.json | awk 'NR==4{print$2}' | cut -d , -f1)
 
-sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==2{print}')/=" /var/www/html/domain.txt
+if [[ $port == "443" ]]; then
+cat /var/www/html/domain.txt | cut -d : -f2 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==2{print}')/="
+else
+sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==2{print}'):$port/=" /var/www/html/domain.txt
+fi
