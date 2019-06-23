@@ -20,6 +20,4 @@ sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/
 sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$v2path'"'",/" /etc/v2ray/config.json
 
 systemctl restart v2ray
-pihole -f
-
 rm -rf /var/www/html/nodepre.txt

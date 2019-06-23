@@ -140,7 +140,20 @@ ipset -X listwlan
 ipset -X listw
 ipset -X listb
 
-lanip="0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16 224.0.0.0/4 240.0.0.0/4 223.5.5.5 223.6.6.6 114.114.114.114 114.114.115.115 1.2.4.8 210.2.4.8 112.124.47.27 114.215.126.16 112.124.47.27 180.76.76.76 119.29.29.29 182.254.116.116"
+lanip="0.0.0.0/8 \
+100.64.0.0/10 \
+127.0.0.0/8 \
+169.254.0.0/16 \
+10.0.0.0/8 \
+172.16.0.0/12 \
+192.168.0.0/16 \
+114.114.114.114 \
+114.114.115.115 \
+119.29.29.29 \
+119.28.28.28 \
+223.5.5.5 \
+223.6.6.6 \
+255.255.255.255/32"
 
 ipset -N chnroute hash:net maxelem 65535
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
@@ -306,14 +319,20 @@ cat > /etc/pihole/dns-servers.conf << EOF
 EOF
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=127.0.0.1#5380' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=223.5.5.5' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=119.29.29.29' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_7=127.0.0.1#5380' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=119.29.29.29' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=114.114.115.115' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=114.114.114.114' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=114.114.114.114' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=114.114.115.115' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf

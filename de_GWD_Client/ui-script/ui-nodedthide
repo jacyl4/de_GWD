@@ -86,6 +86,9 @@ cat > /etc/v2ray/config.json << EOF
     {
       "tag": "direct",
       "protocol": "freedom",
+      "streamSettings": {
+        "sockopt": { "mark": 255 }
+      },
       "settings": {}
     }
   ],

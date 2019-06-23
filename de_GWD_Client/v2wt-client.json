@@ -124,6 +124,9 @@
     {
       "tag": "direct",
       "protocol": "freedom",
+      "streamSettings": {
+        "sockopt": { "mark": 255 }
+      },
       "settings": {}
     }
   ],
