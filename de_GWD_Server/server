@@ -60,7 +60,7 @@ net.core.netdev_max_backlog = 32768
 net.core.default_qdisc = fq
 EOF
 
-if [[ $(uname -r) = "4.14.91-bbrplus" ]]; then
+if [[ $(uname -r | cut -d - -f2) = "bbrplus" ]]; then
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 else
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
