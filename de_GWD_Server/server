@@ -596,8 +596,11 @@ EOF
 
 function installpihole(){
 curl -sSL https://install.pi-hole.net | bash
+
+systemctl stop lighttpd
 systemctl disable lighttpd
 systemctl mask lighttpd
+
 echo "" > /etc/pihole/adlists.list
 pihole -g
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
@@ -806,8 +809,8 @@ blue "------------------"
 
 installbbrplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-headers-4.14.91.deb
-wget -N https://raw.githubusercontent.com/cx9208/Linux-NetSpeed/master/bbrplus/debian-ubuntu/x64/linux-image-4.14.91.deb
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/linux-headers-4.14.129-bbrplus.deb
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/linux-image-4.14.129-bbrplus.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
