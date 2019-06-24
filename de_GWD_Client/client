@@ -106,7 +106,6 @@ mkdir -p /var/log/v2ray
 if [[ $architecture = "arm64" ]]; then
     wget -O ~/v2arm64.zip https://gwdbase.xyz/v2arm64.zip
     unzip v2arm64.zip
-    mv -f ~/v2arm64/geoip.dat /usr/bin/v2ray/geoip.dat
     mv -f ~/v2arm64/geosite.dat /usr/bin/v2ray/geosite.dat
     mv -f ~/v2arm64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2arm64/v2ctl /usr/bin/v2ray/v2ctl
@@ -116,7 +115,6 @@ if [[ $architecture = "arm64" ]]; then
 elif [[ $architecture = "amd64" ]]; then
     wget -O ~/v2amd64.zip https://gwdbase.xyz/v2amd64.zip
     unzip v2amd64.zip
-    mv -f ~/v2amd64/geoip.dat /usr/bin/v2ray/geoip.dat
     mv -f ~/v2amd64/geosite.dat /usr/bin/v2ray/geosite.dat
     mv -f ~/v2amd64/v2ray /usr/bin/v2ray/v2ray
     mv -f ~/v2amd64/v2ctl /usr/bin/v2ray/v2ctl
