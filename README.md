@@ -3,7 +3,6 @@
 
 ### Server：
 
-Run-time compilation version
 ```
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server)
 ```
