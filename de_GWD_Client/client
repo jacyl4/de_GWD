@@ -540,6 +540,7 @@ blue "----------------------"
 
 updatepihole(){
 installpihole
+piholesetting
 
 pihole restartdns
 systemctl restart pihole-FTL
