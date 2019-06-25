@@ -7,16 +7,16 @@ domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
 
 if [[ $port =~ ^[1-9]+$ ]]; then
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
 else
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
 fi
 
-sed -i "$(sed -n -e '/"address":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"serverName":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"serverName"'": "'"'$domain'"'",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"Host":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"Host"'": "'"'$domain'"'"/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"serverName":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"serverName"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"Host":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"Host"'": "'"'$domain'"'"/" /etc/vtrui/config.json
 
-sed -i "$(sed -n -e '/"id":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"id"'": "'"'$uuidnum'"'",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"path":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"path"'": "'"\'$v2path'"'",/" /etc/v2ray/config.json
-systemctl restart v2ray
+sed -i "$(sed -n -e '/"id":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"id"'": "'"'$uuidnum'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"path":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"path"'": "'"\'$v2path'"'",/" /etc/vtrui/config.json
+systemctl restart vtrui
 rm -rf /var/www/html/nodedtpre.txt

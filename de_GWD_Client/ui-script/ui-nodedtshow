@@ -1,13 +1,13 @@
 #!/bin/bash
-mainport=$(awk '/port/' /etc/v2ray/config.json | awk 'NR==3{print$2}' | cut -d , -f1)
+mainport=$(awk '/port/' /etc/vtrui/config.json | awk 'NR==3{print$2}' | cut -d , -f1)
 
 if [[ $mainport == 443 ]]; then
-nodenum=$(cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')/=")
+nodenum=$(cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')/=")
 else
-nodenum=$(sed -n -e "/$(sed -n -e '/"address": "/p' /etc/v2ray/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}'):$port/=" /var/www/html/domain.txt)
+nodenum=$(sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}'):$port/=" /var/www/html/domain.txt)
 fi
 
-cat > /etc/v2ray/config.json << EOF
+cat > /etc/vtrui/config.json << EOF
 {
   "log": {
     "access": "/var/log/v2ray/access.log",
@@ -177,19 +177,19 @@ domain=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f1)
 port=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f2)
 
 if [[ $port =~ ^[1-9]+$ ]]; then
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
 else
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "443",/" /etc/v2ray/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/v2ray/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/v2ray/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
 fi
 
-sed -i '/"address":/c\"address": "'$domain'",'  /etc/v2ray/config.json
-sed -i '/"id":/c\"id": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/uuid.txt)'",'  /etc/v2ray/config.json
-sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/v2ray/config.json
-sed -i '/"path":/c\"path": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/path.txt)'",'  /etc/v2ray/config.json
-sed -i '/"Host":/c\"Host": "'$domain'"'  /etc/v2ray/config.json
+sed -i '/"address":/c\"address": "'$domain'",'  /etc/vtrui/config.json
+sed -i '/"id":/c\"id": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/uuid.txt)'",'  /etc/vtrui/config.json
+sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/vtrui/config.json
+sed -i '/"path":/c\"path": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/path.txt)'",'  /etc/vtrui/config.json
+sed -i '/"Host":/c\"Host": "'$domain'"'  /etc/vtrui/config.json
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php
