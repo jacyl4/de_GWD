@@ -103,14 +103,14 @@ wget -O /usr/local/bin/chnroute.txt https://gwdbase.xyz/ui-cnr.txt
 }
 
 
-function installvtrui(){
+function installv2ray(){
 rm -rf /etc/v2ray
 rm -rf /usr/bin/v2ray
 rm -rf /etc/systemd/system/v2ray.service
 
-mkdir -p /etc/vtrui
-mkdir -p /usr/bin/vtrui
 mkdir -p /var/log/v2ray
+mkdir -p /usr/bin/vtrui
+mkdir -p /etc/vtrui
 if [[ $architecture = "arm64" ]]; then
     wget -N https://gwdbase.xyz/vtarm64.zip
     unzip vtarm64.zip
@@ -286,8 +286,8 @@ git clone https://github.com/m13253/dns-over-https.git
 cd dns-over-https
 make && make install
 cd ~
-rm -rf ~/dns-over-https
 wget -O /etc/dns-over-https/doh-client.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doh-client.conf
+rm -rf ~/dns-over-https
 rm -rf ~/gopath
 }
 
@@ -337,6 +337,17 @@ sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 
 
 function postinstall(){
+doh_upstream='url = "https:\/\/'$doh'\/dq"'
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+dohip=$(nslookup $(echo -e $doh | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+sed -i '/doh/,$d' /etc/hosts
+cat >> /etc/hosts << EOF
+#doh static dns
+$dohip $doh
+$dohip $doh
+EOF
+
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
@@ -378,15 +389,7 @@ unzip ui-web.zip
 rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
-
 rm -rf ~/ui-*
-
-sed -i '/doh/,$d' /etc/hosts
-cat >> /etc/hosts << EOF
-#doh static dns
-$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
-$(nslookup $(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) $(awk 'NR==1{print}' /var/www/html/domain.txt)
-EOF
 
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
 
@@ -420,13 +423,15 @@ installgwd(){
     green "==============="
     read v2path
 
+doh=$v2servn
+
 cd ~
 
 preinstall
 
 predownload
 
-installvtrui
+installv2ray
 domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
 
@@ -504,18 +509,6 @@ EOF
 pihole restartdns
 systemctl restart pihole-FTL
 
-doh=$v2servn
-doh_upstream='url = "https:\/\/'$doh'\/dq"'
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-dohip=$(nslookup $(echo -e $doh | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
-sed -i '/doh/,$d' /etc/hosts
-cat >> /etc/hosts << EOF
-#doh static dns
-$dohip $doh
-$dohip $doh
-EOF
-
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
 echo -e "$v2servn" > /var/www/html/nodename.txt
@@ -554,6 +547,8 @@ blue "-------------------"
 
 
 updategwd(){
+doh=$(awk 'NR==1{print}' /var/www/html/domain.txt)
+
 cd ~
 systemctl stop iptables-proxy
 
@@ -561,7 +556,7 @@ preinstall
 
 predownload
 
-installvtrui
+installv2ray
 
 domain=$(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f1)
 port=$(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f2)
@@ -583,7 +578,6 @@ systemctl enable vtrui
 
 installiptablesproxy
 
-doh=$(awk 'NR==1{print}' /var/www/html/domain.txt)
 installdoh
 systemctl daemon-reload
 systemctl restart doh-client
