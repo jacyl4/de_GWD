@@ -421,7 +421,6 @@ installgwd(){
     read v2path
 
 cd ~
-systemctl stop iptables-proxy
 
 preinstall
 
