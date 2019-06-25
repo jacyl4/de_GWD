@@ -464,6 +464,7 @@ rm -rf ~/go
 
 doh=$v2servn
 installdoh
+systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 systemctl daemon-reload
