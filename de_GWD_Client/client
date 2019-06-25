@@ -300,7 +300,10 @@ cd "Pi-hole/automated install/"
 bash basic-install.sh
 cd ~
 rm -rf ~/Pi-hole
+}
 
+
+function piholesetting(){
 cat > /etc/pihole/adlists.list << EOF
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 https://hosts.nfz.moe/127.0.0.1/full/hosts
@@ -485,6 +488,7 @@ systemctl start doh-client
 systemctl enable doh-client
 
 installpihole
+piholesetting
 
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
