@@ -173,7 +173,7 @@ for iplistw in $(cat /var/www/html/listw.txt); do
   ipset add listw $iplistw
 done
 for ipdomain in $(cat /var/www/html/domain.txt); do
-  ipset add listw $ipdomain
+  ipset add listw $(echo -e $ipdomain | cut -d : -f1)
 done
 
 ipset -N listb hash:net maxelem 65535
@@ -185,10 +185,10 @@ ip rule add fwmark 0x9 table 100 pref 100
 ip route add local default dev lo table 100
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p tcp -dport 4711 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp -dport 4711 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp -dport 5380 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp -dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 4711 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 4711 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
