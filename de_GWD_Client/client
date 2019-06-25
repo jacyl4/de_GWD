@@ -141,7 +141,7 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
-wget -O /usr/bin/vtrui/geosite.dat https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/geosite.dat
+wget -O /usr/bin/vtrui/geosite.dat https://gwdbase.xyz/geosite.dat
 wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/v2wt-client.json
 }
 
