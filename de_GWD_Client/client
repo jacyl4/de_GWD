@@ -108,7 +108,6 @@ rm -rf /etc/v2ray
 rm -rf /usr/bin/v2ray
 rm -rf /etc/systemd/system/v2ray.service
 
-mkdir -p /var/log/v2ray
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 if [[ $architecture = "arm64" ]]; then
