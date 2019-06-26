@@ -670,11 +670,6 @@ wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gw
 
 
 function installiptablesrules(){
-systemctl stop iptablesrules
-systemctl disable iptablesrules
-rm -rf /usr/local/bin/iptablesrules-up
-rm -rf /usr/local/bin/iptablesrules-down
-rm -rf /etc/systemd/system/iptablesrules.service
 }
 
 
@@ -789,8 +784,6 @@ iface $ethernetnum inet static
 EOF
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
 pihole restartdns
-
-installiptablesrules
 
 postinstall
 
@@ -1246,8 +1239,6 @@ installdoh
 systemctl daemon-reload
 systemctl restart doh-server
 systemctl enable doh-server
-
-installiptablesrules
 
 postinstall
 blue "-----------------"
