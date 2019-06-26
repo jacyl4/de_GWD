@@ -77,6 +77,7 @@ apt install -y net-tools dnsutils curl rsync ca-certificates unzip git socat bui
 function installv2ray(){
 rm -rf /etc/v2ray
 rm -rf /usr/bin/v2ray
+rm -rf /var/log/v2ray
 rm -rf /etc/systemd/system/v2ray.service
 
 mkdir -p /usr/bin/vtrui
