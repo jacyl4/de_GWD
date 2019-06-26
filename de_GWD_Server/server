@@ -1,4 +1,17 @@
 #!/bin/bash
+
+systemctl stop v2ray
+systemctl disable v2ray
+rm -rf /etc/v2ray
+rm -rf /usr/bin/v2ray
+rm -rf /var/log/v2ray
+rm -rf /etc/systemd/system/v2ray.service
+systemctl stop iptablesrules
+systemctl disable iptablesrules
+rm -rf /usr/local/bin/iptablesrules-up
+rm -rf /usr/local/bin/iptablesrules-down
+rm -rf /etc/systemd/system/iptablesrules.service
+
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }

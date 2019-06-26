@@ -1,4 +1,12 @@
 #!/bin/bash
+
+systemctl stop v2ray
+systemctl disable v2ray
+rm -rf /etc/v2ray
+rm -rf /usr/bin/v2ray
+rm -rf /var/log/v2ray
+rm -rf /etc/systemd/system/v2ray.service
+
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
@@ -104,11 +112,6 @@ wget -O /usr/local/bin/chnroute.txt https://gwdbase.xyz/ui-cnr.txt
 
 
 function installv2ray(){
-rm -rf /etc/v2ray
-rm -rf /usr/bin/v2ray
-rm -rf /var/log/v2ray
-rm -rf /etc/systemd/system/v2ray.service
-
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 if [[ $architecture = "arm64" ]]; then
