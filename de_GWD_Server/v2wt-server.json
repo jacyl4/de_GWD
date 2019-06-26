@@ -4,6 +4,9 @@
     "error": "/var/log/v2ray/error.log",
     "loglevel": "error"
     },
+  "dns": {
+    "servers": [ "localhost" ]
+    },
   "inbounds": [
     {
     "port": 11811,
@@ -28,7 +31,9 @@
   "outbounds": [
     {
     "protocol": "freedom",
-    "settings": {}
+    "settings": {
+      "domainStrategy": "UseIP"
+      }
     }
   ]
 }
