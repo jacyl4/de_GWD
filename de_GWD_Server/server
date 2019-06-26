@@ -1106,19 +1106,19 @@ changev2rayverify(){
     green "========="
     green "新的UUID"
     green "========="
-    read vtruinuuid
+    read nuuid
 
     green "========="
     green "新的path"
     green "========="
-    read vtruinpath
+    read npath
 
-sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'NR==2{print}')s/.*/location "'\'$vtruinpath''" {/" /etc/nginx/conf.d/default.conf
+sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
 systemctl restart nginx
 
-sed -i "$(sed -n -e '/"id":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$vtruinuuid'"'",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"path":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$vtruinpath'"'"/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"id":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$nuuid'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"path":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$npath'"'"/" /etc/vtrui/config.json
 systemctl restart vtrui
 blue "--------------------------"
 blue  "更换v2ray UUID&path [完毕]"
