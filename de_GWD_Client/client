@@ -321,7 +321,7 @@ $dohip $doh
 EOF
 
 systemctl daemon-reload
-systemctl start doh-client
+systemctl restart doh-client
 systemctl enable doh-client
 }
 
