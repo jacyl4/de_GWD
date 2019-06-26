@@ -794,16 +794,13 @@ installiptablesrules
 
 postinstall
 
-blue "------------------------------------"
+blue "--------------------------------------------"
 blue  "安装de_GWD [完毕]"
 echo
-blue "  域名："
-yellow "$vpsdomain"
-blue "  UUID："
-yellow "$uuidnum"
-blue "  PATH："
-yellow "$v2path"
-blue "------------------------------------"
+blue "域名： $(yellow "$vpsdomain")" 
+blue "UUID： $(yellow "$uuidnum")" 
+blue "PATH： $(yellow "$v2path")" 
+blue "--------------------------------------------"
 }
 
 
