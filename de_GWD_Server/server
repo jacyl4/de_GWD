@@ -669,11 +669,6 @@ wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gw
 
 
 
-function installiptablesrules(){
-}
-
-
-
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
