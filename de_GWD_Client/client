@@ -351,12 +351,14 @@ Description=DNS-over-HTTPS Client
 After=network.target
 Before=nss-lookup.target
 Wants=nss-lookup.target
+
 [Service]
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 LimitNOFILE=1000000
 Restart=always
 RestartSec=3
 Type=simple
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -514,7 +516,6 @@ echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'N
 installiptablesproxy
 
 installdoh
-
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved

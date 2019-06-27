@@ -42,12 +42,12 @@ LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
 
-sed -i '/65535/d' /etc/security/limits.conf
-sed -i '/# End of file/i\* soft nproc 65535' /etc/security/limits.conf
-sed -i '/# End of file/i\* hard nproc 65535' /etc/security/limits.conf
-sed -i '/# End of file/i\* soft nofile 65535' /etc/security/limits.conf
-sed -i '/# End of file/i\* hard nofile 65535' /etc/security/limits.conf
-echo "ulimit -n 65535" > ~/.bash_profile
+sed -i '/1000000/d' /etc/security/limits.conf
+sed -i '/# End of file/i\* soft nproc 1000000' /etc/security/limits.conf
+sed -i '/# End of file/i\* hard nproc 1000000' /etc/security/limits.conf
+sed -i '/# End of file/i\* soft nofile 1000000' /etc/security/limits.conf
+sed -i '/# End of file/i\* hard nofile 1000000' /etc/security/limits.conf
+echo "ulimit -n 1000000" > ~/.bash_profile
 
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
@@ -646,38 +646,77 @@ echo "" > /etc/pihole/adlists.list
 pihole -g
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=8.8.8.8' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 pihole restartdns
 }
 
 
 function installdoh(){
-mkdir -p ~/gopath
-source ~/.profile
+systemctl stop doh-client
+systemctl disable doh-client
 rm -rf ~/dns-over-https
 rm -rf /usr/local/bin/doh-client
 rm -rf /usr/local/bin/doh-server
 rm -rf /etc/NetworkManager/dispatcher.d
 rm -rf /usr/lib/systemd/system/doh-client.service
 rm -rf /usr/lib/systemd/system/doh-server.service
-git clone https://github.com/m13253/dns-over-https.git
-cd dns-over-https
-make && make install
+
 cd ~
-rm -rf ~/dns-over-https
-rm -rf ~/gopath
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
+unzip dohamd64.zip
+mv -f ~/dohamd64/doh-server /usr/local/bin/doh-server
+rm -rf ~/dohamd64*
+chmod +x /usr/local/bin/doh-server
+
+mkdir -p /etc/dns-over-https/
 wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
+
+mkdir -p /etc/NetworkManager/dispatcher.d/
+cat > /etc/NetworkManager/dispatcher.d/doh-server << "EOF"
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/doh-server
+
+cat > /etc/systemd/system/doh-server.service << "EOF"
+[Unit]
+Description=DNS-over-HTTPS server
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
+LimitNOFILE=1000000
+Restart=always
+RestartSec=3
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+EOF
 systemctl daemon-reload
 systemctl restart doh-server
 systemctl enable doh-server
+cd ~
 }
 
 
@@ -741,25 +780,6 @@ systemctl restart nginx
 systemctl enable nginx
 
 installpihole
-
-wget -N https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz
-tar -xvf go*linux-amd64.tar.gz
-rm -rf ~/go*linux-amd64.tar.gz
-rsync -r ~/go /usr/local
-cat > ~/.profile << "EOF"
-if [ "$BASH" ]; then
-  if [ -f ~/.bashrc ]; then
-    . ~/.bashrc
-  fi
-fi
-
-mesg n || true
-
-export GOROOT=/usr/local/go
-export GOPATH=~/gopath
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-rm -rf ~/go
 
 installdoh
 systemctl stop systemd-resolved
@@ -1247,7 +1267,7 @@ statusbad=$(red "✘")
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusgod] v2ray     进程正常"
-elif [[ ! -d "/usr/bin/vtrui" ]]; then
+elif [[ ! -f "/usr/bin/vtrui" ]]; then
     echo "[$statusbad] v2ray     进程未安装"
 else
     echo "[$statusbad] v2ray     进程出错"
@@ -1256,7 +1276,7 @@ fi
 
 if [[ $(systemctl is-active nginx) = "active" ]]; then
     echo "[$statusgod] nginx     进程正常"
-elif [[ ! -d "/usr/local/nginx" ]] && [[ ! -d "/etc/nginx" ]]; then
+elif [[ ! -f "/usr/local/nginx" ]] && [[ ! -d "/etc/nginx" ]]; then
     echo "[$statusbad] nginx     进程未安装"
 else
     echo "[$statusbad] nginx     进程出错"
@@ -1265,7 +1285,7 @@ fi
 
 if [[ $(systemctl is-active doh-server) = "active" ]]; then
     echo "[$statusgod] DoH服务端 进程正常"
-elif [[ ! -d "/usr/local/bin/doh-server" ]]; then
+elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
     echo "[$statusbad] DoH服务端 进程未安装"
 else
     echo "[$statusbad] DoH服务端 进程出错"
@@ -1274,7 +1294,7 @@ fi
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusgod] pihole    进程正常"
-elif [[ ! -d "/usr/local/bin/pihole" ]]; then
+elif [[ ! -f "/usr/local/bin/pihole" ]]; then
     echo "[$statusbad] pihole    进程未安装"
 else
     echo "[$statusbad] pihole    进程出错"
