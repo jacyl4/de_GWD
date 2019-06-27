@@ -29,6 +29,7 @@ case $(uname -m) in
     aarch64)  architecture="arm64" ;;
 esac
 
+mirrorsite="gwdbase.xyz"
 
 function preinstall(){
 echo "Asia/Shanghai" > /etc/timezone
@@ -118,13 +119,13 @@ cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 if [[ $architecture = "arm64" ]]; then
-    wget -N https://gwdbase.xyz/vtarm64.zip
+    wget -N https://$mirrorsite/vtarm64.zip
     unzip vtarm64.zip
     mv -f ~/vtarm64/vtrui /usr/bin/vtrui/vtrui
     mv -f ~/vtarm64/v2ctl /usr/bin/vtrui/v2ctl
     rm -rf ~/vtarm64*
 elif [[ $architecture = "amd64" ]]; then
-    wget -N https://gwdbase.xyz/vtamd64.zip
+    wget -N https://$mirrorsite/vtamd64.zip
     unzip vtamd64.zip
     mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
     mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
@@ -149,7 +150,7 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
-wget -O /usr/bin/vtrui/geosite.dat https://gwdbase.xyz/geosite.dat
+wget -O /usr/bin/vtrui/geosite.dat https://$mirrorsite/geosite.dat
 wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/v2wt-client.json
 
 if [[ $port =~ ^[1-9]+$ ]]; then
@@ -173,7 +174,7 @@ cd ~
 
 
 function installiptablesproxy(){
-wget -O /usr/local/bin/chnroute.txt https://gwdbase.xyz/ui-cnr.txt
+wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
 
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
@@ -301,12 +302,12 @@ systemctl enable iptables-proxy
 function installdoh(){
 cd ~
 if [[ $architecture = "arm64" ]]; then
-  wget -N https://gwdbase.xyz/doharm64.zip
+  wget -N https://$mirrorsite/doharm64.zip
   unzip doharm64.zip
   mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
   rm -rf ~/doharm64*
 elif [[ $architecture = "amd64" ]]; then
-  wget -N https://gwdbase.xyz/dohamd64.zip
+  wget -N https://$mirrorsite/dohamd64.zip
   unzip dohamd64.zip
   mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
   rm -rf ~/dohamd64*
@@ -327,6 +328,23 @@ $dohip $doh
 $dohip $doh
 EOF
 
+mkdir -p /etc/NetworkManager/dispatcher.d/
+cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
+#!/bin/bash
+
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+
 cat > /etc/systemd/system/doh-client.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS Client
@@ -335,7 +353,6 @@ Before=nss-lookup.target
 Wants=nss-lookup.target
 
 [Service]
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 LimitNOFILE=1048576
 Restart=always
@@ -441,8 +458,8 @@ fi
 crontab now.cron
 rm -rf now.cron
 
-wget -N https://gwdbase.xyz/ui-script.zip
-wget -N https://gwdbase.xyz/ui-web.zip
+wget -N https://$mirrorsite/ui-script.zip
+wget -N https://$mirrorsite/ui-web.zip
 rm -rf /usr/local/bin/ui-*
 unzip ui-script.zip
 unzip ui-web.zip
