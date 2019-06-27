@@ -1116,6 +1116,8 @@ blue "-----------------------------"
 
 
 changev2rayverify(){
+systemctl stop vtrui
+
     green "========="
     green "新的UUID"
     green "========="
