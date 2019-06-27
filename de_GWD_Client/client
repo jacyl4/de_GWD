@@ -20,7 +20,7 @@ case $(uname -m) in
     aarch64)  architecture="arm64" ;;
 esac
 
-mirrorsite="acccmi.cf"
+mirrorsite="gwdbase.xyz"
 
 function preinstall(){
 echo "Asia/Shanghai" > /etc/timezone
