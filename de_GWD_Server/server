@@ -1276,7 +1276,7 @@ fi
 
 if [[ $(systemctl is-active nginx) = "active" ]]; then
     echo "[$statusgod] nginx     进程正常"
-elif [[ ! -f "/usr/local/nginx" ]] && [[ ! -d "/etc/nginx" ]]; then
+elif [[ ! -d "/usr/local/nginx" ]] && [[ ! -d "/etc/nginx" ]]; then
     echo "[$statusbad] nginx     进程未安装"
 else
     echo "[$statusbad] nginx     进程出错"
