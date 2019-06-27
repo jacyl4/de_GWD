@@ -15,9 +15,11 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 ![client](https://i.loli.net/2019/06/14/5d03acb0d7c8a12948.png)
 
 #部署
+
 >准备好顶级域名，做好A记录 和 cname for www，不开cdn。
 >
 >最好重新安装vps debian9，有vnc优先网络重装方式，无vnc可以尝试dd重装方式。
+
 ###服务端
 * ssh登入vps。
 
