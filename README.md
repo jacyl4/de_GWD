@@ -14,13 +14,16 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 ```
 ![client](https://i.loli.net/2019/06/14/5d03acb0d7c8a12948.png)
 
+
 #部署
 
 >准备好顶级域名，做好A记录 和 cname for www，不开cdn。
 >
 >最好重新安装vps debian9，有vnc优先网络重装方式，无vnc可以尝试dd重装方式。
 
+
 ###服务端
+
 * ssh登入vps。
 
 - 选项1开始安装，期间自动生成uuid和path，遇pihole安装界面一路回车，最后安装完成会打印 域名，uuid，path 到屏幕。
@@ -43,7 +46,9 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 
 * 选项0 如题。
 
+
 ###客户端
+
 * 安装于虚拟机或实体机的debian9设备，arm平台请用armbian系统。
 
 - 初次安装 保证上级路由 dhcp 分发的 网关为上级本身 dns 可用 dnspod 保证 github 正常访问。
