@@ -44,13 +44,13 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 ###客户端
 * 安装于虚拟机或实体机的debian9设备，arm平台请用armbian系统。
 
-- 初次安装 保证上级路由 dhcp 分发的 网关为上级本身 dns 可用 dnspod 保证 github 正常访问。
+- 初次安装 保证上级路由 dhcp 分发的 网关为上级本身 dns 可用 dnspod 保证 github 正常访问。
 
 * 顺利安装，日后的更新，可以不用理会上级路由的网关跟dns。
 
 - 填 path 一定要记得 / 符号。
 
-* 选项2 可以用来强制重置 web ui 跟 pihole 的密码。 两个密码为同一个。
+* 选项2 可以用来强制重置 web ui 跟 pihole 的密码。 两个密码为同一个。
 
 - 只支持大陆白名单模式。
 
