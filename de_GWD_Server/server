@@ -1117,6 +1117,7 @@ blue "-----------------------------"
 
 changev2rayverify(){
 systemctl stop vtrui
+systemctl stop nginx
 
     green "========="
     green "新的UUID"
@@ -1235,6 +1236,8 @@ blue "-------------------"
 
 
 updategwd(){
+systemctl stop vtrui
+systemctl stop nginx
 cd ~
 preinstall
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
