@@ -124,7 +124,7 @@ systemctl enable vtrui
 }
 
 
-function installnginxlasest(){
+function installnginxlatest(){
 cd ~
 wget -N https://www.openssl.org/source/openssl-1.1.1b.tar.gz
 tar zxvf openssl-1.1.1b.tar.gz
@@ -765,7 +765,7 @@ preinstall
 
 installv2ray
 
-installnginxlasest
+installnginxlatest
 
 nginxconf
 
