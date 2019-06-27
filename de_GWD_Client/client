@@ -287,7 +287,7 @@ ExecStop=/usr/local/bin/iptables-proxy-down
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl start iptables-proxy
+systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 }
 
@@ -467,6 +467,7 @@ predownload
 installv2ray
 
 echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
+
 installiptablesproxy
 
 if [[ $architecture = "arm64" ]]; then
