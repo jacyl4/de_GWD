@@ -1001,13 +1001,13 @@ mv -f ~/setup-nextcloud.php /var/www/html/
 
 blue "------------------------------------"
 blue "  数据库用户名："
-blue "$sqluser"
+yellow "$sqluser"
 blue "  数据库密码："
-blue "$sqlpw"
+yellow "$sqlpw"
 blue "  数据库名称："
-blue "$sqlname"
+yellow "$sqlname"
 blue "  Nextcloud安装地址："
-blue "$vpsdomain/setup-nextcloud.php"
+yellow "$vpsdomain/setup-nextcloud.php"
 blue "------------------------------------"
 }
 
