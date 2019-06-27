@@ -15,7 +15,6 @@ rm -rf /usr/local/bin/doh-server
 rm -rf /etc/NetworkManager/dispatcher.d
 rm -rf /usr/lib/systemd/system/doh-client.service
 rm -rf /usr/lib/systemd/system/doh-server.service
-rm -rf /etc/systemd/system/doh-client.service
 
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
@@ -301,21 +300,21 @@ systemctl enable iptables-proxy
 
 
 function installdoh(){
-mkdir -p ~/gopath
-source ~/.profile
-rm -rf ~/dns-over-https
-rm -rf /usr/local/bin/doh-client
-rm -rf /usr/local/bin/doh-server
-rm -rf /etc/NetworkManager/dispatcher.d
-rm -rf /usr/lib/systemd/system/doh-client.service
-rm -rf /usr/lib/systemd/system/doh-server.service
-git clone https://github.com/m13253/dns-over-https.git
-cd dns-over-https
-make && make install
 cd ~
-rm -rf ~/dns-over-https
-rm -rf ~/gopath
+if [[ $architecture = "arm64" ]]; then
+  wget -N https://$mirrorsite/doharm64.zip
+  unzip doharm64.zip
+  mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
+  rm -rf ~/doharm64*
+elif [[ $architecture = "amd64" ]]; then
+  wget -N https://$mirrorsite/dohamd64.zip
+  unzip dohamd64.zip
+  mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
+  rm -rf ~/dohamd64*
+fi
+chmod +x /usr/local/bin/doh-client
 
+mkdir -p /etc/dns-over-https/
 wget -O /etc/dns-over-https/doh-client.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doh-client.conf
 
 doh_upstream='url = "https:\/\/'$doh'\/dq"'
@@ -329,9 +328,42 @@ $dohip $doh
 $dohip $doh
 EOF
 
+mkdir -p /etc/NetworkManager/dispatcher.d/
+cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/doh-client
+
+cat > /etc/systemd/system/doh-client.service << "EOF"
+[Unit]
+Description=DNS-over-HTTPS Client
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+[Service]
+ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
+LimitNOFILE=1048576
+Restart=always
+RestartSec=3
+Type=simple
+[Install]
+WantedBy=multi-user.target
+EOF
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
+cd ~
 }
 
 
@@ -481,28 +513,6 @@ echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'N
 
 installiptablesproxy
 
-if [[ $architecture = "arm64" ]]; then
-    wget -N https://dl.google.com/go/go1.11.9.linux-arm64.tar.gz
-    tar -xvf go*linux-arm64.tar.gz
-    rm -rf ~/go*linux-arm64.tar.gz
-elif [[ $architecture = "amd64" ]]; then
-    wget -N https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz
-    tar -xvf go*linux-amd64.tar.gz
-    rm -rf ~/go*linux-amd64.tar.gz
-fi
-rsync -r ~/go /usr/local
-cat > ~/.profile << "EOF"
-if [ "$BASH" ]; then
-  if [ -f ~/.bashrc ]; then
-    . ~/.bashrc
-  fi
-fi
-mesg n || true
-export GOROOT=/usr/local/go
-export GOPATH=~/gopath
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-rm -rf ~/go
 installdoh
 
 systemctl stop systemd-resolved
