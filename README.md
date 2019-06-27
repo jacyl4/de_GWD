@@ -17,14 +17,14 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 ![client](https://i.loli.net/2019/06/14/5d03acb0d7c8a12948.png)
 
 
-#部署
+# 部署
 
 >准备好顶级域名，做好A记录 和 cname for www，不开cdn。
 >
 >最好重新安装vps debian9，有vnc优先网络重装方式，无vnc可以尝试dd重装方式。
 
 
-###服务端
+### 服务端
 
 * ssh登入vps。
 
@@ -49,7 +49,7 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 * 选项0 如题。
 
 
-###客户端
+### 客户端
 
 * 安装于虚拟机或实体机的debian9设备，arm平台请用armbian系统。
 
@@ -65,4 +65,4 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 
 * 不需要走代理的内网设备，通过黑白名单页下，将设备内网ip填入内网设备白名单。
 
-- 保存节点的操作稍微有点耗时，稍微多等一小会。 
+- 保存节点的操作稍微有点耗时，稍微多等一小会。
