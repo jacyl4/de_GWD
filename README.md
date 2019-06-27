@@ -1,4 +1,4 @@
-基于v2+ws+tls方案，极大提高了dns性能，优化nginx，支持https2，tls1.3等特性。极大提升浏览器体验。
+极大提高了dns性能，优化nginx，支持https2，tls1.3等特性。极大提升浏览器体验。
 
 ![de_GWD](https://i.loli.net/2019/06/05/5cf78011df0b260138.png)
 
@@ -32,7 +32,7 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 
 * 选项2切换至bbrplus，会自动重启，等两三分钟后自动生效。至此服务端基本完成。如需进一步操作，重新登入vps。
 
-- 利用选项3安装nextcloud，可修改的就nextcloud 用户名 密码，数据库名 数据库用户 数据库密码，其他均为默认。安装过程中，为提供PostgresSQL安全性，会提示设置PostgresSQL主密码。
+- 利用选项3安装nextcloud，可修改的就nextcloud 用户名 密码，数据库名 数据库用户 数据库密码，其他均为默认。安装过程中，为提供PostgresSQL安全性，会提示设置PostgresSQL主密码。
 
 * 完成nextcloud的安装，见到主界面后，方可通过选项4 完善nextcloud缓存设置。
 
