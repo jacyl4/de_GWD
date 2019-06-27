@@ -7,15 +7,6 @@ rm -rf /usr/bin/v2ray
 rm -rf /var/log/v2ray
 rm -rf /etc/systemd/system/v2ray.service
 
-systemctl stop doh-client
-systemctl disable doh-client
-rm -rf ~/dns-over-https
-rm -rf /usr/local/bin/doh-client
-rm -rf /usr/local/bin/doh-server
-rm -rf /etc/NetworkManager/dispatcher.d
-rm -rf /usr/lib/systemd/system/doh-client.service
-rm -rf /usr/lib/systemd/system/doh-server.service
-
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
@@ -300,6 +291,15 @@ systemctl enable iptables-proxy
 
 
 function installdoh(){
+systemctl stop doh-client
+systemctl disable doh-client
+rm -rf ~/dns-over-https
+rm -rf /usr/local/bin/doh-client
+rm -rf /usr/local/bin/doh-server
+rm -rf /etc/NetworkManager/dispatcher.d
+rm -rf /usr/lib/systemd/system/doh-client.service
+rm -rf /usr/lib/systemd/system/doh-server.service
+
 cd ~
 if [[ $architecture = "arm64" ]]; then
   wget -N https://$mirrorsite/doharm64.zip
