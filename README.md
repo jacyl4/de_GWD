@@ -70,3 +70,5 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 * 不需要走代理的内网设备，通过黑白名单页下，将设备内网ip填入内网设备白名单。
 
 - 保存节点的操作稍微有点耗时，稍微多等一小会。
+
+**[再有问题，点我看wiki](https://github.com/gwdburst/de_GWD/wiki)**
