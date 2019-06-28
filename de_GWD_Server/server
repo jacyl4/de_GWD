@@ -49,6 +49,9 @@ sed -i '/# End of file/i\* soft nofile 1000000' /etc/security/limits.conf
 sed -i '/# End of file/i\* hard nofile 1000000' /etc/security/limits.conf
 echo "ulimit -n 1000000" > ~/.bash_profile
 
+sed -i '/IPv6/d'  /etc/hosts
+sed -i '/ip6/d'  /etc/hosts
+
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
 kernel.pid_max = 65535

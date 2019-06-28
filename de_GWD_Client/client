@@ -52,6 +52,9 @@ sed -i '/# End of file/i\* soft nofile 1000000' /etc/security/limits.conf
 sed -i '/# End of file/i\* hard nofile 1000000' /etc/security/limits.conf
 echo "ulimit -n 1000000" > ~/.bash_profile
 
+sed -i '/IPv6/d'  /etc/hosts
+sed -i '/ip6/d'  /etc/hosts
+
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
 kernel.pid_max = 65535
@@ -226,19 +229,26 @@ iptables -t mangle -A V2PROXY -p tcp --dport 4711 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 4711 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
-iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp -m set --match-set listb dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -m set --match-set listb dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p tcp -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp -m set --match-set listwlan src -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -m set --match-set listwlan src -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp -m set --match-set listw dst -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -m set --match-set listw dst -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp -m mark --mark 0xff -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp -m mark --mark 0xff -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
 
 iptables -t mangle -A OUTPUT -p tcp -j V2PROXY
 iptables -t mangle -A OUTPUT -p udp -j V2PROXY
 
-iptables -t mangle -A PREROUTING -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 
 iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9

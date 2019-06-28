@@ -27,7 +27,7 @@
     {
     "protocol": "freedom",
     "settings": {
-      "domainStrategy": "UseIP"
+      "domainStrategy": "UseIPv4"
       }
     }
   ]
