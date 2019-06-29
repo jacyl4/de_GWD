@@ -108,6 +108,13 @@ apt install -y net-tools dnsutils ipset curl rsync ca-certificates unzip git bui
 
 
 
+function predownload(){
+wget -N https://$mirrorsite/ui-script.zip
+wget -N https://$mirrorsite/ui-web.zip
+}
+
+
+
 function installv2ray(){
 cd ~
 mkdir -p /usr/bin/vtrui
@@ -312,12 +319,12 @@ rm -rf /usr/lib/systemd/system/doh-server.service
 
 cd ~
 if [[ $architecture = "arm64" ]]; then
-  wget -N https://$mirrorsite/doharm64.zip
+  wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doharm64.zip
   unzip doharm64.zip
   mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
   rm -rf ~/doharm64*
 elif [[ $architecture = "amd64" ]]; then
-  wget -N https://$mirrorsite/dohamd64.zip
+  wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
   unzip dohamd64.zip
   mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
   rm -rf ~/dohamd64*
@@ -468,8 +475,6 @@ fi
 crontab now.cron
 rm -rf now.cron
 
-wget -N https://$mirrorsite/ui-script.zip
-wget -N https://$mirrorsite/ui-web.zip
 rm -rf /usr/local/bin/ui-*
 unzip ui-script.zip
 unzip ui-web.zip
@@ -518,6 +523,8 @@ doh=$v2servn
 cd ~
 
 preinstall
+
+predownload
 
 installv2ray
 
@@ -606,6 +613,8 @@ cd ~
 systemctl stop iptables-proxy
 
 preinstall
+
+predownload
 
 installv2ray
 
