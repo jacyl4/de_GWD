@@ -9,6 +9,7 @@ fi
 
 cat > /etc/vtrui/config.json << EOF
 {
+  "dns": { "servers": [ "localhost" ] },
   "inbounds": [
     {
     "port": 9897,
@@ -90,7 +91,7 @@ cat > /etc/vtrui/config.json << EOF
       "streamSettings": {
         "sockopt": { "mark": 255 }
       },
-      "settings": {}
+      "settings": { "domainStrategy": "UseIPv4" }
     }
   ],
   "routing": {

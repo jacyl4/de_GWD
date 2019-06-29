@@ -1,7 +1,5 @@
 {
-  "dns": {
-    "servers": [ "localhost" ]
-    },
+  "dns": { "servers": [ "localhost" ] },
   "inbounds": [
     {
     "port": 11811,

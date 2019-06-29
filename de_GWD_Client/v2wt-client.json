@@ -1,4 +1,5 @@
 {
+  "dns": { "servers": [ "localhost" ] },
   "inbounds": [
     {
     "port": 9897,
@@ -80,7 +81,7 @@
       "streamSettings": {
         "sockopt": { "mark": 255 }
       },
-      "settings": {}
+      "settings": { "domainStrategy": "UseIPv4" }
     }
   ],
   "routing": {
