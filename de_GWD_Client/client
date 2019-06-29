@@ -108,13 +108,6 @@ apt install -y net-tools dnsutils ipset curl rsync ca-certificates unzip git bui
 
 
 
-function predownload(){
-wget -N https://$mirrorsite/ui-script.zip
-wget -N https://$mirrorsite/ui-web.zip
-}
-
-
-
 function installv2ray(){
 cd ~
 mkdir -p /usr/bin/vtrui
@@ -475,6 +468,9 @@ fi
 crontab now.cron
 rm -rf now.cron
 
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/ui-script.zip
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/ui-web.zip
+
 rm -rf /usr/local/bin/ui-*
 unzip ui-script.zip
 unzip ui-web.zip
@@ -523,8 +519,6 @@ doh=$v2servn
 cd ~
 
 preinstall
-
-predownload
 
 installv2ray
 
@@ -613,8 +607,6 @@ cd ~
 systemctl stop iptables-proxy
 
 preinstall
-
-predownload
 
 installv2ray
 
