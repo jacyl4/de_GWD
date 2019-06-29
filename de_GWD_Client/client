@@ -211,8 +211,6 @@ ip rule add fwmark 0x9 table 100 pref 100
 ip route add local default dev lo table 100
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 4711 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 4711 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
