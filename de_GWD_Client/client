@@ -415,9 +415,6 @@ EOF
 pihole -g
 
 pihole -f
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 }
 
 
@@ -520,6 +517,10 @@ installiptablesproxy
 
 installpihole
 piholesetting
+
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
 
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
