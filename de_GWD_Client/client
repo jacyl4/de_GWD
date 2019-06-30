@@ -119,7 +119,7 @@ fi
 chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
-wget -O /etc/dns-over-https/doh-client.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doh-client.conf
+wget -O /etc/dns-over-https/doh-client.conf https://$mirrorsite/doh-client.conf
 
 doh_upstream='url = "https:\/\/'$doh'\/dq"'
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
@@ -212,7 +212,7 @@ WantedBy=multi-user.target
 EOF
 wget -O /usr/bin/vtrui/geoip.dat https://$mirrorsite/geoip.dat
 wget -O /usr/bin/vtrui/geosite.dat https://$mirrorsite/geosite.dat
-wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/v2wt-client.json
+wget -O /etc/vtrui/config.json https://$mirrorsite/v2wt-client.json
 
 if [[ $port =~ ^[1-9]+$ ]]; then
 sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
