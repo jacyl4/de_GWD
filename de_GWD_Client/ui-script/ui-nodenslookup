@@ -1,0 +1,6 @@
+#!/bin/bash
+{
+for vtruinode in $(cat /var/www/html/domain.txt); do
+nslookup $(echo -e $vtruinode | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2
+done
+} > /usr/local/bin/vtruinodeip.txt

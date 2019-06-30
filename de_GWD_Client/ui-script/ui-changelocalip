@@ -1,0 +1,8 @@
+#!/bin/bash
+localip="$(awk 'NR==1{print}' /var/www/html/localip.txt)"
+
+sed -i '/"source":/c\"source": [ "'$localip'" ],' /etc/vtrui/config.json
+
+rm -rf /var/www/html/localip.txt
+
+systemctl restart vtrui

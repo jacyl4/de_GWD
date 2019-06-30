@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ $(systemctl is-active iptables-proxy) = "active" ]]; then
+echo "on"
+else
+echo "off"
+fi
