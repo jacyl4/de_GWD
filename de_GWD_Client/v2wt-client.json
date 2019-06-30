@@ -1,5 +1,4 @@
 {
-  "dns": { "servers": [ "localhost" ] },
   "inbounds": [
     {
     "port": 9897,
@@ -75,29 +74,15 @@
       "sockopt": { "mark": 255 }
       }
     },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "streamSettings": {
-        "sockopt": { "mark": 255 }
-      },
-      "settings": { "domainStrategy": "UseIPv4" }
-    }
+    { "tag": "doh", "protocol": "freedom", "settings": { "redirect": "127.0.0.1:5380" } },
+    { "tag": "direct", "protocol": "freedom", "settings": { } }
   ],
   "routing": {
     "domainStrategy": "AsIs",
     "rules": [
-      {
-        "type": "field",
-        "port": "5380,4711",
-        "network": "tcp,udp",
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "domain": ["geosite:cn"],
-        "outboundTag": "direct"
-      },
+      { "type": "field", "ip": [ "geoip:private", "geoip:cn" ], "outboundTag": "direct" },
+      { "type": "field", "domain": ["geosite:cn"], "outboundTag": "direct" },
+      { "type": "field", "port": "53", "network": "tcp,udp", "outboundTag": "doh" },
       {
         "type": "field",
         "domain": [

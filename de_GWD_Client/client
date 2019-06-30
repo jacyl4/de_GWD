@@ -108,6 +108,86 @@ apt install -y net-tools dnsutils ipset curl rsync ca-certificates unzip git bui
 
 
 
+function installdoh(){
+systemctl stop doh-client
+systemctl disable doh-client
+rm -rf ~/dns-over-https
+rm -rf /usr/local/bin/doh-client
+rm -rf /usr/local/bin/doh-server
+rm -rf /etc/NetworkManager/dispatcher.d
+rm -rf /usr/lib/systemd/system/doh-client.service
+rm -rf /usr/lib/systemd/system/doh-server.service
+
+cd ~
+if [[ $architecture = "arm64" ]]; then
+  wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doharm64.zip
+  unzip doharm64.zip
+  mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
+  rm -rf ~/doharm64*
+elif [[ $architecture = "amd64" ]]; then
+  wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
+  unzip dohamd64.zip
+  mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
+  rm -rf ~/dohamd64*
+fi
+chmod +x /usr/local/bin/doh-client
+
+mkdir -p /etc/dns-over-https/
+wget -O /etc/dns-over-https/doh-client.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doh-client.conf
+
+doh_upstream='url = "https:\/\/'$doh'\/dq"'
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
+dohip=$(nslookup $(echo -e $doh | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+sed -i '/doh/,$d' /etc/hosts
+cat >> /etc/hosts << EOF
+#doh static dns
+$dohip $doh
+$dohip $doh
+EOF
+
+mkdir -p /etc/NetworkManager/dispatcher.d/
+cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/doh-client
+
+cat > /etc/systemd/system/doh-client.service << "EOF"
+[Unit]
+Description=DNS-over-HTTPS Client
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
+LimitNOFILE=1000000
+Restart=always
+RestartSec=3
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl restart doh-client
+systemctl enable doh-client
+cd ~
+}
+
+
+
 function installv2ray(){
 cd ~
 mkdir -p /usr/bin/vtrui
@@ -144,6 +224,7 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
+wget -O /usr/bin/vtrui/geoip.dat https://$mirrorsite/geoip.dat
 wget -O /usr/bin/vtrui/geosite.dat https://$mirrorsite/geosite.dat
 wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/v2wt-client.json
 
@@ -300,86 +381,6 @@ systemctl enable iptables-proxy
 
 
 
-function installdoh(){
-systemctl stop doh-client
-systemctl disable doh-client
-rm -rf ~/dns-over-https
-rm -rf /usr/local/bin/doh-client
-rm -rf /usr/local/bin/doh-server
-rm -rf /etc/NetworkManager/dispatcher.d
-rm -rf /usr/lib/systemd/system/doh-client.service
-rm -rf /usr/lib/systemd/system/doh-server.service
-
-cd ~
-if [[ $architecture = "arm64" ]]; then
-  wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doharm64.zip
-  unzip doharm64.zip
-  mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
-  rm -rf ~/doharm64*
-elif [[ $architecture = "amd64" ]]; then
-  wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
-  unzip dohamd64.zip
-  mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
-  rm -rf ~/dohamd64*
-fi
-chmod +x /usr/local/bin/doh-client
-
-mkdir -p /etc/dns-over-https/
-wget -O /etc/dns-over-https/doh-client.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/doh-client.conf
-
-doh_upstream='url = "https:\/\/'$doh'\/dq"'
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-dohip=$(nslookup $(echo -e $doh | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
-sed -i '/doh/,$d' /etc/hosts
-cat >> /etc/hosts << EOF
-#doh static dns
-$dohip $doh
-$dohip $doh
-EOF
-
-mkdir -p /etc/NetworkManager/dispatcher.d/
-cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
-#!/bin/bash
-case "$2" in
-    up)
-        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
-        ;;
-    down)
-        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
-        ;;
-    *)
-        exit 0
-        ;;
-esac
-EOF
-chmod +x /etc/NetworkManager/dispatcher.d/doh-client
-
-cat > /etc/systemd/system/doh-client.service << "EOF"
-[Unit]
-Description=DNS-over-HTTPS Client
-After=network.target
-Before=nss-lookup.target
-Wants=nss-lookup.target
-
-[Service]
-ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
-LimitNOFILE=1000000
-Restart=always
-RestartSec=3
-Type=simple
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl daemon-reload
-systemctl restart doh-client
-systemctl enable doh-client
-cd ~
-}
-
-
-
 function installpihole(){
 rm -rf /var/www/html/admin
 
@@ -427,6 +428,9 @@ EOF
 pihole -g
 
 pihole -f
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
 }
 
 
@@ -513,23 +517,19 @@ installgwd(){
 
 domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
-
 doh=$v2servn
 
 cd ~
 
 preinstall
 
+installdoh
+
 installv2ray
 
 echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
 installiptablesproxy
-
-installdoh
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 
 installpihole
 piholesetting
@@ -600,7 +600,6 @@ domain=$(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f1)
 port=$(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f2)
 uuidnum=$(awk 'NR==1{print}' /var/www/html/uuid.txt)
 v2path=$(awk 'NR==1{print}' /var/www/html/path.txt)
-
 doh=$(awk 'NR==1{print}' /var/www/html/domain.txt)
 
 cd ~
@@ -608,11 +607,11 @@ systemctl stop iptables-proxy
 
 preinstall
 
+installdoh
+
 installv2ray
 
 installiptablesproxy
-
-installdoh
 
 piholesetting
 pihole restartdns
