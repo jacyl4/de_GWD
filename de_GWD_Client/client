@@ -14,13 +14,16 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
+
 architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
     aarch64)  architecture="arm64" ;;
 esac
 
-mirrorsite="gwdbase.xyz"
+mirrorsite="acccmi.cf"
+
+
 
 function preinstall(){
 echo "Asia/Shanghai" > /etc/timezone
@@ -210,9 +213,12 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
-wget -O /usr/bin/vtrui/geoip.dat https://$mirrorsite/geoip.dat
-wget -O /usr/bin/vtrui/geosite.dat https://$mirrorsite/geosite.dat
-wget -O /etc/vtrui/config.json https://$mirrorsite/v2wt-client.json
+
+wget -N https://$mirrorsite/vtpre.zip
+unzip vtpre.zip
+mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
+mv -f ~/vtpre/geosite.dat /usr/bin/vtrui/geosite.dat
+mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
 
 if [[ $port =~ ^[1-9]+$ ]]; then
 sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
@@ -220,12 +226,11 @@ else
 sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
 fi
 
-sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i '/"address":/c\"address": "'$domain'",'  /etc/vtrui/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
 sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/vtrui/config.json
 sed -i '/"path":/c\"path": "'$v2path'",'  /etc/vtrui/config.json
-sed -i '/"Host":/c\"Host": "'$domain'"'  /etc/vtrui/config.json
+sed -i '/"Host":/c\"Host": "'$domain'"' /etc/vtrui/config.json
 
 systemctl daemon-reload
 systemctl restart vtrui
@@ -466,6 +471,8 @@ rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
+
+/usr/local/bin/ui-nodedthide
 
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
 

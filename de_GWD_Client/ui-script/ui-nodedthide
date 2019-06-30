@@ -27,61 +27,79 @@ cat > /etc/vtrui/config.json << EOF
   ],
   "outbounds": [
     {
-    "mux": { "enabled": true },
-    "protocol": "vmess",
-    "settings": { "vnext": [{
-      "address": "xxxx.ooo",
-      "port": 443,
-      "users": [{
-        "id": "00000000-0000-0000-0000-000000000000",
-        "level": 1,
-        "alterId": 64,
-        "security": "aes-128-gcm"
-        }]
-      }]},
-    "streamSettings": {
-      "network": "ws",
-      "wsSettings": {
-        "path": "/000000",
-        "headers": {
-          "Host": "xxxx.ooo"
+      "mux": {
+        "enabled": true
+      },
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 1,
+                "alterId": 64,
+                "security": "aes-128-gcm"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
           }
         },
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "xxxx.ooo",
-        "allowInsecure": false
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
         },
-      "sockopt": { "mark": 255 }
+        "sockopt": {
+          "mark": 255
+        }
       }
     },
     {
-    "tag": "netflix",
-    "protocol": "vmess",
-    "settings": { "vnext": [{
-      "address": "xxxx.ooo",
-      "port": 443,
-      "users": [{
-        "id": "00000000-0000-0000-0000-000000000000",
-        "level": 0,
-        "alterId": 64,
-        "security": "aes-128-gcm"
-        }]
-      }]},
-    "streamSettings": {
-      "network": "ws",
-      "wsSettings": {
-        "path": "/000000",
-        "headers": {
-          "Host": "xxxx.ooo"
+      "tag": "netflix",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 0,
+                "alterId": 64,
+                "security": "aes-128-gcm"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
           }
         },
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "xxxx.ooo",
-        "allowInsecure": false
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
         },
-      "sockopt": { "mark": 255 }
+        "sockopt": {
+          "mark": 255
+        }
       }
     },
     { "tag": "dnsout", "protocol": "dns", "streamSettings": { "sockopt": { "mark": 255 } } }

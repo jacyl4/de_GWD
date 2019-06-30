@@ -27,91 +27,120 @@ cat > /etc/vtrui/config.json << EOF
   ],
   "outbounds": [
     {
-    "mux": { "enabled": true },
-    "protocol": "vmess",
-    "settings": { "vnext": [{
-      "address": "xxxx.ooo",
-      "port": 443,
-      "users": [{
-        "id": "00000000-0000-0000-0000-000000000000",
-        "level": 1,
-        "alterId": 64,
-        "security": "aes-128-gcm"
-        }]
-      }]},
-    "streamSettings": {
-      "network": "ws",
-      "wsSettings": {
-        "path": "/000000",
-        "headers": {
-          "Host": "xxxx.ooo"
+      "mux": {
+        "enabled": true
+      },
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 1,
+                "alterId": 64,
+                "security": "aes-128-gcm"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
           }
         },
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "xxxx.ooo",
-        "allowInsecure": false
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
         },
-      "sockopt": { "mark": 255 }
+        "sockopt": {
+          "mark": 255
+        }
       }
     },
     {
-    "tag": "netflix",
-    "protocol": "vmess",
-    "settings": { "vnext": [{
-      "address": "xxxx.ooo",
-      "port": 443,
-      "users": [{
-        "id": "00000000-0000-0000-0000-000000000000",
-        "level": 0,
-        "alterId": 64,
-        "security": "aes-128-gcm"
-        }]
-      }]},
-    "streamSettings": {
-      "network": "ws",
-      "wsSettings": {
-        "path": "/000000",
-        "headers": {
-          "Host": "xxxx.ooo"
+      "tag": "netflix",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 0,
+                "alterId": 64,
+                "security": "aes-128-gcm"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
           }
         },
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "xxxx.ooo",
-        "allowInsecure": false
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
         },
-      "sockopt": { "mark": 255 }
+        "sockopt": {
+          "mark": 255
+        }
       }
     },
     {
-    "tag": "diverttraffic",
-    "mux": { "enabled": true, "concurrency": 100 },
-    "protocol": "vmess",
-    "settings": { "vnext": [{
-      "address": "xxxx.ooo",
-      "port": 443,
-      "users": [{
-        "id": "00000000-0000-0000-0000-000000000000",
-        "level": 0,
-        "alterId": 64,
-        "security": "aes-128-gcm"
-        }]
-      }]},
-    "streamSettings": {
-      "network": "ws",
-      "wsSettings": {
-        "path": "/000000",
-        "headers": {
-          "Host": "xxxx.ooo"
+      "tag": "diverttraffic",
+      "mux": {
+        "enabled": true,
+        "concurrency": 100
+      },
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 0,
+                "alterId": 64,
+                "security": "aes-128-gcm"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
           }
         },
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "xxxx.ooo",
-        "allowInsecure": false
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
         },
-      "sockopt": { "mark": 255 }
+        "sockopt": {
+          "mark": 255
+        }
       }
     },
     { "tag": "dnsout", "protocol": "dns", "streamSettings": { "sockopt": { "mark": 255 } } }
@@ -171,6 +200,7 @@ fi
 
 sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
 sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
 sed -i '/"id":/c\"id": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/uuid.txt)'",'  /etc/vtrui/config.json
 sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/vtrui/config.json
 sed -i '/"path":/c\"path": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/path.txt)'",'  /etc/vtrui/config.json
