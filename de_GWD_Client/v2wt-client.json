@@ -78,7 +78,7 @@
   ],
   "dns": {"servers": [
     {"address": "127.0.0.1","port": 5380},
-    {"address": "127.0.0.1","port": 53,"domains": ["geosite:cn"]}
+    {"address": "127.0.0.1","port": 53,"domains": ["geosite:cn"] }
                      ]},
   "routing": {
     "domainStrategy": "AsIs",
