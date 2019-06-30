@@ -84,15 +84,17 @@ cat > /etc/vtrui/config.json << EOF
       "sockopt": { "mark": 255 }
       }
     },
-    { "tag": "doh", "protocol": "freedom", "settings": { "redirect": "127.0.0.1:5380" } },
-    { "tag": "direct", "protocol": "freedom", "settings": { } }
+    { "tag": "dnsout", "protocol": "dns", "streamSettings": { "sockopt": { "mark": 255 } } }
   ],
+  "dns": {"servers": [
+    {"address": "127.0.0.1","port": 5380},
+    {"address": "127.0.0.1","port": 53,"domains": ["geosite:cn"]}
+                     ]},
   "routing": {
     "domainStrategy": "AsIs",
     "rules": [
-      { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" },
-      { "type": "field", "domain": ["geosite:cn"], "outboundTag": "direct" },
-      { "type": "field", "port": "53", "network": "tcp,udp", "outboundTag": "doh" },
+      { "type": "field", "ip": [ "geoip:private", "geoip:cn" ], "outboundTag": "direct" },
+      { "type": "field", "port": "53", "network": "tcp,udp", "outboundTag": "dnsout" },
       {
         "type": "field",
         "domain": [
