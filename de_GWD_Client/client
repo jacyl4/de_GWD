@@ -409,7 +409,6 @@ sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
 cat > /etc/pihole/adlists.list << EOF
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-https://hosts.nfz.moe/127.0.0.1/full/hosts
 EOF
 pihole -g
 
