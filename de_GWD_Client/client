@@ -265,7 +265,12 @@ lanip="0.0.0.0/8 \
 119.29.29.29/32 \
 119.28.28.28/32 \
 223.5.5.5/32 \
-223.6.6.6/32"
+223.6.6.6/32 \
+101.226.4.6/32 \
+218.30.118.6/32 \
+202.141.162.123/32 \
+202.141.176.93/32 \
+40.73.101.101/32"
 
 ipset -N chnroute hash:net maxelem 65535
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
@@ -289,6 +294,8 @@ done
 for vtruinodeip in $(cat /usr/local/bin/vtruinodeip.txt); do
   ipset add listw $vtruinodeip
 done
+ipset add listw $(awk "NR==$(echo $[$(sed -n -e '/doh/=' /etc/hosts) + 1]){print}" /etc/hosts | cut -d " " -f1)
+ipset add listw $(awk "NR==$(echo $[$(sed -n -e '/doh/=' /etc/hosts) + 2]){print}" /etc/hosts | cut -d " " -f1)
 
 ipset -N listb hash:net maxelem 65535
 for iplistb in $(cat /var/www/html/listb.txt); do
