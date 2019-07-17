@@ -407,9 +407,7 @@ sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
-cat > /etc/pihole/adlists.list << EOF
-https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-EOF
+echo "" > /etc/pihole/adlists.list
 pihole -g
 
 pihole -f
