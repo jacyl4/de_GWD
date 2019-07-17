@@ -299,8 +299,10 @@ ip rule add fwmark 0x9 table 100 pref 100
 ip route add local default dev lo table 100
 
 iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp --dport 53 -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -p tcp -m set --match-set listb dst -j MARK --set-mark 0x9
-iptables -t mangle -A V2PROXY -p udp --match-set listb dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -m set --match-set listb dst -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
