@@ -1,12 +1,4 @@
 #!/bin/bash
-
-systemctl stop v2ray
-systemctl disable v2ray
-rm -rf /etc/v2ray
-rm -rf /usr/bin/v2ray
-rm -rf /var/log/v2ray
-rm -rf /etc/systemd/system/v2ray.service
-
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
@@ -15,13 +7,15 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
+mirrorsite="acccmi.cf"
+
+
+
 architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
     aarch64)  architecture="arm64" ;;
 esac
-
-mirrorsite="acccmi.cf"
 
 
 
@@ -413,13 +407,10 @@ sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
 cat > /etc/pihole/adlists.list << EOF
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-http://winhelp2002.mvps.org/hosts.txt
-https://cdn.jsdelivr.net/gh/neoFelhz/neohosts@gh-pages/127.0.0.1/basic/hosts
-https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
 EOF
 
 pihole -g
-pihole -w analytics.google.com tv.sohu.com
+pihole -w analytics.google.com
 
 pihole -f
 }
