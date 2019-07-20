@@ -40,7 +40,6 @@ sed -i '/ip6/d'  /etc/hosts
 
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
-kernel.pid_max = 65535
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 8192
 net.ipv6.conf.all.disable_ipv6 = 1
