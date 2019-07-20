@@ -44,7 +44,6 @@ kernel.pid_max = 65535
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 8192
 net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv4.conf.all.route_localnet = 1
 net.ipv4.ip_local_port_range = 1024 65535
 net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_fastopen = 3
