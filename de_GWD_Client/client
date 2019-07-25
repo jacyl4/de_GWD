@@ -443,9 +443,9 @@ date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' 
 hwclock -w
 
 rm -rf ~/client
-rm -rf /var/log/*1
-rm -rf /var/log/*2
-rm -rf /var/log/*gz
+rm -rf /var/log/*1*
+rm -rf /var/log/*2*
+rm -rf /var/log/*.gz
 rm -rf /var/www/html/log.log
 EOF
 chmod +x /usr/local/bin/clearcache
