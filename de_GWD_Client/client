@@ -404,11 +404,9 @@ sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
-cat > /etc/pihole/adlists.list << EOF
-https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-EOF
-
+echo "" > /etc/pihole/adlists.list
 pihole -g
+
 pihole -w analytics.google.com
 
 pihole -f
