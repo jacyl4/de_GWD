@@ -20,13 +20,15 @@ esac
 
 
 function preinstall(){
+apt install -y net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential wget sudo
+
+
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-locale-gen en_US.UTF-8
 
 sed -i '/1000000/d' /etc/security/limits.conf
 sed -i '/# End of file/i\* soft nproc 1000000' /etc/security/limits.conf
@@ -64,27 +66,15 @@ net.core.netdev_max_backlog = 32768
 net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 EOF
-sysctl -p
+sudo sysctl -p
 
 if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
 
-if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian/ stretch main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-EOF
-fi
+
 apt update && apt -y upgrade
-apt install -y net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential
 }
 
 
