@@ -9,6 +9,7 @@
 ## Server：
 
 ```
+apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server)
 ```
 ![server](https://i.loli.net/2019/06/19/5d0a486564e8018716.png)
@@ -16,6 +17,7 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 ## Client：
 
 ```
+apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/client)
 ```
 ![client](https://i.loli.net/2019/06/14/5d03acb0d7c8a12948.png)
