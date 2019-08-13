@@ -20,13 +20,15 @@ esac
 
 
 function preinstall(){
+apt install -y net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential sudo wget
+
+
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-locale-gen en_US.UTF-8
 
 sed -i '/1000000/d' /etc/security/limits.conf
 sed -i '/# End of file/i\* soft nproc 1000000' /etc/security/limits.conf
@@ -71,20 +73,7 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
 
-if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian/ stretch main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
-deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib
-deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
-EOF
-fi
 apt update && apt -y upgrade
-apt install -y net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential
 }
 
 
@@ -411,8 +400,6 @@ sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 echo "" > /etc/pihole/adlists.list
 pihole -g
 
-pihole -w analytics.google.com
-
 pihole -f
 }
 
@@ -667,7 +654,7 @@ fi
     green "===================================="
     green "              客户端                 "
     green "介绍：一键安装de_GWD                  "
-    green "系统：仅测于Debian9 (amd64 & arm64)   "
+    green "系统：仅测于Debian9+ (amd64 & arm64)  "
     green "作者：GWDburst                       "
     green "网站：GWDburst.github.io             "
     green "===================================="
