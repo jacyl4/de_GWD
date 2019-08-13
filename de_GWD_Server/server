@@ -20,13 +20,14 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
+apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic1 libatomic-ops-dev libjemalloc1 libjemalloc-dev expat
+
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-locale-gen en_US.UTF-8
 
 sed -i '/1000000/d' /etc/security/limits.conf
 sed -i '/# End of file/i\* soft nproc 1000000' /etc/security/limits.conf
@@ -70,7 +71,6 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
 apt update && apt -y upgrade
-apt install -y net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic1 libatomic-ops-dev libjemalloc1 libjemalloc-dev expat
 }
 
 
