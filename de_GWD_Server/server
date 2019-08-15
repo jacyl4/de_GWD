@@ -20,7 +20,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic1 libatomic-ops-dev libjemalloc1 libjemalloc-dev expat
+apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat
 
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -74,42 +74,6 @@ apt update && apt -y upgrade
 }
 
 
-function installv2ray(){
-mkdir -p /usr/bin/vtrui
-mkdir -p /etc/vtrui
-wget -O ~/vtamd64.zip https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/vtamd64.zip
-unzip vtamd64.zip
-mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
-mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
-rm -rf ~/vtamd64
-rm -rf ~/vtamd64.zip
-chmod +x /usr/bin/vtrui/vtrui
-chmod +x /usr/bin/vtrui/v2ctl
-
-cat > /etc/systemd/system/vtrui.service << EOF
-[Unit]
-Description=vtrui Service
-After=network.target
-Wants=network.target
-
-[Service]
-Type=simple
-PIDFile=/run/vtrui.pid
-ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
-
-[Install]
-WantedBy=multi-user.target
-EOF
-wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
-sed -i '/"path":/c\"path": "'$v2path'"'  /etc/vtrui/config.json
-systemctl daemon-reload
-systemctl restart vtrui
-systemctl enable vtrui
-}
-
 
 function installnginxlatest(){
 cd ~
@@ -134,6 +98,12 @@ cd ~
 git clone https://github.com/eustas/ngx_brotli.git
 cd ngx_brotli
 git submodule update --init --recursive
+
+cd ~
+git clone https://github.com/jemalloc/jemalloc.git
+cd jemalloc
+./autogen.sh
+make -j $(nproc --all) && make install
 
 cd ~
 mkdir -p /etc/nginx/conf.d
@@ -235,6 +205,7 @@ rm -rf ~/openssl*
 rm -rf ~/pcre*
 rm -rf ~/zlib-cf
 rm -rf ~/ngx_brotli
+rm -rf ~/jemalloc
 }
 
 
@@ -618,44 +589,46 @@ EOF
 }
 
 
-function installpihole(){
-git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
-cd "Pi-hole/automated install/"
-bash basic-install.sh
-cd ~
-rm -rf ~/Pi-hole
 
-systemctl stop lighttpd
-systemctl disable lighttpd
-systemctl mask lighttpd
+function installv2ray(){
+mkdir -p /usr/bin/vtrui
+mkdir -p /etc/vtrui
+wget -O ~/vtamd64.zip https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/vtamd64.zip
+unzip vtamd64.zip
+mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
+mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
+rm -rf ~/vtamd64
+rm -rf ~/vtamd64.zip
+chmod +x /usr/bin/vtrui/vtrui
+chmod +x /usr/bin/vtrui/v2ctl
 
-sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
-pihole restartdns
+cat > /etc/systemd/system/vtrui.service << EOF
+[Unit]
+Description=vtrui Service
+After=network.target
+Wants=network.target
 
-echo "" > /etc/pihole/adlists.list
-pihole -g
+[Service]
+Type=simple
+PIDFile=/run/vtrui.pid
+ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
+wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
+sed -i '/"path":/c\"path": "'$v2path'"'  /etc/vtrui/config.json
+systemctl daemon-reload
+systemctl restart vtrui
+systemctl enable vtrui
 }
 
 
-function installdoh(){
-systemctl stop doh-client
-systemctl disable doh-client
-rm -rf ~/dns-over-https
-rm -rf /usr/local/bin/doh-client
-rm -rf /usr/local/bin/doh-server
-rm -rf /etc/NetworkManager/dispatcher.d
-rm -rf /usr/lib/systemd/system/doh-client.service
-rm -rf /usr/lib/systemd/system/doh-server.service
 
+function installdoh(){
 cd ~
 wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
 unzip dohamd64.zip
@@ -707,6 +680,34 @@ cd ~
 }
 
 
+function installpihole(){
+git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
+cd "Pi-hole/automated install/"
+bash basic-install.sh
+cd ~
+rm -rf ~/Pi-hole
+
+systemctl stop lighttpd
+systemctl disable lighttpd
+systemctl mask lighttpd
+
+sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
+pihole restartdns
+
+echo "" > /etc/pihole/adlists.list
+pihole -g
+}
+
+
 
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
@@ -750,8 +751,6 @@ v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
 cd ~
 preinstall
 
-installv2ray
-
 installnginxlatest
 
 nginxconf
@@ -766,12 +765,14 @@ systemctl daemon-reload
 systemctl restart nginx
 systemctl enable nginx
 
-installpihole
+installv2ray
 
 installdoh
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
+
+installpihole
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
@@ -800,9 +801,9 @@ postinstall
 blue "--------------------------------------------"
 blue  "安装de_GWD [完毕]"
 echo
-blue "域名： $(yellow "$vpsdomain")" 
-blue "UUID： $(yellow "$uuidnum")" 
-blue "PATH： $(yellow "$v2path")" 
+blue "域名： $(yellow "$vpsdomain")"
+blue "UUID： $(yellow "$uuidnum")"
+blue "PATH： $(yellow "$v2path")"
 blue "--------------------------------------------"
 }
 
@@ -1231,8 +1232,6 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
-installv2ray
-
 nginxconf
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
@@ -1242,6 +1241,8 @@ else
 fi
 
 systemctl restart nginx
+
+installv2ray
 
 installdoh
 
