@@ -826,14 +826,18 @@ sysctl -p
 
 /usr/bin/apt purge -y linux-image-*-amd64
 update-grub
+
 crontab -l > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
-sudo reboot
+
+reboot
 EOF
+
 chmod +x ~/bbrkernel/clearkernel
+
 crontab -l > ~/now.cron
 echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
