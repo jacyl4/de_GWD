@@ -817,6 +817,7 @@ dpkg -i linux-image-*.deb
 cat > ~/bbrkernel/clearkernel <<EOF
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
 source /etc/profile
 
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
@@ -830,13 +831,15 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
-reboot
+sudo reboot
 EOF
 chmod +x ~/bbrkernel/clearkernel
 crontab -l > ~/now.cron
 echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
+
+crontab -l
 
 blue "------------------"
 blue  "安装bbrplus [完毕]"
