@@ -75,6 +75,127 @@ apt update && apt -y upgrade
 
 
 
+function installpihole(){
+git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
+cd "Pi-hole/automated install/"
+bash basic-install.sh
+
+cd ~
+rm -rf ~/Pi-hole
+
+systemctl stop lighttpd
+systemctl disable lighttpd
+systemctl mask lighttpd
+
+sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
+pihole restartdns
+
+echo "" > /etc/pihole/adlists.list
+pihole -g
+}
+
+
+
+function installdoh(){
+cd ~
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
+unzip dohamd64.zip
+mv -f ~/dohamd64/doh-server /usr/local/bin/doh-server
+rm -rf ~/dohamd64*
+chmod +x /usr/local/bin/doh-server
+
+mkdir -p /etc/dns-over-https/
+wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
+
+mkdir -p /etc/NetworkManager/dispatcher.d/
+cat > /etc/NetworkManager/dispatcher.d/doh-server << "EOF"
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/doh-server
+
+cat > /etc/systemd/system/doh-server.service << "EOF"
+[Unit]
+Description=DNS-over-HTTPS server
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
+LimitNOFILE=1000000
+Restart=always
+RestartSec=3
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl restart doh-server
+systemctl enable doh-server
+cd ~
+}
+
+
+
+function installv2ray(){
+mkdir -p /usr/bin/vtrui
+mkdir -p /etc/vtrui
+wget -O ~/vtamd64.zip https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/vtamd64.zip
+unzip vtamd64.zip
+mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
+mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
+rm -rf ~/vtamd64
+rm -rf ~/vtamd64.zip
+chmod +x /usr/bin/vtrui/vtrui
+chmod +x /usr/bin/vtrui/v2ctl
+
+cat > /etc/systemd/system/vtrui.service << EOF
+[Unit]
+Description=vtrui Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/vtrui.pid
+ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
+wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
+sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
+sed -i '/"path":/c\"path": "'$v2path'"'  /etc/vtrui/config.json
+systemctl daemon-reload
+systemctl restart vtrui
+systemctl enable vtrui
+}
+
+
+
 function installnginxlatest(){
 cd ~
 wget -N https://www.openssl.org/source/openssl-1.1.1b.tar.gz
@@ -590,125 +711,6 @@ EOF
 
 
 
-function installv2ray(){
-mkdir -p /usr/bin/vtrui
-mkdir -p /etc/vtrui
-wget -O ~/vtamd64.zip https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/vtamd64.zip
-unzip vtamd64.zip
-mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
-mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
-rm -rf ~/vtamd64
-rm -rf ~/vtamd64.zip
-chmod +x /usr/bin/vtrui/vtrui
-chmod +x /usr/bin/vtrui/v2ctl
-
-cat > /etc/systemd/system/vtrui.service << EOF
-[Unit]
-Description=vtrui Service
-After=network.target
-Wants=network.target
-
-[Service]
-Type=simple
-PIDFile=/run/vtrui.pid
-ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
-
-[Install]
-WantedBy=multi-user.target
-EOF
-wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
-sed -i '/"path":/c\"path": "'$v2path'"'  /etc/vtrui/config.json
-systemctl daemon-reload
-systemctl restart vtrui
-systemctl enable vtrui
-}
-
-
-
-function installdoh(){
-cd ~
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
-unzip dohamd64.zip
-mv -f ~/dohamd64/doh-server /usr/local/bin/doh-server
-rm -rf ~/dohamd64*
-chmod +x /usr/local/bin/doh-server
-
-mkdir -p /etc/dns-over-https/
-wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
-
-mkdir -p /etc/NetworkManager/dispatcher.d/
-cat > /etc/NetworkManager/dispatcher.d/doh-server << "EOF"
-#!/bin/bash
-case "$2" in
-    up)
-        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
-        ;;
-    down)
-        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
-        ;;
-    *)
-        exit 0
-        ;;
-esac
-EOF
-chmod +x /etc/NetworkManager/dispatcher.d/doh-server
-
-cat > /etc/systemd/system/doh-server.service << "EOF"
-[Unit]
-Description=DNS-over-HTTPS server
-After=network.target
-Before=nss-lookup.target
-Wants=nss-lookup.target
-
-[Service]
-ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
-LimitNOFILE=1000000
-Restart=always
-RestartSec=3
-Type=simple
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl daemon-reload
-systemctl restart doh-server
-systemctl enable doh-server
-cd ~
-}
-
-
-function installpihole(){
-git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
-cd "Pi-hole/automated install/"
-bash basic-install.sh
-cd ~
-rm -rf ~/Pi-hole
-
-systemctl stop lighttpd
-systemctl disable lighttpd
-systemctl mask lighttpd
-
-sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
-pihole restartdns
-
-echo "" > /etc/pihole/adlists.list
-pihole -g
-}
-
-
-
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
@@ -751,6 +753,15 @@ v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
 cd ~
 preinstall
 
+installpihole
+
+installdoh
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+
+installv2ray
+
 installnginxlatest
 
 nginxconf
@@ -764,15 +775,6 @@ printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.s
 systemctl daemon-reload
 systemctl restart nginx
 systemctl enable nginx
-
-installv2ray
-
-installdoh
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
-
-installpihole
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
@@ -1123,6 +1125,7 @@ systemctl restart nginx
 
 sed -i "$(sed -n -e '/"id":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$nuuid'"'",/" /etc/vtrui/config.json
 sed -i "$(sed -n -e '/"path":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$npath'"'"/" /etc/vtrui/config.json
+
 systemctl restart vtrui
 blue "--------------------------"
 blue  "更换v2ray UUID&path [完毕]"
@@ -1224,13 +1227,18 @@ blue "-------------------"
 
 
 updategwd(){
+vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
+uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+
 systemctl stop vtrui
 systemctl stop nginx
 cd ~
 preinstall
-vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
-uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
-v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+
+installdoh
+
+installv2ray
 
 nginxconf
 
@@ -1241,10 +1249,6 @@ else
 fi
 
 systemctl restart nginx
-
-installv2ray
-
-installdoh
 
 postinstall
 blue "-----------------"
