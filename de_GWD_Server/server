@@ -829,7 +829,7 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
-reboot
+sudo reboot
 EOF
 chmod +x ~/bbrkernel/clearkernel
 crontab -l > ~/now.cron
@@ -840,6 +840,7 @@ rm -rf ~/now.cron
 blue "------------------"
 blue  "安装bbrplus [完毕]"
 blue "------------------"
+
 reboot
 }
 
