@@ -861,6 +861,8 @@ installnextcloud(){
     green "=============="
     read sqlname
 
+dpkg --configure -a
+
 apt install -y software-properties-common apt-transport-https lsb-release
 
 wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -

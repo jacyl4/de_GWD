@@ -22,7 +22,6 @@ esac
 function preinstall(){
 apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential
 
-
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
