@@ -833,7 +833,7 @@ sudo reboot
 EOF
 chmod +x ~/bbrkernel/clearkernel
 crontab -l > ~/now.cron
-echo '@reboot sleep 10 ; ~/bbrkernel/clearkernel' >> ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
