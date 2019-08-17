@@ -1005,7 +1005,7 @@ setnextcloudcache(){
 sed -i "/port 6379/c\port 0" /etc/redis/redis.conf
 sed -i "/unixsocket \/var\/run\/redis\/redis.sock/c\unixsocket \/run\/redis\/redis.sock" /etc/redis/redis.conf
 sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
-usermod -aG redis www-data
+sudo usermod -aG redis www-data
 
 chown -R redis:www-data /run/redis
 
