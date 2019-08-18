@@ -1077,6 +1077,11 @@ changestaticip(){
     green "========="
     read gatewayaddr
 
+ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
+
+route del default
+route add default gw $gatewayaddr $ethernetnum
+
 sed -i "/address/c\address $localaddr"  /etc/network/interfaces
 sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
