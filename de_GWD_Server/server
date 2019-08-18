@@ -824,7 +824,7 @@ sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 sysctl -p
 
-/usr/bin/apt purge -y linux-image-*-amd64
+/usr/bin/apt purge -y linux-image*amd64
 update-grub
 
 crontab -l > ~/now.cron
@@ -1318,7 +1318,7 @@ blue "--------------------------"
     green "=========================="
     echo
     green  "1. 安装de_GWD"
-    green  "2. 切换至bbrplus并重启生效"
+    green  "2. 切换至bbrplus并重启生效（Debian 10 暂不可用）"
     blue   "3. 安装PHP+安装PostgreSQL+安装Nextcloud"
     blue   "4. 配置Nextcloud缓存"
     red    "5. 更改静态IP"
