@@ -1306,7 +1306,7 @@ else
 fi
 
 blue "--------------------------"
-blue  "当前bbr方案：$(awk 'END{print $3}' /etc/sysctl.conf)"
+blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "--------------------------"
 
     green "=========================="
