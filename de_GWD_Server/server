@@ -1012,6 +1012,7 @@ systemctl restart nginx
 
 wget -N https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
+chown -R www-data:www-data /var/www/html/
 
 blue "------------------------------------"
 blue "  数据库用户名："
