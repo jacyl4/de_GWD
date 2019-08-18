@@ -168,7 +168,6 @@ server:
     do-ip6: no
     do-udp: yes
     do-tcp: yes
-    tcp-upstream: yes
 
     so-reuseport: yes
   
