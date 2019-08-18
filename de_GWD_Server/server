@@ -1011,7 +1011,7 @@ blue "------------------------------------"
 
 setnextcloudcache(){
 sed -i "/port 6379/c\port 0" /etc/redis/redis.conf
-sed -i "/unixsocket \/var\/run\/redis\/redis-server.sock/c\unixsocket \/run\/redis\/redis-server.sock" /etc/redis/redis.conf
+sed -i "/unixsocket \/var\/run\/redis\/redis/c\unixsocket \/run\/redis\/redis-server.sock" /etc/redis/redis.conf
 sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
 
 sudo usermod -aG redis www-data
