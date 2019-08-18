@@ -77,11 +77,28 @@ source /etc/profile
 
 
 function installpihole(){
-curl -sSL https://install.pi-hole.net | bash
+mkdir -p /etc/pihole
 
-systemctl stop lighttpd
-systemctl disable lighttpd
-systemctl mask lighttpd
+cat > /etc/pihole/setupVars.conf << EOF
+PIHOLE_INTERFACE=$ethernetnum
+IPV4_ADDRESS=$localaddr/24
+IPV6_ADDRESS=
+PIHOLE_DNS_1=8.8.8.8
+PIHOLE_DNS_2=1.1.1.1
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=false
+INSTALL_WEB_INTERFACE=false
+LIGHTTPD_ENABLED=false
+BLOCKING_ENABLED=false
+WEBPASSWORD=0000000000000000000000000000000000000000000000000000000000000000
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=false
+EOF
+
+curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
@@ -749,7 +766,30 @@ v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
 cd ~
 preinstall
 
+ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
+localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
+gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
+
 installpihole
+
+sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
+sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
+sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+
+cat > /etc/network/interfaces << EOF
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+EOF
+pihole restartdns
 
 installdoh
 systemctl stop systemd-resolved
@@ -771,28 +811,6 @@ printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.s
 systemctl daemon-reload
 systemctl restart nginx
 systemctl enable nginx
-
-ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
-localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
-gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
-sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
-sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
-sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
-cat > /etc/network/interfaces << EOF
-source /etc/network/interfaces.d/*
-
-auto lo
-iface lo inet loopback
-
-auto $ethernetnum
-iface $ethernetnum inet static
-  address $localaddr
-  netmask 255.255.255.0
-  gateway $gatewayaddr
-EOF
-pihole restartdns
 
 postinstall
 
@@ -1224,6 +1242,9 @@ fi
 
 
 updatepihole(){
+ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
+localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
+
 installpihole
 
 blue "-------------------"
