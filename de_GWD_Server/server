@@ -833,7 +833,7 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
 
-reboot
+sudo reboot
 EOF
 
 chmod +x ~/bbrkernel/clearkernel
@@ -849,7 +849,7 @@ blue "------------------"
 blue  "安装bbrplus [完毕]"
 blue "------------------"
 
-reboot
+sudo reboot
 }
 
 
@@ -870,15 +870,17 @@ installnextcloud(){
     green "=============="
     read sqlname
 
+debianx=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
+
 dpkg --configure -a
 
 apt install -y software-properties-common apt-transport-https lsb-release
 
 wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
-echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+echo "deb http://apt.postgresql.org/pub/repos/apt/ $debianx-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-echo "deb https://packages.sury.org/php/ buster main" > /etc/apt/sources.list.d/php7.3.list
+echo "deb https://packages.sury.org/php/ $debianx main" > /etc/apt/sources.list.d/php7.3.list
 
 apt update && apt -y upgrade
 
