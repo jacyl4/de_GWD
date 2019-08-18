@@ -1,17 +1,4 @@
 #!/bin/bash
-
-systemctl stop v2ray
-systemctl disable v2ray
-rm -rf /etc/v2ray
-rm -rf /usr/bin/v2ray
-rm -rf /var/log/v2ray
-rm -rf /etc/systemd/system/v2ray.service
-systemctl stop iptablesrules
-systemctl disable iptablesrules
-rm -rf /usr/local/bin/iptablesrules-up
-rm -rf /usr/local/bin/iptablesrules-down
-rm -rf /etc/systemd/system/iptablesrules.service
-
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
@@ -776,6 +763,9 @@ sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
 sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
 sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+
+route del default
+route add default gw $gatewayaddr $ethernetnum
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*

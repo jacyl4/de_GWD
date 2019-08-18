@@ -577,6 +577,7 @@ sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /et
 
 route del default
 route add default gw $gatewayaddr $ethernetnum
+
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
 
