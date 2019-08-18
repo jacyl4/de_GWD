@@ -818,10 +818,7 @@ cat > ~/bbrkernel/clearkernel <<EOF
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
-source /etc/profile
-
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/c\net.ipv4.tcp_congestion_control = bbrplus" /etc/sysctl.conf
 sysctl -p
 
 /usr/bin/apt purge -y linux-image*amd64
