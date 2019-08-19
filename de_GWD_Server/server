@@ -9,6 +9,8 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 function preinstall(){
 apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat
 
+source /etc/profile
+
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
@@ -60,8 +62,6 @@ fi
 sudo sysctl -p
 
 apt update && apt -y upgrade
-
-source /etc/profile
 }
 
 

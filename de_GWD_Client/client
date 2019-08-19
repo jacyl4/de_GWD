@@ -22,6 +22,8 @@ esac
 function preinstall(){
 apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential
 
+source /etc/profile
+
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
@@ -65,7 +67,7 @@ net.core.netdev_max_backlog = 32768
 net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 EOF
-sysctl -p
+sudo sysctl -p
 
 if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
@@ -73,7 +75,6 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 fi
 
 apt update && apt -y upgrade
-source /etc/profile
 }
 
 
