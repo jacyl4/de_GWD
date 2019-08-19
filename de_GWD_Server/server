@@ -1230,6 +1230,10 @@ localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'EN
 
 installpihole
 
+systemctl stop dhcpcd
+systemctl disable dhcpcd
+systemctl mask dhcpcd
+
 blue "-------------------"
 blue "更新Pi-hole [完毕]"
 blue "-------------------"
