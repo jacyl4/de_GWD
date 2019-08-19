@@ -759,10 +759,9 @@ gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
 
 installpihole
 
-sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
-sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
-sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+systemctl stop dhcpcd
+systemctl disable dhcpcd
+systemctl mask dhcpcd
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
@@ -1074,19 +1073,10 @@ changestaticip(){
     green "========="
     read gatewayaddr
 
-ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
-
-route del default
-route add default gw $gatewayaddr $ethernetnum
-
 sed -i "/address/c\address $localaddr"  /etc/network/interfaces
 sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 
-sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
-sed -i "/static ip_address=/c\static ip_address=$localaddr/24" /etc/dhcpcd.conf
-sed -i "/static routers=/c\static routers=$gatewayaddr" /etc/dhcpcd.conf
-sed -i "/static domain_name_servers=/c\static domain_name_servers=127.0.0.1" /etc/dhcpcd.conf
 blue "------------------"
 blue  "更改静态IP [完毕]"
 blue "------------------"
