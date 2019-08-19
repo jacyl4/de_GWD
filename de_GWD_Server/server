@@ -87,6 +87,10 @@ EOF
 
 curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
 
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
+
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
@@ -759,10 +763,6 @@ gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
 
 installpihole
 
-systemctl stop dhcpcd
-systemctl disable dhcpcd
-systemctl mask dhcpcd
-
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
 
@@ -1229,10 +1229,6 @@ ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
 
 installpihole
-
-systemctl stop dhcpcd
-systemctl disable dhcpcd
-systemctl mask dhcpcd
 
 blue "-------------------"
 blue "更新Pi-hole [完毕]"
