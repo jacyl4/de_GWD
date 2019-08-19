@@ -56,8 +56,11 @@ echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 else
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
-sysctl -p
+
+sudo sysctl -p
+
 apt update && apt -y upgrade
+
 source /etc/profile
 }
 
@@ -754,14 +757,16 @@ installgwd(){
 uuidnum=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
 
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+
 cd ~
 preinstall
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
 gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
-
-installpihole
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
@@ -775,12 +780,10 @@ iface $ethernetnum inet static
   netmask 255.255.255.0
   gateway $gatewayaddr
 EOF
-pihole restartdns
+
+installpihole
 
 installdoh
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 
 installv2ray
 
@@ -1309,7 +1312,7 @@ else
 fi
 
 blue "--------------------------"
-blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue  "当前bbr方案：$(echo $(sudo sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "--------------------------"
 
     green "=========================="
