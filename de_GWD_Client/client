@@ -552,6 +552,8 @@ domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
 doh=$v2servn
 
+sed -i '/nameserver/c\nameserver 119.29.29.29'  /etc/resolv.conf
+
 cd ~
 
 preinstall
