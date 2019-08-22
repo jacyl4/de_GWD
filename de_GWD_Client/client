@@ -240,10 +240,10 @@ else
 sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
 fi
 
-sed -i '/"address":/c\"address": "'$domain'",'  /etc/vtrui/config.json
+sed -i '/"address":/c\"address": "'$domain'",' /etc/vtrui/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
-sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/vtrui/config.json
-sed -i '/"path":/c\"path": "'$v2path'",'  /etc/vtrui/config.json
+sed -i '/"serverName":/c\"serverName": "'$domain'",' /etc/vtrui/config.json
+sed -i '/"path":/c\"path": "'$v2path'",' /etc/vtrui/config.json
 sed -i '/"Host":/c\"Host": "'$domain'"' /etc/vtrui/config.json
 
 systemctl daemon-reload
