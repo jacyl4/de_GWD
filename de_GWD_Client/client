@@ -257,6 +257,15 @@ cd ~
 function installiptablesproxy(){
 wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
 
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
+
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 ipset -X chnroute
@@ -285,10 +294,7 @@ lanip="0.0.0.0/8 \
 202.141.176.93/32 \
 40.73.101.101/32"
 
-ipset -N chnroute hash:net maxelem 65535
-for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
-done
+ipset -R < /usr/local/bin/chnrouteset
 
 ipset -N lanip hash:net maxelem 65535
 for iplanip in $lanip; do
@@ -459,6 +465,15 @@ function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
+
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
 
 ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
