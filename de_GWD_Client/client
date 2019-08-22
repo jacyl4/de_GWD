@@ -656,8 +656,6 @@ installv2ray
 installiptablesproxy
 
 piholesetting
-pihole restartdns
-systemctl restart pihole-FTL
 
 postinstall
 
