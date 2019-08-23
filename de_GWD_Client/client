@@ -229,7 +229,6 @@ EOF
 
 wget -N https://$mirrorsite/vtpre.zip
 unzip vtpre.zip
-mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
 mv -f ~/vtpre/geosite.dat /usr/bin/vtrui/geosite.dat
 mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
 rm -rf ~/vtpre*
@@ -240,7 +239,7 @@ else
 sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
 fi
 
-sed -i '/"address":/c\"address": "'$domain'",' /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
 sed -i '/"serverName":/c\"serverName": "'$domain'",' /etc/vtrui/config.json
 sed -i '/"path":/c\"path": "'$v2path'",' /etc/vtrui/config.json
