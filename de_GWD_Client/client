@@ -337,6 +337,8 @@ iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp --dport 53 -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
