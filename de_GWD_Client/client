@@ -563,7 +563,9 @@ domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
 doh=$v2servn
 
-sed -i '/nameserver/c\nameserver 119.29.29.29'  /etc/resolv.conf
+sed -i '/nameserver/d'  /etc/resolv.conf
+echo -e 'nameserver 119.29.29.29' >> /etc/resolv.conf
+echo -e 'nameserver 119.28.28.28' >> /etc/resolv.conf
 
 cd ~
 
