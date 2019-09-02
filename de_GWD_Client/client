@@ -176,6 +176,7 @@ systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
 
+rm -rf /usr/lib/resolvconf/*
 apt purge -y unbound
 apt autoremove -y
 cd ~
