@@ -502,12 +502,9 @@ fi
 crontab now.cron
 rm -rf now.cron
 
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/ui-script.zip
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/ui-web.zip
+svn export https://github.com/gwdburst/de_GWD/trunk/de_GWD_Client/ui-script
+svn export https://github.com/gwdburst/de_GWD/trunk/de_GWD_Client/ui-web
 
-rm -rf /usr/local/bin/ui-*
-unzip ui-script.zip
-unzip ui-web.zip
 rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
