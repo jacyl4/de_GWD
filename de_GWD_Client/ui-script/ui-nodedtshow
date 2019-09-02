@@ -1,0 +1,205 @@
+#!/bin/bash
+mainport=$(awk '/port/' /etc/vtrui/config.json | awk 'NR==3{print$2}' | cut -d , -f1)
+
+if [[ $mainport == 443 ]]; then
+nodenum=$(cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}')/=")
+else
+nodenum=$(sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==1{print}'):$port/=" /var/www/html/domain.txt)
+fi
+
+cat > /etc/vtrui/config.json << EOF
+{
+  "inbounds": [
+    {
+    "port": 9897,
+    "protocol": "socks",
+    "settings": { "auth": "noauth", "network": "tcp,udp" },
+    "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    },
+    {
+    "port": 9896,
+    "listen": "127.0.0.1",
+    "protocol": "dokodemo-door",
+    "settings": { "auth": "noauth", "network": "tcp,udp", "followRedirect": true },
+    "sniffing": { "enabled": true, "destOverride": ["http", "tls"] },
+    "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "mux": {"enabled": true},
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 1,
+                "alterId": 32,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
+          }
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      }
+    },
+    {
+      "tag": "netflix",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 0,
+                "alterId": 32,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
+          }
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      }
+    },
+    {
+      "tag": "diverttraffic",
+      "protocol": "vmess",
+      "mux": {"enabled": true},
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "level": 0,
+                "alterId": 32,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000",
+          "headers": {
+            "Host": "xxxx.ooo"
+          }
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      }
+    },
+    { "tag": "dnsout", "protocol": "dns", "streamSettings": { "sockopt": { "mark": 255 } } },
+    { "tag": "direct", "protocol": "freedom", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } }
+  ],
+  "dns": {"servers": [
+    {"address": "127.0.0.1","port": 5380},
+    {"address": "127.0.0.1","port": 53, "domains": ["geosite:cn"] }
+                     ]},
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      { "type": "field", "network": "tcp,udp", "protocol": ["dns"], "outboundTag": "dnsout" },
+      { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" },
+      {
+        "type": "field",
+        "domain": [
+          "domain:netflix.com",
+          "domain:nflxvideo.net",
+          "domain:nflxso.net",
+          "domain:nflximg.net",
+          "domain:netflix.net",
+          "domain:netflixdnstest0.com",
+          "domain:netflixdnstest1.com",
+          "domain:netflixdnstest2.com",
+          "domain:netflixdnstest3.com",
+          "domain:netflixdnstest4.com",
+          "domain:netflixdnstest5.com",
+          "domain:netflixdnstest6.com",
+          "domain:netflixdnstest7.com",
+          "domain:netflixdnstest8.com",
+          "domain:netflixdnstest9.com"
+        ],
+        "outboundTag": "netflix"
+      },
+      {
+        "type": "field",
+        "source": [ "10.10.10.10" ],
+        "outboundTag": "diverttraffic"
+      }
+    ]
+  }
+}
+EOF
+
+domain=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f1)
+port=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f2)
+
+if [[ $port =~ ^[1-9]+$ ]]; then
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
+else
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+fi
+
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i '/"id":/c\"id": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/uuid.txt)'",'  /etc/vtrui/config.json
+sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/vtrui/config.json
+sed -i '/"path":/c\"path": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/path.txt)'",'  /etc/vtrui/config.json
+sed -i '/"Host":/c\"Host": "'$domain'"'  /etc/vtrui/config.json
+
+sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php

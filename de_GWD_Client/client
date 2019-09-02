@@ -40,7 +40,7 @@ fi
 
 
 
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential subversion
 
 source /etc/profile
 

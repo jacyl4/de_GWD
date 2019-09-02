@@ -1,0 +1,22 @@
+#!/bin/bash
+v2servn=$(awk 'NR==1{print}' /var/www/html/nodenfpre.txt)
+uuidnum=$(awk 'NR==2{print}' /var/www/html/nodenfpre.txt)
+v2path=$(awk 'NR==3{print}' /var/www/html/nodenfpre.txt)
+
+domain=$(echo -e $v2servn | cut -d : -f1)
+port=$(echo -e $v2servn | cut -d : -f2)
+
+if [[ $port =~ ^[1-9]+$ ]]; then
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
+else
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==4{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+fi
+
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"serverName":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"serverName"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"Host":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"Host"'": "'"'$domain'"'"/" /etc/vtrui/config.json
+
+sed -i "$(sed -n -e '/"id":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"id"'": "'"'$uuidnum'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"path":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"path"'": "'"\'$v2path'"'",/" /etc/vtrui/config.json
+systemctl restart vtrui
+rm -rf /var/www/html/nodenfpre.txt
