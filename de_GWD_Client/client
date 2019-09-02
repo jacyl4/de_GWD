@@ -191,8 +191,8 @@ server:
     do-tcp: yes
 
     so-reuseport: yes
+    prefetch: yes
   
-    log-servfail: no
     minimal-responses: no
     do-not-query-localhost: no
     hide-identity: yes
