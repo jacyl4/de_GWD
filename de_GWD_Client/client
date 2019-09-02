@@ -176,35 +176,8 @@ systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
 
-apt install -y unbound
-
-cat > /etc/unbound/unbound.conf << EOF
-server:
-    verbosity: 0
-    interface: 0.0.0.0@5353
-
-    username: "root"
-
-    do-ip4: yes
-    do-ip6: no
-    do-udp: yes
-    do-tcp: yes
-
-    so-reuseport: yes
-    prefetch: yes
-  
-    minimal-responses: no
-    do-not-query-localhost: no
-    hide-identity: yes
-    hide-version: yes
-
-forward-zone:
-  name: "."
-  forward-addr: 127.0.0.1@5380
-EOF
-
-systemctl restart unbound
-systemctl enable unbound
+apt purge -y unbound
+apt autoremove -y
 cd ~
 }
 
