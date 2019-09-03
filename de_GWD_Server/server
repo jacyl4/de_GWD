@@ -7,6 +7,10 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
+apt autoremove -y
+apt update 
+apt -y upgrade
+
 apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat
 
 source /etc/profile
@@ -60,8 +64,6 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 
 sudo sysctl -p
-
-apt update && apt -y upgrade
 }
 
 
