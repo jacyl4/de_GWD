@@ -7,6 +7,9 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
+apt update 
+apt upgrade -y
+
 apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat
 
 source /etc/profile
@@ -226,10 +229,13 @@ cd ngx_brotli
 git submodule update --init --recursive
 
 cd ~
-git clone https://github.com/jemalloc/jemalloc.git
-cd jemalloc
-./autogen.sh
+wget -N https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+tar xjvf jemalloc-5.2.1.tar.bz2
+cd jemalloc-5.2.1
+./configure -prefix=/usr/local/jemalloc --libdir=/usr/local/lib
 make -j $(nproc --all) && make install
+echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
+ldconfig
 
 cd ~
 mkdir -p /etc/nginx/conf.d
