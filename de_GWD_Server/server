@@ -60,8 +60,6 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 
 sudo sysctl -p
-
-apt update && apt -y upgrade
 }
 
 
@@ -1245,12 +1243,12 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
-systemctl stop vtrui
-systemctl stop nginx
 cd ~
 preinstall
 
 installdoh
+
+systemctl stop vtrui
 
 installv2ray
 
