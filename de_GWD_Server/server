@@ -334,7 +334,7 @@ rm -rf ~/openssl*
 rm -rf ~/pcre*
 rm -rf ~/zlib-cf
 rm -rf ~/ngx_brotli
-rm -rf ~/jemalloc
+rm -rf ~/jemalloc*
 }
 
 
