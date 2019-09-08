@@ -649,11 +649,12 @@ v2path=$(awk 'NR==1{print}' /var/www/html/path.txt)
 doh=$(awk 'NR==1{print}' /var/www/html/domain.txt)
 
 cd ~
-systemctl stop iptables-proxy
 
 preinstall
 
 installdoh
+
+systemctl stop iptables-proxy
 
 installv2ray
 
