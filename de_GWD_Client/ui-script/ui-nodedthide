@@ -30,7 +30,6 @@ cat > /etc/vtrui/config.json << EOF
   "outbounds": [
     {
       "protocol": "vmess",
-      "mux": {"enabled": true},
       "settings": {
         "vnext": [
           {
