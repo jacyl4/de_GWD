@@ -1322,6 +1322,12 @@ else
     echo "[$statusbad] pihole    进程出错"
 fi
 
+if [[ -d "/var/www/html/nextcloud" ]]; then
+  echo "[$statusgod] nextlcoud 已安装"
+else
+  echo "[$statusbad] nextlcoud 未安装"
+fi
+
 blue "--------------------------"
 blue  "当前bbr方案：$(echo $(sudo sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "--------------------------"
