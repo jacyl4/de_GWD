@@ -434,7 +434,6 @@ for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
 done
 EOF
 chmod +x /usr/local/bin/updateGWD
-/usr/local/bin/updateGWD
 
 cat > /usr/local/bin/updateGWDw << "EOF"
 #!/bin/bash
@@ -442,7 +441,6 @@ wget -O /usr/bin/vtrui/geosite.dat https://raw.githubusercontent.com/gwdburst/de
 
 EOF
 chmod +x /usr/local/bin/updateGWDw
-/usr/local/bin/updateGWDw
 
 cat > /usr/local/bin/clearcache << "EOF"
 #!/bin/bash
