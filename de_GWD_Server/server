@@ -1286,6 +1286,8 @@ blue "-----------------"
 start_menu(){
 statusgod=$(green "✔︎")
 statusbad=$(red "✘")
+statusnone=$(yellow "-")
+
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusgod] v2ray     进程正常"
@@ -1323,9 +1325,9 @@ else
 fi
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
-  echo "[$statusgod] nextlcoud 已安装"
+  echo "[$statusgod] nextcloud 已安装"
 else
-  echo "[$statusbad] nextlcoud 未安装"
+  echo "[$statusnone] nextcloud 未安装"
 fi
 
 blue "--------------------------"
