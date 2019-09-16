@@ -229,17 +229,6 @@ cd ~
 
 
 function installiptablesproxy(){
-wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
-
-{
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
- echo "add chnroute $chnroute"
-done
-} > /usr/local/bin/chnrouteset
-
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 ipset -X chnroute
@@ -574,6 +563,17 @@ installdoh
 installv2ray
 
 echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
+
+wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
+
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
 
 installiptablesproxy
 
