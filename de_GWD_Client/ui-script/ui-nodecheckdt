@@ -1,10 +1,10 @@
 #!/bin/bash
-port=$(awk '/port/' /etc/vtrui/config.json | awk 'NR==5{print$2}' | cut -d , -f1)
+port=$(awk '/port/' /etc/vtrui/config.json | awk 'NR==7{print$2}' | cut -d , -f1)
 
 if [[ $port == "443" ]]; then
-cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==3{print}')/=" > /tmp/nodecheckdt
-cat /var/www/html/domain.txt | cut -d . -f1 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==3{print}' | cut -d . -f1)/=" >> /tmp/nodecheckdt
+cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==4{print}')/=" > /tmp/nodecheckdt
+cat /var/www/html/domain.txt | cut -d . -f1 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==4{print}' | cut -d . -f1)/=" >> /tmp/nodecheckdt
 sort /tmp/nodecheckdt | uniq -d
 else
-sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==3{print}'):$port/=" /var/www/html/domain.txt
+sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==4{print}'):$port/=" /var/www/html/domain.txt
 fi
