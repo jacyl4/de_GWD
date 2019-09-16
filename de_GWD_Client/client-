@@ -376,18 +376,35 @@ CONDITIONAL_FORWARDING=false
 EOF
 
 curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
-
-cat > /etc/dnsmasq.conf << EOF
-conf-dir=/etc/dnsmasq.d
-port=5390
-EOF
-
-pihole restartdns
 }
 
 
 
 function piholesetting(){
+sed -i '1,/"port": 9897,/d' /etc/vtrui/config.json
+
+sed -i '1i {\n  "inbounds": [\n    {\n   "port": 53,\n   "tag": "dnsin",\n   "protocol": "dokodemo-door",\n   "settings": {"address": "127.0.0.1", "port": 5390, "network": "tcp,udp"}\n    },\n    {\n    "port": 9897,' /etc/vtrui/config.json
+
+sed -i '/""dns": {"servers": [":/,$d' /etc/vtrui/config.json
+  "dns": {"servers": [
+    {"address": "127.0.0.1","port": 5390},
+    {"address": "127.0.0.1","port": 5390, "domains": ["geosite:cn"] },
+    {"address": "127.0.0.1","port": 5380, "domains": ["geosite:geolocation-!cn"] }
+                     ]},
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      { "type": "field", "inboundTag": ["dnsin"], "outboundTag": "dnsout" },
+      { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" }
+    ]
+  }
+}
+cat >> /etc/vtrui/config.json << EOF
+
+EOF
+
+systemctl restart vtrui
+
 cat > /etc/pihole/dns-servers.conf << EOF
  114DNS;114.114.114.114;114.114.115.115
  DNSpod;119.29.29.29;119.28.28.28
@@ -412,18 +429,17 @@ sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 echo "" > /etc/pihole/adlists.list
 pihole -g
 
+cat > /etc/dnsmasq.conf << EOF
+conf-dir=/etc/dnsmasq.d
+port=5390
+EOF
+
 pihole -f
 }
 
 
 
 function postinstall(){
-sed -i '1,/"port": 9897,/d' /etc/vtrui/config.json
-
-sed -i '1i {\n  "inbounds": [\n    {\n   "port": 53,\n   "tag": "dnsin",\n   "protocol": "dokodemo-door",\n   "settings": {"address": "127.0.0.1", "port": 5390, "network": "tcp,udp"}\n    },\n    {\n    "port": 9897,' /etc/vtrui/config.json
-
-systemctl restart vtrui
-
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
