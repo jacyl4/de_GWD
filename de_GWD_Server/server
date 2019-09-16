@@ -742,10 +742,15 @@ fi
 crontab now.cron
 rm -rf now.cron
 
+
+indexpage=$(ls /var/www/html/index.* 2> /dev/null | wc -l)
+
+if [ "$indexpage" = "0" ]; then 
 wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/sample.zip
 unzip sample.zip
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
+fi 
 }
 
 
