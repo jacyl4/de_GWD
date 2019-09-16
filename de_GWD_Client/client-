@@ -10,7 +10,6 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 mirrorsite="acccmi.cf/gwd"
 
 
-
 architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
@@ -209,12 +208,12 @@ mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
 rm -rf ~/vtpre*
 
 if [[ $port =~ ^[1-9]+$ ]]; then
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
 else
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
 fi
 
-sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
+sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
 sed -i '/"serverName":/c\"serverName": "'$domain'",' /etc/vtrui/config.json
 sed -i '/"path":/c\"path": "'$v2path'",' /etc/vtrui/config.json
@@ -381,30 +380,6 @@ curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
 
 
 function piholesetting(){
-sed -i '1,/"port": 9897,/d' /etc/vtrui/config.json
-
-sed -i '1i {\n  "inbounds": [\n    {\n   "port": 53,\n   "tag": "dnsin",\n   "protocol": "dokodemo-door",\n   "settings": {"address": "127.0.0.1", "port": 5390, "network": "tcp,udp"}\n    },\n    {\n    "port": 9897,' /etc/vtrui/config.json
-
-sed -i '/""dns": {"servers": [":/,$d' /etc/vtrui/config.json
-  "dns": {"servers": [
-    {"address": "127.0.0.1","port": 5390},
-    {"address": "127.0.0.1","port": 5390, "domains": ["geosite:cn"] },
-    {"address": "127.0.0.1","port": 5380, "domains": ["geosite:geolocation-!cn"] }
-                     ]},
-  "routing": {
-    "domainStrategy": "IPIfNonMatch",
-    "rules": [
-      { "type": "field", "inboundTag": ["dnsin"], "outboundTag": "dnsout" },
-      { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" }
-    ]
-  }
-}
-cat >> /etc/vtrui/config.json << EOF
-
-EOF
-
-systemctl restart vtrui
-
 cat > /etc/pihole/dns-servers.conf << EOF
  114DNS;114.114.114.114;114.114.115.115
  DNSpod;119.29.29.29;119.28.28.28
@@ -572,13 +547,8 @@ preinstall
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
+
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
-
-installdoh
-
-installv2ray
-
-echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
 wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
 
@@ -590,6 +560,12 @@ for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/chnrouteset
+
+installdoh
+
+installv2ray
+
+echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
 installiptablesproxy
 
