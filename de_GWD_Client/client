@@ -522,7 +522,7 @@ nameserver 119.28.28.28
 EOF
 
 cd ~
-
+apt update && apt upgrade -y
 preinstall
 
 systemctl stop systemd-resolved
