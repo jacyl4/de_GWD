@@ -354,6 +354,9 @@ systemctl enable iptables-proxy
 function installpihole(){
 rm -rf /var/www/html/admin
 
+if [[ $architecture = "arm64" ]]; then
+curl -sSL https://install.pi-hole.net | bash
+elif [[ $architecture = "amd64" ]]; then
 mkdir -p /etc/pihole
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
@@ -374,7 +377,8 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+fi
 }
 
 
