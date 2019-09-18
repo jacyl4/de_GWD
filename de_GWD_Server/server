@@ -731,7 +731,34 @@ rm -rf ~/server
 rm -rf /var/log/*1
 rm -rf /var/log/*2
 rm -rf /var/log/*gz
+
+localver=$(awk 'NR==1' /usr/local/bin/version.php)
+remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
+
+if [[ $localver < $remotever ]]; then
+
+cat > ~/auto << EOF
+wget -O ~/server https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server
+sed -i '/start_menu(){/,$d' ~/server
+echo "updategwd" >>  ~/server
+chmod +x ~/server
+~/server
+
+crontab -l > ~/now.cron
+sed -i '/auto/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/server
 EOF
+
+crontab -l > ~/now.cron
+echo '0 4 * * *  ~/auto' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+fi
+
+EOF
+
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
 
@@ -750,7 +777,9 @@ wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/s
 unzip sample.zip
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
-fi 
+fi
+
+wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
 }
 
 
@@ -832,7 +861,7 @@ wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/l
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
-cat > ~/bbrkernel/clearkernel <<EOF
+cat > ~/bbrkernel/clearkernel << EOF
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
@@ -1341,6 +1370,7 @@ blue "--------------------------"
     green "作者：GWDburst             "
     green "网站：GWDburst.github.io   "
     green "=========================="
+    blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
     echo
     green  "1. 安装de_GWD"
     green  "2. 切换至bbrplus并重启生效（Debian 10 暂不可用）"
