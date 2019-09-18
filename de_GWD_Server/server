@@ -725,7 +725,7 @@ function postinstall(){
 cat > /usr/local/bin/autoupdate << "EOF"
 #!/bin/bash
 wget -O ~/server https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server
-sed -i '/start_menu(){/,$d' ~/server
+sed -i '$d' ~/server
 echo "updategwd" >>  ~/server
 chmod +x ~/server
 ~/server
