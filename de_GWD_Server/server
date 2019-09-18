@@ -737,7 +737,7 @@ remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_
 
 if [[ $localver < $remotever ]]; then
 
-cat > ~/auto << EOF
+cat > ~/auto << "EOF"
 wget -O ~/server https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server
 sed -i '/start_menu(){/,$d' ~/server
 echo "updategwd" >>  ~/server
