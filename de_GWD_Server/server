@@ -722,6 +722,19 @@ EOF
 
 
 function postinstall(){
+cat > /usr/local/bin/autoupdate << "EOF"
+wget -O ~/server https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server
+sed -i '/start_menu(){/,$d' ~/server
+echo "updategwd" >>  ~/server
+chmod +x ~/server
+~/server
+
+crontab -l > ~/now.cron
+sed -i '/auto/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+EOF
+
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
@@ -734,6 +747,13 @@ rm -rf /var/log/*gz
 
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
 remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
+
+if [[ $localver < $remotever ]]; then
+crontab -l > ~/now.cron
+echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+fi
 EOF
 
 chmod +x /usr/local/bin/updateGWD
