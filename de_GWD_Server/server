@@ -7,7 +7,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat
+apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
 
 source /etc/profile
 
@@ -1285,6 +1285,19 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
+jq -r .inbounds[].settings.clients[].id /etc/vtrui/config.json > /tmp/v2uuid
+
+{
+for v2uuid in $(cat /tmp/v2uuid); do
+  echo '{"id": "'$v2uuid'", "level": 1, "alterId": 32},'
+done
+} > /tmp/v2uuidpre
+
+jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /tmp/v2js
+
+sed -i '$s/.$//' /tmp/v2uuidpre
+sed -i ":a;N;s/\n//g;ta" /tmp/v2uuidpre
+
 cd ~
 preinstall
 
@@ -1293,6 +1306,21 @@ installdoh
 systemctl stop vtrui
 
 installv2ray
+
+v2uuidpre=$(cat /tmp/v2uuidpre)
+
+jq --arg v2uuidpre "$v2uuidpre" '.inbounds[0].settings.clients += [$v2uuidpre]' /tmp/v2js > /etc/vtrui/config.json
+
+sed -i 's/\\//g' /etc/vtrui/config.json
+
+sed -i '/"id":/s/^ *//' /etc/vtrui/config.json
+sed -i '/"id":/s/^.//' /etc/vtrui/config.json
+sed -i '/"id":/s/.$//' /etc/vtrui/config.json
+
+rm -rf /tmp/v2uuid*
+rm -rf /tmp/v2js
+
+systemctl restart vtrui
 
 nginxconf
 
