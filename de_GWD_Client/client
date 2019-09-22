@@ -355,7 +355,7 @@ function installpihole(){
 rm -rf /var/www/html/admin
 
 if [[ $architecture = "arm64" ]]; then
-curl -sSL https://install.pi-hole.net | bash
+sudo curl -sSL https://install.pi-hole.net | bash
 elif [[ $architecture = "amd64" ]]; then
 mkdir -p /etc/pihole
 cat > /etc/pihole/setupVars.conf << EOF
@@ -377,7 +377,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+sudo curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 fi
 }
 
