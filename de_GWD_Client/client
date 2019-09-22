@@ -154,11 +154,6 @@ EOF
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
-
-rm -rf /usr/lib/resolvconf/*
-apt purge -y unbound
-apt autoremove -y
-cd ~
 }
 
 
@@ -384,6 +379,10 @@ fi
 
 
 function piholesetting(){
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+EOF
+  
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=5390
