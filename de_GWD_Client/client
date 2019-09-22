@@ -19,6 +19,8 @@ esac
 
 
 function preinstall(){
+apt update && apt upgrade -y
+
 apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential subversion
 
 source /etc/profile
@@ -89,6 +91,10 @@ if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
+
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
 }
 
 
@@ -556,12 +562,7 @@ deb http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free con
 EOF
 fi
 
-apt update && apt upgrade -y
 preinstall
-
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
@@ -576,11 +577,11 @@ for chnroute in $chnroute ; do
 done
 } > /usr/local/bin/chnrouteset
 
+echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
+
 installdoh
 
 installv2ray
-
-echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
 installiptablesproxy
 
