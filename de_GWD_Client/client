@@ -19,8 +19,6 @@ esac
 
 
 function preinstall(){
-apt update && apt upgrade -y
-
 apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential subversion
 
 source /etc/profile
@@ -561,6 +559,8 @@ deb http://mirrors.aliyun.com/debian stretch-updates main contrib non-free
 deb http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
+
+apt update && apt upgrade -y
 
 preinstall
 
