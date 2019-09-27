@@ -19,8 +19,6 @@ esac
 
 
 function preinstall(){
-apt update && apt upgrade -y
-
 apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential subversion
 
 source /etc/profile
@@ -394,7 +392,6 @@ sudo curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 }
 
 
-
 function piholesetting(){
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
@@ -557,6 +554,8 @@ deb http://mirrors.aliyun.com/debian stretch-updates main contrib non-free
 deb http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free contrib
 EOF
 fi
+
+apt update && apt upgrade -y
 
 preinstall
 
