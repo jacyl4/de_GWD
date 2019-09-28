@@ -813,8 +813,7 @@ systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 
-apt update 
-apt upgrade -y
+apt update && apt upgrade -y
 
 cd ~
 preinstall
