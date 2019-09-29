@@ -25,7 +25,7 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 
 # 部署
 
->准备好顶级域名，做好A记录 和 cname for www，不开cdn。
+>准备好顶级域名，做好A记录，不开cdn。
 >
 
 
