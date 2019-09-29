@@ -762,6 +762,16 @@ rm -rf ~/server
 rm -rf /var/log/*1
 rm -rf /var/log/*2
 rm -rf /var/log/*gz
+
+localver=$(awk 'NR==1' /usr/local/bin/version.php)
+remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
+
+if [[ $localver < $remotever ]]; then
+crontab -l > ~/now.cron
+echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+fi
 EOF
 
 chmod +x /usr/local/bin/updateGWD
