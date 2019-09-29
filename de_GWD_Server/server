@@ -762,16 +762,6 @@ rm -rf ~/server
 rm -rf /var/log/*1
 rm -rf /var/log/*2
 rm -rf /var/log/*gz
-
-localver=$(awk 'NR==1' /usr/local/bin/version.php)
-remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
-
-if [[ $localver < $remotever ]]; then
-crontab -l > ~/now.cron
-echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-fi
 EOF
 
 chmod +x /usr/local/bin/updateGWD
@@ -1354,6 +1344,41 @@ blue "-----------------"
 
 
 
+autoupdateGWD(){
+    green "==============================="
+    green "Y.开启自动更新 / N.关闭自动更新"
+    green "==============================="
+    read autoupdateswitch
+
+if [[ "$autoupdateswitch" = "Y" ]] || [[ "$autoupdateswitch" = "y" ]]; then 
+sed -i '/localver=/,$d' /usr/local/bin/updateGWD
+
+cat >> /usr/local/bin/updateGWD << "EOF"
+localver=$(awk 'NR==1' /usr/local/bin/version.php)
+remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
+
+if [[ $localver < $remotever ]]; then
+crontab -l > ~/now.cron
+echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+fi
+EOF
+blue "--------------------"
+blue  "自动更新 开启 [完毕]"
+blue "--------------------"
+
+elif [[ "$autoupdateswitch" = "N" ]] || [[ "$autoupdateswitch" = "n" ]]; then
+sed -i '/localver=/,$d' /usr/local/bin/updateGWD
+blue "--------------------"
+blue  "自动更新 关闭 [完毕]"
+blue "--------------------"
+fi
+}
+
+
+
+
 start_menu(){
 statusgod=$(green "✔︎")
 statusbad=$(red "✘")
@@ -1424,6 +1449,7 @@ blue "--------------------------"
     yellow "8. 设置v2ray 上级跃点"
     yellow "9. 更新Pi-hole"
     yellow "0. 更新de_GWD"
+    red    "00. 开启/关闭自动更新"
     red    "CTRL+C退出"
     echo
     read -p "请输入数字:" num
@@ -1466,6 +1492,10 @@ blue "--------------------------"
     ;;
     0)
     updategwd
+    start_menu
+    ;;
+    00)
+    autoupdateGWD
     start_menu
     ;;
     *)
