@@ -444,7 +444,7 @@ function makessl(){
 cat > /etc/nginx/conf.d/default.conf << EOF
 server {
     listen 80;
-    server_name $vpsdomain www.$vpsdomain;
+    server_name $vpsdomain;
     root /var/www/html;
     index index.php index.html index.htm;
 }
@@ -454,7 +454,7 @@ systemctl restart nginx
 
 mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
-~/.acme.sh/acme.sh --issue -d $vpsdomain -d www.$vpsdomain -w /var/www/html
+~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html
 ~/.acme.sh/acme.sh --installcert -d $vpsdomain \
                --keypath       /var/www/ssl/$vpsdomain.key  \
                --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
@@ -496,13 +496,13 @@ upstream dns-backend { server 127.0.0.1:8053; }
 
 server {
   listen 80;
-  server_name $vpsdomain www.$vpsdomain;
+  server_name $vpsdomain;
   return 301 https://\$server_name\$request_uri;
 }
 
 server {
   listen 443 ssl spdy http2 fastopen=64 reuseport;
-  server_name $vpsdomain www.$vpsdomain;
+  server_name $vpsdomain;
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
 
@@ -570,13 +570,13 @@ upstream php-handler {
 
 server {
   listen 80;
-  server_name $vpsdomain www.$vpsdomain;
+  server_name $vpsdomain;
   return 301 https://\$server_name\$request_uri;
 }
 
 server {
   listen 443 ssl spdy http2 fastopen=64 reuseport;
-  server_name $vpsdomain www.$vpsdomain;
+  server_name $vpsdomain;
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
 
