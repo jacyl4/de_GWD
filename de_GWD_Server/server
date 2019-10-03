@@ -1300,20 +1300,19 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 
+cd ~
+preinstall
+
+jq -r .inbounds[].settings.clients[].id /etc/vtrui/config.json > /tmp/v2uuid
+
 {
 for v2uuid in $(cat /tmp/v2uuid); do
   echo '{"id": "'$v2uuid'", "level": 1, "alterId": 32},'
 done
 } > /tmp/v2uuidpre
 
-
 sed -i '$s/.$//' /tmp/v2uuidpre
 sed -i ":a;N;s/\n//g;ta" /tmp/v2uuidpre
-
-cd ~
-preinstall
-
-jq -r .inbounds[].settings.clients[].id /etc/vtrui/config.json > /tmp/v2uuid
 
 jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /tmp/v2js
 
