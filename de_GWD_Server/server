@@ -7,6 +7,8 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
+apt update && apt upgrade -y
+
 apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
 
 source /etc/profile
@@ -210,9 +212,12 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
+
 wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
+
 sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
 sed -i '/"path":/c\"path": "'$v2path'"'  /etc/vtrui/config.json
+
 systemctl daemon-reload
 systemctl restart vtrui
 systemctl enable vtrui
@@ -810,12 +815,6 @@ installgwd(){
 
 uuidnum=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
-
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
-
-apt update && apt upgrade -y
 
 cd ~
 preinstall
