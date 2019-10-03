@@ -124,6 +124,10 @@ pihole restartdns
 echo "" > /etc/pihole/adlists.list
 pihole -g
 
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
+
 systemctl stop dhcpcd
 /lib/systemd/systemd-sysv-install disable dhcpcd
 systemctl mask dhcpcd
@@ -813,15 +817,17 @@ installgwd(){
     green "=============================="
     read vpsdomain
 
-uuidnum=$(cat /proc/sys/kernel/random/uuid)
-v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
-
 cd ~
 preinstall
+
+uuidnum=$(cat /proc/sys/kernel/random/uuid)
+v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
 
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
 gatewayaddr="$(route -n |  awk 'NR==3{print $2}')"
+
+installpihole
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
@@ -835,8 +841,6 @@ iface $ethernetnum inet static
   netmask 255.255.255.0
   gateway $gatewayaddr
 EOF
-
-installpihole
 
 installdoh
 
@@ -1296,12 +1300,12 @@ blue "-------------------"
 
 
 updategwd(){
+cd ~
+preinstall
+
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
 v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
-
-cd ~
-preinstall
 
 jq -r .inbounds[].settings.clients[].id /etc/vtrui/config.json > /tmp/v2uuid
 
@@ -1314,13 +1318,13 @@ done
 sed -i '$s/.$//' /tmp/v2uuidpre
 sed -i ":a;N;s/\n//g;ta" /tmp/v2uuidpre
 
-jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /tmp/v2js
-
 installdoh
 
 systemctl stop vtrui
 
 installv2ray
+
+jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /tmp/v2js
 
 v2uuidpre=$(cat /tmp/v2uuidpre)
 
@@ -1370,6 +1374,7 @@ remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_
 
 if [[ $localver < $remotever ]]; then
 crontab -l > ~/now.cron
+sed -i '/autoupdate/d' ~/now.cron
 echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
