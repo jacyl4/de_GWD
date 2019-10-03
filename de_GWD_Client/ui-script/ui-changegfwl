@@ -1,6 +1,4 @@
 #!/bin/bash
 sed -i '/{"address": "127.0.0.1","port": 5380, "domains":/c\{"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }' /etc/vtrui/config.json
 
-sed -i '/geosite:cn/d' /etc/vtrui/config.json
-
 systemctl restart vtrui
