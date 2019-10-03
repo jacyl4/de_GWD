@@ -16,8 +16,7 @@
       "network": "ws",
       "wsSettings": {
         "path": "/0000"
-        },
-      "security": "none"
+        }
       }
     }
   ],
