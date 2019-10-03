@@ -462,6 +462,7 @@ wget -O /usr/bin/vtrui/h2y.dat https://raw.githubusercontent.com/ToutyRater/V2Ra
 
 EOF
 chmod +x /usr/local/bin/updateGWDw
+/usr/local/bin/updateGWDw
 
 cat > /usr/local/bin/clearcache << "EOF"
 #!/bin/bash
