@@ -4,7 +4,7 @@
 
 极大提高了dns性能，优化nginx，支持http2，tls1.3等特性。
 
-![de_GWD](https://i.loli.net/2019/06/05/5cf78011df0b260138.png)
+![de_GWD](https://i.loli.net/2019/10/04/pZQJDSkEy5FuWfn.png)
 
 ## Server：
 
