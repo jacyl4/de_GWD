@@ -436,6 +436,9 @@ pihole -g
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
+wget -O /usr/bin/vtrui/geosite.dat https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dlc.dat
+wget -O /usr/bin/vtrui/h2y.dat https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
 
 {
@@ -453,16 +456,7 @@ for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
 done
 EOF
 chmod +x /usr/local/bin/updateGWD
-
-cat > /usr/local/bin/updateGWDw << "EOF"
-#!/bin/bash
-wget -O /usr/bin/vtrui/geosite.dat https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dlc.dat
-wget -O /usr/bin/vtrui/h2y.dat https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
-
-
-EOF
-chmod +x /usr/local/bin/updateGWDw
-/usr/local/bin/updateGWDw
+/usr/local/bin/updateGWD
 
 cat > /usr/local/bin/clearcache << "EOF"
 #!/bin/bash
@@ -482,9 +476,6 @@ chmod +x /usr/local/bin/clearcache
 crontab -l > now.cron
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
   echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
-fi
-if [[ "$(crontab -l | grep 'updateGWDw' | awk '{print $6}')" != "/usr/local/bin/updateGWDw" ]]; then
-  echo '10 4 * * 0 /usr/local/bin/updateGWDw' >> now.cron
 fi
 if [[ "$(crontab -l | grep 'clearcache' | awk '{print $6}')" != "/usr/local/bin/clearcache" ]]; then
   echo '0 */4 * * * /usr/local/bin/clearcache' >> now.cron
