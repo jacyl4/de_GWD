@@ -78,11 +78,6 @@
           <span>注销</span></a>
       </li>
     </ul>
-<script>
-function logout () {
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-};
-</script>
 
     <div id="content-wrapper">
 
@@ -122,30 +117,15 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-toggle-on"></i>
                 </div>
-                <div class="mr-5">代理开关</div>
+                <div class="mr-5">代理模式</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <span class="float-left">
-<input id="proxy-toggle" type="checkbox" data-toggle="toggle" data-on="代理中" data-off="已停止" data-onstyle="light" data-offstyle="dark" data-style="border mt-n1 mb-n1" data-size="xs">
-                </span>
-                <span class="float-right">
-<button type="button" class="btn btn-light btn-xs mt-n1 mb-n1" onclick="proxyon()">ON</button>
-&#160
-<button type="button" class="btn btn-secondary btn-xs mt-n1 mb-n1" onclick="proxyoff()">OFF</button>
-                </span>
+                <span id="testdns" class="float-left"></span>
+                <button class="btn btn-light btn-xs float-right" onclick="proxyon()">重启进程</button>
               </a>
             </div>
           </div>
 
-<script>
-function proxyon () {
-    $.get('proxyon.php', function(result){});
-    alert ('正在重启代理，耐心等待');
-};
-function proxyoff () {
-    $.get('proxyoff.php', function(result){});
-};
-</script>
 
           <div class="col-xl-3 col-sm-6 mb-3">
             <div class="card text-white bg-dark o-hidden h-100">
@@ -179,30 +159,6 @@ function proxyoff () {
 
         </div>
 
-<script>
-function uptime() {
-$.get('uptime.php', function(data) { $('#uptime').text(data) });
-};
-
-function chlink1() {
-$.get('testbaidu.php', function(data) { $('#testbaidu').text(data) });
-};
-
-function chlink2() {
-$.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
-};
-
-function testproxy() {
-$.get('testproxy.php', function(data) { $('#proxy-toggle').bootstrapToggle(String(data)) });
-};
-
-window.onload = setInterval(function() {
-uptime();
-chlink1();
-chlink2();
-testproxy();
-}, 1800);
-</script>
 
         <!-- DataTables Example -->
         <div class="card mb-3">
@@ -215,28 +171,6 @@ testproxy();
           </span>
           </div>
             <button type="button" class="btn btn-outline-success btn-sm" style="border-Radius: 0px;" onclick="pingtest()">Ping</button>
-<script>
-function pingtest () {
-$.get('ping1.php', function(data) { $('#ping1').text(data) });
-$.get("ping2.php", function(data) { $('#ping2').text(data) });
-$.get("ping3.php", function(data) { $('#ping3').text(data) });
-$.get("ping4.php", function(data) { $('#ping4').text(data) });
-$.get("ping5.php", function(data) { $('#ping5').text(data) });
-$.get("ping6.php", function(data) { $('#ping6').text(data) });
-$.get("ping7.php", function(data) { $('#ping7').text(data) });
-$.get("ping8.php", function(data) { $('#ping8').text(data) });
-$.get("ping9.php", function(data) { $('#ping9').text(data) });
-};
-
-function shownodedt(){
-$.get('nodedtswitch.php', {nodedtswitch:"nodedtshow"}, function(result){ location.reload(); });
-};
-
-function hidenodedt(){
-$.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ location.reload(); });
-};
-</script>
-
 
 
           <div class="card-body">
@@ -386,12 +320,6 @@ $.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ locatio
 </span>
 </div>
 
-<script>
-function submitlocalip () {
-localiptxt=$('#nodedttext').val();
-$.get('changelocalip.php', {localip:localiptxt}, function(result){ });
-}
-</script>
 
             </div>
           </div>
@@ -401,7 +329,12 @@ $.get('changelocalip.php', {localip:localiptxt}, function(result){ });
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-bezier-curve"></i>
-            Dns over Https</div>
+            Dns over Https
+         <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
+          </span>
+          </div>
           <div class="card-body">
 <form>
   <div class="form-group">
@@ -433,13 +366,7 @@ $.get('changelocalip.php', {localip:localiptxt}, function(result){ });
   <button id="submitdoh" type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
 </span>
 
-<script>
-function submitdoh () {
-dohtxt1=$('#DoH1').val();
-dohtxt2=$('#DoH2').val();
-$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
-}
-</script>
+
           </div>
           </div>
 
@@ -472,14 +399,6 @@ $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
 <button id="submitdoh" type="button" class="btn btn-danger" onclick="submitstaticip()">应用&重启</button>
 </span>
 
-<script>
-function submitstaticip () {
-staticip1=$('#localip').val();
-staticip2=$('#upstreamip').val();
-$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
-alert("本机已开始重新启动");
-}
-</script>
           </div>
           </div>
         </div>
@@ -502,6 +421,74 @@ alert("本机已开始重新启动");
   </div>
   <!-- /#wrapper -->
 <script>
+function logout () {
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+};
+
+function uptime() {
+$.get('uptime.php', function(data) { $('#uptime').text(data) });
+};
+
+function chlink1() {
+$.get('testbaidu.php', function(data) { $('#testbaidu').text(data) });
+};
+
+function chlink2() {
+$.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
+};
+
+function proxyon () {
+    $.get('proxyon.php', function(result){});
+    alert ('正在重启代理，耐心等待');
+};
+
+function pingtest () {
+$.get('ping1.php', function(data) { $('#ping1').text(data) });
+$.get("ping2.php", function(data) { $('#ping2').text(data) });
+$.get("ping3.php", function(data) { $('#ping3').text(data) });
+$.get("ping4.php", function(data) { $('#ping4').text(data) });
+$.get("ping5.php", function(data) { $('#ping5').text(data) });
+$.get("ping6.php", function(data) { $('#ping6').text(data) });
+$.get("ping7.php", function(data) { $('#ping7').text(data) });
+$.get("ping8.php", function(data) { $('#ping8').text(data) });
+$.get("ping9.php", function(data) { $('#ping9').text(data) });
+};
+
+function shownodedt(){
+$.get('nodedtswitch.php', {nodedtswitch:"nodedtshow"}, function(result){ location.reload(); });
+};
+
+function hidenodedt(){
+$.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ location.reload(); });
+};
+
+function submitlocalip () {
+localiptxt=$('#nodedttext').val();
+$.get('changelocalip.php', {localip:localiptxt}, function(result){ });
+}
+
+function chnwl (){
+$.get('changechnwl.php', function(result){ location.reload(); });
+}
+
+function gfwl (){
+$.get('changegfwl.php', function(result){ location.reload(); });
+}
+
+function submitdoh () {
+dohtxt1=$('#DoH1').val();
+dohtxt2=$('#DoH2').val();
+$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
+}
+
+function submitstaticip () {
+staticip1=$('#localip').val();
+staticip2=$('#upstreamip').val();
+$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
+alert("本机已开始重新启动");
+}
+
+
 node1 = "<?php echo exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>";
 node2 = "<?php echo exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>";
 node3 = "<?php echo exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>";
@@ -516,72 +503,6 @@ nodenum = "nodecheck<?php echo exec('/usr/local/bin/ui-nodecheck');?>" ;
 nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
 nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
-window.onload = function() {
-$("body").toggleClass("sidebar-toggled");
-$(".sidebar").toggleClass("toggled");
-
-$.get("version.php", function(data) {
-var strver=data;
-var currentvernum = strver.split("-")[0].substring(0);
-var remotevernum = strver.split("-")[1].substring(0);
-$('#currentver').html(currentvernum+'本机');
-$('#remotever').html(remotevernum+' 发布');
-
-var vera = $.trim(currentvernum);
-var verb = $.trim(remotevernum);
-if (vera == verb) {
-$('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
-}
-else {
-$('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
-};
-});
-
-$.get("nodechecknf.php", function(data) { $('#nodenfshow').html(data) });
-$.get("nodecheckdt.php", function(data) { $('#nodedtshow').html(data) });
-
-$('#nodenfshow1').text(node1);
-$('#nodenfshow2').text(node2);
-$('#nodenfshow3').text(node3);
-$('#nodenfshow4').text(node4);
-$('#nodenfshow5').text(node5);
-$('#nodenfshow6').text(node6);
-$('#nodenfshow7').text(node7);
-$('#nodenfshow8').text(node8);
-$('#nodenfshow9').text(node9);
-
-$('#nodedtshow1').text(node1);
-$('#nodedtshow2').text(node2);
-$('#nodedtshow3').text(node3);
-$('#nodedtshow4').text(node4);
-$('#nodedtshow5').text(node5);
-$('#nodedtshow6').text(node6);
-$('#nodedtshow7').text(node7);
-$('#nodedtshow8').text(node8);
-$('#nodedtshow9').text(node9);
-
-$('#nodeshow1').text(node1);
-$('#nodeshow2').text(node2);
-$('#nodeshow3').text(node3);
-$('#nodeshow4').text(node4);
-$('#nodeshow5').text(node5);
-$('#nodeshow6').text(node6);
-$('#nodeshow7').text(node7);
-$('#nodeshow8').text(node8);
-$('#nodeshow9').text(node9);
-
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-
-$("#"+nodenum).html(nodestatust);
-};
 
 function nfswitch1 () {$('#nodenfshow').html(node1); $.get("changenodenf.php", {nodenfnum:"1"}, function(result){ })};
 function nfswitch2 () {$('#nodenfshow').html(node2); $.get("changenodenf.php", {nodenfnum:"2"}, function(result){ })};
@@ -711,6 +632,82 @@ $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatust);
 $.get("changenode.php", {nodenum:"9"}, function(result){});
 };
+
+window.onload = function() {
+$("body").toggleClass("sidebar-toggled");
+$(".sidebar").toggleClass("toggled");
+
+$.get("version.php", function(data) {
+var strver=data;
+var currentvernum = strver.split("-")[0].substring(0);
+var remotevernum = strver.split("-")[1].substring(0);
+$('#currentver').html(currentvernum+'本机');
+$('#remotever').html(remotevernum+' 发布');
+
+var vera = $.trim(currentvernum);
+var verb = $.trim(remotevernum);
+if (vera == verb) {
+$('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
+}
+else {
+$('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
+};
+});
+
+$.get('testdns.php', function(data) { $('#testdns').text(data) });
+
+setInterval(function() {
+uptime();
+chlink1();
+chlink2();
+testproxy();
+}, 1800);
+
+$.get("nodechecknf.php", function(data) { $('#nodenfshow').html(data) });
+$.get("nodecheckdt.php", function(data) { $('#nodedtshow').html(data) });
+
+$('#nodenfshow1').text(node1);
+$('#nodenfshow2').text(node2);
+$('#nodenfshow3').text(node3);
+$('#nodenfshow4').text(node4);
+$('#nodenfshow5').text(node5);
+$('#nodenfshow6').text(node6);
+$('#nodenfshow7').text(node7);
+$('#nodenfshow8').text(node8);
+$('#nodenfshow9').text(node9);
+
+$('#nodedtshow1').text(node1);
+$('#nodedtshow2').text(node2);
+$('#nodedtshow3').text(node3);
+$('#nodedtshow4').text(node4);
+$('#nodedtshow5').text(node5);
+$('#nodedtshow6').text(node6);
+$('#nodedtshow7').text(node7);
+$('#nodedtshow8').text(node8);
+$('#nodedtshow9').text(node9);
+
+$('#nodeshow1').text(node1);
+$('#nodeshow2').text(node2);
+$('#nodeshow3').text(node3);
+$('#nodeshow4').text(node4);
+$('#nodeshow5').text(node5);
+$('#nodeshow6').text(node6);
+$('#nodeshow7').text(node7);
+$('#nodeshow8').text(node8);
+$('#nodeshow9').text(node9);
+
+$('#nodecheck1').html(nodestatusf);
+$('#nodecheck2').html(nodestatusf);
+$('#nodecheck3').html(nodestatusf);
+$('#nodecheck4').html(nodestatusf);
+$('#nodecheck5').html(nodestatusf);
+$('#nodecheck6').html(nodestatusf);
+$('#nodecheck7').html(nodestatusf);
+$('#nodecheck8').html(nodestatusf);
+$('#nodecheck9').html(nodestatusf);
+
+$("#"+nodenum).html(nodestatust);
+};
 </script>
   <!-- Scroll to Top Button-->
   <a class="scroll-to-top rounded" href="#page-top">
@@ -726,7 +723,6 @@ $.get("changenode.php", {nodenum:"9"}, function(result){});
 
   <!-- Custom scripts for all pages-->
   <script src="js/sb-admin.min.js"></script>
-  <script src="js/bootstrap4-toggle.min.js"></script>
 
   <!-- Page level plugin JavaScript-->
   <script src="vendor/datatables/jquery.dataTables.min.js"></script>
