@@ -1,4 +1,4 @@
 #!/bin/bash
-sed -i '/{"address": "127.0.0.1","port": 5380, "domains":/c\{"address": "127.0.0.1","port": 5380, "domains": ["geosite:geolocation-!cn"] }' /etc/vtrui/config.json
+sed -i '/{"address": "127.0.0.1","port": 5380, "domains":/c\{"address": "127.0.0.1","port": 5390, "domains": ["geosite:cn"] },{"address": "127.0.0.1","port": 5380, "domains": ["geosite:geolocation-!cn"] }' /etc/vtrui/config.json
 
 systemctl restart vtrui
