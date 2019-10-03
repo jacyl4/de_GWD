@@ -107,10 +107,6 @@ EOF
 
 curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
 
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
-systemctl mask dhcpcd
-
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
@@ -125,6 +121,10 @@ pihole restartdns
 
 echo "" > /etc/pihole/adlists.list
 pihole -g
+
+systemctl stop dhcpcd
+/lib/systemd/systemd-sysv-install disable dhcpcd
+systemctl mask dhcpcd
 }
 
 
