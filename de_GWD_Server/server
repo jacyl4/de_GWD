@@ -761,7 +761,6 @@ sed -i '/auto/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 EOF
-
 chmod +x /usr/local/bin/autoupdate
 
 cat > /usr/local/bin/updateGWD << "EOF"
@@ -784,7 +783,6 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
-
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
 
