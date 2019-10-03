@@ -674,17 +674,6 @@ cd ~
 
 preinstall
 
-cat > /etc/resolv.conf << EOF
-nameserver 119.29.29.29
-EOF
-  
-cat > /etc/dnsmasq.conf << EOF
-conf-dir=/etc/dnsmasq.d
-EOF
-pihole restartdns
-
-systemctl stop iptables-proxy
-
 installdoh
 
 installv2ray
