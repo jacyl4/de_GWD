@@ -473,15 +473,12 @@ EOF
 chmod +x /usr/local/bin/clearcache
 /usr/local/bin/clearcache
 
-crontab -l > now.cron
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-  echo '0 4 * * * /usr/local/bin/updateGWD' >> now.cron
-fi
-if [[ "$(crontab -l | grep 'clearcache' | awk '{print $6}')" != "/usr/local/bin/clearcache" ]]; then
-  echo '0 */4 * * * /usr/local/bin/clearcache' >> now.cron
-fi
-crontab now.cron
-rm -rf now.cron
+cat > ~/now.cron << EOF
+0 4 * * * /usr/local/bin/updateGWD
+0 */4 * * * /usr/local/bin/clearcache
+EOF
+crontab ~/now.cron
+rm -rf ~/now.cron
 
 svn export https://github.com/gwdburst/de_GWD/trunk/de_GWD_Client/ui-script
 svn export https://github.com/gwdburst/de_GWD/trunk/de_GWD_Client/ui-web
