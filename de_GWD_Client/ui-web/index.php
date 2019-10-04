@@ -121,7 +121,7 @@
               </div>
               <a class="card-footer text-white clearfix small z-1">
                 <span id="testdns" class="float-left"></span>
-                <button class="btn btn-light btn-xs float-right" onclick="proxyon()">重启进程</button>
+                <button class="btn btn-light float-right" style="padding: 0.25rem 0.25rem;font-size: 0.7rem;line-height: 0.8;border-radius: 0.2rem;" onclick="proxyon()">重启进程</button>
               </a>
             </div>
           </div>
