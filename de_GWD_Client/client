@@ -647,6 +647,17 @@ blue "----------------------"
 
 
 
+fixpiholedhcp(){
+sed -i 's/option:router/6/g' /etc/dnsmasq.d/02-pihole-dhcp.conf
+
+pihole restartdns
+
+blue "----------------------"
+blue  "Pi-hole 补丁 [完毕]"
+blue "----------------------"
+}
+
+
 updatepihole(){
 ethernetnum="$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)"
 localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
@@ -739,6 +750,7 @@ fi
     echo
     green  "1. 安装de_GWD"
     green  "2. 更改Pi-hole密码"
+    yellow "8. Pi-hole DHCP补丁（用于开启DHCP服务的用户）"
     yellow "9. 更新Pi-hole"
     yellow "0. 更新de_GWD"
     red    "CTRL+C退出"
@@ -751,6 +763,10 @@ fi
     ;;
     2)
     change_piholeadmin
+    start_menu
+    ;;
+    8)
+    fixpiholedhcp
     start_menu
     ;;
     9)
