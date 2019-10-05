@@ -489,10 +489,9 @@ chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
-/usr/local/bin/ui-nodedthide
-
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
 
+/usr/local/bin/ui-nodedthide
 }
 
 

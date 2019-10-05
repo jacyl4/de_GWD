@@ -660,7 +660,6 @@ setInterval(function() {
 uptime();
 chlink1();
 chlink2();
-testproxy();
 }, 1800);
 
 $.get("nodechecknf.php", function(data) { $('#nodenfshow').html(data) });
