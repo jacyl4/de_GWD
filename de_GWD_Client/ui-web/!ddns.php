@@ -13,7 +13,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>de_GWD - 黑白名单</title>
+  <title>de_GWD - DDNS</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -72,7 +72,7 @@
           <i class="fas fa-fw fa-th-list"></i>
           <span>黑白名单</span></a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link" href="!ddns.php">
           <i class="fas fa-fw fa-ethernet"></i>
           <span>DDNS</span></a>
@@ -98,80 +98,80 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <li class="breadcrumb-item">
             <a href="index.php">概览</a>
           </li>
-          <li class="breadcrumb-item active">黑白名单</li>
+          <li class="breadcrumb-item active">DDNS</li>
         </ol>
 
         <!-- Page Content -->
+
+      <div class="col-md-6 input-group ml-auto mr-auto mb-3">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">Wan IP</span>
+        </div>
+          <span id="wanIP" class="form-control text-center"><?php echo exec("awk 'NR==1{print}' /tmp/wanip"); ?></span>
+      </div>
+
+      <div class="col-md-6 input-group ml-auto mr-auto mb-4">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">归属地</span>
+        </div>
+          <span class="form-control text-center"><?php echo exec("awk 'NR==2{print}' /tmp/wanip"); ?></span>
+      </div>
+
+
+
         <div class="card mb-3">
           <div class="card-header">
-            <i class="fas fa-th-list"></i>
-            名单编辑</div>
+            <i class="fas fa-ethernet"></i>
+            CloudFlare DDNS
+          <span id="ddnscheck" class="badge badge-pill text-success"></span>
+          <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="stopddns()">STOP</button>
+          </span>
+          </div>
           <div class="card-body">
-<form>
-          <div class="form-group">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            黑名单<br>
-          （走国外线路）<br>
-            </span>
-          </div>
-            <textarea id="listb" class="form-control" aria-label="listb" rows="11"><?php echo shell_exec("cat /var/www/html/listb.txt"); ?></textarea>
-          </div>
-          </div>
+  <div class="form-group">
+    <div class="form-row mb-3">
+      <div class="col-md-6 input-group">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">域名</span>
+        </div>
+          <input type="text" id="CFdomain" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/ddns.txt"); ?>">
+      </div>
 
-          <div class="form-group">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            白名单<br>
-          （走国内线路）<br>
-            </span>
-          </div>
-            <textarea id="listw" class="form-control" aria-label="listw" rows="11"><?php echo shell_exec("cat /var/www/html/listw.txt"); ?></textarea>
-          </div>
-          </div>
+      <div class="col-md-6 input-group">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">Zone ID</span>
+        </div>
+          <input type="text" id="CFzoneid" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/ddns.txt"); ?>">
+      </div>
+    </div>
 
-          <div class="form-group">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            内网设备白名单<br>
-          （走国内线路）<br>
-            </span>
-          </div>
-            <textarea id="listwlan" class="form-control" aria-label="listwlan" rows="11"><?php echo shell_exec("cat /var/www/html/listwlan.txt"); ?></textarea>
-          </div>
-          </div>
-</form>
+    <div class="form-row">
+      <div class="col-md-6 input-group">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">CF API KEY</span>
+        </div>
+          <input type="text" id="CFapikey" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/ddns.txt"); ?>">
+      </div>
 
-<span class="float-left text-secondary">
-  <small>
-注：<br>
-应用后，需等待数秒生效，因重整所有的线路规则。<br>
-尽量填写ip，域名也是解析到ip来实现的，有些域名会有cdn加速，就不会太好用。<br>
-一行一个地址，格式如下：<br>
-163.163.163.163<br>
-domain.com<br>
-  </small>
-</span>
+      <div class="col-md-6 input-group">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">CF E-mail</span>
+        </div>
+          <input type="text" id="CFemail" class="form-control" value="<?php echo exec("awk 'NR==5{print}' /var/www/html/ddns.txt"); ?>">
+      </div>
+    </div>
+  </div>
 
 <span class="float-right">
-<button type="button" class="btn btn-primary" onclick="submitlistbw()">应用</button>
+  <button type="button" class="btn btn-primary" onclick="submitddns()">保存&开启</button>
 </span>
 
-<script>
-function submitlistbw () {
-listb=$("#listb").val();
-listw=$("#listw").val();
-listwlan=$("#listwlan").val();
-$.get("listbwsave.php", {listb:listb, listw:listw, listwlan:listwlan}, function(result){});
-alert("黑白名单已提交");
-}
-</script>
+
           </div>
           </div>
 
+        <!-- Page Content -->
       </div>
       <!-- /.container-fluid -->
 
@@ -190,9 +190,26 @@ alert("黑白名单已提交");
   </div>
   <!-- /#wrapper -->
 <script> 
+function submitddns(){
+wanip=$('#wanIP').text();
+cfdomain=$('#CFdomain').val();
+cfzoneid=$('#CFzoneid').val();
+cfapikey=$('#CFapikey').val();
+cfemail=$('#CFemail').val();
+$.get('ddnssave.php', {wanIP:wanip, CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
+}
+
+function stopddns(){
+$.get('ddnsstop.php', function(result){ location.reload() });
+}
+
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
+$.get('ddnsiptest.php');
+$.get('ddnscheck.php', function(data){
+if (data == "true") {$('#ddnscheck').html('on');}
+});
 }
 </script>
 

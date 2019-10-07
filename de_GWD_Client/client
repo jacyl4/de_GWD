@@ -19,7 +19,7 @@ esac
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential subversion
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential subversion jq
 
 source /etc/profile
 

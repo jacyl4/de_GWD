@@ -1,0 +1,7 @@
+#!/bin/bash
+wget -qO /tmp/ip.html https://www.ipip.net/ip.html
+
+{
+awk '/请输入IP地址/' /tmp/ip.html | awk '{print $4}' | cut -d '"' -f2
+sed -n '/地理位置/{n;n;p}' /tmp/ip.html | sed -n '2p' | cut -d '>' -f2 | cut -d '<' -f1
+} > /tmp/wanip

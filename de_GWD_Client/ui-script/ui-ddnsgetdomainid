@@ -1,0 +1,12 @@
+#!/bin/bash
+wanIP=$(awk 'NR==1{print}' /var/www/html/ddns.txt)
+CFdomain=$(awk 'NR==2{print}' /var/www/html/ddns.txt)
+CFzoneid=$(awk 'NR==3{print}' /var/www/html/ddns.txt)
+CFapikey=$(awk 'NR==4{print}' /var/www/html/ddns.txt)
+CFemail=$(awk 'NR==5{print}' /var/www/html/ddns.txt)
+
+{
+curl -sX GET "https://api.cloudflare.com/client/v4/zones/$CFzoneid/dns_records" -H "X-Auth-Email: $CFemail" -H "X-Auth-Key: $CFapikey" -H "Content-Type: application/json" | jq .
+} > /tmp/ddnscf
+
+jq --arg CFdomain "$CFdomain" -r '.result[] | select(.name == $CFdomain).id' /tmp/ddnscf

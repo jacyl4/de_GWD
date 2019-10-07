@@ -73,6 +73,11 @@
           <span>黑白名单</span></a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="!ddns.php">
+          <i class="fas fa-fw fa-ethernet"></i>
+          <span>DDNS</span></a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" href="#" onclick="logout()">
           <i class="fas fa-fw fa-sign-out-alt"></i>
           <span>注销</span></a>
@@ -345,7 +350,7 @@
           <label for="DoH1">DoH1</label>
         </div>
         <div class="form-label-group input-group-append w-50">
-          <span class="input-group-text justify-content-center w-100" id="basic-addon3"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==2{print}' | cut -d' ' -f1"); ?></span>
+          <span class="input-group-text justify-content-center w-100"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==2{print}' | cut -d' ' -f1"); ?></span>
         </div>
       </div>
 
@@ -355,7 +360,7 @@
           <label for="DoH2">DoH2</label>
         </div>
         <div class="form-label-group input-group-append w-50">
-          <span class="input-group-text justify-content-center w-100" id="basic-addon3"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==3{print}' | cut -d' ' -f1"); ?></span>
+          <span class="input-group-text justify-content-center w-100"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==3{print}' | cut -d' ' -f1"); ?></span>
         </div>
       </div>
     </div>
@@ -363,7 +368,7 @@
 </form>
 
 <span class="float-right">
-  <button id="submitdoh" type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
+  <button type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
 </span>
 
 
@@ -396,7 +401,7 @@
 </form>
 
 <span class="float-right">
-<button id="submitdoh" type="button" class="btn btn-danger" onclick="submitstaticip()">应用&重启</button>
+<button type="button" class="btn btn-danger" onclick="submitstaticip()">应用&重启</button>
 </span>
 
           </div>
@@ -421,28 +426,28 @@
   </div>
   <!-- /#wrapper -->
 <script>
-function logout () {
+function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
 };
 
-function uptime() {
+function uptime(){
 $.get('uptime.php', function(data) { $('#uptime').text(data) });
 };
 
-function chlink1() {
+function chlink1(){
 $.get('testbaidu.php', function(data) { $('#testbaidu').text(data) });
 };
 
-function chlink2() {
+function chlink2(){
 $.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
 };
 
-function proxyon () {
+function proxyon(){
     $.get('proxyon.php', function(result){});
     alert ('正在重启代理，耐心等待');
 };
 
-function pingtest () {
+function pingtest(){
 $.get('ping1.php', function(data) { $('#ping1').text(data) });
 $.get("ping2.php", function(data) { $('#ping2').text(data) });
 $.get("ping3.php", function(data) { $('#ping3').text(data) });
@@ -462,26 +467,26 @@ function hidenodedt(){
 $.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ location.reload(); });
 };
 
-function submitlocalip () {
+function submitlocalip(){
 localiptxt=$('#nodedttext').val();
 $.get('changelocalip.php', {localip:localiptxt}, function(result){ });
 }
 
-function chnwl (){
+function chnwl(){
 $.get('changechnwl.php', function(result){ location.reload(); });
 }
 
-function gfwl (){
+function gfwl(){
 $.get('changegfwl.php', function(result){ location.reload(); });
 }
 
-function submitdoh () {
+function submitdoh(){
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
 $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
 }
 
-function submitstaticip () {
+function submitstaticip(){
 staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
 $.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
