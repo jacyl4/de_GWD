@@ -406,7 +406,7 @@ conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
 
-pihole -f
+pihole restartdns
 
 cat > /etc/pihole/dns-servers.conf << EOF
  114DNS;114.114.114.114;114.114.115.115
