@@ -6,7 +6,7 @@ $CFzoneid = $_GET['CFzoneid'];
 $CFapikey = $_GET['CFapikey'];
 $CFemail = $_GET['CFemail'];
 
-$ddnstxt = fopen("ddns.txt", "w");
+$ddnstxt = fopen("ddnscf.txt", "w");
 $txt = "$CFdomain\n";
 fwrite($ddnstxt, $txt);
 $txt = "$CFzoneid\n";
@@ -19,12 +19,12 @@ fclose($ddnstxt);
 
 $CFdomainid = exec('sudo /usr/local/bin/ui-ddnsgetdomainid');
 
-$ddnstxt = fopen("ddns.txt", "a");
+$ddnstxt = fopen("ddnscf.txt", "a");
 $txt = "$CFdomainid";
 fwrite($ddnstxt, $txt);
 fclose($ddnstxt);
 
-exec('sudo /usr/local/bin/ui-ddnsupdateip');
-exec('sudo /usr/local/bin/ui-ddnsupdateon');
+exec('sudo /usr/local/bin/ui-ddnsupdateipcf');
+exec('sudo /usr/local/bin/ui-ddnsupdateoncf');
 ?>
 <?php }?>

@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ "$(crontab -l)" =~ "ddnsupdateip" ]]; then
-	echo "true"
+	echo "cfon"
 else
-	echo "false"
+	echo "none"
 fi

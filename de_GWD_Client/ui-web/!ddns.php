@@ -83,11 +83,7 @@
           <span>注销</span></a>
       </li>
     </ul>
-<script>
-function logout () {
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
-</script>
+
 
     <div id="content-wrapper">
 
@@ -102,31 +98,19 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         </ol>
 
         <!-- Page Content -->
-
       <div class="col-md-6 input-group ml-auto mr-auto mb-3">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Wan IP</span>
         </div>
-          <span class="form-control text-center"><?php echo exec("awk 'NR==1{print}' /tmp/wanip"); ?></span>
+          <span class="form-control text-center"><?php echo exec("curl http://members.3322.org/dyndns/getip"); ?></span>
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="stopddns()">STOP</button>
       </div>
-
-      <div class="col-md-6 input-group ml-auto mr-auto mb-4">
-        <div class="input-group-prepend w-25">
-          <span class="input-group-text justify-content-center w-100">归属地</span>
-        </div>
-          <span class="form-control text-center"><?php echo exec("awk 'NR==2{print}' /tmp/wanip"); ?></span>
-      </div>
-
-
-
+      
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
           <span id="ddnscheck" class="badge badge-pill text-success"></span>
-          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="stopddns()">STOP</button>
-          </span>
           </div>
           <div class="card-body">
   <div class="form-group">
@@ -135,14 +119,14 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">域名</span>
         </div>
-          <input type="text" id="CFdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/ddnscf.txt"); ?>">
       </div>
 
       <div class="col-md-6 input-group">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Zone ID</span>
         </div>
-          <input type="text" id="CFzoneid" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFzoneid" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/ddnscf.txt"); ?>">
       </div>
     </div>
 
@@ -151,25 +135,23 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF API KEY</span>
         </div>
-          <input type="text" id="CFapikey" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFapikey" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/ddnscf.txt"); ?>">
       </div>
 
       <div class="col-md-6 input-group">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF E-mail</span>
         </div>
-          <input type="text" id="CFemail" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFemail" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/ddnscf.txt"); ?>">
       </div>
     </div>
   </div>
 
 <span class="float-right">
-  <button type="button" class="btn btn-primary" onclick="submitddns()">保存&开启</button>
+  <button type="button" class="btn btn-primary" onclick="submitddnscf()">保存&开启</button>
 </span>
-
-
           </div>
-          </div>
+        </div>
 
         <!-- Page Content -->
       </div>
@@ -189,13 +171,17 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 
   </div>
   <!-- /#wrapper -->
-<script> 
-function submitddns(){
+<script>
+function logout(){
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+}
+
+function submitddnscf(){
 cfdomain=$('#CFdomain').val();
 cfzoneid=$('#CFzoneid').val();
 cfapikey=$('#CFapikey').val();
 cfemail=$('#CFemail').val();
-$.get('ddnssave.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
+$.get('ddnssavecf.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
 }
 
 function stopddns(){
@@ -205,9 +191,8 @@ $.get('ddnsstop.php', function(result){ location.reload() });
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
-$.get('ddnsiptest.php');
 $.get('ddnscheck.php', function(data){
-if (data == "true") {$('#ddnscheck').html('on');}
+if (data.indexOf("cfon") != -1) {$('#ddnscheck').html('on');}
 });
 }
 </script>
