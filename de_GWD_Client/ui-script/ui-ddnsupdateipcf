@@ -6,6 +6,7 @@ CFzoneid=$(awk 'NR==2{print}' /var/www/html/ddnscf.txt)
 CFapikey=$(awk 'NR==3{print}' /var/www/html/ddnscf.txt)
 CFemail=$(awk 'NR==4{print}' /var/www/html/ddnscf.txt)
 CFdomainid=$(awk 'NR==5{print}' /var/www/html/ddnscf.txt)
+
 CFdomainip=$(dig $CFdomain -p 5380 | sed -n '/ANSWER SECTION:/{N;p}' | sed -n '2p' | awk '{print$5}')
 
 if [[ "$wanIP" != "$CFdomainip" ]]; then
