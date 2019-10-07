@@ -110,7 +110,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
-          <span id="ddnscheck" class="badge badge-pill text-success"></span>
+          <span id="ddnscheckcf" class="badge badge-pill text-success"></span>
           </div>
           <div class="card-body">
   <div class="form-group">
@@ -192,7 +192,7 @@ window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
 $.get('ddnscheck.php', function(data){
-if (data.indexOf("cfon") != -1) {$('#ddnscheck').html('on');}
+if (data.indexOf("cfon") != -1) {$('#ddnscheckcf').html('on');}
 });
 }
 </script>
