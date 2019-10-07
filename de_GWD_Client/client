@@ -10,6 +10,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 mirrorsite="acccmi.cf/gwd"
 
 
+
 architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
@@ -359,6 +360,10 @@ EOF
 systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
+
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+systemctl mask systemd-resolved
 }
 
 
@@ -426,10 +431,6 @@ sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 
 echo "" > /etc/pihole/adlists.list
 pihole -g
-
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
 }
 
 
@@ -574,6 +575,7 @@ installv2ray
 installiptablesproxy
 
 installpihole
+
 piholesetting
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
