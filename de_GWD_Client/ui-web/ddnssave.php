@@ -1,15 +1,12 @@
 <?php require_once('auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-$wanIP = $_GET['wanIP'];
 $CFdomain = $_GET['CFdomain'];
 $CFzoneid = $_GET['CFzoneid'];
 $CFapikey = $_GET['CFapikey'];
 $CFemail = $_GET['CFemail'];
 
 $ddnstxt = fopen("ddns.txt", "w");
-$txt = "$wanIP\n";
-fwrite($ddnstxt, $txt);
 $txt = "$CFdomain\n";
 fwrite($ddnstxt, $txt);
 $txt = "$CFzoneid\n";

@@ -1,10 +1,13 @@
 #!/bin/bash
-wanIP=$(awk 'NR==1{print}' /var/www/html/ddns.txt)
-CFdomain=$(awk 'NR==2{print}' /var/www/html/ddns.txt)
-CFzoneid=$(awk 'NR==3{print}' /var/www/html/ddns.txt)
-CFapikey=$(awk 'NR==4{print}' /var/www/html/ddns.txt)
-CFemail=$(awk 'NR==5{print}' /var/www/html/ddns.txt)
-CFdomainid=$(awk 'NR==6{print}' /var/www/html/ddns.txt)
+/usr/local/bin/ui-ddnsgetip
+
+wanIP=$(awk 'NR==1{print}' /tmp/wanip)
+
+CFdomain=$(awk 'NR==1{print}' /var/www/html/ddns.txt)
+CFzoneid=$(awk 'NR==2{print}' /var/www/html/ddns.txt)
+CFapikey=$(awk 'NR==3{print}' /var/www/html/ddns.txt)
+CFemail=$(awk 'NR==4{print}' /var/www/html/ddns.txt)
+CFdomainid=$(awk 'NR==5{print}' /var/www/html/ddns.txt)
 CFdomainip=$(dig $CFdomain -p 5380 | sed -n '/ANSWER SECTION:/{N;p}' | sed -n '2p' | awk '{print$5}')
 
 if [[ "$wanIP" != "$CFdomainip" ]]; then

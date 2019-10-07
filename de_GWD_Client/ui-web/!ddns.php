@@ -107,7 +107,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Wan IP</span>
         </div>
-          <span id="wanIP" class="form-control text-center"><?php echo exec("awk 'NR==1{print}' /tmp/wanip"); ?></span>
+          <span class="form-control text-center"><?php echo exec("awk 'NR==1{print}' /tmp/wanip"); ?></span>
       </div>
 
       <div class="col-md-6 input-group ml-auto mr-auto mb-4">
@@ -135,14 +135,14 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">域名</span>
         </div>
-          <input type="text" id="CFdomain" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/ddns.txt"); ?>">
       </div>
 
       <div class="col-md-6 input-group">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Zone ID</span>
         </div>
-          <input type="text" id="CFzoneid" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFzoneid" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/ddns.txt"); ?>">
       </div>
     </div>
 
@@ -151,14 +151,14 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF API KEY</span>
         </div>
-          <input type="text" id="CFapikey" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFapikey" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/ddns.txt"); ?>">
       </div>
 
       <div class="col-md-6 input-group">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF E-mail</span>
         </div>
-          <input type="text" id="CFemail" class="form-control" value="<?php echo exec("awk 'NR==5{print}' /var/www/html/ddns.txt"); ?>">
+          <input type="text" id="CFemail" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/ddns.txt"); ?>">
       </div>
     </div>
   </div>
@@ -191,12 +191,11 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
   <!-- /#wrapper -->
 <script> 
 function submitddns(){
-wanip=$('#wanIP').text();
 cfdomain=$('#CFdomain').val();
 cfzoneid=$('#CFzoneid').val();
 cfapikey=$('#CFapikey').val();
 cfemail=$('#CFemail').val();
-$.get('ddnssave.php', {wanIP:wanip, CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
+$.get('ddnssave.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
 }
 
 function stopddns(){
