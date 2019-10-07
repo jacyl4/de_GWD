@@ -364,6 +364,8 @@ systemctl enable iptables-proxy
 systemctl stop systemd-resolved
 systemctl disable systemd-resolved
 systemctl mask systemd-resolved
+
+rm -rf /etc/resolv.conf
 }
 
 
