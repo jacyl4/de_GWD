@@ -682,11 +682,17 @@ blue "-------------------"
 
 
 updategwd(){
-domain=$(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f1)
-port=$(awk 'NR==1{print}' /var/www/html/domain.txt | cut -d : -f2)
-uuidnum=$(awk 'NR==1{print}' /var/www/html/uuid.txt)
-v2path=$(awk 'NR==1{print}' /var/www/html/path.txt)
-doh=$(awk 'NR==1{print}' /var/www/html/domain.txt)
+port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
+
+result=$(echo $port | grep '^[0-9]\+$')
+if [[ $result = "" ]]; then
+port="443"
+fi
+
+domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
+uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
+v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+doh=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1)
 
 cd ~
 
