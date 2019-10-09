@@ -366,6 +366,10 @@ systemctl disable systemd-resolved
 systemctl mask systemd-resolved
 
 rm -rf /etc/resolv.conf
+
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+EOF
 }
 
 
@@ -399,10 +403,6 @@ sudo curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automate
 
 
 function piholesetting(){
-cat > /etc/resolv.conf << EOF
-nameserver 127.0.0.1
-EOF
-  
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=5390
