@@ -7,8 +7,6 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-apt update && apt upgrade -y
-
 apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
 
 source /etc/profile
@@ -107,7 +105,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+sudo curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
@@ -814,6 +812,27 @@ installgwd(){
     green " 输入此VPS的域名(不加www开头)"
     green "=============================="
     read vpsdomain
+
+if [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "buster" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://deb.debian.org/debian/ buster main
+deb-src http://deb.debian.org/debian/ buster main
+deb http://security.debian.org/debian-security buster/updates main
+deb-src http://security.debian.org/debian-security buster/updates main
+deb http://deb.debian.org/debian/ buster-updates main
+deb-src http://deb.debian.org/debian/ buster-updates main
+EOF
+elif [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "stretch" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://deb.debian.org/debian/ stretch main
+deb-src http://deb.debian.org/debian/ stretch main
+deb http://security.debian.org/debian-security stretch/updates main
+deb-src http://security.debian.org/debian-security stretch/updates main
+deb http://deb.debian.org/debian/ stretch-updates main
+deb-src http://deb.debian.org/debian/ stretch-updates main
+EOF
+fi
+apt update && apt upgrade -y
 
 cd ~
 preinstall

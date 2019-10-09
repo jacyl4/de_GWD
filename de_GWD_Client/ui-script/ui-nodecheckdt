@@ -1,10 +1,11 @@
 #!/bin/bash
-port=$(awk '/port/' /etc/vtrui/config.json | awk 'NR==7{print$2}' | cut -d , -f1)
+port=$(jq '.outbounds[2].settings.vnext[0].port' /etc/vtrui/config.json)
+domain=$(jq -r '.outbounds[2].settings.vnext[0].address' /etc/vtrui/config.json)
 
-if [[ $port == "443" ]]; then
-cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==4{print}')/=" > /tmp/nodecheckdt
-cat /var/www/html/domain.txt | cut -d . -f1 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==4{print}' | cut -d . -f1)/=" >> /tmp/nodecheckdt
-sort /tmp/nodecheckdt | uniq -d
+if [[ "$port" -eq "443" ]]; then
+nodecheck=$domain
 else
-sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==4{print}'):$port/=" /var/www/html/domain.txt
+nodecheck=$domain:$port
 fi
+
+sed -n -e "/$nodecheck/=" /var/www/html/domain.txt

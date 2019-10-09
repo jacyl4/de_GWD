@@ -316,7 +316,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo shell_exec('awk "/source/" /etc/vtrui/config.json | cut -d"\"" -f4'); ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo exec("jq -r '.routing.rules[3].source[]' /etc/vtrui/config.json | xargs"); ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>

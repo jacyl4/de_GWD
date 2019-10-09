@@ -1,4 +1,14 @@
 #!/bin/bash
-sed -i '/{"address": "127.0.0.1","port": 5380, "domains":/c\{"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }' /etc/vtrui/config.json
+read -d '' gfwl << EOF
+[
+{"address": "127.0.0.1","port": 5390},
+{"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }
+]
+EOF
+
+
+jq --argjson gfwl "$gfwl" '.dns.servers = $gfwl'  /etc/vtrui/config.json > /etc/vtrui/temp.json
+
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui

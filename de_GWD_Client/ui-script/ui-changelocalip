@@ -1,8 +1,12 @@
 #!/bin/bash
-localip="$(awk 'NR==1{print}' /var/www/html/localip.txt)"
+localip=$(cat /var/www/html/localip.txt)
 
-sed -i '/"source":/c\"source": [ "'$localip'" ],' /etc/vtrui/config.json
+jq 'del(.routing.rules[3].source[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+for localippre in $(echo "$localip" | xargs -n1); do
+jq --arg localippre $localippre '.routing.rules[3].source+=[$localippre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+done
 
-rm -rf /var/www/html/localip.txt
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui
+rm -rf /var/www/html/localip.txt

@@ -217,6 +217,7 @@ wget -N https://$mirrorsite/vtpre.zip
 unzip vtpre.zip
 mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
 mv -f ~/vtpre/geosite.dat /usr/bin/vtrui/geosite.dat
+mv -f ~/vtpre/h2y.dat /usr/bin/vtrui/h2y.dat
 mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
 rm -rf ~/vtpre*
 

@@ -1,13 +1,14 @@
 #!/bin/bash
-mainport=$(awk '/port/' /etc/vtrui/config.json | awk 'NR==5{print$2}' | cut -d , -f1)
+port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 
-if [[ $mainport == 443 ]]; then
-cat /var/www/html/domain.txt | cut -d : -f2 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==2{print}')/=" > /tmp/nodecheck
-cat /var/www/html/domain.txt | cut -d . -f1 2>&1 | sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==2{print}' | cut -d . -f1)/=" >> /tmp/nodecheck
-nodenum=$(sort /tmp/nodecheck | uniq -d)
-else
-nodenum=$(sed -n -e "/$(sed -n -e '/"address": "/p' /etc/vtrui/config.json | awk -F'"' '{print$4}' | awk 'NR==2{print}'):$port/=" /var/www/html/domain.txt)
+result=$(echo $port | grep '^[0-9]\+$')
+if [[ $result = "" ]]; then
+port="443"
 fi
+
+domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
+uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
+v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
 cat > /etc/vtrui/config.json << EOF
 {
@@ -152,8 +153,7 @@ cat > /etc/vtrui/config.json << EOF
   ],
   "dns": {"servers": [
     {"address": "127.0.0.1","port": 5390},
-    {"address": "127.0.0.1","port": 5390, "domains": ["geosite:cn"] },
-    {"address": "127.0.0.1","port": 5380, "domains": ["geosite:geolocation-!cn"] }
+    {"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }
                      ]},
   "routing": {
     "domainStrategy": "IPIfNonMatch",
@@ -191,25 +191,25 @@ cat > /etc/vtrui/config.json << EOF
 }
 EOF
 
-domain=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f1)
-port=$(awk "NR==$nodenum{print}" /var/www/html/domain.txt | cut -d : -f2)
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
+jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
+jq --arg domain "$domain" '.outbounds[1].settings.vnext[0].address=$domain' |\
+jq --argjson port "$port" '.outbounds[1].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
+jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' |\
+jq --arg domain "$domain" '.outbounds[2].settings.vnext[0].address=$domain' |\
+jq --argjson port "$port" '.outbounds[2].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[2].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[2].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[2].streamSettings.wsSettings.headers.Host=$domain' |\
+jq --arg domain "$domain" '.outbounds[2].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-if [[ $port =~ ^[1-9]+$ ]]; then
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==6{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==7{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
-else
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==6{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==7{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
-fi
-
-sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==3{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==4{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
-sed -i '/"id":/c\"id": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/uuid.txt)'",'  /etc/vtrui/config.json
-sed -i '/"serverName":/c\"serverName": "'$domain'",'  /etc/vtrui/config.json
-sed -i '/"path":/c\"path": "'$(awk 'NR=='$nodenum'{print}' /var/www/html/path.txt)'",'  /etc/vtrui/config.json
-sed -i '/"Host":/c\"Host": "'$domain'"'  /etc/vtrui/config.json
+systemctl restart vtrui
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php
