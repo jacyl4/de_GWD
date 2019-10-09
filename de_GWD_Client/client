@@ -472,7 +472,6 @@ rm -rf /var/log/*1*
 rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
 rm -rf /var/www/html/log.log
-rm -rf /tmp/nodecheck*
 EOF
 chmod +x /usr/local/bin/clearcache
 /usr/local/bin/clearcache
