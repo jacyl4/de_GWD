@@ -216,22 +216,21 @@ EOF
 wget -N https://$mirrorsite/vtpre.zip
 unzip vtpre.zip
 mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
-mv -f ~/vtpre/geosite.dat /usr/bin/vtrui/geosite.dat
-mv -f ~/vtpre/h2y.dat /usr/bin/vtrui/h2y.dat
 mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
 rm -rf ~/vtpre*
 
-if [[ $port =~ ^[1-9]+$ ]]; then
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "$port",/" /etc/vtrui/config.json
-else
-sed -i "$(sed -n -e '/"port":/=' /etc/vtrui/config.json | awk 'NR==5{print}')s/.*/"'"port"'": "443",/" /etc/vtrui/config.json
+result=$(echo $port | grep '^[0-9]\+$')
+if [[ $result = "" ]]; then
+port="443"
 fi
 
-sed -i "$(sed -n -e '/"address":/=' /etc/vtrui/config.json | awk 'NR==2{print}')s/.*/"'"address"'": "'"'$domain'"'",/" /etc/vtrui/config.json
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
-sed -i '/"serverName":/c\"serverName": "'$domain'",' /etc/vtrui/config.json
-sed -i '/"path":/c\"path": "'$v2path'",' /etc/vtrui/config.json
-sed -i '/"Host":/c\"Host": "'$domain'"' /etc/vtrui/config.json
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
+jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
 
 systemctl daemon-reload
 systemctl restart vtrui
@@ -512,6 +511,11 @@ installgwd(){
     read gatewayaddr
 
     green "==============="
+    green "DOH域名"
+    green "==============="
+    read doh
+
+    green "==============="
     green "v2ray节点域名"
     green "==============="
     read v2servn
@@ -528,7 +532,6 @@ installgwd(){
 
 domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
-doh=$v2servn
 
 cat > /etc/resolv.conf << EOF
 nameserver 119.29.29.29
