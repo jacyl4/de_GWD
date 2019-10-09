@@ -217,8 +217,8 @@ EOF
 
 wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
 
-sed -i '/"id":/c\"id": "'$uuidnum'",'  /etc/vtrui/config.json
-sed -i '/"path":/c\"path": "'$v2path'"'  /etc/vtrui/config.json
+jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/vtrui/config.json |\
+jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl daemon-reload
 systemctl restart vtrui
@@ -813,6 +813,11 @@ installgwd(){
     green "=============================="
     read vpsdomain
 
+cat > /etc/resolv.conf << EOF
+nameserver 1.1.1.1
+nameserver 1.0.0.1
+EOF
+
 if [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "buster" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://deb.debian.org/debian/ buster main
@@ -1069,7 +1074,7 @@ systemctl enable php7.3-fpm
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 
-v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
 nginxnextcloudconf
 
@@ -1169,7 +1174,7 @@ changedomain(){
     green "=============================="
     read vpsdomain
 
-v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
 rm -rf /var/www/ssl
 
@@ -1210,8 +1215,8 @@ sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{prin
 
 systemctl restart nginx
 
-sed -i "$(sed -n -e '/"id":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"id"'": "'"'$nuuid'"'",/" /etc/vtrui/config.json
-sed -i "$(sed -n -e '/"path":/=' /etc/vtrui/config.json | awk 'NR==1{print}')s/.*/"'"path"'": "'"\'$npath'"'"/" /etc/vtrui/config.json
+jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /etc/vtrui/config.json |\
+jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui
 blue "--------------------------"
@@ -1226,6 +1231,7 @@ changev2rayupstream(){
     green "Y.修改上级跃点 / N.删除上级跃点"
     green "==============================="
     read v2rayupstreamyn
+
 if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 
@@ -1255,8 +1261,7 @@ cat >> /etc/vtrui/config.json << EOF
       "users": [{
         "id": "$upstreamuuid",
         "level": 1,
-        "alterId": 64,
-        "security": "none"
+        "alterId": 32
         }]
       }]},
     "streamSettings": {
@@ -1321,19 +1326,16 @@ cd ~
 preinstall
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
-uuidnum=$(awk "/id/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
-v2path=$(awk "/path/" /etc/vtrui/config.json | awk 'NR==1{print}' | cut -d '"' -f 4)
+uuidnum=$(jq -r '.inbounds[0].settings.clients[0].id' /etc/vtrui/config.json)
+v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-jq -r .inbounds[].settings.clients[].id /etc/vtrui/config.json > /tmp/v2uuid
+v2uuids=$(jq -r '.inbounds[].settings.clients[].id' /etc/vtrui/config.json)
 
 {
-for v2uuid in $(cat /tmp/v2uuid); do
-  echo '{"id": "'$v2uuid'", "level": 1, "alterId": 32},'
+for v2uuid in $v2uuids; do
+echo '{"id": "'$v2uuid'", "level": 1, "alterId": 32}'
 done
-} > /tmp/v2uuidpre
-
-sed -i '$s/.$//' /tmp/v2uuidpre
-sed -i ":a;N;s/\n//g;ta" /tmp/v2uuidpre
+} > /tmp/v2uuid
 
 installdoh
 
@@ -1341,22 +1343,18 @@ systemctl stop vtrui
 
 installv2ray
 
-jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /tmp/v2js
+jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
-v2uuidpre=$(cat /tmp/v2uuidpre)
+cat /tmp/v2uuid | while read line
+do
+jq --argjson v2uuid "$line" '.inbounds[0].settings.clients+=[$v2uuid]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+done
 
-jq --arg v2uuidpre "$v2uuidpre" '.inbounds[0].settings.clients += [$v2uuidpre]' /tmp/v2js > /etc/vtrui/config.json
-
-sed -i 's/\\//g' /etc/vtrui/config.json
-
-sed -i '/"id":/s/^ *//' /etc/vtrui/config.json
-sed -i '/"id":/s/^.//' /etc/vtrui/config.json
-sed -i '/"id":/s/.$//' /etc/vtrui/config.json
-
-rm -rf /tmp/v2uuid*
-rm -rf /tmp/v2js
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui
+
+rm -rf /tmp/v2uuid
 
 nginxconf
 
