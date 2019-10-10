@@ -402,6 +402,7 @@ git clone --depth 1 https://github.com/pi-hole/pi-hole.git
 cd "pi-hole/automated install/"
 sudo bash basic-install.sh --unattended
 cd ~
+rm -rf ~/pi-hole
 }
 
 
