@@ -398,7 +398,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-sudo curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+sudo curl -sSLk https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 }
 
 
