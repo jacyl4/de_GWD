@@ -159,11 +159,11 @@ Before=nss-lookup.target
 Wants=nss-lookup.target
 
 [Service]
+Type=simple
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 LimitNOFILE=1000000
 Restart=always
 RestartSec=3
-Type=simple
 
 [Install]
 WantedBy=multi-user.target
@@ -206,8 +206,8 @@ Wants=network.target
 Type=simple
 PIDFile=/run/vtrui.pid
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+Restart=always
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
@@ -350,9 +350,9 @@ Wants=network.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 ExecStart=/usr/local/bin/iptables-proxy-up
 ExecStop=/usr/local/bin/iptables-proxy-down
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
