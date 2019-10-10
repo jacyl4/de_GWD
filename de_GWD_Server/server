@@ -748,16 +748,20 @@ EOF
 function postinstall(){
 cat > /usr/local/bin/autoupdate << "EOF"
 #!/bin/bash
-wget -O ~/server https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server
-sed -i '$d' ~/server
-echo "updategwd" >>  ~/server
-chmod +x ~/server
-~/server
+wget -O ~/serverauto https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server
+
+sed -i '$d' ~/serverauto
+
+echo "updategwd" >>  ~/serverauto
+
+chmod +x ~/serverauto
+~/serverauto
 
 crontab -l > ~/now.cron
 sed -i '/auto/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
+rm -rf ~/serverauto
 EOF
 chmod +x /usr/local/bin/autoupdate
 
