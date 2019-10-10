@@ -84,6 +84,7 @@ sudo sysctl -p
 
 
 function installpihole(){
+cd ~
 mkdir -p /etc/pihole
 
 cat > /etc/pihole/setupVars.conf << EOF
@@ -105,7 +106,11 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-sudo curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+git clone --depth 1 https://github.com/pi-hole/pi-hole.git
+cd "pi-hole/automated install/"
+sudo bash basic-install.sh --unattended
+cd ~
+rm -rf ~/pi-hole
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
