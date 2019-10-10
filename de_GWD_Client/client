@@ -235,7 +235,6 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 systemctl daemon-reload
 systemctl restart vtrui
 systemctl enable vtrui
-cd ~
 }
 
 
@@ -375,6 +374,7 @@ EOF
 
 
 function installpihole(){
+cd ~
 rm -rf /var/www/html/admin
 
 mkdir -p /etc/pihole
@@ -398,7 +398,10 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-sudo curl -sSLk https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+git clone --depth 1 https://github.com/pi-hole/pi-hole.git
+cd "pi-hole/automated install/"
+sudo bash basic-install.sh --unattended
+cd ~
 }
 
 
