@@ -775,6 +775,11 @@ cat > /usr/local/bin/updateGWD << "EOF"
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
+rm -rf ~/server
+rm -rf /var/log/*1
+rm -rf /var/log/*2
+rm -rf /var/log/*gz
+
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
 remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
 
@@ -785,11 +790,6 @@ echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 fi
-
-rm -rf ~/server
-rm -rf /var/log/*1
-rm -rf /var/log/*2
-rm -rf /var/log/*gz
 EOF
 chmod +x /usr/local/bin/updateGWD
 /usr/local/bin/updateGWD
