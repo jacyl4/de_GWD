@@ -127,13 +127,9 @@ pihole restartdns
 echo "" > /etc/pihole/adlists.list
 pihole -g
 
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
+systemctl mask systemd-resolved --now
 
-systemctl stop dhcpcd
-/lib/systemd/systemd-sysv-install disable dhcpcd
-systemctl mask dhcpcd
+systemctl mask dhcpcd --now
 }
 
 
@@ -184,8 +180,7 @@ Type=simple
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl restart doh-server
-systemctl enable doh-server
+systemctl enable doh-server --now
 cd ~
 }
 
@@ -226,8 +221,7 @@ jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl daemon-reload
-systemctl restart vtrui
-systemctl enable vtrui
+systemctl enable vtrui --now
 }
 
 
@@ -889,8 +883,7 @@ nginxwebconf
 mkdir -p /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
 systemctl daemon-reload
-systemctl restart nginx
-systemctl enable nginx
+systemctl enable nginx --now
 
 postinstall
 
@@ -1079,8 +1072,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl restart php7.3-fpm
-systemctl enable php7.3-fpm
+systemctl enable php7.3-fpm --now
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 

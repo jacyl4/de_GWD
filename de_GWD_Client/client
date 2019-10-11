@@ -98,7 +98,6 @@ fi
 
 function installdoh(){
 systemctl stop doh-client
-systemctl disable doh-client
 rm -rf ~/dns-over-https
 rm -rf /usr/local/bin/doh-client
 rm -rf /usr/local/bin/doh-server
@@ -170,8 +169,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl restart doh-client
-systemctl enable doh-client
+systemctl enable doh-client --now
 }
 
 
@@ -233,8 +231,7 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 
 
 systemctl daemon-reload
-systemctl restart vtrui
-systemctl enable vtrui
+systemctl enable vtrui --now
 }
 
 
@@ -359,12 +356,9 @@ EOF
 
 systemctl daemon-reload
 
-systemctl restart iptables-proxy
-systemctl enable iptables-proxy
+systemctl enable iptables-proxy --now
 
-systemctl stop systemd-resolved
-systemctl disable systemd-resolved
-systemctl mask systemd-resolved
+systemctl mask systemd-resolved --now
 
 rm -rf /etc/resolv.conf
 
