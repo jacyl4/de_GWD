@@ -356,7 +356,9 @@ RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 EOF
+
 systemctl daemon-reload
+
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
