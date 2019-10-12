@@ -316,7 +316,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo exec("jq -r '.routing.rules[3].source[]' /etc/vtrui/config.json | xargs"); ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo exec("jq -r '.routing.rules[5].source[]' /etc/vtrui/config.json | xargs"); ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
@@ -443,8 +443,8 @@ $.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
 };
 
 function proxyon(){
-    $.get('proxyon.php', function(result){});
-    alert ('正在重启代理，耐心等待');
+alert("确认重启代理进程");
+$.get('proxyon.php', function(result){ location.reload(); });
 };
 
 function pingtest(){

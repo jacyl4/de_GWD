@@ -7,22 +7,20 @@ $listwlan = $_GET['listwlan'];
 
 $listbtxt = fopen("listb.txt", "w");
 $txt = "$listb\n";
-fwrite($listbtxt, "");
 fwrite($listbtxt, $txt);
 fclose($listbtxt);
 
 $listwtxt = fopen("listw.txt", "w");
 $txt = "$listw\n";
-fwrite($listwtxt, "");
 fwrite($listwtxt, $txt);
 fclose($listwtxt);
 
 $listwlantxt = fopen("listwlan.txt", "w");
 $txt = "$listwlan\n";
-fwrite($listwlantxt, "");
 fwrite($listwlantxt, $txt);
 fclose($listwlantxt);
 
-shell_exec('sudo systemctl restart iptables-proxy');
+exec('sudo /usr/local/bin/ui-listbw');
+exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

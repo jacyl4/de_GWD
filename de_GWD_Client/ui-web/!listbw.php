@@ -112,8 +112,8 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">
-            黑名单<br>
-          （走国外线路）<br>
+            黑名单域名<br>
+          （走国外解析）<br>
             </span>
           </div>
             <textarea id="listb" class="form-control" aria-label="listb" rows="11"><?php echo shell_exec("cat /var/www/html/listb.txt"); ?></textarea>
@@ -124,8 +124,8 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">
-            白名单<br>
-          （走国内线路）<br>
+            白名单域名<br>
+          （走国内解析）<br>
             </span>
           </div>
             <textarea id="listw" class="form-control" aria-label="listw" rows="11"><?php echo shell_exec("cat /var/www/html/listw.txt"); ?></textarea>
@@ -136,7 +136,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">
-            内网设备白名单<br>
+            内网设备白名单IP<br>
           （走国内线路）<br>
             </span>
           </div>
@@ -148,11 +148,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 <span class="float-left text-secondary">
   <small>
 注：<br>
-应用后，需等待数秒生效，因重整所有的线路规则。<br>
-尽量填写ip，域名也是解析到ip来实现的，有些域名会有cdn加速，就不会太好用。<br>
-一行一个地址，格式如下：<br>
-163.163.163.163<br>
-domain.com<br>
+一行一个地址<br>
   </small>
 </span>
 
@@ -165,7 +161,7 @@ function submitlistbw () {
 listb=$("#listb").val();
 listw=$("#listw").val();
 listwlan=$("#listwlan").val();
-$.get("listbwsave.php", {listb:listb, listw:listw, listwlan:listwlan}, function(result){});
+$.get("listbwsave.php", {listb:listb, listw:listw, listwlan:listwlan}, function(result){ location.reload(); });
 alert("黑白名单已提交");
 }
 </script>

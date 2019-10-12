@@ -1,0 +1,25 @@
+#!/bin/bash
+listb=$(cat /var/www/html/listb.txt)
+listw=$(cat /var/www/html/listw.txt)
+
+jq 'del(.routing.rules[1].domain[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+
+if [[ ! -n "$listb" ]]; then
+	jq '.routing.rules[1].domain=["google.com"]' /etc/vtrui/temp.json > /etc/vtrui/config.json
+else
+	for listbpre in $(echo "$listb" | xargs -n1); do
+	jq --arg listbpre $listbpre '.routing.rules[1].domain+=[$listbpre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+	done
+	mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+fi
+
+jq 'del(.routing.rules[2].domain[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+
+if [[ ! -n "$listw" ]]; then
+	jq '.routing.rules[2].domain=["baidu.com"]' /etc/vtrui/temp.json > /etc/vtrui/config.json
+else
+	for listwpre in $(echo "$listw" | xargs -n1); do
+	jq --arg listwpre $listwpre '.routing.rules[2].domain+=[$listwpre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+	done
+	mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+fi

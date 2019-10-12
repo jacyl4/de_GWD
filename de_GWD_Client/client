@@ -245,7 +245,6 @@ ipset -X chnroute
 ipset -X lanip
 ipset -X listwlan
 ipset -X listw
-ipset -X listb
 
 lanip="0.0.0.0/8 \
 100.64.0.0/10 \
@@ -284,10 +283,6 @@ done
 ipset add listw $(awk "NR==$(echo $[$(sed -n -e '/doh/=' /etc/hosts) + 1]){print}" /etc/hosts | cut -d " " -f1)
 ipset add listw $(awk "NR==$(echo $[$(sed -n -e '/doh/=' /etc/hosts) + 2]){print}" /etc/hosts | cut -d " " -f1)
 
-ipset -N listb hash:net maxelem 65535
-for iplistb in $(cat /var/www/html/listb.txt); do
-  ipset add listb $iplistb
-done
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local default dev lo table 100
@@ -295,7 +290,6 @@ ip route add local default dev lo table 100
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
@@ -336,7 +330,6 @@ ipset -F chnroute
 ipset -F lanip
 ipset -F listwlan
 ipset -F listw
-ipset -F listb
 EOF
 chmod +x /usr/local/bin/iptables-proxy-down
 
