@@ -169,7 +169,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable doh-client --now
+systemctl restart doh-client
+systemctl enable doh-client
 }
 
 
@@ -231,7 +232,8 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 
 
 systemctl daemon-reload
-systemctl enable vtrui --now
+systemctl restart vtrui
+systemctl enable vtrui
 }
 
 
@@ -355,8 +357,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-
-systemctl enable iptables-proxy --now
+systemctl restart iptables-proxy
+systemctl enable iptables-proxy
 
 systemctl mask systemd-resolved --now
 
