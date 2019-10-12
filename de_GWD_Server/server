@@ -782,7 +782,7 @@ remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_
 if [[ $localver < $remotever ]]; then
 crontab -l > ~/now.cron
 sed -i '/autoupdate/d' ~/now.cron
-echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
+echo '30 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 fi
@@ -792,7 +792,7 @@ chmod +x /usr/local/bin/updateGWD
 
 crontab -l > now.cron
 if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-echo '0 */4 * * * /usr/local/bin/updateGWD' >> now.cron
+echo '0 */2 * * * /usr/local/bin/updateGWD' >> now.cron
 fi
 crontab now.cron
 rm -rf now.cron
