@@ -12,5 +12,6 @@ fwrite($dohtxt, $txt);
 fclose($dohtxt);
 
 shell_exec('sudo /usr/local/bin/ui-changedoh');
+shell_exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>
