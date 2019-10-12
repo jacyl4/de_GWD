@@ -1,6 +1,9 @@
 #!/bin/bash
-listb=$(cat /var/www/html/listb.txt)
-listw=$(cat /var/www/html/listw.txt)
+listb=$(cat /var/www/html/listb.txt | xargs echo -n | xargs -n1)
+listw=$(cat /var/www/html/listw.txt | xargs echo -n | xargs -n1)
+
+echo "$listb" > /var/www/html/listb.txt
+echo "$listw" > /var/www/html/listw.txt
 
 jq 'del(.routing.rules[1].domain[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
