@@ -116,14 +116,14 @@ cat > /etc/vtrui/config.json << EOF
   ],
   "dns": {"servers": [
     {"address": "127.0.0.1","port": 5390},
+    {"address": "127.0.0.1","port": 5390, "domains": ["domain:baidu.com"] },
+    {"address": "127.0.0.1","port": 5380, "domains": ["domain:google.com"] },
     {"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }
                      ]},
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules": [
       { "type": "field", "inboundTag": ["dnsin"], "outboundTag": "dnsout" },
-      { "type": "field", "domain": [ "google.com" ], "outboundTag": "proxy" },
-      { "type": "field", "domain": [ "baidu.com" ], "outboundTag": "direct" },
       { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" },
       {
         "type": "field",
