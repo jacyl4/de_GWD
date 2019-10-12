@@ -180,7 +180,8 @@ Type=simple
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable doh-server --now
+systemctl restart doh-server
+systemctl enable doh-server
 cd ~
 }
 
@@ -221,7 +222,8 @@ jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl daemon-reload
-systemctl enable vtrui --now
+systemctl restart vtrui
+systemctl enable vtrui
 }
 
 
@@ -883,7 +885,8 @@ nginxwebconf
 mkdir -p /etc/systemd/system/nginx.service.d
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
 systemctl daemon-reload
-systemctl enable nginx --now
+systemctl restart nginx
+systemctl enable nginx
 
 postinstall
 
@@ -1072,7 +1075,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable php7.3-fpm --now
+systemctl restart php7.3-fpm
+systemctl enable php7.3-fpm
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
 
