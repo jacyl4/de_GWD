@@ -524,7 +524,6 @@ installgwd(){
     green "==============="
     read v2path
 
-cd ~
 if [[ $architecture = "amd64" ]] && [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "buster" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.aliyun.com/debian buster main contrib non-free
@@ -543,10 +542,10 @@ fi
 
 apt update && apt upgrade -y
 
+preinstall
+
 domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
-
-preinstall
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
