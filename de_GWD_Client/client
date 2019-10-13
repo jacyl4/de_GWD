@@ -365,7 +365,6 @@ EOF
 
 
 function installpihole(){
-cd ~
 rm -rf /var/www/html/admin
 
 mkdir -p /etc/pihole
@@ -389,11 +388,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-git clone --depth 1 https://github.com/pi-hole/pi-hole.git
-cd "pi-hole/automated install/"
-sudo bash basic-install.sh --unattended
-cd ~
-rm -rf ~/pi-hole
+sudo curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 }
 
 
