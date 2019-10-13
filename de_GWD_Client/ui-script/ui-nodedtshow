@@ -17,7 +17,7 @@ cat > /etc/vtrui/config.json << EOF
    "port": 53,
    "tag": "dnsin",
    "protocol": "dokodemo-door",
-   "settings": {"address": "", "port": 5390, "network": "tcp,udp"}
+   "settings": {"address": "0.0.0.0", "port": 5390, "network": "tcp,udp"}
     },
     {
     "port": 9897,
