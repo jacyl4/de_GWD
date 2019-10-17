@@ -8,8 +8,8 @@ doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 
-doh1ip=$(nslookup $(echo -e $doh1 | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
-doh2ip=$(nslookup $(echo -e $doh2 | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+doh1ip=$(nslookup $(echo $doh1 | cut -d : -f1) 119.29.29.29| awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+doh2ip=$(nslookup $(echo $doh2 | cut -d : -f1) 119.29.29.29| awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i '/doh/,$d' /etc/hosts
 cat >> /etc/hosts << EOF
@@ -18,8 +18,5 @@ $doh1ip $doh1
 $doh2ip $doh2
 EOF
 
-ipset add listw $doh1ip
-ipset add listw $doh2ip
-
 systemctl restart doh-client
-rm -rf /var/www/html/doh.txt
+systemctl restart iptables-proxy
