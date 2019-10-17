@@ -75,7 +75,7 @@
       <li class="nav-item">
         <a class="nav-link" href="!ddns.php">
           <i class="fas fa-fw fa-ethernet"></i>
-          <span>DDNS</span></a>
+          <span>DDNS & WireGuard</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#" onclick="logout()">

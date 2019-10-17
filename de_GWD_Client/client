@@ -9,6 +9,8 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 mirrorsite="acccmi.cf/gwd"
 
+mirrorsiteip="172.247.127.156"
+
 
 
 architecture=""
@@ -20,7 +22,7 @@ esac
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git build-essential subversion jq
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq
 
 source /etc/profile
 
@@ -86,7 +88,7 @@ net.core.netdev_max_backlog = 32768
 net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 EOF
-sudo sysctl -p
+sysctl -p
 
 if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
@@ -123,10 +125,14 @@ mkdir -p /etc/dns-over-https/
 wget -O /etc/dns-over-https/doh-client.conf https://$mirrorsite/doh-client.conf
 
 doh_upstream='url = "https:\/\/'$doh'\/dq"'
+
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream/" /etc/dns-over-https/doh-client.conf
-dohip=$(nslookup $(echo -e $doh | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+
+dohip=$(nslookup $(echo $doh | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+
 sed -i '/doh/,$d' /etc/hosts
+
 cat >> /etc/hosts << EOF
 #doh static dns
 $dohip $doh
@@ -134,6 +140,7 @@ $dohip $doh
 EOF
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
+
 cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
 #!/bin/bash
 case "$2" in
@@ -290,7 +297,10 @@ ip route add local default dev lo table 100
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-
+iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
@@ -316,9 +326,6 @@ cat > /usr/local/bin/iptables-proxy-down << EOF
 #!/bin/bash
 systemctl stop vtrui
 
-ip route flush table 100
-ip rule delete fwmark 0x9
-
 iptables -t nat -F
 iptables -t nat -X
 iptables -t mangle -F
@@ -330,6 +337,9 @@ ipset -F chnroute
 ipset -F lanip
 ipset -F listwlan
 ipset -F listw
+
+ip route flush table 100
+ip rule del fwmark 0x9
 EOF
 chmod +x /usr/local/bin/iptables-proxy-down
 
@@ -354,12 +364,6 @@ systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
 systemctl mask systemd-resolved --now
-
-rm -rf /etc/resolv.conf
-
-cat > /etc/resolv.conf << EOF
-nameserver 127.0.0.1
-EOF
 }
 
 
@@ -388,7 +392,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-sudo curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 }
 
 
@@ -396,6 +400,10 @@ function piholesetting(){
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=5390
+EOF
+
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
 EOF
 
 pihole restartdns
@@ -427,6 +435,24 @@ pihole -g
 
 
 
+function installwg(){
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
+apt update
+
+apt install -y wireguard qrencode
+
+mkdir -p /etc/wireguard
+cd /etc/wireguard
+
+wg genkey | tee sprivatekey | wg pubkey > spublickey
+wg genkey | tee cprivatekey | wg pubkey > cpublickey
+cd ~
+}
+
+
+
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
@@ -437,7 +463,6 @@ curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4
 
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-
 chnroute=`cat /usr/local/bin/chnroute.txt`
 for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
@@ -484,6 +509,7 @@ rm -rf ~/ui-*
 wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
 
 /usr/local/bin/ui-nodedthide
+/usr/local/bin/ui-changedoh
 }
 
 
@@ -500,11 +526,6 @@ installgwd(){
     read gatewayaddr
 
     green "==============="
-    green "DOH域名"
-    green "==============="
-    read doh
-
-    green "==============="
     green "v2ray节点域名"
     green "==============="
     read v2servn
@@ -518,6 +539,13 @@ installgwd(){
     green "输入path"
     green "==============="
     read v2path
+
+cd ~
+
+cat > /etc/resolv.conf << EOF
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+EOF
 
 if [[ $architecture = "amd64" ]] && [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "buster" ]]; then
 cat > /etc/apt/sources.list << EOF
@@ -539,25 +567,26 @@ apt update && apt upgrade -y
 
 preinstall
 
-domain=$(echo -e $v2servn | cut -d : -f1)
-port=$(echo -e $v2servn | cut -d : -f2)
-
+domain=$(echo $v2servn | cut -d : -f1)
+port=$(echo $v2servn | cut -d : -f2)
+doh=$(echo $v2servn | cut -d : -f1)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+
+sed -i "1i $mirrorsiteip $(echo $mirrorsite | cut -d "/" -f1)" /etc/hosts
+
+installdoh
+
+echo -e $(nslookup $(echo $v2servn | cut -d : -f1) -port=5380 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
 wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
 
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-
 chnroute=`cat /usr/local/bin/chnroute.txt`
 for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/chnrouteset
-
-echo -e $(nslookup $(echo -e $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
-
-installdoh
 
 installv2ray
 
@@ -590,37 +619,21 @@ EOF
 
 pihole restartdns
 
+installwg
+
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-echo -e "$v2servn" > /var/www/html/nodename.txt
-echo -e "$v2servn" > /var/www/html/domain.txt
-echo -e "$uuidnum" > /var/www/html/uuid.txt
-echo -e "$v2path" > /var/www/html/path.txt
+sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
+
+echo "$v2servn" > /var/www/html/nodename.txt
+echo "$v2servn" > /var/www/html/domain.txt
+echo "$v2servn" > /var/www/html/doh.txt
+echo "$v2servn" >> /var/www/html/doh.txt
+echo "$uuidnum" > /var/www/html/uuid.txt
+echo "$v2path" > /var/www/html/path.txt
 chown -R www-data:www-data /var/www/html/*.txt
 
 postinstall
-
-cd ~
-if [[ $architecture = "amd64" ]] && [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "buster" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://deb.debian.org/debian/ buster main
-deb-src http://deb.debian.org/debian/ buster main
-deb http://security.debian.org/debian-security buster/updates main
-deb-src http://security.debian.org/debian-security buster/updates main
-deb http://deb.debian.org/debian/ buster-updates main
-deb-src http://deb.debian.org/debian/ buster-updates main
-EOF
-elif [[ $architecture = "amd64" ]] && [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "stretch" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://deb.debian.org/debian/ stretch main
-deb-src http://deb.debian.org/debian/ stretch main
-deb http://security.debian.org/debian-security stretch/updates main
-deb-src http://security.debian.org/debian-security stretch/updates main
-deb http://deb.debian.org/debian/ stretch-updates main
-deb-src http://deb.debian.org/debian/ stretch-updates main
-EOF
-fi
-apt update && apt upgrade -y
 
 blue "-----------------"
 blue  "安装de_GWD [完毕]"
@@ -688,6 +701,8 @@ installv2ray
 installiptablesproxy
 
 piholesetting
+
+installwg
 
 postinstall
 

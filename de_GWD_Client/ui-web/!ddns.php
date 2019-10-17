@@ -75,7 +75,7 @@
       <li class="nav-item active">
         <a class="nav-link" href="!ddns.php">
           <i class="fas fa-fw fa-ethernet"></i>
-          <span>DDNS</span></a>
+          <span>DDNS & WireGuard</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#" onclick="logout()">
@@ -153,6 +153,46 @@
           </div>
         </div>
 
+
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-ethernet"></i>
+            WireGuard Server
+          <span id="wgcheck" class="badge badge-pill text-success"></span>
+          </div>
+          <div class="card-body">
+
+<span class="float-left text-secondary">
+  <small>
+注：<br>
+需要CloudFlare DDNS开启状态<br>
+需要主路由映射端口9895到de_GWD的地址<br>
+  </small>
+</span>
+
+<span class="float-right">
+  <button type="button" class="btn btn-outline-danger" onclick="wgoff()">关闭</button>
+  <button type="button" class="btn btn-outline-primary" onclick="wgon()">开启</button>
+  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
+</span>
+
+<!-- Modal -->
+<div class="modal fade" id="wgqrpop" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode" class="m-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+          </div>
+        </div>
         <!-- Page Content -->
       </div>
       <!-- /.container-fluid -->
@@ -188,11 +228,25 @@ function stopddns(){
 $.get('ddnsstop.php', function(result){ location.reload() });
 }
 
+function wgoff(){
+$.get('wgoff.php', function(result){ location.reload() });
+}
+
+function wgon(){
+$.get('wgon.php', function(result){ location.reload() });
+}
+
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
 $.get('ddnscheck.php', function(data){
 if (data.indexOf("cfon") != -1) {$('#ddnscheckcf').html('on');}
+});
+$.get('wgcheck.php', function(data){
+if (data.indexOf("on") != -1) {$('#wgcheck').html('on');}
+});
+$.get('wgqrtxt.php', function(data){
+jQuery('#qrcode').qrcode({width: 465,height: 465,correctLevel:0,text: data}); 
 });
 }
 </script>
@@ -211,6 +265,7 @@ if (data.indexOf("cfon") != -1) {$('#ddnscheckcf').html('on');}
 
   <!-- Custom scripts for all pages-->
   <script src="js/sb-admin.min.js"></script>
+  <script src="js/jquery.qrcode.min.js"></script>
 
 </body>
 
