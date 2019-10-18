@@ -623,7 +623,9 @@ EOF
 
 pihole restartdns
 
+if [[ $architecture = "amd64" ]]; then
 installwg
+fi
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
@@ -710,7 +712,9 @@ installiptablesproxy
 
 piholesetting
 
+if [[ $architecture = "amd64" ]]; then
 installwg
+fi
 
 postinstall
 
