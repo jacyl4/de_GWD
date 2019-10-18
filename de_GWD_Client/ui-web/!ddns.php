@@ -184,7 +184,7 @@
         <h5 class="modal-title" >WireGuard客户端 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode" class="m-auto"></div>
+        <div id="qrcode"></div>
       </div>
     </div>
   </div>
@@ -246,7 +246,7 @@ $.get('wgcheck.php', function(data){
 if (data.indexOf("on") != -1) {$('#wgcheck').html('on');}
 });
 $.get('wgqrtxt.php', function(data){
-jQuery('#qrcode').qrcode({width: 465,height: 465,correctLevel:0,text: data}); 
+jQuery('#qrcode').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
 });
 }
 </script>
