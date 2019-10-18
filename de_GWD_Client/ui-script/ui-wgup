@@ -33,3 +33,4 @@ chmod 600 /etc/wireguard/client.conf
 
 systemctl daemon-reload
 systemctl restart wg-quick@wg0
+systemctl enable wg-quick@wg0
