@@ -1,4 +1,4 @@
-1.4.37
+1.5.38
 -
 <?php
 $str= file_get_contents('https://github.com/gwdburst/de_GWD/raw/master/de_GWD_Client/version.php');
