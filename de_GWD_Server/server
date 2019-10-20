@@ -961,34 +961,41 @@ debianx=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
 
 dpkg --configure -a
 
-apt install -y software-properties-common apt-transport-https lsb-release
+apt -y install software-properties-common dirmngr apt-transport-https lsb-release
 
-wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
-echo "deb http://apt.postgresql.org/pub/repos/apt/ $debianx-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
+add-apt-repository 'deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian stretch main'
 
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $debianx main" > /etc/apt/sources.list.d/php7.3.list
 
 apt update && apt -y upgrade
 
-apt autoremove -y
+apt install -y mariadb-server
 
-apt install -y postgresql postgresql-contrib
+mysql_secure_installation
 
-sed -i "/local   all             postgres                                peer/c\local   all             postgres                                trust"  /etc/postgresql/11/main/pg_hba.conf
-/etc/init.d/postgresql restart
+green "再次输入刚创建的MariaDB root用户密码"
+read sqlrootpw
 
-psql -U postgres -w -c "CREATE USER $sqluser WITH PASSWORD '$sqlpw';"
-psql -U postgres -w -c "CREATE DATABASE $sqlname OWNER $sqluser;"
-psql -U postgres -w -c "GRANT ALL PRIVILEGES ON DATABASE $sqlname TO $sqluser;"
+cat > ~/.my.cnf << EOF
+[client]
+user=root
+password=$sqlrootpw
+EOF
 
-sed -i "/local   all             postgres                                trust/c\local   all             postgres                                peer"  /etc/postgresql/11/main/pg_hba.conf
-/etc/init.d/postgresql restart
+mysql -e "create database $sqlname default charset utf8 collate utf8_general_ci;"
+mysql -e "CREATE USER '$sqluser'@'localhost' IDENTIFIED BY '$sqlpw';"
+mysql -e "grant all privileges on $sqlname.* TO '$sqluser'@'localhost';"
 
-green "为PostgreSQL默认用户建立密码"
-psql -U postgres -w -c "\password postgres"
+rm -rf ~/.my.cnf
 
-apt install -y php7.3 php7.3-fpm php7.3-pgsql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
+sed -i '/malloc-lib/d' /etc/mysql/my.cnf
+sed -i '/\[mysqld_safe\]/a\malloc-lib = \/usr\/local\/lib\/libjemalloc.so' /etc/mysql/my.cnf
+
+systemctl restart mariadb
+
+apt install -y php7.3 php7.3-fpm php7.3-mysql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
 
 cat > /etc/php/7.3/fpm/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -1474,7 +1481,7 @@ blue "--------------------------"
     echo
     green  "1. 安装de_GWD"
     green  "2. 切换至bbrplus并重启生效（Debian 10 暂不可用）"
-    blue   "3. 安装PHP+安装PostgreSQL+安装Nextcloud"
+    blue   "3. 安装PHP+安装MariaDB+安装Nextcloud"
     blue   "4. 配置Nextcloud缓存"
     red    "5. 更改静态IP"
     red    "6. 更换域名并重新制作证书"

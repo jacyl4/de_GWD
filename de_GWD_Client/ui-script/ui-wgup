@@ -12,7 +12,7 @@ PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j A
 
 [Peer]
 PublicKey = $(cat /etc/wireguard/cpublickey)
-AllowedIPs = 172.16.66.0/24
+AllowedIPs = 172.16.66.2/32
 EOF
 chmod 600 /etc/wireguard/wg0.conf
 
