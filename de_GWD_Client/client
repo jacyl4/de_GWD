@@ -397,20 +397,6 @@ CONDITIONAL_FORWARDING=false
 EOF
 
 curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
-}
-
-
-function piholesetting(){
-cat > /etc/dnsmasq.conf << EOF
-conf-dir=/etc/dnsmasq.d
-port=5390
-EOF
-
-cat > /etc/resolv.conf << EOF
-nameserver 127.0.0.1
-EOF
-
-pihole restartdns
 
 cat > /etc/pihole/dns-servers.conf << EOF
  114DNS;114.114.114.114;114.114.115.115
@@ -435,6 +421,20 @@ sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 
 echo "" > /etc/pihole/adlists.list
 pihole -g
+}
+
+
+function piholesetting(){
+cat > /etc/dnsmasq.conf << EOF
+conf-dir=/etc/dnsmasq.d
+port=5390
+EOF
+
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+EOF
+
+pihole restartdns
 }
 
 
