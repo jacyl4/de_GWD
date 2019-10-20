@@ -7,9 +7,9 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-mirrorsite="gwdbase.xyz/gwd"
+mirrorsite="acccmi.cf/gwd"
 
-mirrorsiteip="103.135.249.101"
+mirrorsiteip="172.247.127.156"
 
 
 
