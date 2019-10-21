@@ -1016,7 +1016,7 @@ emergency_restart_interval = 60s
 process_control_timeout = 10s
 daemonize = yes
 
-rlimit_files = 2048
+rlimit_files = 1000000
 rlimit_core = 0
 
 include=/etc/php/7.3/fpm/pool.d/*.conf
@@ -1040,10 +1040,10 @@ user = www-data
 group = www-data
 
 pm = dynamic
-pm.max_children = 50
+pm.max_children = 40
 pm.start_servers = 10
 pm.min_spare_servers = 5
-pm.max_spare_servers = 30
+pm.max_spare_servers = 25
 pm.max_requests = 1000
 pm.process_idle_timeout = 10s
 request_terminate_timeout = 320s
