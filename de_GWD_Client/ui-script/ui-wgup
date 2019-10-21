@@ -5,7 +5,7 @@ cat > /etc/wireguard/wg0.conf << EOF
 PrivateKey = $(cat /etc/wireguard/sprivatekey)
 Address = 172.16.66.1/24
 ListenPort = 9895
-DNS = $(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)
+DNS = 172.16.66.1
 MTU = 1420
 PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s $(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1),172.16.66.0/24 -o $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) -j MASQUERADE
 PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s $(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1),172.16.66.0/24 -o $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) -j MASQUERADE
@@ -21,7 +21,7 @@ cat > /etc/wireguard/client.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey)
 Address = 172.16.66.2/32
-DNS = $(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)
+DNS = 172.16.66.1
 MTU = 1420
 
 [Peer]
