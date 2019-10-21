@@ -997,7 +997,7 @@ systemctl restart mariadb
 
 apt install -y php7.3 php7.3-fpm php7.3-mysql php7.3-curl php7.3-dom php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu ffmpeg redis-server
 
-cat > /etc/php/7.3/fpm/php-fpm.conf <<EOF
+cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
 ;;;;;;;;;;;;;;;;;;;;;
 ; FPM Configuration ;
 ;;;;;;;;;;;;;;;;;;;;;
@@ -1013,7 +1013,7 @@ log_level = warning
 
 emergency_restart_threshold = 30
 emergency_restart_interval = 60s
-process_control_timeout = 5s
+process_control_timeout = 20s
 daemonize = yes
 
 rlimit_files = 65535
@@ -1022,7 +1022,7 @@ rlimit_core = 0
 include=/etc/php/7.3/fpm/pool.d/*.conf
 EOF
 
-cat > /etc/php/7.3/fpm/pool.d/www.conf <<EOF
+cat > /etc/php/7.3/fpm/pool.d/www.conf << EOF
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ;
 ;;;;;;;;;;;;;;;;;;;;
@@ -1030,22 +1030,26 @@ cat > /etc/php/7.3/fpm/pool.d/www.conf <<EOF
 user = www-data
 group = www-data
 listen = /run/php/php7.3-fpm.sock
+listen.backlog = -1
 listen.allowed_clients = 127.0.0.1
 listen.owner = www-data
 listen.group = www-data
+listen.mode = 0666
+
+user = www-data
+group = www-data
 
 pm = dynamic
-pm.max_children = 16
-pm.start_servers = 11
-pm.min_spare_servers = 8
-pm.max_spare_servers = 16
-pm.max_requests = 2048
+pm.max_children = 50
+pm.start_servers = 10
+pm.min_spare_servers = 5
+pm.max_spare_servers = 30
+pm.max_requests = 1000
 pm.process_idle_timeout = 10s
-request_terminate_timeout = 120
+request_terminate_timeout = 320s
 request_slowlog_timeout = 0
 
 pm.status_path = /status
-slowlog = var/log/slow.log
 
 catch_workers_output = yes
 env[HOSTNAME] = \$HOSTNAME
