@@ -20,4 +20,4 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/client)
 ```
-![client](https://i.loli.net/2019/06/14/5d03acb0d7c8a12948.png)
+![client](https://i.loli.net/2019/10/22/A6UIOdL9MkhfNQP.png)
