@@ -438,6 +438,7 @@ conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
 
+rm -rf /etc/resolv.conf
 
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
