@@ -7,9 +7,9 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-mirrorsite="acccmi.cf/gwd"
+mirrorsite="ucccmi.cf/gwd"
 
-mirrorsiteip="172.247.127.156"
+mirrorsiteip="172.247.76.127"
 
 
 
@@ -442,11 +442,6 @@ pihole restartdns
 function installwg(){
 systemctl stop wg-quick@wg0
 
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
-
-apt update
-
 apt install -y wireguard qrencode
 
 if [[ ! -d "/etc/wireguard" ]]; then
@@ -600,6 +595,16 @@ done
 installv2ray
 
 installiptablesproxy
+
+debianx=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ $debianx main" > /etc/apt/sources.list.d/php.list
+
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
+apt update
 
 installpihole
 
