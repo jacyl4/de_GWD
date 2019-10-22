@@ -4,7 +4,7 @@
 
 极大提高了dns性能，优化nginx，支持http2，tls1.3等特性。
 
-![de_GWD](https://i.loli.net/2019/10/21/iAbeCnr1WRQTPwS.png)
+![de_GWD](https://i.loli.net/2019/10/23/M1bzgCtvyBDalJK.png)
 
 ## Server：
 
@@ -20,4 +20,4 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/client)
 ```
-![client](https://i.loli.net/2019/10/22/A6UIOdL9MkhfNQP.png)
+![client](https://i.loli.net/2019/10/23/kicWonTVpUq9x7X.png)
