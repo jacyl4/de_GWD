@@ -1,4 +1,4 @@
-[![telegram](https://i.loli.net/2019/10/23/xMGmfY2Wat6R8uI.png)](https://t.me/de_GWD)
+[![telegram](https://i.loli.net/2019/10/23/Ol9PX7io5b3hZsz.png)](https://t.me/de_GWD)
 
 一个真正大幅提升浏览器体验的软路由旁路网关。
 
