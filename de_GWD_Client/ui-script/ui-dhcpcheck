@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ -f "/etc/dnsmasq.d/02-pihole-dhcp.conf" ]]; then
+echo "on"
+fi

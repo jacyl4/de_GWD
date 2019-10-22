@@ -366,12 +366,9 @@
     </div>
   </div>
 </form>
-
 <span class="float-right">
   <button type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
 </span>
-
-
           </div>
           </div>
 
@@ -386,24 +383,56 @@
             <div class="form-row">
               <div class="col-md-6">
                 <div class="form-label-group">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo shell_exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
                   <label for="localip">本机地址</label>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-label-group">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo shell_exec("route -n |  awk 'NR==3{print $2}'"); ?>">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("route -n |  awk 'NR==3{print $2}'"); ?>">
                   <label for="upstreamip">上级地址</label>
                 </div>
               </div>
             </div>
           </div>
 </form>
-
 <span class="float-right">
 <button type="button" class="btn btn-danger" onclick="submitstaticip()">应用&重启</button>
 </span>
+          </div>
+          </div>
 
+        <!-- DHCP -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-network-wired"></i>
+            DHCP 服务
+          <span id="dhcpcheck" class="badge badge-pill text-success"></span>
+          </div>
+
+          <div class="card-body">
+<form>
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col-md-6">
+                <div class="form-label-group">
+                  <input type="text" id="ipstart" class="form-control" placeholder="起始IP" required="required" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/dhcp.txt"); ?>">
+                  <label for="ipstart">起始IP</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-label-group">
+                  <input type="text" id="ipend" class="form-control" placeholder="结束IP" required="required" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/dhcp.txt"); ?>">
+                  <label for="ipend">结束IP</label>
+                </div>
+              </div>
+            </div>
+          </div>
+</form>
+<span class="float-right">
+<button type="button" class="btn btn-outline-primary" onclick="dhcpup()">开启</button>
+<button type="button" class="btn btn-outline-danger" onclick="dhcpdown()">关闭</button>
+</span>
           </div>
           </div>
         </div>
@@ -493,6 +522,15 @@ $.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(
 alert("本机已开始重新启动");
 }
 
+function dhcpup(){
+ipstarttxt=$('#ipstart').val();
+ipendtxt=$('#ipend').val();
+$.get('dhcpup.php', {ipstart:ipstarttxt, ipend:ipendtxt},function(result){ location.reload(); });
+}
+
+function dhcpdown(){
+$.get('dhcpdown.php', function(result){ location.reload(); });
+}
 
 node1 = "<?php echo exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>";
 node2 = "<?php echo exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>";
@@ -641,6 +679,10 @@ $.get("changenode.php", {nodenum:"9"}, function(result){});
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
+
+$.get('dhcpcheck.php', function(data){
+if (data.indexOf("on") != -1) {$('#dhcpcheck').html('on');}
+});
 
 $.get("version.php", function(data) {
 var strver=data;

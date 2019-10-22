@@ -110,7 +110,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
-          <span id="ddnscheckcf" class="badge badge-pill text-success"></span>
+          <span id="ddnscheckcf" class="badge text-success"></span>
           </div>
           <div class="card-body">
   <div class="form-group">
@@ -158,7 +158,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             WireGuard Server
-          <span id="wgcheck" class="badge badge-pill text-success"></span>
+          <span id="wgcheck" class="badge text-success"></span>
           </div>
           <div class="card-body">
 
