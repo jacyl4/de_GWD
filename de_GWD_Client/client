@@ -7,9 +7,9 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-mirrorsite="ucccmi.cf/gwd"
+mirrorsite="acccmi.cf/gwd"
 
-mirrorsiteip="172.247.76.127"
+mirrorsiteip="172.247.127.156"
 
 
 
@@ -372,6 +372,14 @@ systemctl mask systemd-resolved --now
 
 
 
+function installwg(){
+systemctl stop wg-quick@wg0
+
+apt install -y wireguard qrencode
+}
+
+
+
 function installpihole(){
 rm -rf /var/www/html/admin
 
@@ -430,29 +438,12 @@ conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
 
+
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 EOF
 
 pihole restartdns
-}
-
-
-
-function installwg(){
-systemctl stop wg-quick@wg0
-
-apt install -y wireguard qrencode
-
-if [[ ! -d "/etc/wireguard" ]]; then
-mkdir -p /etc/wireguard
-cd /etc/wireguard
-
-wg genkey | tee sprivatekey | wg pubkey > spublickey
-wg genkey | tee cprivatekey | wg pubkey > cpublickey
-
-cd ~
-fi
 }
 
 
@@ -580,7 +571,7 @@ sed -i "1i $mirrorsiteip $(echo $mirrorsite | cut -d "/" -f1)" /etc/hosts
 
 installdoh
 
-echo -e $(nslookup $(echo $v2servn | cut -d : -f1) -port=5380 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
+echo -e $(nslookup port=5380 $(echo $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
 wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
 
@@ -602,9 +593,22 @@ wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $debianx main" > /etc/apt/sources.list.d/php.list
 
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 150\n' > /etc/apt/preferences.d/limit-unstable
 
 apt update && apt upgrade -y
+
+if [[ $architecture = "amd64" ]]; then
+
+installwg
+
+mkdir -p /etc/wireguard
+
+cd /etc/wireguard
+
+wg genkey | tee sprivatekey | wg pubkey > spublickey
+wg genkey | tee cprivatekey | wg pubkey > cpublickey
+cd ~
+fi
 
 installpihole
 
@@ -632,10 +636,6 @@ iface $ethernetnum inet static
 EOF
 
 pihole restartdns
-
-if [[ $architecture = "amd64" ]]; then
-installwg
-fi
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
@@ -708,11 +708,11 @@ installv2ray
 
 installiptablesproxy
 
-piholesetting
-
 if [[ $architecture = "amd64" ]]; then
 installwg
 fi
+
+piholesetting
 
 postinstall
 
