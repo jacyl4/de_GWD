@@ -1092,7 +1092,7 @@ nginxnextcloudconf
 
 systemctl restart nginx
 
-wget -N https://download.nextcloud.com/server/installer/setup-nextcloud.php
+wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
 chown -R www-data:www-data /var/www/html/
 
