@@ -171,10 +171,10 @@
 </span>
 
 <span class="float-right">
-  <button type="button" class="btn btn-outline-secondary" onclick="wgrekey()">重新生成密钥</button>
-  <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
-  <button type="button" class="btn btn-outline-primary" onclick="wgon()">开启</button>
-  <button type="button" class="btn btn-outline-danger" onclick="wgoff()">关闭</button>
+  <button type="button" class="btn btn-outline-secondary mb-3" onclick="wgrekey()">重新生成密钥</button>
+  <button type="button" class="btn btn-outline-dark mb-3" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
+  <button type="button" class="btn btn-outline-primary mb-3" onclick="wgon()">开启</button>
+  <button type="button" class="btn btn-outline-danger mb-3" onclick="wgoff()">关闭</button>
 </span>
 
 <!-- Modal -->
