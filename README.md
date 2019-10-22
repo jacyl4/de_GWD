@@ -1,4 +1,7 @@
-[![telegram](https://i.loli.net/2019/06/28/5d151251c9e2741763.jpg)](https://t.me/de_GWD)
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<!-- Place this tag where you want the button to render. -->
+<a class="github-button" href="https://t.me/de_GWD" data-icon="octicon-cloud-download">Telegram</a>
 
 一个真正大幅提升浏览器体验的软路由旁路网关。
 
