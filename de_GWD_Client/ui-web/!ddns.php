@@ -171,9 +171,10 @@
 </span>
 
 <span class="float-right">
-  <button type="button" class="btn btn-outline-danger" onclick="wgoff()">关闭</button>
+  <button type="button" class="btn btn-outline-secondary" onclick="wgrekey()">重新生成密钥</button>
+  <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
   <button type="button" class="btn btn-outline-primary" onclick="wgon()">开启</button>
-  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
+  <button type="button" class="btn btn-outline-danger" onclick="wgoff()">关闭</button>
 </span>
 
 <!-- Modal -->
@@ -226,6 +227,10 @@ $.get('ddnssavecf.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey
 
 function stopddns(){
 $.get('ddnsstop.php', function(result){ location.reload() });
+}
+
+function wgrekey(){
+$.get('wgrekey.php', function(result){ location.reload() });
 }
 
 function wgoff(){

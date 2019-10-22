@@ -1,0 +1,7 @@
+#!/bin/bash
+cd /etc/wireguard
+
+wg genkey | tee sprivatekey | wg pubkey > spublickey
+wg genkey | tee cprivatekey | wg pubkey > cpublickey
+
+systemctl stop wg-quick@wg0
