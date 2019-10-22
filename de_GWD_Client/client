@@ -449,12 +449,15 @@ apt update
 
 apt install -y wireguard qrencode
 
+if [[ ! -d "/etc/wireguard" ]]; then
 mkdir -p /etc/wireguard
 cd /etc/wireguard
 
 wg genkey | tee sprivatekey | wg pubkey > spublickey
 wg genkey | tee cprivatekey | wg pubkey > cpublickey
+
 cd ~
+fi
 }
 
 
