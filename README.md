@@ -1,7 +1,6 @@
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 
-<!-- Place this tag where you want the button to render. -->
-<a class="github-button" href="https://t.me/de_GWD" data-icon="octicon-cloud-download">Telegram</a>
+<a class="github-button" href="https://t.me/de_GWD" data-icon="octicon-cloud-download" aria-label="Download ntkme/github-buttons on GitHub">Telegram</a>
 
 一个真正大幅提升浏览器体验的软路由旁路网关。
 
