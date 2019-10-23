@@ -602,13 +602,6 @@ installv2ray
 
 installiptablesproxy
 
-debianx=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
-
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-echo "deb https://packages.sury.org/php/ $debianx main" > /etc/apt/sources.list.d/php.list
-
-apt update
-
 installpihole
 
 piholesetting
