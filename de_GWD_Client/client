@@ -451,7 +451,7 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 
 apt update
 
-apt install -y wireguard qrencode
+apt install -y wireguard
 
 mkdir -p /etc/wireguard
 fi
