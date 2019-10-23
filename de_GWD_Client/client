@@ -517,7 +517,7 @@ wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_
 /usr/local/bin/ui-nodedthide
 /usr/local/bin/ui-changedoh
 
-if [[ ! -f "/etc/wireguard/" ]]; then
+if [[ ! -f "/etc/wireguard/sprivatekey" ]]&&[[ ! -f "/etc/wireguard/cprivatekey" ]]; then
 /usr/local/bin/ui-wgchangekey
 fi
 }
