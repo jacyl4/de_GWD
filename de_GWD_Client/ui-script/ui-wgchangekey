@@ -4,4 +4,6 @@ cd /etc/wireguard
 wg genkey | tee sprivatekey | wg pubkey > spublickey
 wg genkey | tee cprivatekey | wg pubkey > cpublickey
 
+cd ~
+
 systemctl stop wg-quick@wg0

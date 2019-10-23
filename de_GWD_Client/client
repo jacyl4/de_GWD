@@ -368,14 +368,12 @@ systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
 systemctl mask systemd-resolved --now
-}
 
+rm -rf /etc/resolv.conf
 
-
-function installwg(){
-systemctl stop wg-quick@wg0
-
-apt install -y wireguard qrencode
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+EOF
 }
 
 
@@ -438,13 +436,25 @@ conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
 
-rm -rf /etc/resolv.conf
-
-cat > /etc/resolv.conf << EOF
-nameserver 127.0.0.1
-EOF
-
 pihole restartdns
+}
+
+
+
+function installwg(){
+if [[ $architecture = "amd64" ]]; then
+
+systemctl stop wg-quick@wg0
+
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
+apt update
+
+apt install -y wireguard qrencode
+
+mkdir -p /etc/wireguard
+fi
 }
 
 
@@ -506,6 +516,10 @@ wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_
 
 /usr/local/bin/ui-nodedthide
 /usr/local/bin/ui-changedoh
+
+if [[ ! -f "/etc/wireguard/" ]]; then
+/usr/local/bin/ui-wgchangekey
+fi
 }
 
 
@@ -572,7 +586,7 @@ sed -i "1i $mirrorsiteip $(echo $mirrorsite | cut -d "/" -f1)" /etc/hosts
 
 installdoh
 
-echo -e $(nslookup port=5380 $(echo $v2servn | cut -d : -f1) | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
+echo -e $(nslookup port=5380 $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
 wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
 
@@ -593,23 +607,7 @@ debianx=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $debianx main" > /etc/apt/sources.list.d/php.list
 
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 150\n' > /etc/apt/preferences.d/limit-unstable
-
-apt update && apt upgrade -y
-
-if [[ $architecture = "amd64" ]]; then
-
-installwg
-
-mkdir -p /etc/wireguard
-
-cd /etc/wireguard
-
-wg genkey | tee sprivatekey | wg pubkey > spublickey
-wg genkey | tee cprivatekey | wg pubkey > cpublickey
-cd ~
-fi
+apt update
 
 installpihole
 
@@ -637,6 +635,8 @@ iface $ethernetnum inet static
 EOF
 
 pihole restartdns
+
+installwg
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
@@ -709,11 +709,9 @@ installv2ray
 
 installiptablesproxy
 
-if [[ $architecture = "amd64" ]]; then
-installwg
-fi
-
 piholesetting
+
+installwg
 
 postinstall
 
