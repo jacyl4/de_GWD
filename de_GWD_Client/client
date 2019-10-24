@@ -212,8 +212,8 @@ Wants=network.target
 Type=simple
 PIDFile=/run/vtrui.pid
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=always
-RestartSec=3
+Restart=on-failure
+RestartPreventExitStatus=23
 
 [Install]
 WantedBy=multi-user.target
@@ -489,7 +489,7 @@ chmod +x /usr/local/bin/updateGWD
 
 cat > /usr/local/bin/clearcache << "EOF"
 #!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
 rm -rf ~/client

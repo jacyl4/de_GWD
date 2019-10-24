@@ -1035,9 +1035,11 @@ listen.owner = www-data
 listen.group = www-data
 listen.mode = 0666
 
-pm = ondemand
-pm.max_children = 20
-pm.process_idle_timeout = 10s
+pm = dynamic
+pm.max_children = 25
+pm.start_servers = 5
+pm.min_spare_servers = 5
+pm.max_spare_servers = 20
 pm.max_requests = 500
 pm.process_idle_timeout = 10s
 request_terminate_timeout = 320s
