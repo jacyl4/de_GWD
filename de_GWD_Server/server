@@ -941,6 +941,64 @@ sudo reboot
 
 
 
+installbbr2(){
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget -N https://raw.githubusercontent.com/xiya233/bbr2/master/debian/linux-headers-5.2.0-rc3%2B_5.2.0-rc3%2B-1_amd64.deb
+wget -N https://raw.githubusercontent.com/xiya233/bbr2/master/debian/linux-image-5.2.0-rc3%2B_5.2.0-rc3%2B-1_amd64.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+cat > /etc/modules << EOF
+tcp_bbr
+tcp_bbr2
+tcp_dctcp
+EOF
+
+cat > ~/bbrkernel/clearkernel << EOF
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_ecn/d' /etc/sysctl.conf
+
+echo "net.ipv4.tcp_congestion_control = bbr2" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_ecn = 1" >> /etc/sysctl.conf
+sysctl -p
+
+/usr/bin/apt purge -y linux-image-4.14.129-bbrplus
+/usr/bin/apt purge -y linux-image-4*
+update-grub
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+
+sudo reboot
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+crontab -l
+
+blue "------------------"
+blue  "安装bbr2 [完毕]"
+blue "------------------"
+
+sudo reboot
+}
+
+
+
 installnextcloud(){
     green "=============="
     green " 数据库用户名"
@@ -1484,7 +1542,8 @@ blue "--------------------------"
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
     echo
     green  "1. 安装de_GWD"
-    green  "2. 切换至bbrplus并重启生效（Debian 10 暂不可用）"
+    green  "11.切换至bbrplus并重启生效（Debian 10 暂不可用）"
+    green  "12.切换至bbr2"
     blue   "3. 安装PHP+安装MariaDB+安装Nextcloud"
     blue   "4. 配置Nextcloud缓存"
     red    "5. 更改静态IP"
@@ -1502,8 +1561,12 @@ blue "--------------------------"
     installgwd
     start_menu
     ;;
-    2)
+    11)
     installbbrplus
+    start_menu
+    ;;
+    12)
+    installbbr2
     start_menu
     ;;
     3)
