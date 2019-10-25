@@ -330,10 +330,10 @@ cat > /usr/local/bin/iptables-proxy-down << EOF
 #!/bin/bash
 systemctl stop vtrui
 
-iptables -t nat -F
-iptables -t nat -X
 iptables -t mangle -F
 iptables -t mangle -X
+iptables -t nat -F
+iptables -t nat -X
 iptables -F
 iptables -X
 
