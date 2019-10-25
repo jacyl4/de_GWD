@@ -948,8 +948,6 @@ echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-crontab -l
-
 blue "------------------"
 blue  "安装bbrplus [完毕]"
 blue "------------------"
@@ -1003,8 +1001,6 @@ crontab -l > ~/now.cron
 echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-
-crontab -l
 
 blue "------------------"
 blue  "安装bbr2 [完毕]"
