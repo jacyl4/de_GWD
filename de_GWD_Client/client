@@ -321,7 +321,7 @@ iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 98
 iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 systemctl restart vtrui
 
-if [[ "$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1)" =~ "wg0" ]]; then
+if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) =~ "wg0" ]]; then
 systemctl restart wg-quick@wg0
 fi
 EOF
