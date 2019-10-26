@@ -122,7 +122,8 @@ fi
 chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
-wget -O /etc/dns-over-https/doh-client.conf https://$mirrorsite/doh-client.conf
+wget -N https://$mirrorsite/doh-client.conf
+mv -f ~/doh-client.conf /etc/dns-over-https/doh-client.conf
 
 doh_upstream='url = "https:\/\/'$doh'\/dq"'
 
@@ -466,8 +467,10 @@ fi
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
-wget -O /usr/bin/vtrui/geosite.dat https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dlc.dat
-wget -O /usr/bin/vtrui/h2y.dat https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dlc.dat
+wget -N https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+mv -f ~/geosite.dat /usr/bin/vtrui/geosite.dat
+mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
 
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
 
@@ -516,7 +519,8 @@ chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
-wget -O /var/www/html/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
+wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
+mv -f ~/version.php /var/www/html/version.php
 
 /usr/local/bin/ui-nodedthide
 /usr/local/bin/ui-changedoh
@@ -592,7 +596,8 @@ installdoh
 
 echo -e $(nslookup port=5380 $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
 
-wget -O /usr/local/bin/chnroute.txt https://$mirrorsite/ui-cnr.txt
+wget -N https://$mirrorsite/ui-cnr.txt
+mv -f ~/ui-cnr.txt /usr/local/bin/chnroute.txt
 
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
