@@ -37,7 +37,6 @@ cat > /etc/vtrui/config.json << EOF
   "outbounds": [
     {
       "tag": "proxy",
-      "mux": {"enabled": true},
       "protocol": "vmess",
       "settings": {
         "vnext": [
@@ -75,7 +74,6 @@ cat > /etc/vtrui/config.json << EOF
     },
     {
       "tag": "netflix",
-      "mux": {"enabled": true},
       "protocol": "vmess",
       "settings": {
         "vnext": [
@@ -113,7 +111,6 @@ cat > /etc/vtrui/config.json << EOF
     },
     {
       "tag": "diverttraffic",
-      "mux": {"enabled": true},
       "protocol": "vmess",
       "settings": {
         "vnext": [
