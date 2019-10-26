@@ -470,7 +470,7 @@ cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dlc.dat
 wget -N https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
-mv -f ~/geosite.dat /usr/bin/vtrui/geosite.dat
+mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
 
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
