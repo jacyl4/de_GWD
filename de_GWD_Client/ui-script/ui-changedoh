@@ -1,6 +1,6 @@
 #!/bin/bash
-doh1="$(awk 'NR==1{print}' /var/www/html/doh.txt)"
-doh2="$(awk 'NR==2{print}' /var/www/html/doh.txt)"
+doh1=$(awk 'NR==1{print}' /var/www/html/doh.txt)
+doh2=$(awk 'NR==2{print}' /var/www/html/doh.txt)
 
 doh_upstream1='url = "https:\/\/'$doh1'\/dq"'
 doh_upstream2='url = "https:\/\/'$doh2'\/dq"'

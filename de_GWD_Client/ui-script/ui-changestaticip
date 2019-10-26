@@ -1,6 +1,6 @@
 #!/bin/bash
-localip="$(cat /var/www/html/staticip.txt | awk 'NR==1{print}')"
-upstreamip="$(cat /var/www/html/staticip.txt | awk 'NR==2{print}')"
+localip=$(cat /var/www/html/staticip.txt | awk 'NR==1{print}')
+upstreamip=$(cat /var/www/html/staticip.txt | awk 'NR==2{print}')
 
 
 sed -i "/address/c\address $localip"  /etc/network/interfaces

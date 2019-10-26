@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ "$(curl -4skI -o /dev/null -w %{http_code} www.baidu.com | awk 'NR==1{print $1}')" = "200" ]]; then
+if [[ $(curl -4skI -o /dev/null -w %{http_code} www.baidu.com | awk 'NR==1{print $1}') = "200" ]]; then
     echo "✓ 国内线路畅通"
 else
     echo "✗ 国内线路不通"
