@@ -146,8 +146,10 @@ echo "" > /etc/pihole/adlists.list
 pihole -g
 
 systemctl mask systemd-resolved --now
+systemctl daemon-reload
 
 systemctl mask dhcpcd --now
+systemctl daemon-reload
 }
 
 

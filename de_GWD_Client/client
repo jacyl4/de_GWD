@@ -369,6 +369,7 @@ systemctl restart iptables-proxy
 systemctl enable iptables-proxy
 
 systemctl mask systemd-resolved --now
+systemctl daemon-reload
 
 rm -rf /etc/resolv.conf
 
