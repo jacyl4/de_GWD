@@ -72,31 +72,20 @@ net.core.netdev_max_backlog = 32768
 EOF
 
 if [[ "$(uname -r)" =~ "bbrplus" ]]; then
-echo "" > /etc/modules
-
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_ecn/d' /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+
 elif [[ "$(uname -r)" =~ "5.2.0" ]]; then
-cat > /etc/modules << EOF
-tcp_bbr
-tcp_bbr2
-tcp_dctcp
-EOF
-
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_ecn/d' /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr2" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_ecn = 1" >> /etc/sysctl.conf
-else
-echo "" > /etc/modules
 
+else
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_ecn/d' /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
@@ -983,8 +972,6 @@ PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_ecn/d' /etc/sysctl.conf
-
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 sysctl -p
@@ -1024,22 +1011,14 @@ wget -N https://raw.githubusercontent.com/xiya233/bbr2/master/debian/linux-image
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
-cat > /etc/modules << EOF
-tcp_bbr
-tcp_bbr2
-tcp_dctcp
-EOF
-
 cat > ~/bbrkernel/clearkernel << EOF
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_ecn/d' /etc/sysctl.conf
-
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr2" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_ecn = 1" >> /etc/sysctl.conf
 sysctl -p
 
 /usr/bin/apt purge -y linux-image-4.14.129-bbrplus
