@@ -15,7 +15,6 @@ cat > /etc/vtrui/config.json << EOF
   "inbounds": [
     {
    "port": 53,
-   "listen": "127.0.0.1",
    "tag": "dnsin",
    "protocol": "dokodemo-door",
    "settings": {"address": "0.0.0.0", "network": "tcp,udp"},
