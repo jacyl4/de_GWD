@@ -297,9 +297,6 @@ ipset add listw $(awk "NR==$(echo $[$(sed -n -e '/doh/=' /etc/hosts) + 2]){print
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local default dev lo table 100
 
-iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 53
-iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 53
-
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
