@@ -18,14 +18,14 @@ cat > /etc/vtrui/config.json << EOF
    "tag": "dnsin",
    "protocol": "dokodemo-door",
    "settings": {"address": "0.0.0.0", "network": "tcp,udp"},
-   "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
+   "streamSettings": { "sockopt": { "mark": 255} }
     },
     {
     "port": 9897,
     "listen": "127.0.0.1",
     "protocol": "socks",
     "settings": { "auth": "noauth", "network": "tcp,udp" },
-    "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
+    "streamSettings": { "sockopt": { "mark": 255} }
     },
     {
     "port": 9896,
