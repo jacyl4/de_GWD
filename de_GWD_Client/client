@@ -167,10 +167,12 @@ Wants=nss-lookup.target
 
 [Service]
 Type=simple
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 LimitNOFILE=1000000
 Restart=always
 RestartSec=3
+User=nobody
 
 [Install]
 WantedBy=multi-user.target
