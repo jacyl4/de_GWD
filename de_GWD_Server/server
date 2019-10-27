@@ -1235,9 +1235,9 @@ systemctl restart php7.3-fpm
 
 sed -i '/installed/,$d' /var/www/html/nextcloud/config/config.php
 cat >> /var/www/html/nextcloud/config/config.php << EOF
-  'installed' => true,
+'installed' => true,
 
-  'enabledPreviewProviders' =>
+'enabledPreviewProviders' =>
   array (
     0 => 'OC\\Preview\\PNG',
     1 => 'OC\\Preview\\JPEG',
@@ -1254,10 +1254,17 @@ cat >> /var/www/html/nextcloud/config/config.php << EOF
 
 'memcache.local' => '\OC\Memcache\APCu',
 'memcache.distributed' => '\OC\Memcache\Redis',
-'redis' => [
-     'host'     => '/var/run/redis/redis-server.sock',
-     'port'     => 0,
-],
+'redis' =>
+  array (
+    'host' => '/var/run/redis/redis-server.sock',
+    'port' => 0,
+  ),
+'max_filesize_animated_gifs_public_sharing' => -1,
+'filelocking.enabled' => true,
+'filelocking.ttl' => 60*60,
+'filelocking.debug' => false,
+'memcache.locking' => 'OC\\Memcache\\Redis',
+'loglevel' => 0,
 );
 EOF
 
