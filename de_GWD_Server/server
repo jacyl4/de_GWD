@@ -1567,7 +1567,7 @@ blue "--------------------------"
     echo
     green  "1. 安装de_GWD"
     green  "11.切换至bbrplus并重启生效（Debian 9）"
-    green  "12.切换至bbr2并重启生效（Debian 9/10）"
+    green  "12.切换至bbr2.0并重启生效（Debian 9/10）"
     blue   "3. 安装PHP+安装MariaDB+安装Nextcloud"
     blue   "4. 配置Nextcloud缓存"
     red    "5. 更改静态IP"
