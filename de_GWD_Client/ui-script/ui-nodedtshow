@@ -15,22 +15,25 @@ cat > /etc/vtrui/config.json << EOF
   "inbounds": [
     {
    "port": 53,
+   "listen": "127.0.0.1",
    "tag": "dnsin",
    "protocol": "dokodemo-door",
-   "settings": {"address": "0.0.0.0", "network": "tcp,udp"}
+   "settings": {"address": "0.0.0.0", "network": "tcp,udp"},
+   "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
     },
     {
     "port": 9897,
+    "listen": "127.0.0.1",
     "protocol": "socks",
     "settings": { "auth": "noauth", "network": "tcp,udp" },
-    "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
     },
     {
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
-    "settings": { "auth": "noauth", "network": "tcp,udp", "followRedirect": true },
     "sniffing": { "enabled": true, "destOverride": ["http", "tls"] },
+    "settings": { "auth": "noauth", "network": "tcp,udp", "followRedirect": true },
     "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
     }
   ],
