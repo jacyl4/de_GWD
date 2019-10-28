@@ -13,7 +13,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>de_GWD - 黑白名单</title>
+  <title>de_GWD - DDNS</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -67,17 +67,17 @@
           <i class="fas fa-fw fa-stream"></i>
           <span>节点管理</span></a>
       </li>
-      <li class="nav-item active">
+      <li class="nav-item">
         <a class="nav-link" href="!listbw.php">
           <i class="fas fa-fw fa-th-list"></i>
           <span>黑白名单</span></a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link" href="!ddns.php">
           <i class="fas fa-fw fa-ethernet"></i>
           <span>DDNS & WireGuard</span></a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link" href="!update.php">
           <i class="fas fa-fw fa-arrow-alt-circle-up"></i>
           <span>更新</span></a>
@@ -88,11 +88,7 @@
           <span>注销</span></a>
       </li>
     </ul>
-<script>
-function logout () {
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
-</script>
+
 
     <div id="content-wrapper">
 
@@ -103,75 +99,26 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <li class="breadcrumb-item">
             <a href="index.php">概览</a>
           </li>
-          <li class="breadcrumb-item active">黑白名单</li>
+          <li class="breadcrumb-item active">更新</li>
         </ol>
 
-        <!-- Page Content -->
+        <!-- Page Content -->    
         <div class="card mb-3">
           <div class="card-header">
-            <i class="fas fa-th-list"></i>
-            名单编辑</div>
+            <i class="fas fa-archive"></i>
+            备份-恢复
+          <span id="ddnscheckcf" class="badge text-success"></span>
+          </div>
           <div class="card-body">
-<form>
-          <div class="form-group">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            黑名单域名<br>
-          （走国外解析）<br>
-            </span>
-          </div>
-            <textarea id="listb" class="form-control" aria-label="listb" rows="11"><?php echo shell_exec("cat /var/www/html/listb.txt"); ?></textarea>
-          </div>
-          </div>
 
-          <div class="form-group">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            白名单域名<br>
-          （走国内解析）<br>
-            </span>
-          </div>
-            <textarea id="listw" class="form-control" aria-label="listw" rows="11"><?php echo shell_exec("cat /var/www/html/listw.txt"); ?></textarea>
-          </div>
-          </div>
-
-          <div class="form-group">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            内网设备白名单IP<br>
-          （走国内线路）<br>
-            </span>
-          </div>
-            <textarea id="listwlan" class="form-control" aria-label="listwlan" rows="11"><?php echo shell_exec("cat /var/www/html/listwlan.txt"); ?></textarea>
-          </div>
-          </div>
-</form>
-
-<span class="float-left text-secondary">
-  <small>
-注：一行一个地址<br>
-  </small>
+<span class="float-left">
+  <button type="button" class="btn btn-secondary" onclick="backup()">备份</button>
 </span>
-
-<span class="float-right">
-<button type="button" class="btn btn-primary" onclick="submitlistbw()">应用</button>
-</span>
-
-<script>
-function submitlistbw () {
-listb=$("#listb").val();
-listw=$("#listw").val();
-listwlan=$("#listwlan").val();
-$.get("listbwsave.php", {listb:listb, listw:listw, listwlan:listwlan}, function(result){ location.reload(); });
-alert("黑白名单已提交");
-}
-</script>
           </div>
-          </div>
+        </div>
 
+
+        <!-- Page Content -->
       </div>
       <!-- /.container-fluid -->
 
@@ -189,7 +136,15 @@ alert("黑白名单已提交");
 
   </div>
   <!-- /#wrapper -->
-<script> 
+<script>
+function logout(){
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+}
+
+function backup(){
+$.get('backup.php', function(result){window.location.href = "de_GWD_backup.zip"});
+}
+
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
@@ -210,6 +165,7 @@ $(".sidebar").toggleClass("toggled");
 
   <!-- Custom scripts for all pages-->
   <script src="js/sb-admin.min.js"></script>
+  <script src="js/jquery.qrcode.min.js"></script>
 
 </body>
 

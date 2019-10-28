@@ -78,6 +78,11 @@
           <span>DDNS & WireGuard</span></a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="!update.php">
+          <i class="fas fa-fw fa-arrow-alt-circle-up"></i>
+          <span>更新</span></a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" href="#" onclick="logout()">
           <i class="fas fa-fw fa-sign-out-alt"></i>
           <span>注销</span></a>

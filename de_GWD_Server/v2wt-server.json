@@ -5,6 +5,7 @@
     "port": 11811,
     "listen": "127.0.0.1",
     "protocol": "vmess",
+    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
     "settings": {
       "clients": [{
         "id": "00000000-0000-0000-0000-000000000000",
@@ -21,11 +22,7 @@
     }
   ],
   "outbounds": [
-    {
-    "protocol": "freedom",
-    "settings": {
-      "domainStrategy": "UseIP"
-      }
-    }
+  {"protocol": "freedom", "settings": {"domainStrategy": "UseIP"}},
+  {"tag": "block", "protocol": "blackhole", "settings": {}}
   ]
 }

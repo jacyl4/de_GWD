@@ -1,0 +1,19 @@
+#!/bin/bash
+
+mkdir -p ~/de_GWD_backup
+
+cp -f /var/www/html/ddnscf.txt ~/de_GWD_backup
+cp -f /var/www/html/doh.txt ~/de_GWD_backup
+cp -f /var/www/html/domain.txt ~/de_GWD_backup
+cp -f /var/www/html/nodename.txt ~/de_GWD_backup
+cp -f /var/www/html/path.txt ~/de_GWD_backup
+cp -f /var/www/html/uuid.txt ~/de_GWD_backup
+cp -f /var/www/html/wgdomain.txt ~/de_GWD_backup
+
+cd ~
+
+zip -r de_GWD_backup.zip de_GWD_backup
+
+mv -f ~/de_GWD_backup.zip /var/www/html
+
+rm -rf ~/de_GWD_backup*
