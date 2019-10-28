@@ -12,6 +12,12 @@ v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.
 
 cat > /etc/vtrui/config.json << EOF
 {
+  "dns": {"servers": [
+    {"address": "127.0.0.1","port": 5390},
+    {"address": "127.0.0.1","port": 5390, "domains": ["domain:baidu.com"] },
+    {"address": "127.0.0.1","port": 5380, "domains": ["domain:google.com"] },
+    {"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }
+                     ]},
   "inbounds": [
     {
     "port": 53,
@@ -150,12 +156,6 @@ cat > /etc/vtrui/config.json << EOF
     { "tag": "dnsout", "protocol": "dns", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } },
     { "tag": "direct", "protocol": "freedom", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } }
   ],
-  "dns": {"servers": [
-    {"address": "127.0.0.1","port": 5390},
-    {"address": "127.0.0.1","port": 5390, "domains": ["domain:baidu.com"] },
-    {"address": "127.0.0.1","port": 5380, "domains": ["domain:google.com"] },
-    {"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }
-                     ]},
   "routing": {
     "domainStrategy": "IPOnDemand",
     "rules": [
