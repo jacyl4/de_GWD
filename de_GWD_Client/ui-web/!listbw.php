@@ -147,8 +147,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 
 <span class="float-left text-secondary">
   <small>
-注：<br>
-一行一个地址<br>
+注：一行一个地址<br>
   </small>
 </span>
 

@@ -162,20 +162,30 @@
           </div>
           <div class="card-body">
 
+<div class="form-row mb-3">
+      <div class="col-md-6 input-group">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">域名</span>
+        </div>
+          <input type="text" id="WGdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/wgdomain.txt"); ?>">
+      </div>
+
+      <div class="col-md-6">
+        <span class="float-right">
+          <button type="button" class="btn btn-outline-secondary" onclick="wgrekey()">重新生成密钥</button>
+          <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
+          <button type="button" class="btn btn-outline-primary" onclick="wgon()">开启</button>
+          <button type="button" class="btn btn-outline-danger" onclick="wgoff()">关闭</button>
+        </span>
+      </div>
+</div>
+
 <span class="float-left text-secondary">
   <small>
-注：<br>
-需要CloudFlare DDNS开启状态<br>
-需要主路由映射端口9895到de_GWD的地址<br>
+注：需要CloudFlare DDNS开启状态，需要主路由映射端口9895到de_GWD的地址。
   </small>
 </span>
 
-<span class="float-right">
-  <button type="button" class="btn btn-outline-secondary mb-3" onclick="wgrekey()">重新生成密钥</button>
-  <button type="button" class="btn btn-outline-dark mb-3" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
-  <button type="button" class="btn btn-outline-primary mb-3" onclick="wgon()">开启</button>
-  <button type="button" class="btn btn-outline-danger mb-3" onclick="wgoff()">关闭</button>
-</span>
 
 <!-- Modal -->
 <div class="modal fade" id="wgqrpop" role="dialog" aria-hidden="true">
@@ -238,7 +248,8 @@ $.get('wgoff.php', function(result){ location.reload() });
 }
 
 function wgon(){
-$.get('wgon.php', function(result){ location.reload() });
+wgdomain=$('#WGdomain').val();
+$.get('wgon.php', {WGdomain:wgdomain}, function(result){ location.reload() });
 }
 
 window.onload = function() {
