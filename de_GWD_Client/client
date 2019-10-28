@@ -205,23 +205,6 @@ fi
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
-cat > /etc/systemd/system/vtrui.service << EOF
-[Unit]
-Description=vtrui Service
-After=network.target
-Wants=network.target
-
-[Service]
-Type=simple
-PIDFile=/run/vtrui.pid
-ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
 wget -N https://$mirrorsite/vtpre.zip
 unzip vtpre.zip
 mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
@@ -240,6 +223,22 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
+cat > /etc/systemd/system/vtrui.service << EOF
+[Unit]
+Description=vtrui Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/vtrui.pid
+ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
 systemctl daemon-reload
 systemctl restart vtrui
