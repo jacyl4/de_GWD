@@ -182,7 +182,7 @@
 
 <span class="float-left text-secondary">
   <small>
-注：需要CloudFlare DDNS开启状态，需要主路由映射端口9895到de_GWD的地址。
+注：需要主路由映射端口9895到de_GWD的地址。
   </small>
 </span>
 
