@@ -170,7 +170,7 @@
 <div class="form-row mb-3">
       <div class="col-md-6 input-group">
         <div class="input-group-prepend w-25">
-          <span class="input-group-text justify-content-center w-100">域名</span>
+          <span class="input-group-text justify-content-center w-100">地址</span>
         </div>
           <input type="text" id="WGdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/wgdomain.txt"); ?>">
       </div>
