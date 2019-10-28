@@ -17,22 +17,21 @@ cat > /etc/vtrui/config.json << EOF
     "port": 53,
     "tag": "dnsin",
     "protocol": "dokodemo-door",
-    "settings": {"address": "0.0.0.0", "network": "tcp,udp"},
-    "streamSettings": { "sockopt": { "mark": 255} }
+    "settings": {"network": "tcp,udp", "address": "0.0.0.0"}
     },
     {
     "port": 9897,
     "listen": "127.0.0.1",
     "protocol": "socks",
-    "settings": { "auth": "noauth", "network": "tcp,udp" },
+    "settings": {"network": "tcp,udp", "auth": "noauth"},
     "streamSettings": { "sockopt": { "mark": 255} }
     },
     {
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
-    "sniffing": { "enabled": true, "destOverride": ["http", "tls"] },
-    "settings": { "auth": "noauth", "network": "tcp,udp", "followRedirect": true },
+    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
+    "settings": {"network": "tcp,udp", "auth": "noauth", "followRedirect": true},
     "streamSettings": { "sockopt": { "mark": 255, "tproxy": "tproxy" } }
     }
   ],
@@ -149,7 +148,7 @@ cat > /etc/vtrui/config.json << EOF
         }
       }
     },
-    { "tag": "dnsout", "protocol": "dns", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } },
+    { "tag": "dnsout", "protocol": "dns", "settings": {} },
     { "tag": "direct", "protocol": "freedom", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } }
   ],
   "dns": {"servers": [
