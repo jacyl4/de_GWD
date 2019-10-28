@@ -148,7 +148,7 @@ cat > /etc/vtrui/config.json << EOF
         }
       }
     },
-    { "tag": "dnsout", "protocol": "dns", "settings": {} },
+    { "tag": "dnsout", "protocol": "dns", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } },
     { "tag": "direct", "protocol": "freedom", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } }
   ],
   "dns": {"servers": [
