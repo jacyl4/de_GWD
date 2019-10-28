@@ -169,10 +169,10 @@ Wants=nss-lookup.target
 Type=simple
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
-LimitNOFILE=1000000
 Restart=always
 RestartSec=3
-User=nobody
+LimitNPROC=1000000
+LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
@@ -235,6 +235,8 @@ PIDFile=/run/vtrui.pid
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=on-failure
 RestartPreventExitStatus=23
+LimitNPROC=1000000
+LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
