@@ -172,7 +172,7 @@
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">地址</span>
         </div>
-          <input type="text" id="WGdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/wgdomain.txt"); ?>">
+          <input type="text" id="WGaddress" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGaddress.txt"); ?>">
       </div>
 
       <div class="col-md-6">
@@ -253,8 +253,8 @@ $.get('wgoff.php', function(result){ location.reload() });
 }
 
 function wgon(){
-wgdomain=$('#WGdomain').val();
-$.get('wgon.php', {WGdomain:wgdomain}, function(result){ location.reload() });
+WGaddress=$('#WGaddress').val();
+$.get('wgon.php', {WGaddress:WGaddress}, function(result){ location.reload() });
 }
 
 window.onload = function() {

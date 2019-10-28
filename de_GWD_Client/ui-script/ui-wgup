@@ -26,7 +26,7 @@ MTU = 1420
 
 [Peer]
 PublicKey = $(cat /etc/wireguard/spublickey)
-Endpoint = $(awk 'NR==1{print}' /var/www/html/wgdomain.txt):9895
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):9895
 AllowedIPs = 0.0.0.0/0
 EOF
 chmod 600 /etc/wireguard/client.conf

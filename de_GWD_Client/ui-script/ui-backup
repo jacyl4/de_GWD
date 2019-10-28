@@ -8,7 +8,7 @@ cp -f /var/www/html/domain.txt ~/de_GWD_backup
 cp -f /var/www/html/nodename.txt ~/de_GWD_backup
 cp -f /var/www/html/path.txt ~/de_GWD_backup
 cp -f /var/www/html/uuid.txt ~/de_GWD_backup
-cp -f /var/www/html/wgdomain.txt ~/de_GWD_backup
+cp -f /var/www/html/WGaddress.txt ~/de_GWD_backup
 
 cd ~
 
