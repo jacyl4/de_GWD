@@ -141,8 +141,9 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">
-            内网设备白名单IP<br>
-          （走国内线路）<br>
+            内网设备白名单<br>
+            IP<br>
+            （走国内线路）<br>
             </span>
           </div>
             <textarea id="listwlan" class="form-control" aria-label="listwlan" rows="11"><?php echo shell_exec("cat /var/www/html/listwlan.txt"); ?></textarea>
