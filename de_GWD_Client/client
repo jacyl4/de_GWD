@@ -216,11 +216,9 @@ Before=nss-lookup.target
 Wants=nss-lookup.target
 
 [Service]
-Type=simple
-AmbientCapabilities=CAP_NET_BIND_SERVICE
+Type=notify
 ExecStart=/usr/local/bin/unbound -c /etc/unbound/unbound.conf
-Restart=always
-RestartSec=3
+Restart=on-failure
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -629,6 +627,10 @@ deb http://mirrors.aliyun.com/debian buster-proposed-updates main contrib non-fr
 deb http://mirrors.aliyun.com/debian buster-updates main contrib non-free
 deb http://mirrors.aliyun.com/debian-security/ buster/updates main non-free contrib
 EOF
+
+echo "" > /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/preferences.d/limit-unstable
+
 elif [[ $architecture = "amd64" ]] && [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "stretch" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.aliyun.com/debian stretch main contrib non-free
