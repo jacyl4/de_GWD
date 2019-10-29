@@ -22,7 +22,7 @@ esac
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq libevent-dev
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq libevent-dev libpython3.7
 
 source /etc/profile
 
