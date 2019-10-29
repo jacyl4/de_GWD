@@ -22,7 +22,7 @@ esac
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq unbound
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq
 
 source /etc/profile
 
@@ -181,31 +181,6 @@ EOF
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
-
-cat > /etc/unbound/unbound.conf << EOF
-server:
-    verbosity: 0
-    interface: 0.0.0.0@5353
-    username: "root"
-    do-ip4: yes
-    do-ip6: no
-    do-udp: yes
-    do-tcp: yes
-    so-reuseport: yes
-  
-    log-servfail: no
-    minimal-responses: no
-    do-not-query-localhost: no
-    hide-identity: yes
-    hide-version: yes
-forward-zone:
-  name: "."
-  forward-addr: 127.0.0.1@5380
-EOF
-
-systemctl daemon-reload
-systemctl restart unbound
-systemctl enable unbound
 }
 
 
