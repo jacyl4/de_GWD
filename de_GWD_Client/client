@@ -200,7 +200,7 @@ server:
   
     log-servfail: no
     minimal-responses: no
-    do-not-query-localhost: yes
+    do-not-query-localhost: no
     hide-identity: yes
     hide-version: yes
 forward-zone:
@@ -218,7 +218,7 @@ Wants=nss-lookup.target
 [Service]
 Type=simple
 AmbientCapabilities=CAP_NET_BIND_SERVICE
-ExecStart=/usr/local/bin/unbound -c /etc/unbound.conf
+ExecStart=/usr/local/bin/unbound -c /etc/unbound/unbound.conf
 Restart=always
 RestartSec=3
 LimitNPROC=1000000
