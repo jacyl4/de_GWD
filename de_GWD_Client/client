@@ -22,7 +22,7 @@ esac
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq libevent-dev libpython3.7
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq unbound
 
 source /etc/profile
 
@@ -112,17 +112,14 @@ if [[ $architecture = "arm64" ]]; then
   wget -N https://$mirrorsite/doharm64.zip
   unzip doharm64.zip
   mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
-  mv -f ~/doharm64/unbound /usr/local/bin/unbound
   rm -rf ~/doharm64*
 elif [[ $architecture = "amd64" ]]; then
   wget -N https://$mirrorsite/dohamd64.zip
   unzip dohamd64.zip
   mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
-  mv -f ~/dohamd64/unbound /usr/local/bin/unbound
   rm -rf ~/dohamd64*
 fi
 chmod +x /usr/local/bin/doh-client
-chmod +x /usr/local/bin/unbound
 
 mkdir -p /etc/dns-over-https/
 wget -N https://$mirrorsite/doh-client.conf
@@ -185,8 +182,6 @@ systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
 
-mkdir -p /etc/unbound
-
 cat > /etc/unbound/unbound.conf << EOF
 server:
     verbosity: 0
@@ -206,24 +201,6 @@ server:
 forward-zone:
   name: "."
   forward-addr: 127.0.0.1@5380
-EOF
-
-cat > /etc/systemd/system/unbound.service << "EOF"
-[Unit]
-Description=unbound
-After=network.target
-Before=nss-lookup.target
-Wants=nss-lookup.target
-
-[Service]
-Type=notify
-ExecStart=/usr/local/bin/unbound -c /etc/unbound/unbound.conf
-Restart=on-failure
-LimitNPROC=1000000
-LimitNOFILE=1000000
-
-[Install]
-WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
