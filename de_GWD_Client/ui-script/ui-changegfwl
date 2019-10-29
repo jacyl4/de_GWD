@@ -3,8 +3,8 @@ read -d '' gfwl << EOF
 [
 {"address": "127.0.0.1","port": 5390},
 {"address": "127.0.0.1","port": 5390, "domains": ["domain:baidu.com"] },
-{"address": "127.0.0.1","port": 5380, "domains": ["domain:google.com"] },
-{"address": "127.0.0.1","port": 5380, "domains": ["ext:h2y.dat:gfw"] }
+{"address": "127.0.0.1","port": 5353, "domains": ["domain:google.com"] },
+{"address": "127.0.0.1","port": 5353, "domains": ["ext:h2y.dat:gfw"] }
 ]
 EOF
 

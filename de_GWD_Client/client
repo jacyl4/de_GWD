@@ -22,7 +22,7 @@ esac
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq libevent-dev
 
 source /etc/profile
 
@@ -112,14 +112,17 @@ if [[ $architecture = "arm64" ]]; then
   wget -N https://$mirrorsite/doharm64.zip
   unzip doharm64.zip
   mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
+  mv -f ~/doharm64/unbound /usr/local/bin/unbound
   rm -rf ~/doharm64*
 elif [[ $architecture = "amd64" ]]; then
   wget -N https://$mirrorsite/dohamd64.zip
   unzip dohamd64.zip
   mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
+  mv -f ~/dohamd64/unbound /usr/local/bin/unbound
   rm -rf ~/dohamd64*
 fi
 chmod +x /usr/local/bin/doh-client
+chmod +x /usr/local/bin/unbound
 
 mkdir -p /etc/dns-over-https/
 wget -N https://$mirrorsite/doh-client.conf
@@ -181,6 +184,53 @@ EOF
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
+
+mkdir -p /etc/unbound
+
+cat > /etc/unbound/unbound.conf << EOF
+server:
+    verbosity: 0
+    interface: 127.0.0.1@5353
+    username: "root"
+    do-ip4: yes
+    do-ip6: no
+    do-udp: yes
+    do-tcp: yes
+    so-reuseport: yes
+  
+    log-servfail: no
+    minimal-responses: no
+    do-not-query-localhost: yes
+    hide-identity: yes
+    hide-version: yes
+forward-zone:
+  name: "."
+  forward-addr: 127.0.0.1@53
+EOF
+
+cat > /etc/systemd/system/unbound.service << "EOF"
+[Unit]
+Description=unbound
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+Type=simple
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/local/bin/unbound -c /etc/unbound.conf
+Restart=always
+RestartSec=3
+LimitNPROC=1000000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart unbound
+systemctl enable unbound
 }
 
 
@@ -232,6 +282,7 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vtrui.pid
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=on-failure
 RestartPreventExitStatus=23
@@ -301,6 +352,8 @@ ip route add local default dev lo table 100
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5353 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5353 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT

@@ -346,7 +346,6 @@
           </span>
           </div>
           <div class="card-body">
-<form>
   <div class="form-group">
     <div class="form-row">
       <div class="col-md-6 input-group">
@@ -370,7 +369,6 @@
       </div>
     </div>
   </div>
-</form>
 <span class="float-right">
   <button type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
 </span>
@@ -383,7 +381,6 @@
             <i class="fas fa-exchange-alt"></i>
             静态地址</div>
           <div class="card-body">
-<form>
           <div class="form-group">
             <div class="form-row">
               <div class="col-md-6">
@@ -400,7 +397,6 @@
               </div>
             </div>
           </div>
-</form>
 <span class="float-right">
 <button type="button" class="btn btn-danger" onclick="submitstaticip()">应用&重启</button>
 </span>
@@ -416,7 +412,6 @@
           </div>
 
           <div class="card-body">
-<form>
           <div class="form-group">
             <div class="form-row">
               <div class="col-md-6">
@@ -433,7 +428,6 @@
               </div>
             </div>
           </div>
-</form>
 <span class="float-right">
 <button type="button" class="btn btn-outline-primary" onclick="dhcpup()">开启</button>
 <button type="button" class="btn btn-outline-danger" onclick="dhcpdown()">关闭</button>
