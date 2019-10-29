@@ -185,7 +185,7 @@ systemctl enable doh-client
 cat > /etc/unbound/unbound.conf << EOF
 server:
     verbosity: 0
-    interface: 127.0.0.1@5353
+    interface: 0.0.0.0@5353
     username: "root"
     do-ip4: yes
     do-ip6: no
