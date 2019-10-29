@@ -219,8 +219,7 @@ cat > /etc/systemd/system/doh-server.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target
-Before=nss-lookup.target
-Wants=nss-lookup.target
+Wants=network.target
 
 [Service]
 Type=simple

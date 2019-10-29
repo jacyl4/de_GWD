@@ -7,9 +7,9 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-mirrorsite="acccmi.cf/gwd"
+mirrorsite="gwdbase.xyz/gwd"
 
-mirrorsiteip="172.247.127.156"
+mirrorsiteip="103.135.249.101"
 
 
 
@@ -22,7 +22,7 @@ esac
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq unbound
 
 source /etc/profile
 
@@ -162,8 +162,7 @@ cat > /etc/systemd/system/doh-client.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS Client
 After=network.target
-Before=nss-lookup.target
-Wants=nss-lookup.target
+Wants=network.target
 
 [Service]
 Type=simple
@@ -181,6 +180,32 @@ EOF
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
+
+
+cat > /etc/unbound/unbound.conf << EOF
+server:
+    verbosity: 0
+    interface: 127.0.0.1@5353
+    username: "root"
+    do-ip4: yes
+    do-ip6: no
+    do-udp: yes
+    do-tcp: yes
+    so-reuseport: yes
+  
+    log-servfail: no
+    minimal-responses: no
+    do-not-query-localhost: no
+    hide-identity: yes
+    hide-version: yes
+forward-zone:
+  name: "."
+  forward-addr: 127.0.0.1@5380
+EOF
+
+systemctl daemon-reload
+systemctl restart unbound
+systemctl enable unbound
 }
 
 
