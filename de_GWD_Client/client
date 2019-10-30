@@ -771,6 +771,15 @@ start_menu(){
 statusgod=$(green "✔︎")
 statusbad=$(red "✘")
 
+if [[ $(systemctl is-active doh-client) = "active" ]]; then
+    echo "[$statusgod] DoH客户端 进程正常"
+elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
+    echo "[$statusbad] DoH客户端 进程未安装"
+else
+    echo "[$statusbad] DoH客户端 进程出错"
+fi
+
+
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusgod] v2ray     进程正常"
 elif [[ ! -f "/usr/bin/vtrui" ]]; then
@@ -786,15 +795,6 @@ elif [[ ! -f "/etc/systemd/system/iptables-proxy.service" ]]; then
     echo "[$statusbad] 代理规则  进程未安装"
 else
     echo "[$statusbad] 代理规则  进程出错"
-fi
-
-
-if [[ $(systemctl is-active doh-client) = "active" ]]; then
-    echo "[$statusgod] DoH客户端 进程正常"
-elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
-    echo "[$statusbad] DoH客户端 进程未安装"
-else
-    echo "[$statusbad] DoH客户端 进程出错"
 fi
 
 
