@@ -598,7 +598,7 @@ nameserver 119.29.29.29
 nameserver 119.28.28.28
 EOF
 
-if [[ $architecture = "amd64" ]] && [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "buster" ]]; then
+if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://mirrors.aliyun.com/debian buster main contrib non-free
 deb http://mirrors.aliyun.com/debian buster-proposed-updates main contrib non-free
@@ -608,14 +608,6 @@ EOF
 
 echo "" > /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
-
-elif [[ $architecture = "amd64" ]] && [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "stretch" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian stretch main contrib non-free
-deb http://mirrors.aliyun.com/debian stretch-proposed-updates main contrib non-free
-deb http://mirrors.aliyun.com/debian stretch-updates main contrib non-free
-deb http://mirrors.aliyun.com/debian-security/ stretch/updates main non-free contrib
-EOF
 fi
 
 apt update && apt upgrade -y
