@@ -802,7 +802,7 @@ fi
     green "===================================="
     green "              客户端                 "
     green "介绍：一键安装de_GWD                  "
-    green "系统：Debian 10 (amd64 & arm64)      "
+    green "系统：only Debian 10 (amd64 & arm64) "
     green "作者：GWDburst                       "
     green "网站：GWDburst.github.io             "
     green "===================================="
