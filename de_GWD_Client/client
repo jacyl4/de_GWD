@@ -22,6 +22,36 @@ esac
 
 
 function preinstall(){
+rm -rf /etc/resolv.conf
+
+cat > /etc/resolv.conf << EOF
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+EOF
+
+if [[ $(cat /etc/dnsmasq.conf) =~ "5390" ]]; then
+cat > /etc/dnsmasq.conf << EOF
+conf-dir=/etc/dnsmasq.d
+EOF
+pihole restartdns
+fi
+
+systemctl stop iptables-proxy
+
+if [[ $architecture = "amd64" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.aliyun.com/debian buster main contrib non-free
+deb http://mirrors.aliyun.com/debian buster-proposed-updates main contrib non-free
+deb http://mirrors.aliyun.com/debian buster-updates main contrib non-free
+deb http://mirrors.aliyun.com/debian-security/ buster/updates main non-free contrib
+EOF
+
+echo "" > /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/preferences.d/limit-unstable
+fi
+
+apt update && apt upgrade -y
+
 apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq unbound
 
 source /etc/profile
@@ -465,10 +495,7 @@ sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 
 echo "" > /etc/pihole/adlists.list
 pihole -g
-}
 
-
-function piholesetting(){
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=5390
@@ -593,25 +620,6 @@ installgwd(){
 
 cd ~
 
-cat > /etc/resolv.conf << EOF
-nameserver 119.29.29.29
-nameserver 119.28.28.28
-EOF
-
-if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian buster main contrib non-free
-deb http://mirrors.aliyun.com/debian buster-proposed-updates main contrib non-free
-deb http://mirrors.aliyun.com/debian buster-updates main contrib non-free
-deb http://mirrors.aliyun.com/debian-security/ buster/updates main non-free contrib
-EOF
-
-echo "" > /etc/apt/sources.list.d/unstable.list
-rm -rf /etc/apt/preferences.d/limit-unstable
-fi
-
-apt update && apt upgrade -y
-
 preinstall
 
 domain=$(echo $v2servn | cut -d : -f1)
@@ -641,8 +649,6 @@ installv2ray
 installiptablesproxy
 
 installpihole
-
-piholesetting
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
@@ -703,8 +709,6 @@ localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'EN
 
 installpihole
 
-piholesetting
-
 pihole restartdns
 
 blue "-------------------"
@@ -714,6 +718,7 @@ blue "-------------------"
 
 
 updategwd(){
+localaddr=$(ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}')
 port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 
 result=$(echo $port | grep '^[0-9]\+$')
@@ -740,7 +745,7 @@ installv2ray
 
 installiptablesproxy
 
-piholesetting
+installpihole
 
 installwg
 
@@ -801,7 +806,6 @@ fi
     echo
     green  "1. 安装de_GWD"
     green  "2. 更改Pi-hole密码"
-    yellow "9. 更新Pi-hole"
     yellow "0. 更新de_GWD"
     red    "CTRL+C退出"
     echo
@@ -813,10 +817,6 @@ fi
     ;;
     2)
     change_piholeadmin
-    start_menu
-    ;;
-    9)
-    updatepihole
     start_menu
     ;;
     0)
