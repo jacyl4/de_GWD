@@ -90,7 +90,7 @@ echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 
-sudo sysctl -p
+sysctl -p
 }
 
 
@@ -117,7 +117,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-sudo curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
@@ -987,7 +987,7 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
 
-sudo reboot
+reboot
 EOF
 
 chmod +x ~/bbrkernel/clearkernel
@@ -1001,7 +1001,7 @@ blue "------------------"
 blue  "安装bbrplus [完毕]"
 blue "------------------"
 
-sudo reboot
+reboot
 }
 
 
@@ -1033,7 +1033,7 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
 
-sudo reboot
+reboot
 EOF
 
 chmod +x ~/bbrkernel/clearkernel
@@ -1047,7 +1047,7 @@ blue "------------------"
 blue  "安装bbr2.0 [完毕]"
 blue "------------------"
 
-sudo reboot
+reboot
 }
 
 
@@ -1593,7 +1593,7 @@ else
 fi
 
 blue "--------------------------"
-blue  "当前bbr方案：$(echo $(sudo sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "--------------------------"
 
     green "=========================="

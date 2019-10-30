@@ -480,11 +480,7 @@ CONDITIONAL_FORWARDING=false
 EOF
 fi
 
-git clone --depth 1 https://github.com/pi-hole/pi-hole.git
-cd "pi-hole/automated install/"
-sudo bash basic-install.sh --unattended
-cd ~
-rm -rf ~/pi-hole
+curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
 cat > /etc/pihole/dns-servers.conf << EOF
  114DNS;114.114.114.114;114.114.115.115
