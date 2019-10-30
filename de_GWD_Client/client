@@ -445,6 +445,7 @@ EOF
 function installpihole(){
 rm -rf /var/www/html/admin
 
+if [[ ! -f "/etc/pihole/setupVars.conf" ]]; then
 mkdir -p /etc/pihole
 
 cat > /etc/pihole/setupVars.conf << EOF
@@ -465,6 +466,7 @@ DNS_BOGUS_PRIV=true
 DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
+fi
 
 git clone --depth 1 https://github.com/pi-hole/pi-hole.git
 cd "pi-hole/automated install/"
