@@ -1236,36 +1236,37 @@ systemctl restart redis-server
 systemctl restart php7.3-fpm
 
 sed -i '/installed/,$d' /var/www/html/nextcloud/config/config.php
-cat >> /var/www/html/nextcloud/config/config.php << EOF
+cat >> /var/www/html/nextcloud/config/config.php << "EOF"
 'installed' => true,
 
 'enabledPreviewProviders' =>
   array (
-    0 => 'OC\\Preview\\PNG',
-    1 => 'OC\\Preview\\JPEG',
-    2 => 'OC\\Preview\\GIF',
-    3 => 'OC\\Preview\\HEIC',
-    4 => 'OC\\Preview\\BMP',
-    5 => 'OC\\Preview\\XBitmap',
-    6 => 'OC\\Preview\\MP3',
-    7 => 'OC\\Preview\\TXT',
-    8 => 'OC\\Preview\\MarkDown',
-    9 => 'OC\\Preview\\Movie',
-    10 => 'OC\\Preview\\PDF',
+    0 => 'OC\Preview\PNG',
+    1 => 'OC\Preview\JPEG',
+    2 => 'OC\Preview\GIF',
+    3 => 'OC\Preview\HEIC',
+    4 => 'OC\Preview\BMP',
+    5 => 'OC\Preview\XBitmap',
+    6 => 'OC\Preview\MP3',
+    7 => 'OC\Preview\TXT',
+    8 => 'OC\Preview\MarkDown',
+    9 => 'OC\Preview\Movie',
+    10 => 'OC\Preview\PDF',
   ),
 
 'memcache.local' => '\OC\Memcache\APCu',
 'memcache.distributed' => '\OC\Memcache\Redis',
+'memcache.locking' => '\OC\Memcache\Redis',
+'filelocking.enabled' => true,
+'filelocking.ttl' => 60*60,
+'filelocking.debug' => false,
 'redis' =>
   array (
     'host' => '/var/run/redis/redis-server.sock',
     'port' => 0,
+    'timeout' => 0.0,
   ),
 'max_filesize_animated_gifs_public_sharing' => -1,
-'filelocking.enabled' => true,
-'filelocking.ttl' => 60*60,
-'filelocking.debug' => false,
-'memcache.locking' => 'OC\\Memcache\\Redis',
 'loglevel' => 0,
 );
 EOF

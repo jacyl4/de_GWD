@@ -216,13 +216,25 @@ cat > /etc/unbound/unbound.conf << EOF
 server:
     verbosity: 0
     interface: 127.0.0.1@5353
-    username: "root"
+
+    outgoing-range: 8192
+    num-queries-per-thread: 4096
+    so-rcvbuf: 8m
+    so-sndbuf: 8m
+    so-reuseport: yes
+    rrset-cache-size: 100m
+    msg-cache-size: 50m
+
     do-ip4: yes
-    do-ip6: no
+    do-ip6: yes
     do-udp: yes
     do-tcp: yes
-    so-reuseport: yes
-  
+
+    val-permissive-mode: yes
+    module-config: "iterator"
+    
+    extended-statistics: no
+    log-queries: no
     log-servfail: no
     minimal-responses: no
     do-not-query-localhost: no
