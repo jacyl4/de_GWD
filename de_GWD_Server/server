@@ -1599,7 +1599,7 @@ blue "--------------------------"
     green "=========================="
     green "     Server               "
     green "Require: Debian 9/10      "
-    green "Author:  jacyl4           "
+    green "Author:  JacyL4           "
     green "=========================="
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
     echo
