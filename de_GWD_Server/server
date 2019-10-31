@@ -1254,9 +1254,9 @@ cat >> /var/www/html/nextcloud/config/config.php << "EOF"
     10 => 'OC\Preview\PDF',
   ),
 
-'memcache.local' => '\OC\Memcache\APCu',
-'memcache.distributed' => '\OC\Memcache\Redis',
-'memcache.locking' => '\OC\Memcache\Redis',
+'memcache.local' => '\\OC\\Memcache\\APCu',
+'memcache.distributed' => '\\OC\\Memcache\\Redis',
+'memcache.locking' => '\\OC\\Memcache\\Redis',
 'filelocking.enabled' => true,
 'filelocking.ttl' => 60*60,
 'filelocking.debug' => false,
