@@ -1589,7 +1589,7 @@ fi
 if [[ -d "/var/www/html/nextcloud" ]]; then
     echo "[$statusgod] nextcloud    [installed]"
 else
-    echo "[$statusnone] nextcloud   [not installed]"
+    echo "[$statusnone] nextcloud    [not installed]"
 fi
 
 blue "--------------------------"
