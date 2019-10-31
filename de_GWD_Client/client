@@ -457,6 +457,10 @@ EOF
 function installpihole(){
 rm -rf /var/www/html/admin
 
+if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
+rm -rf /etc/pihole/setupVars.conf
+fi
+
 if [[ ! -f "/etc/pihole/setupVars.conf" ]]; then
 mkdir -p /etc/pihole
 
