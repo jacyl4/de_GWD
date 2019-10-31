@@ -10,7 +10,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="de_GWD">
-  <meta name="author" content="GWDburst">
+  <meta name="author" content="JacyL4">
 
   <title>de_GWD - 概览</title>
 
@@ -443,7 +443,7 @@
       <footer class="sticky-footer">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by GWDburst 2019</span>
+            <span>Copyright © de_GWD by JacyL4 2019</span>
           </div>
         </div>
       </footer>

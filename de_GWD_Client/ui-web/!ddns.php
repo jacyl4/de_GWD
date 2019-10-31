@@ -217,7 +217,7 @@
       <footer class="sticky-footer">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by GWDburst 2019</span>
+            <span>Copyright © de_GWD by JacyL4 2019</span>
           </div>
         </div>
       </footer>

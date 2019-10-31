@@ -603,29 +603,29 @@ fi
 
 
 installgwd(){
-    green "==============="
-    green "本机地址"
-    green "==============="
+    green "========================="
+    green "de_GWD IP address"
+    green "========================="
     read localaddr
 
-    green "==============="
-    green "上级路由地址"
-    green "==============="
+    green "========================="
+    green "Upstream route IP address"
+    green "========================="
     read gatewayaddr
 
-    green "==============="
-    green "v2ray节点域名"
-    green "==============="
+    green "========================="
+    green "V2ray domain"
+    green "========================="
     read v2servn
 
-    green "==============="
-    green "输入v2ray uuid"
-    green "==============="
+    green "========================="
+    green "V2ray UUID"
+    green "========================="
     read uuidnum
 
-    green "==============="
-    green "输入path"
-    green "==============="
+    green "========================="
+    green "Path"
+    green "========================="
     read v2path
 
 cd ~
@@ -699,32 +699,19 @@ chown -R www-data:www-data /var/www/html/*.txt
 
 postinstall
 
-blue "-----------------"
-blue  "安装de_GWD [完毕]"
-blue "-----------------"
+blue "----------------------"
+blue  "Install de_GWD [done]"
+blue "----------------------"
 }
 
 
 change_piholeadmin(){
 pihole -a -p
-blue "----------------------"
-blue  "更改Pi-hole密码 [完毕]"
-blue "----------------------"
+blue "-------------------------------"
+blue  "Change Pi-hole password [done]"
+blue "-------------------------------"
 }
 
-
-updatepihole(){
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
-localaddr="$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1)"
-
-installpihole
-
-pihole restartdns
-
-blue "-------------------"
-blue  "更新Pi-hole [完毕]"
-blue "-------------------"
-}
 
 
 updategwd(){
@@ -761,9 +748,9 @@ installwg
 
 postinstall
 
-blue "------------------"
-blue  "更新de_GWD [完毕]"
-blue "------------------"
+blue "---------------------"
+blue  "Update de_GWD [done]"
+blue "---------------------"
 }
 
 
@@ -772,54 +759,52 @@ statusgod=$(green "✔︎")
 statusbad=$(red "✘")
 
 if [[ $(systemctl is-active doh-client) = "active" ]]; then
-    echo "[$statusgod] DoH客户端 进程正常"
+    echo "[$statusgod] DoH client     [working]"
 elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
-    echo "[$statusbad] DoH客户端 进程未安装"
+    echo "[$statusbad] DoH client     [not Installed]"
 else
-    echo "[$statusbad] DoH客户端 进程出错"
+    echo "[$statusbad] DoH client     [start failed]"
 fi
 
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusgod] v2ray     进程正常"
+    echo "[$statusgod] v2ray          [working]"
 elif [[ ! -f "/usr/bin/vtrui" ]]; then
-    echo "[$statusbad] v2ray     进程未安装"
+    echo "[$statusbad] v2ray          [not Installed]"
 else
-    echo "[$statusbad] v2ray     进程出错"
+    echo "[$statusbad] v2ray          [start failed]"
 fi
 
 
 if [[ $(systemctl is-active iptables-proxy) = "active" ]]; then
-    echo "[$statusgod] 代理规则  进程正常"
+    echo "[$statusgod] iptables-proxy [working]"
 elif [[ ! -f "/etc/systemd/system/iptables-proxy.service" ]]; then
-    echo "[$statusbad] 代理规则  进程未安装"
+    echo "[$statusbad] iptables-proxy [not Installed]"
 else
-    echo "[$statusbad] 代理规则  进程出错"
+    echo "[$statusbad] iptables-proxy [start failed]"
 fi
 
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
-    echo "[$statusgod] pihole    进程正常"
+    echo "[$statusgod] Pi-hole        [working]"
 elif [ ! -f "/usr/local/bin/pihole" ]; then
-    echo "[$statusbad] pihole    进程未安装"
+    echo "[$statusbad] Pi-hole        [not installed]"
 else
-    echo "[$statusbad] pihole    进程出错"
+    echo "[$statusbad] Pi-hole        [start failed]"
 fi
 
-    green "===================================="
-    green "              客户端                 "
-    green "介绍：一键安装de_GWD                  "
-    green "系统：only Debian 10 (amd64 & arm64) "
-    green "作者：jacyl4                       "
-    green "网站：jacyl4.github.io             "
-    green "===================================="
+    green "======================================="
+    green "                  CLIENT               "
+    green "Require: only Debian 10 (amd64 & arm64) "
+    green "Author:  JacyL4                         "
+    green "======================================="
     echo
-    green  "1. 安装de_GWD"
-    green  "2. 更改Pi-hole密码"
-    yellow "0. 更新de_GWD"
-    red    "CTRL+C退出"
+    green  "1. Install de_GWD"
+    green  "2. Change Pi-hole password"
+    yellow "0. Update de_GWD"
+    red    "CTRL+C EXIT"
     echo
-    read -p "请输入数字:" num
+    read -p "Select:" num
     case "$num" in
     1)
     installgwd
@@ -835,7 +820,7 @@ fi
     ;;
     *)
     clear
-    red "请输入正确数字"
+    red "Wrong number"
     sleep 1s
     start_menu
     ;;

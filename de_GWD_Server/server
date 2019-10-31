@@ -872,9 +872,9 @@ wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_G
 
 
 installgwd(){
-    green "=============================="
-    green " 输入此VPS的域名(不加www开头)"
-    green "=============================="
+    green "======================"
+    green " Input domain (no www)"
+    green "======================"
     read vpsdomain
 
 cat > /etc/resolv.conf << EOF
@@ -951,9 +951,9 @@ systemctl enable nginx
 postinstall
 
 blue "--------------------------------------------"
-blue  "安装de_GWD [完毕]"
+blue  "Install de_GWD [done]"
 echo
-blue "域名： $(yellow "$vpsdomain")"
+blue "Domain： $(yellow "$vpsdomain")"
 blue "UUID： $(yellow "$uuidnum")"
 blue "PATH： $(yellow "$v2path")"
 blue "--------------------------------------------"
@@ -997,9 +997,9 @@ echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-blue "------------------"
-blue  "安装bbrplus [完毕]"
-blue "------------------"
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
 
 reboot
 }
@@ -1043,9 +1043,9 @@ echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-blue "------------------"
-blue  "安装bbr2.0 [完毕]"
-blue "------------------"
+blue "----------------------"
+blue  "Install bbr2.0 [done]"
+blue "----------------------"
 
 reboot
 }
@@ -1053,19 +1053,19 @@ reboot
 
 
 installnextcloud(){
-    green "=============="
-    green " 数据库用户名"
-    green "=============="
+    green "=================="
+    green " Datadase user"
+    green "=================="
     read sqluser
 
-    green "=============="
-    green " 数据库密码"
-    green "=============="
+    green "=================="
+    green " Datadase password"
+    green "=================="
     read sqlpw
 
-    green "=============="
-    green " 数据库名称"
-    green "=============="
+    green "=================="
+    green " Datadase name"
+    green "=================="
     read sqlname
 
 debianx=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
@@ -1209,13 +1209,13 @@ mv -f ~/setup-nextcloud.php /var/www/html/
 chown -R www-data:www-data /var/www/html/
 
 blue "------------------------------------"
-blue "  数据库用户名："
+blue "  Datadase user:"
 yellow "$sqluser"
-blue "  数据库密码："
+blue "  Datadase password:"
 yellow "$sqlpw"
-blue "  数据库名称："
+blue "  Datadase name:"
 yellow "$sqlname"
-blue "  Nextcloud安装地址："
+blue "  Nextcloud Installation address:"
 yellow "$vpsdomain/setup-nextcloud.php"
 blue "------------------------------------"
 }
@@ -1271,21 +1271,21 @@ cat >> /var/www/html/nextcloud/config/config.php << "EOF"
 );
 EOF
 
-blue "------------------------"
-blue "配置Nextcloud缓存 [完毕]"
-blue "------------------------"
+blue "-----------------------------"
+blue "Config Nextcloud cache [done]"
+blue "-----------------------------"
 }
 
 
 
 changestaticip(){
     green "========="
-    green "本机地址"
+    green "Address"
     green "========="
     read localaddr
 
     green "========="
-    green "网关地址"
+    green "Gateway"
     green "========="
     read gatewayaddr
 
@@ -1293,17 +1293,17 @@ sed -i "/address/c\address $localaddr"  /etc/network/interfaces
 sed -i "/gateway/c\gateway $gatewayaddr"  /etc/network/interfaces
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24"  /etc/pihole/setupVars.conf
 
-blue "------------------"
-blue  "更改静态IP [完毕]"
-blue "------------------"
+blue "-----------------"
+blue  "Change IP [done]"
+blue "-----------------"
 }
 
 
 
 changedomain(){
-    green "=============================="
-    green " 输入新的VPS的域名(不加www开头)"
-    green "=============================="
+    green "================================"
+    green " Input the new domain ( no www )"
+    green "================================"
     read vpsdomain
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
@@ -1322,9 +1322,9 @@ systemctl restart nginx
 
 /usr/local/bin/updateGWD
 
-blue "-----------------------------"
-blue "更换域名并重新制作证书 [完毕]"
-blue "-----------------------------"
+blue "-----------------------------------------------"
+blue "Change domain and issue new certificates [done]"
+blue "-----------------------------------------------"
 }
 
 
@@ -1334,12 +1334,12 @@ systemctl stop vtrui
 systemctl stop nginx
 
     green "========="
-    green "新的UUID"
+    green "New UUID"
     green "========="
     read nuuid
 
     green "========="
-    green "新的path"
+    green "New path"
     green "========="
     read npath
 
@@ -1351,35 +1351,35 @@ jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /etc/vtrui/
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui
-blue "--------------------------"
-blue  "更换v2ray UUID&path [完毕]"
-blue "--------------------------"
+blue "------------------------------"
+blue  "Change v2ray UUID&path [done]"
+blue "------------------------------"
 }
 
 
 
 changev2rayupstream(){
-    green "==============================="
-    green "Y.修改上级跃点 / N.删除上级跃点"
-    green "==============================="
+    green "==================================================="
+    green "Y. Change v2ray upstream / N. Delete v2ray upstream"
+    green "==================================================="
     read v2rayupstreamyn
 
 if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 
-    green "============"
-    green "上级跃点域名"
-    green "============"
+    green "====================="
+    green "v2ray upstream domain"
+    green "====================="
     read upstreamdomain
 
-    green "============"
-    green "上级跃点UUID"
-    green "============"
+    green "====================="
+    green "v2ray upstream UUID"
+    green "====================="
     read upstreamuuid
 
-    green "============"
-    green "上级跃点path"
-    green "============"
+    green "====================="
+    green "v2ray upstream path"
+    green "====================="
     read upstreampath
 
 cat >> /etc/vtrui/config.json << EOF
@@ -1416,9 +1416,9 @@ cat >> /etc/vtrui/config.json << EOF
 }
 EOF
 systemctl restart vtrui
-blue "--------------------"
-blue  "修改上级跃点 [完毕]"
-blue "--------------------"
+blue "-----------------------------"
+blue  "Change v2ray upstream [done]"
+blue "-----------------------------"
 
 elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
@@ -1432,9 +1432,9 @@ cat >> /etc/vtrui/config.json << EOF
 }
 EOF
 systemctl restart vtrui
-blue "--------------------"
-blue  "删除上级跃点 [完毕]"
-blue "--------------------"
+blue "-----------------------------"
+blue  "Delete v2ray upstream [done]"
+blue "-----------------------------"
 fi
 }
 
@@ -1446,9 +1446,9 @@ localaddr=$(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END
 
 installpihole
 
-blue "-------------------"
-blue "更新Pi-hole [完毕]"
-blue "-------------------"
+blue "---------------------"
+blue "Update Pi-hole [done]"
+blue "---------------------"
 }
 
 
@@ -1502,17 +1502,17 @@ fi
 systemctl restart nginx
 
 postinstall
-blue "-----------------"
-blue  "更新de_GWD [完毕]"
-blue "-----------------"
+blue "---------------------"
+blue  "Update de_GWD [done]"
+blue "---------------------"
 }
 
 
 
 autoupdateGWD(){
-    green "==============================="
-    green "Y.开启自动更新 / N.关闭自动更新"
-    green "==============================="
+    green "=============================================="
+    green "Y. Turn on autoupdate / N. Turn off autoupdate"
+    green "=============================================="
     read autoupdateswitch
 
 if [[ "$autoupdateswitch" = "Y" ]] || [[ "$autoupdateswitch" = "y" ]]; then 
@@ -1530,15 +1530,15 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
-blue "--------------------"
-blue  "自动更新 开启 [完毕]"
-blue "--------------------"
+blue "--------------------------"
+blue  "Autoupdate turn on [done]"
+blue "--------------------------"
 
 elif [[ "$autoupdateswitch" = "N" ]] || [[ "$autoupdateswitch" = "n" ]]; then
 sed -i '/localver=/,$d' /usr/local/bin/updateGWD
-blue "--------------------"
-blue  "自动更新 关闭 [完毕]"
-blue "--------------------"
+blue "---------------------------"
+blue  "Autoupdate turn off [done]"
+blue "---------------------------"
 fi
 }
 
@@ -1552,44 +1552,44 @@ statusnone=$(yellow "-")
 
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusgod] v2ray     进程正常"
+    echo "[$statusgod] v2ray        [working]"
 elif [[ ! -f "/usr/bin/vtrui" ]]; then
-    echo "[$statusbad] v2ray     进程未安装"
+    echo "[$statusbad] v2ray        [not Installed]"
 else
-    echo "[$statusbad] v2ray     进程出错"
+    echo "[$statusbad] v2ray        [start failed]"
 fi
 
 
 if [[ $(systemctl is-active nginx) = "active" ]]; then
-    echo "[$statusgod] nginx     进程正常"
+    echo "[$statusgod] nginx        [working]"
 elif [[ ! -d "/usr/local/nginx" ]] && [[ ! -d "/etc/nginx" ]]; then
-    echo "[$statusbad] nginx     进程未安装"
+    echo "[$statusbad] nginx        [not Installed]"
 else
-    echo "[$statusbad] nginx     进程出错"
+    echo "[$statusbad] nginx        [start failed]"
 fi
 
 
 if [[ $(systemctl is-active doh-server) = "active" ]]; then
-    echo "[$statusgod] DoH服务端 进程正常"
+    echo "[$statusgod] DoH server   [working]"
 elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
-    echo "[$statusbad] DoH服务端 进程未安装"
+    echo "[$statusbad] DoH server   [not Installed]"
 else
-    echo "[$statusbad] DoH服务端 进程出错"
+    echo "[$statusbad] DoH server   [start failed]"
 fi
 
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
-    echo "[$statusgod] pihole    进程正常"
+    echo "[$statusgod] Pi-hole      [working]"
 elif [[ ! -f "/usr/local/bin/pihole" ]]; then
-    echo "[$statusbad] pihole    进程未安装"
+    echo "[$statusbad] Pi-hole      [not installed]"
 else
-    echo "[$statusbad] pihole    进程出错"
+    echo "[$statusbad] Pi-hole      [start failed]"
 fi
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
-  echo "[$statusgod] nextcloud 已安装"
+  echo "[$statusgod] nextcloud      [installed]"
 else
-  echo "[$statusnone] nextcloud 未安装"
+  echo "[$statusnone] nextcloud     [not installed]"
 fi
 
 blue "--------------------------"
@@ -1597,29 +1597,27 @@ blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut 
 blue "--------------------------"
 
     green "=========================="
-    green "     服务端（编译版）        "
-    green "介绍：一键安装de_GWD        "
-    green "系统：Debian 9/10          "
-    green "作者：jacyl4             "
-    green "网站：jacyl4.github.io   "
+    green "     Server               "
+    green "Require: Debian 9/10      "
+    green "Author:  jacyl4           "
     green "=========================="
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
     echo
-    green  "1. 安装de_GWD"
-    green  "11.切换至bbrplus并重启生效（Debian 9）"
-    green  "12.切换至bbr2.0并重启生效（Debian 9/10）"
-    blue   "3. 安装PHP+安装MariaDB+安装Nextcloud"
-    blue   "4. 配置Nextcloud缓存"
-    red    "5. 更改静态IP"
-    red    "6. 更换域名并重新制作证书"
-    yellow "7. 更换v2ray UUID & path"
-    yellow "8. 设置v2ray 上级跃点"
-    yellow "9. 更新Pi-hole"
-    yellow "0. 更新de_GWD"
-    red    "00. 开启/关闭自动更新"
-    red    "CTRL+C退出"
+    green  "1. Install de_GWD"
+    green  "11.Install bbrplus and reboot（Debian 9）"
+    green  "12.Install bbr2.0 and reboot（Debian 9/10）"
+    blue   "3. Install PHP+MariaDB+Nextcloud"
+    blue   "4. Config Nextcloud cache"
+    red    "5. Change static IP"
+    red    "6. Change domain and issue new certificates"
+    yellow "7. Change v2ray UUID & path"
+    yellow "8. Set v2ray upsteram"
+    yellow "9. Update Pi-hole"
+    yellow "0. Update de_GWD"
+    red    "00. Autoupdate turn on/off"
+    red    "CTRL+C EXIT"
     echo
-    read -p "请输入数字:" num
+    read -p "Select:" num
     case "$num" in
     1)
     installgwd
@@ -1671,7 +1669,7 @@ blue "--------------------------"
     ;;
     *)
     clear
-    red "请输入正确数字"
+    red "Wrong number"
     sleep 1s
     start_menu
     ;;
