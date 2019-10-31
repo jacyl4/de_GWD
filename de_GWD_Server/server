@@ -1597,7 +1597,7 @@ blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut 
 blue "--------------------------"
 
     green "=========================="
-    green "     Server               "
+    green "         Server           "
     green "Require: Debian 9/10      "
     green "Author:  JacyL4           "
     green "=========================="
