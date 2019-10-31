@@ -189,14 +189,14 @@ systemctl enable iptablesrules
 
 function installdoh(){
 cd ~
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dohamd64.zip
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/dohamd64.zip
 unzip dohamd64.zip
 mv -f ~/dohamd64/doh-server /usr/local/bin/doh-server
 rm -rf ~/dohamd64*
 chmod +x /usr/local/bin/doh-server
 
 mkdir -p /etc/dns-over-https/
-wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/doh-server.conf
+wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/doh-server.conf
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
 cat > /etc/NetworkManager/dispatcher.d/doh-server << "EOF"
@@ -244,7 +244,7 @@ cd ~
 function installv2ray(){
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
-wget -O ~/vtamd64.zip https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/vtamd64.zip
+wget -O ~/vtamd64.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/vtamd64.zip
 unzip vtamd64.zip
 mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
 mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
@@ -273,7 +273,7 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 
-wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/v2wt-server.json
+wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/v2wt-server.json
 
 jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/vtrui/config.json |\
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
@@ -807,7 +807,7 @@ EOF
 function postinstall(){
 cat > /usr/local/bin/autoupdate << "EOF"
 #!/bin/bash
-wget -O ~/update https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server
+wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server
 
 sed -i '$d' ~/update
 
@@ -835,7 +835,7 @@ rm -rf /var/log/*2
 rm -rf /var/log/*gz
 
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
-remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
+remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
 
 if [[ $localver < $remotever ]]; then
 crontab -l > ~/now.cron
@@ -859,13 +859,13 @@ rm -rf now.cron
 indexpage=$(ls /var/www/html/index.* 2> /dev/null | wc -l)
 
 if [ "$indexpage" = "0" ]; then 
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/sample.zip
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/sample.zip
 unzip sample.zip
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
 fi
 
-wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
+wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php
 }
 
 
@@ -963,8 +963,8 @@ blue "--------------------------------------------"
 
 installbbrplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/linux-headers-4.14.129-bbrplus.deb
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/linux-image-4.14.129-bbrplus.deb
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/linux-headers-4.14.129-bbrplus.deb
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/linux-image-4.14.129-bbrplus.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
@@ -1520,7 +1520,7 @@ sed -i '/localver=/,$d' /usr/local/bin/updateGWD
 
 cat >> /usr/local/bin/updateGWD << "EOF"
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
-remotever=$(curl -s https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
+remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php | awk 'NR==1')
 
 if [[ $localver < $remotever ]]; then
 crontab -l > ~/now.cron
@@ -1600,8 +1600,8 @@ blue "--------------------------"
     green "     服务端（编译版）        "
     green "介绍：一键安装de_GWD        "
     green "系统：Debian 9/10          "
-    green "作者：GWDburst             "
-    green "网站：GWDburst.github.io   "
+    green "作者：jacyl4             "
+    green "网站：jacyl4.github.io   "
     green "=========================="
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
     echo

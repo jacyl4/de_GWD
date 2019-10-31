@@ -537,7 +537,7 @@ fi
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/dlc.dat
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/dlc.dat
 wget -N https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
 mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
@@ -581,15 +581,15 @@ EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-svn export https://github.com/gwdburst/de_GWD/trunk/de_GWD_Client/ui-script
-svn export https://github.com/gwdburst/de_GWD/trunk/de_GWD_Client/ui-web
+svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-script
+svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-web
 
 rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
-wget -N https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/version.php
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php
 mv -f ~/version.php /var/www/html/version.php
 
 /usr/local/bin/ui-nodedthide
@@ -810,8 +810,8 @@ fi
     green "              客户端                 "
     green "介绍：一键安装de_GWD                  "
     green "系统：only Debian 10 (amd64 & arm64) "
-    green "作者：GWDburst                       "
-    green "网站：GWDburst.github.io             "
+    green "作者：jacyl4                       "
+    green "网站：jacyl4.github.io             "
     green "===================================="
     echo
     green  "1. 安装de_GWD"
