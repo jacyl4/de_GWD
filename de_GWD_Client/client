@@ -800,7 +800,7 @@ fi
     green "======================================="
     echo
     green  "1. Install de_GWD"
-    green  "2. Change Pi-hole password"
+    green  "2. Change de_GWD password"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo
