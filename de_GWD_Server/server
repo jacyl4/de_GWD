@@ -1552,20 +1552,20 @@ statusnone=$(yellow "-")
 
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusgod] v2ray        [working]"
+    echo "[$statusgod] V2RAY        [working]"
 elif [[ ! -f "/usr/bin/vtrui" ]]; then
-    echo "[$statusbad] v2ray        [not Installed]"
+    echo "[$statusbad] V2RAY        [not Installed]"
 else
-    echo "[$statusbad] v2ray        [start failed]"
+    echo "[$statusbad] V2RAY        [start failed]"
 fi
 
 
 if [[ $(systemctl is-active nginx) = "active" ]]; then
-    echo "[$statusgod] nginx        [working]"
+    echo "[$statusgod] NGINX        [working]"
 elif [[ ! -d "/usr/local/nginx" ]] && [[ ! -d "/etc/nginx" ]]; then
-    echo "[$statusbad] nginx        [not Installed]"
+    echo "[$statusbad] NGINX        [not Installed]"
 else
-    echo "[$statusbad] nginx        [start failed]"
+    echo "[$statusbad] NGINX        [start failed]"
 fi
 
 
@@ -1587,9 +1587,9 @@ else
 fi
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
-    echo "[$statusgod] nextcloud    [installed]"
+    echo "[$statusgod] Nextcloud    [installed]"
 else
-    echo "[$statusnone] nextcloud    [not installed]"
+    echo "[$statusnone] Nextcloud    [not installed]"
 fi
 
 blue "--------------------------"
@@ -1614,7 +1614,7 @@ blue "--------------------------"
     yellow "8. Set v2ray upsteram"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
-    red    "00. Autoupdate turn on/off"
+    red    "00.Autoupdate turn on/off"
     red    "CTRL+C EXIT"
     echo
     read -p "Select:" num
