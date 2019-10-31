@@ -9,7 +9,7 @@
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server)
 ```
-![server](https://i.loli.net/2019/11/01/9p2j5v4tsFgTkq8.png)
+![server](https://i.loli.net/2019/11/01/lbHdZqYIERMCKhF.png)
 
 ## Client：
 
@@ -17,4 +17,4 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://acccmi.cf/gwd/client)
 ```
-![client](https://i.loli.net/2019/11/01/ZLxhb5AdCo1q8OB.png)
+![client](https://i.loli.net/2019/11/01/qf37QxZbmhKBcjp.png)
