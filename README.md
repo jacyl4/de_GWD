@@ -10,7 +10,7 @@
 
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Server/server)
+bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server)
 ```
 ![server](https://i.loli.net/2019/10/21/5bsY2Vmok7OauSD.png)
 
@@ -18,6 +18,6 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdbur
 
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/gwdburst/de_GWD/master/de_GWD_Client/client)
+bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/client)
 ```
 ![client](https://i.loli.net/2019/10/23/kicWonTVpUq9x7X.png)
