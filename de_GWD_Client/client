@@ -11,6 +11,7 @@ mirrorsite="acccmi.cf/gwd"
 
 mirrorsiteip="172.247.127.156"
 
+ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
 
 
 architecture=""
@@ -585,14 +586,6 @@ EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-mkdir -p /var/www/html/ariang
-wget -q https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip
-unzip AriaNg*
-mv -f index.html /var/www/html/ariang
-rm -rf AriaNg*
-rm -rf index.html
-rm -rf LICENSE
-
 svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-web
 
@@ -603,6 +596,18 @@ rm -rf ~/ui-*
 
 wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php
 mv -f ~/version.php /var/www/html/version.php
+
+mkdir -p /var/www/html/ariang
+cd ~
+wget -q $ariang
+
+unzip AriaNg-*
+
+mv -f index.html /var/www/html/ariang
+
+rm -rf AriaNg*
+rm -rf index.html
+rm -rf LICENSE
 
 /usr/local/bin/ui-nodedthide
 /usr/local/bin/ui-changedoh
