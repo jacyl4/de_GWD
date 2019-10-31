@@ -1592,15 +1592,15 @@ else
     echo "[$statusnone] Nextcloud    [not installed]"
 fi
 
-blue "---------------------------"
+blue "--------------------------"
 blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
-blue "---------------------------"
+blue "--------------------------"
 
-    green "==========================="
+    green "=========================="
     green "         Server            "
     green "Require: Debian 9/10       "
     green "Author:  JacyL4            "
-    green "==========================="
+    green "=========================="
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
     echo
     green  "1. Install de_GWD"
