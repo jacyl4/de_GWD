@@ -129,14 +129,6 @@ fi
 
 
 function installdoh(){
-systemctl stop doh-client
-rm -rf ~/dns-over-https
-rm -rf /usr/local/bin/doh-client
-rm -rf /usr/local/bin/doh-server
-rm -rf /etc/NetworkManager/dispatcher.d
-rm -rf /usr/lib/systemd/system/doh-client.service
-rm -rf /usr/lib/systemd/system/doh-server.service
-
 cd ~
 if [[ $architecture = "arm64" ]]; then
   wget -N https://$mirrorsite/doharm64.zip
@@ -195,6 +187,8 @@ LimitNOFILE=1000000
 [Install]
 WantedBy=multi-user.target
 EOF
+
+systemctl mask systemd-resolved --now
 
 systemctl daemon-reload
 systemctl restart doh-client
@@ -350,9 +344,7 @@ ipset -N listw hash:net maxelem 65535
 for iplistw in $(cat /var/www/html/listw.txt); do
   ipset add listw $iplistw
 done
-for vtruinodeip in $(cat /usr/local/bin/vtruinodeip.txt); do
-  ipset add listw $vtruinodeip
-done
+ipset add listw $(jq -r '.dns.hosts[]' /etc/vtrui/config.json)
 
 
 ip rule add fwmark 0x9 table 100 pref 100
@@ -432,9 +424,6 @@ EOF
 systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
-
-systemctl mask systemd-resolved --now
-systemctl daemon-reload
 }
 
 
@@ -638,13 +627,6 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
-doh=$(echo $mirrorsite | cut -d "/" -f1)
-sed -i "1i $mirrorsiteip $(echo $mirrorsite | cut -d "/" -f1)" /etc/hosts
-
-installdoh
-
-echo -e $(nslookup $domain 119.29.29.29| awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
-
 wget -N https://$mirrorsite/ui-cnr.txt
 mv -f ~/ui-cnr.txt /usr/local/bin/chnroute.txt
 
@@ -655,6 +637,11 @@ for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/chnrouteset
+
+doh=$(echo $mirrorsite | cut -d "/" -f1)
+sed -i "1i $mirrorsiteip $doh" /etc/hosts
+
+installdoh
 
 installv2ray
 
@@ -689,8 +676,6 @@ installwg
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-sed -i "/$domain/d" /etc/hosts
-
 echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $v2servn > /var/www/html/doh.txt
@@ -703,7 +688,7 @@ chown -R www-data:www-data /var/www/html/*.txt
 
 postinstall
 
-sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
+sed -i "/$doh/d" /etc/hosts
 
 blue "----------------------"
 blue  "Install de_GWD [done]"
