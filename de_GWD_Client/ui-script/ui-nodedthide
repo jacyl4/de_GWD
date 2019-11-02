@@ -121,9 +121,9 @@ cat > /etc/vtrui/config.json << EOF
         }
       }
     },
-    { "tag": "direct", "protocol": "freedom", "settings": {}, "streamSettings": { "sockopt": { "mark": 255 } } },
-    { "tag": "dnsout", "protocol": "dns", "settings": {} },
-    { "tag": "block", "protocol": "blackhole", "settings": {} }
+    { "tag": "direct", "protocol": "freedom", "streamSettings": { "sockopt": { "mark": 255 } } },
+    { "tag": "dnsout", "protocol": "dns" },
+    { "tag": "block", "protocol": "blackhole" }
   ],
   "routing": {
     "domainStrategy": "AsIs",
