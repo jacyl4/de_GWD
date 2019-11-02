@@ -342,46 +342,6 @@
           </div>
         </div>
 
-        <!-- DoH -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-bezier-curve"></i>
-            Dns over Https
-         <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
-          </span>
-          </div>
-          <div class="card-body">
-  <div class="form-group">
-    <div class="form-row">
-      <div class="col-md-6 input-group">
-        <div class="form-label-group input-group-prepend w-50">
-          <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
-          <label for="DoH1">DoH1</label>
-        </div>
-        <div class="form-label-group input-group-append w-50">
-          <span class="input-group-text justify-content-center w-100"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==2{print}' | cut -d' ' -f1"); ?></span>
-        </div>
-      </div>
-
-      <div class="col-md-6 input-group">
-        <div class="form-label-group input-group-prepend w-50">
-          <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
-          <label for="DoH2">DoH2</label>
-        </div>
-        <div class="form-label-group input-group-append w-50">
-          <span class="input-group-text justify-content-center w-100"><?php echo shell_exec("cat /etc/hosts | grep doh -A 2 | awk 'NR==3{print}' | cut -d' ' -f1"); ?></span>
-        </div>
-      </div>
-    </div>
-  </div>
-<span class="float-right">
-  <button type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
-</span>
-          </div>
-          </div>
-
 
 <div class="row">
         <!-- hosts -->
@@ -400,7 +360,7 @@
             （默认）<br>
             </span>
           </div>
-            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="10" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
+            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="12" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
           </div>
 
           <div class="input-group mb-3">
@@ -420,7 +380,42 @@
           </div>
 </div>
 
-<div class="col-md-6">      
+<div class="col-md-6"> 
+        <!-- DoH -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-bezier-curve"></i>
+            Dns over Https
+         <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
+          </span>
+          </div>
+          <div class="card-body">
+  <div class="form-group">
+    <div class="form-row">
+      <div class="col-md-6">
+        <div class="form-label-group">
+          <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
+          <label for="DoH1">DoH1</label>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-label-group">
+          <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
+          <label for="DoH2">DoH2</label>
+        </div>
+      </div>
+    </div>
+  </div>
+<span class="float-right">
+  <button type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
+</span>
+          </div>
+          </div>
+
+
         <!-- 静态地址 -->
         <div class="card mb-3">
           <div class="card-header">
@@ -448,6 +443,7 @@
 </span>
           </div>
           </div>
+
 
         <!-- DHCP -->
         <div class="card mb-3">
