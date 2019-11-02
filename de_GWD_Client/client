@@ -225,7 +225,7 @@ server:
     log-queries: no
     log-servfail: no
     minimal-responses: no
-    do-not-query-localhost: yes
+    do-not-query-localhost: no
     hide-identity: yes
     hide-version: yes
     
@@ -439,6 +439,9 @@ systemctl daemon-reload
 
 
 function installpihole(){
+iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 53
+iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 53
+
 rm -rf /var/www/html/admin
 
 if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
