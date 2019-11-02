@@ -133,6 +133,8 @@ cd ~
 doh=$(echo $mirrorsite | cut -d "/" -f1)
 sed -i "1i $mirrorsiteip $doh" /etc/hosts
 
+domainip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+
 if [[ $architecture = "arm64" ]]; then
   wget -N https://$mirrorsite/doharm64.zip
   unzip doharm64.zip
@@ -275,11 +277,14 @@ jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
-jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json
 
-dohip=$(nslookup $doh 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+jq --arg key $doh --arg value $mirrorsiteip '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json
 
-jq --arg key $doh --arg value $dohip '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/config.json
+jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp2.json > /etc/vtrui/temp.json
+
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
 
 cat > /etc/systemd/system/vtrui.service << EOF
 [Unit]
