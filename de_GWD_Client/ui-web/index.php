@@ -345,7 +345,7 @@
 
 <div class="row">
         <!-- hosts -->
-<div class="col-md-6">      
+<div class="col-md-6 m-auto">      
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-network-wired"></i>
