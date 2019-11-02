@@ -155,7 +155,7 @@ mkdir -p /etc/dns-over-https/
 wget -N https://$mirrorsite/doh-client.conf
 mv -f ~/doh-client.conf /etc/dns-over-https/doh-client.conf
 
-doh_upstream='url = "https:\/\/'$v2servn'\/dq"'
+doh_upstream='url = "https:\/\/'$doh'\/dq"'
 
 sed -i "/url/c\\$doh_upstream" /etc/dns-over-https/doh-client.conf
 
@@ -638,7 +638,7 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
-doh=$domain
+doh=$(echo $mirrorsite | cut -d "/" -f1)
 sed -i "1i $mirrorsiteip $(echo $mirrorsite | cut -d "/" -f1)" /etc/hosts
 
 installdoh
