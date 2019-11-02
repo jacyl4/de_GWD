@@ -598,8 +598,7 @@ if [[ ! -f "/etc/wireguard/sprivatekey" ]]&&[[ ! -f "/etc/wireguard/cprivatekey"
 /usr/local/bin/ui-wgchangekey >/dev/null 2>&1
 fi
 
-doh=$(echo $mirrorsite | cut -d "/" -f1)
-sed -i "1i $mirrorsiteip $doh" /etc/hosts
+sed -i "/$doh/d" /etc/hosts
 }
 
 
