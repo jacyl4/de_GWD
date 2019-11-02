@@ -130,6 +130,9 @@ fi
 
 function installdoh(){
 cd ~
+doh=$(echo $mirrorsite | cut -d "/" -f1)
+sed -i "1i $mirrorsiteip $doh" /etc/hosts
+
 if [[ $architecture = "arm64" ]]; then
   wget -N https://$mirrorsite/doharm64.zip
   unzip doharm64.zip
@@ -589,6 +592,9 @@ rm -rf LICENSE
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]&&[[ ! -f "/etc/wireguard/cprivatekey" ]]; then
 /usr/local/bin/ui-wgchangekey >/dev/null 2>&1
 fi
+
+doh=$(echo $mirrorsite | cut -d "/" -f1)
+sed -i "1i $mirrorsiteip $doh" /etc/hosts
 }
 
 
@@ -638,9 +644,6 @@ for chnroute in $chnroute ; do
 done
 } > /usr/local/bin/chnrouteset
 
-doh=$(echo $mirrorsite | cut -d "/" -f1)
-sed -i "1i $mirrorsiteip $doh" /etc/hosts
-
 installdoh
 
 installv2ray
@@ -685,8 +688,6 @@ echo $v2path > /var/www/html/path.txt
 chown -R www-data:www-data /var/www/html/*.txt
 
 postinstall
-
-sed -i "/$doh/d" /etc/hosts
 
 blue "----------------------"
 blue  "Install de_GWD [done]"
