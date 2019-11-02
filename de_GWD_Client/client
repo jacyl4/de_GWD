@@ -8,6 +8,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 mirrorsite="acccmi.cf/gwd"
+mirrorsiteip="172.247.127.156"
 
 ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
 
@@ -279,9 +280,9 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-dohip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+dohip=$(nslookup $doh 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
-jq --arg key $domain --arg value $dohip '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/config.json
+jq --arg key $doh --arg value $dohip '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/config.json
 
 cat > /etc/systemd/system/vtrui.service << EOF
 [Unit]
@@ -439,9 +440,6 @@ systemctl daemon-reload
 
 
 function installpihole(){
-iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 53
-iptables -t nat -A PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 53
-
 rm -rf /var/www/html/admin
 
 if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
@@ -640,6 +638,9 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
+doh=$domain
+sed -i "1i $mirrorsiteip $(echo $mirrorsite | cut -d "/" -f1)" /etc/hosts
+
 installdoh
 
 echo -e $(nslookup $domain 119.29.29.29| awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2) > /usr/local/bin/vtruinodeip.txt
@@ -688,7 +689,7 @@ installwg
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
+sed -i "/$domain/d" /etc/hosts
 
 echo "$v2servn" > /var/www/html/nodename.txt
 echo "$v2servn" > /var/www/html/domain.txt
@@ -697,6 +698,8 @@ echo "$v2servn" >> /var/www/html/doh.txt
 echo "$uuidnum" > /var/www/html/uuid.txt
 echo "$v2path" > /var/www/html/path.txt
 chown -R www-data:www-data /var/www/html/*.txt
+
+sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
 
 postinstall
 
