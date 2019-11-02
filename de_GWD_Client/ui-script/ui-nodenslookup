@@ -1,6 +1,9 @@
 #!/bin/bash
 jq 'del(.dns.hosts[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
+jq --arg key "geosite:category-ads" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json
+jq --arg key "ext:h2y.dat:ad" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp2.json > /etc/vtrui/temp.json
+
 for node in $(cat /var/www/html/domain.txt); do
 	nodename=$(echo $node | cut -d : -f1)
 	nodeip=$(nslookup $nodename 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
@@ -19,3 +22,7 @@ jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtr
 done
 
 rm -rf /etc/vtrui/hosts
+
+/usr/local/bin/ui-hostsdefault > /var/www/html/hostsdefault.txt
+chown -R www-data:www-data /var/www/html/*.txt
+

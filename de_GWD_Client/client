@@ -582,12 +582,12 @@ rm -rf AriaNg*
 rm -rf index.html
 rm -rf LICENSE
 
-/usr/local/bin/ui-nodenslookup
-/usr/local/bin/ui-nodedthide
-/usr/local/bin/ui-changedoh
+/usr/local/bin/ui-nodenslookup >/dev/null 2>&1
+/usr/local/bin/ui-nodedthide >/dev/null 2>&1
+/usr/local/bin/ui-changedoh >/dev/null 2>&1
 
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]&&[[ ! -f "/etc/wireguard/cprivatekey" ]]; then
-/usr/local/bin/ui-wgchangekey
+/usr/local/bin/ui-wgchangekey >/dev/null 2>&1
 fi
 }
 
@@ -682,8 +682,6 @@ echo $v2servn > /var/www/html/doh.txt
 echo $v2servn >> /var/www/html/doh.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
-echo "" > /var/www/html/hostsdefault.txt
-echo "" > /var/www/html/hostscustomize.txt
 chown -R www-data:www-data /var/www/html/*.txt
 
 postinstall

@@ -217,12 +217,12 @@ jq --arg v2path "$v2path" '.outbounds[2].streamSettings.wsSettings.path=$v2path'
 jq --arg domain "$domain" '.outbounds[2].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[2].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-cat /var/www/html/hostsdefault.txt /var/www/html/hostscustomize.txt > /etc/vtrui/hosts
-
 jq 'del(.dns.hosts[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
 jq --arg key "geosite:category-ads" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json
 jq --arg key "ext:h2y.dat:ad" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp2.json > /etc/vtrui/temp.json
+
+cat /var/www/html/hostsdefault.txt /var/www/html/hostscustomize.txt > /etc/vtrui/hosts
 
 cat /etc/vtrui/hosts | while read line 
 do

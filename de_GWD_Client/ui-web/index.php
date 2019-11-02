@@ -302,7 +302,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:none">
+<div id="shnodedt" style="display:block">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -381,6 +381,7 @@
 </span>
           </div>
           </div>
+
 
 <div class="row">
         <!-- hosts -->
