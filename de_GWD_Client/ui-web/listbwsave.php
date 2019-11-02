@@ -6,17 +6,17 @@ $listw = $_GET['listw'];
 $listwlan = $_GET['listwlan'];
 
 $listbtxt = fopen("listb.txt", "w");
-$txt = "$listb\n";
+$txt = "$listb";
 fwrite($listbtxt, $txt);
 fclose($listbtxt);
 
 $listwtxt = fopen("listw.txt", "w");
-$txt = "$listw\n";
+$txt = "$listw";
 fwrite($listwtxt, $txt);
 fclose($listwtxt);
 
 $listwlantxt = fopen("listwlan.txt", "w");
-$txt = "$listwlan\n";
+$txt = "$listwlan";
 fwrite($listwlantxt, $txt);
 fclose($listwlantxt);
 

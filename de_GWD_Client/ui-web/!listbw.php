@@ -119,7 +119,6 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             <i class="fas fa-th-list"></i>
             名单编辑</div>
           <div class="card-body">
-<form>
           <div class="form-group">
           <div class="input-group">
           <div class="input-group-prepend">
@@ -156,7 +155,6 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             <textarea id="listwlan" class="form-control" aria-label="listwlan" rows="11"><?php echo shell_exec("cat /var/www/html/listwlan.txt"); ?></textarea>
           </div>
           </div>
-</form>
 
 <span class="float-left text-secondary">
   <small>

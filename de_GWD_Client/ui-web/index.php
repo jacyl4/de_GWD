@@ -382,6 +382,44 @@
           </div>
           </div>
 
+<div class="row">
+        <!-- hosts -->
+<div class="col-md-6">      
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-network-wired"></i>
+            静态解析
+          </div>
+
+          <div class="card-body">
+          <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">
+            hosts<br>
+            （默认）<br>
+            </span>
+          </div>
+            <textarea id="hosts" class="form-control" aria-label="hosts" rows="10"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
+          </div>
+
+          <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">
+            hosts<br>
+            （自定）<br>
+            </span>
+          </div>
+            <textarea id="hosts" class="form-control" aria-label="hosts" rows="4"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
+          </div>
+
+<span class="float-right">
+<button type="button" class="btn btn-primary" onclick="submitdoh()">应用</button>
+</span>
+          </div>
+          </div>
+</div>
+
+<div class="col-md-6">      
         <!-- 静态地址 -->
         <div class="card mb-3">
           <div class="card-header">
@@ -441,8 +479,10 @@
 </span>
           </div>
           </div>
-        </div>
+</div>
 
+</div>
+        </div>
       </div>
       <!-- /.container-fluid -->
 
