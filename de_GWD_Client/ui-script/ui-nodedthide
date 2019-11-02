@@ -15,7 +15,8 @@ cat > /etc/vtrui/config.json << EOF
   "dns": {
     "hosts":{
       "geosite:category-ads": "127.0.0.1",
-      "ext:h2y.dat:ad": "127.0.0.1"
+      "ext:h2y.dat:ad": "127.0.0.1",
+      "localhost": "127.0.0.1"
     },
     "servers": [
     {"address": "127.0.0.1","port":5390},
@@ -168,11 +169,6 @@ jq --arg uuidnum "$uuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$uuidnu
 jq --arg v2path "$v2path" '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain "$domain" '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
-jq 'del(.dns.hosts[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
-
-jq --arg key "geosite:category-ads" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json
-jq --arg key "ext:h2y.dat:ad" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp2.json > /etc/vtrui/temp.json
 
 cat /var/www/html/hostsdefault.txt /var/www/html/hostscustomize.txt > /etc/vtrui/hosts
 
