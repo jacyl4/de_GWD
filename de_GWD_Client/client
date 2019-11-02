@@ -720,10 +720,12 @@ fi
 domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
-doh=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1)
 
-echo "$doh" > /var/www/html/doh.txt
-echo "$doh" >> /var/www/html/doh.txt
+dohorigin1=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1)
+dohorigin2=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1)
+
+echo "$dohorigin1" > /var/www/html/doh.txt
+echo "$dohorigin2" >> /var/www/html/doh.txt
 chown -R www-data:www-data /var/www/html/*.txt
 
 cd ~
