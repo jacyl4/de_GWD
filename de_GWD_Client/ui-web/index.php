@@ -399,7 +399,7 @@
             （默认）<br>
             </span>
           </div>
-            <textarea id="hosts" class="form-control" aria-label="hosts" rows="10"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
+            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="10"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
           </div>
 
           <div class="input-group mb-3">
@@ -409,11 +409,11 @@
             （自定）<br>
             </span>
           </div>
-            <textarea id="hosts" class="form-control" aria-label="hosts" rows="4"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
+            <textarea id="hostscustomize" class="form-control" aria-label="hostscustomize" rows="4"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
           </div>
 
 <span class="float-right">
-<button type="button" class="btn btn-primary" onclick="submitdoh()">应用</button>
+<button type="button" class="btn btn-primary" onclick="submithosts()">应用</button>
 </span>
           </div>
           </div>
@@ -559,6 +559,12 @@ function submitdoh(){
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
 $.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
+}
+
+function submithosts(){
+hostsdefault=$("#hostsdefault").val();
+hostscustomize=$("#hostscustomize").val();
+$.get("hostssave.php", {hostsdefault:hostsdefault, hostscustomize:hostscustomize}, function(result){ location.reload(); });
 }
 
 function submitstaticip(){

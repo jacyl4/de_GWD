@@ -1,0 +1,16 @@
+#!/bin/bash
+cat /var/www/html/hostsdefault.txt /var/www/html/hostscustomize.txt > /etc/vtrui/hosts
+
+jq 'del(.dns.hosts[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+
+cat /etc/vtrui/hosts | while read line 
+do
+	key=$(echo $line | awk '{print$1}')
+	value=$(echo $line | awk '{print$2}')
+jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+done
+
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
+systemctl restart vtrui
+rm -rf /etc/vtrui/hosts
