@@ -22,6 +22,8 @@ do
 jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/config.json
 done
 
+rm -rf /etc/vtrui/temp*.json
+
 rm -rf /etc/vtrui/hosts
 
 /usr/local/bin/ui-hostsdefault > /var/www/html/hostsdefault.txt

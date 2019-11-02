@@ -199,7 +199,6 @@ systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
 
-
 cat > /etc/unbound/unbound.conf << EOF
 server:
     verbosity: 0
@@ -281,10 +280,9 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 
 jq --arg key $doh --arg value $mirrorsiteip '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json
 
-jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp2.json > /etc/vtrui/temp.json
+jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp2.json > /etc/vtrui/config.json
 
-mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
+rm -rf /etc/vtrui/temp*.json
 
 cat > /etc/systemd/system/vtrui.service << EOF
 [Unit]
@@ -352,7 +350,9 @@ ipset -N listw hash:net maxelem 65535
 for iplistw in $(cat /var/www/html/listw.txt); do
   ipset add listw $iplistw
 done
-ipset add listw $(jq -r '.dns.hosts[]' /etc/vtrui/config.json)
+for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
+  ipset add listw $hosts
+done
 
 
 ip rule add fwmark 0x9 table 100 pref 100
