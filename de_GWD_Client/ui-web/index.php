@@ -302,7 +302,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:block">
+<div id="shnodedt" style="display:none">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -399,7 +399,7 @@
             （默认）<br>
             </span>
           </div>
-            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="10"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
+            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="10" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
           </div>
 
           <div class="input-group mb-3">
