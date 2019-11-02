@@ -691,17 +691,19 @@ sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root
 
 sed -i "/$domain/d" /etc/hosts
 
-echo "$v2servn" > /var/www/html/nodename.txt
-echo "$v2servn" > /var/www/html/domain.txt
-echo "$v2servn" > /var/www/html/doh.txt
-echo "$v2servn" >> /var/www/html/doh.txt
-echo "$uuidnum" > /var/www/html/uuid.txt
-echo "$v2path" > /var/www/html/path.txt
+echo $v2servn > /var/www/html/nodename.txt
+echo $v2servn > /var/www/html/domain.txt
+echo $v2servn > /var/www/html/doh.txt
+echo $v2servn >> /var/www/html/doh.txt
+echo $uuidnum > /var/www/html/uuid.txt
+echo $v2path > /var/www/html/path.txt
+echo "" > /var/www/html/hostsdefault.txt
+echo "" > /var/www/html/hostscustomize.txt
 chown -R www-data:www-data /var/www/html/*.txt
 
-sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
-
 postinstall
+
+sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
 
 blue "----------------------"
 blue  "Install de_GWD [done]"
