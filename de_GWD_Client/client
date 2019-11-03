@@ -204,9 +204,6 @@ server:
     verbosity: 0
     interface: 127.0.0.1@5353
 
-    username: "unbound"
-    directory: "/etc/unbound"
-
     outgoing-range: 8192
     num-queries-per-thread: 4096
     so-rcvbuf: 8m
@@ -220,6 +217,10 @@ server:
     do-udp: yes
     do-tcp: yes
     
+    val-permissive-mode: yes
+    module-config: "iterator"
+
+    minimal-responses: no
     extended-statistics: no
     log-queries: no
     log-servfail: no
