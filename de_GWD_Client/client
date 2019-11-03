@@ -135,12 +135,12 @@ systemctl stop doh-client
 
 cd ~
 if [[ $architecture = "arm64" ]]; then
-  wget -N https://$mirrorsite/doharm64.zip
+  wget https://$mirrorsite/doharm64.zip
   unzip doharm64.zip
   mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
   rm -rf ~/doharm64*
 elif [[ $architecture = "amd64" ]]; then
-  wget -N https://$mirrorsite/dohamd64.zip
+  wget https://$mirrorsite/dohamd64.zip
   unzip dohamd64.zip
   mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
   rm -rf ~/dohamd64*
@@ -148,7 +148,7 @@ fi
 chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
-wget -N https://$mirrorsite/doh-client.conf
+wget https://$mirrorsite/doh-client.conf
 mv -f ~/doh-client.conf /etc/dns-over-https/doh-client.conf
 
 doh_upstream='url = "https:\/\/'$doh'\/dq"'
@@ -202,7 +202,10 @@ systemctl enable doh-client
 cat > /etc/unbound/unbound.conf << EOF
 server:
     verbosity: 0
-    interface: 0.0.0.0@5353
+    interface: 127.0.0.1@5353
+
+    username: "unbound"
+    directory: "/etc/unbound"
 
     outgoing-range: 8192
     num-queries-per-thread: 4096
@@ -213,17 +216,13 @@ server:
     msg-cache-size: 50m
 
     do-ip4: yes
-    do-ip6: yes
+    do-ip6: no
     do-udp: yes
     do-tcp: yes
-
-    val-permissive-mode: yes
-    module-config: "iterator"
     
     extended-statistics: no
     log-queries: no
     log-servfail: no
-    minimal-responses: no
     do-not-query-localhost: no
     hide-identity: yes
     hide-version: yes
@@ -247,13 +246,13 @@ cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 if [[ $architecture = "arm64" ]]; then
-    wget -N https://$mirrorsite/vtarm64.zip
+    wget https://$mirrorsite/vtarm64.zip
     unzip vtarm64.zip
     mv -f ~/vtarm64/vtrui /usr/bin/vtrui/vtrui
     mv -f ~/vtarm64/v2ctl /usr/bin/vtrui/v2ctl
     rm -rf ~/vtarm64*
 elif [[ $architecture = "amd64" ]]; then
-    wget -N https://$mirrorsite/vtamd64.zip
+    wget https://$mirrorsite/vtamd64.zip
     unzip vtamd64.zip
     mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
     mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
@@ -262,7 +261,7 @@ fi
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
-wget -N https://$mirrorsite/vtpre.zip
+wget https://$mirrorsite/vtpre.zip
 unzip vtpre.zip
 mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
 mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
@@ -440,12 +439,16 @@ systemctl enable iptables-proxy
 
 
 function installpihole(){
-iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5353
-iptables -t nat -I PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 5353
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+nameserver 1.1.1.1
+EOF
   
 if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
 rm -rf /etc/pihole/setupVars.conf
 fi
+
+mkdir -p /etc/pihole
 
 if [[ ! -f "/etc/pihole/setupVars.conf" ]]; then
 mkdir -p /etc/pihole
@@ -472,6 +475,13 @@ fi
 
 curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
+cat > /etc/dnsmasq.conf << EOF
+conf-dir=/etc/dnsmasq.d
+port=5390
+EOF
+
+pihole restartdns
+
 cat > /etc/pihole/dns-servers.conf << EOF
  114DNS;114.114.114.114;114.114.115.115
  DNSpod;119.29.29.29;119.28.28.28
@@ -496,12 +506,9 @@ sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 echo "" > /etc/pihole/adlists.list
 pihole -g
 
-cat > /etc/dnsmasq.conf << EOF
-conf-dir=/etc/dnsmasq.d
-port=5390
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
 EOF
-
-pihole restartdns
 }
 
 
@@ -527,8 +534,8 @@ fi
 function postinstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
-wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/dlc.dat
-wget -N https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/dlc.dat
+wget https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
 mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
 
@@ -579,7 +586,7 @@ chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
-wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php
 mv -f ~/version.php /var/www/html/version.php
 
 mkdir -p /var/www/html/ariang
@@ -641,7 +648,7 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
-wget -N https://$mirrorsite/ui-cnr.txt
+wget https://$mirrorsite/ui-cnr.txt
 mv -f ~/ui-cnr.txt /usr/local/bin/chnroute.txt
 
 {
