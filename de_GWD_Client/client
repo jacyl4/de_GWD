@@ -53,7 +53,7 @@ fi
 
 apt update && apt upgrade -y
 
-apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq unbound
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip zip git subversion jq unbound
 
 source /etc/profile
 
