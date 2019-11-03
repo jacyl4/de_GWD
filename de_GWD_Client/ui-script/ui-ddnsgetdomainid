@@ -10,3 +10,4 @@ curl -sX GET "https://api.cloudflare.com/client/v4/zones/$CFzoneid/dns_records" 
 
 jq --arg CFdomain "$CFdomain" -r '.result[] | select(.name == $CFdomain).id' /tmp/ddnscf
 
+rm -rf /tmp/ddnscf
