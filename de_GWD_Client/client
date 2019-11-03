@@ -312,11 +312,10 @@ systemctl enable vtrui
 function installiptablesproxy(){
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
+ipset -X hosts
 ipset -X chnroute
 ipset -X lanip
 ipset -X listwlan
-ipset -X listw
-ipset -X hosts
 
 lanip="0.0.0.0/8 \
 100.64.0.0/10 \
@@ -345,11 +344,6 @@ for iplistwlan in $(cat /var/www/html/listwlan.txt); do
   ipset add listwlan $iplistwlan
 done
 
-ipset -N listw hash:net maxelem 65535
-for iplistw in $(cat /var/www/html/listw.txt); do
-  ipset add listw $iplistw
-done
-
 ipset -N hosts hash:net maxelem 65535
 for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
   ipset add hosts $hosts
@@ -368,11 +362,10 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
@@ -405,11 +398,10 @@ iptables -t nat -X
 iptables -F
 iptables -X
 
+ipset -F hosts
 ipset -F chnroute
 ipset -F lanip
 ipset -F listwlan
-ipset -F listw
-ipset -F hosts
 
 ip route flush table 100
 ip rule del fwmark 0x9
