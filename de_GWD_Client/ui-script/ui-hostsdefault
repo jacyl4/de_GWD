@@ -5,6 +5,7 @@ jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json
 
 for key in $hostscustomizekey; do
 	sed -i "/$key/d" /tmp/hostsdefault
+	sed -i "/127.0.0.1/d" /tmp/hostsdefault
 done
 
 cat /tmp/hostsdefault
