@@ -597,8 +597,8 @@ rm -rf AriaNg*
 rm -rf index.html
 rm -rf LICENSE
 
-/usr/local/bin/ui-nodenslookup >/dev/null 2>&1
 /usr/local/bin/ui-nodedthide >/dev/null 2>&1
+/usr/local/bin/ui-nodenslookup >/dev/null 2>&1
 /usr/local/bin/ui-changedoh >/dev/null 2>&1
 
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]&&[[ ! -f "/etc/wireguard/cprivatekey" ]]; then
