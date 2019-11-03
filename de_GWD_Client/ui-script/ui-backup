@@ -2,7 +2,6 @@
 
 mkdir -p ~/de_GWD_backup
 
-cp -f /var/www/html/hostsdefault.txt ~/de_GWD_backup
 cp -f /var/www/html/hostscustomize.txt ~/de_GWD_backup
 cp -f /var/www/html/doh.txt ~/de_GWD_backup
 cp -f /var/www/html/domain.txt ~/de_GWD_backup
