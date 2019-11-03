@@ -576,13 +576,13 @@ server {
 
   ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
   ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
   ssl_session_timeout 10m;
   ssl_session_cache shared:le_nginx_SSL:10m;
   ssl_buffer_size 1400;
-  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
   ssl_early_data on;
   proxy_set_header Early-Data \$ssl_early_data;
@@ -590,13 +590,17 @@ server {
   ssl_stapling on;
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
-  resolver 8.8.8.8 valid=600s;
+  resolver 1.1.1.1 valid=600s;
   resolver_timeout 5s;
+
+  add_header X-Frame-Options DENY;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
 
 location /dq {
   proxy_http_version      1.1;
-  proxy_set_header Host \$http_host;
-  proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Host \$host;
   proxy_set_header Connection "upgrade";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -650,13 +654,13 @@ server {
 
   ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
   ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
   ssl_session_timeout 10m;
   ssl_session_cache shared:le_nginx_SSL:10m;
   ssl_buffer_size 1400;
-  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
   ssl_early_data on;
   proxy_set_header Early-Data \$ssl_early_data;
@@ -667,6 +671,10 @@ server {
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
 
+  add_header X-Frame-Options DENY;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
 
   location ~ [^/]\.php(/|$) {
     include fastcgi_params;
@@ -770,8 +778,7 @@ server {
 
 location /dq {
   proxy_http_version      1.1;
-  proxy_set_header Host \$http_host;
-  proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Host \$host;
   proxy_set_header Connection "upgrade";
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
