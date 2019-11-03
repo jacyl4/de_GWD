@@ -360,7 +360,7 @@
             （默认）<br>
             </span>
           </div>
-            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="12" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
+            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="13" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
           </div>
 
           <div class="input-group mb-3">
@@ -370,7 +370,7 @@
             （自定）<br>
             </span>
           </div>
-            <textarea id="hostscustomize" class="form-control" aria-label="hostscustomize" rows="4"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
+            <textarea id="hostscustomize" class="form-control" aria-label="hostscustomize" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
           </div>
 
 <span class="float-right">
@@ -394,14 +394,14 @@
           <div class="card-body">
   <div class="form-group">
     <div class="form-row">
-      <div class="col-md-6">
+      <div class="col-md-6 my-1">
         <div class="form-label-group">
           <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
           <label for="DoH1">DoH1</label>
         </div>
       </div>
 
-      <div class="col-md-6">
+      <div class="col-md-6 my-1">
         <div class="form-label-group">
           <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
           <label for="DoH2">DoH2</label>
@@ -424,13 +424,13 @@
           <div class="card-body">
           <div class="form-group">
             <div class="form-row">
-              <div class="col-md-6">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
                   <label for="localip">本机地址</label>
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("route -n |  awk 'NR==3{print $2}'"); ?>">
                   <label for="upstreamip">上级地址</label>
@@ -456,13 +456,13 @@
           <div class="card-body">
           <div class="form-group">
             <div class="form-row">
-              <div class="col-md-6">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="ipstart" class="form-control" placeholder="起始IP" required="required" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/dhcp.txt"); ?>">
                   <label for="ipstart">起始IP</label>
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="ipend" class="form-control" placeholder="结束IP" required="required" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/dhcp.txt"); ?>">
                   <label for="ipend">结束IP</label>

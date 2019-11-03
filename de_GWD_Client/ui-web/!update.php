@@ -118,9 +118,27 @@
           </div>
           <div class="card-body">
 
-<span class="float-left">
-  <button type="button" class="btn btn-secondary" onclick="backup()">备份</button>
-</span>
+  <div class="my-2 float-left">
+<button type="button" class="btn btn-outline-secondary" onclick="backup()">备份下载</button>
+  </div>
+
+  <div class="my-2 col-md-4 float-left">
+<div class="input-group">
+  <div class="custom-file">
+    <input type="file" class="custom-file-input" id="inputGroupFile04">
+    <label class="custom-file-label" for="inputGroupFile04">选择文件</label>
+  </div>
+  <div class="input-group-append">
+    <button type="button" class="btn btn-outline-secondary">上传恢复</button>
+  </div>
+</div>
+  </div>
+
+
+  <div class="my-2 float-right">
+<button type="button" class="btn btn-outline-danger float-right" onclick="backup()">更新</button>
+  </div>
+
           </div>
         </div>
 
