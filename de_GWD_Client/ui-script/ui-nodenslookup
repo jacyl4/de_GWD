@@ -1,9 +1,8 @@
 #!/bin/bash
-jq 'del(.dns.hosts[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
-
-jq --arg key "geosite:category-ads" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp3.json
-jq --arg key "ext:h2y.dat:ad" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp3.json > /etc/vtrui/temp2.json
-jq --arg key "localhost" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp2.json > /etc/vtrui/temp.json
+jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
+jq --arg key "geosite:category-ads" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' |\
+jq --arg key "ext:h2y.dat:ad" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' |\
+jq --arg key "localhost" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json
 
 for node in $(cat /var/www/html/domain.txt); do
 	nodename=$(echo $node | cut -d : -f1)
@@ -11,21 +10,16 @@ for node in $(cat /var/www/html/domain.txt); do
 jq --arg key $nodename --arg value $nodeip '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
 done
 
-mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
 cat /var/www/html/hostscustomize.txt > /etc/vtrui/hosts
 
 cat /etc/vtrui/hosts | while read line 
 do
 	key=$(echo $line | awk '{print$1}')
 	value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/config.json
+jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
 done
 
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
 rm -rf /etc/vtrui/temp*.json
-
 rm -rf /etc/vtrui/hosts
-
-/usr/local/bin/ui-hostsdefault > /var/www/html/hostsdefault.txt
-chown -R www-data:www-data /var/www/html/*.txt
-

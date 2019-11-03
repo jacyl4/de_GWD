@@ -9,4 +9,5 @@ for key in $hostscustomizekey; do
 done
 
 cat /tmp/hostsdefault
+
 rm -rf /tmp/hostsdefault
