@@ -476,6 +476,9 @@ fi
 
 curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
+systemctl mask dhcpcd --now
+systemctl daemon-reload
+
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=5390
