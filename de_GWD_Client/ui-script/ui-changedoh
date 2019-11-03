@@ -14,8 +14,8 @@ sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{
 doh1ip=$(nslookup $dohname1 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 doh2ip=$(nslookup $dohname2 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
-jq --arg key1 $dohname1 --arg value1 $doh1ip '.dns.hosts += {($key1): ($value1)}' /etc/vtrui/config.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/config.json
-jq --arg key2 $dohname2 --arg value2 $doh2ip '.dns.hosts += {($key2): ($value2)}' /etc/vtrui/config.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/config.json
+jq --arg key1 $dohname1 --arg value1 $doh1ip '.dns.hosts += {($key1): ($value1)}' /etc/vtrui/config.json |\
+jq --arg key2 $dohname2 --arg value2 $doh2ip '.dns.hosts += {($key2): ($value2)}' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart doh-client
 systemctl restart iptables-proxy

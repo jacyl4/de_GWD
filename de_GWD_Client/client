@@ -194,6 +194,7 @@ User=nobody
 WantedBy=multi-user.target
 EOF
 
+systemctl mask systemd-resolved --now
 systemctl daemon-reload
 systemctl restart doh-client
 systemctl enable doh-client
@@ -434,14 +435,14 @@ EOF
 systemctl daemon-reload
 systemctl restart iptables-proxy
 systemctl enable iptables-proxy
-
-systemctl mask systemd-resolved --now
-systemctl daemon-reload
 }
 
 
 
 function installpihole(){
+iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5353
+iptables -t nat -I PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 5353
+  
 if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
 rm -rf /etc/pihole/setupVars.conf
 fi
