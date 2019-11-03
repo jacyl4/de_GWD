@@ -1,0 +1,832 @@
+#!/bin/bash
+clear
+function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+
+
+mirrorsite="acccmi.cf/gwd"
+
+mirrorsiteip="172.247.127.156"
+
+ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
+
+
+architecture=""
+case $(uname -m) in
+    x86_64)  architecture="amd64" ;;
+    aarch64)  architecture="arm64" ;;
+esac
+
+
+
+function preinstall(){
+rm -rf /etc/resolv.conf
+
+cat > /etc/resolv.conf << EOF
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+EOF
+
+if [[ $(cat /etc/dnsmasq.conf) =~ "5390" ]]; then
+cat > /etc/dnsmasq.conf << EOF
+conf-dir=/etc/dnsmasq.d
+EOF
+pihole restartdns
+fi
+
+systemctl stop iptables-proxy
+
+if [[ $architecture = "amd64" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.aliyun.com/debian buster main contrib non-free
+deb http://mirrors.aliyun.com/debian buster-proposed-updates main contrib non-free
+deb http://mirrors.aliyun.com/debian buster-updates main contrib non-free
+deb http://mirrors.aliyun.com/debian-security/ buster/updates main non-free contrib
+EOF
+
+echo "" > /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/preferences.d/limit-unstable
+fi
+
+apt update && apt upgrade -y
+
+apt install -y sudo net-tools dnsutils ipset curl rsync ca-certificates unzip git subversion jq unbound
+
+source /etc/profile
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+cat > /etc/default/locale << EOF
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+locale-gen en_US.UTF-8
+
+cat > /etc/security/limits.conf << EOF
+* soft nofile 1000000
+* hard nofile 1000000
+* soft nproc 1000000
+* hard nproc 1000000
+EOF
+
+echo "ulimit -n 1000000" > ~/.bash_profile
+
+cat > /etc/sysctl.conf << EOF
+vm.overcommit_memory = 1
+fs.file-max = 1000000
+net.nf_conntrack_max = 1000000
+net.netfilter.nf_conntrack_max = 1000000
+fs.inotify.max_user_instances = 8192
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv4.ip_forward = 1
+net.ipv4.ip_local_port_range = 1024 65535
+net.ipv4.tcp_window_scaling = 1
+net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_syn_retries = 1
+net.ipv4.tcp_synack_retries = 1
+net.ipv4.tcp_timestamps = 0
+net.ipv4.tcp_fin_timeout = 30
+net.ipv4.tcp_max_syn_backlog = 16384
+net.ipv4.tcp_max_tw_buckets = 6000
+net.ipv4.tcp_max_orphans = 32768
+net.ipv4.tcp_rmem = 4096 87380 8388608
+net.ipv4.tcp_wmem = 4096 87380 8388608
+net.core.rmem_max = 8388608
+net.core.wmem_max = 8388608
+net.core.somaxconn = 32768
+net.core.netdev_max_backlog = 32768
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+EOF
+sysctl -p
+
+
+if [[ $architecture = "arm64" ]]; then
+sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
+/etc/init.d/cpufrequtils restart;
+fi
+}
+
+
+
+function installdoh(){
+doh=$(echo $mirrorsite | cut -d "/" -f1)
+sed -i "1i $mirrorsiteip $doh" /etc/hosts
+
+systemctl stop doh-client
+
+cd ~
+if [[ $architecture = "arm64" ]]; then
+  wget -N https://$mirrorsite/doharm64.zip
+  unzip doharm64.zip
+  mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
+  rm -rf ~/doharm64*
+elif [[ $architecture = "amd64" ]]; then
+  wget -N https://$mirrorsite/dohamd64.zip
+  unzip dohamd64.zip
+  mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
+  rm -rf ~/dohamd64*
+fi
+chmod +x /usr/local/bin/doh-client
+
+mkdir -p /etc/dns-over-https/
+wget -N https://$mirrorsite/doh-client.conf
+mv -f ~/doh-client.conf /etc/dns-over-https/doh-client.conf
+
+doh_upstream='url = "https:\/\/'$doh'\/dq"'
+
+sed -i "/url/c\\$doh_upstream" /etc/dns-over-https/doh-client.conf
+
+mkdir -p /etc/NetworkManager/dispatcher.d/
+
+cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/doh-client
+
+cat > /etc/systemd/system/doh-client.service << "EOF"
+[Unit]
+Description=DNS-over-HTTPS Client
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+Type=simple
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
+Restart=always
+RestartSec=3
+LimitNPROC=1000000
+LimitNOFILE=1000000
+User=nobody
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart doh-client
+systemctl enable doh-client
+
+cat > /etc/unbound/unbound.conf << EOF
+server:
+    verbosity: 0
+    interface: 0.0.0.0@5353
+
+    outgoing-range: 8192
+    num-queries-per-thread: 4096
+    so-rcvbuf: 8m
+    so-sndbuf: 8m
+    so-reuseport: yes
+    rrset-cache-size: 100m
+    msg-cache-size: 50m
+
+    do-ip4: yes
+    do-ip6: yes
+    do-udp: yes
+    do-tcp: yes
+
+    val-permissive-mode: yes
+    module-config: "iterator"
+    
+    extended-statistics: no
+    log-queries: no
+    log-servfail: no
+    minimal-responses: no
+    do-not-query-localhost: no
+    hide-identity: yes
+    hide-version: yes
+    
+forward-zone:
+  name: "."
+  forward-addr: 127.0.0.1@5380
+EOF
+
+systemctl daemon-reload
+systemctl restart unbound
+systemctl enable unbound
+}
+
+
+
+function installv2ray(){
+domainip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+
+cd ~
+mkdir -p /usr/bin/vtrui
+mkdir -p /etc/vtrui
+if [[ $architecture = "arm64" ]]; then
+    wget -N https://$mirrorsite/vtarm64.zip
+    unzip vtarm64.zip
+    mv -f ~/vtarm64/vtrui /usr/bin/vtrui/vtrui
+    mv -f ~/vtarm64/v2ctl /usr/bin/vtrui/v2ctl
+    rm -rf ~/vtarm64*
+elif [[ $architecture = "amd64" ]]; then
+    wget -N https://$mirrorsite/vtamd64.zip
+    unzip vtamd64.zip
+    mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
+    mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
+    rm -rf ~/vtamd64*
+fi
+chmod +x /usr/bin/vtrui/vtrui
+chmod +x /usr/bin/vtrui/v2ctl
+
+wget -N https://$mirrorsite/vtpre.zip
+unzip vtpre.zip
+mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
+mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
+rm -rf ~/vtpre*
+
+result=$(echo $port | grep '^[0-9]\+$')
+if [[ $result = "" ]]; then
+port="443"
+fi
+
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
+jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
+jq --arg key $doh --arg value $mirrorsiteip '.dns.hosts += {($key): ($value)}' |\
+jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
+cat > /etc/systemd/system/vtrui.service << EOF
+[Unit]
+Description=vtrui Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/vtrui.pid
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+LimitNPROC=1000000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart vtrui
+systemctl enable vtrui
+}
+
+
+
+function installiptablesproxy(){
+cat > /usr/local/bin/iptables-proxy-up << "EOF"
+#!/bin/bash
+ipset -X chnroute
+ipset -X lanip
+ipset -X listwlan
+ipset -X listw
+ipset -X hosts
+
+lanip="0.0.0.0/8 \
+100.64.0.0/10 \
+127.0.0.0/8 \
+169.254.0.0/16 \
+10.0.0.0/8 \
+172.16.0.0/12 \
+192.168.0.0/16 \
+255.255.255.255/32 \
+114.114.114.114/32 \
+114.114.115.115/32 \
+119.29.29.29/32 \
+119.28.28.28/32 \
+223.5.5.5/32 \
+223.6.6.6/32"
+
+ipset -R < /usr/local/bin/chnrouteset
+
+ipset -N lanip hash:net maxelem 65535
+for iplanip in $lanip; do
+  ipset add lanip $iplanip
+done
+
+ipset -N listwlan hash:net maxelem 65535
+for iplistwlan in $(cat /var/www/html/listwlan.txt); do
+  ipset add listwlan $iplistwlan
+done
+
+ipset -N listw hash:net maxelem 65535
+for iplistw in $(cat /var/www/html/listw.txt); do
+  ipset add listw $iplistw
+done
+
+ipset -N hosts hash:net maxelem 65535
+for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
+  ipset add hosts $hosts
+done
+
+
+ip rule add fwmark 0x9 table 100 pref 100
+ip route add local default dev lo table 100
+
+iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5353 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5353 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listw dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
+
+iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
+
+iptables -t mangle -A OUTPUT -p tcp -j V2PROXY
+iptables -t mangle -A OUTPUT -p udp -j V2PROXY
+
+iptables -t mangle -A PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
+
+iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+systemctl restart vtrui
+
+if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) =~ "wg0" ]]; then
+systemctl restart wg-quick@wg0
+fi
+EOF
+chmod +x /usr/local/bin/iptables-proxy-up
+
+cat > /usr/local/bin/iptables-proxy-down << EOF
+#!/bin/bash
+systemctl stop vtrui
+
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -F
+iptables -X
+
+ipset -F chnroute
+ipset -F lanip
+ipset -F listwlan
+ipset -F listw
+ipset -F hosts
+
+ip route flush table 100
+ip rule del fwmark 0x9
+EOF
+chmod +x /usr/local/bin/iptables-proxy-down
+
+cat > /etc/systemd/system/iptables-proxy.service << EOF
+[Unit]
+Description=iptables-proxy
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/iptables-proxy-up
+ExecStop=/usr/local/bin/iptables-proxy-down
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart iptables-proxy
+systemctl enable iptables-proxy
+
+systemctl mask systemd-resolved --now
+systemctl daemon-reload
+}
+
+
+
+function installpihole(){
+if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
+rm -rf /etc/pihole/setupVars.conf
+fi
+
+if [[ ! -f "/etc/pihole/setupVars.conf" ]]; then
+mkdir -p /etc/pihole
+
+cat > /etc/pihole/setupVars.conf << EOF
+PIHOLE_INTERFACE=$ethernetnum
+IPV4_ADDRESS=$localaddr/24
+IPV6_ADDRESS=
+PIHOLE_DNS_1=119.29.29.29
+PIHOLE_DNS_2=119.28.28.28
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=true
+INSTALL_WEB_INTERFACE=true
+LIGHTTPD_ENABLED=true
+BLOCKING_ENABLED=true
+WEBPASSWORD=0000000000000000000000000000000000000000000000000000000000000000
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=false
+EOF
+fi
+
+curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+
+cat > /etc/pihole/dns-servers.conf << EOF
+ 114DNS;114.114.114.114;114.114.115.115
+ DNSpod;119.29.29.29;119.28.28.28
+ 阿里DNS;223.5.5.5;223.6.6.6
+EOF
+
+sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=119.29.29.29' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=114.114.115.115' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=114.114.114.114' /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=114.114.114.114' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=114.114.115.115' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
+
+echo "" > /etc/pihole/adlists.list
+pihole -g
+
+cat > /etc/dnsmasq.conf << EOF
+conf-dir=/etc/dnsmasq.d
+port=5390
+EOF
+
+pihole restartdns
+}
+
+
+
+function installwg(){
+if [[ $architecture = "amd64" ]]; then
+
+systemctl stop wg-quick@wg0
+
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
+apt update
+
+apt install -y wireguard
+
+mkdir -p /etc/wireguard
+fi
+}
+
+
+
+function postinstall(){
+cat > /usr/local/bin/updateGWD << "EOF"
+#!/bin/bash
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/dlc.dat
+wget -N https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
+mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
+
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
+
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
+
+ipset -F chnroute
+for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
+  ipset add chnroute $ipchnroute
+done
+EOF
+chmod +x /usr/local/bin/updateGWD
+/usr/local/bin/updateGWD
+
+cat > /usr/local/bin/clearcache << "EOF"
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+rm -rf ~/client
+rm -rf /var/log/*1*
+rm -rf /var/log/*2*
+rm -rf /var/log/*.gz
+rm -rf /var/www/html/log.log
+EOF
+chmod +x /usr/local/bin/clearcache
+/usr/local/bin/clearcache
+
+cat > ~/now.cron << EOF
+0 4 * * * /usr/local/bin/updateGWD
+0 */4 * * * /usr/local/bin/clearcache
+EOF
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-script
+svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-web
+
+rsync -r ~/ui-script/* /usr/local/bin
+chmod +x /usr/local/bin/*
+rsync -r ~/ui-web/* /var/www/html
+rm -rf ~/ui-*
+
+wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Client/version.php
+mv -f ~/version.php /var/www/html/version.php
+
+mkdir -p /var/www/html/ariang
+cd ~
+wget -q $ariang
+
+unzip AriaNg-*
+
+mv -f index.html /var/www/html/ariang
+
+rm -rf AriaNg*
+rm -rf index.html
+rm -rf LICENSE
+
+/usr/local/bin/ui-nodenslookup >/dev/null 2>&1
+/usr/local/bin/ui-nodedthide >/dev/null 2>&1
+/usr/local/bin/ui-changedoh >/dev/null 2>&1
+
+if [[ ! -f "/etc/wireguard/sprivatekey" ]]&&[[ ! -f "/etc/wireguard/cprivatekey" ]]; then
+/usr/local/bin/ui-wgchangekey >/dev/null 2>&1
+fi
+
+sed -i "/$doh/d" /etc/hosts
+}
+
+
+
+installgwd(){
+    green "========================="
+    green "de_GWD IP address"
+    green "========================="
+    read localaddr
+
+    green "========================="
+    green "Upstream route IP address"
+    green "========================="
+    read gatewayaddr
+
+    green "========================="
+    green "V2ray domain"
+    green "========================="
+    read v2servn
+
+    green "========================="
+    green "V2ray UUID"
+    green "========================="
+    read uuidnum
+
+    green "========================="
+    green "Path"
+    green "========================="
+    read v2path
+
+cd ~
+
+preinstall
+
+domain=$(echo $v2servn | cut -d : -f1)
+port=$(echo $v2servn | cut -d : -f2)
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+
+wget -N https://$mirrorsite/ui-cnr.txt
+mv -f ~/ui-cnr.txt /usr/local/bin/chnroute.txt
+
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
+
+installdoh
+
+installv2ray
+
+installiptablesproxy
+
+installpihole
+
+sed -i "/static ip_address=/d" /etc/dhcpcd.conf
+sed -i "/static routers=/d" /etc/dhcpcd.conf
+sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
+
+echo -e "static ip_address=$localaddr/24" >> /etc/dhcpcd.conf
+echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
+echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
+
+cat > /etc/network/interfaces << EOF
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+EOF
+
+pihole restartdns
+
+installwg
+
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+
+sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
+
+echo $v2servn > /var/www/html/doh.txt
+echo $v2servn >> /var/www/html/doh.txt
+echo $v2servn > /var/www/html/nodename.txt
+echo $v2servn > /var/www/html/domain.txt
+echo $uuidnum > /var/www/html/uuid.txt
+echo $v2path > /var/www/html/path.txt
+chown -R www-data:www-data /var/www/html/*.txt
+
+postinstall
+
+blue "----------------------"
+blue  "Install de_GWD [done]"
+blue "----------------------"
+}
+
+
+change_piholeadmin(){
+pihole -a -p
+blue "-------------------------------"
+blue  "Change Pi-hole password [done]"
+blue "-------------------------------"
+}
+
+
+
+updategwd(){
+localaddr=$(ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}')
+port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
+
+result=$(echo $port | grep '^[0-9]\+$')
+if [[ $result = "" ]]; then
+port="443"
+fi
+
+domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
+uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
+v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+
+dohorigin1=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1)
+dohorigin2=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1)
+
+echo "$dohorigin1" > /var/www/html/doh.txt
+echo "$dohorigin2" >> /var/www/html/doh.txt
+chown -R www-data:www-data /var/www/html/*.txt
+
+cd ~
+
+preinstall
+
+installdoh
+
+installv2ray
+
+installiptablesproxy
+
+installpihole
+
+installwg
+
+postinstall
+
+blue "---------------------"
+blue  "Update de_GWD [done]"
+blue "---------------------"
+}
+
+
+start_menu(){
+statusgod=$(green "✔︎")
+statusbad=$(red "✘")
+
+if [[ $(systemctl is-active doh-client) = "active" ]]; then
+    echo "[$statusgod] DoH client     [working]"
+elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
+    echo "[$statusbad] DoH client     [not Installed]"
+else
+    echo "[$statusbad] DoH client     [start failed]"
+fi
+
+
+if [[ $(systemctl is-active vtrui) = "active" ]]; then
+    echo "[$statusgod] V2RAY          [working]"
+elif [[ ! -f "/usr/bin/vtrui" ]]; then
+    echo "[$statusbad] V2RAY          [not Installed]"
+else
+    echo "[$statusbad] V2RAY          [start failed]"
+fi
+
+
+if [[ $(systemctl is-active iptables-proxy) = "active" ]]; then
+    echo "[$statusgod] Iptables-proxy [working]"
+elif [[ ! -f "/etc/systemd/system/iptables-proxy.service" ]]; then
+    echo "[$statusbad] Iptables-proxy [not Installed]"
+else
+    echo "[$statusbad] Iptables-proxy [start failed]"
+fi
+
+
+if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+    echo "[$statusgod] Pi-hole        [working]"
+elif [ ! -f "/usr/local/bin/pihole" ]; then
+    echo "[$statusbad] Pi-hole        [not installed]"
+else
+    echo "[$statusbad] Pi-hole        [start failed]"
+fi
+
+    green "======================================="
+    green "                  CLIENT               "
+    green "Require: only Debian 10 (amd64 & arm64) "
+    green "Author:  JacyL4                         "
+    green "======================================="
+    echo
+    green  "1. Install de_GWD"
+    green  "2. Change de_GWD password"
+    yellow "0. Update de_GWD"
+    red    "CTRL+C EXIT"
+    echo
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installgwd
+    start_menu
+    ;;
+    2)
+    change_piholeadmin
+    start_menu
+    ;;
+    0)
+    updategwd
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
