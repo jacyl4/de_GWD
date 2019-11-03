@@ -360,7 +360,7 @@
             （默认）<br>
             </span>
           </div>
-            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="13" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
+            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="12" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
           </div>
 
           <div class="input-group mb-3">
@@ -370,7 +370,7 @@
             （自定）<br>
             </span>
           </div>
-            <textarea id="hostscustomize" class="form-control" aria-label="hostscustomize" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
+            <textarea id="hostscustomize" class="form-control" aria-label="hostscustomize" rows="5"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
           </div>
 
 <span class="float-right">
