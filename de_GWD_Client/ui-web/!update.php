@@ -113,7 +113,7 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-archive"></i>
-            备份-恢复
+            备份-恢复-更新
           <span id="ddnscheckcf" class="badge text-success"></span>
           </div>
           <div class="card-body">
@@ -136,7 +136,7 @@
 
 
   <div class="my-2 float-right">
-<button type="button" class="btn btn-outline-danger float-right" onclick="backup()">更新</button>
+<button type="button" class="btn btn-outline-danger float-right" onclick="update()">更新</button>
   </div>
 
           </div>
