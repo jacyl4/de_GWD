@@ -1,4 +1,3 @@
-<?php ob_start(ob_gzhandler); ?>
 <?php require_once('auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <!DOCTYPE html>
@@ -832,4 +831,3 @@ $("#"+nodenum).html(nodestatust);
 <?php }?>
 <?php  if(!$auth){ ?>
 <?php header('Location: login.php');} ?>
-<?php ob_end_flush(); ?>

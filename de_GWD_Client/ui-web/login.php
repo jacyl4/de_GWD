@@ -1,4 +1,3 @@
-<?php ob_start(ob_gzhandler); ?> 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,4 +66,3 @@ $.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href=
 </body>
 
 </html>
-<?php ob_end_flush(); ?> 

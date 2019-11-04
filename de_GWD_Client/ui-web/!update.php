@@ -1,4 +1,3 @@
-<?php ob_start(ob_gzhandler); ?> 
 <?php require_once('auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
   
@@ -13,7 +12,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>de_GWD - DDNS</title>
+  <title>de_GWD - 更新</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -118,22 +117,27 @@
           </div>
           <div class="card-body">
 
+<div class="progress">
+  <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
   <div class="my-2 float-left">
 <button type="button" class="btn btn-outline-secondary" onclick="backup()">备份下载</button>
   </div>
 
   <div class="my-2 col-md-4 float-left">
+<form>
 <div class="input-group">
   <div class="custom-file">
-    <input type="file" class="custom-file-input" id="inputGroupFile04">
-    <label class="custom-file-label" for="inputGroupFile04">选择文件</label>
+    <input type="file" class="custom-file-input" id="customFile">
+    <label class="custom-file-label" for="customFile">...</label>
   </div>
   <div class="input-group-append">
-    <button type="button" class="btn btn-outline-secondary">上传恢复</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="restore()">上传恢复</button>
   </div>
 </div>
+</form>
   </div>
-
 
   <div class="my-2 float-right">
 <button type="button" class="btn btn-outline-danger float-right" onclick="update()">更新</button>
@@ -173,6 +177,12 @@ $.get('backup.php', function(result){window.location.href = "de_GWD_backup.zip"}
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
+
+$(".custom-file-input").on("change", function() {
+  var fileName = $(this).val().split("\\").pop();
+  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+
 }
 </script>
 
@@ -199,4 +209,3 @@ $(".sidebar").toggleClass("toggled");
 <?php }?>
 <?php  if(!$auth){ ?>
 <?php header('Location: login.php');} ?>
-<?php ob_end_flush(); ?> 
