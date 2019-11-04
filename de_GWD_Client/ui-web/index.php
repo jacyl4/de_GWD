@@ -301,7 +301,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:none">
+<div id="shnodedt" style="display:block">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -385,25 +385,25 @@
             Dns over Https
           <span class="float-right mt-n1 mb-n2">
                 <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
+                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitdoh()">应用</button>
           </span>
           </div>
           <div class="card-body">
           <div class="form-group">
             <div class="form-row">
-              <div class="col-md-5 my-1">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
                   <label for="DoH1">DoH1</label>
                 </div>
               </div>
-              <div class="col-md-5 my-1 ml-auto">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
                   <label for="DoH2">DoH2</label>
                 </div>
               </div>
-<button type="button" class="btn btn-outline-primary my-1 m-auto" onclick="submitdoh()">应用</button>
             </div>
           </div>
           </div>
@@ -414,23 +414,26 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-exchange-alt"></i>
-            静态地址</div>
+            静态地址
+          <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitstaticip()">重启</button>
+          </span>
+          </div>
           <div class="card-body">
           <div class="form-group">
             <div class="form-row">
-              <div class="col-md-5 my-1">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
                   <label for="localip">本机地址</label>
                 </div>
               </div>
-              <div class="col-md-5 my-1 ml-auto">
+              <div class="col-md-6 my-1">
                 <div class="form-label-group">
                   <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("route -n |  awk 'NR==3{print $2}'"); ?>">
                   <label for="upstreamip">上级地址</label>
                 </div>
               </div>
-<button type="button" class="btn btn-outline-danger my-1 m-auto" onclick="submitstaticip()">重启</button>
             </div>
           </div>
           </div>
@@ -444,8 +447,8 @@
             DHCP 服务
           <span id="dhcpcheck" class="badge badge-pill text-success"></span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-primary  btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
-<button type="button" class="btn btn-outline-danger  btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpdown()">关闭</button>
+<button type="button" class="btn btn-outline-success btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
+<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpdown()">关闭</button>
 </span>
           </div>
 
