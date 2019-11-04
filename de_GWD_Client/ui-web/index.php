@@ -347,7 +347,7 @@
 <div class="col-md-6 m-auto">      
         <div class="card mb-3">
           <div class="card-header">
-            <i class="fas fa-network-wired"></i>
+            <i class="far fa-compass"></i>
             静态解析
           <span class="float-right mt-n1 mb-n2">
             <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submithosts()">提交</button>
