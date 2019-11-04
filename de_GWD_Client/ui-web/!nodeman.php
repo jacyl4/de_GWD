@@ -283,7 +283,7 @@ path7:path7,
 path8:path8,
 path9:path9,
 }, function(result){ location.reload(); });
-alert("节点信息已保存");
+alert("节点信息开始保存,等待自动刷新。");
 }
 </script>
             </div>
