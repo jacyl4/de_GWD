@@ -126,14 +126,14 @@
           <div class="card-body">
   <div class="form-group">
     <div class="form-row mb-3">
-      <div class="col-md-6 input-group">
+      <div class="col-md-6 input-group my-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">域名</span>
         </div>
           <input type="text" id="CFdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/ddnscf.txt"); ?>">
       </div>
 
-      <div class="col-md-6 input-group">
+      <div class="col-md-6 input-group my-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Zone ID</span>
         </div>
@@ -142,14 +142,14 @@
     </div>
 
     <div class="form-row">
-      <div class="col-md-6 input-group">
+      <div class="col-md-6 input-group my-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF API KEY</span>
         </div>
           <input type="text" id="CFapikey" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/ddnscf.txt"); ?>">
       </div>
 
-      <div class="col-md-6 input-group">
+      <div class="col-md-6 input-group my-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF E-mail</span>
         </div>
@@ -174,7 +174,7 @@
           <div class="card-body">
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group">
+      <div class="col-md-6 input-group my-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">域名/公网IP</span>
         </div>
@@ -183,10 +183,10 @@
 
       <div class="col-md-6">
         <span class="float-right">
-          <button type="button" class="btn btn-outline-secondary" onclick="wgrekey()">重新生成密钥</button>
-          <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
-          <button type="button" class="btn btn-outline-primary" onclick="wgon()">开启</button>
-          <button type="button" class="btn btn-outline-danger" onclick="wgoff()">关闭</button>
+          <button type="button" class="btn btn-outline-secondary my-1" onclick="wgrekey()">重新生成密钥</button>
+          <button type="button" class="btn btn-outline-dark my-1" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
+          <button type="button" class="btn btn-outline-primary my-1" onclick="wgon()">开启</button>
+          <button type="button" class="btn btn-outline-danger my-1" onclick="wgoff()">关闭</button>
         </span>
       </div>
 </div>
