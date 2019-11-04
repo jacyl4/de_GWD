@@ -349,6 +349,9 @@
           <div class="card-header">
             <i class="fas fa-network-wired"></i>
             静态解析
+          <span class="float-right mt-n1 mb-n2">
+            <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submithosts()">提交</button>
+          </span>
           </div>
 
           <div class="card-body">
@@ -356,25 +359,20 @@
           <div class="input-group-prepend">
             <span class="input-group-text">
             hosts<br>
-            （默认）<br>
+            （自定）<br>
             </span>
           </div>
-            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="12" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
+            <textarea id="hostscustomize" class="form-control" aria-label="hostscustomize" rows="4"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
           </div>
-
           <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text">
             hosts<br>
-            （自定）<br>
+            （默认）<br>
             </span>
           </div>
-            <textarea id="hostscustomize" class="form-control" aria-label="hostscustomize" rows="5"><?php echo shell_exec("sudo /usr/local/bin/ui-hostscustomize"); ?></textarea>
+            <textarea id="hostsdefault" class="form-control" aria-label="hostsdefault" rows="10" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsdefault"); ?></textarea>
           </div>
-
-<span class="float-right">
-<button type="button" class="btn btn-primary" onclick="submithosts()">应用</button>
-</span>
           </div>
           </div>
 </div>
@@ -385,32 +383,29 @@
           <div class="card-header">
             <i class="fas fa-bezier-curve"></i>
             Dns over Https
-         <span class="float-right mt-n1 mb-n2">
+          <span class="float-right mt-n1 mb-n2">
                 <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
           </span>
           </div>
           <div class="card-body">
-  <div class="form-group">
-    <div class="form-row">
-      <div class="col-md-6 my-1">
-        <div class="form-label-group">
-          <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
-          <label for="DoH1">DoH1</label>
-        </div>
-      </div>
-
-      <div class="col-md-6 my-1">
-        <div class="form-label-group">
-          <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
-          <label for="DoH2">DoH2</label>
-        </div>
-      </div>
-    </div>
-  </div>
-<span class="float-right">
-  <button type="button" class="btn btn-primary" onclick="submitdoh()">应用&解析</button>
-</span>
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col-md-5 my-1">
+                <div class="form-label-group">
+                  <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
+                  <label for="DoH1">DoH1</label>
+                </div>
+              </div>
+              <div class="col-md-5 my-1 ml-auto">
+                <div class="form-label-group">
+                  <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
+                  <label for="DoH2">DoH2</label>
+                </div>
+              </div>
+<button type="button" class="btn btn-outline-primary my-1 m-auto" onclick="submitdoh()">应用</button>
+            </div>
+          </div>
           </div>
           </div>
 
@@ -423,23 +418,21 @@
           <div class="card-body">
           <div class="form-group">
             <div class="form-row">
-              <div class="col-md-6 my-1">
+              <div class="col-md-5 my-1">
                 <div class="form-label-group">
                   <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
                   <label for="localip">本机地址</label>
                 </div>
               </div>
-              <div class="col-md-6 my-1">
+              <div class="col-md-5 my-1 ml-auto">
                 <div class="form-label-group">
                   <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("route -n |  awk 'NR==3{print $2}'"); ?>">
                   <label for="upstreamip">上级地址</label>
                 </div>
               </div>
+<button type="button" class="btn btn-outline-danger my-1 m-auto" onclick="submitstaticip()">重启</button>
             </div>
           </div>
-<span class="float-right">
-<button type="button" class="btn btn-danger" onclick="submitstaticip()">应用&重启</button>
-</span>
           </div>
           </div>
 
@@ -450,6 +443,10 @@
             <i class="fas fa-network-wired"></i>
             DHCP 服务
           <span id="dhcpcheck" class="badge badge-pill text-success"></span>
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-primary  btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
+<button type="button" class="btn btn-outline-danger  btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpdown()">关闭</button>
+</span>
           </div>
 
           <div class="card-body">
@@ -469,10 +466,6 @@
               </div>
             </div>
           </div>
-<span class="float-right">
-<button type="button" class="btn btn-outline-primary" onclick="dhcpup()">开启</button>
-<button type="button" class="btn btn-outline-danger" onclick="dhcpdown()">关闭</button>
-</span>
           </div>
           </div>
 </div>
