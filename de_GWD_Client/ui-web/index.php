@@ -818,11 +818,6 @@ $("#"+nodenum).html(nodestatust);
   <!-- Custom scripts for all pages-->
   <script src="js/sb-admin.min.js"></script>
 
-  <!-- Page level plugin JavaScript-->
-  <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-  <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-  <!-- scripts for this page-->
 
 </body>
 
