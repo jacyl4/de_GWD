@@ -1,13 +1,8 @@
 #!/bin/bash
-hostscustomizekey=$(awk '{print $1}' /var/www/html/hostscustomize.txt)
+sed "/127.0.0.1/d" /etc/vtrui/config.json | jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' > /tmp/hostsdefault
 
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json > /tmp/hostsdefault
-
-for key in $hostscustomizekey; do
+for key in $(awk '{print $1}' /var/www/html/hostscustomize.txt); do
 	sed -i "/$key/d" /tmp/hostsdefault
-	sed -i "/127.0.0.1/d" /tmp/hostsdefault
 done
 
 cat /tmp/hostsdefault
-
-rm -rf /tmp/hostsdefault
