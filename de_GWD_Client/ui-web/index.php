@@ -499,24 +499,24 @@
 <script>
 function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-};
+}
 
 function uptime(){
 $.get('uptime.php', function(data) { $('#uptime').text(data) });
-};
+}
 
 function chlink1(){
 $.get('testbaidu.php', function(data) { $('#testbaidu').text(data) });
-};
+}
 
 function chlink2(){
 $.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
-};
+}
 
 function proxyon(){
 alert("确认重启代理进程");
 $.get('proxyon.php', function(result){ location.reload(); });
-};
+}
 
 function pingtest(){
 $.get('ping1.php', function(data) { $('#ping1').text(data) });
@@ -528,15 +528,15 @@ $.get("ping6.php", function(data) { $('#ping6').text(data) });
 $.get("ping7.php", function(data) { $('#ping7').text(data) });
 $.get("ping8.php", function(data) { $('#ping8').text(data) });
 $.get("ping9.php", function(data) { $('#ping9').text(data) });
-};
+}
 
 function shownodedt(){
 $.get('nodedtswitch.php', {nodedtswitch:"nodedtshow"}, function(result){ location.reload(); });
-};
+}
 
 function hidenodedt(){
 $.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ location.reload(); });
-};
+}
 
 function submitlocalip(){
 localiptxt=$('#nodedttext').val();
