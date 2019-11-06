@@ -7,7 +7,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-apt install -y sudo net-tools dnsutils curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
+apt install -y sudo locales net-tools dnsutils wget curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
 
 source /etc/profile
 
@@ -15,8 +15,8 @@ echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 cat > /etc/default/locale << EOF
-LANG=en_US.UTF-8
-LANGUAGE=en_US.UTF-8
+LANG="en_US.UTF-8"
+LANGUAGE="en_US.UTF-8"
 LC_CTYPE="en_US.UTF-8"
 LC_NUMERIC="en_US.UTF-8"
 LC_TIME="en_US.UTF-8"
@@ -29,7 +29,7 @@ LC_ADDRESS="en_US.UTF-8"
 LC_TELEPHONE="en_US.UTF-8"
 LC_MEASUREMENT="en_US.UTF-8"
 LC_IDENTIFICATION="en_US.UTF-8"
-LC_ALL=en_US.UTF-8
+LC_ALL="en_US.UTF-8"
 EOF
 locale-gen en_US.UTF-8
 
