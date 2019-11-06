@@ -19,5 +19,6 @@ function sys_linux()
  $sysInfo = sys_linux(); 
  $uptime = $sysInfo['uptime']; 
  echo $uptime;
+die();
 ?>
 <?php ob_end_flush(); ?> 

@@ -4,7 +4,8 @@
 
 $nodedtnum = exec("/usr/local/bin/ui-nodecheckdt"); 
 
-echo shell_exec("awk 'NR=={$nodedtnum}{print}' /var/www/html/nodename.txt"); 
+echo shell_exec("awk 'NR=={$nodedtnum}{print}' /var/www/html/nodename.txt");
 
+die();
 ?>
 <?php }?>

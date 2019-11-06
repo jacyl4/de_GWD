@@ -1,0 +1,9 @@
+#!/bin/bash
+cd /var/www/html/restore
+
+unzip /var/www/html/restore/de_GWD_backup.zip
+
+mv -f /var/www/html/restore/de_GWD_backup/*.txt /var/www/html
+
+rm -rf /var/www/html/de_GWD_backup.zip
+rm -rf /var/www/html/restore/de_GWD_backup.zip

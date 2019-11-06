@@ -4,7 +4,8 @@
 
 $nodenfnum = exec("/usr/local/bin/ui-nodechecknf"); 
 
-echo shell_exec("awk 'NR=={$nodenfnum}{print}' /var/www/html/nodename.txt"); 
+echo shell_exec("awk 'NR=={$nodenfnum}{print}' /var/www/html/nodename.txt");
 
+die();
 ?>
 <?php }?>

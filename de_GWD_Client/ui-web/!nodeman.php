@@ -16,10 +16,7 @@
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-
-  <!-- Page level plugin CSS-->
-  <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-
+  
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.min.css" rel="stylesheet">
   <link href="css/bootstrap4-toggle.min.css" rel="stylesheet">

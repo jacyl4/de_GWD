@@ -579,6 +579,10 @@ rm -rf ~/now.cron
 svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/de_GWD_Client/ui-web
 
+mkdir -p /var/www/html/restore
+chown -R www-data:www-data /var/www/html/restore
+chown -R www-data:www-data /var/www/html/*.txt
+
 rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
@@ -700,7 +704,6 @@ echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
-chown -R www-data:www-data /var/www/html/*.txt
 
 postinstall
 

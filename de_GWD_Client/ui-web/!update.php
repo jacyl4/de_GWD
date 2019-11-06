@@ -17,9 +17,6 @@
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
 
-  <!-- Page level plugin CSS-->
-  <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.min.css" rel="stylesheet">
 
@@ -129,8 +126,8 @@
 <form>
 <div class="input-group">
   <div class="custom-file">
-    <input type="file" class="custom-file-input" id="customFile">
-    <label class="custom-file-label" for="customFile">...</label>
+    <input type="file" class="custom-file-input" id="restorefile">
+    <label class="custom-file-label" for="restorefile">...</label>
   </div>
   <div class="input-group-append">
     <button type="button" class="btn btn-outline-secondary" onclick="restore()">上传恢复</button>
@@ -174,15 +171,36 @@ function backup(){
 $.get('backup.php', function(result){window.location.href = "de_GWD_backup.zip"});
 }
 
+function restore(){
+var file_data = $('#restorefile').prop('files')[0];
+var form_data = new FormData();
+form_data.append('file', file_data);
+$.ajax({
+        url: 'restore.php',
+        dataType: 'zip',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        type: 'post',
+        success: function(data){
+        }
+      });
+alert('设置已恢复')
+}
+
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
-
-$(".custom-file-input").on("change", function() {
+  $(".custom-file-input").on("change", function() {
   var fileName = $(this).val().split("\\").pop();
   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-});
 
+  if( fileName != "de_GWD_backup.zip" ){
+  alert("文件选择错误");
+  }
+
+});
 }
 </script>
 
