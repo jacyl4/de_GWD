@@ -511,7 +511,9 @@ EOF
 
 
 function installwg(){
-if [[ $architecture = "amd64" ]]; then
+if [[ $architecture = "arm64" ]]; then
+apt install -y linux-headers-odroidxu4
+fi
 
 systemctl stop wg-quick@wg0 > /dev/null 2>&1
 
@@ -523,7 +525,6 @@ apt update
 apt install -y wireguard
 
 mkdir -p /etc/wireguard
-fi
 }
 
 
