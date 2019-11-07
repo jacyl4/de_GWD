@@ -114,10 +114,6 @@
           </div>
           <div class="card-body">
 
-<div class="progress">
-  <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-</div>
-
   <div class="my-2 float-left">
 <button type="button" class="btn btn-outline-secondary" onclick="backup()">备份下载</button>
   </div>
