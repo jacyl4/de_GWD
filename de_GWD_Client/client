@@ -537,7 +537,8 @@ wget https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/
 mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
 
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > /usr/local/bin/chnroute.txt
+curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
+mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
 
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
