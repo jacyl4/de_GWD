@@ -588,7 +588,7 @@ chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/version.php
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
 
 mkdir -p /var/www/html/ariang

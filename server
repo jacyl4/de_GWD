@@ -825,7 +825,7 @@ rm -rf /var/log/*2
 rm -rf /var/log/*gz
 
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
-remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/version.php | awk 'NR==1')
+remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
 
 if [[ $localver < $remotever ]]; then
 crontab -l > ~/now.cron
@@ -855,7 +855,7 @@ rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
 fi
 
-wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/version.php
+wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 }
 
 
@@ -1510,7 +1510,7 @@ sed -i '/localver=/,$d' /usr/local/bin/updateGWD
 
 cat >> /usr/local/bin/updateGWD << "EOF"
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
-remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/version.php | awk 'NR==1')
+remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
 
 if [[ $localver < $remotever ]]; then
 crontab -l > ~/now.cron
