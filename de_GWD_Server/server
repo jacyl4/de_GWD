@@ -598,11 +598,8 @@ server {
   add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
 
 location /dq {
-  proxy_http_version      1.1;
   proxy_set_header Host \$host;
   proxy_set_header X-Real-IP \$remote_addr;
-  proxy_redirect          off;
-  proxy_buffering         off;
   proxy_pass              http://localhost:8053/dq;
 }
 
