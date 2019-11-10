@@ -7,7 +7,7 @@
 
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/de_GWD_Server/server)
+bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
 ![server](https://i.loli.net/2019/11/01/hbP2BHvGyIXutOR.png)
 
