@@ -797,7 +797,7 @@ EOF
 function postinstall(){
 cat > /usr/local/bin/autoupdate << "EOF"
 #!/bin/bash
-wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/server
+wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
 
 sed -i '$d' ~/update
 
