@@ -8,4 +8,9 @@ else
 nodecheck=$domain:$port
 fi
 
-sed -n -e "/$nodecheck/=" /var/www/html/domain.txt
+nodecheck2=$(echo $nodecheck | cut -d . -f1)
+
+sed -n -e "/$nodecheck/=" /var/www/html/domain.txt > /tmp/nodecheckdt
+awk -F. '{print$1}' /var/www/html/domain.txt | sed -n -e "/$nodecheck2/=" >> /tmp/nodecheckdt
+
+sort /tmp/nodecheckdt | uniq -d
