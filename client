@@ -448,7 +448,7 @@ mkdir -p /etc/pihole
 
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
-IPV4_ADDRESS=$localaddr/24
+IPV4_ADDRESS=$localaddr/32
 IPV6_ADDRESS=
 PIHOLE_DNS_1=119.29.29.29
 PIHOLE_DNS_2=119.28.28.28
