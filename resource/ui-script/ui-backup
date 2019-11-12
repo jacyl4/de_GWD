@@ -10,12 +10,15 @@ cp -f /var/www/html/path.txt ~/de_GWD_backup
 cp -f /var/www/html/uuid.txt ~/de_GWD_backup
 cp -f /var/www/html/ddnscf.txt ~/de_GWD_backup
 cp -f /var/www/html/WGaddress.txt ~/de_GWD_backup
-
+cp -f /etc/wireguard/sprivatekey ~/de_GWD_backup
+cp -f /etc/wireguard/cprivatekey ~/de_GWD_backup
+cp -f /etc/wireguard/spublickey ~/de_GWD_backup
+cp -f /etc/wireguard/cpublickey ~/de_GWD_backup
 
 cd ~
 
 zip -r de_GWD_backup.zip de_GWD_backup
 
-mv -f ~/de_GWD_backup.zip /var/www/html
-
 rm -rf ~/de_GWD_backup*
+
+mv -f ~/de_GWD_backup.zip /var/www/html

@@ -2,6 +2,7 @@
 cd /var/www/html/restore
 
 unzip /var/www/html/restore/de_GWD_backup.zip
+chown -R www-data:www-data /var/www/html/*.txt
 
 mv -f /var/www/html/restore/de_GWD_backup/*.txt /var/www/html
 
