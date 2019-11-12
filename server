@@ -523,10 +523,9 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html --keylength ec-256
 ~/.acme.sh/acme.sh --installcert -d $vpsdomain \
                --keypath       /var/www/ssl/$vpsdomain.key  \
-               --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
+               --fullchainpath /var/www/ssl/fullchain.cer \
                --reloadcmd     "systemctl force-reload nginx"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
-openssl x509 -outform der -in /var/www/ssl/$vpsdomain.key.pem -out /var/www/ssl/$vpsdomain.crt
 
 cat > /var/www/ssl/update_ocsp_cache << EOF
 #!/bin/bash
@@ -539,7 +538,7 @@ cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
 
 openssl ocsp -no_nonce \
     -issuer  /var/www/ssl/intermediate.pem \
-    -cert    /var/www/ssl/$vpsdomain.key.pem \
+    -cert    /var/www/ssl/fullchain.cer \
     -CAfile  /var/www/ssl/bundle.pem \
     -VAfile  /var/www/ssl/bundle.pem \
     -url     http://ocsp.int-x3.letsencrypt.org \
@@ -570,7 +569,7 @@ server {
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
 
-  ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
+  ssl_certificate /var/www/ssl/fullchain.cer;
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
@@ -641,7 +640,7 @@ server {
   root /var/www/html;
   index index.php index.html index.htm index.nginx-debian.html;
 
-  ssl_certificate /var/www/ssl/$vpsdomain.key.pem;
+  ssl_certificate /var/www/ssl/fullchain.cer;
   ssl_certificate_key /var/www/ssl/$vpsdomain.key;
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
