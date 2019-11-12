@@ -19,6 +19,6 @@ cd ~
 
 zip -r de_GWD_backup.zip de_GWD_backup
 
-rm -rf ~/de_GWD_backup*
-
 mv -f ~/de_GWD_backup.zip /var/www/html
+
+rm -rf ~/de_GWD_backup*
