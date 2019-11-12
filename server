@@ -518,7 +518,7 @@ systemctl restart nginx
 mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html --keylength ec-256
-~/.acme.sh/acme.sh --installcert -d $vpsdomain \
+~/.acme.sh/acme.sh --installcert -d $vpsdomain --ecc \
                --keypath       /var/www/ssl/$vpsdomain.key  \
                --fullchainpath /var/www/ssl/fullchain.cer \
                --reloadcmd     "systemctl force-reload nginx"
