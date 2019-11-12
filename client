@@ -641,13 +641,13 @@ installgwd(){
     green "========================="
     read v2path
 
-cd ~
-
-preinstall
-
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+
+cd ~
+
+preinstall
 
 wget https://$mirrorsite/ui-cnr.txt
 mv -f ~/ui-cnr.txt /usr/local/bin/chnroute.txt
@@ -720,6 +720,9 @@ blue "-------------------------------"
 
 
 updategwd(){
+ddnscheck=$(/usr/local/bin/ui-ddnscheck)
+wgcheck=$(/usr/local/bin/ui-wgcheck)
+
 localaddr=$(ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}')
 port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 
@@ -755,6 +758,14 @@ installpihole
 installwg
 
 postinstall
+
+if [[ $ddnscheck = "cfon" ]]; then
+/usr/local/bin/ui-ddnsupdateipcf
+fi
+
+if [[ $wgcheck = "on" ]]; then
+/usr/local/bin/ui-wgup
+fi
 
 blue "---------------------"
 blue  "Update de_GWD [done]"
