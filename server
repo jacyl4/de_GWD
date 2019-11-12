@@ -520,7 +520,7 @@ systemctl restart nginx
 
 mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
-~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html
+~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html --keylength ec-256
 ~/.acme.sh/acme.sh --installcert -d $vpsdomain \
                --keypath       /var/www/ssl/$vpsdomain.key  \
                --fullchainpath /var/www/ssl/$vpsdomain.key.pem \
