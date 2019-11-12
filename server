@@ -122,6 +122,9 @@ echo "" > /etc/pihole/adlists.list
 
 curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
+systemctl mask dhcpcd --now
+systemctl daemon-reload
+
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
 sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.0.0.1' /etc/pihole/setupVars.conf
