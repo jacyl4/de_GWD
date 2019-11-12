@@ -46,10 +46,10 @@ deb http://mirrors.aliyun.com/debian buster-proposed-updates main contrib non-fr
 deb http://mirrors.aliyun.com/debian buster-updates main contrib non-free
 deb http://mirrors.aliyun.com/debian-security/ buster/updates main non-free contrib
 EOF
+fi
 
 echo "" > /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
-fi
 
 apt update && apt upgrade -y
 
@@ -213,7 +213,7 @@ server:
     msg-cache-size: 50m
 
     do-ip4: yes
-    do-ip6: no
+    do-ip6: yes
     do-udp: yes
     do-tcp: yes
     
@@ -476,8 +476,6 @@ conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
 
-pihole restartdns
-
 cat > /etc/pihole/dns-servers.conf << EOF
  114DNS;114.114.114.114;114.114.115.115
  DNSpod;119.29.29.29;119.28.28.28
@@ -499,12 +497,12 @@ sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
 
-echo "" > /etc/pihole/adlists.list
-pihole -g
-
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 EOF
+
+echo "" > /etc/pihole/adlists.list
+pihole -g && pihole -f
 }
 
 
@@ -696,8 +694,6 @@ pihole restartdns
 installwg
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
-
-sed -i "/$(echo $mirrorsite | cut -d "/" -f1)/d" /etc/hosts
 
 echo $v2servn > /var/www/html/doh.txt
 echo $v2servn >> /var/www/html/doh.txt
