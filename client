@@ -719,6 +719,7 @@ blue "-------------------------------"
 
 
 updategwd(){
+testdns=$(/usr/local/bin/ui-testdns)
 ddnscheck=$(/usr/local/bin/ui-ddnscheck)
 wgcheck=$(/usr/local/bin/ui-wgcheck)
 
@@ -759,6 +760,12 @@ installpihole
 installwg
 
 postinstall
+
+if [[ $testdns = "GFWlist" ]]; then
+/usr/local/bin/ui-changegfwl
+else
+/usr/local/bin/ui-changechnwl
+fi
 
 if [[ $ddnscheck = "cfon" ]]; then
 /usr/local/bin/ui-ddnsupdateoncf
