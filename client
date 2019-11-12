@@ -194,7 +194,6 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 
-systemctl mask systemd-resolved --now > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 systemctl restart doh-client > /dev/null 2>&1
 systemctl enable doh-client > /dev/null 2>&1
@@ -469,9 +468,6 @@ fi
 echo $piholeadlist > /etc/pihole/adlists.list
 
 curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
-
-systemctl mask dhcpcd --now > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
 
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
