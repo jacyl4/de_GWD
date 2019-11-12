@@ -549,6 +549,7 @@ if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www
 echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
 fi
 crontab now.cron
+rm -rf now.cron
 }
 
 
