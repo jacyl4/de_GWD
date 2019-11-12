@@ -1179,7 +1179,7 @@ systemctl daemon-reload
 systemctl restart php7.3-fpm
 systemctl enable php7.3-fpm
 
-vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *crt | cut -d . -f3 --complement)
+vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --complement | rev)
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
