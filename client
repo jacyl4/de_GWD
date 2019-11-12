@@ -466,6 +466,8 @@ CONDITIONAL_FORWARDING=false
 EOF
 fi
 
+echo $piholeadlist > /etc/pihole/adlists.list
+
 curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
 systemctl mask dhcpcd --now > /dev/null 2>&1
@@ -501,7 +503,6 @@ cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 EOF
 
-echo "" > /etc/pihole/adlists.list
 pihole -g && pihole -f
 }
 
@@ -645,6 +646,8 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
+piholeadlist=""
+
 cd ~
 
 preinstall
@@ -736,6 +739,8 @@ uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
+piholeadlist=$(cat /etc/pihole/adlists.list)
+
 dohorigin1=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1)
 dohorigin2=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1)
 
@@ -760,7 +765,6 @@ installwg
 postinstall
 
 if [[ $ddnscheck = "cfon" ]]; then
-/usr/local/bin/ui-ddnsupdateipcf
 /usr/local/bin/ui-ddnsupdateoncf
 fi
 
