@@ -9,6 +9,8 @@ mv -f /var/www/html/restore/de_GWD_backup/*key /etc/wireguard/
 chown -R www-data:www-data /var/www/html/*.txt
 
 /usr/local/bin/ui-hostssave
+/usr/local/bin/ui-nodenslookup
+/usr/local/bin/ui-changedoh
 
 rm -rf /var/www/html/de_GWD_backup.zip
 rm -rf /var/www/html/restore/de_GWD_backup.zip
