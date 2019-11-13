@@ -502,7 +502,7 @@ cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 EOF
 
-pihole -g && pihole -f
+pihole -f
 }
 
 
