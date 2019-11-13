@@ -823,7 +823,7 @@ rm -rf /var/log/*gz
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
 remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
 
-if [[ $localver < $remotever ]]; then
+if [[ $localver != $remotever ]]; then
 crontab -l > ~/now.cron
 sed -i '/autoupdate/d' ~/now.cron
 echo '30 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
