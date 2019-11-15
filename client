@@ -434,6 +434,7 @@ function installpihole(){
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 nameserver 8.8.8.8
+nameserver 1.1.1.1
 EOF
   
 if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
