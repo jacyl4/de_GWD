@@ -78,12 +78,6 @@ sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 
-elif [[ "$(uname -r)" =~ "5.2.0" ]]; then
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr2" >> /etc/sysctl.conf
-
 else
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
@@ -992,52 +986,6 @@ reboot
 
 
 
-installbbr2(){
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N https://raw.githubusercontent.com/xiya233/bbr2/master/debian/linux-headers-5.2.0-rc3%2B_5.2.0-rc3%2B-1_amd64.deb
-wget -N https://raw.githubusercontent.com/xiya233/bbr2/master/debian/linux-image-5.2.0-rc3%2B_5.2.0-rc3%2B-1_amd64.deb
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-cat > ~/bbrkernel/clearkernel << EOF
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr2" >> /etc/sysctl.conf
-sysctl -p
-
-/usr/bin/apt purge -y linux-image-4.14.129-bbrplus
-/usr/bin/apt purge -y linux-image-4*
-update-grub
-
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-
-reboot
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-blue "----------------------"
-blue  "Install bbr2.0 [done]"
-blue "----------------------"
-
-reboot
-}
-
-
-
 installnextcloud(){
     green "=================="
     green " Datadase user"
@@ -1584,14 +1532,13 @@ blue "--------------------------"
 
     green "=========================="
     green "         Server            "
-    green "Require: Debian 9/10       "
-    green "Author:  JacyL4            "
+    green "Recommend: Debian 9        "
+    green "Author:    JacyL4          "
     green "=========================="
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
     echo
     green  "1. Install de_GWD"
-    green  "11.Install bbrplus and reboot（Debian 9）"
-    green  "12.Install bbr2.0 and reboot（Debian 9/10）"
+    green  "2. Install bbrplus and reboot（only Debian 9）"
     blue   "3. Install PHP+MariaDB+Nextcloud"
     blue   "4. Config Nextcloud cache"
     red    "5. Change static IP"
@@ -1609,12 +1556,8 @@ blue "--------------------------"
     installgwd
     start_menu
     ;;
-    11)
+    2)
     installbbrplus
-    start_menu
-    ;;
-    12)
-    installbbr2
     start_menu
     ;;
     3)
