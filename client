@@ -433,7 +433,7 @@ systemctl enable iptables-proxy > /dev/null 2>&1
 function installpihole(){
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
-nameserver 1.1.1.1
+nameserver 8.8.8.8
 EOF
   
 if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
@@ -467,7 +467,9 @@ fi
 
 echo $piholeadlist > /etc/pihole/adlists.list
 
-curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
+bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
+rm -rf ~/Pi-hole
 
 systemctl mask dhcpcd --now > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
