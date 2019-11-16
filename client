@@ -41,10 +41,12 @@ systemctl stop iptables-proxy > /dev/null 2>&1
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian buster main contrib non-free
-deb http://mirrors.aliyun.com/debian buster-proposed-updates main contrib non-free
-deb http://mirrors.aliyun.com/debian buster-updates main contrib non-free
-deb http://mirrors.aliyun.com/debian-security/ buster/updates main non-free contrib
+deb http://mirrors.aliyun.com/debian buster main
+deb-src http://mirrors.aliyun.com/debian buster main
+deb http://mirrors.aliyun.com/debian-security/ buster/updates main
+deb-src http://mirrors.aliyun.com/debian-security/ buster/updates main
+deb http://mirrors.aliyun.com/debian buster-updates main
+deb-src http://mirrors.aliyun.com/debian buster-updates main
 EOF
 fi
 
@@ -430,18 +432,46 @@ systemctl enable iptables-proxy > /dev/null 2>&1
 
 
 
-function installpihole(){
+function installwg(){
+systemctl stop wg-quick@wg0 > /dev/null 2>&1
+
+if [[ $architecture = "amd64" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://deb.debian.org/debian buster main
+deb-src http://deb.debian.org/debian buster main
+deb http://deb.debian.org/debian-security/ buster/updates main
+deb-src http://deb.debian.org/debian-security/ buster/updates main
+deb http://deb.debian.org/debian buster-updates main
+deb-src http://deb.debian.org/debian buster-updates main
+EOF
+fi
+
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
+apt update && apt upgrade -y
+
+if [[ $architecture = "arm64" ]]; then
+apt install -y linux-headers-odroidxu4
+fi
+
+apt install -y wireguard-dkms wireguard-tools
+
+mkdir -p /etc/wireguard
+}
+
+
+
+function installpihole(){  
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
-nameserver 8.8.8.8
 nameserver 1.1.1.1
+nameserver 8.8.8.8
 EOF
   
 if [[ $(systemctl is-active pihole-FTL) != "active" ]]; then
 rm -rf /etc/pihole/setupVars.conf
 fi
-
-mkdir -p /etc/pihole
 
 if [[ ! -f "/etc/pihole/setupVars.conf" ]]; then
 mkdir -p /etc/pihole
@@ -450,8 +480,8 @@ cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/32
 IPV6_ADDRESS=
-PIHOLE_DNS_1=119.29.29.29
-PIHOLE_DNS_2=119.28.28.28
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=8.8.8.8
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true
@@ -508,24 +538,6 @@ EOF
 pihole -f
 }
 
-
-
-function installwg(){
-systemctl stop wg-quick@wg0 > /dev/null 2>&1
-
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
-
-apt update
-
-if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4
-fi
-
-apt install -y wireguard-dkms wireguard-tools
-
-mkdir -p /etc/wireguard
-}
 
 
 
@@ -671,6 +683,8 @@ installv2ray
 
 installiptablesproxy
 
+installwg
+
 installpihole
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
@@ -695,8 +709,6 @@ iface $ethernetnum inet static
 EOF
 
 pihole restartdns
-
-installwg
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
@@ -763,9 +775,9 @@ installv2ray
 
 installiptablesproxy
 
-installpihole
-
 installwg
+
+installpihole
 
 postinstall
 
