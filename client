@@ -41,12 +41,12 @@ systemctl stop iptables-proxy > /dev/null 2>&1
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian buster main
-deb-src http://mirrors.aliyun.com/debian buster main
-deb http://mirrors.aliyun.com/debian-security/ buster/updates main
-deb-src http://mirrors.aliyun.com/debian-security/ buster/updates main
-deb http://mirrors.aliyun.com/debian buster-updates main
-deb-src http://mirrors.aliyun.com/debian buster-updates main
+deb http://mirrors.163.com/debian buster main
+deb-src http://mirrors.163.com/debian buster main
+deb http://mirrors.163.com/debian-security/ buster/updates main
+deb-src http://mirrors.163.com/debian-security/ buster/updates main
+deb http://mirrors.163.com/debian buster-updates main
+deb-src http://mirrors.163.com/debian buster-updates main
 EOF
 fi
 
