@@ -452,10 +452,12 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 apt update && apt upgrade -y
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4
+apt install -y linux-headers-odroidxu4 wireguard-tools
+elif [[ $architecture = "amd64" ]]; then
+apt install -y wireguard
 fi
 
-apt install -y wireguard-dkms wireguard-tools
+
 
 mkdir -p /etc/wireguard
 }
