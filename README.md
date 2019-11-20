@@ -15,6 +15,6 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- https://acccmi.cf/gwd/client)
+bash <(wget --no-check-certificate -qO- https://gwdbase.xyz/gwd/client)
 ```
 ![client](https://i.loli.net/2019/11/01/qf37QxZbmhKBcjp.png)
