@@ -7,9 +7,9 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-mirrorsite="acccmi.cf/gwd"
+mirrorsite="gwdbase.xyz/gwd"
 
-mirrorsiteip="172.247.127.156"
+mirrorsiteip="103.135.249.101"
 
 ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
 
