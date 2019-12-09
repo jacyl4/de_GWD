@@ -3,10 +3,12 @@ localip=$(cat /var/www/html/staticip.txt | awk 'NR==1{print}')
 upstreamip=$(cat /var/www/html/staticip.txt | awk 'NR==2{print}')
 
 
-sed -i "/address/c\address $localip"  /etc/network/interfaces
-sed -i "/gateway/c\gateway $upstreamip"  /etc/network/interfaces
+sed -i "/address/c\address $localip" /etc/network/interfaces
+sed -i "/gateway/c\gateway $upstreamip" /etc/network/interfaces
 
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localip/24"  /etc/pihole/setupVars.conf
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localip/24" /etc/pihole/setupVars.conf
+sed -i "/CONDITIONAL_FORWARDING_IP=/c\CONDITIONAL_FORWARDING_IP=$localip" /etc/pihole/setupVars.conf
+sed -i "/CONDITIONAL_FORWARDING_REVERSE=/d" /etc/pihole/setupVars.conf
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
