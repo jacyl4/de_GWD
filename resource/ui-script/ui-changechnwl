@@ -4,8 +4,7 @@ read -d '' chnwl << EOF
 {"address":"127.0.0.1","port":5353},
 {"address":"127.0.0.1","port":5390,"domains":["domain:baidu.com"]},
 {"address":"127.0.0.1","port":5353,"domains":["domain:google.com"]},
-{"address":"127.0.0.1","port":5390,"domains":["geosite:cn"]},
-{"address":"127.0.0.1","port":5353,"domains":["geosite:geolocation-!cn"]}
+{"address":"127.0.0.1","port":5390,"domains":["geosite:cn"]}
 ]
 EOF
 

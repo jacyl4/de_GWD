@@ -1,7 +1,5 @@
 #!/bin/bash
 jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
-jq --arg key "geosite:category-ads" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' |\
-jq --arg key "ext:h2y.dat:ad" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' |\
 jq --arg key "localhost" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json
 
 cat /var/www/html/hostscustomize.txt >> /tmp/hostsdefault
