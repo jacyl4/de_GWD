@@ -739,6 +739,8 @@ blue "-------------------------------"
 
 
 updategwd(){
+source /etc/profile
+
 testdns=$(/usr/local/bin/ui-testdns)
 dhcpcheck=$(/usr/local/bin/ui-dhcpcheck)
 ddnscheck=$(/usr/local/bin/ui-ddnscheck)
