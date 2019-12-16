@@ -199,6 +199,7 @@ path = "/dq"
 
 upstream = [
   "udp:127.0.0.1:53",
+  "tcp:127.0.0.1:53",
 ]
 
 timeout = 10
