@@ -9,8 +9,6 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 mirrorsite="gwdbase.xyz/gwd"
 
-mirrorsiteip="103.135.249.101"
-
 ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
 
 
@@ -135,8 +133,10 @@ fi
 
 
 function installdoh(){
-doh=$(echo $mirrorsite | cut -d "/" -f1)
-sed -i "1i $mirrorsiteip $doh" /etc/hosts
+doh=$domain
+domainip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+
+sed -i "1i $domainip $doh" /etc/hosts
 
 systemctl stop doh-client > /dev/null 2>&1
 
@@ -246,8 +246,6 @@ systemctl enable unbound > /dev/null 2>&1
 
 
 function installv2ray(){
-domainip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
-
 cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
@@ -284,7 +282,7 @@ jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnu
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
-jq --arg key $doh --arg value $mirrorsiteip '.dns.hosts += {($key): ($value)}' |\
+jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
 jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 cat > /etc/systemd/system/vtrui.service << EOF
