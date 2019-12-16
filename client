@@ -133,14 +133,14 @@ fi
 
 
 function installdoh(){
+cd ~
+systemctl stop doh-client > /dev/null 2>&1
+
 doh=$domain
 domainip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i "1i $domainip $doh" /etc/hosts
 
-systemctl stop doh-client > /dev/null 2>&1
-
-cd ~
 if [[ $architecture = "arm64" ]]; then
   wget https://$mirrorsite/doharm64.zip
   unzip doharm64.zip
@@ -155,15 +155,38 @@ fi
 chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
-wget https://$mirrorsite/doh-client.conf
-mv -f ~/doh-client.conf /etc/dns-over-https/doh-client.conf
+cat > /etc/dns-over-https/doh-client.conf << EOF
+listen = [ "127.0.0.1:5380", ]
+
+[upstream]
+upstream_selector = "weighted_round_robin"
+
+# DoH1
+[[upstream.upstream_ietf]]
+    url = "https://xxx.ooo/dq"
+    weight = 50
+
+# DoH2
+[[upstream.upstream_ietf]]
+    url = "https://xxx.ooo/dq"
+    weight = 50
+
+[others]
+timeout = 30
+
+no_cookies = true
+
+no_ecs = true
+
+no_ipv6 = true
+
+verbose = false
+EOF
 
 doh_upstream='url = "https:\/\/'$doh'\/dq"'
-
 sed -i "/url/c\\$doh_upstream" /etc/dns-over-https/doh-client.conf
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
-
 cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
 #!/bin/bash
 case "$2" in

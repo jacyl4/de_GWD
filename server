@@ -192,7 +192,24 @@ rm -rf ~/dohamd64*
 chmod +x /usr/local/bin/doh-server
 
 mkdir -p /etc/dns-over-https/
-wget -O /etc/dns-over-https/doh-server.conf https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/doh-server.conf
+cat > /etc/dns-over-https/doh-server.conf << EOF
+listen = [ "127.0.0.1:8053", ]
+
+path = "/dq"
+
+upstream = [
+  "tcp:127.0.0.1:53",
+  "udp:127.0.0.1:53",
+]
+
+timeout = 10
+
+tries = 3
+
+verbose = false
+
+log_guessed_client_ip = false
+EOF
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
 cat > /etc/NetworkManager/dispatcher.d/doh-server << "EOF"
