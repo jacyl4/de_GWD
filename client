@@ -290,7 +290,7 @@ fi
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
-cat > /vtpre/v2wt-client.json << EOF
+cat > /etc/vtrui/config.json << EOF
 {
 "dns": {"tag": "flow", "hosts": {"localhost": "127.0.0.1"}, "servers": [{"address": "127.0.0.1", "port": 5353}]},
 "inbounds": [

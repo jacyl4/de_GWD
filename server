@@ -1438,6 +1438,8 @@ blue "---------------------"
 
 updategwd(){
 cd ~
+source /etc/profile
+
 preinstall
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
