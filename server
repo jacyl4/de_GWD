@@ -265,6 +265,40 @@ rm -rf ~/vtamd64.zip
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
+cat > /etc/vtrui/config.json << EOF
+{
+  "dns": { "servers": [ "localhost" ] },
+  "inbounds": [
+    {
+    "port": 11811,
+    "listen": "127.0.0.1",
+    "protocol": "vmess",
+    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
+    "settings": {
+      "clients": [{
+        "id": "00000000-0000-0000-0000-000000000000",
+        "level": 1,
+        "alterId": 32
+        }]
+      },
+    "streamSettings": {
+      "network": "ws",
+      "wsSettings": {
+        "path": "/0000"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+  {"protocol": "freedom", "settings": {"domainStrategy": "UseIP"}},
+  {"tag": "block", "protocol": "blackhole", "settings": {}}
+  ]
+}
+EOF
+
+jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/vtrui/config.json |\
+jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
 cat > /etc/systemd/system/vtrui.service << EOF
 [Unit]
 Description=vtrui Service
@@ -284,11 +318,6 @@ LimitNOFILE=1000000
 [Install]
 WantedBy=multi-user.target
 EOF
-
-wget -O /etc/vtrui/config.json https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/v2wt-server.json
-
-jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/vtrui/config.json |\
-jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl daemon-reload
 systemctl restart vtrui

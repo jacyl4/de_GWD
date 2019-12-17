@@ -277,22 +277,93 @@ if [[ $architecture = "arm64" ]]; then
     unzip vtarm64.zip
     mv -f ~/vtarm64/vtrui /usr/bin/vtrui/vtrui
     mv -f ~/vtarm64/v2ctl /usr/bin/vtrui/v2ctl
+    mv -f ~/vtarm64/geoip.dat /usr/bin/vtrui/geoip.dat
     rm -rf ~/vtarm64*
 elif [[ $architecture = "amd64" ]]; then
     wget https://$mirrorsite/vtamd64.zip
     unzip vtamd64.zip
     mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
     mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
+    mv -f ~/vtamd64/geoip.dat /usr/bin/vtrui/geoip.dat
     rm -rf ~/vtamd64*
 fi
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
-wget https://$mirrorsite/vtpre.zip
-unzip vtpre.zip
-mv -f ~/vtpre/geoip.dat /usr/bin/vtrui/geoip.dat
-mv -f ~/vtpre/v2wt-client.json /etc/vtrui/config.json
-rm -rf ~/vtpre*
+cat > /vtpre/v2wt-client.json << EOF
+{
+"dns": {"tag": "flow", "hosts": {"localhost": "127.0.0.1"}, "servers": [{"address": "127.0.0.1", "port": 5353}]},
+"inbounds": [
+  {
+    "port": 53,
+    "tag": "dnsin",
+    "protocol": "dokodemo-door",
+    "settings": {"network": "tcp,udp", "address": "0.0.0.0", "port": 53}
+  },
+  {
+    "port": 9897,
+    "listen": "127.0.0.1",
+    "protocol": "socks",
+    "settings": {"network": "tcp,udp"}
+  },
+  {
+    "port": 9896,
+    "listen": "127.0.0.1",
+    "protocol": "dokodemo-door",
+    "settings": {"network": "tcp,udp", "followRedirect": true},
+    "streamSettings": { "sockopt": {"tproxy": "tproxy" } }
+  }
+],
+"outbounds": [
+  {
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+        {
+          "address": "xxxx.ooo",
+          "port": 443,
+          "users": [
+            {
+              "id": "00000000-0000-0000-0000-000000000000",
+              "level": 0,
+              "alterId": 32,
+              "security": "auto"
+            }
+          ]
+        }
+      ]
+    },
+    "streamSettings": {
+      "network": "ws",
+      "wsSettings": {
+        "path": "/000000",
+        "headers": {
+          "Host": "xxxx.ooo"
+        }
+      },
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "xxxx.ooo",
+        "allowInsecure": false
+      },
+      "sockopt": {
+        "mark": 255
+      }
+    }
+  },
+  { "tag": "direct", "protocol": "freedom", "streamSettings": { "sockopt": { "mark": 255 } } },
+  { "tag": "dnsout", "protocol": "dns"}
+],
+"routing": {
+  "domainStrategy": "AsIs",
+  "rules": [
+    { "type": "field", "inboundTag": "dnsin", "outboundTag": "dnsout" },
+    { "type": "field", "inboundTag": "flow", "outboundTag": "direct" },
+    { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" }
+  ]
+}
+}
+EOF
 
 result=$(echo $port | grep '^[0-9]\+$')
 if [[ $result = "" ]]; then
