@@ -822,6 +822,7 @@ blue "----------------------"
 }
 
 
+
 change_piholeadmin(){
 pihole -a -p
 blue "-------------------------------"
@@ -839,19 +840,14 @@ dhcpcheck=$(/usr/local/bin/ui-dhcpcheck)
 ddnscheck=$(/usr/local/bin/ui-ddnscheck)
 wgcheck=$(/usr/local/bin/ui-wgcheck)
 
-localaddr=$(ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}')
-port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
-
 piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
-result=$(echo $port | grep '^[0-9]\+$')
-if [[ $result = "" ]]; then
-port="443"
-fi
-
 domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
+port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+
+localaddr=$(ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}')
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
 piholeadlist=$(cat /etc/pihole/adlists.list)
