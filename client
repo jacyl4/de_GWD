@@ -21,6 +21,8 @@ esac
 
 
 function preinstall(){
+systemctl stop iptables-proxy > /dev/null 2>&1
+
 rm -rf /etc/resolv.conf
 
 cat > /etc/resolv.conf << EOF
@@ -32,10 +34,8 @@ if [[ $(cat /etc/dnsmasq.conf) =~ "5390" ]]; then
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 EOF
-pihole restartdns
+pihole restartdns > /dev/null 2>&1
 fi
-
-systemctl stop iptables-proxy > /dev/null 2>&1
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
@@ -48,7 +48,7 @@ deb-src http://mirrors.163.com/debian buster-updates main
 EOF
 fi
 
-echo "" > /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
 
 apt update && apt upgrade -y
@@ -214,6 +214,7 @@ Wants=nss-lookup.target
 Type=simple
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
+ExecStop=/usr/bin/killall -9 doh-client
 Restart=always
 RestartSec=3
 LimitNPROC=1000000
@@ -241,7 +242,7 @@ server:
     msg-cache-size: 50m
 
     do-ip4: yes
-    do-ip6: yes
+    do-ip6: no
     do-udp: yes
     do-tcp: yes
     
@@ -272,6 +273,7 @@ function installv2ray(){
 cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
+
 if [[ $architecture = "arm64" ]]; then
     wget https://$mirrorsite/vtarm64.zip
     unzip vtarm64.zip
@@ -287,31 +289,37 @@ elif [[ $architecture = "amd64" ]]; then
     mv -f ~/vtamd64/geoip.dat /usr/bin/vtrui/geoip.dat
     rm -rf ~/vtamd64*
 fi
+
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
 cat > /etc/vtrui/config.json << EOF
 {
-"dns": {"tag": "flow", "hosts": {"localhost": "127.0.0.1"}, "servers": [{"address": "127.0.0.1", "port": 5353}]},
+"dns": {
+  "tag": "flow",
+  "hosts": {
+    "localhost": "127.0.0.1"
+  },
+  "servers": [
+    {
+      "address": "127.0.0.1",
+      "port": 5353
+    }
+  ]
+},
 "inbounds": [
   {
     "port": 53,
     "tag": "dnsin",
     "protocol": "dokodemo-door",
-    "settings": {"network": "tcp,udp", "address": "0.0.0.0", "port": 53}
-  },
-  {
-    "port": 9897,
-    "listen": "127.0.0.1",
-    "protocol": "socks",
-    "settings": {"network": "tcp,udp"}
+    "settings": { "network": "tcp,udp", "address": "0.0.0.0", "port": 53 }
   },
   {
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
-    "settings": {"network": "tcp,udp", "followRedirect": true},
-    "streamSettings": { "sockopt": {"tproxy": "tproxy" } }
+    "settings": { "network": "tcp,udp", "followRedirect": true },
+    "streamSettings": { "sockopt": { "tproxy": "tproxy" } }
   }
 ],
 "outbounds": [
@@ -365,8 +373,8 @@ cat > /etc/vtrui/config.json << EOF
 }
 EOF
 
-result=$(echo $port | grep '^[0-9]\+$')
-if [[ $result = "" ]]; then
+portcheck=$(echo $port | grep '^[0-9]\+$')
+if [[ $portcheck = "" ]]; then
 port="443"
 fi
 
@@ -390,8 +398,9 @@ Type=simple
 PIDFile=/run/vtrui.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+ExecStop=/usr/bin/killall -9 vtrui
+Restart=always
+RestartSec=3
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -436,16 +445,15 @@ for iplanip in $lanip; do
   ipset add lanip $iplanip
 done
 
-ipset -N listwlan hash:net maxelem 65535
-for iplistwlan in $(cat /var/www/html/listwlan.txt); do
-  ipset add listwlan $iplistwlan
-done
-
 ipset -N hosts hash:net maxelem 65535
 for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
   ipset add hosts $hosts
 done
 
+ipset -N listwlan hash:net maxelem 65535
+for iplistwlan in $(cat /var/www/html/listwlan.txt); do
+  ipset add listwlan $iplistwlan
+done
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local default dev lo table 100
@@ -476,6 +484,7 @@ iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 
 iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+
 systemctl restart vtrui
 
 if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) =~ "wg0" ]]; then
@@ -495,9 +504,9 @@ iptables -t nat -X
 iptables -F
 iptables -X
 
-ipset -F hosts
 ipset -F chnroute
 ipset -F lanip
+ipset -F hosts
 ipset -F listwlan
 
 ip route flush table 100
@@ -552,8 +561,6 @@ apt install -y linux-headers-odroidxu4 wireguard-tools
 elif [[ $architecture = "amd64" ]]; then
 apt install -y wireguard
 fi
-
-
 
 mkdir -p /etc/wireguard
 }
@@ -631,7 +638,6 @@ EOF
 
 pihole -f
 }
-
 
 
 
@@ -750,6 +756,8 @@ installgwd(){
     green "========================="
     read v2path
 
+cd ~
+
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
@@ -757,24 +765,14 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 piholeadlist=""
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
-cd ~
 
 preinstall
-
-wget https://$mirrorsite/ui-cnr.txt
-mv -f ~/ui-cnr.txt /usr/local/bin/chnroute.txt
-
-{
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
- echo "add chnroute $chnroute"
-done
-} > /usr/local/bin/chnrouteset
 
 installdoh
 
 installv2ray
+
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 
 installiptablesproxy
 
@@ -847,7 +845,7 @@ port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-localaddr=$(ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}')
+localaddr=$(ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | awk 'NR==1{print}')
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
 piholeadlist=$(cat /etc/pihole/adlists.list)
