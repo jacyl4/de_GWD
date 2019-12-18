@@ -35,7 +35,7 @@ cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 EOF
 pihole restartdns > /dev/null 2>&1
-systemctl stop pihole-FTL
+systemctl stop pihole-FTL > /dev/null 2>&1
 fi
 
 if [[ $architecture = "amd64" ]]; then
