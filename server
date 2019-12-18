@@ -90,6 +90,10 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 
 sysctl -p
+
+systemctl disable systemd-resolved
+systemctl stop systemd-resolved
+systemctl mask systemd-resolved
 }
 
 
