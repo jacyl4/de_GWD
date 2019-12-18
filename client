@@ -35,6 +35,7 @@ cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 EOF
 pihole restartdns > /dev/null 2>&1
+systemctl stop pihole-FTL
 fi
 
 if [[ $architecture = "amd64" ]]; then
@@ -128,6 +129,10 @@ if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
+
+systemctl disable systemd-resolved
+systemctl stop systemd-resolved
+systemctl mask systemd-resolved
 }
 
 
