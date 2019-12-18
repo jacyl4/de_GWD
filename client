@@ -222,7 +222,6 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 ExecStop=/usr/bin/killall -9 doh-client
 Restart=on-failure
-RestartSec=3
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -406,7 +405,6 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/usr/bin/killall -9 vtrui
 Restart=on-failure
-RestartSec=3
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
