@@ -212,11 +212,12 @@ Wants=nss-lookup.target
 
 [Service]
 Type=simple
+PIDFile=/run/doh-client.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 ExecStop=/usr/bin/killall -9 doh-client
-Restart=always
-RestartSec=3
+Restart=on-failure
+RestartSec=5
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -399,8 +400,8 @@ PIDFile=/run/vtrui.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/usr/bin/killall -9 vtrui
-Restart=always
-RestartSec=3
+Restart=on-failure
+RestartSec=5
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -485,6 +486,7 @@ iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 
+systemctl restart doh-client
 systemctl restart vtrui
 
 if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) =~ "wg0" ]]; then
@@ -495,6 +497,7 @@ chmod +x /usr/local/bin/iptables-proxy-up
 
 cat > /usr/local/bin/iptables-proxy-down << EOF
 #!/bin/bash
+systemctl stop doh-client
 systemctl stop vtrui
 
 iptables -t mangle -F
