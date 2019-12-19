@@ -92,7 +92,7 @@ cat > /etc/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "level": 0,
+                "level": 1,
                 "alterId": 4,
                 "security": "auto"
               }
@@ -129,7 +129,7 @@ cat > /etc/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "level": 0,
+                "level": 1,
                 "alterId": 4,
                 "security": "auto"
               }
