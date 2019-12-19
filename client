@@ -579,7 +579,7 @@ EOF
 
 mkdir -p /etc/pihole
 
-echo $piholeadlist > /etc/pihole/adlists.list
+mv -f /etc/pihole/adlists_b.list /etc/pihole/adlists.list
 
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
@@ -765,9 +765,9 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
-piholeadlist=""
-
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
+
+echo "" > /etc/pihole/adlists_b.list
 
 preinstall
 
@@ -851,14 +851,14 @@ v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.
 localaddr=$(ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | awk 'NR==1{print}')
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
-piholeadlist=$(cat /etc/pihole/adlists.list)
-
 dohorigin1=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1)
 dohorigin2=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1)
 
 echo "$dohorigin1" > /var/www/html/doh.txt
 echo "$dohorigin2" >> /var/www/html/doh.txt
 chown -R www-data:www-data /var/www/html/*.txt
+
+cp -rf /etc/pihole/adlists.list /etc/pihole/adlists_b.list
 
 cd ~
 
