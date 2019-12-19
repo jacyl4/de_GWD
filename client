@@ -579,7 +579,7 @@ EOF
 
 mkdir -p /etc/pihole
 
-mv -f /etc/pihole/adlists_b.list /etc/pihole/adlists.list
+mv -f /etc/pihole/adlists.list.b /etc/pihole/adlists.list
 
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
@@ -767,7 +767,7 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 
-echo "" > /etc/pihole/adlists_b.list
+echo "" > /etc/pihole/adlists.list.b
 
 preinstall
 
@@ -858,7 +858,7 @@ echo "$dohorigin1" > /var/www/html/doh.txt
 echo "$dohorigin2" >> /var/www/html/doh.txt
 chown -R www-data:www-data /var/www/html/*.txt
 
-cp -rf /etc/pihole/adlists.list /etc/pihole/adlists_b.list
+cp -rf /etc/pihole/adlists.list /etc/pihole/adlists.list.b
 
 cd ~
 
