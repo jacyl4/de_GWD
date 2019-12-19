@@ -130,9 +130,8 @@ sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
 
-systemctl disable systemd-resolved
-systemctl stop systemd-resolved
-systemctl mask systemd-resolved
+systemctl mask --now systemd-resolved > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
 }
 
 
@@ -580,6 +579,8 @@ EOF
 
 mkdir -p /etc/pihole
 
+echo $piholeadlist > /etc/pihole/adlists.list
+
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
@@ -601,13 +602,11 @@ CONDITIONAL_FORWARDING_IP=$localaddr
 CONDITIONAL_FORWARDING_DOMAIN=lan
 EOF
 
-echo $piholeadlist > /etc/pihole/adlists.list
-
 git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
 bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
 rm -rf ~/Pi-hole
 
-systemctl mask dhcpcd --now > /dev/null 2>&1
+systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 
 cat > /etc/dnsmasq.conf << EOF
