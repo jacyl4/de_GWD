@@ -66,6 +66,11 @@
           <span>概览</span>
         </a>
       </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="!ddns.php">
+          <i class="fas fa-fw fa-ethernet"></i>
+          <span>DDNS & WireGuard</span></a>
+      </li>
       <li class="nav-item">
         <a class="nav-link" href="!nodeman.php">
           <i class="fas fa-fw fa-stream"></i>
@@ -75,11 +80,6 @@
         <a class="nav-link" href="!listbw.php">
           <i class="fas fa-fw fa-th-list"></i>
           <span>黑白名单</span></a>
-      </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="!ddns.php">
-          <i class="fas fa-fw fa-ethernet"></i>
-          <span>DDNS & WireGuard</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="!update.php">
@@ -191,7 +191,7 @@
 
 <span class="float-left text-secondary">
   <small>
-注：需要主路由映射端口9895到de_GWD的地址。
+注：需要主路由映射UDP端口9895到de_GWD的地址。
   </small>
 </span>
 
