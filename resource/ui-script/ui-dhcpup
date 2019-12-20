@@ -5,6 +5,6 @@ ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut
 
 sudo pihole -a enabledhcp "$ipstart" "$ipend" "$ipgateway" "24" "lan"
 
-sed -i 's/option:router/6/g' /etc/dnsmasq.d/02-pihole-dhcp.conf
+sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
 
 pihole restartdns
