@@ -577,8 +577,6 @@ nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
 
-mkdir -p /etc/pihole
-
 mv -f /etc/pihole/adlists.list.b /etc/pihole/adlists.list
 
 cat > /etc/pihole/setupVars.conf << EOF
@@ -767,8 +765,6 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 
-echo "" > /etc/pihole/adlists.list.b
-
 preinstall
 
 installdoh
@@ -780,6 +776,9 @@ echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/l
 installiptablesproxy
 
 installwg
+
+mkdir -p /etc/pihole
+echo "" > /etc/pihole/adlists.list.b
 
 installpihole
 
