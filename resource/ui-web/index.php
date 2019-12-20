@@ -407,36 +407,6 @@
           </div>
 
 
-        <!-- 静态地址 -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-exchange-alt"></i>
-            静态地址
-          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitstaticip()">重启</button>
-          </span>
-          </div>
-          <div class="card-body">
-          <div class="form-group">
-            <div class="form-row">
-              <div class="col-md-6 my-1">
-                <div class="form-label-group">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
-                  <label for="localip">本机地址</label>
-                </div>
-              </div>
-              <div class="col-md-6 my-1">
-                <div class="form-label-group">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("route -n |  awk 'NR==3{print $2}'"); ?>">
-                  <label for="upstreamip">上级地址</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
-          </div>
-
-
         <!-- DHCP -->
         <div class="card mb-3">
           <div class="card-header">
@@ -468,6 +438,38 @@
           </div>
           </div>
           </div>
+
+
+        <!-- 静态地址 -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-exchange-alt"></i>
+            静态地址
+          <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitstaticip()">重启</button>
+          </span>
+          </div>
+          <div class="card-body">
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col-md-6 my-1">
+                <div class="form-label-group">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
+                  <label for="localip">本机地址</label>
+                </div>
+              </div>
+              <div class="col-md-6 my-1">
+                <div class="form-label-group">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("route -n |  awk 'NR==3{print $2}'"); ?>">
+                  <label for="upstreamip">上级地址</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+          </div>
+
+
 </div>
 
 </div>
