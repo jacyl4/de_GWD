@@ -1379,7 +1379,7 @@ cat >> /etc/vtrui/config.json << EOF
       "users": [{
         "id": "$upstreamuuid",
         "level": 1,
-        "alterId": 32
+        "alterId": 64
         }]
       }]},
     "streamSettings": {
@@ -1454,7 +1454,7 @@ v2uuids=$(jq -r '.inbounds[].settings.clients[].id' /etc/vtrui/config.json)
 
 {
 for v2uuid in $v2uuids; do
-echo '{"id": "'$v2uuid'", "level": 1, "alterId": 32}'
+echo '{"id": "'$v2uuid'", "level": 1, "alterId": 64}'
 done
 } > /tmp/v2uuid
 
