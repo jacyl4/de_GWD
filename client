@@ -9,8 +9,10 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 mirrorsite="acccoc.top/gwd"
 
-ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
+smartdns_arm64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.aarch64-debian-all.deb"
+smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
 
+ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
 
 architecture=""
 case $(uname -m) in
@@ -160,7 +162,7 @@ chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
 cat > /etc/dns-over-https/doh-client.conf << EOF
-listen = [ "127.0.0.1:5380", ]
+listen = [ "127.0.0.1:5381", ]
 
 [upstream]
 upstream_selector = "weighted_round_robin"
@@ -234,7 +236,7 @@ systemctl enable doh-client > /dev/null 2>&1
 cat > /etc/unbound/unbound.conf << EOF
 server:
     verbosity: 0
-    interface: 127.0.0.1@5353
+    interface: 127.0.0.1@5380
 
     outgoing-range: 8192
     num-queries-per-thread: 4096
@@ -262,7 +264,7 @@ server:
     
 forward-zone:
   name: "."
-  forward-addr: 127.0.0.1@5380
+  forward-addr: 127.0.0.1@5381
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
@@ -306,7 +308,7 @@ cat > /etc/vtrui/config.json << EOF
   "servers": [
     {
       "address": "127.0.0.1",
-      "port": 5353
+      "port": 5380
     }
   ]
 },
@@ -462,10 +464,10 @@ ip route add local default dev lo table 100
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5353 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5353 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5381 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5381 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
@@ -570,7 +572,36 @@ mkdir -p /etc/wireguard
 
 
 
-function installpihole(){  
+function installpihole(){
+if [[ $architecture = "arm64" ]]; then
+  wget -O ~/smartdns.deb $smartdns_arm64
+elif [[ $architecture = "amd64" ]]; then
+  wget -O ~/smartdns.deb $smartdns_amd64
+fi
+
+dpkg -i smartdns.deb
+
+cat > /etc/smartdns/smartdns.conf << EOF
+bind 127.0.0.1:5391
+
+cache-size 1024
+
+prefetch-domain yes
+
+speed-check-mode tcp:443,tcp:80,ping
+
+server 114.114.114.114
+server 114.114.115.115
+server 119.29.29.29
+server 119.28.28.28
+server 223.5.5.5
+server 223.6.6.6
+EOF
+
+systemctl restart smartdns > /dev/null 2>&1
+
+rm -rf ~/smartdns.deb
+
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 nameserver 1.1.1.1
@@ -583,8 +614,7 @@ cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
 IPV6_ADDRESS=
-PIHOLE_DNS_1=1.1.1.1
-PIHOLE_DNS_2=8.8.8.8
+PIHOLE_DNS_1=127.0.0.1#5391
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true
@@ -613,25 +643,13 @@ port=5390
 EOF
 
 cat > /etc/pihole/dns-servers.conf << EOF
- 114DNS;114.114.114.114;114.114.115.115
- DNSpod;119.29.29.29;119.28.28.28
- 阿里DNS;223.5.5.5;223.6.6.6
+ SmartDNS;127.0.0.1#5391
 EOF
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_6=223.6.6.6' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_5=223.5.5.5' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=119.28.28.28' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=119.29.29.29' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=114.114.115.115' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=114.114.114.114' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=127.0.0.1#5391' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=114.114.114.114' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=114.114.115.115' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=119.29.29.29' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=119.28.28.28' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=223.5.5.5' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=223.6.6.6' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=127.0.0.1#5391' /etc/dnsmasq.d/01-pihole.conf
 
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
