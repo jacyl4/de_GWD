@@ -604,8 +604,6 @@ rm -rf ~/smartdns.deb
 
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
-nameserver 1.1.1.1
-nameserver 8.8.8.8
 EOF
 
 mv -f /etc/pihole/adlists.list.b /etc/pihole/adlists.list
