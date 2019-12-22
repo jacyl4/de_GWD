@@ -148,16 +148,13 @@ domainip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' 
 sed -i "1i $domainip $doh" /etc/hosts
 
 if [[ $architecture = "arm64" ]]; then
-  wget https://$mirrorsite/doharm64.zip
-  unzip doharm64.zip
-  mv -f ~/doharm64/doh-client /usr/local/bin/doh-client
-  rm -rf ~/doharm64*
+  wget -O ~/doh.zip https://$mirrorsite/doharm64.zip
 elif [[ $architecture = "amd64" ]]; then
-  wget https://$mirrorsite/dohamd64.zip
-  unzip dohamd64.zip
-  mv -f ~/dohamd64/doh-client /usr/local/bin/doh-client
-  rm -rf ~/dohamd64*
+  wget -O ~/doh.zip https://$mirrorsite/dohamd64.zip
 fi
+unzip doh.zip
+mv -f ~/doh/doh-client /usr/local/bin/doh-client
+rm -rf ~/doh*
 chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
@@ -279,21 +276,15 @@ mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 
 if [[ $architecture = "arm64" ]]; then
-    wget https://$mirrorsite/vtarm64.zip
-    unzip vtarm64.zip
-    mv -f ~/vtarm64/vtrui /usr/bin/vtrui/vtrui
-    mv -f ~/vtarm64/v2ctl /usr/bin/vtrui/v2ctl
-    mv -f ~/vtarm64/geoip.dat /usr/bin/vtrui/geoip.dat
-    rm -rf ~/vtarm64*
+    wget -O ~/vtrui.zip https://$mirrorsite/vtarm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget https://$mirrorsite/vtamd64.zip
-    unzip vtamd64.zip
-    mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
-    mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
-    mv -f ~/vtamd64/geoip.dat /usr/bin/vtrui/geoip.dat
-    rm -rf ~/vtamd64*
+    wget -O ~/vtrui.zip https://$mirrorsite/vtamd64.zip
 fi
-
+unzip vtrui.zip
+mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
+mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
+mv -f ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
+rm -rf ~/vtrui*
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
@@ -599,7 +590,33 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
+rm -rf /lib/systemd/system/smartdns.service
+
+cat > /etc/systemd/system/smartdns.service << EOF
+[Unit]
+Description=smartdns server
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/smartdns.pid
+EnvironmentFile=/etc/default/smartdns
+ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
+KillMode=process
+Restart=on-failure
+RestartSec=2
+LimitNPROC=1000000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload > /dev/null 2>&1
 systemctl restart smartdns > /dev/null 2>&1
+systemctl enable smartdns > /dev/null 2>&1
 
 rm -rf ~/smartdns.deb
 
