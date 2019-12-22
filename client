@@ -469,6 +469,8 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5381 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5381 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5391 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5391 -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
