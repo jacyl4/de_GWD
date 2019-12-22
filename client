@@ -251,7 +251,6 @@ server:
     do-udp: yes
     do-tcp: yes
     
-    val-permissive-mode: yes
     module-config: "iterator"
 
     minimal-responses: no
@@ -634,6 +633,18 @@ rm -rf ~/Pi-hole
 
 systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
+
+cat > /usr/local/bin/pihole_hotfix << "EOF"
+#!/bin/bash
+ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1)
+sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
+pihole restartdns
+EOF
+
+chmod +x /usr/local/bin/pihole_hotfix
+
+sed -i '/pihole_hotfix/d'  /etc/pihole/setupVars.conf
+sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
