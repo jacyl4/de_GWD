@@ -234,8 +234,9 @@ systemctl enable doh-client > /dev/null 2>&1
 cat > /etc/unbound/unbound.conf << EOF
 server:
     verbosity: 0
-    interface: 127.0.0.1@5380
+    ip-address: 127.0.0.1@5380
 
+    num-threads: 2
     outgoing-range: 8192
     num-queries-per-thread: 4096
     so-rcvbuf: 8m
@@ -262,6 +263,30 @@ server:
 forward-zone:
   name: "."
   forward-addr: 127.0.0.1@5381
+EOF
+
+rm -rf /lib/systemd/system/unbound.service
+
+cat > /etc/systemd/system/unbound.service << "EOF"
+[Unit]
+Description=Unbound DNS server
+After=network.target
+Before=nss-lookup.target
+Wants=nss-lookup.target
+
+[Service]
+Type=notify
+PIDFile=/run/unbound.pid
+EnvironmentFile=-/etc/default/unbound
+ExecStart=/usr/sbin/unbound -d $DAEMON_OPTS
+ExecReload=/usr/sbin/unbound-control reload
+Restart=on-failure
+RestartSec=2
+LimitNPROC=1000000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
@@ -593,16 +618,16 @@ EOF
 
 rm -rf /lib/systemd/system/smartdns.service
 
-cat > /etc/systemd/system/smartdns.service << EOF
+cat > /etc/systemd/system/smartdns.service << "EOF"
 [Unit]
-Description=smartdns server
+Description=Smart DNS server
 After=network.target
 Before=nss-lookup.target
 Wants=nss-lookup.target
 
 [Service]
 Type=forking
-PIDFile=/var/run/smartdns.pid
+PIDFile=/run/smartdns.pid
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
