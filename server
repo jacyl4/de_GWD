@@ -91,9 +91,8 @@ fi
 
 sysctl -p
 
-systemctl disable systemd-resolved
-systemctl stop systemd-resolved
-systemctl mask systemd-resolved
+systemctl mask --now systemd-resolved
+systemctl daemon-reload
 }
 
 
