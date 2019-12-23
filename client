@@ -922,13 +922,6 @@ v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.
 localaddr=$(ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | awk 'NR==1{print}')
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
-dohorigin1=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1)
-dohorigin2=$(awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1)
-
-echo "$dohorigin1" > /var/www/html/doh.txt
-echo "$dohorigin2" >> /var/www/html/doh.txt
-chown -R www-data:www-data /var/www/html/*.txt
-
 cp -rf /etc/pihole/adlists.list /etc/pihole/adlists.list.b
 
 cd ~
