@@ -189,10 +189,10 @@ systemctl enable iptablesrules
 
 function installdoh(){
 cd ~
-wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
-unzip dohamd64.zip
-mv -f ~/dohamd64/doh-server /usr/local/bin/doh-server
-rm -rf ~/dohamd64*
+wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
+unzip doh.zip
+mv -f ~/doh/doh-server /usr/local/bin/doh-server
+rm -rf ~/doh*
 chmod +x /usr/local/bin/doh-server
 
 mkdir -p /etc/dns-over-https/
@@ -260,12 +260,11 @@ cd ~
 function installv2ray(){
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
-wget -O ~/vtamd64.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
-unzip vtamd64.zip
-mv -f ~/vtamd64/vtrui /usr/bin/vtrui/vtrui
-mv -f ~/vtamd64/v2ctl /usr/bin/vtrui/v2ctl
-rm -rf ~/vtamd64
-rm -rf ~/vtamd64.zip
+wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
+unzip vtrui.zip
+mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
+mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
+rm -rf ~/vtrui*
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
