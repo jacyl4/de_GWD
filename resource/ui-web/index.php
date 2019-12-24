@@ -414,8 +414,8 @@
             DHCP 服务
           <span id="dhcpcheck" class="badge badge-pill text-success"></span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpdown()">关闭</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpdown()">关闭</button>
 </span>
           </div>
 
