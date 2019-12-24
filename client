@@ -144,7 +144,7 @@ cd ~
 systemctl stop doh-client > /dev/null 2>&1
 
 doh=$domain
-domainip=$(nslookup $domain 119.29.29.29 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i "1i $domainip $doh" /etc/hosts
 
@@ -605,8 +605,6 @@ bind 127.0.0.1:5391
 cache-size 1024
 
 prefetch-domain yes
-
-speed-check-mode tcp:443,tcp:80,ping
 
 server 114.114.114.114
 server 114.114.115.115
