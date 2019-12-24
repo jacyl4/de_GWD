@@ -381,7 +381,7 @@
             <i class="fas fa-bezier-curve"></i>
             Dns over Https
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
                 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitdoh()">应用</button>
           </span>
@@ -414,7 +414,7 @@
             DHCP 服务
           <span id="dhcpcheck" class="badge badge-pill text-success"></span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-success btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
+<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpdown()">关闭</button>
 </span>
           </div>
