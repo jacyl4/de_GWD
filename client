@@ -23,9 +23,9 @@ esac
 
 
 function preinstall(){
-apt purge -y unbound
-rm -rf /usr/lib/resolvconf
+rm -rf /usr/lib/resolvconf/*
 rm -rf /etc/unbound/unbound.conf
+apt purge -y unbound
 rm -rf /lib/systemd/system/unbound.service
 rm -rf /etc/systemd/system/unbound.service
 apt autoremove -y
