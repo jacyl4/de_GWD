@@ -31,6 +31,24 @@ AllowedIPs = 0.0.0.0/0
 EOF
 chmod 600 /etc/wireguard/client.conf
 
+
+cat > /etc/systemd/system/wgqk@wg0.service << "EOF"
+[Unit]
+Description=WireGuard via wg-quick(8) for wg0
+After=network-online.target nss-lookup.target
+Wants=network-online.target nss-lookup.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/wg-quick up /etc/wireguard/wg0.conf
+ExecStop=/usr/bin/wg-quick down /etc/wireguard/wg0.conf
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
 systemctl daemon-reload
-systemctl restart wg-quick@wg0
-systemctl enable wg-quick@wg0
+systemctl restart wgqk@wg0
+systemctl enable wgqk@wg0

@@ -223,9 +223,9 @@ chmod +x /etc/NetworkManager/dispatcher.d/doh-client
 cat > /etc/systemd/system/doh-client.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS Client
-After=network.target
+After=network-online.target
 Before=nss-lookup.target
-Wants=nss-lookup.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -362,8 +362,8 @@ jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > 
 cat > /etc/systemd/system/vtrui.service << EOF
 [Unit]
 Description=vtrui Service
-After=network.target
-Wants=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -495,9 +495,9 @@ Wants=network.target
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/local/bin/iptables-proxy-up
 ExecStop=/usr/local/bin/iptables-proxy-down
-RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
@@ -577,9 +577,9 @@ rm -rf /lib/systemd/system/smartdns.service
 cat > /etc/systemd/system/smartdns.service << "EOF"
 [Unit]
 Description=Smart DNS server
-After=network.target
+After=network-online.target
 Before=nss-lookup.target
-Wants=nss-lookup.target
+Wants=network-online.target
 
 [Service]
 Type=forking
