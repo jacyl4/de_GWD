@@ -23,6 +23,12 @@ esac
 
 
 function preinstall(){
+apt purge -y unbound
+rm -rf /etc/unbound/unbound.conf
+rm -rf /lib/systemd/system/unbound.service
+rm -rf /etc/systemd/system/unbound.service
+systemctl daemon-reload > /dev/null 2>&1
+
 rm -rf ~/*
 systemctl stop iptables-proxy > /dev/null 2>&1
 
@@ -57,7 +63,7 @@ rm -rf /etc/apt/preferences.d/limit-unstable
 
 apt update && apt upgrade -y
 
-apt install -y sudo locales net-tools dnsutils ipset wget curl rsync ca-certificates unzip zip git subversion jq unbound
+apt install -y sudo locales net-tools dnsutils ipset wget curl rsync ca-certificates unzip zip git subversion jq
 
 source /etc/profile
 
@@ -160,7 +166,7 @@ chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
 cat > /etc/dns-over-https/doh-client.conf << EOF
-listen = [ "127.0.0.1:5381", ]
+listen = [ "127.0.0.1:5380", ]
 
 [upstream]
 upstream_selector = "weighted_round_robin"
@@ -230,68 +236,6 @@ EOF
 systemctl daemon-reload > /dev/null 2>&1
 systemctl restart doh-client > /dev/null 2>&1
 systemctl enable doh-client > /dev/null 2>&1
-
-cat > /etc/unbound/unbound.conf << EOF
-server:
-    verbosity: 0
-    ip-address: 127.0.0.1@5380
-
-    num-threads: 2
-    outgoing-range: 8192
-    num-queries-per-thread: 4096
-    so-rcvbuf: 8m
-    so-sndbuf: 8m
-    so-reuseport: yes
-    rrset-cache-size: 100m
-    msg-cache-size: 50m
-
-    do-ip4: yes
-    do-ip6: no
-    do-udp: yes
-    do-tcp: yes
-    
-    module-config: "iterator"
-
-    minimal-responses: no
-    extended-statistics: no
-    log-queries: no
-    log-servfail: no
-    do-not-query-localhost: no
-    hide-identity: yes
-    hide-version: yes
-    
-forward-zone:
-  name: "."
-  forward-addr: 127.0.0.1@5381
-EOF
-
-rm -rf /lib/systemd/system/unbound.service
-
-cat > /etc/systemd/system/unbound.service << "EOF"
-[Unit]
-Description=Unbound DNS server
-After=network.target
-Before=nss-lookup.target
-Wants=nss-lookup.target
-
-[Service]
-Type=notify
-PIDFile=/run/unbound.pid
-EnvironmentFile=-/etc/default/unbound
-ExecStart=/usr/sbin/unbound -d $DAEMON_OPTS
-ExecReload=/usr/sbin/unbound-control reload
-Restart=on-failure
-RestartSec=2
-LimitNPROC=1000000
-LimitNOFILE=1000000
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload > /dev/null 2>&1
-systemctl restart unbound > /dev/null 2>&1
-systemctl enable unbound > /dev/null 2>&1
 }
 
 
@@ -480,14 +424,12 @@ ip route add local default dev lo table 100
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5370 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5370 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5381 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5381 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5391 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5391 -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
@@ -600,11 +542,17 @@ fi
 dpkg -i smartdns.deb
 
 cat > /etc/smartdns/smartdns.conf << EOF
-bind 127.0.0.1:5391
+bind 127.0.0.1:5370
 
 cache-size 1024
 
 prefetch-domain yes
+
+speed-check-mode tcp:80,ping
+
+rr-ttl 300
+rr-ttl-min 60
+rr-ttl-max 86400
 
 server 114.114.114.114
 server 114.114.115.115
@@ -646,6 +594,8 @@ rm -rf ~/smartdns.deb
 
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
+nameserver 1.1.1.1
+nameserver 8.8.8.8
 EOF
 
 mv -f /etc/pihole/adlists.list.b /etc/pihole/adlists.list
@@ -654,7 +604,7 @@ cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
 IPV6_ADDRESS=
-PIHOLE_DNS_1=127.0.0.1#5391
+PIHOLE_DNS_1=127.0.0.1#5380
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true
@@ -695,13 +645,13 @@ port=5390
 EOF
 
 cat > /etc/pihole/dns-servers.conf << EOF
- SmartDNS;127.0.0.1#5391
+ DoH;127.0.0.1#5380
 EOF
 
 sed -i '/PIHOLE_DNS/d' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=127.0.0.1#5391' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=127.0.0.1#5380' /etc/pihole/setupVars.conf
 sed -i '/server=/d' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=127.0.0.1#5391' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
