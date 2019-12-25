@@ -561,10 +561,6 @@ prefetch-domain yes
 
 speed-check-mode tcp:80,ping
 
-rr-ttl 300
-rr-ttl-min 60
-rr-ttl-max 86400
-
 server 114.114.114.114
 server 114.114.115.115
 server 119.29.29.29
