@@ -740,7 +740,7 @@ rm -rf LICENSE
 /usr/local/bin/ui-nodenslookup >/dev/null 2>&1
 /usr/local/bin/ui-changedoh >/dev/null 2>&1
 
-if [[ ! -f "/etc/wireguard/sprivatekey" ]]&&[[ ! -f "/etc/wireguard/cprivatekey" ]]; then
+if [[ ! -f "/etc/wireguard/sprivatekey" ]]||[[ ! -f "/etc/wireguard/cprivatekey" ]]; then
 /usr/local/bin/ui-wgchangekey >/dev/null 2>&1
 fi
 
