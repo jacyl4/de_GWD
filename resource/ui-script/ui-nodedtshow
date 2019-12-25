@@ -188,7 +188,7 @@ cat > /etc/vtrui/config.json << EOF
       },
       {
         "type": "field",
-        "source": [ "10.10.10.10" ],
+        "source": [ "10.0.0.1" ],
         "outboundTag": "diverttraffic"
       }
     ]
