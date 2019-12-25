@@ -24,9 +24,11 @@ esac
 
 function preinstall(){
 apt purge -y unbound
+rm -rf /usr/lib/resolvconf
 rm -rf /etc/unbound/unbound.conf
 rm -rf /lib/systemd/system/unbound.service
 rm -rf /etc/systemd/system/unbound.service
+apt autoremove -y
 systemctl daemon-reload > /dev/null 2>&1
 
 rm -rf ~/*
@@ -46,6 +48,9 @@ EOF
 pihole restartdns > /dev/null 2>&1
 systemctl stop pihole-FTL > /dev/null 2>&1
 fi
+
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
@@ -503,6 +508,12 @@ systemctl enable iptables-proxy > /dev/null 2>&1
 
 
 function installwg(){
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+EOF
+
 systemctl stop wg-quick@wg0 > /dev/null 2>&1
 
 if [[ $architecture = "amd64" ]]; then
@@ -586,17 +597,11 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 
+rm -rf ~/smartdns.deb
+
 systemctl daemon-reload > /dev/null 2>&1
 systemctl restart smartdns > /dev/null 2>&1
 systemctl enable smartdns > /dev/null 2>&1
-
-rm -rf ~/smartdns.deb
-
-cat > /etc/resolv.conf << EOF
-nameserver 127.0.0.1
-nameserver 1.1.1.1
-nameserver 8.8.8.8
-EOF
 
 mv -f /etc/pihole/adlists.list.b /etc/pihole/adlists.list
 
