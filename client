@@ -78,6 +78,7 @@ echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+
 cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
@@ -95,6 +96,7 @@ LC_MEASUREMENT="en_US.UTF-8"
 LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
+
 locale-gen en_US.UTF-8
 
 cat > /etc/security/limits.conf << EOF
@@ -458,6 +460,10 @@ iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 98
 
 systemctl restart doh-client
 systemctl restart vtrui
+
+if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) =~ "wg0" ]]; then
+systemctl restart wg-quick@wg0
+fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
@@ -513,6 +519,8 @@ nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
 
+systemctl stop wg-quick@wg0 > /dev/null 2>&1
+
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://deb.debian.org/debian buster main
@@ -530,9 +538,9 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 apt update && apt upgrade -y
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 wireguard-tools
+apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools
 elif [[ $architecture = "amd64" ]]; then
-apt install -y wireguard
+apt install -y wireguard-dkms wireguard-tools
 fi
 
 mkdir -p /etc/wireguard
