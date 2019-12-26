@@ -179,7 +179,7 @@
             <i class="fas fa-stream"></i>
             节点列表
          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-primary btn-sm mt-1" style="border-Radius: 0px;" onclick="shownodedt()">启用内网设备分流</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="shownodedt()">启用内网设备分流</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="hidenodedt()">禁用内网设备分流</button>
           </span>
           </div>
@@ -209,6 +209,18 @@
       <a class="dropdown-item" onclick="nfswitch8()" href="#" id="nodenfshow8"></a>
       <a class="dropdown-item" onclick="nfswitch9()" href="#" id="nodenfshow9"></a>
     </div>
+  </div>
+</div>
+</span>
+
+<span class="float-right">
+<div class="input-group mt-1 mr-4">
+  <div class="input-group-prepend">
+  <label class="input-group-text">V2去广告<span id="v2adcheck" class="badge badge-pill text-success"></span></label>
+  </div>
+  <div class="input-group-append">
+    <button class="btn btn-secondary" type="button" onclick="v2adadd()">开启</button>
+    <button class="btn btn-secondary" type="button" onclick="v2addel()">关闭</button>
   </div>
 </div>
 </span>
@@ -382,7 +394,7 @@
             Dns over Https
           <span class="float-right mt-n1 mb-n2">
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="chnwl()">大陆白名单</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="gfwl()">GFWlist</button>
                 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitdoh()">应用</button>
           </span>
           </div>
@@ -414,6 +426,7 @@
             DHCP 服务
           <span id="dhcpcheck" class="badge badge-pill text-success"></span>
 <span class="float-right mt-n1 mb-n2">
+<a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">设置</a>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpdown()">关闭</button>
 </span>
@@ -511,6 +524,14 @@ $.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
 function proxyon(){
 alert("确认重启代理进程");
 $.get('proxyon.php', function(result){ location.reload(); });
+}
+
+function v2adadd(){
+$.get('v2adadd.php', function(result){ location.reload(); });
+}
+
+function v2addel(){
+$.get('v2addel.php', function(result){ location.reload(); });
 }
 
 function pingtest(){
@@ -725,6 +746,10 @@ $(".sidebar").toggleClass("toggled");
 
 $.get('dhcpcheck.php', function(data){
 if (data.indexOf("on") != -1) {$('#dhcpcheck').html('on');}
+});
+
+$.get('v2adcheck.php', function(data){
+if (data.indexOf("on") != -1) {$('#v2adcheck').html('on');}
 });
 
 $.get("version.php", function(data) {
