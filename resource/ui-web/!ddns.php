@@ -112,7 +112,6 @@
           <span class="input-group-text justify-content-center w-100">Wan IP</span>
         </div>
           <span class="form-control text-center"><?php echo exec("curl http://members.3322.org/dyndns/getip"); ?></span>
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="stopddns()">STOP</button>
       </div>
       
         <div class="card mb-3">
@@ -120,7 +119,12 @@
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
           <span id="ddnscheckcf" class="badge text-success"></span>
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitddnscf()">开启</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="stopddns()">关闭</button>
+</span>
           </div>
+
           <div class="card-body">
   <div class="form-group">
     <div class="form-row mb-3">
@@ -155,10 +159,6 @@
       </div>
     </div>
   </div>
-
-<span class="float-right">
-  <button type="button" class="btn btn-primary" onclick="submitddnscf()">保存&开启</button>
-</span>
           </div>
         </div>
 
@@ -168,49 +168,215 @@
             <i class="fas fa-ethernet"></i>
             WireGuard Server
           <span id="wgcheck" class="badge text-success"></span>
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="wgon()">开启</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="wgoff()">关闭</button>
+</span>
           </div>
           <div class="card-body">
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1">
-        <div class="input-group-prepend w-25">
+      <div class="col-md-6 input-group my-1 ml-auto mr-auto">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">WireGuard Endpoint</span>
           <span class="input-group-text justify-content-center w-100">域名/公网IP</span>
         </div>
           <input type="text" id="WGaddress" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGaddress.txt"); ?>">
       </div>
+      <button type="button" class="btn btn-outline-secondary my-1" onclick="wgrekey()">重新生成密钥</button>
+</div>
 
-      <div class="col-md-6">
-        <span class="float-right">
-          <button type="button" class="btn btn-outline-secondary my-1" onclick="wgrekey()">重新生成密钥</button>
-          <button type="button" class="btn btn-outline-dark my-1" data-toggle="modal" data-target="#wgqrpop">显示二维码</button>
-          <button type="button" class="btn btn-outline-primary my-1" onclick="wgon()">开启</button>
-          <button type="button" class="btn btn-outline-danger my-1" onclick="wgoff()">关闭</button>
-        </span>
+<div class="form-row mb-3">
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点1</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark1" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop1" onclick="submitwgmark()">显示二维码</button>
+      </div>
+
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点2</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark2" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop2" onclick="submitwgmark()">显示二维码</button>
+      </div>
+</div>
+
+<div class="form-row mb-3">
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点3</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark3" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop3" onclick="submitwgmark()">显示二维码</button>
+      </div>
+
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点4</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark4" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop4" onclick="submitwgmark()">显示二维码</button>
+      </div>
+</div>
+
+<div class="form-row mb-3">
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点5</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark5" class="form-control" value="<?php echo exec("awk 'NR==5{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop5" onclick="submitwgmark()">显示二维码</button>
+      </div>
+
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点6</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark6" class="form-control" value="<?php echo exec("awk 'NR==6{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop6" onclick="submitwgmark()">显示二维码</button>
+      </div>
+</div>
+
+<div class="form-row mb-3">
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点7</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark7" class="form-control" value="<?php echo exec("awk 'NR==7{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop7" onclick="submitwgmark()">显示二维码</button>
+      </div>
+
+      <div class="col-md-6 input-group my-1">
+        <div class="input-group-prepend w-50">
+          <span class="input-group-text justify-content-center w-100">节点8</span>
+          <span class="input-group-text justify-content-center w-100">备注：</span>
+        </div>
+          <input type="text" id="WGmark8" class="form-control" value="<?php echo exec("awk 'NR==8{print}' /var/www/html/WGmark.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop8" onclick="submitwgmark()">显示二维码</button>
       </div>
 </div>
 
 <span class="float-left text-secondary">
   <small>
-注：需要主路由映射UDP端口9895到de_GWD的地址。
+注：需要主路由映射UDP端口49894到de_GWD的地址。
   </small>
 </span>
 
 
 <!-- Modal -->
-<div class="modal fade" id="wgqrpop" role="dialog" aria-hidden="true">
+<div class="modal fade" id="wgqrpop1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端 二维码</h5>
+        <h5 class="modal-title" >WireGuard客户端1 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode"></div>
+        <div id="qrcode1"></div>
       </div>
     </div>
   </div>
 </div>
 
+<div class="modal fade" id="wgqrpop2" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端2 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode2"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div class="modal fade" id="wgqrpop3" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端3 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop4" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端4 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop5" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端5 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode5"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop6" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端6 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode6"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop7" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端7 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode7"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop8" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >WireGuard客户端8 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode8"></div>
+      </div>
+    </div>
+  </div>
+</div>
           </div>
         </div>
         <!-- Page Content -->
@@ -261,6 +427,18 @@ WGaddress=$('#WGaddress').val();
 $.get('wgon.php', {WGaddress:WGaddress}, function(result){ location.reload() });
 }
 
+function submitwgmark(){
+WGmark1=$('#WGmark1').val();
+WGmark2=$('#WGmark2').val();
+WGmark3=$('#WGmark3').val();
+WGmark4=$('#WGmark4').val();
+WGmark5=$('#WGmark5').val();
+WGmark6=$('#WGmark6').val();
+WGmark7=$('#WGmark7').val();
+WGmark8=$('#WGmark8').val();
+$.get('wgmark.php', {WGmark1:WGmark1, WGmark2:WGmark2, WGmark3:WGmark3, WGmark4:WGmark4, WGmark5:WGmark5, WGmark6:WGmark6, WGmark7:WGmark7, WGmark8:WGmark8}, function(result){ });
+}
+
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
@@ -270,8 +448,29 @@ if (data.indexOf("cfon") != -1) {$('#ddnscheckcf').html('on');}
 $.get('wgcheck.php', function(data){
 if (data.indexOf("on") != -1) {$('#wgcheck').html('on');}
 });
-$.get('wgqrtxt.php', function(data){
-jQuery('#qrcode').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+$.get('wgqrtxt1.php', function(data){
+jQuery('#qrcode1').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+});
+$.get('wgqrtxt2.php', function(data){
+jQuery('#qrcode2').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+});
+$.get('wgqrtxt3.php', function(data){
+jQuery('#qrcode3').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+});
+$.get('wgqrtxt4.php', function(data){
+jQuery('#qrcode4').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+});
+$.get('wgqrtxt5.php', function(data){
+jQuery('#qrcode5').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+});
+$.get('wgqrtxt6.php', function(data){
+jQuery('#qrcode6').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+});
+$.get('wgqrtxt7.php', function(data){
+jQuery('#qrcode7').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
+});
+$.get('wgqrtxt8.php', function(data){
+jQuery('#qrcode8').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
 });
 }
 </script>

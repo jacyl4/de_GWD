@@ -4,32 +4,168 @@ cat > /etc/wireguard/wg0.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/sprivatekey)
 Address = 172.16.66.1/24
-ListenPort = 9895
+ListenPort = 49894
 DNS = 172.16.66.1
 MTU = 1420
 PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s $(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1),172.16.66.0/24 -o $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}') -j MASQUERADE
 PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s $(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1),172.16.66.0/24 -o $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}') -j MASQUERADE
 
 [Peer]
-PublicKey = $(cat /etc/wireguard/cpublickey)
-AllowedIPs = 172.16.66.0/24
+PublicKey = $(cat /etc/wireguard/cpublickey1)
+AllowedIPs = 172.16.66.11/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey2)
+AllowedIPs = 172.16.66.12/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey3)
+AllowedIPs = 172.16.66.13/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey4)
+AllowedIPs = 172.16.66.14/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey5)
+AllowedIPs = 172.16.66.15/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey6)
+AllowedIPs = 172.16.66.16/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey7)
+AllowedIPs = 172.16.66.17/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey8)
+AllowedIPs = 172.16.66.18/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/cpublickey9)
+AllowedIPs = 172.16.66.19/32
 EOF
 chmod 600 /etc/wireguard/wg0.conf
 
 
-cat > /etc/wireguard/client.conf << EOF
+cat > /etc/wireguard/client1.conf << EOF
 [Interface]
-PrivateKey = $(cat /etc/wireguard/cprivatekey)
-Address = 172.16.66.2/32
+PrivateKey = $(cat /etc/wireguard/cprivatekey1)
+Address = 172.16.66.11/32
 DNS = 172.16.66.1
 MTU = 1420
 
 [Peer]
 PublicKey = $(cat /etc/wireguard/spublickey)
-Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):9895
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
 AllowedIPs = 0.0.0.0/0
 EOF
-chmod 600 /etc/wireguard/client.conf
+
+cat > /etc/wireguard/client2.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey2)
+Address = 172.16.66.12/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+
+cat > /etc/wireguard/client3.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey3)
+Address = 172.16.66.13/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+
+cat > /etc/wireguard/client4.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey4)
+Address = 172.16.66.14/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+
+cat > /etc/wireguard/client5.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey5)
+Address = 172.16.66.15/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+
+cat > /etc/wireguard/client6.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey6)
+Address = 172.16.66.16/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+
+cat > /etc/wireguard/client7.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey7)
+Address = 172.16.66.17/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+
+cat > /etc/wireguard/client8.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey8)
+Address = 172.16.66.18/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+
+cat > /etc/wireguard/client9.conf << EOF
+[Interface]
+PrivateKey = $(cat /etc/wireguard/cprivatekey9)
+Address = 172.16.66.19/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/spublickey)
+Endpoint = $(awk 'NR==1{print}' /var/www/html/WGaddress.txt):49894
+AllowedIPs = 0.0.0.0/0
+EOF
+chmod 600 /etc/wireguard/client*.conf
 
 
 systemctl daemon-reload
