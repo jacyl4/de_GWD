@@ -464,7 +464,7 @@ systemctl restart doh-client
 systemctl restart vtrui
 
 if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}') =~ "wg0" ]]; then
-systemctl restart wg-quick@wg0
+systemctl start wg-quick@wg0
 fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
@@ -520,8 +520,6 @@ nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
-
-systemctl stop wg-quick@wg0
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
