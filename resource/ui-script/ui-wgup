@@ -1,5 +1,7 @@
 #!/bin/bash
 
+iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s $(ip -oneline -family inet address show |  awk '{print $4}' | awk 'END {print}' | cut -d '/' -f1),172.16.66.0/24 -o $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}') -j MASQUERADE
+
 cat > /etc/wireguard/wg0.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/sprivatekey)

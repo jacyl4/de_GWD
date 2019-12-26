@@ -23,6 +23,8 @@ esac
 
 
 function preinstall(){
+rm -rf /etc/wireguard/cprivatekey
+rm -rf /etc/wireguard/cpublickey
 rm -rf /usr/lib/resolvconf/*
 rm -rf /etc/unbound/unbound.conf
 apt purge -y unbound
