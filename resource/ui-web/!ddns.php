@@ -182,8 +182,8 @@
           <span class="input-group-text justify-content-center w-100">域名/公网IP</span>
         </div>
           <input type="text" id="WGaddress" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGaddress.txt"); ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="wgrekey()">重新生成密钥</button>
       </div>
-      <button type="button" class="btn btn-outline-secondary my-1" onclick="wgrekey()">重新生成密钥</button>
 </div>
 
 <div class="form-row mb-3">
