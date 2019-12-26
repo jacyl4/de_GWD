@@ -942,12 +942,12 @@ else
 fi
 
 
-if [[ $(systemctl is-active iptables-proxy) = "active" ]]; then
-    echo "[$statusgod] Iptables-proxy [working]"
-elif [[ ! -f "/etc/systemd/system/iptables-proxy.service" ]]; then
-    echo "[$statusbad] Iptables-proxy [not Installed]"
+if [[ $(systemctl is-active smartdns) = "active" ]]; then
+    echo "[$statusgod] SmartDNS       [working]"
+elif [[ ! -f "/etc/systemd/system/smartdns.service" ]]; then
+    echo "[$statusbad] SmartDNS       [not Installed]"
 else
-    echo "[$statusbad] Iptables-proxy [start failed]"
+    echo "[$statusbad] SmartDNS       [start failed]"
 fi
 
 
