@@ -178,7 +178,7 @@
 <div class="form-row mb-3">
       <div class="col-md-6 input-group my-1 ml-auto mr-auto">
         <div class="input-group-prepend w-50">
-          <span class="input-group-text justify-content-center w-100">WireGuard Endpoint</span>
+          <span class="input-group-text justify-content-center w-100">Endpoint</span>
           <span class="input-group-text justify-content-center w-100">域名/公网IP</span>
         </div>
           <input type="text" id="WGaddress" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGaddress.txt"); ?>">
