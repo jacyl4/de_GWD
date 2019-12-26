@@ -521,7 +521,7 @@ nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
 
-systemctl stop wg-quick@wg0 > /dev/null 2>&1
+systemctl stop wg-quick@wg0
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
@@ -544,8 +544,6 @@ apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools
 elif [[ $architecture = "amd64" ]]; then
 apt install -y wireguard-dkms wireguard-tools
 fi
-
-mkdir -p /etc/wireguard
 }
 
 
@@ -750,7 +748,8 @@ rm -rf LICENSE
 /usr/local/bin/ui-nodenslookup >/dev/null 2>&1
 /usr/local/bin/ui-changedoh >/dev/null 2>&1
 
-if [[ ! -f "/etc/wireguard/sprivatekey" ]]||[[ ! -f "/etc/wireguard/cprivatekey1" ]]||[[ ! -f "/etc/wireguard/cprivatekey2" ]]||[[ ! -f "/etc/wireguard/cprivatekey3" ]]||[[ ! -f "/etc/wireguard/cprivatekey4" ]]||[[ ! -f "/etc/wireguard/cprivatekey5" ]]||[[ ! -f "/etc/wireguard/cprivatekey6" ]]||[[ ! -f "/etc/wireguard/cprivatekey7" ]]||[[ ! -f "/etc/wireguard/cprivatekey8" ]]||[[ ! -f "/etc/wireguard/cprivatekey9" ]]; then
+if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
+mkdir -p /etc/wireguard
 /usr/local/bin/ui-wgchangekey >/dev/null 2>&1
 fi
 
