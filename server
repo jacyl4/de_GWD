@@ -90,15 +90,14 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 
 sysctl -p
-
-systemctl mask --now systemd-resolved
-systemctl daemon-reload
 }
 
 
 
 function installpihole(){
 mkdir -p /etc/pihole
+
+echo "" > /etc/pihole/adlists.list
 
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
@@ -118,8 +117,6 @@ DNS_BOGUS_PRIV=true
 DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
-
-echo "" > /etc/pihole/adlists.list
 
 curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 
