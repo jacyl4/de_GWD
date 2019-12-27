@@ -292,7 +292,7 @@ cat > /etc/vtrui/config.json << EOF
     }
   ],
   "outbounds": [
-  {"protocol": "freedom", "settings": {"domainStrategy": "UseIP"}},
+  {"protocol": "freedom", "settings": {"domainStrategy": "UseIPv4"}},
   {"tag": "block", "protocol": "blackhole", "settings": {}}
   ]
 }
