@@ -214,7 +214,7 @@
 </span>
 
 <span class="float-right">
-<div class="input-group mt-1 mr-4">
+<div class="input-group mt-1 mr-4 mb-4">
   <div class="input-group-prepend">
   <label class="input-group-text">V2去广告<span id="v2adcheck" class="badge badge-pill text-success"></span></label>
   </div>
@@ -509,16 +509,26 @@ function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
 }
 
-function uptime(){
-$.get('uptime.php', function(data) { $('#uptime').text(data) });
+function checklink(){
+$.get('testbaidu.php',function(data) {
+var checklink1 = data;
+if ( $.trim(checklink1) == "ONLINE" ) {
+$('#testbaidu').text("✓ 国内线路畅通");
 }
-
-function chlink1(){
-$.get('testbaidu.php', function(data) { $('#testbaidu').text(data) });
+else {
+$('#testbaidu').text("✗ 国内线路不通");
 }
+});
 
-function chlink2(){
-$.get('testgoogle.php', function(data) { $('#testgoogle').text(data) });
+$.get('testgoogle.php',function(data) {
+var checklink2 = data;
+if ( $.trim(checklink2) == "ONLINE" ) {
+$('#testgoogle').text("✓ 国外线路畅通");
+}
+else {
+$('#testgoogle').text("✗ 国外线路不通");
+}
+});
 }
 
 function proxyon(){
@@ -744,39 +754,6 @@ window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
 
-$.get('dhcpcheck.php', function(data){
-if (data.indexOf("on") != -1) {$('#dhcpcheck').html('on');}
-});
-
-$.get('v2adcheck.php', function(data){
-if (data.indexOf("on") != -1) {$('#v2adcheck').html('on');}
-});
-
-$.get("version.php", function(data) {
-var strver=data;
-var currentvernum = strver.split("-")[0].substring(0);
-var remotevernum = strver.split("-")[1].substring(0);
-$('#currentver').html(currentvernum+'本机');
-$('#remotever').html(remotevernum+' 发布');
-
-var vera = $.trim(currentvernum);
-var verb = $.trim(remotevernum);
-if (vera == verb) {
-$('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
-}
-else {
-$('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
-};
-});
-
-$.get('testdns.php', function(data) { $('#testdns').text(data) });
-
-setInterval(function() {
-uptime();
-chlink1();
-chlink2();
-}, 1800);
-
 $.get("nodechecknf.php", function(data) { $('#nodenfshow').html(data) });
 $.get("nodecheckdt.php", function(data) { $('#nodedtshow').html(data) });
 
@@ -821,6 +798,39 @@ $('#nodecheck8').html(nodestatusf);
 $('#nodecheck9').html(nodestatusf);
 
 $("#"+nodenum).html(nodestatust);
+
+$.get('uptime.php', function(data) { $('#uptime').text(data) });
+
+$.get('dhcpcheck.php', function(data){
+if (data.indexOf("on") != -1) {$('#dhcpcheck').html('on');}
+});
+
+$.get('v2adcheck.php', function(data){
+if (data.indexOf("on") != -1) {$('#v2adcheck').html('on');}
+});
+
+$.get("version.php", function(data) {
+var strver=data;
+var currentvernum = strver.split("-")[0].substring(0);
+var remotevernum = strver.split("-")[1].substring(0);
+$('#currentver').html(currentvernum+'本机');
+$('#remotever').html(remotevernum+' 发布');
+
+var vera = $.trim(currentvernum);
+var verb = $.trim(remotevernum);
+if (vera == verb) {
+$('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
+}
+else {
+$('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
+};
+});
+
+$.get('testdns.php', function(data) { $('#testdns').text(data) });
+
+setInterval(function() {
+checklink();
+}, 1500);
 };
 </script>
   <!-- Scroll to Top Button-->
