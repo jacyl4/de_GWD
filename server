@@ -1529,8 +1529,8 @@ fi
 
 
 start_menu(){
-statusgod=$(green "✔︎")
-statusbad=$(red "✘")
+statusgod=$(green "✓")
+statusbad=$(red "x")
 statusnone=$(yellow "-")
 
 

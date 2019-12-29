@@ -20,8 +20,8 @@ case $(uname -m) in
     aarch64)  architecture="arm64" ;;
 esac
 
-statusuccess=$(green "[OK]")
-statusfailed=$(red "[failed]")
+statusuccess=$(green "[ OK ]")
+statusfailed=$(red "[ failed ]")
 
 
 function preinstall(){
@@ -516,11 +516,17 @@ systemctl daemon-reload > /dev/null 2>&1
 systemctl restart iptables-proxy > /dev/null 2>&1
 systemctl enable iptables-proxy > /dev/null 2>&1
 
+echo
 if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk 'NR==1{print $1}') =~ "20" ]]; then
-    echo "$statusuccess v2ray access"
+    echo "$statusuccess de_GWD server access"
+    echo "$statusuccess de_GWD server access"
+    echo "$statusuccess de_GWD server access"
 else
-    echo "$statusfailed v2ray access"
+    echo "$statusfailed de_GWD server access"
+    echo "$statusfailed de_GWD server access"
+    echo "$statusfailed de_GWD server access"
 fi
+echo
 }
 
 
@@ -615,7 +621,7 @@ systemctl daemon-reload > /dev/null 2>&1
 systemctl restart smartdns > /dev/null 2>&1
 systemctl enable smartdns > /dev/null 2>&1
 
-mv -f /etc/pihole/adlists.list.b /etc/pihole/adlists.list
+echo "" > /etc/pihole/adlists.list
 
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
@@ -816,7 +822,6 @@ installiptablesproxy
 installwg
 
 mkdir -p /etc/pihole
-echo "" > /etc/pihole/adlists.list.b
 
 installpihole
 
@@ -887,8 +892,6 @@ v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.
 
 localaddr=$(ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | awk 'NR==1{print}')
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
-
-cp -rf /etc/pihole/adlists.list /etc/pihole/adlists.list.b
 
 cd ~
 
