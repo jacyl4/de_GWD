@@ -23,6 +23,8 @@ esac
 
 
 function preinstall(){
+rm -rf /usr/local/bin/ui-testbaidu
+rm -rf /usr/local/bin/ui-testgoogle
 rm -rf /etc/wireguard/cprivatekey
 rm -rf /etc/wireguard/cpublickey
 rm -rf /usr/lib/resolvconf/*
