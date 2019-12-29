@@ -42,10 +42,6 @@ AllowedIPs = 172.16.66.17/32
 [Peer]
 PublicKey = $(cat /etc/wireguard/cpublickey8)
 AllowedIPs = 172.16.66.18/32
-
-[Peer]
-PublicKey = $(cat /etc/wireguard/cpublickey9)
-AllowedIPs = 172.16.66.19/32
 EOF
 chmod 600 /etc/wireguard/wg0.conf
 
