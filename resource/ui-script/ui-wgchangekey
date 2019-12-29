@@ -12,6 +12,5 @@ wg genkey | tee cprivatekey5 | wg pubkey > cpublickey5
 wg genkey | tee cprivatekey6 | wg pubkey > cpublickey6
 wg genkey | tee cprivatekey7 | wg pubkey > cpublickey7
 wg genkey | tee cprivatekey8 | wg pubkey > cpublickey8
-wg genkey | tee cprivatekey9 | wg pubkey > cpublickey9
 
 cd ~
