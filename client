@@ -20,6 +20,8 @@ case $(uname -m) in
     aarch64)  architecture="arm64" ;;
 esac
 
+statusuccess=$(green "[OK]")
+statusfailed=$(red "[failed]")
 
 
 function preinstall(){
@@ -35,7 +37,8 @@ rm -rf /etc/systemd/system/unbound.service
 apt autoremove -y
 systemctl daemon-reload > /dev/null 2>&1
 
-rm -rf ~/*
+rm -rf ~/doh*
+rm -rf ~/vtrui*
 systemctl stop iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
@@ -512,6 +515,12 @@ EOF
 systemctl daemon-reload > /dev/null 2>&1
 systemctl restart iptables-proxy > /dev/null 2>&1
 systemctl enable iptables-proxy > /dev/null 2>&1
+
+if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk 'NR==1{print $1}') =~ "20" ]]; then
+    echo "$statusuccess v2ray access"
+else
+    echo "$statusfailed v2ray access"
+fi
 }
 
 
@@ -922,8 +931,8 @@ blue "---------------------"
 
 
 start_menu(){
-statusgod=$(green "✔︎")
-statusbad=$(red "✘")
+statusgod=$(green "✓")
+statusbad=$(red "x")
 
 if [[ $(systemctl is-active doh-client) = "active" ]]; then
     echo "[$statusgod] DoH client     [working]"
