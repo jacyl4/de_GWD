@@ -239,7 +239,8 @@ Type=simple
 PIDFile=/run/doh-client.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
-Restart=on-failure
+Restart=always
+RestartSec=2s
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -378,7 +379,8 @@ Type=simple
 PIDFile=/run/vtrui.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
+Restart=always
+RestartSec=2s
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -607,8 +609,8 @@ PIDFile=/run/smartdns.pid
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
-Restart=on-failure
-RestartSec=2
+Restart=always
+RestartSec=2s
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
