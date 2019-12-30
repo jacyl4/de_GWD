@@ -138,14 +138,6 @@ sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
 
-rm -rf /etc/resolv.conf
-
-cat > /run/resolvconf/resolv.conf << EOF
-nameserver 127.0.0.1
-EOF
-
-ln -s /run/resolvconf/resolv.conf /etc/resolv.conf
-
 pihole -f
 }
 
@@ -916,14 +908,12 @@ installgwd(){
     green "======================"
     read vpsdomain
 
-rm -rf /etc/resolv.conf
-
-cat > /run/resolvconf/resolv.conf << EOF
+cat > /etc/resolv.conf << EOF
 nameserver 1.1.1.1
 nameserver 8.8.8.8
+nameserver 1.0.0.1
+nameserver 8.8.4.4
 EOF
-
-ln -s /run/resolvconf/resolv.conf /etc/resolv.conf
 
 if [[ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) = "buster" ]]; then
 cat > /etc/apt/sources.list << EOF
