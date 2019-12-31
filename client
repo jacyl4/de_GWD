@@ -934,7 +934,7 @@ blue "---------------------"
 
 start_menu(){
 statusgod=$(green "✓")
-statusbad=$(red "x")
+statusbad=$(red "✕")
 
 if [[ $(systemctl is-active doh-client) = "active" ]]; then
     echo "[$statusgod] DoH client     [working]"

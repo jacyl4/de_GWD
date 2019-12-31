@@ -1540,7 +1540,7 @@ fi
 
 start_menu(){
 statusgod=$(green "✓")
-statusbad=$(red "x")
+statusbad=$(red "✕")
 statusnone=$(yellow "-")
 
 
