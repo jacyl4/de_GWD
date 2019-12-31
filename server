@@ -7,7 +7,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-apt install -y sudo locales net-tools dnsutils wget curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc2 libjemalloc-dev expat jq
+apt install -y sudo locales net-tools dnsutils wget curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
 
 source /etc/profile
 
@@ -372,11 +372,11 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-wget -N https://nginx.org/download/nginx-1.17.0.tar.gz
-tar zxvf nginx-1.17.0.tar.gz
-sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.0/auto/cc/gcc
+wget -N https://nginx.org/download/nginx-1.17.7.tar.gz
+tar zxvf nginx-1.17.7.tar.gz
+sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.7/auto/cc/gcc
 mkdir -p /etc/nginx
-cd nginx-1.17.0
+cd nginx-1.17.7
 curl https://raw.githubusercontent.com/kn007/patch/master/nginx.patch | patch -p1
 curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_strict-sni.patch | patch -p1
 
