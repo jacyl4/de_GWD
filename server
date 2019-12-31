@@ -428,7 +428,7 @@ curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_st
 --with-zlib=../zlib-cf \
 --with-openssl=../openssl-1.1.1b \
 --with-openssl-opt='zlib enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
---with-cc-opt='-DTCP_FASTOPEN=23 -m64 -g -O3 -flto -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2 -gsplit-dwarf' \
+--with-cc-opt='-DTCP_FASTOPEN=23 -m64 -g -O3 -flto -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2' \
 --with-ld-opt='-lrt -ljemalloc -Wl,-z,relro -Wl,-z,now -fPIC -flto' \
 --add-module=../ngx_brotli
 
