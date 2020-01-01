@@ -7,7 +7,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-apt install -y sudo locales net-tools dnsutils wget curl rsync ca-certificates unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
+apt install -y sudo locales net-tools dnsutils ca-certificates wget curl rsync unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
 
 source /etc/profile
 
@@ -331,6 +331,15 @@ systemctl enable vtrui
 
 
 function installnginxlatest(){
+mkdir -p /etc/nginx
+mkdir -p /etc/nginx/conf.d
+mkdir -p /var/log/nginx
+mkdir -p /var/cache/nginx/client_temp
+mkdir -p /var/cache/nginx/proxy_temp
+mkdir -p /var/cache/nginx/fastcgi_temp
+mkdir -p /var/cache/nginx/scgi_temp
+mkdir -p /var/cache/nginx/uwsgi_temp
+
 cd ~
 wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
 tar xjvf jemalloc-5.2.1.tar.bz2
@@ -346,7 +355,8 @@ cd zlib-cf
 make -f Makefile.in distclean
 
 cd ~
-git clone --recursive https://github.com/google/ngx_brotli.git
+git clone https://github.com/google/ngx_brotli.git
+cd ngx_brotli && git submodule update --init
 
 cd ~
 wget https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
@@ -360,18 +370,9 @@ curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-
 curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-1.1.1b-chacha_draft.patch | patch -p1
 
 cd ~
-mkdir -p /etc/nginx/conf.d
-mkdir -p /var/log/nginx
-mkdir -p /var/cache/nginx/client_temp
-mkdir -p /var/cache/nginx/proxy_temp
-mkdir -p /var/cache/nginx/fastcgi_temp
-mkdir -p /var/cache/nginx/scgi_temp
-mkdir -p /var/cache/nginx/uwsgi_temp
-
 wget https://nginx.org/download/nginx-1.17.7.tar.gz
 tar zxvf nginx-1.17.7.tar.gz
 sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.7/auto/cc/gcc
-mkdir -p /etc/nginx
 cd nginx-1.17.7
 curl https://raw.githubusercontent.com/kn007/patch/master/nginx.patch | patch -p1
 curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_strict-sni.patch | patch -p1
