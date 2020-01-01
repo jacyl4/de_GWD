@@ -332,36 +332,32 @@ systemctl enable vtrui
 
 function installnginxlatest(){
 cd ~
+wget -N https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+tar xjvf jemalloc-5.2.1.tar.bz2
+cd jemalloc-5.2.1
+./configure
+make -j $(nproc --all) && make install
+echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
+ldconfig
+
+cd ~
+git clone https://github.com/cloudflare/zlib.git zlib-cf
+cd zlib-cf
+make -f Makefile.in distclean
+
+cd ~
+git clone --recursive https://github.com/google/ngx_brotli.git
+
+cd ~
+wget -N https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
+tar -zxvf pcre-8.43.tar.gz
+
+cd ~
 wget -N https://www.openssl.org/source/openssl-1.1.1b.tar.gz
 tar zxvf openssl-1.1.1b.tar.gz
 cd openssl-1.1.1b
 curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-equal-1.1.1b.patch | patch -p1
 curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-1.1.1b-chacha_draft.patch | patch -p1
-
-cd ~
-wget -N https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
-tar -zxvf pcre-8.43.tar.gz
-cd pcre-8.43
-autoreconf -f -i
-
-cd ~
-git clone https://github.com/cloudflare/zlib.git zlib-cf
-cd zlib-cf
-./configure --64
-
-cd ~
-git clone https://github.com/eustas/ngx_brotli.git
-cd ngx_brotli
-git submodule update --init --recursive
-
-cd ~
-wget -N https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
-tar xjvf jemalloc-5.2.1.tar.bz2
-cd jemalloc-5.2.1
-./configure -prefix=/usr/local/jemalloc --libdir=/usr/local/lib
-make -j $(nproc --all) && make install
-echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
-ldconfig
 
 cd ~
 mkdir -p /etc/nginx/conf.d
@@ -423,9 +419,9 @@ curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_st
 --with-stream_realip_module \
 --with-stream_ssl_module \
 --with-stream_ssl_preread_module \
+--with-zlib=../zlib-cf \
 --with-pcre=../pcre-8.43 \
 --with-pcre-jit \
---with-zlib=../zlib-cf \
 --with-openssl=../openssl-1.1.1b \
 --with-openssl-opt='zlib enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
 --with-cc-opt='-DTCP_FASTOPEN=23 -m64 -g -O3 -flto -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2' \
@@ -460,11 +456,11 @@ systemctl daemon-reload
 systemctl restart nginx
 
 rm -rf ~/nginx*
-rm -rf ~/openssl*
-rm -rf ~/pcre*
+rm -rf ~/jemalloc*
 rm -rf ~/zlib-cf
 rm -rf ~/ngx_brotli
-rm -rf ~/jemalloc*
+rm -rf ~/pcre*
+rm -rf ~/openssl*
 }
 
 
@@ -504,7 +500,7 @@ http {
   sendfile            on;
   tcp_nodelay         on;
   tcp_nopush          on;
-  keepalive_timeout   120;
+  keepalive_timeout   10;
   types_hash_max_size 2048;
   server_tokens       off;
 
