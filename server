@@ -332,7 +332,7 @@ systemctl enable vtrui
 
 function installnginxlatest(){
 cd ~
-wget -N https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
 tar xjvf jemalloc-5.2.1.tar.bz2
 cd jemalloc-5.2.1
 ./configure
@@ -349,11 +349,11 @@ cd ~
 git clone --recursive https://github.com/google/ngx_brotli.git
 
 cd ~
-wget -N https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
+wget https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
 tar -zxvf pcre-8.43.tar.gz
 
 cd ~
-wget -N https://www.openssl.org/source/openssl-1.1.1b.tar.gz
+wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz
 tar zxvf openssl-1.1.1b.tar.gz
 cd openssl-1.1.1b
 curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-equal-1.1.1b.patch | patch -p1
@@ -368,7 +368,7 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-wget -N https://nginx.org/download/nginx-1.17.7.tar.gz
+wget https://nginx.org/download/nginx-1.17.7.tar.gz
 tar zxvf nginx-1.17.7.tar.gz
 sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.7/auto/cc/gcc
 mkdir -p /etc/nginx
@@ -889,7 +889,7 @@ rm -rf now.cron
 indexpage=$(ls /var/www/html/index.* 2> /dev/null | wc -l)
 
 if [ "$indexpage" = "0" ]; then 
-wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/sample.zip
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/sample.zip
 unzip sample.zip
 rsync -r ~/sample/* /var/www/html/
 rm -rf ~/sample*
@@ -995,8 +995,8 @@ blue "--------------------------------------------"
 
 installbbrplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
-wget -N https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
