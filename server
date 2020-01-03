@@ -1534,7 +1534,9 @@ blue "--------------------------"
     green "Recommend: Debian 9        "
     green "Author:    JacyL4          "
     green "=========================="
+if [[ -f "/usr/local/bin/version.php" ]]; then
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
+fi
     echo
     green  "1. Install de_GWD"
     green  "2. Install bbrplus and reboot（only Debian 9）"
