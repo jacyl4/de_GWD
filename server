@@ -1512,6 +1512,8 @@ fi
 
 if [[ $(systemctl is-active docker) = "active" ]]; then
     echo "[$statusgod] Docker       [working]"
+elif [[ ! -f "/usr/bin/docker" ]]; then
+    echo "[$statusbad] Docker       [not installed]"
 else
     echo "[$statusbad] Docker       [start failed]"
 fi
