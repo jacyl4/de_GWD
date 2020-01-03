@@ -428,7 +428,11 @@ docker rm nginx > /dev/null 2>&1
 docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
 
 docker pull jacyl4/nginx_tls1.3:latest
+}
 
+
+
+function launchnginx(){
 if [[ -d "/var/www/html/nextcloud" ]]; then
 
 docker run -d --name=nginx --net=host --restart=always \
@@ -901,6 +905,8 @@ nginxconf
 
 installnginx
 
+launchnginx
+
 makessl
 
 nginxwebconf
@@ -1113,7 +1119,7 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.j
 
 nginxnextcloudconf
 
-installnginx
+launchnginx
 
 wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
@@ -1408,6 +1414,8 @@ rm -rf /tmp/v2uuid
 nginxconf
 
 installnginx
+
+launchnginx
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
   nginxnextcloudconf
