@@ -6,7 +6,7 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-function preinstall(){
+function preInstall(){
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
@@ -94,7 +94,7 @@ rm -rf /run/resolvconf/interface/systemd-resolved
 
 
 
-function installpihole(){
+function installPihole(){
 mkdir -p /etc/pihole
 
 echo "" > /etc/pihole/adlists.list
@@ -139,7 +139,7 @@ pihole -f
 
 
 
-function installiptablesrules(){
+function installIptablesRules(){
 cat > /usr/local/bin/iptablesrules-up << EOF
 #!/bin/bash
 iptables -A INPUT -p udp --dport 53 -s 172.17.0.0/24 -j ACCEPT
@@ -180,7 +180,7 @@ systemctl enable iptablesrules
 
 
 
-function installdoh(){
+function installDoh(){
 cd ~
 wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
 unzip doh.zip
@@ -253,7 +253,7 @@ cd ~
 
 
 
-function installv2ray(){
+function installV2ray(){
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
@@ -327,7 +327,7 @@ systemctl enable vtrui
 
 
 
-function nginxconf(){
+function nginxConf(){
 mkdir -p /etc/nginx
 mkdir -p /etc/nginx/conf.d
 mkdir -p /var/log/nginx
@@ -433,7 +433,7 @@ EOF
 
 
 
-function installnginx(){
+function installNginx(){
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
@@ -443,7 +443,7 @@ docker pull jacyl4/nginx_tls1.3:latest
 
 
 
-function launchnginx(){
+function launchNginx(){
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
@@ -469,7 +469,7 @@ fi
 
 
 
-function makessl(){
+function makeSsl(){
 
 rm -rf /etc/nginx/conf.d/default.conf
 
@@ -522,7 +522,7 @@ rm -rf now.cron
 }
 
 
-function nginxwebconf(){
+function nginxWebConf(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 server {
   listen 80;
@@ -591,7 +591,7 @@ docker restart nginx > /dev/null 2>&1
 }
 
 
-function nginxnextcloudconf(){
+function nginxNextcloudConf(){
 cat > /etc/nginx/conf.d/default.conf<< EOF
 upstream php-handler {
     server unix:/run/php/php7.3-fpm.sock;
@@ -760,14 +760,14 @@ docker restart nginx > /dev/null 2>&1
 
 
 
-function postinstall(){
+function postInstall(){
 cat > /usr/local/bin/autoupdate << "EOF"
 #!/bin/bash
 wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
 
 sed -i '$d' ~/update
 
-echo "updategwd" >>  ~/update
+echo "updateGWD" >>  ~/update
 
 chmod +x ~/update
 ~/update
@@ -827,7 +827,7 @@ wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_G
 
 
 
-installgwd(){
+installGWD(){
     green "======================"
     green " Input domain (no www)"
     green "======================"
@@ -881,7 +881,7 @@ apt install -y docker-ce
 systemctl enable docker
 systemctl start docker
 
-preinstall
+preInstall
 
 uuidnum=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
@@ -890,9 +890,9 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 gatewayaddr=$(route -n |  awk 'NR==3{print $2}')
 
-installpihole
+installPihole
 
-installiptablesrules
+installIptablesRules
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
@@ -907,21 +907,21 @@ iface $ethernetnum inet static
   gateway $gatewayaddr
 EOF
 
-installdoh
+installDoh
 
-installv2ray
+installV2ray
 
-nginxconf
+nginxConf
 
-installnginx
+installNginx
 
-launchnginx
+launchNginx
 
-makessl
+makeSsl
 
-nginxwebconf
+nginxWebConf
 
-postinstall
+postInstall
 
 blue "--------------------------------------------"
 blue  "Install de_GWD [done]"
@@ -934,7 +934,7 @@ blue "--------------------------------------------"
 
 
 
-installbbrplus(){
+installBBRplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
@@ -979,7 +979,7 @@ reboot
 
 
 
-installnextcloud(){
+installNextcloud(){
     green "=================="
     green " Datadase user"
     green "=================="
@@ -1127,9 +1127,9 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --compl
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-nginxnextcloudconf
+nginxNextcloudConf
 
-launchnginx
+launchNginx
 
 wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
@@ -1149,7 +1149,7 @@ blue "------------------------------------"
 
 
 
-setnextcloudcache(){
+setNextcloudCache(){
 sed -i "/port 6379/c\port 0" /etc/redis/redis.conf
 sed -i "/unixsocket \/var\/run\/redis\/redis/c\unixsocket \/run\/redis\/redis-server.sock" /etc/redis/redis.conf
 sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
@@ -1208,7 +1208,7 @@ blue "-----------------------------"
 
 
 
-changestaticip(){
+changeStaticIp(){
     green "========="
     green "Address"
     green "========="
@@ -1230,7 +1230,7 @@ blue "-----------------"
 
 
 
-changedomain(){
+changeDomain(){
     green "================================"
     green " Input the new domain ( no www )"
     green "================================"
@@ -1240,12 +1240,12 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.j
 
 rm -rf /var/www/ssl
 
-makessl
+makeSsl
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
-  nginxnextcloudconf
+  nginxNextcloudConf
 else
-  nginxwebconf
+  nginxWebConf
 fi
 
 docker restart nginx > /dev/null 2>&1
@@ -1257,7 +1257,7 @@ blue "-----------------------------------------------"
 
 
 
-changev2rayverify(){
+changeV2rayVerify(){
 systemctl stop vtrui > /dev/null 2>&1
 docker stop nginx > /dev/null 2>&1
 
@@ -1286,7 +1286,7 @@ blue "------------------------------"
 
 
 
-changev2rayupstream(){
+changeV2rayUpstream(){
     green "==================================================="
     green "Y. Change v2ray upstream / N. Delete v2ray upstream"
     green "==================================================="
@@ -1368,11 +1368,11 @@ fi
 
 
 
-updatepihole(){
+updatePihole(){
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
-installpihole
+installPihole
 
 blue "---------------------"
 blue "Update Pi-hole [done]"
@@ -1381,11 +1381,11 @@ blue "---------------------"
 
 
 
-updategwd(){
+updateGWD(){
 cd ~
 source /etc/profile
 
-preinstall
+preInstall
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
@@ -1402,11 +1402,11 @@ echo '{"id": "'$v2uuid'", "level": 1, "alterId": 64}'
 done
 } > /tmp/v2uuid
 
-installiptablesrules
+installIptablesRules
 
-installdoh
+installDoh
 
-installv2ray
+installV2ray
 
 jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
@@ -1421,19 +1421,19 @@ systemctl restart vtrui
 
 rm -rf /tmp/v2uuid
 
-nginxconf
+nginxConf
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
-  nginxnextcloudconf
+  nginxNextcloudConf
 else
-  nginxwebconf
+  nginxWebConf
 fi
 
-installnginx
+installNginx
 
-launchnginx
+launchNginx
 
-postinstall
+postInstall
 blue "---------------------"
 blue  "Update de_GWD [done]"
 blue "---------------------"
@@ -1441,7 +1441,7 @@ blue "---------------------"
 
 
 
-autoupdateGWD(){
+autoUpdateGWD(){
     green "=============================================="
     green "Y. Turn on autoupdate / N. Turn off autoupdate"
     green "=============================================="
@@ -1550,47 +1550,47 @@ blue "--------------------------"
     read -p "Select:" num
     case "$num" in
     1)
-    installgwd
+    installGWD
     start_menu
     ;;
     2)
-    installbbrplus
+    installBBRplus
     start_menu
     ;;
     3)
-    installnextcloud
+    installNextcloud
     start_menu
     ;;
     4)
-    setnextcloudcache
+    setNextcloudCache
     start_menu
     ;;
     5)
-    changestaticip
+    changeStaticIp
     start_menu
     ;;
     6)
-    changedomain
+    changeDomain
     start_menu
     ;;
     7)
-    changev2rayverify
+    changeV2rayVerify
     start_menu
     ;;
     8)
-    changev2rayupstream
+    changeV2rayUpstream
     start_menu
     ;;
     9)
-    updatepihole
+    updatePihole
     start_menu
     ;;
     0)
-    updategwd
+    updateGWD
     start_menu
     ;;
     00)
-    autoupdateGWD
+    autoUpdateGWD
     start_menu
     ;;
     *)
