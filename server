@@ -1422,17 +1422,15 @@ rm -rf /tmp/v2uuid
 
 nginxconf
 
-installnginx
-
-launchnginx
-
 if [[ -d "/var/www/html/nextcloud" ]]; then
   nginxnextcloudconf
 else
   nginxwebconf
 fi
 
-docker restart nginx > /dev/null 2>&1
+installnginx
+
+launchnginx
 
 postinstall
 blue "---------------------"
