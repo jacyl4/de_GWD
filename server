@@ -7,10 +7,6 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 function preinstall(){
-apt install -y sudo locales net-tools dnsutils ca-certificates wget curl rsync unzip git socat build-essential autoconf libtool libpcre3 libpcre3-dev zlib1g zlib1g-dev libatomic-ops-dev libjemalloc-dev expat jq
-
-source /etc/profile
-
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
@@ -146,6 +142,8 @@ pihole -f
 function installiptablesrules(){
 cat > /usr/local/bin/iptablesrules-up << EOF
 #!/bin/bash
+iptables -A INPUT -p udp --dport 53 -s 172.17.0.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -s 172.17.0.0/24 -j ACCEPT
 
 iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP
@@ -154,11 +152,6 @@ chmod +x /usr/local/bin/iptablesrules-up
 
 cat > /usr/local/bin/iptablesrules-down << EOF
 #!/bin/bash
-
-iptables -t mangle -F
-iptables -t mangle -X
-iptables -t nat -F
-iptables -t nat -X
 iptables -F
 iptables -X
 EOF
@@ -195,7 +188,7 @@ mv -f ~/doh/doh-server /usr/local/bin/doh-server
 rm -rf ~/doh*
 chmod +x /usr/local/bin/doh-server
 
-mkdir -p /etc/dns-over-https/
+mkdir -p /etc/dns-over-https
 cat > /etc/dns-over-https/doh-server.conf << EOF
 listen = [ "127.0.0.1:8053", ]
 
@@ -214,7 +207,7 @@ verbose = false
 log_guessed_client_ip = false
 EOF
 
-mkdir -p /etc/NetworkManager/dispatcher.d/
+mkdir -p /etc/NetworkManager/dispatcher.d
 cat > /etc/NetworkManager/dispatcher.d/doh-server << "EOF"
 #!/bin/bash
 case "$2" in
@@ -230,6 +223,8 @@ case "$2" in
 esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
+
+touch /run/doh-server.pid
 
 cat > /etc/systemd/system/doh-server.service << "EOF"
 [Unit]
@@ -303,6 +298,8 @@ EOF
 jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/vtrui/config.json |\
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
+touch /run/vtrui.pid
+
 cat > /etc/systemd/system/vtrui.service << EOF
 [Unit]
 Description=vtrui Service
@@ -330,144 +327,17 @@ systemctl enable vtrui
 
 
 
-function installnginxlatest(){
+function nginxconf(){
 mkdir -p /etc/nginx
 mkdir -p /etc/nginx/conf.d
 mkdir -p /var/log/nginx
-mkdir -p /var/cache/nginx/client_temp
-mkdir -p /var/cache/nginx/proxy_temp
-mkdir -p /var/cache/nginx/fastcgi_temp
-mkdir -p /var/cache/nginx/scgi_temp
-mkdir -p /var/cache/nginx/uwsgi_temp
+mkdir -p /var/www/ssl
+mkdir -p /var/www/html
 
-cd ~
-wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
-tar xjvf jemalloc-5.2.1.tar.bz2
-cd jemalloc-5.2.1
-./configure
-make -j $(nproc --all) && make install
-echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
-ldconfig
+rm -rf /etc/nginx/nginx.conf
 
-cd ~
-git clone https://github.com/cloudflare/zlib.git zlib-cf
-cd zlib-cf
-make -f Makefile.in distclean
-
-cd ~
-git clone https://github.com/google/ngx_brotli.git
-cd ngx_brotli && git submodule update --init
-
-cd ~
-wget https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
-tar -zxvf pcre-8.43.tar.gz
-
-cd ~
-wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz
-tar zxvf openssl-1.1.1b.tar.gz
-cd openssl-1.1.1b
-curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-equal-1.1.1b.patch | patch -p1
-curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/openssl-1.1.1b-chacha_draft.patch | patch -p1
-
-cd ~
-wget https://nginx.org/download/nginx-1.17.7.tar.gz
-tar zxvf nginx-1.17.7.tar.gz
-sed -i 's/CFLAGS="$CFLAGS -g"/#CFLAGS="$CFLAGS -g"/' ~/nginx-1.17.7/auto/cc/gcc
-cd nginx-1.17.7
-curl https://raw.githubusercontent.com/kn007/patch/master/nginx.patch | patch -p1
-curl https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_strict-sni.patch | patch -p1
-
-./configure \
---prefix=/etc/nginx \
---sbin-path=/usr/sbin/nginx \
---conf-path=/etc/nginx/nginx.conf \
---error-log-path=/var/log/nginx/error.log \
---http-log-path=/var/log/nginx/access.log \
---pid-path=/run/nginx.pid \
---lock-path=/run/nginx.lock \
---http-client-body-temp-path=/var/cache/nginx/client_temp \
---http-proxy-temp-path=/var/cache/nginx/proxy_temp \
---http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
---http-scgi-temp-path=/var/cache/nginx/scgi_temp \
---http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
---user=www-data \
---group=www-data \
---with-compat \
---with-file-aio \
---with-threads \
---with-libatomic \
---with-mail \
---with-mail_ssl_module \
---with-http_realip_module \
---with-http_ssl_module \
---with-http_addition_module \
---with-http_sub_module \
---with-http_dav_module \
---with-http_stub_status_module \
---with-http_flv_module \
---with-http_mp4_module \
---with-http_gunzip_module \
---with-http_slice_module \
---with-http_gzip_static_module \
---with-http_auth_request_module \
---with-http_random_index_module \
---with-http_secure_link_module \
---with-http_degradation_module \
---with-http_spdy_module \
---with-http_v2_module \
---with-http_v2_hpack_enc \
---with-stream \
---with-stream_realip_module \
---with-stream_ssl_module \
---with-stream_ssl_preread_module \
---with-zlib=../zlib-cf \
---with-pcre=../pcre-8.43 \
---with-pcre-jit \
---with-openssl=../openssl-1.1.1b \
---with-openssl-opt='zlib enable-weak-ssl-ciphers enable-ec_nistp_64_gcc_128 -march=native -ljemalloc -Wl,-flto' \
---with-cc-opt='-DTCP_FASTOPEN=23 -m64 -g -O3 -flto -ffast-math -march=native -fstack-protector-strong -fuse-ld=gold --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fno-strict-aliasing -fPIC -Wdate-time -Wp,-D_FORTIFY_SOURCE=2' \
---with-ld-opt='-lrt -ljemalloc -Wl,-z,relro -Wl,-z,now -fPIC -flto' \
---add-module=../ngx_brotli
-
-make -j $(nproc --all) && make install
-
-cd ~
-cat > /lib/systemd/system/nginx.service << "EOF"
-[Unit]
-Description=The NGINX HTTP and reverse proxy server
-After=syslog.target network.target remote-fs.target nss-lookup.target
-Wants=network.target
-
-[Service]
-Type=forking
-PIDFile=/run/nginx.pid
-ExecStartPre=/usr/sbin/nginx -t
-ExecStart=/usr/sbin/nginx
-ExecReload=/usr/sbin/nginx -s reload
-ExecStop=/bin/kill -s QUIT $MAINPID
-PrivateTmp=true
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl restart nginx
-
-rm -rf ~/nginx*
-rm -rf ~/jemalloc*
-rm -rf ~/zlib-cf
-rm -rf ~/ngx_brotli
-rm -rf ~/pcre*
-rm -rf ~/openssl*
-}
-
-
-function nginxconf(){
 cat > /etc/nginx/nginx.conf << EOF
-user  www-data www-data;
+user  nginx nginx;
 worker_processes auto;
 pid   /run/nginx.pid;
 
@@ -551,7 +421,44 @@ EOF
 }
 
 
+
+function installnginx(){
+docker stop nginx > /dev/null 2>&1
+docker rm nginx > /dev/null 2>&1
+docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
+
+docker pull jacyl4/nginx_tls1.3:latest
+
+if [[ -d "/var/www/html/nextcloud" ]]; then
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /run/php/php7.3-fpm.sock:/run/php/php7.3-fpm.sock \
+-v /var/www/ssl/:/var/www/ssl/ \
+-v /var/www/html/:/var/www/html/ \
+jacyl4/nginx_tls1.3:latest
+
+else
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /var/www/ssl/:/var/www/ssl/ \
+-v /var/www/html/:/var/www/html/ \
+jacyl4/nginx_tls1.3:latest
+
+fi
+}
+
+
+
 function makessl(){
+
+rm -rf /etc/nginx/conf.d/default.conf
+
 cat > /etc/nginx/conf.d/default.conf << EOF
 server {
     listen 80;
@@ -561,7 +468,7 @@ server {
 }
 EOF
 
-systemctl restart nginx
+docker restart nginx > /dev/null 2>&1
 
 mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
@@ -569,7 +476,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --installcert -d $vpsdomain --ecc \
                --key-file       /var/www/ssl/$vpsdomain.key  \
                --fullchain-file /var/www/ssl/fullchain.cer \
-               --reloadcmd     "systemctl force-reload nginx"
+               --reloadcmd     "docker restart nginx > /dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat > /var/www/ssl/update_ocsp_cache << EOF
@@ -665,6 +572,8 @@ location $v2path {
 
 }
 EOF
+
+docker restart nginx > /dev/null 2>&1
 }
 
 
@@ -831,6 +740,8 @@ location $v2path {
 
 }
 EOF
+
+docker restart nginx > /dev/null 2>&1
 }
 
 
@@ -907,6 +818,8 @@ installgwd(){
     green " Input domain (no www)"
     green "======================"
     read vpsdomain
+    
+cd ~
 
 cat > /etc/resolv.conf << EOF
 nameserver 1.1.1.1
@@ -934,9 +847,26 @@ deb http://deb.debian.org/debian/ stretch-updates main
 deb-src http://deb.debian.org/debian/ stretch-updates main
 EOF
 fi
-apt update && apt upgrade -y
 
-cd ~
+apt update
+
+apt install -y sudo locales net-tools dnsutils unzip wget curl rsync git jq socat apt-transport-https ca-certificates gnupg2 software-properties-common
+
+source /etc/profile
+
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+
+sed -i "/docker/d" /etc/apt/sources.list
+
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable"
+
+apt update
+
+apt install -y docker-ce
+
+systemctl enable docker
+systemctl start docker
+
 preinstall
 
 uuidnum=$(cat /proc/sys/kernel/random/uuid)
@@ -967,19 +897,13 @@ installdoh
 
 installv2ray
 
-installnginxlatest
-
 nginxconf
+
+installnginx
 
 makessl
 
 nginxwebconf
-
-mkdir -p /etc/systemd/system/nginx.service.d
-printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
-systemctl daemon-reload
-systemctl restart nginx
-systemctl enable nginx
 
 postinstall
 
@@ -1055,21 +979,16 @@ installnextcloud(){
     green "=================="
     read sqlname
 
-debianx=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
+apt update
 
 dpkg --configure -a
 
-apt -y install software-properties-common dirmngr apt-transport-https lsb-release
+apt -y install dirmngr
 
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
-add-apt-repository "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $debianx main"
+add-apt-repository "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main"
 
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-echo "deb https://packages.sury.org/php/ $debianx main" > /etc/apt/sources.list.d/php.list
-
-apt update
-
-apt install -y mariadb-server
+apt update && apt install -y mariadb-server
 
 mysql_secure_installation
 
@@ -1088,16 +1007,17 @@ mysql -e "grant all privileges on $sqlname.* TO '$sqluser'@'localhost';"
 
 rm -rf ~/.my.cnf
 
-sed -i '/malloc-lib/d' /etc/mysql/my.cnf
-sed -i '/\[mysqld_safe\]/a\malloc-lib = \/usr\/local\/lib\/libjemalloc.so' /etc/mysql/my.cnf
-
 sed -i "/bind-address/s/^/#/g" /etc/mysql/my.cnf
 sed -i '/skip-networking = 1/d' /etc/mysql/my.cnf
 sed -i '/skip-networking/a\skip-networking = 1' /etc/mysql/my.cnf
 
 systemctl restart mariadb
 
-apt install -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-dom php-dompdf php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu php-redis redis-server imagemagick ffmpeg
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
+
+apt update && apt install -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-dom php-dompdf php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu php-redis redis-server imagemagick ffmpeg
+
 cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
 ;;;;;;;;;;;;;;;;;;;;;
 ; FPM Configuration ;
@@ -1160,6 +1080,9 @@ EOF
 sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
 echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
 
+mkdir -p /run/php
+touch /run/php/php7.3-fpm.pid
+
 cat > /lib/systemd/system/php7.3-fpm.service << "EOF"
 [Unit]
 Description=The PHP 7.3 FastCGI Process Manager
@@ -1190,7 +1113,7 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.j
 
 nginxnextcloudconf
 
-systemctl restart nginx
+installnginx
 
 wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
@@ -1215,15 +1138,8 @@ sed -i "/port 6379/c\port 0" /etc/redis/redis.conf
 sed -i "/unixsocket \/var\/run\/redis\/redis/c\unixsocket \/run\/redis\/redis-server.sock" /etc/redis/redis.conf
 sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
 
-sudo usermod -aG redis www-data
-
-sudo chown -R redis:www-data /run/redis
-
-systemctl restart redis-server
-
-systemctl restart php7.3-fpm
-
 sed -i '/installed/,$d' /var/www/html/nextcloud/config/config.php
+
 cat >> /var/www/html/nextcloud/config/config.php << "EOF"
 'installed' => true,
 
@@ -1258,6 +1174,16 @@ cat >> /var/www/html/nextcloud/config/config.php << "EOF"
 'loglevel' => 0,
 );
 EOF
+
+sudo usermod -aG redis www-data
+
+sudo chown -R redis:www-data /run/redis
+
+systemctl restart redis-server
+
+systemctl restart php7.3-fpm
+
+docker restart nginx > /dev/null 2>&1
 
 blue "-----------------------------"
 blue "Config Nextcloud cache [done]"
@@ -1306,9 +1232,7 @@ else
   nginxwebconf
 fi
 
-systemctl restart nginx
-
-/usr/local/bin/updateGWD
+docker restart nginx > /dev/null 2>&1
 
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
@@ -1318,8 +1242,8 @@ blue "-----------------------------------------------"
 
 
 changev2rayverify(){
-systemctl stop vtrui
-systemctl stop nginx
+systemctl stop vtrui > /dev/null 2>&1
+docker stop nginx > /dev/null 2>&1
 
     green "========="
     green "New UUID"
@@ -1333,12 +1257,12 @@ systemctl stop nginx
 
 sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
-systemctl restart nginx
+docker restart nginx > /dev/null 2>&1
 
 jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /etc/vtrui/config.json |\
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-systemctl restart vtrui
+systemctl restart vtrui > /dev/null 2>&1
 blue "------------------------------"
 blue  "Change v2ray UUID&path [done]"
 blue "------------------------------"
@@ -1446,7 +1370,9 @@ cd ~
 source /etc/profile
 
 preinstall
+
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --complement | rev)
 uuidnum=$(jq -r '.inbounds[0].settings.clients[0].id' /etc/vtrui/config.json)
@@ -1463,8 +1389,6 @@ done
 installiptablesrules
 
 installdoh
-
-systemctl stop vtrui
 
 installv2ray
 
@@ -1483,13 +1407,15 @@ rm -rf /tmp/v2uuid
 
 nginxconf
 
+installnginx
+
 if [[ -d "/var/www/html/nextcloud" ]]; then
   nginxnextcloudconf
 else
   nginxwebconf
 fi
 
-systemctl restart nginx
+docker restart nginx > /dev/null 2>&1
 
 postinstall
 blue "---------------------"
@@ -1550,15 +1476,6 @@ else
 fi
 
 
-if [[ $(systemctl is-active nginx) = "active" ]]; then
-    echo "[$statusgod] NGINX        [working]"
-elif [[ ! -d "/usr/local/nginx" ]] && [[ ! -d "/etc/nginx" ]]; then
-    echo "[$statusbad] NGINX        [not Installed]"
-else
-    echo "[$statusbad] NGINX        [start failed]"
-fi
-
-
 if [[ $(systemctl is-active doh-server) = "active" ]]; then
     echo "[$statusgod] DoH server   [working]"
 elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
@@ -1575,6 +1492,14 @@ elif [[ ! -f "/usr/local/bin/pihole" ]]; then
 else
     echo "[$statusbad] Pi-hole      [start failed]"
 fi
+
+
+if [[ $(systemctl is-active docker) = "active" ]]; then
+    echo "[$statusgod] Docker       [working]"
+else
+    echo "[$statusbad] Docker       [start failed]"
+fi
+
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
     echo "[$statusgod] Nextcloud    [installed]"
