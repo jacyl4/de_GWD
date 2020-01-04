@@ -864,7 +864,7 @@ fi
 
 apt update
 
-apt install -y sudo locales net-tools dnsutils unzip wget curl rsync git jq socat apt-transport-https ca-certificates gnupg2 software-properties-common
+apt install -y sudo locales net-tools dnsutils unzip wget curl rsync git socat jq apt-transport-https ca-certificates gnupg2 software-properties-common dirmngr
 
 source /etc/profile
 
@@ -998,8 +998,6 @@ installNextcloud(){
 apt update
 
 dpkg --configure -a
-
-apt -y install dirmngr
 
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
 add-apt-repository "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main"
