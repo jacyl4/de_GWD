@@ -543,7 +543,6 @@ echo "" > /etc/pihole/adlists.list
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
-IPV6_ADDRESS=
 PIHOLE_DNS_1=127.0.0.1#5380
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=false
@@ -1033,8 +1032,8 @@ port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-localaddr=$(ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | awk 'NR==1{print}')
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 cd ~
 

@@ -473,7 +473,7 @@
               </div>
               <div class="col-md-6 my-1">
                 <div class="form-label-group">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("route -n |  awk 'NR==3{print $2}'"); ?>">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("sudo route -n |  awk 'NR==3{print $2}'"); ?>">
                   <label for="upstreamip">上级地址</label>
                 </div>
               </div>
