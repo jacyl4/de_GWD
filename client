@@ -97,6 +97,8 @@ net.ipv4.tcp_congestion_control = bbr
 EOF
 sysctl -p
 
+sed -i '/ip6-/d' /etc/hosts
+
 systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 rm -rf /run/resolvconf/interface/systemd-resolved
@@ -229,13 +231,14 @@ cat > /etc/vtrui/config.json << EOF
     "port": 53,
     "listen": "0.0.0.0",
     "protocol": "dokodemo-door",
-    "settings": { "network": "tcp,udp", "address": "0.0.0.0", "port": 53 }
+    "settings": {"address": "0.0.0.0", "port": 53, "network": "tcp,udp"}
   },
   {
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
-    "settings": { "network": "tcp,udp", "followRedirect": true },
+    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
+    "settings": {"network": "tcp,udp", "followRedirect": true},
     "streamSettings": { "sockopt": { "tproxy": "tproxy" } }
   }
 ],
@@ -326,7 +329,6 @@ EOF
 
 systemctl daemon-reload > /dev/null 2>&1
 systemctl enable vtrui > /dev/null 2>&1
-systemctl restart vtrui > /dev/null 2>&1
 }
 
 
@@ -487,9 +489,6 @@ EOF
 
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
-
-echo "deb https://packages.sury.org/php/ $osRelease main" > /etc/apt/sources.list.d/php.list
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install -y wireguard-dkms wireguard-tools zip subversion rsync php7.3-fpm php7.3-cgi php7.3-zip php7.3-sqlite
 }
@@ -1048,6 +1047,8 @@ installDOH
 installV2ray
 
 installIptablesProxy
+
+installWG
 
 installpihole
 
