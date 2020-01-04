@@ -212,8 +212,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart doh-client > /dev/null 2>&1
 systemctl enable doh-client > /dev/null 2>&1
+systemctl restart doh-client > /dev/null 2>&1
 }
 
 
@@ -348,8 +348,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart vtrui > /dev/null 2>&1
 systemctl enable vtrui > /dev/null 2>&1
+systemctl restart vtrui > /dev/null 2>&1
 }
 
 
@@ -473,8 +473,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart iptables-proxy > /dev/null 2>&1
 systemctl enable iptables-proxy > /dev/null 2>&1
+systemctl restart iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 
@@ -561,8 +561,8 @@ EOF
 rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart smartdns > /dev/null 2>&1
 systemctl enable smartdns > /dev/null 2>&1
+systemctl restart smartdns > /dev/null 2>&1
 
 echo "" > /etc/pihole/adlists.list
 cat > /etc/pihole/setupVars.conf << EOF
@@ -707,9 +707,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl restart php7.3-fpm
 systemctl enable php7.3-fpm
-
+systemctl restart php7.3-fpm
 
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
