@@ -328,11 +328,11 @@ systemctl enable vtrui
 
 
 function nginxConf(){
-mkdir -p /etc/nginx
-mkdir -p /etc/nginx/conf.d
-mkdir -p /var/log/nginx
-mkdir -p /var/www/ssl
-mkdir -p /var/www/html
+mkdir -p "/etc/nginx"
+mkdir -p "/etc/nginx/conf.d"
+mkdir -p "/var/log/nginx"
+mkdir -p "/var/www/ssl"
+mkdir -p "/var/www/html"
 
 rm -rf /etc/nginx/nginx.conf
 

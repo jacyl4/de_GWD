@@ -19,43 +19,20 @@ statusFailed=$(red "[ failed ]")
 function preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
+rm -rf /etc/resolv.conf
 cat > /etc/resolv.conf << EOF
-nameserver 223.5.5.5
-nameserver 223.6.6.6
 nameserver 119.29.29.29
+nameserver 223.5.5.5
 nameserver 119.28.28.28
+nameserver 223.6.6.6
 EOF
 
-if [[ $(cat /etc/dnsmasq.conf) =~ "5390" ]]; then
+touch "/etc/dnsmasq.conf"
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
+port=53
 EOF
-pihole restartdns > /dev/null 2>&1
-systemctl stop pihole-FTL > /dev/null 2>&1
-fi
-
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.163.com/debian buster main
-deb-src http://mirrors.163.com/debian buster main
-deb http://mirrors.163.com/debian-security/ buster/updates main
-deb-src http://mirrors.163.com/debian-security/ buster/updates main
-deb http://mirrors.163.com/debian buster-updates main
-deb-src http://mirrors.163.com/debian buster-updates main
-EOF
-rm -rf /etc/apt/sources.list.d/unstable.list
-rm -rf /etc/apt/preferences.d/limit-unstable
-apt update && apt install -y sudo locales net-tools dnsutils ipset unzip zip wget curl git subversion rsync jq ca-certificates apt-transport-https gnupg2 software-properties-common php7.3-fpm php7.3-cgi php7.3-sqlite
-source /etc/profile
-
-add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable"
-
-curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
-
-apt update && apt install -y docker-ce
-
-systemctl enable docker
-systemctl restart docker
-
+/etc/init.d/dnsmasq restart > /dev/null 2>&1
 
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -477,7 +454,6 @@ systemctl enable iptables-proxy > /dev/null 2>&1
 systemctl restart iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 EOF
@@ -497,7 +473,7 @@ echo
 
 
 
-function installWGDO(){
+function installWG(){
 cat > /etc/apt/sources.list << EOF
 deb http://deb.debian.org/debian buster main
 deb-src http://deb.debian.org/debian buster main
@@ -589,6 +565,7 @@ bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
 rm -rf ~/Pi-hole
 
 systemctl mask --now dhcpcd > /dev/null 2>&1
+systemctl mask --now lighttpd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 
 cat > /usr/local/bin/pihole_hotfix << "EOF"
@@ -606,6 +583,7 @@ cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
+/etc/init.d/dnsmasq restart
 
 cat > /etc/pihole/dns-servers.conf << EOF
  DoH;127.0.0.1#5380
@@ -623,10 +601,6 @@ pihole -f
 
 function nginxPHP(){
 cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
-;;;;;;;;;;;;;;;;;;;;;
-; FPM Configuration ;
-;;;;;;;;;;;;;;;;;;;;;
-
 ;;;;;;;;;;;;;;;;;;
 ; Global Options ;
 ;;;;;;;;;;;;;;;;;;
@@ -634,7 +608,6 @@ cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
 [global]
 pid = /run/php/php7.3-fpm.pid
 error_log = /var/log/php7.3-fpm.log
-log_level = warning
 
 emergency_restart_threshold = 20
 emergency_restart_interval = 60s
@@ -655,10 +628,10 @@ cat > /etc/php/7.3/fpm/pool.d/www.conf << EOF
 user = www-data
 group = www-data
 listen = /run/php/php7.3-fpm.sock
-listen.backlog = -1
-listen.allowed_clients = 127.0.0.1
 listen.owner = www-data
 listen.group = www-data
+listen.backlog = -1
+listen.allowed_clients = 127.0.0.1
 listen.mode = 0666
 
 pm = dynamic
@@ -680,9 +653,6 @@ env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
-
-sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
-echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
 
 mkdir -p /run/php
 touch /run/php/php7.3-fpm.pid
@@ -710,6 +680,7 @@ systemctl daemon-reload
 systemctl enable php7.3-fpm
 systemctl restart php7.3-fpm
 
+
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
@@ -717,9 +688,9 @@ docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
 docker pull jacyl4/nginx_tls1.3:latest
 
 
-mkdir -p /etc/nginx
-mkdir -p /etc/nginx/conf.d
-mkdir -p /var/log/nginx
+mkdir -p "/etc/nginx"
+mkdir -p "/etc/nginx/conf.d"
+mkdir -p "/var/log/nginx"
 
 rm -rf /etc/nginx/nginx.conf
 cat > /etc/nginx/nginx.conf << EOF
@@ -807,22 +778,10 @@ EOF
 
 rm -rf /etc/nginx/conf.d/default.conf
 cat > /etc/nginx/conf.d/default.conf<< EOF
-upstream php-handler {
-    server unix:/run/php/php7.3-fpm.sock;
-}
-
 server {
-  listen 80;
-  root /var/www/html;
-  index index.php index.html index.htm index.nginx-debian.html;
-
-  add_header X-Content-Type-Options nosniff;
-  add_header X-Robots-Tag none;
-  add_header X-Download-Options noopen;
-  add_header X-Permitted-Cross-Domain-Policies none;
-  add_header X-XSS-Protection "1; mode=block";
-  add_header Referrer-Policy no-referrer;
-  add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+    listen 80;
+    root /var/www/html;
+    index index.php index.html index.htm;
 
   location ~ [^/]\.php(/|$) {
     include fastcgi_params;
@@ -831,12 +790,8 @@ server {
     fastcgi_index index.php;
   }
 
-    fastcgi_hide_header X-Powered-By;
-
-    location = /robots.txt {
-        allow all;
-        log_not_found off;
-        access_log off;
+    location ~ /\.ht {
+        deny all;
     }
 }
 EOF
@@ -978,6 +933,23 @@ piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 
 preInstall
 
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.aliyun.com/debian buster main
+deb http://mirrors.aliyun.com/debian-security buster/updates main
+deb http://mirrors.aliyun.com/debian buster-updates main
+EOF
+rm -rf /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/preferences.d/limit-unstable
+apt update && apt install -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
+source /etc/profile
+
+echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable" > /etc/apt/sources.list.d/docker.list
+curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
+apt update && apt install -y docker-ce
+
+systemctl enable docker
+systemctl restart docker
+
 installDOH
 
 installV2ray
@@ -986,11 +958,13 @@ echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/l
 
 installIptablesProxy
 
-installWGDO
+installWG
 
 mkdir -p /etc/pihole
 
 installpihole
+
+apt install -y zip subversion rsync php7.3-fpm
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
@@ -1023,6 +997,8 @@ echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
 
 nginxPHP
 
@@ -1071,8 +1047,6 @@ installDOH
 installV2ray
 
 installIptablesProxy
-
-installWGDO
 
 installpihole
 
