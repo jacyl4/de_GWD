@@ -1120,6 +1120,15 @@ else
 fi
 
 
+if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
+    echo "[$statusgod] PHP7.3-FPM     [working]"
+elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
+    echo "[$statusbad] PHP7.3-FPM     [not installed]"
+else
+    echo "[$statusbad] PHP7.3-FPM     [start failed]"
+fi
+
+
 if [[ $(systemctl is-active docker) = "active" ]]; then
     echo "[$statusgod] Docker         [working]"
 elif [[ ! -f "/usr/bin/docker" ]]; then
