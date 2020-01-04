@@ -32,7 +32,6 @@ cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=53
 EOF
-/etc/init.d/dnsmasq restart > /dev/null 2>&1
 
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -583,7 +582,6 @@ cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
-/etc/init.d/dnsmasq restart
 
 cat > /etc/pihole/dns-servers.conf << EOF
  DoH;127.0.0.1#5380
