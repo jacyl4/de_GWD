@@ -15,6 +15,7 @@ ariaNGaddr="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 
+osRelease=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
 
 function preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
@@ -474,12 +475,12 @@ echo
 
 function installWG(){
 cat > /etc/apt/sources.list << EOF
-deb http://deb.debian.org/debian buster main
-deb-src http://deb.debian.org/debian buster main
-deb http://deb.debian.org/debian-security/ buster/updates main
-deb-src http://deb.debian.org/debian-security/ buster/updates main
-deb http://deb.debian.org/debian buster-updates main
-deb-src http://deb.debian.org/debian buster-updates main
+deb http://deb.debian.org/debian $osRelease main
+deb-src http://deb.debian.org/debian $osRelease main
+deb http://deb.debian.org/debian-security/ $osRelease/updates main
+deb-src http://deb.debian.org/debian-security/ $osRelease/updates main
+deb http://deb.debian.org/debian $osRelease-updates main
+deb-src http://deb.debian.org/debian $osRelease-updates main
 EOF
 
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
@@ -931,16 +932,16 @@ piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 preInstall
 
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian buster main
-deb http://mirrors.aliyun.com/debian-security buster/updates main
-deb http://mirrors.aliyun.com/debian buster-updates main
+deb http://mirrors.aliyun.com/debian $osRelease main
+deb http://mirrors.aliyun.com/debian-security $osRelease/updates main
+deb http://mirrors.aliyun.com/debian $osRelease-updates main
 EOF
 rm -rf /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
 apt update && apt install -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
 source /etc/profile
 
-echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable" > /etc/apt/sources.list.d/docker.list
+echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $osRelease stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
 apt update && apt install -y docker-ce
 
