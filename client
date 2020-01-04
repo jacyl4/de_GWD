@@ -960,11 +960,11 @@ installIptablesProxy
 
 installWG
 
+apt install -y zip subversion rsync php7.3-fpm php7.3-cgi php7.3-zip php7.3-sqlite
+
 mkdir -p /etc/pihole
 
 installpihole
-
-apt install -y zip subversion rsync php7.3-fpm
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
