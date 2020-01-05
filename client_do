@@ -6,66 +6,36 @@ function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
+mirrorSite="acccoc.top/gwd"
 
-mirrorsite="acccoc.top/gwd"
+smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
 
-smartdns_arm64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.aarch64-debian-all.deb"
+ariaNGaddr="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
 
-ariang="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
+statuSuccess=$(green "[ OK ]")
+statusFailed=$(red "[ failed ]")
 
-
-statusuccess=$(green "[ OK ]")
-statusfailed=$(red "[ failed ]")
-
-
-function preinstall(){
-rm -rf /usr/local/bin/ui-testbaidu
-rm -rf /usr/local/bin/ui-testgoogle
-rm -rf /etc/wireguard/cprivatekey
-rm -rf /etc/wireguard/cpublickey
-rm -rf /usr/lib/resolvconf/*
-rm -rf /etc/unbound/unbound.conf
-apt purge -y unbound
-rm -rf /lib/systemd/system/unbound.service
-rm -rf /etc/systemd/system/unbound.service
-systemctl daemon-reload > /dev/null 2>&1
-
-rm -rf ~/doh*
-rm -rf ~/vtrui*
+function preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
+rm -rf /etc/resolv.conf
 cat > /etc/resolv.conf << EOF
-nameserver 223.5.5.5
-nameserver 223.6.6.6
 nameserver 119.29.29.29
+nameserver 223.5.5.5
 nameserver 119.28.28.28
+nameserver 223.6.6.6
 EOF
 
-if [[ $(cat /etc/dnsmasq.conf) =~ "5390" ]]; then
+touch "/etc/dnsmasq.conf"
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
+port=53
 EOF
-pihole restartdns > /dev/null 2>&1
-systemctl stop pihole-FTL > /dev/null 2>&1
-fi
-
-date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
-rm -rf /etc/apt/sources.list.d/unstable.list
-rm -rf /etc/apt/preferences.d/limit-unstable
-
-apt update
-
-apt install -y sudo locales net-tools dnsutils ipset wget curl rsync ca-certificates unzip zip git subversion jq
-
-source /etc/profile
 
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-
 cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
@@ -83,7 +53,6 @@ LC_MEASUREMENT="en_US.UTF-8"
 LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
-
 locale-gen en_US.UTF-8
 
 cat > /etc/security/limits.conf << EOF
@@ -92,7 +61,6 @@ cat > /etc/security/limits.conf << EOF
 * soft nproc 1000000
 * hard nproc 1000000
 EOF
-
 echo "ulimit -n 1000000" > ~/.bash_profile
 
 cat > /etc/sysctl.conf << EOF
@@ -100,8 +68,6 @@ vm.overcommit_memory = 1
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 1000000
 fs.inotify.max_user_watches = 1000000
-net.nf_conntrack_max = 1000000
-net.netfilter.nf_conntrack_max = 1000000
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv4.ip_forward = 1
 net.ipv4.ip_local_port_range = 1025 65535
@@ -129,9 +95,7 @@ net.ipv4.tcp_congestion_control = bbr
 EOF
 sysctl -p
 
-
-sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
-/etc/init.d/cpufrequtils restart;
+sed -i '/ip6-/d' /etc/hosts
 
 systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
@@ -140,16 +104,14 @@ rm -rf /run/resolvconf/interface/systemd-resolved
 
 
 
-function installdoh(){
+function installDOH(){
 cd ~
-systemctl stop doh-client > /dev/null 2>&1
-
 doh=$domain
 domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i "1i $domainip $doh" /etc/hosts
 
-wget -O ~/doh.zip https://$mirrorsite/doharm64.zip
+wget --no-check-certificate -O ~/doh.zip https://$mirrorSite/dohamd64.zip
 unzip doh.zip
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
 rm -rf ~/doh*
@@ -204,6 +166,7 @@ esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-client
 
+touch /run/doh-client.pid
 cat > /etc/systemd/system/doh-client.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS Client
@@ -226,18 +189,21 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart doh-client > /dev/null 2>&1
 systemctl enable doh-client > /dev/null 2>&1
+systemctl restart doh-client > /dev/null 2>&1
 }
 
 
 
-function installv2ray(){
+function installV2ray(){
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
 cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 
-wget -O ~/vtrui.zip https://$mirrorsite/vtarm64.zip
+wget --no-check-certificate  -O ~/vtrui.zip https://$mirrorSite/vtamd64.zip
 unzip vtrui.zip
 mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
@@ -266,13 +232,14 @@ cat > /etc/vtrui/config.json << EOF
     "port": 53,
     "listen": "0.0.0.0",
     "protocol": "dokodemo-door",
-    "settings": { "network": "tcp,udp", "address": "0.0.0.0", "port": 53 }
+    "settings": {"address": "0.0.0.0", "port": 53, "network": "tcp,udp"}
   },
   {
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
-    "settings": { "network": "tcp,udp", "followRedirect": true },
+    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
+    "settings": {"network": "tcp,udp", "followRedirect": true},
     "streamSettings": { "sockopt": { "tproxy": "tproxy" } }
   }
 ],
@@ -320,8 +287,7 @@ cat > /etc/vtrui/config.json << EOF
   "domainStrategy": "IPOnDemand",
   "rules": [
     { "type": "field", "inboundTag": "dnsin", "outboundTag": "dnsout" },
-    { "type": "field", "inboundTag": "flow", "outboundTag": "direct" },
-    { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" }
+    { "type": "field", "inboundTag": "flow", "outboundTag": "direct" }
   ]
 }
 }
@@ -341,6 +307,7 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
 jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
+touch /run/vtrui.pid
 cat > /etc/systemd/system/vtrui.service << EOF
 [Unit]
 Description=vtrui Service
@@ -362,13 +329,12 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart vtrui > /dev/null 2>&1
 systemctl enable vtrui > /dev/null 2>&1
 }
 
 
 
-function installiptablesproxy(){
+function installIptablesProxy(){
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 ipset -X hosts
@@ -487,11 +453,10 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart iptables-proxy > /dev/null 2>&1
 systemctl enable iptables-proxy > /dev/null 2>&1
+systemctl restart iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 nameserver 1.1.1.1
@@ -500,42 +465,47 @@ EOF
 
 echo
 if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk 'NR==1{print $1}') =~ "20" ]]; then
-    echo "$statusuccess de_GWD server access"
-    echo "$statusuccess de_GWD server access"
-    echo "$statusuccess de_GWD server access"
+    echo "$statuSuccess de_GWD server access"
+    echo "$statuSuccess de_GWD server access"
+    echo "$statuSuccess de_GWD server access"
 else
-    echo "$statusfailed de_GWD server access"
-    echo "$statusfailed de_GWD server access"
-    echo "$statusfailed de_GWD server access"
+    echo "$statusFailed de_GWD server access"
+    echo "$statusFailed de_GWD server access"
+    echo "$statusFailed de_GWD server access"
 fi
 echo
 }
 
 
 
-function installwg(){
+function installWG(){
+cat > /etc/apt/sources.list << EOF
+deb http://deb.debian.org/debian buster main
+deb-src http://deb.debian.org/debian buster main
+deb http://deb.debian.org/debian-security/ buster/updates main
+deb-src http://deb.debian.org/debian-security/ buster/updates main
+deb http://deb.debian.org/debian buster-updates main
+deb-src http://deb.debian.org/debian buster-updates main
+EOF
+
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools
+apt update && apt install -y wireguard-dkms wireguard-tools zip subversion rsync php7.3-fpm php7.3-cgi php7.3-zip php7.3-sqlite
 }
 
 
 
 function installpihole(){
-wget -O ~/smartdns.deb $smartdns_arm64
-
+wget -O ~/smartdns.deb $smartdns_amd64
 dpkg -i smartdns.deb
 
 cat > /etc/smartdns/smartdns.conf << EOF
 bind 127.0.0.1:5370
 
 cache-size 1024
-
 prefetch-domain yes
-
 speed-check-mode tcp:80,ping
-
 force-AAAA-SOA yes
 
 server 114.114.114.114
@@ -547,7 +517,7 @@ server 223.6.6.6
 EOF
 
 rm -rf /lib/systemd/system/smartdns.service
-
+touch /run/smartdns.pid
 cat > /etc/systemd/system/smartdns.service << "EOF"
 [Unit]
 Description=Smart DNS server
@@ -569,24 +539,21 @@ LimitNOFILE=1000000
 [Install]
 WantedBy=multi-user.target
 EOF
-
 rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart smartdns > /dev/null 2>&1
 systemctl enable smartdns > /dev/null 2>&1
+systemctl restart smartdns > /dev/null 2>&1
 
 echo "" > /etc/pihole/adlists.list
-
 cat > /etc/pihole/setupVars.conf << EOF
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
-IPV6_ADDRESS=
 PIHOLE_DNS_1=127.0.0.1#5380
 QUERY_LOGGING=true
-INSTALL_WEB_SERVER=true
+INSTALL_WEB_SERVER=false
 INSTALL_WEB_INTERFACE=true
-LIGHTTPD_ENABLED=true
+LIGHTTPD_ENABLED=false
 BLOCKING_ENABLED=true
 WEBPASSWORD=$piholepw
 DNSMASQ_LISTENING=single
@@ -597,12 +564,12 @@ CONDITIONAL_FORWARDING=true
 CONDITIONAL_FORWARDING_IP=$localaddr
 CONDITIONAL_FORWARDING_DOMAIN=lan
 EOF
-
 git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
 bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
 rm -rf ~/Pi-hole
 
 systemctl mask --now dhcpcd > /dev/null 2>&1
+systemctl mask --now lighttpd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 
 cat > /usr/local/bin/pihole_hotfix << "EOF"
@@ -611,7 +578,6 @@ ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut
 sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
 pihole restartdns
 EOF
-
 chmod +x /usr/local/bin/pihole_hotfix
 
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
@@ -636,7 +602,215 @@ pihole -f
 
 
 
-function postinstall(){
+function nginxPHP(){
+cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
+;;;;;;;;;;;;;;;;;;
+; Global Options ;
+;;;;;;;;;;;;;;;;;;
+
+[global]
+pid = /run/php/php7.3-fpm.pid
+error_log = /var/log/php7.3-fpm.log
+
+emergency_restart_threshold = 20
+emergency_restart_interval = 60s
+process_control_timeout = 10s
+daemonize = yes
+
+rlimit_files = 1000000
+rlimit_core = 0
+
+include=/etc/php/7.3/fpm/pool.d/*.conf
+EOF
+
+cat > /etc/php/7.3/fpm/pool.d/www.conf << EOF
+;;;;;;;;;;;;;;;;;;;;
+; Pool Definitions ;
+;;;;;;;;;;;;;;;;;;;;
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php7.3-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+listen.backlog = -1
+listen.allowed_clients = 127.0.0.1
+listen.mode = 0666
+
+pm = dynamic
+pm.max_children = 20
+pm.start_servers = 5
+pm.min_spare_servers = 5
+pm.max_spare_servers = 20
+pm.max_requests = 500
+pm.process_idle_timeout = 10s
+request_terminate_timeout = 320s
+request_slowlog_timeout = 0
+
+pm.status_path = /status
+
+catch_workers_output = yes
+env[HOSTNAME] = \$HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+EOF
+
+mkdir -p /run/php
+touch /run/php/php7.3-fpm.pid
+cat > /lib/systemd/system/php7.3-fpm.service << "EOF"
+[Unit]
+Description=The PHP 7.3 FastCGI Process Manager
+Documentation=man:php-fpm7.3(8)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=notify
+PIDFile=/run/php/php7.3-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+ExecReload=/bin/kill -USR2 $MAINPID
+PrivateTmp=true
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable php7.3-fpm
+systemctl restart php7.3-fpm
+
+
+docker stop nginx > /dev/null 2>&1
+docker rm nginx > /dev/null 2>&1
+
+docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
+docker pull jacyl4/nginx_tls1.3:latest
+
+
+mkdir -p "/etc/nginx"
+mkdir -p "/etc/nginx/conf.d"
+mkdir -p "/var/log/nginx"
+
+rm -rf /etc/nginx/nginx.conf
+cat > /etc/nginx/nginx.conf << EOF
+user  www-data www-data;
+worker_processes auto;
+pid   /run/nginx.pid;
+
+    worker_rlimit_nofile 65535;
+
+events {
+    use epoll;
+    worker_connections  65535;
+    multi_accept on;
+}
+
+http {
+  include mime.types;
+  default_type application/octet-stream;
+
+  server_names_hash_bucket_size 128;
+  client_header_buffer_size 32k;
+  large_client_header_buffers 4 32k;
+  client_max_body_size 1024m;
+  client_body_buffer_size 10m;
+
+  fastcgi_connect_timeout 300;
+  fastcgi_send_timeout 300;
+  fastcgi_read_timeout 300;
+  fastcgi_buffer_size 64k;
+  fastcgi_buffers 4 64k;
+  fastcgi_busy_buffers_size 128k;
+  fastcgi_temp_file_write_size 128k;
+  fastcgi_intercept_errors on;
+
+  sendfile            on;
+  tcp_nodelay         on;
+  tcp_nopush          on;
+  keepalive_timeout   10;
+  types_hash_max_size 2048;
+  server_tokens       off;
+
+  gzip                on;
+  gzip_disable        "MSIE [1-6]\.";
+  gzip_vary           on;
+  gzip_proxied        any;
+  gzip_comp_level     4;
+  gzip_min_length     256;
+  gzip_buffers        16 8k;
+  gzip_http_version   1.0;
+  gzip_types    text/plain
+                text/javascript
+                text/css
+                text/js
+                text/xml
+                text/x-component
+                text/x-json
+                font/opentype
+                application/x-font-ttf
+                application/javascript
+                application/x-javascript
+                application/x-web-app-manifest+json
+                application/json
+                application/atom+xml
+                application/xml
+                application/xml+rss
+                application/xhtml+xml
+                application/vnd.ms-fontobject
+                image/svg+xml
+                image/x-icon;
+
+  brotli              on;
+  brotli_static       on;
+  brotli_comp_level   6;
+  brotli_buffers      16 8k;
+  brotli_min_length   20;
+  brotli_window       16m;
+  brotli_types        *;
+
+  access_log off;
+  error_log off;
+
+  include /etc/nginx/conf.d/*.conf;
+}
+EOF
+
+rm -rf /etc/nginx/conf.d/default.conf
+cat > /etc/nginx/conf.d/default.conf<< EOF
+server {
+    listen 80;
+    root /var/www/html;
+    index index.php index.html index.htm;
+
+  location ~ [^/]\.php(/|$) {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    fastcgi_index index.php;
+  }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /run/php/php7.3-fpm.sock:/run/php/php7.3-fpm.sock \
+-v /var/www/html/:/var/www/html/ \
+jacyl4/nginx_tls1.3:latest
+}
+
+
+
+function postInstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
@@ -702,7 +876,7 @@ mv -f ~/version.php /var/www/html/version.php
 
 mkdir -p /var/www/html/ariang
 cd ~
-wget -q $ariang
+wget -q $ariaNGaddr
 
 unzip AriaNg-*
 
@@ -726,7 +900,7 @@ sed -i "/$doh/d" /etc/hosts
 
 
 
-installgwd(){
+installGWD(){
     green "========================="
     green "de_GWD IP address"
     green "========================="
@@ -760,17 +934,34 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 
-preinstall
+preInstall
 
-installdoh
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.aliyun.com/debian buster main
+deb http://mirrors.aliyun.com/debian-security buster/updates main
+deb http://mirrors.aliyun.com/debian buster-updates main
+EOF
+rm -rf /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/preferences.d/limit-unstable
+apt update && apt install -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
+source /etc/profile
 
-installv2ray
+echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable" > /etc/apt/sources.list.d/docker.list
+curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
+apt update && apt install -y docker-ce
+
+systemctl enable docker
+systemctl restart docker
+
+installDOH
+
+installV2ray
 
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 
-installiptablesproxy
+installIptablesProxy
 
-installwg
+installWG
 
 mkdir -p /etc/pihole
 
@@ -807,8 +998,12 @@ echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
 
-postinstall
+nginxPHP
+
+postInstall
 
 blue "----------------------"
 blue  "Install de_GWD [done]"
@@ -817,7 +1012,7 @@ blue "----------------------"
 
 
 
-change_piholeadmin(){
+change_piholeAdmin(){
 pihole -a -p
 blue "-------------------------------"
 blue  "Change Pi-hole password [done]"
@@ -826,7 +1021,7 @@ blue "-------------------------------"
 
 
 
-updategwd(){
+updateGWD(){
 source /etc/profile
 
 testdns=$(/usr/local/bin/ui-testdns)
@@ -841,24 +1036,26 @@ port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-localaddr=$(ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | awk 'NR==1{print}')
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 cd ~
 
-preinstall
+preInstall
 
-installdoh
+installDOH
 
-installv2ray
+installV2ray
 
-installiptablesproxy
+installIptablesProxy
 
-installwg
+installWG
 
 installpihole
 
-postinstall
+nginxPHP
+
+postInstall
 
 if [[ $testdns = "GFWlist" ]]; then
 /usr/local/bin/ui-changegfwl
@@ -923,9 +1120,27 @@ else
     echo "[$statusbad] Pi-hole        [start failed]"
 fi
 
+
+if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
+    echo "[$statusgod] PHP7.3-FPM     [working]"
+elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
+    echo "[$statusbad] PHP7.3-FPM     [not installed]"
+else
+    echo "[$statusbad] PHP7.3-FPM     [start failed]"
+fi
+
+
+if [[ $(systemctl is-active docker) = "active" ]]; then
+    echo "[$statusgod] Docker         [working]"
+elif [[ ! -f "/usr/bin/docker" ]]; then
+    echo "[$statusbad] Docker         [not installed]"
+else
+    echo "[$statusbad] Docker         [start failed]"
+fi
+
     green "==============================="
     green "              CLIENT           "
-    green "Recommend: Debian 10 ( arm64 ) "
+    green "Recommend: Debian 10 ( amd64 ) "
     green "Author:    JacyL4              "
     green "==============================="
     echo
@@ -937,15 +1152,15 @@ fi
     read -p "Select:" num
     case "$num" in
     1)
-    installgwd
+    installGWD
     start_menu
     ;;
     2)
-    change_piholeadmin
+    change_piholeAdmin
     start_menu
     ;;
     0)
-    updategwd
+    updateGWD
     start_menu
     ;;
     *)
