@@ -830,6 +830,8 @@ echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
 
 postinstall
 
