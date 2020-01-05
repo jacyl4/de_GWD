@@ -511,7 +511,7 @@ dpkg -i smartdns.deb
 cat > /etc/smartdns/smartdns.conf << EOF
 bind 127.0.0.1:5370
 
-cache-size 1024
+cache-size 10000
 prefetch-domain yes
 speed-check-mode tcp:80,ping
 force-AAAA-SOA yes
