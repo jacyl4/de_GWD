@@ -448,7 +448,7 @@ function launchNginx(){
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
-if [[ -d "/var/www/html/nextcloud" ]]; then
+if [[ -d "/etc/php" ]]; then
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
@@ -1111,8 +1111,6 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --compl
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
 nginxNextcloudConf
-
-mkdir -p /var/www/html/nextcloud
 
 launchNginx
 
