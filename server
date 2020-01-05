@@ -987,6 +987,8 @@ apt update
 
 dpkg --configure -a
 
+apt install -y dirmngr
+
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
 add-apt-repository "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $osRelease main"
 
