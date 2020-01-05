@@ -461,7 +461,7 @@ EOF
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools
+apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r)
 }
 
 
@@ -791,7 +791,7 @@ cat > /usr/local/bin/clearcache << "EOF"
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-rm -rf ~/client
+rm -rf ~/client_do
 rm -rf /var/log/*1*
 rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
