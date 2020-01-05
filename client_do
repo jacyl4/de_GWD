@@ -594,7 +594,7 @@ jacyl4/nginx_tls1.3:latest
 
 
 
-function installpihole(){
+function installPihole(){
 wget -O ~/smartdns.deb $smartdns_amd64
 dpkg -i smartdns.deb
 
@@ -942,7 +942,7 @@ dockerNginx
 
 mkdir -p /etc/pihole
 
-installpihole
+installPihole
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
@@ -1026,7 +1026,7 @@ installWG
 
 dockerNginx
 
-installpihole
+installPihole
 
 postInstall
 

@@ -26,7 +26,7 @@ statusuccess=$(green "[ OK ]")
 statusfailed=$(red "[ failed ]")
 
 
-function preinstall(){
+function preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
@@ -42,46 +42,6 @@ cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=53
 EOF
-
-if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian $osRelease main
-deb http://mirrors.aliyun.com/debian-security $osRelease/updates main
-deb http://mirrors.aliyun.com/debian $osRelease-updates main
-EOF
-fi
-
-rm -rf /etc/apt/sources.list.d/unstable.list
-rm -rf /etc/apt/preferences.d/limit-unstable
-
-apt update
-
-apt install -y sudo locales net-tools dnsutils ipset wget curl rsync ca-certificates unzip zip git subversion jq
-
-source /etc/profile
-
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat > /etc/default/locale << EOF
-LANG=en_US.UTF-8
-LANGUAGE=en_US.UTF-8
-LC_CTYPE="en_US.UTF-8"
-LC_NUMERIC="en_US.UTF-8"
-LC_TIME="en_US.UTF-8"
-LC_COLLATE="en_US.UTF-8"
-LC_MONETARY="en_US.UTF-8"
-LC_MESSAGES="en_US.UTF-8"
-LC_PAPER="en_US.UTF-8"
-LC_NAME="en_US.UTF-8"
-LC_ADDRESS="en_US.UTF-8"
-LC_TELEPHONE="en_US.UTF-8"
-LC_MEASUREMENT="en_US.UTF-8"
-LC_IDENTIFICATION="en_US.UTF-8"
-LC_ALL=en_US.UTF-8
-EOF
-locale-gen en_US.UTF-8
 
 cat > /etc/security/limits.conf << EOF
 * soft nofile 1000000
@@ -139,10 +99,8 @@ rm -rf /run/resolvconf/interface/systemd-resolved
 
 
 
-function installdoh(){
+function installDOH(){
 cd ~
-systemctl stop doh-client > /dev/null 2>&1
-
 doh=$domain
 domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
@@ -160,7 +118,7 @@ chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
 cat > /etc/dns-over-https/doh-client.conf << EOF
-listen = [ "127.0.0.1:5380", ]
+listen = [ "127.0.0.1:5380" ]
 
 [upstream]
 upstream_selector = "weighted_round_robin"
@@ -177,13 +135,9 @@ upstream_selector = "weighted_round_robin"
 
 [others]
 timeout = 30
-
 no_cookies = true
-
-no_ecs = false
-
+no_ecs = true
 no_ipv6 = true
-
 verbose = false
 EOF
 
@@ -236,7 +190,7 @@ systemctl restart doh-client > /dev/null 2>&1
 
 
 
-function installv2ray(){
+function installV2ray(){
 date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
@@ -379,7 +333,7 @@ systemctl enable vtrui > /dev/null 2>&1
 
 
 
-function installiptablesproxy(){
+function installIptablesProxy(){
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 ipset -X hosts
@@ -498,11 +452,10 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart iptables-proxy > /dev/null 2>&1
 systemctl enable iptables-proxy > /dev/null 2>&1
+systemctl restart iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-
 cat > /etc/resolv.conf << EOF
 nameserver 127.0.0.1
 nameserver 1.1.1.1
@@ -524,15 +477,12 @@ echo
 
 
 
-function installwg(){
+function installWG(){
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://deb.debian.org/debian $osRelease main
-deb-src http://deb.debian.org/debian $osRelease main
 deb http://deb.debian.org/debian-security/ $osRelease/updates main
-deb-src http://deb.debian.org/debian-security/ $osRelease/updates main
 deb http://deb.debian.org/debian $osRelease-updates main
-deb-src http://deb.debian.org/debian $osRelease-updates main
 EOF
 fi
 
@@ -542,21 +492,20 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools
+apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-odroidxu4
 elif [[ $architecture = "amd64" ]]; then
-apt install -y wireguard-dkms wireguard-tools
+apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r)
 fi
 }
 
 
 
-function installpihole(){
+function installPihole(){
 if [[ $architecture = "arm64" ]]; then
   wget -O ~/smartdns.deb $smartdns_arm64
 elif [[ $architecture = "amd64" ]]; then
   wget -O ~/smartdns.deb $smartdns_amd64
 fi
-
 dpkg -i smartdns.deb
 
 cat > /etc/smartdns/smartdns.conf << EOF
@@ -600,8 +549,8 @@ EOF
 rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl restart smartdns > /dev/null 2>&1
 systemctl enable smartdns > /dev/null 2>&1
+systemctl restart smartdns > /dev/null 2>&1
 
 echo "" > /etc/pihole/adlists.list
 cat > /etc/pihole/setupVars.conf << EOF
@@ -659,7 +608,7 @@ pihole -f
 
 
 
-function postinstall(){
+function postInstall(){
 cat > /usr/local/bin/updateGWD << "EOF"
 #!/bin/bash
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
@@ -711,10 +660,6 @@ rm -rf ~/now.cron
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-mkdir -p /var/www/html/restore
-chown -R www-data:www-data /var/www/html/restore
-chown -R www-data:www-data /var/www/html/*.txt
-
 rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
@@ -723,17 +668,20 @@ rm -rf ~/ui-*
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
 
-mkdir -p /var/www/html/ariang
 cd ~
-wget -q $ariang
-
+wget -q $ariaNGaddr
 unzip AriaNg-*
 
+mkdir -p /var/www/html/ariang
 mv -f index.html /var/www/html/ariang
 
 rm -rf AriaNg*
 rm -rf index.html
 rm -rf LICENSE
+
+mkdir -p /var/www/html/restore
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
 
 /usr/local/bin/ui-nodedthide >/dev/null 2>&1
 /usr/local/bin/ui-nodenslookup >/dev/null 2>&1
@@ -783,21 +731,59 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 
-preinstall
+preInstall
 
-installdoh
+if [[ $architecture = "amd64" ]]; then
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.aliyun.com/debian $osRelease main
+deb http://mirrors.aliyun.com/debian-security $osRelease/updates main
+deb http://mirrors.aliyun.com/debian $osRelease-updates main
+EOF
+fi
 
-installv2ray
+rm -rf /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/preferences.d/limit-unstable
+
+apt update && apt upgrade -y
+apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset wget curl rsync ca-certificates unzip zip git subversion jq
+source /etc/profile
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+cat > /etc/default/locale << EOF
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+locale-gen en_US.UTF-8
+
+installDOH
+
+installV2ray
 
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 
-installiptablesproxy
+installIptablesProxy
 
-installwg
+installWG
 
 mkdir -p /etc/pihole
 
-installpihole
+installPihole
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
@@ -833,7 +819,7 @@ echo $v2path > /var/www/html/path.txt
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 
-postinstall
+postInstall
 
 blue "----------------------"
 blue  "Install de_GWD [done]"
@@ -871,19 +857,19 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 cd ~
 
-preinstall
+preInstall
 
-installdoh
+installDOH
 
-installv2ray
+installV2ray
 
-installiptablesproxy
+installIptablesProxy
 
-installwg
+installWG
 
-installpihole
+installPihole
 
-postinstall
+postInstall
 
 if [[ $testdns = "GFWlist" ]]; then
 /usr/local/bin/ui-changegfwl
