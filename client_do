@@ -32,29 +32,6 @@ conf-dir=/etc/dnsmasq.d
 port=53
 EOF
 
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat > /etc/default/locale << EOF
-LANG=en_US.UTF-8
-LANGUAGE=en_US.UTF-8
-LC_CTYPE="en_US.UTF-8"
-LC_NUMERIC="en_US.UTF-8"
-LC_TIME="en_US.UTF-8"
-LC_COLLATE="en_US.UTF-8"
-LC_MONETARY="en_US.UTF-8"
-LC_MESSAGES="en_US.UTF-8"
-LC_PAPER="en_US.UTF-8"
-LC_NAME="en_US.UTF-8"
-LC_ADDRESS="en_US.UTF-8"
-LC_TELEPHONE="en_US.UTF-8"
-LC_MEASUREMENT="en_US.UTF-8"
-LC_IDENTIFICATION="en_US.UTF-8"
-LC_ALL=en_US.UTF-8
-EOF
-locale-gen en_US.UTF-8
-
 cat > /etc/security/limits.conf << EOF
 * soft nofile 1000000
 * hard nofile 1000000
@@ -119,7 +96,7 @@ chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
 cat > /etc/dns-over-https/doh-client.conf << EOF
-listen = [ "127.0.0.1:5380", ]
+listen = [ "127.0.0.1:5380" ]
 
 [upstream]
 upstream_selector = "weighted_round_robin"
@@ -136,13 +113,9 @@ upstream_selector = "weighted_round_robin"
 
 [others]
 timeout = 30
-
 no_cookies = true
-
 no_ecs = true
-
 no_ipv6 = true
-
 verbose = false
 EOF
 
@@ -481,17 +454,142 @@ echo
 function installWG(){
 cat > /etc/apt/sources.list << EOF
 deb http://deb.debian.org/debian buster main
-deb-src http://deb.debian.org/debian buster main
 deb http://deb.debian.org/debian-security/ buster/updates main
-deb-src http://deb.debian.org/debian-security/ buster/updates main
 deb http://deb.debian.org/debian buster-updates main
-deb-src http://deb.debian.org/debian buster-updates main
 EOF
 
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install -y wireguard-dkms wireguard-tools
+apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools
+}
+
+
+
+function dockerNginx(){
+mkdir -p "/etc/nginx"
+mkdir -p "/etc/nginx/conf.d"
+mkdir -p "/var/log/nginx"
+
+mkdir -p /run/php
+touch "/run/php/php7.3-fpm.sock"
+chown www-data:www-data /run/php/php7.3-fpm.sock
+
+rm -rf /etc/nginx/nginx.conf
+cat > /etc/nginx/nginx.conf << EOF
+user  www-data www-data;
+worker_processes auto;
+pid   /run/nginx.pid;
+
+    worker_rlimit_nofile 65535;
+
+events {
+    use epoll;
+    worker_connections  65535;
+    multi_accept on;
+}
+
+http {
+  include mime.types;
+  default_type application/octet-stream;
+
+  server_names_hash_bucket_size 128;
+  client_header_buffer_size 32k;
+  large_client_header_buffers 4 32k;
+  client_max_body_size 1024m;
+  client_body_buffer_size 10m;
+
+  fastcgi_connect_timeout 300;
+  fastcgi_send_timeout 300;
+  fastcgi_read_timeout 300;
+  fastcgi_buffer_size 64k;
+  fastcgi_buffers 4 64k;
+  fastcgi_busy_buffers_size 128k;
+  fastcgi_temp_file_write_size 128k;
+  fastcgi_intercept_errors on;
+
+  sendfile            on;
+  tcp_nodelay         on;
+  tcp_nopush          on;
+  keepalive_timeout   10;
+  types_hash_max_size 2048;
+  server_tokens       off;
+
+  gzip                on;
+  gzip_disable        "MSIE [1-6]\.";
+  gzip_vary           on;
+  gzip_proxied        any;
+  gzip_comp_level     4;
+  gzip_min_length     256;
+  gzip_buffers        16 8k;
+  gzip_http_version   1.0;
+  gzip_types    text/plain
+                text/javascript
+                text/css
+                text/js
+                text/xml
+                text/x-component
+                text/x-json
+                font/opentype
+                application/x-font-ttf
+                application/javascript
+                application/x-javascript
+                application/x-web-app-manifest+json
+                application/json
+                application/atom+xml
+                application/xml
+                application/xml+rss
+                application/xhtml+xml
+                application/vnd.ms-fontobject
+                image/svg+xml
+                image/x-icon;
+
+  brotli              on;
+  brotli_static       on;
+  brotli_comp_level   6;
+  brotli_buffers      16 8k;
+  brotli_min_length   20;
+  brotli_window       16m;
+  brotli_types        *;
+
+  access_log off;
+  error_log off;
+
+  include /etc/nginx/conf.d/*.conf;
+}
+EOF
+
+rm -rf /etc/nginx/conf.d/default.conf
+cat > /etc/nginx/conf.d/default.conf<< EOF
+server {
+    listen       80 ;
+    server_name  localhost;
+    root         /var/www/html;
+    index        index.php index.html index.htm;
+
+  location ~* \.php$ {
+    fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
+    fastcgi_index           index.php;
+    fastcgi_split_path_info ^(.+\.php)(.*)$;
+    include                 fastcgi_params;
+    fastcgi_param           SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+  }
+
+}
+EOF
+
+docker stop nginx > /dev/null 2>&1
+docker rm nginx > /dev/null 2>&1
+docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
+docker pull jacyl4/nginx_tls1.3:latest
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /var/www/html/:/var/www/html/ \
+-v /run/php/php7.3-fpm.sock:/run/php/php7.3-fpm.sock \
+-v /etc/localtime:/etc/localtime \
+jacyl4/nginx_tls1.3:latest
 }
 
 
@@ -597,12 +695,8 @@ sed -i '/server=/d' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
 pihole -f
-}
 
-
-
-function nginxPHP(){
-apt install -y  zip subversion rsync php7.3-fpm
+apt install --no-install-recommends --no-install-suggests -y zip subversion rsync php7.3-fpm
 
 cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
 ;;;;;;;;;;;;;;;;;;
@@ -658,155 +752,9 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-mkdir -p /run/php
-touch /run/php/php7.3-fpm.pid
-cat > /lib/systemd/system/php7.3-fpm.service << "EOF"
-[Unit]
-Description=The PHP 7.3 FastCGI Process Manager
-Documentation=man:php-fpm7.3(8)
-After=network.target
-Wants=network.target
-
-[Service]
-Type=notify
-PIDFile=/run/php/php7.3-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
-ExecReload=/bin/kill -USR2 $MAINPID
-PrivateTmp=true
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
 systemctl enable php7.3-fpm
 systemctl restart php7.3-fpm
-
-
-docker stop nginx > /dev/null 2>&1
-docker rm nginx > /dev/null 2>&1
-
-docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
-docker pull jacyl4/nginx_tls1.3:latest
-
-
-mkdir -p "/etc/nginx"
-mkdir -p "/etc/nginx/conf.d"
-mkdir -p "/var/log/nginx"
-
-rm -rf /etc/nginx/nginx.conf
-cat > /etc/nginx/nginx.conf << EOF
-user  www-data www-data;
-worker_processes auto;
-pid   /run/nginx.pid;
-
-    worker_rlimit_nofile 65535;
-
-events {
-    use epoll;
-    worker_connections  65535;
-    multi_accept on;
-}
-
-http {
-  include mime.types;
-  default_type application/octet-stream;
-
-  server_names_hash_bucket_size 128;
-  client_header_buffer_size 32k;
-  large_client_header_buffers 4 32k;
-  client_max_body_size 1024m;
-  client_body_buffer_size 10m;
-
-  fastcgi_connect_timeout 300;
-  fastcgi_send_timeout 300;
-  fastcgi_read_timeout 300;
-  fastcgi_buffer_size 64k;
-  fastcgi_buffers 4 64k;
-  fastcgi_busy_buffers_size 128k;
-  fastcgi_temp_file_write_size 128k;
-  fastcgi_intercept_errors on;
-
-  sendfile            on;
-  tcp_nodelay         on;
-  tcp_nopush          on;
-  keepalive_timeout   10;
-  types_hash_max_size 2048;
-  server_tokens       off;
-
-  gzip                on;
-  gzip_disable        "MSIE [1-6]\.";
-  gzip_vary           on;
-  gzip_proxied        any;
-  gzip_comp_level     4;
-  gzip_min_length     256;
-  gzip_buffers        16 8k;
-  gzip_http_version   1.0;
-  gzip_types    text/plain
-                text/javascript
-                text/css
-                text/js
-                text/xml
-                text/x-component
-                text/x-json
-                font/opentype
-                application/x-font-ttf
-                application/javascript
-                application/x-javascript
-                application/x-web-app-manifest+json
-                application/json
-                application/atom+xml
-                application/xml
-                application/xml+rss
-                application/xhtml+xml
-                application/vnd.ms-fontobject
-                image/svg+xml
-                image/x-icon;
-
-  brotli              on;
-  brotli_static       on;
-  brotli_comp_level   6;
-  brotli_buffers      16 8k;
-  brotli_min_length   20;
-  brotli_window       16m;
-  brotli_types        *;
-
-  access_log off;
-  error_log off;
-
-  include /etc/nginx/conf.d/*.conf;
-}
-EOF
-
-rm -rf /etc/nginx/conf.d/default.conf
-cat > /etc/nginx/conf.d/default.conf<< EOF
-server {
-    listen 80;
-    root /var/www/html;
-    index index.php index.html index.htm;
-
-  location ~ [^/]\.php(/|$) {
-    include fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-    fastcgi_pass unix:/run/php/php7.3-fpm.sock;
-    fastcgi_index index.php;
-  }
-
-    location ~ /\.ht {
-        deny all;
-    }
-}
-EOF
-
-docker run -d --name=nginx --net=host --restart=always \
--v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
--v /run/php/php7.3-fpm.sock:/run/php/php7.3-fpm.sock \
--v /var/www/html/:/var/www/html/ \
-jacyl4/nginx_tls1.3:latest
+docker restart nginx
 }
 
 
@@ -863,10 +811,6 @@ rm -rf ~/now.cron
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-mkdir -p /var/www/html/restore
-chown -R www-data:www-data /var/www/html/restore
-chown -R www-data:www-data /var/www/html/*.txt
-
 rsync -r ~/ui-script/* /usr/local/bin
 chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
@@ -875,17 +819,20 @@ rm -rf ~/ui-*
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
 
-mkdir -p /var/www/html/ariang
 cd ~
 wget -q $ariaNGaddr
-
 unzip AriaNg-*
 
+mkdir -p /var/www/html/ariang
 mv -f index.html /var/www/html/ariang
 
 rm -rf AriaNg*
 rm -rf index.html
 rm -rf LICENSE
+
+mkdir -p /var/www/html/restore
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
 
 /usr/local/bin/ui-nodedthide >/dev/null 2>&1
 /usr/local/bin/ui-nodenslookup >/dev/null 2>&1
@@ -927,13 +874,13 @@ installGWD(){
     green "========================="
     read v2path
 
-cd ~
-
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
+
+cd ~
 
 preInstall
 
@@ -942,17 +889,45 @@ deb http://mirrors.aliyun.com/debian buster main
 deb http://mirrors.aliyun.com/debian-security buster/updates main
 deb http://mirrors.aliyun.com/debian buster-updates main
 EOF
+
 rm -rf /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
-apt update && apt install -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
-source /etc/profile
+
+apt update && apt upgrade -y
+apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
 
 echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
-apt update && apt install -y docker-ce
+
+apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
 
 systemctl enable docker
 systemctl restart docker
+
+source /etc/profile
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+cat > /etc/default/locale << EOF
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+locale-gen en_US.UTF-8
 
 installDOH
 
@@ -963,6 +938,8 @@ echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/l
 installIptablesProxy
 
 installWG
+
+dockerNginx
 
 mkdir -p /etc/pihole
 
@@ -999,10 +976,6 @@ echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
-chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
-
-nginxPHP
 
 postInstall
 
@@ -1052,9 +1025,9 @@ installIptablesProxy
 
 installWG
 
-installpihole
+dockerNginx
 
-nginxPHP
+installpihole
 
 postInstall
 
