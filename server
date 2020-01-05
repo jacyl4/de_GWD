@@ -338,7 +338,7 @@ mkdir -p "/var/www/html"
 rm -rf /etc/nginx/nginx.conf
 
 cat > /etc/nginx/nginx.conf << EOF
-user  nginx nginx;
+user  www-data www-data;
 worker_processes auto;
 pid   /run/nginx.pid;
 
