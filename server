@@ -1112,6 +1112,8 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.j
 
 nginxNextcloudConf
 
+mkdir -p /var/www/html/nextcloud
+
 launchNginx
 
 wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
