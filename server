@@ -7,6 +7,10 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 osRelease=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
 
+rm -rf /etc/systemd/system/iptablesrules.service
+rm -rf /etc/systemd/system/doh-server.service
+rm -rf /etc/systemd/system/vtrui.service
+
 function preInstall(){
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -158,7 +162,7 @@ iptables -X
 EOF
 chmod +x /usr/local/bin/iptablesrules-down
 
-cat > /etc/systemd/system/iptablesrules.service << EOF
+cat > /lib/systemd/system/iptablesrules.service << EOF
 [Unit]
 Description=iptablesrules
 After=network.target
@@ -227,7 +231,7 @@ chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
 touch /run/doh-server.pid
 
-cat > /etc/systemd/system/doh-server.service << "EOF"
+cat > /lib/systemd/system/doh-server.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target
@@ -301,7 +305,7 @@ jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' 
 
 touch /run/vtrui.pid
 
-cat > /etc/systemd/system/vtrui.service << EOF
+cat > /lib/systemd/system/vtrui.service << EOF
 [Unit]
 Description=vtrui Service
 After=network.target
