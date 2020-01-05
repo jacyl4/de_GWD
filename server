@@ -12,29 +12,6 @@ rm -rf /etc/systemd/system/doh-server.service
 rm -rf /etc/systemd/system/vtrui.service
 
 function preInstall(){
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat > /etc/default/locale << EOF
-LANG=en_US.UTF-8
-LANGUAGE=en_US.UTF-8
-LC_CTYPE="en_US.UTF-8"
-LC_NUMERIC="en_US.UTF-8"
-LC_TIME="en_US.UTF-8"
-LC_COLLATE="en_US.UTF-8"
-LC_MONETARY="en_US.UTF-8"
-LC_MESSAGES="en_US.UTF-8"
-LC_PAPER="en_US.UTF-8"
-LC_NAME="en_US.UTF-8"
-LC_ADDRESS="en_US.UTF-8"
-LC_TELEPHONE="en_US.UTF-8"
-LC_MEASUREMENT="en_US.UTF-8"
-LC_IDENTIFICATION="en_US.UTF-8"
-LC_ALL=en_US.UTF-8
-EOF
-locale-gen en_US.UTF-8
-
 cat > /etc/security/limits.conf << EOF
 * soft nofile 1000000
 * hard nofile 1000000
@@ -92,54 +69,11 @@ fi
 
 sysctl -p
 
+sed -i '/ip6-/d' /etc/hosts
+
 systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 rm -rf /run/resolvconf/interface/systemd-resolved
-}
-
-
-
-function installPihole(){
-mkdir -p /etc/pihole
-
-echo "" > /etc/pihole/adlists.list
-
-cat > /etc/pihole/setupVars.conf << EOF
-PIHOLE_INTERFACE=$ethernetnum
-IPV4_ADDRESS=$localaddr/24
-IPV6_ADDRESS=
-PIHOLE_DNS_1=8.8.8.8
-PIHOLE_DNS_2=1.1.1.1
-QUERY_LOGGING=false
-INSTALL_WEB_SERVER=false
-INSTALL_WEB_INTERFACE=false
-LIGHTTPD_ENABLED=false
-BLOCKING_ENABLED=true
-WEBPASSWORD=0000000000000000000000000000000000000000000000000000000000000000
-DNSMASQ_LISTENING=single
-DNS_FQDN_REQUIRED=true
-DNS_BOGUS_PRIV=true
-DNSSEC=false
-CONDITIONAL_FORWARDING=false
-EOF
-
-curl -sSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
-
-systemctl mask dhcpcd --now
-systemctl daemon-reload
-
-sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.8.8' /etc/pihole/setupVars.conf
-sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
-
-pihole -f
 }
 
 
@@ -179,13 +113,55 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl restart iptablesrules
 systemctl enable iptablesrules
+systemctl restart iptablesrules
 }
 
 
 
-function installDoh(){
+function installPihole(){
+echo "" > /etc/pihole/adlists.list
+cat > /etc/pihole/setupVars.conf << EOF
+PIHOLE_INTERFACE=$ethernetnum
+IPV4_ADDRESS=$localaddr/24
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=8.8.8.8
+QUERY_LOGGING=false
+INSTALL_WEB_SERVER=false
+INSTALL_WEB_INTERFACE=false
+LIGHTTPD_ENABLED=false
+BLOCKING_ENABLED=true
+WEBPASSWORD=0000000000000000000000000000000000000000000000000000000000000000
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=false
+EOF
+
+curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+
+systemctl mask --now dhcpcd
+systemctl mask --now lighttpd
+systemctl daemon-reload
+
+sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_3=1.0.0.1' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_2=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
+sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
+
+pihole -f
+}
+
+
+
+function installDOH(){
 cd ~
 wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
 unzip doh.zip
@@ -195,20 +171,14 @@ chmod +x /usr/local/bin/doh-server
 
 mkdir -p /etc/dns-over-https
 cat > /etc/dns-over-https/doh-server.conf << EOF
-listen = [ "127.0.0.1:8053", ]
-
+listen = [ "127.0.0.1:8053" ]
 path = "/dq"
 
-upstream = [
-  "udp:127.0.0.1:53",
-]
+upstream = [ "udp:127.0.0.1:53" ]
 
 timeout = 10
-
 tries = 3
-
 verbose = false
-
 log_guessed_client_ip = false
 EOF
 
@@ -230,7 +200,6 @@ EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
 touch /run/doh-server.pid
-
 cat > /lib/systemd/system/doh-server.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS server
@@ -251,14 +220,14 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl restart doh-server
 systemctl enable doh-server
-cd ~
+systemctl restart doh-server
 }
 
 
 
 function installV2ray(){
+cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
@@ -326,8 +295,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl restart vtrui
 systemctl enable vtrui
+systemctl restart vtrui
 }
 
 
@@ -425,20 +394,15 @@ http {
 EOF
 
 rm -rf /etc/nginx/conf.d/default.conf
-
 cat > /etc/nginx/conf.d/default.conf << EOF
 server {
-    listen 80;
+    listen      80;
     server_name $vpsdomain;
-    root /var/www/html;
-    index index.php index.html index.htm;
+    root        /var/www/html;
+    index       index.php index.html index.htm;
 }
 EOF
-}
 
-
-
-function installNginx(){
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
@@ -453,6 +417,10 @@ docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
 if [[ -d "/etc/php" ]]; then
+mkdir -p /run/php
+touch "/run/php/php7.3-fpm.sock"
+chown www-data:www-data /run/php/php7.3-fpm.sock
+
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
@@ -475,18 +443,15 @@ fi
 
 
 function makeSsl(){
-
 rm -rf /etc/nginx/conf.d/default.conf
-
 cat > /etc/nginx/conf.d/default.conf << EOF
 server {
-    listen 80;
+    listen      80;
     server_name $vpsdomain;
-    root /var/www/html;
-    index index.php index.html index.htm;
+    root        /var/www/html;
+    index       index.php index.html index.htm;
 }
 EOF
-
 docker restart nginx > /dev/null 2>&1
 
 mkdir -p /var/www/ssl
@@ -840,6 +805,8 @@ installGWD(){
     
 cd ~
 
+preInstall
+
 cat > /etc/resolv.conf << EOF
 nameserver 1.1.1.1
 nameserver 8.8.8.8
@@ -849,31 +816,44 @@ EOF
 
 cat > /etc/apt/sources.list << EOF
 deb http://deb.debian.org/debian/ $osRelease main
-deb-src http://deb.debian.org/debian/ $osRelease main
 deb http://security.debian.org/debian-security $osRelease/updates main
-deb-src http://security.debian.org/debian-security $osRelease/updates main
 deb http://deb.debian.org/debian/ $osRelease-updates main
-deb-src http://deb.debian.org/debian/ $osRelease-updates main
 EOF
 
-apt update
-
-apt install -y sudo locales net-tools dnsutils unzip wget curl rsync git socat jq apt-transport-https ca-certificates gnupg2 software-properties-common dirmngr
-
+apt update && apt upgrade -y
+apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils unzip wget curl rsync git jq socat apt-transport-https ca-certificates gnupg2 software-properties-common dirmngr
 source /etc/profile
 
-curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+cat > /etc/default/locale << EOF
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+locale-gen en_US.UTF-8
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $osRelease stable" > /etc/apt/sources.list.d/docker.list
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
-apt update
-
-apt install -y docker-ce
+apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
 
 systemctl enable docker
-systemctl start docker
-
-preInstall
+systemctl restart docker
 
 uuidnum=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
@@ -882,9 +862,11 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 gatewayaddr=$(route -n |  awk 'NR==3{print $2}')
 
-installPihole
-
 installIptablesRules
+
+mkdir -p /etc/pihole
+
+installPihole
 
 cat > /etc/network/interfaces << EOF
 source /etc/network/interfaces.d/*
@@ -899,13 +881,11 @@ iface $ethernetnum inet static
   gateway $gatewayaddr
 EOF
 
-installDoh
+installDOH
 
 installV2ray
 
 nginxConf
-
-installNginx
 
 launchNginx
 
@@ -991,12 +971,10 @@ apt update
 
 dpkg --configure -a
 
-apt install -y dirmngr
-
+echo "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $osRelease main" > /etc/apt/sources.list.d/mariadb.list
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
-add-apt-repository "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $osRelease main"
 
-apt update && apt install -y mariadb-server
+apt update && apt install --no-install-recommends --no-install-suggests -y mariadb-server
 
 mysql_secure_installation
 
@@ -1024,7 +1002,7 @@ systemctl restart mariadb
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $osRelease main" > /etc/apt/sources.list.d/php.list
 
-apt update && apt install -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-dom php-dompdf php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu php-redis redis-server imagemagick ffmpeg
+apt update && apt install --no-install-recommends --no-install-suggests -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-dom php-dompdf php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu php-redis redis-server imagemagick ffmpeg
 
 cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
 ;;;;;;;;;;;;;;;;;;
@@ -1083,35 +1061,10 @@ EOF
 sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
 echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
 
-mkdir -p /run/php
-touch /run/php/php7.3-fpm.pid
-
-cat > /lib/systemd/system/php7.3-fpm.service << "EOF"
-[Unit]
-Description=The PHP 7.3 FastCGI Process Manager
-Documentation=man:php-fpm7.3(8)
-After=network.target
-Wants=network.target
-
-[Service]
-Type=notify
-PIDFile=/run/php/php7.3-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
-ExecReload=/bin/kill -USR2 $MAINPID
-PrivateTmp=true
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl restart php7.3-fpm
 systemctl enable php7.3-fpm
+systemctl restart php7.3-fpm
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --complement | rev)
-
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
 nginxNextcloudConf
@@ -1121,6 +1074,7 @@ launchNginx
 wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
 chown -R www-data:www-data /var/www/html/
+chmod -R 755 /var/www/html
 
 blue "------------------------------------"
 blue "  Datadase user:"
@@ -1391,7 +1345,7 @@ done
 
 installIptablesRules
 
-installDoh
+installDOH
 
 installV2ray
 
@@ -1415,8 +1369,6 @@ if [[ -d "/var/www/html/nextcloud" ]]; then
 else
   nginxWebConf
 fi
-
-installNginx
 
 launchNginx
 

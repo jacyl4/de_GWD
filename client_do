@@ -471,10 +471,6 @@ mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
 mkdir -p "/var/log/nginx"
 
-mkdir -p /run/php
-touch "/run/php/php7.3-fpm.sock"
-chown www-data:www-data /run/php/php7.3-fpm.sock
-
 rm -rf /etc/nginx/nginx.conf
 cat > /etc/nginx/nginx.conf << EOF
 user  www-data www-data;
@@ -582,6 +578,10 @@ docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
 docker pull jacyl4/nginx_tls1.3:latest
+
+mkdir -p /run/php
+touch "/run/php/php7.3-fpm.sock"
+chown www-data:www-data /run/php/php7.3-fpm.sock
 
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
@@ -895,15 +895,6 @@ rm -rf /etc/apt/preferences.d/limit-unstable
 
 apt update && apt upgrade -y
 apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
-
-echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable" > /etc/apt/sources.list.d/docker.list
-curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
-
-apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
-
-systemctl enable docker
-systemctl restart docker
-
 source /etc/profile
 
 echo "Asia/Shanghai" > /etc/timezone
@@ -928,6 +919,14 @@ LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
+
+echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable" > /etc/apt/sources.list.d/docker.list
+curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
+
+apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
+
+systemctl enable docker
+systemctl restart docker
 
 installDOH
 
