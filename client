@@ -7,7 +7,7 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-mirrorsite="acccoc.top/gwd"
+mirrorSite="http://xz-nat.uovz.com:10178/gwd"
 
 smartdns_arm64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.aarch64-debian-all.deb"
 smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
@@ -107,9 +107,9 @@ domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' 
 sed -i "1i $domainip $doh" /etc/hosts
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -O ~/doh.zip https://$mirrorsite/doharm64.zip
+  wget --no-check-certificate -O ~/doh.zip $mirrorsite/doharm64.zip
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -O ~/doh.zip https://$mirrorsite/dohamd64.zip
+  wget --no-check-certificate -O ~/doh.zip $mirrorsite/dohamd64.zip
 fi
 unzip doh.zip
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
@@ -199,9 +199,9 @@ mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 
 if [[ $architecture = "arm64" ]]; then
-    wget --no-check-certificate -O ~/vtrui.zip https://$mirrorsite/vtarm64.zip
+    wget --no-check-certificate -O ~/vtrui.zip $mirrorsite/vtarm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget --no-check-certificate -O ~/vtrui.zip https://$mirrorsite/vtamd64.zip
+    wget --no-check-certificate -O ~/vtrui.zip $mirrorsite/vtamd64.zip
 fi
 unzip vtrui.zip
 mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
