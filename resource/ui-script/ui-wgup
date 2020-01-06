@@ -153,10 +153,8 @@ AllowedIPs = 0.0.0.0/0
 EOF
 chmod 600 /etc/wireguard/client*.conf
 
+systemctl restart iptables-proxy
 
 systemctl daemon-reload
 systemctl enable wg-quick@wg0
 systemctl restart wg-quick@wg0
-
-systemctl restart iptables-proxy
-
