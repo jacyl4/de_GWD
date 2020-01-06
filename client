@@ -664,8 +664,8 @@ wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
 
 cd ~
-wget -q $ariaNGaddr
-unzip AriaNg-*
+wget -q -O ~/ariaNG.zip $ariaNGaddr
+unzip ariaNG.zip
 
 mkdir -p /var/www/html/ariang
 mv -f index.html /var/www/html/ariang
