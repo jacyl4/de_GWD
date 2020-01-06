@@ -599,6 +599,12 @@ sed -i '/IPV6_ADDRESS=/a\PIHOLE_DNS_1=127.0.0.1#5380' /etc/pihole/setupVars.conf
 sed -i '/server=/d' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
 
+cat > /etc/pihole/pihole-FTL.conf << EOF
+PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
+EOF
+
+systemctl restart pihole-FTL
 pihole -f
 }
 
