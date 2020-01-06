@@ -28,5 +28,5 @@ bash <(wget --no-check-certificate -qO- https://acccoc.top/gwd/client_do)
 ![client](https://i.loli.net/2020/01/06/mxlQVkFNv2yLo8K.png)
 
 
-![client_do](https://i.loli.net/2020/01/06/KgohRQOZMB9Lw7e.png)
+![client_do](https://i.loli.net/2020/01/06/PVt4eSUKhQMx2Oy.png)
 
