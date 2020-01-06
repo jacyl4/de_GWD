@@ -1108,7 +1108,7 @@ else
 fi
 
     green "==============================="
-    green "              CLIENT           "
+    green "           CLIENT (Docker)     "
     green "Recommend: Debian 10 ( amd64 ) "
     green "Author:    JacyL4              "
     green "==============================="
