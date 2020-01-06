@@ -657,7 +657,6 @@ svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
 rsync -r ~/ui-script/* /usr/local/bin
-chmod +x /usr/local/bin/*
 rsync -r ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
@@ -678,6 +677,7 @@ rm -rf LICENSE
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
+chmod +x /usr/local/bin/*
 
 /usr/local/bin/ui-nodedthide >/dev/null 2>&1
 /usr/local/bin/ui-nodenslookup >/dev/null 2>&1
@@ -837,9 +837,9 @@ updategwd(){
 source /etc/profile
 
 testdns=$(/usr/local/bin/ui-testdns)
-dhcpcheck=$(/usr/local/bin/ui-dhcpcheck)
-ddnscheck=$(/usr/local/bin/ui-ddnscheck)
-wgcheck=$(/usr/local/bin/ui-wgcheck)
+dhcpcheck=$(/usr/local/bin/ui-checkDhcp)
+ddnscheck=$(/usr/local/bin/ui-checkDDNScf)
+wgcheck=$(/usr/local/bin/ui-checkWG)
 
 piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
@@ -877,7 +877,7 @@ if [[ $dhcpcheck = "on" ]]; then
 /usr/local/bin/ui-dhcpup
 fi
 
-if [[ $ddnscheck = "cfon" ]]; then
+if [[ $ddnscheck = "on" ]]; then
 /usr/local/bin/ui-ddnsupdateoncf
 fi
 
