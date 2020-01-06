@@ -31,6 +31,7 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
+<span class="float-right badge badge-pill text-primary"> <?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?> </span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -216,7 +217,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4 mb-4">
   <div class="input-group-prepend">
-  <label class="input-group-text">V2去广告<span id="v2adcheck" class="badge badge-pill text-success"></span></label>
+  <label class="input-group-text">V2去广告<span class="badge badge-pill text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="v2adadd()">开启</button>
@@ -424,7 +425,7 @@
           <div class="card-header">
             <i class="fas fa-network-wired"></i>
             DHCP 服务
-          <span id="dhcpcheck" class="badge badge-pill text-success"></span>
+          <span class="badge badge-pill text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?></span>
 <span class="float-right mt-n1 mb-n2">
 <a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">设置</a>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="dhcpup()">开启</button>
@@ -800,14 +801,6 @@ $('#nodecheck9').html(nodestatusf);
 $("#"+nodenum).html(nodestatust);
 
 $.get('uptime.php', function(data) { $('#uptime').text(data) });
-
-$.get('dhcpcheck.php', function(data){
-if (data.indexOf("on") != -1) {$('#dhcpcheck').html('on');}
-});
-
-$.get('v2adcheck.php', function(data){
-if (data.indexOf("on") != -1) {$('#v2adcheck').html('on');}
-});
 
 $.get("version.php", function(data) {
 var strver=data;

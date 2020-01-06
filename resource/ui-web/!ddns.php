@@ -32,6 +32,7 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
+<span class="float-right badge badge-pill text-primary"> <?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?> </span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -118,7 +119,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
-          <span id="ddnscheckcf" class="badge text-success"></span>
+          <span id="ddnscheckcf" class="badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitddnscf()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="stopddns()">关闭</button>
@@ -167,7 +168,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             WireGuard Server
-          <span id="wgcheck" class="badge text-success"></span>
+          <span class="badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="wgrekey()">重新生成密钥</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="wgon()">开启</button>
@@ -448,12 +449,7 @@ $.get('wgmark.php', {WGmark1:WGmark1, WGmark2:WGmark2, WGmark3:WGmark3, WGmark4:
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
-$.get('ddnscheck.php', function(data){
-if (data.indexOf("cfon") != -1) {$('#ddnscheckcf').html('on');}
-});
-$.get('wgcheck.php', function(data){
-if (data.indexOf("on") != -1) {$('#wgcheck').html('on');}
-});
+
 $.get('wgqrtxt1.php', function(data){
 jQuery('#qrcode1').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
 });
