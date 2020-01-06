@@ -843,9 +843,9 @@ updategwd(){
 source /etc/profile
 
 testdns=$(/usr/local/bin/ui-testdns)
-dhcpcheck=$(/usr/local/bin/ui-checkDhcp)
-ddnscheck=$(/usr/local/bin/ui-checkDDNScf)
-wgcheck=$(/usr/local/bin/ui-checkWG)
+checkDHCP=$(/usr/local/bin/ui-checkDhcp)
+checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
+checkWG=$(/usr/local/bin/ui-checkWG)
 
 piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
@@ -879,15 +879,15 @@ else
 /usr/local/bin/ui-changechnwl
 fi
 
-if [[ $dhcpcheck = "on" ]]; then
+if [[ $checkDHCP = "on" ]]; then
 /usr/local/bin/ui-dhcpup
 fi
 
-if [[ $ddnscheck = "on" ]]; then
+if [[ $checkDDNScf = "on" ]]; then
 /usr/local/bin/ui-ddnsupdateoncf
 fi
 
-if [[ $wgcheck = "on" ]]; then
+if [[ $checkWG = "on" ]]; then
 /usr/local/bin/ui-wgup
 fi
 
@@ -898,42 +898,42 @@ blue "---------------------"
 
 
 start_menu(){
-statusgod=$(green "✓")
-statusbad=$(red "✕")
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
 
 if [[ $(systemctl is-active doh-client) = "active" ]]; then
-    echo "[$statusgod] DoH client     [working]"
+    echo "[$statusGOOD] DoH client     [working]"
 elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
-    echo "[$statusbad] DoH client     [not Installed]"
+    echo "[$statusBAD] DoH client     [not Installed]"
 else
-    echo "[$statusbad] DoH client     [start failed]"
+    echo "[$statusBAD] DoH client     [start failed]"
 fi
 
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusgod] V2RAY          [working]"
+    echo "[$statusGOOD] V2RAY          [working]"
 elif [[ ! -f "/usr/bin/vtrui" ]]; then
-    echo "[$statusbad] V2RAY          [not Installed]"
+    echo "[$statusBAD] V2RAY          [not Installed]"
 else
-    echo "[$statusbad] V2RAY          [start failed]"
+    echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
 
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
-    echo "[$statusgod] SmartDNS       [working]"
+    echo "[$statusGOOD] SmartDNS       [working]"
 elif [[ ! -f "/etc/smartdns/smartdns.conf" ]]; then
-    echo "[$statusbad] SmartDNS       [not Installed]"
+    echo "[$statusBAD] SmartDNS       [not Installed]"
 else
-    echo "[$statusbad] SmartDNS       [start failed]"
+    echo "[$statusBAD] SmartDNS       [start failed]"
 fi
 
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
-    echo "[$statusgod] Pi-hole        [working]"
+    echo "[$statusGOOD] Pi-hole        [working]"
 elif [ ! -f "/usr/local/bin/pihole" ]; then
-    echo "[$statusbad] Pi-hole        [not installed]"
+    echo "[$statusBAD] Pi-hole        [not installed]"
 else
-    echo "[$statusbad] Pi-hole        [start failed]"
+    echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
     green "===================================="

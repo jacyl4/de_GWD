@@ -7,6 +7,10 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 osRelease=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
 
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+statusNONE=$(yellow "-")
+
 function preInstall(){
 cat > /etc/security/limits.conf << EOF
 * soft nofile 1000000
@@ -1405,51 +1409,46 @@ fi
 
 
 start_menu(){
-statusgod=$(green "✓")
-statusbad=$(red "✕")
-statusnone=$(yellow "-")
-
-
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusgod] V2RAY        [working]"
+    echo "[$statusGOOD] V2RAY        [working]"
 elif [[ ! -f "/usr/bin/vtrui" ]]; then
-    echo "[$statusbad] V2RAY        [not Installed]"
+    echo "[$statusBAD] V2RAY        [not Installed]"
 else
-    echo "[$statusbad] V2RAY        [start failed]"
+    echo "[$statusBAD] V2RAY        [start failed]"
 fi
 
 
 if [[ $(systemctl is-active doh-server) = "active" ]]; then
-    echo "[$statusgod] DoH server   [working]"
+    echo "[$statusGOOD] DoH server   [working]"
 elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
-    echo "[$statusbad] DoH server   [not Installed]"
+    echo "[$statusBAD] DoH server   [not Installed]"
 else
-    echo "[$statusbad] DoH server   [start failed]"
+    echo "[$statusBAD] DoH server   [start failed]"
 fi
 
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
-    echo "[$statusgod] Pi-hole      [working]"
+    echo "[$statusGOOD] Pi-hole      [working]"
 elif [[ ! -f "/usr/local/bin/pihole" ]]; then
-    echo "[$statusbad] Pi-hole      [not installed]"
+    echo "[$statusBAD] Pi-hole      [not installed]"
 else
-    echo "[$statusbad] Pi-hole      [start failed]"
+    echo "[$statusBAD] Pi-hole      [start failed]"
 fi
 
 
 if [[ $(systemctl is-active docker) = "active" ]]; then
-    echo "[$statusgod] Docker       [working]"
+    echo "[$statusGOOD] Docker       [working]"
 elif [[ ! -f "/usr/bin/docker" ]]; then
-    echo "[$statusbad] Docker       [not installed]"
+    echo "[$statusBAD] Docker       [not installed]"
 else
-    echo "[$statusbad] Docker       [start failed]"
+    echo "[$statusBAD] Docker       [start failed]"
 fi
 
 
 if [[ -d "/var/www/html/nextcloud" ]]; then
-    echo "[$statusgod] Nextcloud    [installed]"
+    echo "[$statusGOOD] Nextcloud    [installed]"
 else
-    echo "[$statusnone] Nextcloud    [not installed]"
+    echo "[$statusNONE] Nextcloud    [not installed]"
 fi
 
 blue "--------------------------"
