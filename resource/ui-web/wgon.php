@@ -2,9 +2,12 @@
 <?php if (isset($auth) && $auth) {?>
 <?php
 $WGaddress = $_GET['WGaddress'];
+$WGaddressport = $_GET['WGaddressport'];
 
 $WGaddresstxt = fopen("WGaddress.txt", "w");
 $txt = "$WGaddress\n";
+fwrite($WGaddresstxt, $txt);
+$txt = "$WGaddressport\n";
 fwrite($WGaddresstxt, $txt);
 fclose($WGaddresstxt);
 

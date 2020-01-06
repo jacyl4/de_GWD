@@ -169,6 +169,7 @@
             WireGuard Server
           <span id="wgcheck" class="badge text-success"></span>
 <span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="wgrekey()">重新生成密钥</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="wgon()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="wgoff()">关闭</button>
 </span>
@@ -176,15 +177,19 @@
           <div class="card-body">
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1 ml-auto mr-auto">
-        <div class="input-group-prepend w-50">
-          <span class="input-group-text justify-content-center w-100">Endpoint</span>
-          <span class="input-group-text justify-content-center w-100">域名/公网IP</span>
+      <div class="col-md-6 input-group my-1 ml-auto mr-auto ">
+        <div class="input-group-prepend">
+          <span class="input-group-text justify-content-center">Endpoint</span>
+          <span class="input-group-text justify-content-center">域名/公网IP</span>
         </div>
           <input type="text" id="WGaddress" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGaddress.txt"); ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="wgrekey()">重新生成密钥</button>
+          <div class="input-group-append">
+          <span class="input-group-text justify-content-center">UDP端口</span>
+          </div>
+          <input type="text" id="WGaddressport" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/WGaddress.txt"); ?>">
       </div>
 </div>
+
 
 <div class="form-row mb-3">
       <div class="col-md-6 input-group my-1">
@@ -268,7 +273,7 @@
 
 <span class="float-left text-secondary">
   <small>
-注：需要主路由映射UDP端口49894到de_GWD的地址。
+注：需要主路由映射所需UDP端口到de_GWD的地址。
   </small>
 </span>
 
@@ -424,7 +429,8 @@ $.get('wgoff.php', function(result){ location.reload() });
 
 function wgon(){
 WGaddress=$('#WGaddress').val();
-$.get('wgon.php', {WGaddress:WGaddress}, function(result){ location.reload() });
+WGaddressport=$('#WGaddressport').val();
+$.get('wgon.php', {WGaddress:WGaddress, WGaddressport:WGaddressport}, function(result){ location.reload() });
 }
 
 function submitwgmark(){
