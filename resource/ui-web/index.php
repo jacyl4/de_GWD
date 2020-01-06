@@ -311,7 +311,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:none">
+<div id="shnodedt" style="display:block">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -495,7 +495,7 @@
       <footer class="sticky-footer">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by JacyL4 2019</span>
+            <span>Copyright © de_GWD by JacyL4 2020</span>
           </div>
         </div>
       </footer>
