@@ -7,10 +7,6 @@ function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 osRelease=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
 
-rm -rf /etc/systemd/system/iptablesrules.service
-rm -rf /etc/systemd/system/doh-server.service
-rm -rf /etc/systemd/system/vtrui.service
-
 function preInstall(){
 cat > /etc/security/limits.conf << EOF
 * soft nofile 1000000
