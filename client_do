@@ -821,7 +821,7 @@ unzip ariaNG.zip
 mkdir -p /var/www/html/ariang
 mv -f index.html /var/www/html/ariang
 
-rm -rf AriaNg*
+rm -rf ariaNG.zip
 rm -rf index.html
 rm -rf LICENSE
 
