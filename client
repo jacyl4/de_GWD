@@ -107,9 +107,9 @@ domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' 
 sed -i "1i $domainip $doh" /etc/hosts
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -O ~/doh.zip $mirrorsite/doharm64.zip
+  wget --no-check-certificate -O ~/doh.zip $mirrorSite/doharm64.zip
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -O ~/doh.zip $mirrorsite/dohamd64.zip
+  wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 fi
 unzip doh.zip
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
@@ -199,9 +199,9 @@ mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 
 if [[ $architecture = "arm64" ]]; then
-    wget --no-check-certificate -O ~/vtrui.zip $mirrorsite/vtarm64.zip
+    wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtarm64.zip
 elif [[ $architecture = "amd64" ]]; then
-    wget --no-check-certificate -O ~/vtrui.zip $mirrorsite/vtamd64.zip
+    wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
 fi
 unzip vtrui.zip
 mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
