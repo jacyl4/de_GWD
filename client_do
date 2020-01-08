@@ -42,6 +42,7 @@ echo "ulimit -n 1000000" > ~/.bash_profile
 
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
+vm.swappiness = 10
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 1000000
 fs.inotify.max_user_watches = 1000000

@@ -12,6 +12,16 @@ statusBAD=$(red "✕")
 statusNONE=$(yellow "-")
 
 function preInstall(){
+checkSWAP=`swapon --show`
+if [[ -z "$checkSWAP" ]]; then
+install -o root -g root -m 0600 /dev/null /swapfile
+dd if=/dev/zero of=/swapfile bs=1k count=512k
+mkswap /swapfile
+swapon /swapfile
+sed -i "/swapfile/d" /etc/fstab
+echo "/swapfile swap swap defaults 0 0" > /etc/fstab
+fi
+
 cat > /etc/security/limits.conf << EOF
 * soft nofile 1000000
 * hard nofile 1000000
@@ -26,6 +36,7 @@ sed -i '/ip6/d'  /etc/hosts
 
 cat > /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
+vm.swappiness = 10
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 1000000
 fs.inotify.max_user_watches = 1000000
@@ -517,6 +528,7 @@ server {
   resolver 1.1.1.1 valid=600s;
   resolver_timeout 5s;
 
+  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-Robots-Tag none;
   add_header X-Download-Options noopen;
@@ -590,6 +602,7 @@ server {
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
 
+  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-Robots-Tag none;
   add_header X-Download-Options noopen;
@@ -672,6 +685,7 @@ server {
             # Before enabling Strict-Transport-Security headers please read
             # into this topic first.
             # add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;";
+            add_header X-Frame-Options SAMEORIGIN;
             add_header X-Content-Type-Options nosniff;
             add_header X-XSS-Protection "1; mode=block";
             add_header X-Robots-Tag none;
