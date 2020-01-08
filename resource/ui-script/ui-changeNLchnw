@@ -1,0 +1,15 @@
+#!/bin/bash
+read -d '' chnwl << EOF
+[
+{"address":"127.0.0.1","port":5390},
+{"address":"127.0.0.1","port":5370,"domains":["domain:baidu.com"]},
+{"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
+{"address":"127.0.0.1","port":5370,"domains":["geosite:cn"]}
+]
+EOF
+
+jq --argjson chnwl "$chnwl" '.dns.servers = $chnwl' /etc/vtrui/config.json > /etc/vtrui/temp.json
+
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
+systemctl restart vtrui

@@ -1,0 +1,5 @@
+#!/bin/bash
+crontab -l > ~/now.cron
+sed -i '/ddnsupdate/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
