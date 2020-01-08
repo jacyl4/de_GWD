@@ -1,4 +1,7 @@
 #!/bin/bash
+rm -rf /var/www/html/listb*
+rm -rf /var/www/html/listw*
+
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
@@ -313,9 +316,11 @@ systemctl enable vtrui > /dev/null 2>&1
 function installIptablesProxy(){
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
-ipset -X hosts
 ipset -X chnroute
+ipset -X hosts
 ipset -X lanip
+ipset -X listB
+ipset -X listW
 ipset -X listWlan
 
 lanip="0.0.0.0/8 \
@@ -374,13 +379,13 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport $(awk 'NR==2{print}' /var/www/html/WGaddress.txt) -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
-iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
@@ -417,8 +422,10 @@ iptables -F
 iptables -X
 
 ipset -F chnroute
-ipset -F lanip
 ipset -F hosts
+ipset -F lanip
+ipset -F listB
+ipset -F listW
 ipset -F listWlan
 
 ip route flush table 100
@@ -899,6 +906,9 @@ port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
+
+rm -rf /var/www/html/*
+rm -rf /var/www/html/ui-*
 
 cd ~
 
