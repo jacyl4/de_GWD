@@ -11,6 +11,6 @@ $txt = "$upstreamip\n";
 fwrite($staticip, $txt);
 fclose($staticip);
 
-shell_exec('sudo /usr/local/bin/ui-changestaticip');
+shell_exec('sudo /usr/local/bin/ui-changeStaticIP');
 ?>
 <?php }?>

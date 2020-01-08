@@ -72,12 +72,12 @@
           <span>DDNS & WireGuard</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="!nodeman.php">
+        <a class="nav-link" href="!nodeMAN.php">
           <i class="fas fa-fw fa-stream"></i>
           <span>节点管理</span></a>
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="!listbw.php">
+        <a class="nav-link" href="!listBW.php">
           <i class="fas fa-fw fa-th-list"></i>
           <span>黑白名单</span></a>
       </li>
@@ -160,11 +160,11 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 </span>
 
 <span class="float-right">
-<button type="button" class="btn btn-primary" onclick="submitlistbw()">应用</button>
+<button type="button" class="btn btn-primary" onclick="submitlistBW()">应用</button>
 </span>
 
 <script>
-function submitlistbw () {
+function submitlistBW () {
 listB=$("#listB").val();
 listW=$("#listW").val();
 listWlan=$("#listWlan").val();

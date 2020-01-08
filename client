@@ -714,9 +714,9 @@ mkdir -p /etc/wireguard
 /usr/local/bin/ui-wgchangekey >/dev/null 2>&1
 fi
 
-/usr/local/bin/ui-nodedthide >/dev/null 2>&1
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 /usr/local/bin/ui-nodenslookup >/dev/null 2>&1
-/usr/local/bin/ui-changedoh >/dev/null 2>&1
+/usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
 sed -i "/$doh/d" /etc/hosts
 }
@@ -869,7 +869,7 @@ blue "-------------------------------"
 updategwd(){
 source /etc/profile
 
-testdns=$(/usr/local/bin/ui-testdns)
+checkDNS=$(/usr/local/bin/ui-checkDNS)
 checkDHCP=$(/usr/local/bin/ui-checkDhcp)
 checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
 checkWG=$(/usr/local/bin/ui-checkWG)
@@ -900,10 +900,10 @@ installPihole
 
 postInstall
 
-if [[ $testdns = "GFWlist" ]]; then
-/usr/local/bin/ui-changegfwl
+if [[ $checkDNS = "GFWlist" ]]; then
+/usr/local/bin/ui-changeNLgfw
 else
-/usr/local/bin/ui-changechnwl
+/usr/local/bin/ui-changeNLchnw
 fi
 
 if [[ $checkDHCP = "on" ]]; then

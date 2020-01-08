@@ -11,6 +11,6 @@ $txt = "$DoH2\n";
 fwrite($dohtxt, $txt);
 fclose($dohtxt);
 
-shell_exec('sudo /usr/local/bin/ui-changedoh');
+shell_exec('sudo /usr/local/bin/ui-changeDOH');
 ?>
 <?php }?>

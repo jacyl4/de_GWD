@@ -17,6 +17,6 @@ $txt = "$v2path\n";
 fwrite($nodedtpre, $txt);
 fclose($nodedtpre);
 
-shell_exec('sudo /usr/local/bin/ui-changenodedt');
+shell_exec('sudo /usr/local/bin/ui-changeNodeDT');
 ?>
 <?php }?>

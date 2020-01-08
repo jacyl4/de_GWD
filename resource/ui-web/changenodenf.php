@@ -17,6 +17,6 @@ $txt = "$v2path\n";
 fwrite($nodenfpre, $txt);
 fclose($nodenfpre);
 
-shell_exec('sudo /usr/local/bin/ui-changenodenf');
+shell_exec('sudo /usr/local/bin/ui-changeNodeNF');
 ?>
 <?php }?>

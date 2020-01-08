@@ -10,6 +10,6 @@ $txt = "$hostscustomize\n";
 fwrite($hostscustomizetxt, $txt);
 fclose($hostscustomizetxt);
 
-exec('sudo /usr/local/bin/ui-hostssave');
+exec('sudo /usr/local/bin/ui-hostSave');
 ?>
 <?php }?>

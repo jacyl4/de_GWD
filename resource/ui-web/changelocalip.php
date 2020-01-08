@@ -8,6 +8,6 @@ $txt = "$localip\n";
 fwrite($localiptxt, $txt);
 fclose($localiptxt);
 
-shell_exec('sudo /usr/local/bin/ui-changelocalip');
+shell_exec('sudo /usr/local/bin/ui-changeLocalIP');
 ?>
 <?php }?>

@@ -1155,7 +1155,7 @@ blue "-----------------------------"
 
 
 
-changeStaticIp(){
+changeStaticIP(){
     green "========="
     green "Address"
     green "========="
@@ -1510,7 +1510,7 @@ fi
     start_menu
     ;;
     5)
-    changeStaticIp
+    changeStaticIP
     start_menu
     ;;
     6)

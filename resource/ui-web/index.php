@@ -72,12 +72,12 @@
           <span>DDNS & WireGuard</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="!nodeman.php">
+        <a class="nav-link" href="!nodeMAN.php">
           <i class="fas fa-fw fa-stream"></i>
           <span>节点管理</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="!listbw.php">
+        <a class="nav-link" href="!listBW.php">
           <i class="fas fa-fw fa-th-list"></i>
           <span>黑白名单</span></a>
       </li>
@@ -117,9 +117,9 @@
                 <div class="mr-5">联网状态</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <span id="testbaidu" class="float-left">
+                <span id="testBaidu" class="float-left">
                 </span>
-                <span id="testgoogle" class="float-right">
+                <span id="testGoogle" class="float-right">
                 </span>
               </a>
             </div>
@@ -134,7 +134,7 @@
                 <div class="mr-5">代理模式</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <span id="testdns" class="float-left"></span>
+                <span id="checkDNS" class="float-left"></span>
                 <button class="btn btn-light float-right" style="padding: 0.25rem 0.25rem;font-size: 0.7rem;line-height: 0.8;border-radius: 0.2rem;" onclick="proxyon()">重启进程</button>
               </a>
             </div>
@@ -511,23 +511,23 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 }
 
 function checklink(){
-$.get('testbaidu.php',function(data) {
+$.get('testBaidu.php',function(data) {
 var checklink1 = data;
 if ( $.trim(checklink1) == "ONLINE" ) {
-$('#testbaidu').text("✓ 国内线路畅通");
+$('#testBaidu').text("✓ 国内线路畅通");
 }
 else {
-$('#testbaidu').text("✗ 国内线路不通");
+$('#testBaidu').text("✗ 国内线路不通");
 }
 });
 
-$.get('testgoogle.php',function(data) {
+$.get('testGoogle.php',function(data) {
 var checklink2 = data;
 if ( $.trim(checklink2) == "ONLINE" ) {
-$('#testgoogle').text("✓ 国外线路畅通");
+$('#testGoogle').text("✓ 国外线路畅通");
 }
 else {
-$('#testgoogle').text("✗ 国外线路不通");
+$('#testGoogle').text("✗ 国外线路不通");
 }
 });
 }
@@ -558,42 +558,42 @@ $.get("ping9.php", function(data) { $('#ping9').text(data) });
 }
 
 function shownodedt(){
-$.get('nodedtswitch.php', {nodedtswitch:"nodedtshow"}, function(result){ location.reload(); });
+$.get('switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){ location.reload(); });
 }
 
 function hidenodedt(){
-$.get('nodedtswitch.php', {nodedtswitch:"nodedthide"}, function(result){ location.reload(); });
+$.get('switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){ location.reload(); });
 }
 
 function submitlocalip(){
 localiptxt=$('#nodedttext').val();
-$.get('changelocalip.php', {localip:localiptxt}, function(result){ });
+$.get('changeLocalIP.php', {localip:localiptxt}, function(result){ });
 }
 
 function chnwl(){
-$.get('changechnwl.php', function(result){ location.reload(); });
+$.get('changeNLchnw.php', function(result){ location.reload(); });
 }
 
 function gfwl(){
-$.get('changegfwl.php', function(result){ location.reload(); });
+$.get('changeNLgfw.php', function(result){ location.reload(); });
 }
 
 function submitdoh(){
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-$.get('changedoh.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
+$.get('changeDOH.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
 }
 
 function submithosts(){
 hostsdefault=$("#hostsdefault").val();
 hostscustomize=$("#hostscustomize").val();
-$.get("hostssave.php", {hostsdefault:hostsdefault, hostscustomize:hostscustomize}, function(result){ location.reload(); });
+$.get("hostSave.php", {hostsdefault:hostsdefault, hostscustomize:hostscustomize}, function(result){ location.reload(); });
 }
 
 function submitstaticip(){
 staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
-$.get('changestaticip.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
+$.get('changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
 alert("本机已开始重新启动");
 }
 
@@ -622,25 +622,25 @@ nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>�
 nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
 
-function nfswitch1 () {$('#nodenfshow').html(node1); $.get("changenodenf.php", {nodenfnum:"1"}, function(result){ })};
-function nfswitch2 () {$('#nodenfshow').html(node2); $.get("changenodenf.php", {nodenfnum:"2"}, function(result){ })};
-function nfswitch3 () {$('#nodenfshow').html(node3); $.get("changenodenf.php", {nodenfnum:"3"}, function(result){ })};
-function nfswitch4 () {$('#nodenfshow').html(node4); $.get("changenodenf.php", {nodenfnum:"4"}, function(result){ })};
-function nfswitch5 () {$('#nodenfshow').html(node5); $.get("changenodenf.php", {nodenfnum:"5"}, function(result){ })};
-function nfswitch6 () {$('#nodenfshow').html(node6); $.get("changenodenf.php", {nodenfnum:"6"}, function(result){ })};
-function nfswitch7 () {$('#nodenfshow').html(node7); $.get("changenodenf.php", {nodenfnum:"7"}, function(result){ })};
-function nfswitch8 () {$('#nodenfshow').html(node8); $.get("changenodenf.php", {nodenfnum:"8"}, function(result){ })};
-function nfswitch9 () {$('#nodenfshow').html(node9); $.get("changenodenf.php", {nodenfnum:"9"}, function(result){ })};
+function nfswitch1 () {$('#nodenfshow').html(node1); $.get("changeNodeNF.php", {nodenfnum:"1"}, function(result){ })};
+function nfswitch2 () {$('#nodenfshow').html(node2); $.get("changeNodeNF.php", {nodenfnum:"2"}, function(result){ })};
+function nfswitch3 () {$('#nodenfshow').html(node3); $.get("changeNodeNF.php", {nodenfnum:"3"}, function(result){ })};
+function nfswitch4 () {$('#nodenfshow').html(node4); $.get("changeNodeNF.php", {nodenfnum:"4"}, function(result){ })};
+function nfswitch5 () {$('#nodenfshow').html(node5); $.get("changeNodeNF.php", {nodenfnum:"5"}, function(result){ })};
+function nfswitch6 () {$('#nodenfshow').html(node6); $.get("changeNodeNF.php", {nodenfnum:"6"}, function(result){ })};
+function nfswitch7 () {$('#nodenfshow').html(node7); $.get("changeNodeNF.php", {nodenfnum:"7"}, function(result){ })};
+function nfswitch8 () {$('#nodenfshow').html(node8); $.get("changeNodeNF.php", {nodenfnum:"8"}, function(result){ })};
+function nfswitch9 () {$('#nodenfshow').html(node9); $.get("changeNodeNF.php", {nodenfnum:"9"}, function(result){ })};
 
-function dtswitch1 () {$('#nodedtshow').html(node1); $.get("changenodedt.php", {nodedtnum:"1"}, function(result){ })};
-function dtswitch2 () {$('#nodedtshow').html(node2); $.get("changenodedt.php", {nodedtnum:"2"}, function(result){ })};
-function dtswitch3 () {$('#nodedtshow').html(node3); $.get("changenodedt.php", {nodedtnum:"3"}, function(result){ })};
-function dtswitch4 () {$('#nodedtshow').html(node4); $.get("changenodedt.php", {nodedtnum:"4"}, function(result){ })};
-function dtswitch5 () {$('#nodedtshow').html(node5); $.get("changenodedt.php", {nodedtnum:"5"}, function(result){ })};
-function dtswitch6 () {$('#nodedtshow').html(node6); $.get("changenodedt.php", {nodedtnum:"6"}, function(result){ })};
-function dtswitch7 () {$('#nodedtshow').html(node7); $.get("changenodedt.php", {nodedtnum:"7"}, function(result){ })};
-function dtswitch8 () {$('#nodedtshow').html(node8); $.get("changenodedt.php", {nodedtnum:"8"}, function(result){ })};
-function dtswitch9 () {$('#nodedtshow').html(node9); $.get("changenodedt.php", {nodedtnum:"9"}, function(result){ })};
+function dtswitch1 () {$('#nodedtshow').html(node1); $.get("changeNodeDT.php", {nodedtnum:"1"}, function(result){ })};
+function dtswitch2 () {$('#nodedtshow').html(node2); $.get("changeNodeDT.php", {nodedtnum:"2"}, function(result){ })};
+function dtswitch3 () {$('#nodedtshow').html(node3); $.get("changeNodeDT.php", {nodedtnum:"3"}, function(result){ })};
+function dtswitch4 () {$('#nodedtshow').html(node4); $.get("changeNodeDT.php", {nodedtnum:"4"}, function(result){ })};
+function dtswitch5 () {$('#nodedtshow').html(node5); $.get("changeNodeDT.php", {nodedtnum:"5"}, function(result){ })};
+function dtswitch6 () {$('#nodedtshow').html(node6); $.get("changeNodeDT.php", {nodedtnum:"6"}, function(result){ })};
+function dtswitch7 () {$('#nodedtshow').html(node7); $.get("changeNodeDT.php", {nodedtnum:"7"}, function(result){ })};
+function dtswitch8 () {$('#nodedtshow').html(node8); $.get("changeNodeDT.php", {nodedtnum:"8"}, function(result){ })};
+function dtswitch9 () {$('#nodedtshow').html(node9); $.get("changeNodeDT.php", {nodedtnum:"9"}, function(result){ })};
 
 function switch1 () {
 $('#checkNode2').html(nodestatusf);
@@ -652,7 +652,7 @@ $('#checkNode7').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode1').html(nodestatust);
-$.get("changenode.php", {nodenum:"1"}, function(result){});
+$.get("changeNode.php", {nodenum:"1"}, function(result){});
 };
 function switch2 () {
 $('#checkNode1').html(nodestatusf);
@@ -664,7 +664,7 @@ $('#checkNode7').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode2').html(nodestatust);
-$.get("changenode.php", {nodenum:"2"}, function(result){});
+$.get("changeNode.php", {nodenum:"2"}, function(result){});
 };
 function switch3 () {
 $('#checkNode1').html(nodestatusf);
@@ -676,7 +676,7 @@ $('#checkNode7').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode3').html(nodestatust);
-$.get("changenode.php", {nodenum:"3"}, function(result){});
+$.get("changeNode.php", {nodenum:"3"}, function(result){});
 };
 function switch4 () {
 $('#checkNode1').html(nodestatusf);
@@ -688,7 +688,7 @@ $('#checkNode7').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode4').html(nodestatust);
-$.get("changenode.php", {nodenum:"4"}, function(result){});
+$.get("changeNode.php", {nodenum:"4"}, function(result){});
 };
 function switch5 () {
 $('#checkNode1').html(nodestatusf);
@@ -700,7 +700,7 @@ $('#checkNode7').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode5').html(nodestatust);
-$.get("changenode.php", {nodenum:"5"}, function(result){});
+$.get("changeNode.php", {nodenum:"5"}, function(result){});
 };
 function switch6 () {
 $('#checkNode1').html(nodestatusf);
@@ -712,7 +712,7 @@ $('#checkNode7').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode6').html(nodestatust);
-$.get("changenode.php", {nodenum:"6"}, function(result){});
+$.get("changeNode.php", {nodenum:"6"}, function(result){});
 };
 function switch7 () {
 $('#checkNode1').html(nodestatusf);
@@ -724,7 +724,7 @@ $('#checkNode6').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode7').html(nodestatust);
-$.get("changenode.php", {nodenum:"7"}, function(result){});
+$.get("changeNode.php", {nodenum:"7"}, function(result){});
 };
 function switch8 () {
 $('#checkNode1').html(nodestatusf);
@@ -736,7 +736,7 @@ $('#checkNode6').html(nodestatusf);
 $('#checkNode7').html(nodestatusf);
 $('#checkNode9').html(nodestatusf);
 $('#checkNode8').html(nodestatust);
-$.get("changenode.php", {nodenum:"8"}, function(result){});
+$.get("changeNode.php", {nodenum:"8"}, function(result){});
 };
 function switch9 () {
 $('#checkNode1').html(nodestatusf);
@@ -748,7 +748,7 @@ $('#checkNode6').html(nodestatusf);
 $('#checkNode7').html(nodestatusf);
 $('#checkNode8').html(nodestatusf);
 $('#checkNode9').html(nodestatust);
-$.get("changenode.php", {nodenum:"9"}, function(result){});
+$.get("changeNode.php", {nodenum:"9"}, function(result){});
 };
 
 window.onload = function() {
@@ -819,7 +819,7 @@ $('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
 };
 });
 
-$.get('testdns.php', function(data) { $('#testdns').text(data) });
+$.get('checkDNS.php', function(data) { $('#checkDNS').text(data) });
 
 setInterval(function() {
 checklink();
