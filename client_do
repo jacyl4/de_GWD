@@ -841,7 +841,7 @@ rm -rf /var/log/*.gz
 rm -rf /tmp/nodecheck*
 rm -rf /var/www/html/log.log
 
-/usr/local/bin/ui-listBWresolve
+/usr/local/bin/ui-listBWresolve > /dev/null 2>&1
 EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
