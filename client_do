@@ -1,6 +1,7 @@
 #!/bin/bash
 rm -rf /var/www/html/listb*
 rm -rf /var/www/html/listw*
+rm -rf /var/www/html/nodecheck*
 
 clear
 function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
