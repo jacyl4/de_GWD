@@ -242,7 +242,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==1{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping1" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch1()">切换</button></td>
-                    <td id="nodecheck1"></td>
+                    <td id="checkNode1"></td>
                   </tr>
                   <tr>
                     <td>2</td>
@@ -250,7 +250,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==2{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping2" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch2()">切换</button></td>
-                    <td id="nodecheck2"></td>
+                    <td id="checkNode2"></td>
                   </tr>
                   <tr>
                     <td>3</td>
@@ -258,7 +258,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==3{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping3" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch3()">切换</button></td>
-                    <td id="nodecheck3"></td>
+                    <td id="checkNode3"></td>
                   </tr>
                   <tr>
                     <td>4</td>
@@ -266,7 +266,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==4{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping4" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch4()">切换</button></td>
-                    <td id="nodecheck4"></td>
+                    <td id="checkNode4"></td>
                   </tr>
                   <tr>
                     <td>5</td>
@@ -274,7 +274,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==5{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping5" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch5()">切换</button></td>
-                    <td id="nodecheck5"></td>
+                    <td id="checkNode5"></td>
                   </tr>
                   <tr>
                     <td>6</td>
@@ -282,7 +282,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==6{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping6" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch6()">切换</button></td>
-                    <td id="nodecheck6"></td>
+                    <td id="checkNode6"></td>
                   </tr>
                   <tr>
                     <td>7</td>
@@ -290,7 +290,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==7{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping7" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch7()">切换</button></td>
-                    <td id="nodecheck7"></td>
+                    <td id="checkNode7"></td>
                   </tr>
                   <tr>
                     <td>8</td>
@@ -298,7 +298,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==8{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping8" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch8()">切换</button></td>
-                    <td id="nodecheck8"></td>
+                    <td id="checkNode8"></td>
                   </tr>
                   <tr>
                     <td>9</td>
@@ -306,7 +306,7 @@
                     <td><span class="align-middle"><?php echo exec("awk 'NR==9{print}' /var/www/html/domain.txt"); ?></span></td>
                     <td><span id="ping9" class='mb-0 text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch9()">切换</button></td>
-                    <td id="nodecheck9"></td>
+                    <td id="checkNode9"></td>
                   </tr>
                 </tbody>
               </table>
@@ -617,7 +617,7 @@ node7 = "<?php echo exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?>";
 node8 = "<?php echo exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?>";
 node9 = "<?php echo exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?>";
 
-nodenum = "nodecheck<?php echo exec('/usr/local/bin/ui-nodecheck');?>" ;
+nodenum = "checkNode<?php echo exec('/usr/local/bin/ui-checkNode');?>" ;
 nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
 nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
@@ -643,111 +643,111 @@ function dtswitch8 () {$('#nodedtshow').html(node8); $.get("changenodedt.php", {
 function dtswitch9 () {$('#nodedtshow').html(node9); $.get("changenodedt.php", {nodedtnum:"9"}, function(result){ })};
 
 function switch1 () {
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck1').html(nodestatust);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode1').html(nodestatust);
 $.get("changenode.php", {nodenum:"1"}, function(result){});
 };
 function switch2 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck2').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode2').html(nodestatust);
 $.get("changenode.php", {nodenum:"2"}, function(result){});
 };
 function switch3 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck3').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode3').html(nodestatust);
 $.get("changenode.php", {nodenum:"3"}, function(result){});
 };
 function switch4 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck4').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode4').html(nodestatust);
 $.get("changenode.php", {nodenum:"4"}, function(result){});
 };
 function switch5 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck5').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode5').html(nodestatust);
 $.get("changenode.php", {nodenum:"5"}, function(result){});
 };
 function switch6 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck6').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode6').html(nodestatust);
 $.get("changenode.php", {nodenum:"6"}, function(result){});
 };
 function switch7 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck7').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode7').html(nodestatust);
 $.get("changenode.php", {nodenum:"7"}, function(result){});
 };
 function switch8 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
-$('#nodecheck8').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
+$('#checkNode8').html(nodestatust);
 $.get("changenode.php", {nodenum:"8"}, function(result){});
 };
 function switch9 () {
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatust);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatust);
 $.get("changenode.php", {nodenum:"9"}, function(result){});
 };
 
@@ -755,8 +755,8 @@ window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
 
-$.get("nodechecknf.php", function(data) { $('#nodenfshow').html(data) });
-$.get("nodecheckdt.php", function(data) { $('#nodedtshow').html(data) });
+$.get("checkNodeNF.php", function(data) { $('#nodenfshow').html(data) });
+$.get("checkNodeDT.php", function(data) { $('#nodedtshow').html(data) });
 
 $('#nodenfshow1').text(node1);
 $('#nodenfshow2').text(node2);
@@ -788,15 +788,15 @@ $('#nodeshow7').text(node7);
 $('#nodeshow8').text(node8);
 $('#nodeshow9').text(node9);
 
-$('#nodecheck1').html(nodestatusf);
-$('#nodecheck2').html(nodestatusf);
-$('#nodecheck3').html(nodestatusf);
-$('#nodecheck4').html(nodestatusf);
-$('#nodecheck5').html(nodestatusf);
-$('#nodecheck6').html(nodestatusf);
-$('#nodecheck7').html(nodestatusf);
-$('#nodecheck8').html(nodestatusf);
-$('#nodecheck9').html(nodestatusf);
+$('#checkNode1').html(nodestatusf);
+$('#checkNode2').html(nodestatusf);
+$('#checkNode3').html(nodestatusf);
+$('#checkNode4').html(nodestatusf);
+$('#checkNode5').html(nodestatusf);
+$('#checkNode6').html(nodestatusf);
+$('#checkNode7').html(nodestatusf);
+$('#checkNode8').html(nodestatusf);
+$('#checkNode9').html(nodestatusf);
 
 $("#"+nodenum).html(nodestatust);
 
