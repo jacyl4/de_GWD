@@ -124,7 +124,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           （走国外解析）<br>
             </span>
           </div>
-            <textarea id="listb" class="form-control" aria-label="listb" rows="11"><?php echo shell_exec("cat /var/www/html/listb.txt"); ?></textarea>
+            <textarea id="listB" class="form-control" aria-label="listB" rows="11"><?php echo shell_exec("cat /var/www/html/listB.txt"); ?></textarea>
           </div>
           </div>
 
@@ -136,7 +136,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           （走国内解析）<br>
             </span>
           </div>
-            <textarea id="listw" class="form-control" aria-label="listw" rows="11"><?php echo shell_exec("cat /var/www/html/listw.txt"); ?></textarea>
+            <textarea id="listW" class="form-control" aria-label="listW" rows="11"><?php echo shell_exec("cat /var/www/html/listW.txt"); ?></textarea>
           </div>
           </div>
 
@@ -149,7 +149,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             （走国内线路）<br>
             </span>
           </div>
-            <textarea id="listwlan" class="form-control" aria-label="listwlan" rows="11"><?php echo shell_exec("cat /var/www/html/listwlan.txt"); ?></textarea>
+            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="11"><?php echo shell_exec("cat /var/www/html/listWlan.txt"); ?></textarea>
           </div>
           </div>
 
@@ -165,10 +165,10 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 
 <script>
 function submitlistbw () {
-listb=$("#listb").val();
-listw=$("#listw").val();
-listwlan=$("#listwlan").val();
-$.get("listbwsave.php", {listb:listb, listw:listw, listwlan:listwlan}, function(result){ location.reload(); });
+listB=$("#listB").val();
+listW=$("#listW").val();
+listWlan=$("#listWlan").val();
+$.get("listBWsave.php", {listB:listB, listW:listW, listWlan:listWlan}, function(result){ location.reload(); });
 alert("黑白名单已提交");
 }
 </script>

@@ -316,7 +316,7 @@ cat > /usr/local/bin/iptables-proxy-up << "EOF"
 ipset -X hosts
 ipset -X chnroute
 ipset -X lanip
-ipset -X listwlan
+ipset -X listWlan
 
 lanip="0.0.0.0/8 \
 100.64.0.0/10 \
@@ -345,9 +345,19 @@ for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
   ipset add hosts $hosts
 done
 
-ipset -N listwlan hash:net maxelem 65535
-for iplistwlan in $(cat /var/www/html/listwlan.txt); do
-  ipset add listwlan $iplistwlan
+ipset -N listB hash:net maxelem 65535
+for iplistB in $(cat /var/www/html/listBip.txt); do
+  ipset add listB $iplistB
+done
+
+ipset -N listW hash:net maxelem 65535
+for iplistW in $(cat /var/www/html/listWip.txt); do
+  ipset add listW $iplistW
+done
+
+ipset -N listWlan hash:net maxelem 65535
+for iplistWlan in $(cat /var/www/html/listWlan.txt); do
+  ipset add listWlan $iplistWlan
 done
 
 ip rule add fwmark 0x9 table 100 pref 100
@@ -363,11 +373,14 @@ iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport $(awk 'NR==2{print}' /var/www/html/WGaddress.txt) -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listwlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
+
+iptables -t mangle -A V2PROXY -m set --match-set listb dst -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
@@ -406,7 +419,7 @@ iptables -X
 ipset -F chnroute
 ipset -F lanip
 ipset -F hosts
-ipset -F listwlan
+ipset -F listWlan
 
 ip route flush table 100
 ip rule del fwmark 0x9
@@ -765,14 +778,39 @@ docker restart nginx
 
 
 function postInstall(){
-cat > /usr/local/bin/updateGWD << "EOF"
+svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
+svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
+
+rsync -r ~/ui-script/* /usr/local/bin
+rsync -r ~/ui-web/* /var/www/html
+rm -rf ~/ui-*
+
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+mv -f ~/version.php /var/www/html/version.php
+
+cd ~
+wget -qc -O ~/ariaNG.zip $ariaNGaddr
+unzip ariaNG.zip
+
+mkdir -p /var/www/html/ariang
+mv -f index.html /var/www/html/ariang
+rm -rf ariaNG.zip
+rm -rf index.html
+rm -rf LICENSE
+
+mkdir -p /var/www/html/restore
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
+chmod +x /usr/local/bin/*
+
+
+cat > /usr/local/bin/Q4am << "EOF"
 #!/bin/bash
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
-wget https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+wget -qc https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
+wget -qc https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+curl -sL 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
 mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
-
-curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
 mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
 
 {
@@ -788,65 +826,42 @@ for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
   ipset add chnroute $ipchnroute
 done
 EOF
-chmod +x /usr/local/bin/updateGWD
-/usr/local/bin/updateGWD
+chmod +x /usr/local/bin/Q4am
+/usr/local/bin/Q4am
 
-cat > /usr/local/bin/clearcache << "EOF"
+cat > /usr/local/bin/Q4H << "EOF"
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-rm -rf ~/client_do
+rm -rf ~/client*
 rm -rf /var/log/*1*
 rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
 rm -rf /tmp/nodecheck*
 rm -rf /var/www/html/log.log
+
+/usr/local/bin/ui-ui-listBWresolve
 EOF
-chmod +x /usr/local/bin/clearcache
-/usr/local/bin/clearcache
+chmod +x /usr/local/bin/Q4H
+/usr/local/bin/Q4H
 
 cat > ~/now.cron << EOF
-0 4 * * * /usr/local/bin/updateGWD
-0 */4 * * * /usr/local/bin/clearcache
+0 4 * * * /usr/local/bin/Q4am
+0 */4 * * * /usr/local/bin/Q4H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
-
-rsync -r ~/ui-script/* /usr/local/bin
-rsync -r ~/ui-web/* /var/www/html
-rm -rf ~/ui-*
-
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
-mv -f ~/version.php /var/www/html/version.php
-
-cd ~
-wget -q -O ~/ariaNG.zip $ariaNGaddr
-unzip ariaNG.zip
-
-mkdir -p /var/www/html/ariang
-mv -f index.html /var/www/html/ariang
-
-rm -rf ariaNG.zip
-rm -rf index.html
-rm -rf LICENSE
-
-mkdir -p /var/www/html/restore
-chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
-chmod +x /usr/local/bin/*
-
-/usr/local/bin/ui-nodedthide >/dev/null 2>&1
-/usr/local/bin/ui-nodenslookup >/dev/null 2>&1
-/usr/local/bin/ui-changedoh >/dev/null 2>&1
 
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
 mkdir -p /etc/wireguard
 /usr/local/bin/ui-wgchangekey >/dev/null 2>&1
 fi
+
+/usr/local/bin/ui-nodedthide >/dev/null 2>&1
+/usr/local/bin/ui-nodenslookup >/dev/null 2>&1
+/usr/local/bin/ui-changedoh >/dev/null 2>&1
 
 sed -i "/$doh/d" /etc/hosts
 }
