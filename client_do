@@ -693,9 +693,6 @@ cat > /etc/pihole/dns-servers.conf << EOF
  DoH;127.0.0.1#5380
 EOF
 
-sed -i '/PIHOLE_DNS/d' /etc/pihole/setupVars.conf
-sed -i '/IPV4_ADDRESS=/a\PIHOLE_DNS_1=127.0.0.1#5380' /etc/pihole/setupVars.conf
-
 cat > /etc/pihole/pihole-FTL.conf << EOF
 PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
