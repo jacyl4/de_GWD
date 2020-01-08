@@ -21,6 +21,7 @@ fwrite($listWlantxt, $txt);
 fclose($listWlantxt);
 
 exec('sudo /usr/local/bin/ui-listBW');
+exec('sudo /usr/local/bin/ui-listBWresolve');
 exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>
