@@ -1,6 +1,6 @@
 #!/bin/bash
-echo "" > /var/www/html/listBip.txt
-echo "" > /var/www/html/listWip.txt
+sed -i '1,$d' /var/www/html/listBip.txt
+sed -i '1,$d' /var/www/html/listWip.txt
 
 for listB in $(cat /var/www/html/listB.txt); do
   echo $(nslookup -port=5380 $listB | awk '/Address/ {print$2}' | sed '1d') >> /var/www/html/listBip.txt
