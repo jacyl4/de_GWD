@@ -865,7 +865,7 @@ rm -rf ~/now.cron
 
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
 mkdir -p /etc/wireguard
-/usr/local/bin/ui-wgchangekey >/dev/null 2>&1
+/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
 fi
 
 /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
