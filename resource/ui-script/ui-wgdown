@@ -1,5 +1,0 @@
-#!/bin/bash
-systemctl disable --now wg-quick@wg0
-
-rm -rf /etc/wireguard/wg0.conf
-rm -rf /etc/wireguard/client*.conf
