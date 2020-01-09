@@ -4,10 +4,10 @@ rm -rf /var/www/html/listw*
 rm -rf /var/www/html/nodecheck*
 
 clear
-function blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
-function yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
-function green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
-function red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
@@ -30,7 +30,7 @@ statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 
 
-function preInstall(){
+preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
@@ -110,7 +110,7 @@ hwclock -w
 
 
 
-function installDOH(){
+installDOH(){
 cd ~
 doh=$domain
 domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
@@ -201,7 +201,7 @@ systemctl restart doh-client > /dev/null 2>&1
 
 
 
-function installV2ray(){
+installV2ray(){
 cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
@@ -341,7 +341,7 @@ systemctl enable vtrui > /dev/null 2>&1
 
 
 
-function installIptablesProxy(){
+installIptablesProxy(){
 cat > /usr/local/bin/iptables-proxy-up << "EOF"
 #!/bin/bash
 ipset -X chnroute
@@ -503,7 +503,7 @@ echo
 
 
 
-function installWG(){
+installWG(){
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
 deb http://deb.debian.org/debian $osRelease main
@@ -526,7 +526,7 @@ fi
 
 
 
-function installPihole(){
+installPihole(){
 if [[ $architecture = "arm64" ]]; then
   wget -O ~/smartdns.deb $smartdns_arm64
 elif [[ $architecture = "amd64" ]]; then
@@ -635,7 +635,7 @@ pihole -f
 
 
 
-function postInstall(){
+postInstall(){
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
