@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ $(cat /etc/vtrui/config.json) =~ "category-ads" ]]; then
+echo "on"
+fi
