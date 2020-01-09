@@ -240,7 +240,7 @@
                     <td>1</td>
                     <td><span id="nodeshow1" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==1{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping1" class='text-success'></span></td>
+                    <td><span id="ping1" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch1()">切换</button></td>
                     <td id="checkNode1"></td>
                   </tr>
@@ -248,7 +248,7 @@
                     <td>2</td>
                     <td><span id="nodeshow2" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==2{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping2" class='text-success'></span></td>
+                    <td><span id="ping2" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch2()">切换</button></td>
                     <td id="checkNode2"></td>
                   </tr>
@@ -256,7 +256,7 @@
                     <td>3</td>
                     <td><span id="nodeshow3" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==3{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping3" class='mb-0 text-success'></span></td>
+                    <td><span id="ping3" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch3()">切换</button></td>
                     <td id="checkNode3"></td>
                   </tr>
@@ -264,7 +264,7 @@
                     <td>4</td>
                     <td><span id="nodeshow4" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==4{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping4" class='mb-0 text-success'></span></td>
+                    <td><span id="ping4" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch4()">切换</button></td>
                     <td id="checkNode4"></td>
                   </tr>
@@ -272,7 +272,7 @@
                     <td>5</td>
                     <td><span id="nodeshow5" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==5{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping5" class='mb-0 text-success'></span></td>
+                    <td><span id="ping5" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch5()">切换</button></td>
                     <td id="checkNode5"></td>
                   </tr>
@@ -280,7 +280,7 @@
                     <td>6</td>
                     <td><span id="nodeshow6" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==6{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping6" class='mb-0 text-success'></span></td>
+                    <td><span id="ping6" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch6()">切换</button></td>
                     <td id="checkNode6"></td>
                   </tr>
@@ -288,7 +288,7 @@
                     <td>7</td>
                     <td><span id="nodeshow7" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==7{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping7" class='mb-0 text-success'></span></td>
+                    <td><span id="ping7" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch7()">切换</button></td>
                     <td id="checkNode7"></td>
                   </tr>
@@ -296,7 +296,7 @@
                     <td>8</td>
                     <td><span id="nodeshow8" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==8{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping8" class='mb-0 text-success'></span></td>
+                    <td><span id="ping8" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch8()">切换</button></td>
                     <td id="checkNode8"></td>
                   </tr>
@@ -304,7 +304,7 @@
                     <td>9</td>
                     <td><span id="nodeshow9" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==9{print}' /var/www/html/domain.txt"); ?></span></td>
-                    <td><span id="ping9" class='mb-0 text-success'></span></td>
+                    <td><span id="ping9" class='text-success'>00.0</span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch9()">切换</button></td>
                     <td id="checkNode9"></td>
                   </tr>
@@ -406,7 +406,7 @@
               <div class="input-group">
                 <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
                 <div class="input-group-append">
-                  <span class="input-group-text text-success" id="ping10"></span> <span class="input-group-text text-secondary">ms</span>
+                  <span class="input-group-text text-success" id="ping10">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
               </div>
@@ -414,7 +414,7 @@
               <div class="input-group">
                 <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
                 <div class="input-group-append">
-                  <span class="input-group-text text-success" id="ping11"></span> <span class="input-group-text text-secondary">ms</span>
+                  <span class="input-group-text text-success" id="ping11">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
               </div>
