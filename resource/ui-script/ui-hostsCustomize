@@ -1,0 +1,13 @@
+#!/bin/bash
+hostsCustomizeKey=$(awk '{print $1}' /var/www/html/hostsCustomize.txt)
+
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json > /tmp/hostsCustomize
+
+{
+for key in $hostsCustomizeKey; do
+	awk "/$key/" /tmp/hostsCustomize
+done 
+} > /tmp/hostsCustomize2
+
+cat /tmp/hostsCustomize2
+rm -rf /tmp/hostsCustomize*
