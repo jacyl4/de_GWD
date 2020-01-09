@@ -197,7 +197,28 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 <span class="float-right">
 <button type="button" class="btn btn-primary" onclick="savenode()">保存</button>
 </span>
+            </div>
+          </div>
+        </div>
 
+
+      </div>
+      <!-- /.container-fluid -->
+
+      <!-- Sticky Footer -->
+      <footer class="sticky-footer">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright © de_GWD by JacyL4 2020</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+    <!-- /.content-wrapper -->
+
+  </div>
+  <!-- /#wrapper -->
 <script>
 function savenode() {
 nodename1=$("#nodename1").val();
@@ -283,30 +304,7 @@ path9:path9,
 }, function(result){ location.reload(); });
 alert("节点信息已保存");
 }
-</script>
-            </div>
-          </div>
-        </div>
 
-
-      </div>
-      <!-- /.container-fluid -->
-
-      <!-- Sticky Footer -->
-      <footer class="sticky-footer">
-        <div class="container my-auto">
-          <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by JacyL4 2020</span>
-          </div>
-        </div>
-      </footer>
-
-    </div>
-    <!-- /.content-wrapper -->
-
-  </div>
-  <!-- /#wrapper -->
-<script> 
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");

@@ -129,8 +129,8 @@ fwrite($pathtxt, $txt8);
 fwrite($pathtxt, $txt9);
 fclose($pathtxt);
 
-shell_exec('sudo /usr/local/bin/ui-nodenslookup');
+shell_exec('sudo /usr/local/bin/ui-nodeResolve');
 
-shell_exec('sudo systemctl restart iptables-proxy');
+shell_exec('sudo /usr/local/bin/ui-changeDOH');
 ?>
 <?php }?>

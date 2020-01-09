@@ -715,7 +715,7 @@ mkdir -p /etc/wireguard
 fi
 
 /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
-/usr/local/bin/ui-nodenslookup >/dev/null 2>&1
+/usr/local/bin/ui-nodeResolve >/dev/null 2>&1
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
 sed -i "/$doh/d" /etc/hosts
