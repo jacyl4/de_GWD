@@ -1,4 +1,0 @@
-#!/bin/bash
-jq 'del(.dns.hosts["geosite:category-ads"])' /etc/vtrui/config.json | jq 'del(.dns.hosts["ext:h2y.dat:ad"])' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
-systemctl restart vtrui
