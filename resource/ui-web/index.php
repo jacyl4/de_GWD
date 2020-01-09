@@ -403,16 +403,20 @@
           <div class="form-group">
             <div class="form-row">
               <div class="col-md-6 my-1">
-                <div class="form-label-group">
-                  <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
-                  <label for="DoH1">DoH1</label>
+              <div class="input-group">
+                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-success" id="ping10"></span> <span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
+              </div>
               <div class="col-md-6 my-1">
-                <div class="form-label-group">
-                  <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
-                  <label for="DoH2">DoH2</label>
+              <div class="input-group">
+                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-success" id="ping11"></span> <span class="input-group-text text-secondary">ms</span>
                 </div>
+              </div>
               </div>
             </div>
           </div>
@@ -437,15 +441,19 @@
           <div class="form-group">
             <div class="form-row">
               <div class="col-md-6 my-1">
-                <div class="form-label-group">
+                <div class="input-group">
                   <input type="text" id="ipstart" class="form-control" placeholder="起始IP" required="required" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/dhcp.txt"); ?>">
-                  <label for="ipstart">起始IP</label>
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">起始</span>
+                </div>
                 </div>
               </div>
               <div class="col-md-6 my-1">
-                <div class="form-label-group">
+                <div class="input-group">
                   <input type="text" id="ipend" class="form-control" placeholder="结束IP" required="required" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/dhcp.txt"); ?>">
-                  <label for="ipend">结束IP</label>
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">结束</span>
+                </div>
                 </div>
               </div>
             </div>
@@ -467,15 +475,19 @@
           <div class="form-group">
             <div class="form-row">
               <div class="col-md-6 my-1">
-                <div class="form-label-group">
+                <div class="input-group">
                   <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
-                  <label for="localip">本机地址</label>
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">本机</span>
+                </div>
                 </div>
               </div>
               <div class="col-md-6 my-1">
-                <div class="form-label-group">
+                <div class="input-group">
                   <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("sudo route -n |  awk 'NR==3{print $2}'"); ?>">
-                  <label for="upstreamip">上级地址</label>
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">上级</span>
+                </div>
                 </div>
               </div>
             </div>
@@ -554,6 +566,8 @@ $.get("ping6.php", function(data) { $('#ping6').text(data) });
 $.get("ping7.php", function(data) { $('#ping7').text(data) });
 $.get("ping8.php", function(data) { $('#ping8').text(data) });
 $.get("ping9.php", function(data) { $('#ping9').text(data) });
+$.get("ping10.php", function(data) { $('#ping10').text(data) });
+$.get("ping11.php", function(data) { $('#ping11').text(data) });
 }
 
 function v2adADD(){
