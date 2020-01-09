@@ -100,6 +100,9 @@ fi
 systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 rm -rf /run/resolvconf/interface/systemd-resolved
+
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 }
 
 
@@ -196,9 +199,6 @@ systemctl restart doh-client > /dev/null 2>&1
 
 
 function installV2ray(){
-date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
 cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
