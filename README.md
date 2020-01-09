@@ -1,7 +1,7 @@
 [![telegram](https://i.loli.net/2019/10/23/Ol9PX7io5b3hZsz.png)](https://t.me/de_GWD)
 
 
-![de_GWD](https://i.loli.net/2020/01/06/kDZ5Qc6EXhnYbSj.png)
+![de_GWD](https://i.loli.net/2020/01/10/MujJkHcXd3697vU.png)
 
 ## Server：
 
