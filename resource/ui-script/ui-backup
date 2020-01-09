@@ -9,6 +9,9 @@ cp -f /var/www/html/path.txt ~/de_GWD_backup
 cp -f /var/www/html/hostsCustomize.txt ~/de_GWD_backup
 cp -f /var/www/html/doh.txt ~/de_GWD_backup
 cp -f /var/www/html/ddnsCF.txt ~/de_GWD_backup
+cp -f /var/www/html/listB.txt ~/de_GWD_backup
+cp -f /var/www/html/listW.txt ~/de_GWD_backup
+cp -f /var/www/html/listWlan.txt ~/de_GWD_backup
 cp -f /var/www/html/WGaddress.txt ~/de_GWD_backup
 cp -f /var/www/html/WGmark.txt ~/de_GWD_backup
 cp -f /etc/wireguard/*key* ~/de_GWD_backup
