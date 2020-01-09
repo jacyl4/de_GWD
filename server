@@ -747,11 +747,8 @@ function postInstall(){
 cat > /usr/local/bin/autoUpdate << "EOF"
 #!/bin/bash
 wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
-
 sed -i '$d' ~/update
-
 echo "updateGWD" >>  ~/update
-
 chmod +x ~/update
 ~/update
 
