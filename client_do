@@ -1073,7 +1073,7 @@ if [[ $checkDHCP = "on" ]]; then
 fi
 
 if [[ $checkDDNScf = "on" ]]; then
-/usr/local/bin/ui-ddnsUpdateIPCF
+/usr/local/bin/ui-ddnsUpdateOnCF
 fi
 
 if [[ $checkWG = "on" ]]; then
