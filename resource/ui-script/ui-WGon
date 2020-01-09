@@ -6,7 +6,7 @@ WGaddressport=$(awk 'NR==2{print}' /var/www/html/WGaddress.txt)
 cat > /etc/wireguard/wg0.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/sprivatekey)
-Address = 172.16.66.1/24
+Address = 172.16.66.1/32
 ListenPort = $WGaddressport
 DNS = 172.16.66.1
 MTU = 1420
@@ -51,7 +51,7 @@ chmod 600 /etc/wireguard/wg0.conf
 cat > /etc/wireguard/client1.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey1)
-Address = 172.16.66.11/24
+Address = 172.16.66.11/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -64,7 +64,7 @@ EOF
 cat > /etc/wireguard/client2.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey2)
-Address = 172.16.66.12/24
+Address = 172.16.66.12/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -77,7 +77,7 @@ EOF
 cat > /etc/wireguard/client3.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey3)
-Address = 172.16.66.13/24
+Address = 172.16.66.13/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -90,7 +90,7 @@ EOF
 cat > /etc/wireguard/client4.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey4)
-Address = 172.16.66.14/24
+Address = 172.16.66.14/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -103,7 +103,7 @@ EOF
 cat > /etc/wireguard/client5.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey5)
-Address = 172.16.66.15/24
+Address = 172.16.66.15/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -116,7 +116,7 @@ EOF
 cat > /etc/wireguard/client6.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey6)
-Address = 172.16.66.16/24
+Address = 172.16.66.16/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -129,7 +129,7 @@ EOF
 cat > /etc/wireguard/client7.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey7)
-Address = 172.16.66.17/24
+Address = 172.16.66.17/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -142,7 +142,7 @@ EOF
 cat > /etc/wireguard/client8.conf << EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/cprivatekey8)
-Address = 172.16.66.18/24
+Address = 172.16.66.18/32
 DNS = 172.16.66.1
 MTU = 1420
 
@@ -155,6 +155,5 @@ chmod 600 /etc/wireguard/client*.conf
 
 systemctl restart iptables-proxy
 
-systemctl daemon-reload
 systemctl enable wg-quick@wg0
 systemctl restart wg-quick@wg0
