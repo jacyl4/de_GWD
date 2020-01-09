@@ -1,4 +1,6 @@
 #!/bin/bash
+checkV2ad=$(/usr/local/bin/ui-checkV2ad)
+
 port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 
 result=$(echo $port | grep '^[0-9]\+$')
@@ -180,3 +182,7 @@ rm -rf /etc/vtrui/hosts
 systemctl restart vtrui
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
+
+if [[ $checkV2ad = "on" ]]; then
+/usr/local/bin/ui-v2adADD
+fi

@@ -1034,6 +1034,7 @@ checkDNS=$(/usr/local/bin/ui-checkDNS)
 checkDHCP=$(/usr/local/bin/ui-checkDhcp)
 checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
 checkWG=$(/usr/local/bin/ui-checkWG)
+checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
 piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
@@ -1079,6 +1080,10 @@ fi
 
 if [[ $checkWG = "on" ]]; then
 /usr/local/bin/ui-WGon
+fi
+
+if [[ $checkV2ad = "on" ]]; then
+/usr/local/bin/ui-v2adADD
 fi
 
 blue "---------------------"
