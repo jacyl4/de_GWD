@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ "$(crontab -l)" =~ "ddnsupdateipcf" ]]; then
+	echo "on"
+fi
