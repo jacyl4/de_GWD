@@ -134,7 +134,7 @@
                 <div class="mr-5">代理模式</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <span id="checkDNS" class="float-left"></span>
+                <span class="float-left"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDNS');?></span>
                 <button class="btn btn-light float-right" style="padding: 0.25rem 0.25rem;font-size: 0.7rem;line-height: 0.8;border-radius: 0.2rem;" onclick="proxyon()">重启进程</button>
               </a>
             </div>
@@ -311,7 +311,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:block">
+<div id="shnodedt" style="display:none">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -818,8 +818,6 @@ else {
 $('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
 };
 });
-
-$.get('checkDNS.php', function(data) { $('#checkDNS').text(data) });
 
 setInterval(function() {
 checklink();
