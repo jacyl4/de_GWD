@@ -788,6 +788,8 @@ chmod +x /usr/local/bin/Q2H
 
 crontab -l > now.cron
 if [[ "$(crontab -l | grep 'Q2H' | awk '{print $6}')" != "/usr/local/bin/Q2H" ]]; then
+sed -i '/update/d' ~/now.cron
+sed -i '/Update/d' ~/now.cron
 echo '0 */2 * * * /usr/local/bin/Q2H' >> now.cron
 fi
 crontab now.cron
