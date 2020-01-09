@@ -220,7 +220,8 @@
   <label class="input-group-text">V2去广告<span class="badge badge-pill text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
   </div>
   <div class="input-group-append">
-
+    <button class="btn btn-secondary" type="button" onclick="v2adADD()">开启</button>
+    <button class="btn btn-secondary" type="button" onclick="v2adDEL()">关闭</button>
   </div>
 </div>
 </span>
@@ -553,6 +554,14 @@ $.get("ping6.php", function(data) { $('#ping6').text(data) });
 $.get("ping7.php", function(data) { $('#ping7').text(data) });
 $.get("ping8.php", function(data) { $('#ping8').text(data) });
 $.get("ping9.php", function(data) { $('#ping9').text(data) });
+}
+
+function v2adADD(){
+$.get('v2adADD.php', function(result){window.location.reload();});
+}
+
+function v2adDEL(){
+$.get('v2adDEL.php', function(result){window.location.reload();});
 }
 
 function submitlocalip(){
