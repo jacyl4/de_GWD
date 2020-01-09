@@ -121,7 +121,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <div class="input-group-prepend">
             <span class="input-group-text">
             黑名单域名<br>
-          （走国外解析）<br>
+          （走国外线路）<br>
             </span>
           </div>
             <textarea id="listB" class="form-control" aria-label="listB" rows="11"><?php echo shell_exec("cat /var/www/html/listB.txt"); ?></textarea>
@@ -133,7 +133,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           <div class="input-group-prepend">
             <span class="input-group-text">
             白名单域名<br>
-          （走国内解析）<br>
+          （走国内线路）<br>
             </span>
           </div>
             <textarea id="listW" class="form-control" aria-label="listW" rows="11"><?php echo shell_exec("cat /var/www/html/listW.txt"); ?></textarea>
