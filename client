@@ -723,7 +723,7 @@ sed -i "/$doh/d" /etc/hosts
 
 
 
-installgwd(){
+installGWD(){
     green "========================="
     green "de_GWD IP address"
     green "========================="
@@ -845,8 +845,6 @@ echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
-chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
 
 postInstall
 
@@ -857,7 +855,7 @@ blue "----------------------"
 
 
 
-change_piholeadmin(){
+change_piholeAdmin(){
 pihole -a -p
 blue "-------------------------------"
 blue  "Change Pi-hole password [done]"
@@ -866,7 +864,7 @@ blue "-------------------------------"
 
 
 
-updategwd(){
+updateGWD(){
 source /etc/profile
 
 checkDNS=$(/usr/local/bin/ui-checkDNS)
@@ -977,15 +975,15 @@ fi
     read -p "Select:" num
     case "$num" in
     1)
-    installgwd
+    installGWD
     start_menu
     ;;
     2)
-    change_piholeadmin
+    change_piholeAdmin
     start_menu
     ;;
     0)
-    updategwd
+    updateGWD
     start_menu
     ;;
     *)

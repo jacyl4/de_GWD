@@ -19,6 +19,7 @@ ariaNGaddr="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 
+
 function preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
