@@ -284,10 +284,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端1 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端1 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode1"></div>
+        <div class="text-center" id="qrcode1"></div>
       </div>
     </div>
   </div>
@@ -297,10 +297,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端2 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端2 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode2"></div>
+        <div class="text-center" id="qrcode2"></div>
       </div>
     </div>
   </div>
@@ -310,10 +310,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端3 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端3 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode3"></div>
+        <div class="text-center" id="qrcode3"></div>
       </div>
     </div>
   </div>
@@ -323,10 +323,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端4 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端4 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode4"></div>
+        <div class="text-center" id="qrcode4"></div>
       </div>
     </div>
   </div>
@@ -336,10 +336,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端5 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端5 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode5"></div>
+        <div class="text-center" id="qrcode5"></div>
       </div>
     </div>
   </div>
@@ -349,10 +349,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端6 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端6 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode6"></div>
+        <div class="text-center" id="qrcode6"></div>
       </div>
     </div>
   </div>
@@ -362,10 +362,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端7 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端7 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode7"></div>
+        <div class="text-center" id="qrcode7"></div>
       </div>
     </div>
   </div>
@@ -375,10 +375,10 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" >WireGuard客户端8 二维码</h5>
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端8 二维码</h5>
       </div>
       <div class="modal-body">
-        <div id="qrcode8"></div>
+        <div class="text-center" id="qrcode8"></div>
       </div>
     </div>
   </div>
