@@ -85,6 +85,13 @@ sed -i '/ip6-/d' /etc/hosts
 systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 rm -rf /run/resolvconf/interface/systemd-resolved
+
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 }
 
 
@@ -829,9 +836,6 @@ EOF
 apt update && apt upgrade -y
 apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils unzip wget curl rsync git jq socat apt-transport-https ca-certificates gnupg2 software-properties-common dirmngr
 source /etc/profile
-
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 cat > /etc/default/locale << EOF
