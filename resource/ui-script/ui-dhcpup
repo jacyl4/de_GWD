@@ -1,0 +1,10 @@
+#!/bin/bash
+ipstart=$(awk 'NR==1{print}' /var/www/html/dhcp.txt)
+ipend=$(awk 'NR==2{print}' /var/www/html/dhcp.txt)
+ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1)
+
+sudo pihole -a enabledhcp "$ipstart" "$ipend" "$ipgateway" "24" "lan"
+
+sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
+
+pihole restartdns

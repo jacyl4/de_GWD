@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ -d "/etc/docker" ]]; then
+echo "Docker Edition"
+fi

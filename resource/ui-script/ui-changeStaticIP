@@ -1,0 +1,35 @@
+#!/bin/bash
+localip=$(cat /var/www/html/staticip.txt | awk 'NR==1{print}')
+upstreamip=$(cat /var/www/html/staticip.txt | awk 'NR==2{print}')
+
+
+sed -i "/address/c\address $localip" /etc/network/interfaces
+sed -i "/gateway/c\gateway $upstreamip" /etc/network/interfaces
+
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localip/24" /etc/pihole/setupVars.conf
+sed -i "/CONDITIONAL_FORWARDING_IP=/c\CONDITIONAL_FORWARDING_IP=$localip" /etc/pihole/setupVars.conf
+sed -i "/CONDITIONAL_FORWARDING_REVERSE=/d" /etc/pihole/setupVars.conf
+
+sed -i "/static ip_address=/d" /etc/dhcpcd.conf
+sed -i "/static routers=/d" /etc/dhcpcd.conf
+sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
+
+echo -e "static ip_address=$localip/24" >> /etc/dhcpcd.conf
+echo -e "static routers=$upstreamip" >> /etc/dhcpcd.conf
+echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
+
+sed -i '/nameserver/c\nameserver 127.0.0.1'  /etc/resolv.conf
+rm -rf /var/www/html/staticip.txt
+
+if [[ -f "/etc/dnsmasq.d/02-pihole-dhcp.conf" ]]; then
+ipstart=$(awk 'NR==1{print}' /var/www/html/dhcp.txt)
+ipend=$(awk 'NR==2{print}' /var/www/html/dhcp.txt)
+
+sudo pihole -a enabledhcp "$ipstart" "$ipend" "$localip" "24" "lan"
+
+sed -i 's/option:router/6/g' /etc/dnsmasq.d/02-pihole-dhcp.conf
+
+pihole restartdns
+fi
+
+reboot
