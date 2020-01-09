@@ -728,27 +728,27 @@ sed -i "/$doh/d" /etc/hosts
 
 installGWD(){
     green "========================="
-    green "de_GWD IP address"
+    green " de_GWD IP address"
     green "========================="
     read localaddr
 
     green "========================="
-    green "Upstream route IP address"
+    green " Upstream route IP address"
     green "========================="
     read gatewayaddr
 
     green "========================="
-    green "V2ray domain"
+    green " V2ray domain"
     green "========================="
     read v2servn
 
     green "========================="
-    green "V2ray UUID"
+    green " V2ray UUID"
     green "========================="
     read uuidnum
 
     green "========================="
-    green "Path"
+    green " Path"
     green "========================="
     read v2path
 
