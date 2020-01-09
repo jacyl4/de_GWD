@@ -778,7 +778,6 @@ remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/versi
 
 if [[ $localver != $remotever ]]; then
 crontab -l > ~/now.cron
-sed -i '/autoUpdate/d' ~/now.cron
 echo '30 4 * * *  /usr/local/bin/autoUpdate' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
