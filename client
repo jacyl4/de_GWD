@@ -661,9 +661,9 @@ chmod +x /usr/local/bin/*
 
 cat > /usr/local/bin/Q4am << "EOF"
 #!/bin/bash
-wget -qc https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
-wget -qc https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
-curl -sL 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
+wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
+wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+curl -L 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
 mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
 mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
