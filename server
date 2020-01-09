@@ -744,7 +744,7 @@ docker restart nginx > /dev/null 2>&1
 
 
 function postInstall(){
-cat > /usr/local/bin/autoupdate << "EOF"
+cat > /usr/local/bin/autoUpdate << "EOF"
 #!/bin/bash
 wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
 
@@ -761,9 +761,9 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/update
 EOF
-chmod +x /usr/local/bin/autoupdate
+chmod +x /usr/local/bin/autoUpdate
 
-cat > /usr/local/bin/updateGWD << "EOF"
+cat > /usr/local/bin/Q2H << "EOF"
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
@@ -778,18 +778,18 @@ remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/versi
 
 if [[ $localver != $remotever ]]; then
 crontab -l > ~/now.cron
-sed -i '/autoupdate/d' ~/now.cron
-echo '30 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
+sed -i '/autoUpdate/d' ~/now.cron
+echo '30 4 * * *  /usr/local/bin/autoUpdate' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
-chmod +x /usr/local/bin/updateGWD
-/usr/local/bin/updateGWD
+chmod +x /usr/local/bin/Q2H
+/usr/local/bin/Q2H
 
 crontab -l > now.cron
-if [[ "$(crontab -l | grep 'updateGWD' | awk '{print $6}')" != "/usr/local/bin/updateGWD" ]]; then
-echo '0 */2 * * * /usr/local/bin/updateGWD' >> now.cron
+if [[ "$(crontab -l)" =~ "Q2H" ]]; then
+echo '0 */2 * * * /usr/local/bin/Q2H' >> now.cron
 fi
 crontab now.cron
 rm -rf now.cron
@@ -1392,11 +1392,11 @@ blue "---------------------"
 
 autoUpdateGWD(){
     green "=============================================="
-    green "Y. Turn on autoupdate / N. Turn off autoupdate"
+    green "Y. Turn on AutoUpdate / N. Turn off AutoUpdate"
     green "=============================================="
-    read autoupdateswitch
+    read autoUpdateswitch
 
-if [[ "$autoupdateswitch" = "Y" ]] || [[ "$autoupdateswitch" = "y" ]]; then 
+if [[ "$autoUpdateswitch" = "Y" ]] || [[ "$autoUpdateswitch" = "y" ]]; then 
 sed -i '/localver=/,$d' /usr/local/bin/updateGWD
 
 cat >> /usr/local/bin/updateGWD << "EOF"
@@ -1405,20 +1405,20 @@ remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/versi
 
 if [[ $localver < $remotever ]]; then
 crontab -l > ~/now.cron
-sed -i '/autoupdate/d' ~/now.cron
-echo '0 4 * * *  /usr/local/bin/autoupdate' >> ~/now.cron
+sed -i '/autoUpdate/d' ~/now.cron
+echo '0 4 * * *  /usr/local/bin/autoUpdate' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
 blue "--------------------------"
-blue  "Autoupdate turn on [done]"
+blue  "AutoUpdate turn on [done]"
 blue "--------------------------"
 
-elif [[ "$autoupdateswitch" = "N" ]] || [[ "$autoupdateswitch" = "n" ]]; then
+elif [[ "$autoUpdateswitch" = "N" ]] || [[ "$autoUpdateswitch" = "n" ]]; then
 sed -i '/localver=/,$d' /usr/local/bin/updateGWD
 blue "---------------------------"
-blue  "Autoupdate turn off [done]"
+blue  "AutoUpdate turn off [done]"
 blue "---------------------------"
 fi
 }
@@ -1492,7 +1492,7 @@ fi
     yellow "8. Set v2ray upsteram"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
-    red    "00.Autoupdate turn on/off"
+    red    "00.AutoUpdate turn on/off"
     red    "CTRL+C EXIT"
     echo
     read -p "Select:" num
