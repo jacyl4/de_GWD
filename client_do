@@ -1069,7 +1069,7 @@ else
 fi
 
 if [[ $checkDHCP = "on" ]]; then
-/usr/local/bin/ui-dhcpup
+/usr/local/bin/ui-dhcpUP
 fi
 
 if [[ $checkDDNScf = "on" ]]; then
@@ -1077,7 +1077,7 @@ if [[ $checkDDNScf = "on" ]]; then
 fi
 
 if [[ $checkWG = "on" ]]; then
-/usr/local/bin/ui-wgup
+/usr/local/bin/ui-WGon
 fi
 
 blue "---------------------"
