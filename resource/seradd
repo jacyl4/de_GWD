@@ -7,6 +7,32 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
+preInstall(){
+grep /var/www/html -rl /var/www/html > /tmp/htmlFILE
+
+for htmlFile in $(cat /tmp/htmlFILE); do
+  sed -i 's:/var/www/html:/var/www/html/gwd:g' $htmlFile
+done
+
+grep /var/www/html -rl /usr/local/bin > /tmp/binFILE
+
+for binFILE in $(cat /tmp/binFILE); do
+  sed -i 's:/var/www/html:/var/www/html/gwd:g' $binFILE
+done
+
+mkdir -p /var/www/tmp
+mv -f /var/www/html/* /var/www/tmp
+
+mkdir -p /var/www/html/gwd
+mv -f /var/www/tmp/* /var/www/html/gwd
+
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
+chmod +x /usr/local/bin/*
+}
+
+
+
 installDOH(){
 cd ~
 wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
@@ -140,17 +166,17 @@ for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
 done
 
 ipset -N listB hash:net maxelem 65535
-for iplistB in $(cat /var/www/html/listBip.txt); do
+for iplistB in $(cat /var/www/html/gwd/listBip.txt); do
   ipset add listB $iplistB
 done
 
 ipset -N listW hash:net maxelem 65535
-for iplistW in $(cat /var/www/html/listWip.txt); do
+for iplistW in $(cat /var/www/html/gwd/listWip.txt); do
   ipset add listW $iplistW
 done
 
 ipset -N listWlan hash:net maxelem 65535
-for iplistWlan in $(cat /var/www/html/listWlan.txt); do
+for iplistWlan in $(cat /var/www/html/gwd/listWlan.txt); do
   ipset add listWlan $iplistWlan
 done
 
@@ -172,7 +198,7 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport $(awk 'NR==2{print}' /var/www/html/WGaddress.txt) -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport $(awk 'NR==2{print}' /var/www/html/gwd/WGaddress.txt) -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
@@ -304,6 +330,8 @@ de_GWDadd(){
     read httpsPORT
 cd ~
 
+preInstall
+
 installDOH
 
 v2rayADD
@@ -404,6 +432,8 @@ httpPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==1{print$2}' 
 httpsPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==2{print$2}')
 
 cd ~
+
+preInstall
 
 installDOH
 

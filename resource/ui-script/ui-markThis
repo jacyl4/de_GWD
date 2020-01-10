@@ -6,3 +6,5 @@ sed -i "/<title>/c\<title>$markName \- DDNS</title>" /var/www/html/!ddns.php
 sed -i "/<title>/c\<title>$markName \- 节点管理</title>" /var/www/html/!nodeMAN.php
 sed -i "/<title>/c\<title>$markName \- 黑白名单</title>" /var/www/html/!listBW.php
 sed -i "/<title>/c\<title>$markName \- 更新</title>" /var/www/html/!update.php
+
+touch "/usr/local/bin/ui-amarked"

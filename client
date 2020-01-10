@@ -1,8 +1,4 @@
 #!/bin/bash
-rm -rf /var/www/html/listb*
-rm -rf /var/www/html/listw*
-rm -rf /var/www/html/nodecheck*
-
 clear
 blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
@@ -927,7 +923,7 @@ if [[ $checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
-if [[ -f "/var/www/html/markThis.txt" ]]; then
+if [[ -f "/usr/local/bin/ui-amarked" ]]; then
 /usr/local/bin/ui-markThis
 fi
 
