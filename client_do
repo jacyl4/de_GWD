@@ -587,18 +587,18 @@ EOF
 rm -rf /etc/nginx/conf.d/default.conf
 cat > /etc/nginx/conf.d/default.conf<< EOF
 server {
-    listen       80;
-    server_name  localhost;
-    root         /var/www/html;
-    index        index.php index.html index.htm;
+  listen       80;
+  server_name  localhost;
+  root         /var/www/html;
+  index        index.php index.html index.htm;
 
-  location ~* \.php$ {
-    fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
-    fastcgi_index           index.php;
-    fastcgi_split_path_info ^(.+\.php)(.*)$;
-    include                 fastcgi_params;
-    fastcgi_param           SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-  }
+location ~* \.php$ {
+  fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
+  fastcgi_index           index.php;
+  fastcgi_split_path_info ^(.+\.php)(.*)$;
+  include                 fastcgi_params;
+  fastcgi_param           SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+}
 
 }
 EOF
