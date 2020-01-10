@@ -396,10 +396,51 @@ rm -rf now.cron
 
 
 
+de_GWDaddUpdate(){
+uuidnum=$(jq -r '.inbounds[2].settings.clients[0].id' /etc/vtrui/config.json)
+v2path=$(jq -r '.inbounds[2].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+vpsdomain=$(awk '/server_name/' /etc/nginx/conf.d/default.conf | awk 'NR==1{print$2}' | sed 's/.$//')
+httpPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==1{print$2}' | sed 's/.$//')
+httpsPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==2{print$2}')
+
+cd ~
+
+installDOH
+
+v2rayADD
+
+iptablesProxyADD
+
+nginxWebConf
+
+mkdir -p /var/www/ssl
+chown -R www-data:www-data /var/www/ssl
+chmod -R 600 /var/www/ssl
+
+docker stop nginx > /dev/null 2>&1
+docker rm nginx > /dev/null 2>&1
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /var/www/ssl/:/var/www/ssl/ \
+-v /var/www/html/:/var/www/html/ \
+-v /run/php/php7.3-fpm.sock:/run/php/php7.3-fpm.sock \
+jacyl4/nginx_tls1.3:latest
+
+rm -rf ~/seradd
+
+
+
+}
+
+
 start_menu(){
 
     green  "1. de_GWD add"
     green  "2. make SSL"
+    yellow "0. de_GWD add Update"
     red    "CTRL+C EXIT"
     echo
     read -p "Select:" num
@@ -408,8 +449,12 @@ start_menu(){
     de_GWDadd
     start_menu
     ;;
-    1)
+    2)
     makeSSL
+    start_menu
+    ;;
+    0)
+    de_GWDaddUpdate
     start_menu
     ;;
     *)
