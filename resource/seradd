@@ -357,6 +357,7 @@ docker run -d --name=nginx --net=host --restart=always \
 jacyl4/nginx_tls1.3:latest
 
 rm -rf ~/seradd
+touch "/usr/local/bin/ui-aseradd"
 }
 
 
@@ -460,9 +461,7 @@ docker run -d --name=nginx --net=host --restart=always \
 jacyl4/nginx_tls1.3:latest
 
 rm -rf ~/seradd
-
-
-
+touch "/usr/local/bin/ui-aseradd"
 }
 
 

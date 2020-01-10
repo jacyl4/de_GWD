@@ -1092,6 +1092,14 @@ if [[ -f "/usr/local/bin/ui-amarked" ]]; then
 /usr/local/bin/ui-markThis
 fi
 
+if [[ -f "/usr/local/bin/ui-aseradd" ]]; then
+wget -O ~/seradd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/seradd
+sed -i '$d' ~/seradd
+echo "de_GWDaddUpdate" >>  ~/seradd
+chmod +x ~/seradd
+~/seradd
+fi
+
 blue "---------------------"
 blue  "Update de_GWD [done]"
 blue "---------------------"
