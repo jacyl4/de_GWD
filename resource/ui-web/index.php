@@ -406,7 +406,7 @@
               <div class="input-group">
                 <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
                 <div class="input-group-append">
-                  <span class="input-group-text text-success" id="ping10">00.0</span><span class="input-group-text text-secondary">ms</span>
+                  <span class="input-group-text text-success" id="pingDOH1">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
               </div>
@@ -414,7 +414,7 @@
               <div class="input-group">
                 <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
                 <div class="input-group-append">
-                  <span class="input-group-text text-success" id="ping11">00.0</span><span class="input-group-text text-secondary">ms</span>
+                  <span class="input-group-text text-success" id="pingDOH2">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
               </div>
@@ -566,8 +566,8 @@ $.get("ping6.php", function(data) { $('#ping6').text(data) });
 $.get("ping7.php", function(data) { $('#ping7').text(data) });
 $.get("ping8.php", function(data) { $('#ping8').text(data) });
 $.get("ping9.php", function(data) { $('#ping9').text(data) });
-$.get("ping10.php", function(data) { $('#ping10').text(data) });
-$.get("ping11.php", function(data) { $('#ping11').text(data) });
+$.get("pingDOH1.php", function(data) { $('#pingDOH1').text(data) });
+$.get("pingDOH2.php", function(data) { $('#pingDOH2').text(data) });
 }
 
 function v2adADD(){
