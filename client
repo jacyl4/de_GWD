@@ -927,6 +927,10 @@ if [[ $checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
+if [[ -f "/var/www/html/markThis.txt" ]]; then
+/usr/local/bin/ui-markThis
+fi
+
 blue "---------------------"
 blue  "Update de_GWD [done]"
 blue "---------------------"
