@@ -25,6 +25,7 @@ mv -f /var/www/html/* /var/www/tmp
 
 mkdir -p /var/www/html/gwd
 mv -f /var/www/tmp/* /var/www/html/gwd
+rm -rf /var/www/tmp
 
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html

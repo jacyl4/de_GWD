@@ -639,8 +639,8 @@ postInstall(){
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-rsync -r ~/ui-script/* /usr/local/bin
-rsync -r ~/ui-web/* /var/www/html
+mv -f ~/ui-script/* /usr/local/bin
+mv -f ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
@@ -767,7 +767,7 @@ rm -rf /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
 
 apt update && apt upgrade -y
-apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset wget curl rsync ca-certificates unzip zip git subversion jq
+apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset wget curl ca-certificates unzip zip git subversion jq
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
