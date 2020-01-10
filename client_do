@@ -268,7 +268,7 @@ cat > /etc/vtrui/config.json << EOF
   { "tag": "dnsout", "protocol": "dns"}
 ],
 "routing": {
-  "domainStrategy": "IPOnDemand",
+  "domainStrategy": "AsIs",
   "rules": [
     { "type": "field", "inboundTag": "dnsin", "outboundTag": "dnsout" },
     { "type": "field", "inboundTag": "flow", "outboundTag": "direct" }
