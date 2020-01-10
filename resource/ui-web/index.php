@@ -165,6 +165,7 @@
                 <div class="mr-5">运行时长</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
+                <button type="button" class="btn btn-light float-left" style="padding: 0.25rem 0.25rem;font-size: 0.7rem;line-height: 0.8;border-radius: 0.2rem;" data-toggle="modal" data-target="#markThis">备注本机</button>
                 <span id="uptime" class="float-right">
                 </span>
               </a>
@@ -174,14 +175,32 @@
         </div>
 
 
+<!-- Modal -->
+<div class="modal fade" id="markThis" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="markThisLabel">备注本机</h5>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php system("cat /var/www/html/markThis.txt"); ?>">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
         <!-- DataTables Example -->
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-stream"></i>
             节点列表
          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="NodeDTshow()">启用内网设备分流</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="NodeDThide()">禁用内网设备分流</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="NodeDTshow()">启用内网设备分流</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="NodeDThide()">禁用内网设备分流</button>
           </span>
           </div>
             <button type="button" class="btn btn-outline-success btn-sm" style="border-radius: 0px;" onclick="pingtest()">Ping</button>
@@ -394,8 +413,8 @@
             <i class="fas fa-bezier-curve"></i>
             Dns over Https
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="changeNLchnw()">大陆白名单</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="changeNLgfw()">GFWlist</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLchnw()">大陆白名单</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLgfw()">GFWlist</button>
                 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submitdoh()">应用</button>
           </span>
           </div>
@@ -547,6 +566,11 @@ $('#testGoogle').text("✗ 国外线路不通");
 function restartProxy(){
 alert('确认重启代理进程');
 $.get('restartProxy.php', function(result){window.location.reload();});
+}
+
+function markThis(){
+markNametxt=$('#markName').val();
+$.get('markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
 }
 
 function NodeDTshow(){
