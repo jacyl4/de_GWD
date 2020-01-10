@@ -41,13 +41,6 @@
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
       <li class="nav-item no-arrow mx-1">
-        <a class="nav-link" href="/ariang">
-          <i class="fas fa-cloud-download-alt"></i>
-          <span>AriaNG</span>
-        </a>
-      </li>
-
-      <li class="nav-item no-arrow mx-1">
         <a class="nav-link" href="/admin">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Pi-hole</span>

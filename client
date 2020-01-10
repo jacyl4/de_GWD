@@ -12,8 +12,6 @@ mirrorSite="http://xz-nat.uovz.com:10178/gwd"
 smartdns_arm64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.aarch64-debian-all.deb"
 smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
 
-ariaNGaddr="https://github.com/mayswind/AriaNg/releases/download/1.1.4/AriaNg-1.1.4-AllInOne.zip"
-
 osRelease=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
 
 architecture=""
@@ -647,16 +645,6 @@ rm -rf ~/ui-*
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
-
-cd ~
-wget -qc -O ~/ariaNG.zip $ariaNGaddr
-unzip ariaNG.zip
-
-mkdir -p /var/www/html/ariang
-mv -f index.html /var/www/html/ariang
-rm -rf ariaNG.zip
-rm -rf index.html
-rm -rf LICENSE
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
