@@ -602,8 +602,9 @@ docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
 docker pull jacyl4/nginx_tls1.3:latest
 
 mkdir -p /run/php
-touch "/run/php/php7.3-fpm.sock"
-chown www-data:www-data /run/php/php7.3-fpm.sock
+rm -rf /run/php/php7.3-fpm.sock
+touch /run/php/php7.3-fpm.sock
+chown -R www-data:www-data /run/php
 
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
