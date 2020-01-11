@@ -962,7 +962,7 @@ fi
 
     green "===================================="
     green "                CLIENT               "
-    green "Recommend: Debian 10 (amd64 & arm64) "
+    green "Recommend: Debian 9 + (amd64 & arm64)"
     green "Author:    JacyL4                    "
     green "===================================="
     echo

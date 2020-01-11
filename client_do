@@ -476,9 +476,9 @@ echo
 
 installWG(){
 cat > /etc/apt/sources.list << EOF
-deb http://deb.debian.org/debian buster main
-deb http://deb.debian.org/debian-security/ buster/updates main
-deb http://deb.debian.org/debian buster-updates main
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
+deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
@@ -727,6 +727,12 @@ EOF
 systemctl restart pihole-FTL
 pihole -f
 
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+
+echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
+
+apt update
 apt install --no-install-recommends --no-install-suggests -y zip subversion php7.3-fpm
 
 cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
@@ -782,6 +788,8 @@ env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
+
+sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
 
 systemctl enable php7.3-fpm
 systemctl restart php7.3-fpm
@@ -911,9 +919,9 @@ cd ~
 preInstall
 
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian buster main
-deb http://mirrors.aliyun.com/debian-security buster/updates main
-deb http://mirrors.aliyun.com/debian buster-updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
+deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
 rm -rf /etc/apt/sources.list.d/unstable.list
@@ -943,7 +951,7 @@ LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
 
-echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian buster stable" > /etc/apt/sources.list.d/docker.list
+echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
 
 apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
@@ -1145,7 +1153,7 @@ fi
 
     green "==============================="
     green "           CLIENT ( Docker )   "
-    green "Recommend: Debian 10 ( amd64 ) "
+    green "Recommend: Debian 9 + ( amd64 )"
     green "Author:    JacyL4              "
     green "==============================="
     echo
