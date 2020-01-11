@@ -12,7 +12,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>de_GWD - 节点管理</title>
+<title>本地 - 节点管理</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -40,6 +40,13 @@
 
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
+      <li class="nav-item no-arrow mx-1">
+        <a class="nav-link" href="/ariang">
+          <i class="fas fa-cloud-download-alt"></i>
+          <span>AriaNG</span>
+        </a>
+      </li>
+      
       <li class="nav-item no-arrow mx-1">
         <a class="nav-link" href="/admin">
           <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -115,8 +122,8 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th class="text-nowrap text-center"><———— 节点名 ————></th>
                     <th class="text-nowrap text-center"><———— 域名 ————></th>
+                    <th class="text-nowrap text-center"><———— 节点名 ————></th>
                     <th class="text-nowrap text-center"><———————— UUID ————————></th>
                     <th class="text-nowrap text-center"><—— PATH ——></th>
                   </tr>
@@ -124,64 +131,64 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
                 <tbody>
                   <tr>
                     <td>1</td>
-                    <td><input type="text" class="form-control" id="nodename1" value="<?php echo shell_exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain1" value="<?php echo shell_exec("awk 'NR==1{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename1" value="<?php echo shell_exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid1" value="<?php echo shell_exec("awk 'NR==1{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path1" value="<?php echo shell_exec("awk 'NR==1{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>2</td>
-                    <td><input type="text" class="form-control" id="nodename2" value="<?php echo shell_exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain2" value="<?php echo shell_exec("awk 'NR==2{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename2" value="<?php echo shell_exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid2" value="<?php echo shell_exec("awk 'NR==2{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path2" value="<?php echo shell_exec("awk 'NR==2{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>3</td>
-                    <td><input type="text" class="form-control" id="nodename3" value="<?php echo shell_exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain3" value="<?php echo shell_exec("awk 'NR==3{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename3" value="<?php echo shell_exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid3" value="<?php echo shell_exec("awk 'NR==3{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path3" value="<?php echo shell_exec("awk 'NR==3{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>4</td>
-                    <td><input type="text" class="form-control" id="nodename4" value="<?php echo shell_exec("awk 'NR==4{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain4" value="<?php echo shell_exec("awk 'NR==4{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename4" value="<?php echo shell_exec("awk 'NR==4{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid4" value="<?php echo shell_exec("awk 'NR==4{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path4" value="<?php echo shell_exec("awk 'NR==4{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>5</td>
-                    <td><input type="text" class="form-control" id="nodename5" value="<?php echo shell_exec("awk 'NR==5{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain5" value="<?php echo shell_exec("awk 'NR==5{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename5" value="<?php echo shell_exec("awk 'NR==5{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid5" value="<?php echo shell_exec("awk 'NR==5{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path5" value="<?php echo shell_exec("awk 'NR==5{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>6</td>
-                    <td><input type="text" class="form-control" id="nodename6" value="<?php echo shell_exec("awk 'NR==6{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain6" value="<?php echo shell_exec("awk 'NR==6{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename6" value="<?php echo shell_exec("awk 'NR==6{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid6" value="<?php echo shell_exec("awk 'NR==6{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path6" value="<?php echo shell_exec("awk 'NR==6{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>7</td>
-                    <td><input type="text" class="form-control" id="nodename7" value="<?php echo shell_exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain7" value="<?php echo shell_exec("awk 'NR==7{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename7" value="<?php echo shell_exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid7" value="<?php echo shell_exec("awk 'NR==7{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path7" value="<?php echo shell_exec("awk 'NR==7{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>8</td>
-                    <td><input type="text" class="form-control" id="nodename8" value="<?php echo shell_exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain8" value="<?php echo shell_exec("awk 'NR==8{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename8" value="<?php echo shell_exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid8" value="<?php echo shell_exec("awk 'NR==8{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path8" value="<?php echo shell_exec("awk 'NR==8{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
                   <tr>
                     <td>9</td>
-                    <td><input type="text" class="form-control" id="nodename9" value="<?php echo shell_exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="domain9" value="<?php echo shell_exec("awk 'NR==9{print}' /var/www/html/domain.txt"); ?>"></td>
+                    <td><input type="text" class="form-control" id="nodename9" value="<?php echo shell_exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="uuid9" value="<?php echo shell_exec("awk 'NR==9{print}' /var/www/html/uuid.txt"); ?>"></td>
                     <td><input type="text" class="form-control" id="path9" value="<?php echo shell_exec("awk 'NR==9{print}' /var/www/html/path.txt"); ?>"></td>
                   </tr>
