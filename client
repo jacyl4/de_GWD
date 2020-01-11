@@ -12,8 +12,6 @@ mirrorSite="http://xz-nat.uovz.com:10178/gwd"
 smartdns_arm64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.aarch64-debian-all.deb"
 smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
 
-osRelease=$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)
-
 architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
@@ -500,9 +498,9 @@ echo
 installWG(){
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
-deb http://deb.debian.org/debian $osRelease main
-deb http://deb.debian.org/debian-security/ $osRelease/updates main
-deb http://deb.debian.org/debian $osRelease-updates main
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
+deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 fi
 
@@ -639,8 +637,8 @@ postInstall(){
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-mv -f ~/ui-script/* /usr/local/bin
-mv -f ~/ui-web/* /var/www/html
+rsync -Ir ~/ui-script/* /usr/local/bin
+rsync -Ir ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
@@ -757,9 +755,9 @@ preInstall
 
 if [[ $architecture = "amd64" ]]; then
 cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian $osRelease main
-deb http://mirrors.aliyun.com/debian-security $osRelease/updates main
-deb http://mirrors.aliyun.com/debian $osRelease-updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
+deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 fi
 
@@ -767,7 +765,7 @@ rm -rf /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
 
 apt update && apt upgrade -y
-apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset wget curl ca-certificates unzip zip git subversion jq
+apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset wget curl ca-certificates unzip zip git subversion rsync jq
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen

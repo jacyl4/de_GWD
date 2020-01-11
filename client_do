@@ -733,7 +733,7 @@ wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
 
 apt update
-apt install --no-install-recommends --no-install-suggests -y zip subversion php7.3-fpm
+apt install --no-install-recommends --no-install-suggests -y zip subversion rsync php7.3-fpm 
 
 cat > /etc/php/7.3/fpm/php-fpm.conf << EOF
 ;;;;;;;;;;;;;;;;;;
@@ -802,8 +802,8 @@ postInstall(){
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-mv -f ~/ui-script/* /usr/local/bin
-mv -f ~/ui-web/* /var/www/html
+rsync -Ir ~/ui-script/* /usr/local/bin
+rsync -Ir ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
