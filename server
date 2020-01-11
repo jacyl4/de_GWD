@@ -410,7 +410,7 @@ http {
 EOF
 
 rm -rf /etc/nginx/conf.d/default.conf
-touch "/etc/nginx/conf.d/default.conf"
+touch /etc/nginx/conf.d/default.conf
 
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
@@ -427,7 +427,7 @@ docker rm nginx > /dev/null 2>&1
 
 if [[ -d "/etc/php" ]]; then
 mkdir -p /run/php
-touch "/run/php/php7.3-fpm.sock"
+touch /run/php/php7.3-fpm.sock
 chown www-data:www-data /run/php/php7.3-fpm.sock
 
 docker run -d --name=nginx --net=host --restart=always \
