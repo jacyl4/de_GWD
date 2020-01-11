@@ -25,8 +25,8 @@ apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ```
 
-![client](https://i.loli.net/2020/01/06/mxlQVkFNv2yLo8K.png)
+![client](https://i.loli.net/2020/01/11/4o6fJYW2iVHvKR9.png)
 
 
-![client_do](https://i.loli.net/2020/01/06/PVt4eSUKhQMx2Oy.png)
+![client_do](https://i.loli.net/2020/01/11/eYZWOkDwBjm7EdN.png)
 
