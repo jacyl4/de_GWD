@@ -1065,6 +1065,8 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
+sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
+
 sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
 echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
 

@@ -6,7 +6,7 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-mirrorSite="http://xz-nat.uovz.com:10178/gwd"
+mirrorSite="https://xznat.seso.icu:10336/gwd"
 
 smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
 
