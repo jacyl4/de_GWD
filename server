@@ -88,7 +88,6 @@ rm -rf /run/resolvconf/interface/systemd-resolved
 
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-dpkg-reconfigure tzdata
 
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
