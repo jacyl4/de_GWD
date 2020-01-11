@@ -240,8 +240,8 @@
 
                     <tr>
                     <th>#</th>
-                    <th>节点名</th>
                     <th>域名</th>
+                    <th>节点名</th>
                     <th>延迟(ms)</th>
                     <th>操作</th>
                     <th>状态</th>
@@ -250,72 +250,72 @@
                 <tbody>
                   <tr>
                     <td>1</td>
-                    <td><span id="nodeshow1" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==1{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow1" class="align-middle"></span></td>
                     <td><span id="ping1" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch1()">切换</button></td>
                     <td id="checkNode1"></td>
                   </tr>
                   <tr>
                     <td>2</td>
-                    <td><span id="nodeshow2" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==2{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow2" class="align-middle"></span></td>
                     <td><span id="ping2" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch2()">切换</button></td>
                     <td id="checkNode2"></td>
                   </tr>
                   <tr>
                     <td>3</td>
-                    <td><span id="nodeshow3" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==3{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow3" class="align-middle"></span></td>
                     <td><span id="ping3" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch3()">切换</button></td>
                     <td id="checkNode3"></td>
                   </tr>
                   <tr>
                     <td>4</td>
-                    <td><span id="nodeshow4" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==4{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow4" class="align-middle"></span></td>
                     <td><span id="ping4" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch4()">切换</button></td>
                     <td id="checkNode4"></td>
                   </tr>
                   <tr>
                     <td>5</td>
-                    <td><span id="nodeshow5" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==5{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow5" class="align-middle"></span></td>
                     <td><span id="ping5" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch5()">切换</button></td>
                     <td id="checkNode5"></td>
                   </tr>
                   <tr>
                     <td>6</td>
-                    <td><span id="nodeshow6" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==6{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow6" class="align-middle"></span></td>
                     <td><span id="ping6" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch6()">切换</button></td>
                     <td id="checkNode6"></td>
                   </tr>
                   <tr>
                     <td>7</td>
-                    <td><span id="nodeshow7" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==7{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow7" class="align-middle"></span></td>
                     <td><span id="ping7" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch7()">切换</button></td>
                     <td id="checkNode7"></td>
                   </tr>
                   <tr>
                     <td>8</td>
-                    <td><span id="nodeshow8" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==8{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow8" class="align-middle"></span></td>
                     <td><span id="ping8" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch8()">切换</button></td>
                     <td id="checkNode8"></td>
                   </tr>
                   <tr>
                     <td>9</td>
-                    <td><span id="nodeshow9" class="align-middle"></span></td>
                     <td><span class="align-middle"><?php echo exec("awk 'NR==9{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span id="nodeshow9" class="align-middle"></span></td>
                     <td><span id="ping9" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch9()">切换</button></td>
                     <td id="checkNode9"></td>
