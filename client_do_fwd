@@ -366,7 +366,7 @@ installClient_do_fwd(){
     read client_do_fwd_httpsPORT
 
 wget -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '1107,$d' ~/client_do
+sed -i '2d' ~/client_do && sed -i '1101,$d' ~/client_do
 chmod +x ~/client_do
 . ~/client_do
 cd ~
@@ -563,7 +563,7 @@ clifwdUpdate(){
 source /etc/profile
 
 wget -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '1107,$d' ~/client_do
+sed -i '2d' ~/client_do && sed -i '1101,$d' ~/client_do
 chmod +x ~/client_do
 . ~/client_do
 cd ~

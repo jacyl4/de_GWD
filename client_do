@@ -25,12 +25,6 @@ nameserver 119.28.28.28
 nameserver 223.6.6.6
 EOF
 
-echo "" > /etc/dnsmasq.conf
-cat > /etc/dnsmasq.conf << EOF
-conf-dir=/etc/dnsmasq.d
-port=53
-EOF
-
 cat > /etc/security/limits.conf << EOF
 * soft nofile 1000000
 * hard nofile 1000000
