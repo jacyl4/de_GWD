@@ -25,7 +25,7 @@ nameserver 119.28.28.28
 nameserver 223.6.6.6
 EOF
 
-touch "/etc/dnsmasq.conf"
+echo "" > /etc/dnsmasq.conf
 cat > /etc/dnsmasq.conf << EOF
 conf-dir=/etc/dnsmasq.d
 port=53
@@ -147,7 +147,7 @@ esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-client
 
-touch /run/doh-client.pid
+echo "" > /run/doh-client.pid
 cat > /lib/systemd/system/doh-client.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS Client
@@ -285,7 +285,7 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
 jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-touch /run/vtrui.pid
+echo "" > /run/vtrui.pid
 cat > /lib/systemd/system/vtrui.service << EOF
 [Unit]
 Description=vtrui Service
@@ -604,7 +604,7 @@ docker pull jacyl4/nginx_tls1.3:latest
 
 mkdir -p /run/php
 rm -rf /run/php/php7.3-fpm.sock
-touch /run/php/php7.3-fpm.sock
+echo "" > /run/php/php7.3-fpm.sock
 chown -R www-data:www-data /run/php
 
 docker run -d --name=nginx --net=host --restart=always \
@@ -643,7 +643,7 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-touch /run/smartdns.pid
+echo "" > /run/smartdns.pid
 cat > /lib/systemd/system/smartdns.service << "EOF"
 [Unit]
 Description=Smart DNS server
@@ -861,7 +861,6 @@ chmod +x /usr/local/bin/Q4H
 cat > ~/now.cron << EOF
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
-@reboot if [[ -d /run/php/php7.3-fpm.sock ]]; then rm -rf /run/php/php7.3-fpm.sock && touch /run/php/php7.3-fpm.sock && chown www-data:www-data /run/php/php7.3-fpm.sock; fi
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron

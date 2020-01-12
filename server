@@ -216,7 +216,7 @@ esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
-touch /run/doh-server.pid
+echo "" > /run/doh-server.pid
 cat > /lib/systemd/system/doh-server.service << "EOF"
 [Unit]
 Description=DNS-over-HTTPS server
@@ -289,7 +289,7 @@ EOF
 jq --arg uuidnum "$uuidnum" '.inbounds[0].settings.clients[0].id=$uuidnum' /etc/vtrui/config.json |\
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-touch /run/vtrui.pid
+echo "" > /run/vtrui.pid
 cat > /lib/systemd/system/vtrui.service << EOF
 [Unit]
 Description=vtrui Service
@@ -409,7 +409,7 @@ http {
 EOF
 
 rm -rf /etc/nginx/conf.d/default.conf
-touch /etc/nginx/conf.d/default.conf
+echo "" > /etc/nginx/conf.d/default.conf
 
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
@@ -426,7 +426,7 @@ docker rm nginx > /dev/null 2>&1
 
 if [[ -d "/etc/php" ]]; then
 mkdir -p /run/php
-touch /run/php/php7.3-fpm.sock
+echo "" > /run/php/php7.3-fpm.sock
 chown www-data:www-data /run/php/php7.3-fpm.sock
 
 docker run -d --name=nginx --net=host --restart=always \
