@@ -82,7 +82,8 @@ read -d '' vtruiIn << EOF
     "protocol": "vmess",
     "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
     "settings": {
-      "clients": []
+      "clients": [
+      ]
       },
     "streamSettings": {
       "network": "ws",
@@ -426,7 +427,7 @@ installDOH
 
 installV2ray
 
-echo $client_do_fwd_uuidnum > /tmp/v2uuids
+echo '{"id": "'$client_do_fwd_uuidnum'", "level": 1, "alterId": 64}' > /tmp/v2uuids
 
 client_do_fwd_v2ray
 
