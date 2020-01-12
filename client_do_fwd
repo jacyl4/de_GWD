@@ -313,55 +313,55 @@ sed -i "/$doh/d" /etc/hosts
 
 
 
-installCliFwd(){
-    green "========================="
+installClient_do_fwd(){
+    green "==========================="
     green " de_GWD IP address"
-    green "========================="
+    green "==========================="
     read localaddr
 
-    green "========================="
+    green "==========================="
     green " Upstream route IP address"
-    green "========================="
+    green "==========================="
     read gatewayaddr
 
-    green "========================="
+    green "==========================="
     green " V2ray domain"
-    green "========================="
+    green "==========================="
     read v2servn
 
-    green "========================="
+    green "==========================="
     green " V2ray UUID"
-    green "========================="
+    green "==========================="
     read uuidnum
 
-    green "========================="
+    green "==========================="
     green " Path"
-    green "========================="
+    green "==========================="
     read v2path
 
-    green "========================="
+    green "==========================="
     green " client_do_fwd_V2ray UUID"
-    green "========================="
+    green "==========================="
     read client_do_fwd_uuidnum
 
-    green "========================="
+    green "==========================="
     green " client_do_fwd_Path"
-    green "========================="
+    green "==========================="
     read client_do_fwd_v2path
 
-    green "========================="
+    green "==========================="
     green " client_do_fwd_Domain"
-    green "========================="
+    green "==========================="
     read client_do_fwd_vpsdomain
 
-    green "========================="
+    green "==========================="
     green " client_do_fwd_http port"
-    green "========================="
+    green "==========================="
     read client_do_fwd_httpPORT
 
-    green "========================="
+    green "==========================="
     green " client_do_fwd_https port"
-    green "========================="
+    green "==========================="
     read client_do_fwd_httpsPORT
 
 wget -O ~/client_do $mirrorSite/client_do
@@ -660,7 +660,7 @@ start_menu(){
     read -p "Select:" num
     case "$num" in
     1)
-    installCliFwd
+    installClient_do_fwd
     start_menu
     ;;
     2)
