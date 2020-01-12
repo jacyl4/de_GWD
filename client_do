@@ -917,16 +917,16 @@ installGWD(){
     green "========================="
     read v2path
 
+cd ~
+
+rm -rf /var/www/html/*
+rm -rf /usr/local/bin/ui-*
+
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
-
-rm -rf /var/www/html/*
-rm -rf /var/www/html/ui-*
-
-cd ~
 
 preInstall
 
