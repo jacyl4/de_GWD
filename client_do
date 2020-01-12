@@ -861,7 +861,6 @@ chmod +x /usr/local/bin/Q4H
 cat > ~/now.cron << EOF
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
-@reboot rm -rf /run/php/* && systemctl restart php7.3-fpm && systemctl restart docker
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
