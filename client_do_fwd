@@ -7,6 +7,28 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 mirrorSite="http://xznat.seso.icu:10178/"
 
+
+
+client_do_fwd_iptablesProxy(){
+sed -i '/dport 53 -s/d' /usr/local/bin/iptables-proxy-up
+sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
+
+addRule1="iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT"
+addRule2="iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT"
+
+addRule3="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+addRule4="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule3" /usr/local/bin/iptables-proxy-up
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule4" /usr/local/bin/iptables-proxy-up
+
+systemctl restart iptables-proxy
+}
+
+
+
 client_do_fwd_installDOHser(){
 cd ~
 wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
@@ -68,26 +90,6 @@ EOF
 systemctl daemon-reload
 systemctl enable doh-server
 systemctl restart doh-server
-}
-
-
-
-client_do_fwd_iptablesProxy(){
-sed -i '/dport 53 -s/d' /usr/local/bin/iptables-proxy-up
-sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
-
-addRule1="iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT"
-addRule2="iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT"
-
-addRule3="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
-addRule4="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
-
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule3" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule4" /usr/local/bin/iptables-proxy-up
-
-systemctl restart iptables-proxy
 }
 
 
@@ -305,6 +307,11 @@ sed -i "/$doh/d" /etc/hosts
 
 
 installClient_do_fwd(){
+wget -O ~/client_do $mirrorSite/client_do
+sed -i '2d' ~/client_do && sed -i '1101,$d' ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
     green "==========================="
     green " de_GWD IP address"
     green "==========================="
@@ -355,10 +362,6 @@ installClient_do_fwd(){
     green "==========================="
     read client_do_fwd_httpsPORT
 
-wget -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '1101,$d' ~/client_do
-chmod +x ~/client_do
-. ~/client_do
 cd ~
 
 rm -rf /var/www/html/gwd/*
@@ -421,17 +424,11 @@ echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/l
 
 installIptablesProxy
 
-client_do_fwd_iptablesProxy
-
 installWG
 
 dockerNginx
 
-client_do_fwd_nginxWebConf
-
 installPihole
-
-client_do_fwd_installDOHser
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
@@ -467,6 +464,12 @@ echo $uuidnum > /var/www/html/gwd/uuid.txt
 echo $v2path > /var/www/html/gwd/path.txt
 echo $client_do_fwd_uuidnum > /var/www/html/gwd/FWDuuid.txt
 echo $client_do_fwd_v2path > /var/www/html/gwd/FWDpath.txt
+
+client_do_fwd_iptablesProxy
+
+client_do_fwd_installDOHser
+
+client_do_fwd_nginxWebConf
 
 client_do_fwd_PostInstall
 
@@ -632,17 +635,17 @@ installV2ray
 
 installIptablesProxy
 
-client_do_fwd_iptablesProxy
-
 installWG
 
 dockerNginx
 
-client_do_fwd_nginxWebConf
-
 installPihole
 
+client_do_fwd_iptablesProxy
+
 client_do_fwd_installDOHser
+
+client_do_fwd_nginxWebConf
 
 client_do_fwd_PostInstall
 
