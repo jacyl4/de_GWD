@@ -72,41 +72,6 @@ systemctl restart doh-server
 
 
 
-client_do_fwd_v2ray(){
-read -d '' vtruiIn << EOF
-	{
-    "port": 11811,
-    "listen": "127.0.0.1",
-    "protocol": "vmess",
-    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
-    "settings": {
-      "clients": [
-      ]
-      },
-    "streamSettings": {
-      "network": "ws",
-      "wsSettings": {
-        "path": "/0000"
-        }
-      }
-    }
-EOF
-
-jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/config.json |\
-jq --arg client_do_fwd_v2path "$client_do_fwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$client_do_fwd_v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
-cat /tmp/v2uuids | while read v2uuids
-do
-jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-done
-
-rm -rf /tmp/v2uuids
-
-systemctl restart vtrui
-}
-
-
-
 client_do_fwd_iptablesProxy(){
 sed -i '/dport 53 -s/d' /usr/local/bin/iptables-proxy-up
 sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
@@ -236,7 +201,34 @@ rsync -Ir ~/ui-script/* /usr/local/bin
 rsync -Ir ~/ui-web/* /var/www/html/gwd
 rm -rf ~/ui-*
 
-wget $mirrorSite/version.php
+cat << "EOF" > /tmp/vtruiConfADD
+client_do_fwd_v2path=$(cat /var/www/html/gwd/FWDpath.txt)
+client_do_fwd_uuidnum=$(cat /var/www/html/gwd/FWDuuid.txt)
+
+vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path": "/0000"}}}'
+
+jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/config.json |\
+jq --arg client_do_fwd_v2path "$client_do_fwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$client_do_fwd_v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
+{
+for v2uuids in $client_do_fwd_uuidnum; do
+echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
+done
+} > /tmp/v2uuids
+
+cat /tmp/v2uuids | while read v2uuids
+do
+jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+done
+
+rm -rf /tmp/v2uuids
+
+systemctl restart vtrui
+EOF
+
+cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow
+
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/gwd/version.php
 
 chown -R www-data:www-data /var/www/html
@@ -421,10 +413,6 @@ installDOH
 
 installV2ray
 
-echo '{"id": "'$client_do_fwd_uuidnum'", "level": 1, "alterId": 64}' > /tmp/v2uuids
-
-client_do_fwd_v2ray
-
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 
 installIptablesProxy
@@ -473,6 +461,8 @@ echo $v2servn > /var/www/html/gwd/nodename.txt
 echo $v2servn > /var/www/html/gwd/domain.txt
 echo $uuidnum > /var/www/html/gwd/uuid.txt
 echo $v2path > /var/www/html/gwd/path.txt
+echo $client_do_fwd_uuidnum > /var/www/html/gwd/FWDuuid.txt
+echo $client_do_fwd_v2path > /var/www/html/gwd/FWDpath.txt
 
 client_do_fwd_PostInstall
 
@@ -632,15 +622,13 @@ client_do_fwd_v2uuids=$(jq -r '.inbounds[2].settings.clients[].id' /etc/vtrui/co
 for v2uuids in $client_do_fwd_v2uuids; do
 echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
 done
-} > /tmp/v2uuids
+} > /var/www/html/gwd/v2uuids
 
 preInstall
 
 installDOH
 
 installV2ray
-
-client_do_fwd_v2ray
 
 installIptablesProxy
 
