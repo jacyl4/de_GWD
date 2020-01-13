@@ -1341,13 +1341,13 @@ vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --compl
 uuidnum=$(jq -r '.inbounds[0].settings.clients[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-v2uuids=$(jq -r '.inbounds[].settings.clients[].id' /etc/vtrui/config.json)
+v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)
 
 {
-for v2uuid in $v2uuids; do
-echo '{"id": "'$v2uuid'", "level": 1, "alterId": 64}'
+for v2uuids in $v2uuids; do
+echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
 done
-} > /tmp/v2uuid
+} > /tmp/v2uuids
 
 installIptablesRules
 
@@ -1357,16 +1357,16 @@ installV2ray
 
 jq 'del(.inbounds[0].settings.clients[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
-cat /tmp/v2uuid | while read line
+cat /tmp/v2uuids | while read line
 do
-jq --argjson v2uuid "$line" '.inbounds[0].settings.clients+=[$v2uuid]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+jq --argjson v2uuids "$line" '.inbounds[0].settings.clients+=[$v2uuids]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
 done
 
 mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui
 
-rm -rf /tmp/v2uuid
+rm -rf /tmp/v2uuids
 
 nginxConf
 

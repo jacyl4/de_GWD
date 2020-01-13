@@ -861,7 +861,6 @@ chmod +x /usr/local/bin/Q4H
 cat << EOF > ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
-@reboot /usr/local/bin/Q4H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
