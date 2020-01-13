@@ -681,7 +681,7 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
 -v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
 -v /var/www/html/:/var/www/html/ \
--v /run/php/php7.3-fpm.sock:/run/php/php7.3-fpm.sock \
+-v /run/php/:/run/php/ \
 jacyl4/nginx_tls1.3:latest
 }
 
@@ -846,10 +846,6 @@ cat << "EOF" > /usr/local/bin/Q4H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
-
-if [[ -d "/run/php/php7.3-fpm.sock" ]]; then
-rm -rf /run/php/php7.3-fpm.sock
-fi
 
 rm -rf ~/client*
 rm -rf /var/log/*1*
