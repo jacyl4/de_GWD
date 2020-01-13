@@ -559,6 +559,28 @@ EOF
 
 sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
 
+rm -rf /lib/systemd/system/php7.3-fpm.service
+cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
+[Unit]
+Description=The PHP 7.3 FastCGI Process Manager
+Documentation=man:php-fpm7.3(8)
+After=network.target
+
+[Service] 
+Type=notify
+PIDFile=/run/php/php7.3-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+ExecReload=/bin/kill -USR2 $MAINPID
+Restart=always
+RestartSec=2s
+LimitNPROC=1000000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload > /dev/null 2>&1
 systemctl enable php7.3-fpm
 systemctl restart php7.3-fpm
 }
