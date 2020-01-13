@@ -205,10 +205,12 @@ cat << "EOF" > /tmp/vtruiConfADD
 client_do_fwd_v2path=$(cat /var/www/html/gwd/FWDpath.txt)
 client_do_fwd_uuidnum=$(cat /var/www/html/gwd/FWDuuid.txt)
 
+jq 'del(.inbounds[2])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+
 vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path": "/0000"}}}'
 
-jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/config.json |\
-jq --arg client_do_fwd_v2path "$client_do_fwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$client_do_fwd_v2path' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/temp.json |\
+jq --arg client_do_fwd_v2path "$client_do_fwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$client_do_fwd_v2path' > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
 
 {
 for v2uuids in $client_do_fwd_uuidnum; do
@@ -218,8 +220,10 @@ done
 
 cat /tmp/v2uuids | while read v2uuids
 do
-jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
 done
+
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 rm -rf /tmp/v2uuids
 
