@@ -490,7 +490,7 @@ client_do_fwd_checkWG=$(/usr/local/bin/ui-checkWG)
 client_do_fwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
 client_do_fwd_vpsdomain=$(awk '/server_name/' /etc/nginx/conf.d/default.conf | awk 'END{print$2}' | sed 's/.$//')
-client_do_fwd_httpsPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==2{print$2}')
+client_do_fwd_httpsPORT=$(awk '/ssl http2 spdy fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
 client_do_fwd_v2path=$(cat /var/www/html/gwd/FWDpath.txt)
 
 wget -O ~/client_do $mirrorSite/client_do
