@@ -471,6 +471,10 @@ echo $client_do_fwd_v2path > /var/www/html/gwd/FWDpath.txt
 client_do_fwd_PostInstall
 
 echo "" > /usr/local/bin/ui-aclifwd
+
+blue "-----------------------------"
+blue  "de_GWD clifwd install [done]"
+blue "-----------------------------"
 }
 
 
@@ -665,6 +669,10 @@ if [[ -f "/usr/local/bin/ui-amarked" ]]; then
 fi
 
 echo "" > /usr/local/bin/ui-aclifwd
+
+blue "----------------------------"
+blue  "de_GWD clifwd Update [done]"
+blue "----------------------------"
 }
 
 
