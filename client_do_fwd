@@ -612,17 +612,9 @@ client_do_fwd_checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
 client_do_fwd_checkWG=$(/usr/local/bin/ui-checkWG)
 client_do_fwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
-client_do_fwd_v2path=$(jq -r '.inbounds[2].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 client_do_fwd_vpsdomain=$(awk '/server_name/' /etc/nginx/conf.d/default.conf | awk 'END{print$2}' | sed 's/.$//')
 client_do_fwd_httpPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==1{print$2}' | sed 's/.$//')
 client_do_fwd_httpsPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==2{print$2}')
-client_do_fwd_v2uuids=$(jq -r '.inbounds[2].settings.clients[].id' /etc/vtrui/config.json)
-
-{
-for v2uuids in $client_do_fwd_v2uuids; do
-echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
-done
-} > /var/www/html/gwd/v2uuids
 
 preInstall
 
