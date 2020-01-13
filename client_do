@@ -1019,6 +1019,51 @@ blue "-------------------------------"
 
 
 
+installBBRplus(){
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+cat << EOF > ~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+
+/usr/bin/apt purge -y linux-image*amd64
+update-grub
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+
+reboot
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
+
+reboot
+}
+
+
+
 updateGWD(){
 source /etc/profile
 
@@ -1145,6 +1190,10 @@ else
     echo "[$statusBAD] Docker         [start failed]"
 fi
 
+blue "--------------------------"
+blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "--------------------------"
+
     green "==============================="
     green "           CLIENT ( Docker )   "
     green "Recommend: Debian 9 + ( amd64 )"
@@ -1153,6 +1202,7 @@ fi
     echo
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
+    green  "3. Install bbrplus and reboot（only Debian 9）"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo
@@ -1164,6 +1214,10 @@ fi
     ;;
     2)
     change_piholeAdmin
+    start_menu
+    ;;
+    3)
+    installBBRplus
     start_menu
     ;;
     0)
