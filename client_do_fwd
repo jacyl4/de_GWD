@@ -333,8 +333,6 @@ installClient_do_fwd(){
     green "==========================="
     read client_do_fwd_httpsPORT
 
-cd ~
-
 rm -rf /var/www/html/gwd/*
 
 wget -O ~/client_do $mirrorSite/client_do
@@ -479,6 +477,8 @@ echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
 fi
 crontab now.cron
 rm -rf now.cron
+
+docker restart nginx
 }
 
 
