@@ -356,13 +356,13 @@ chmod +x ~/client_do
 
 installGWD
 
-client_do_fwd_iptablesProxy
+client_do_fwd_PostInstall
 
 client_do_fwd_installDOHser
 
 client_do_fwd_nginxWebConf
 
-client_do_fwd_PostInstall
+client_do_fwd_iptablesProxy
 
 echo "" > /usr/local/bin/ui-aclifwd
 
