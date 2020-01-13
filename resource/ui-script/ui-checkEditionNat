@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ -f "/usr/local/bin/doh-server" ]]; then
+echo "Nat"
+fi
