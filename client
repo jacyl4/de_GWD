@@ -1008,9 +1008,9 @@ else
     echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
-blue "--------------------------"
+blue "-----------------------------"
 blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
-blue "--------------------------"
+blue "-----------------------------"
 
     green "===================================="
     green "                CLIENT               "
