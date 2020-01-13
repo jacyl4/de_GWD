@@ -489,7 +489,72 @@ EOF
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r)
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" | sudo tee /etc/apt/sources.list.d/docker.list
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
+
+apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io zip subversion rsync php7.3-fpm php7.3-common php7.3-cgi php7.3-sqlite3
+
+systemctl enable docker
+systemctl restart docker
+
+cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
+;;;;;;;;;;;;;;;;;;
+; Global Options ;
+;;;;;;;;;;;;;;;;;;
+
+[global]
+pid = /run/php/php7.3-fpm.pid
+error_log = /var/log/php7.3-fpm.log
+
+emergency_restart_threshold = 20
+emergency_restart_interval = 60s
+process_control_timeout = 10s
+daemonize = yes
+
+rlimit_files = 1000000
+rlimit_core = 0
+
+include=/etc/php/7.3/fpm/pool.d/*.conf
+EOF
+
+cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
+;;;;;;;;;;;;;;;;;;;;
+; Pool Definitions ;
+;;;;;;;;;;;;;;;;;;;;
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php7.3-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+listen.backlog = -1
+listen.allowed_clients = 127.0.0.1
+listen.mode = 0666
+
+pm = dynamic
+pm.max_children = 20
+pm.start_servers = 5
+pm.min_spare_servers = 5
+pm.max_spare_servers = 20
+pm.max_requests = 500
+pm.process_idle_timeout = 10s
+request_terminate_timeout = 320s
+request_slowlog_timeout = 0
+
+pm.status_path = /status
+
+catch_workers_output = yes
+env[HOSTNAME] = \$HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+EOF
+
+sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
 }
 
 
@@ -607,17 +672,16 @@ docker rm nginx > /dev/null 2>&1
 docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
 docker pull jacyl4/nginx_tls1.3:latest
 
-mkdir -p /run/php
 rm -rf /run/php/php7.3-fpm.sock
-echo "" > /run/php/php7.3-fpm.sock
-chown -R www-data:www-data /run/php
+systemctl enable php7.3-fpm
+systemctl restart php7.3-fpm
 
 docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
 -v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
 -v /var/www/html/:/var/www/html/ \
 -v /run/php/php7.3-fpm.sock:/run/php/php7.3-fpm.sock \
--v /etc/localtime:/etc/localtime \
 jacyl4/nginx_tls1.3:latest
 }
 
@@ -732,74 +796,6 @@ EOF
 
 systemctl restart pihole-FTL
 pihole -f
-
-
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-
-echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
-
-apt update
-apt install --no-install-recommends --no-install-suggests -y zip subversion rsync php7.3-fpm 
-
-cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
-;;;;;;;;;;;;;;;;;;
-; Global Options ;
-;;;;;;;;;;;;;;;;;;
-
-[global]
-pid = /run/php/php7.3-fpm.pid
-error_log = /var/log/php7.3-fpm.log
-
-emergency_restart_threshold = 20
-emergency_restart_interval = 60s
-process_control_timeout = 10s
-daemonize = yes
-
-rlimit_files = 1000000
-rlimit_core = 0
-
-include=/etc/php/7.3/fpm/pool.d/*.conf
-EOF
-
-cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
-;;;;;;;;;;;;;;;;;;;;
-; Pool Definitions ;
-;;;;;;;;;;;;;;;;;;;;
-[www]
-user = www-data
-group = www-data
-listen = /run/php/php7.3-fpm.sock
-listen.owner = www-data
-listen.group = www-data
-listen.backlog = -1
-listen.allowed_clients = 127.0.0.1
-listen.mode = 0666
-
-pm = dynamic
-pm.max_children = 20
-pm.start_servers = 5
-pm.min_spare_servers = 5
-pm.max_spare_servers = 20
-pm.max_requests = 500
-pm.process_idle_timeout = 10s
-request_terminate_timeout = 320s
-request_slowlog_timeout = 0
-
-pm.status_path = /status
-
-catch_workers_output = yes
-env[HOSTNAME] = \$HOSTNAME
-env[PATH] = /usr/local/bin:/usr/bin:/bin
-env[TMP] = /tmp
-env[TMPDIR] = /tmp
-env[TEMP] = /tmp
-EOF
-
-sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
-
-systemctl enable php7.3-fpm
-systemctl restart php7.3-fpm
-docker restart nginx
 }
 
 
@@ -851,6 +847,10 @@ cat << "EOF" > /usr/local/bin/Q4H
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
+if [[ -d "/run/php/php7.3-fpm.sock" ]]; then
+rm -rf /run/php/php7.3-fpm.sock
+fi
+
 rm -rf ~/client*
 rm -rf /var/log/*1*
 rm -rf /var/log/*2*
@@ -866,6 +866,7 @@ chmod +x /usr/local/bin/Q4H
 cat << EOF > ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
+@reboot /usr/local/bin/Q4H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -956,14 +957,6 @@ LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
-
-echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
-curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
-
-apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
-
-systemctl enable docker
-systemctl restart docker
 
 installDOH
 
