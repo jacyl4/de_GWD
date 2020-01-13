@@ -307,35 +307,6 @@ sed -i "/$doh/d" /etc/hosts
 
 
 installClient_do_fwd(){
-wget -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '1101,$d' ~/client_do
-chmod +x ~/client_do
-. ~/client_do
-
-    green "==========================="
-    green " de_GWD IP address"
-    green "==========================="
-    read localaddr
-
-    green "==========================="
-    green " Upstream route IP address"
-    green "==========================="
-    read gatewayaddr
-
-    green "==========================="
-    green " V2ray domain"
-    green "==========================="
-    read v2servn
-
-    green "==========================="
-    green " V2ray UUID"
-    green "==========================="
-    read uuidnum
-
-    green "==========================="
-    green " Path"
-    green "==========================="
-    read v2path
 
     green "==========================="
     green " client_do_fwd_V2ray UUID"
@@ -365,94 +336,10 @@ chmod +x ~/client_do
 cd ~
 
 rm -rf /var/www/html/gwd/*
-rm -rf /usr/local/bin/ui-*
 
-domain=$(echo $v2servn | cut -d : -f1)
-port=$(echo $v2servn | cut -d : -f2)
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
-
-piholepw="0000000000000000000000000000000000000000000000000000000000000000"
-
-preInstall
-
-cat > /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
-deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
-EOF
-
-rm -rf /etc/apt/sources.list.d/unstable.list
-rm -rf /etc/apt/preferences.d/limit-unstable
-
-apt update && apt upgrade -y
-apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
-source /etc/profile
-
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat > /etc/default/locale << EOF
-LANG=en_US.UTF-8
-LANGUAGE=en_US.UTF-8
-LC_CTYPE="en_US.UTF-8"
-LC_NUMERIC="en_US.UTF-8"
-LC_TIME="en_US.UTF-8"
-LC_COLLATE="en_US.UTF-8"
-LC_MONETARY="en_US.UTF-8"
-LC_MESSAGES="en_US.UTF-8"
-LC_PAPER="en_US.UTF-8"
-LC_NAME="en_US.UTF-8"
-LC_ADDRESS="en_US.UTF-8"
-LC_TELEPHONE="en_US.UTF-8"
-LC_MEASUREMENT="en_US.UTF-8"
-LC_IDENTIFICATION="en_US.UTF-8"
-LC_ALL=en_US.UTF-8
-EOF
-locale-gen en_US.UTF-8
-
-echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
-curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
-
-apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
-
-systemctl enable docker
-systemctl restart docker
-
-installDOH
-
-installV2ray
-
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
-
-installIptablesProxy
-
-installWG
-
-dockerNginx
-
-installPihole
-
-sed -i "/static ip_address=/d" /etc/dhcpcd.conf
-sed -i "/static routers=/d" /etc/dhcpcd.conf
-sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
-
-echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
-echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
-echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
-
-cat > /etc/network/interfaces << EOF
-source /etc/network/interfaces.d/*
-
-auto lo
-iface lo inet loopback
-
-auto $ethernetnum
-iface $ethernetnum inet static
-  address $localaddr
-  netmask 255.255.255.0
-  gateway $gatewayaddr
-EOF
-
-pihole restartdns
-
+wget -O ~/client_do $mirrorSite/client_do
+sed -i '2d' ~/client_do && sed -i '/\/etc\/sudoers/,$d' ~/client_do
+cat << "EOF" >> ~/client_do
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
 mkdir -p /var/www/html/gwd/
@@ -464,6 +351,12 @@ echo $uuidnum > /var/www/html/gwd/uuid.txt
 echo $v2path > /var/www/html/gwd/path.txt
 echo $client_do_fwd_uuidnum > /var/www/html/gwd/FWDuuid.txt
 echo $client_do_fwd_v2path > /var/www/html/gwd/FWDpath.txt
+}
+EOF
+chmod +x ~/client_do
+. ~/client_do
+
+installGWD
 
 client_do_fwd_iptablesProxy
 
@@ -602,8 +495,17 @@ blue "-------------------------------"
 clifwdUpdate(){
 source /etc/profile
 
+client_do_fwd_checkDNS=$(/usr/local/bin/ui-checkDNS)
+client_do_fwd_checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
+client_do_fwd_checkWG=$(/usr/local/bin/ui-checkWG)
+client_do_fwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
+
+client_do_fwd_vpsdomain=$(awk '/server_name/' /etc/nginx/conf.d/default.conf | awk 'END{print$2}' | sed 's/.$//')
+client_do_fwd_httpPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==1{print$2}' | sed 's/.$//')
+client_do_fwd_httpsPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==2{print$2}')
+
 wget -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '1101,$d' ~/client_do
+sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
 chmod +x ~/client_do
 . ~/client_do
 cd ~
@@ -617,15 +519,6 @@ v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-
-client_do_fwd_checkDNS=$(/usr/local/bin/ui-checkDNS)
-client_do_fwd_checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
-client_do_fwd_checkWG=$(/usr/local/bin/ui-checkWG)
-client_do_fwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
-
-client_do_fwd_vpsdomain=$(awk '/server_name/' /etc/nginx/conf.d/default.conf | awk 'END{print$2}' | sed 's/.$//')
-client_do_fwd_httpPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==1{print$2}' | sed 's/.$//')
-client_do_fwd_httpsPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==2{print$2}')
 
 preInstall
 
