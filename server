@@ -1071,8 +1071,8 @@ rm -rf /lib/systemd/system/php7.3-fpm.service
 cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
 [Unit]
 Description=The PHP 7.3 FastCGI Process Manager
-Documentation=man:php-fpm7.3(8)
 After=network.target
+Wants=network.target
 
 [Service] 
 Type=notify
