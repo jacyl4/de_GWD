@@ -25,6 +25,12 @@ apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ```
 
+
+amd64 nat forward Edition
+```
+apt install -y wget
+bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do_fwd)
+```
 ![client](https://i.loli.net/2020/01/11/4o6fJYW2iVHvKR9.png)
 
 
