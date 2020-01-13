@@ -98,8 +98,8 @@ hwclock -w
 installIptablesRules(){
 cat > /usr/local/bin/iptablesrules-up << EOF
 #!/bin/bash
-iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24 -j ACCEPT
-iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
 
 iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP
