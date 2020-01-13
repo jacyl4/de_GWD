@@ -358,11 +358,11 @@ installGWD
 
 client_do_fwd_PostInstall
 
+client_do_fwd_iptablesProxy
+
 client_do_fwd_installDOHser
 
 client_do_fwd_nginxWebConf
-
-client_do_fwd_iptablesProxy
 
 echo "" > /usr/local/bin/ui-aclifwd
 
@@ -483,7 +483,7 @@ docker restart nginx
 
 
 
-change_piholeAdmin(){
+change_clifwd_piholeAdmin(){
 pihole -a -p
 blue "-------------------------------"
 blue  "Change Pi-hole password [done]"
@@ -536,11 +536,11 @@ installPihole
 
 client_do_fwd_PostInstall
 
+client_do_fwd_iptablesProxy
+
 client_do_fwd_installDOHser
 
 client_do_fwd_nginxWebConf
-
-client_do_fwd_iptablesProxy
 
 if [[ $client_do_fwd_checkDNS = "GFWlist" ]]; then
 /usr/local/bin/ui-changeNLgfw
@@ -601,7 +601,7 @@ start_menu(){
     start_menu
     ;;
     9)
-    change_piholeAdmin
+    change_clifwd_piholeAdmin
     start_menu
     ;;
     0)
