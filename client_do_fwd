@@ -574,6 +574,70 @@ blue "----------------------------"
 
 
 start_menu(){
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+
+if [[ $(systemctl is-active smartdns) = "active" ]]; then
+    echo "[$statusGOOD] SmartDNS       [working]"
+elif [[ ! -f "/etc/smartdns/smartdns.conf" ]]; then
+    echo "[$statusBAD] SmartDNS       [not Installed]"
+else
+    echo "[$statusBAD] SmartDNS       [start failed]"
+fi
+
+if [[ $(systemctl is-active doh-client) = "active" ]]; then
+    echo "[$statusGOOD] DoH client     [working]"
+elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
+    echo "[$statusBAD] DoH client     [not Installed]"
+else
+    echo "[$statusBAD] DoH client     [start failed]"
+fi
+
+if [[ $(systemctl is-active doh-server) = "active" ]]; then
+    echo "[$statusGOOD] DoH server     [working]"
+elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
+    echo "[$statusBAD] DoH server     [not Installed]"
+else
+    echo "[$statusBAD] DoH server     [start failed]"
+fi
+
+if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+    echo "[$statusGOOD] Pi-hole        [working]"
+elif [ ! -f "/usr/local/bin/pihole" ]; then
+    echo "[$statusBAD] Pi-hole        [not installed]"
+else
+    echo "[$statusBAD] Pi-hole        [start failed]"
+fi
+
+if [[ $(systemctl is-active vtrui) = "active" ]]; then
+    echo "[$statusGOOD] V2RAY          [working]"
+elif [[ ! -f "/usr/bin/vtrui" ]]; then
+    echo "[$statusBAD] V2RAY          [not Installed]"
+else
+    echo "[$statusBAD] V2RAY          [start failed]"
+fi
+
+if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
+    echo "[$statusGOOD] PHP7.3-FPM     [working]"
+elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] PHP7.3-FPM     [not installed]"
+else
+    echo "[$statusBAD] PHP7.3-FPM     [start failed]"
+fi
+
+
+if [[ $(systemctl is-active docker) = "active" ]]; then
+    echo "[$statusGOOD] Docker         [working]"
+elif [[ ! -f "/usr/bin/docker" ]]; then
+    echo "[$statusBAD] Docker         [not installed]"
+else
+    echo "[$statusBAD] Docker         [start failed]"
+fi
+
+blue "--------------------------"
+blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "--------------------------"
+
     green "================================"
     green "      CLIENT_fwd ( Docker )"
     green "Recommend: Debian 9 + ( amd64 )"
