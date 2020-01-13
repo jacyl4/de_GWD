@@ -38,7 +38,7 @@ chmod +x /usr/local/bin/doh-server
 rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https
-cat > /etc/dns-over-https/doh-server.conf << EOF
+cat << EOF > /etc/dns-over-https/doh-server.conf
 listen = [ "127.0.0.1:8053" ]
 path = "/dq"
 
@@ -51,7 +51,7 @@ log_guessed_client_ip = false
 EOF
 
 mkdir -p /etc/NetworkManager/dispatcher.d
-cat > /etc/NetworkManager/dispatcher.d/doh-server << "EOF"
+cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
 #!/bin/bash
 case "$2" in
     up)
@@ -68,7 +68,7 @@ EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
 touch /run/doh-server.pid
-cat > /lib/systemd/system/doh-server.service << "EOF"
+cat << "EOF" > /lib/systemd/system/doh-server.service
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target
@@ -96,7 +96,7 @@ systemctl restart doh-server
 
 client_do_fwd_nginxWebConf(){
 rm -rf /etc/nginx/conf.d/default.conf
-cat > /etc/nginx/conf.d/default.conf<< EOF
+cat << EOF > /etc/nginx/conf.d/default.conf
 server {
   listen $client_do_fwd_httpPORT;
   server_name $client_do_fwd_vpsdomain;
@@ -241,7 +241,7 @@ chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 chmod +x /usr/local/bin/*
 
-cat > /usr/local/bin/Q4am << "EOF"
+cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
 wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
@@ -266,7 +266,7 @@ EOF
 chmod +x /usr/local/bin/Q4am
 /usr/local/bin/Q4am
 
-cat > /usr/local/bin/Q4H << "EOF"
+cat << "EOF" > /usr/local/bin/Q4H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
@@ -284,7 +284,7 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-cat > ~/now.cron << EOF
+cat << EOF > ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
 EOF
@@ -389,7 +389,7 @@ wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
-cat > ~/bbrkernel/clearkernel << EOF
+cat << EOF > ~/bbrkernel/clearkernel
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
@@ -460,7 +460,7 @@ curl https://get.acme.sh | sh
                --reloadcmd     "docker restart nginx > /dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
-cat > /var/www/ssl/update_ocsp_cache << EOF
+cat << EOF > /var/www/ssl/update_ocsp_cache
 #!/bin/bash
 wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
 wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem

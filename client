@@ -26,14 +26,14 @@ preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-cat > /etc/resolv.conf << EOF
+cat << EOF > /etc/resolv.conf
 nameserver 119.29.29.29
 nameserver 223.5.5.5
 nameserver 119.28.28.28
 nameserver 223.6.6.6
 EOF
 
-cat > /etc/security/limits.conf << EOF
+cat << EOF > /etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
 * soft nproc 1000000
@@ -41,7 +41,7 @@ cat > /etc/security/limits.conf << EOF
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
-cat > /etc/sysctl.conf << EOF
+cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 10
 fs.file-max = 1000000
@@ -125,7 +125,7 @@ rm -rf ~/doh*
 chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
-cat > /etc/dns-over-https/doh-client.conf << EOF
+cat << EOF > /etc/dns-over-https/doh-client.conf
 listen = [ "127.0.0.1:5380" ]
 
 [upstream]
@@ -153,7 +153,7 @@ doh_upstream='url = "https:\/\/'$doh'\/dq"'
 sed -i "/url/c\\$doh_upstream" /etc/dns-over-https/doh-client.conf
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
-cat > /etc/NetworkManager/dispatcher.d/doh-client << "EOF"
+cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
 #!/bin/bash
 case "$2" in
     up)
@@ -170,7 +170,7 @@ EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-client
 
 echo "" > /run/doh-client.pid
-cat > /lib/systemd/system/doh-client.service << "EOF"
+cat << "EOF" > /lib/systemd/system/doh-client.service
 [Unit]
 Description=DNS-over-HTTPS Client
 After=network-online.target
@@ -216,7 +216,7 @@ rm -rf ~/vtrui*
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
-cat > /etc/vtrui/config.json << EOF
+cat << EOF > /etc/vtrui/config.json
 {
 "dns": {
   "tag": "flow",
@@ -312,7 +312,7 @@ jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
 jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 echo "" > /run/vtrui.pid
-cat > /lib/systemd/system/vtrui.service << EOF
+cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network-online.target
@@ -339,7 +339,7 @@ systemctl enable vtrui > /dev/null 2>&1
 
 
 installIptablesProxy(){
-cat > /usr/local/bin/iptables-proxy-up << "EOF"
+cat << "EOF" > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
 ipset -X hosts
@@ -434,7 +434,7 @@ fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
-cat > /usr/local/bin/iptables-proxy-down << EOF
+cat << EOF > /usr/local/bin/iptables-proxy-down
 #!/bin/bash
 systemctl stop doh-client
 systemctl stop vtrui
@@ -458,7 +458,7 @@ ip rule del fwmark 0x9
 EOF
 chmod +x /usr/local/bin/iptables-proxy-down
 
-cat > /lib/systemd/system/iptables-proxy.service << EOF
+cat << EOF > /lib/systemd/system/iptables-proxy.service
 [Unit]
 Description=iptables-proxy
 After=network.target
@@ -479,7 +479,7 @@ systemctl enable iptables-proxy > /dev/null 2>&1
 systemctl restart iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-cat > /etc/resolv.conf << EOF
+cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
@@ -502,7 +502,7 @@ echo
 
 installWG(){
 if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
+cat << EOF > /etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
 deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
@@ -531,7 +531,7 @@ elif [[ $architecture = "amd64" ]]; then
 fi
 dpkg -i smartdns.deb
 
-cat > /etc/smartdns/smartdns.conf << EOF
+cat << EOF > /etc/smartdns/smartdns.conf
 bind 127.0.0.1:5370
 bind-tcp 127.0.0.1:5370
 
@@ -553,7 +553,7 @@ server 223.6.6.6
 EOF
 
 echo "" > /run/smartdns.pid
-cat > /lib/systemd/system/smartdns.service << "EOF"
+cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=Smart DNS server
 After=network-online.target
@@ -581,7 +581,7 @@ systemctl enable smartdns > /dev/null 2>&1
 systemctl restart smartdns > /dev/null 2>&1
 
 echo "" > /etc/pihole/adlists.list
-cat > /etc/pihole/setupVars.conf << EOF
+cat << EOF > /etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
 PIHOLE_DNS_1=127.0.0.1#5380
@@ -607,7 +607,7 @@ rm -rf ~/Pi-hole
 systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 
-cat > /usr/local/bin/pihole_hotfix << "EOF"
+cat << "EOF" > /usr/local/bin/pihole_hotfix
 #!/bin/bash
 ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1)
 sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
@@ -618,16 +618,16 @@ chmod +x /usr/local/bin/pihole_hotfix
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
-cat > /etc/dnsmasq.conf << EOF
+cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
 port=5390
 EOF
 
-cat > /etc/pihole/dns-servers.conf << EOF
+cat << EOF > /etc/pihole/dns-servers.conf
  DoH;127.0.0.1#5380
 EOF
 
-cat > /etc/pihole/pihole-FTL.conf << EOF
+cat << EOF > /etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
 EOF
@@ -655,7 +655,7 @@ chmod -R 755 /var/www/html
 chmod +x /usr/local/bin/*
 
 
-cat > /usr/local/bin/Q4am << "EOF"
+cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
 wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
@@ -680,7 +680,7 @@ EOF
 chmod +x /usr/local/bin/Q4am
 /usr/local/bin/Q4am
 
-cat > /usr/local/bin/Q4H << "EOF"
+cat << "EOF" > /usr/local/bin/Q4H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
@@ -697,7 +697,7 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-cat > ~/now.cron << EOF
+cat << EOF > ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
 EOF
@@ -759,7 +759,7 @@ piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 preInstall
 
 if [[ $architecture = "amd64" ]]; then
-cat > /etc/apt/sources.list << EOF
+cat << EOF > /etc/apt/sources.list
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
 deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
@@ -774,7 +774,7 @@ apt install --no-install-recommends --no-install-suggests -y sudo locales net-to
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat > /etc/default/locale << EOF
+cat << EOF > /etc/default/locale
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
 LC_CTYPE="en_US.UTF-8"
@@ -815,7 +815,7 @@ echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
-cat > /etc/network/interfaces << EOF
+cat << EOF > /etc/network/interfaces
 source /etc/network/interfaces.d/*
 
 auto lo
