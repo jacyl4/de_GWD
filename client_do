@@ -920,6 +920,19 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut 
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 
+cat << EOF > /etc/network/interfaces
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+  address $localaddr
+  netmask 255.255.255.0
+  gateway $gatewayaddr
+EOF
+
 preInstall
 
 cat << EOF > /etc/apt/sources.list
@@ -978,19 +991,6 @@ sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
-
-cat << EOF > /etc/network/interfaces
-source /etc/network/interfaces.d/*
-
-auto lo
-iface lo inet loopback
-
-auto $ethernetnum
-iface $ethernetnum inet static
-  address $localaddr
-  netmask 255.255.255.0
-  gateway $gatewayaddr
-EOF
 
 pihole restartdns
 
