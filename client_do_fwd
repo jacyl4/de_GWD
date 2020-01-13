@@ -198,8 +198,8 @@ rsync -Ir ~/ui-web/* /var/www/html/gwd
 rm -rf ~/ui-*
 
 cat << "EOF" > /tmp/vtruiConfADD
-client_do_fwd_v2path=$(cat /var/www/html/gwd/FWDpath.txt)
-client_do_fwd_uuidnum=$(cat /var/www/html/gwd/FWDuuid.txt)
+client_do_fwd_v2path=$(cat /var/www/FWDpath.txt)
+client_do_fwd_uuidnum=$(cat /var/www/FWDuuid.txt)
 
 jq 'del(.inbounds[2])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
@@ -336,8 +336,8 @@ echo $v2servn > /var/www/html/gwd/nodename.txt
 echo $v2servn > /var/www/html/gwd/domain.txt
 echo $uuidnum > /var/www/html/gwd/uuid.txt
 echo $v2path > /var/www/html/gwd/path.txt
-echo $client_do_fwd_uuidnum > /var/www/html/gwd/FWDuuid.txt
-echo $client_do_fwd_v2path > /var/www/html/gwd/FWDpath.txt
+echo $client_do_fwd_uuidnum > /var/www/FWDuuid.txt
+echo $client_do_fwd_v2path > /var/www/FWDpath.txt
 }
 EOF
 chmod +x ~/client_do
@@ -491,7 +491,7 @@ client_do_fwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
 client_do_fwd_vpsdomain=$(awk '/server_name/' /etc/nginx/conf.d/default.conf | awk 'END{print$2}' | sed 's/.$//')
 client_do_fwd_httpsPORT=$(awk '/ssl http2 spdy fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
-client_do_fwd_v2path=$(cat /var/www/html/gwd/FWDpath.txt)
+client_do_fwd_v2path=$(cat /var/www/FWDpath.txt)
 
 wget -O ~/client_do $mirrorSite/client_do
 sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do

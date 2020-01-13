@@ -2,6 +2,7 @@
 
 mkdir -p ~/de_GWD_backup
 
+cp -f /var/www/FWD*.txt ~/de_GWD_backup
 cp -f /var/www/html/*.txt ~/de_GWD_backup
 cp -f /etc/wireguard/*key* ~/de_GWD_backup
 
