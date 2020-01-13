@@ -373,6 +373,15 @@ blue "-----------------------------"
 
 
 
+change_clifwd_piholeAdmin(){
+pihole -a -p
+blue "-------------------------------"
+blue  "Change Pi-hole password [done]"
+blue "-------------------------------"
+}
+
+
+
 installBBRplus(){
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
@@ -483,15 +492,6 @@ docker restart nginx
 
 
 
-change_clifwd_piholeAdmin(){
-pihole -a -p
-blue "-------------------------------"
-blue  "Change Pi-hole password [done]"
-blue "-------------------------------"
-}
-
-
-
 clifwdUpdate(){
 source /etc/profile
 
@@ -580,9 +580,9 @@ start_menu(){
     green "================================"
     echo
     green  "1. de_GWD clifwd install"
-    green  "2. Install bbrplus and reboot（only Debian 9）"
+    green  "2. Change de_GWD password"
+    green  "3. Install bbrplus and reboot（only Debian 9）"
     green  "6. make SSL"
-    green  "9. Change de_GWD password"
     yellow "0. de_GWD clifwd Update"
     red    "CTRL+C EXIT"
     echo
@@ -593,15 +593,15 @@ start_menu(){
     start_menu
     ;;
     2)
+    change_clifwd_piholeAdmin
+    start_menu
+    ;;
+    3)
     installBBRplus
     start_menu
     ;;
     6)
     makeSSL
-    start_menu
-    ;;
-    9)
-    change_clifwd_piholeAdmin
     start_menu
     ;;
     0)
