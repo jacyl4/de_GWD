@@ -98,12 +98,6 @@ client_do_fwd_nginxWebConf(){
 rm -rf /etc/nginx/conf.d/default.conf
 cat << EOF > /etc/nginx/conf.d/default.conf
 server {
-  listen $client_do_fwd_httpPORT;
-  server_name $client_do_fwd_vpsdomain;
-  return 301 https://\$server_name\$request_uri;
-}
-
-server {
   listen $client_do_fwd_httpsPORT ssl http2 spdy fastopen=64 reuseport;
   server_name $client_do_fwd_vpsdomain;
   root /var/www/html;
@@ -308,6 +302,15 @@ sed -i "/$doh/d" /etc/hosts
 
 
 installClient_do_fwd(){
+    green "==========================="
+    green " client_do_fwd_Domain"
+    green "==========================="
+    read client_do_fwd_vpsdomain
+
+    green "==========================="
+    green " client_do_fwd_https port"
+    green "==========================="
+    read client_do_fwd_httpsPORT
 
     green "==========================="
     green " client_do_fwd_V2ray UUID"
@@ -318,21 +321,6 @@ installClient_do_fwd(){
     green " client_do_fwd_Path"
     green "==========================="
     read client_do_fwd_v2path
-
-    green "==========================="
-    green " client_do_fwd_Domain"
-    green "==========================="
-    read client_do_fwd_vpsdomain
-
-    green "==========================="
-    green " client_do_fwd_http port"
-    green "==========================="
-    read client_do_fwd_httpPORT
-
-    green "==========================="
-    green " client_do_fwd_https port"
-    green "==========================="
-    read client_do_fwd_httpsPORT
 
 rm -rf /var/www/html/gwd/*
 
@@ -502,7 +490,6 @@ client_do_fwd_checkWG=$(/usr/local/bin/ui-checkWG)
 client_do_fwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
 client_do_fwd_vpsdomain=$(awk '/server_name/' /etc/nginx/conf.d/default.conf | awk 'END{print$2}' | sed 's/.$//')
-client_do_fwd_httpPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==1{print$2}' | sed 's/.$//')
 client_do_fwd_httpsPORT=$(awk '/listen/' /etc/nginx/conf.d/default.conf | awk 'NR==2{print$2}')
 client_do_fwd_v2path=$(cat /var/www/html/gwd/FWDpath.txt)
 
