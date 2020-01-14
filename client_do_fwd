@@ -127,7 +127,7 @@ server {
   add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
   
 location ~* \.php$ {
-  fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
+  fastcgi_pass            unix:/run/php/php7.4-fpm.sock;
   fastcgi_index           index.php;
   fastcgi_split_path_info ^(.+\.php)(.*)$;
   include                 fastcgi_params;
@@ -608,12 +608,12 @@ else
     echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
-if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
-    echo "[$statusGOOD] PHP7.3-FPM     [working]"
-elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
-    echo "[$statusBAD] PHP7.3-FPM     [not installed]"
+if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
+    echo "[$statusGOOD] PHP7.4-FPM     [working]"
+elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] PHP7.4-FPM     [not installed]"
 else
-    echo "[$statusBAD] PHP7.3-FPM     [start failed]"
+    echo "[$statusBAD] PHP7.4-FPM     [start failed]"
 fi
 
 
