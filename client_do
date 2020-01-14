@@ -498,19 +498,20 @@ echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-re
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
 
-apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io zip subversion rsync php7.3-fpm php7.3-common php7.3-cgi php7.3-sqlite3
+apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io \
+php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync net-tools dialog dhcpcd5 lsof netcat idn2 dns-root-data resolvconf lighttpd
 
 systemctl enable docker
 systemctl restart docker
 
-cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
+cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
 ;;;;;;;;;;;;;;;;;;
 ; Global Options ;
 ;;;;;;;;;;;;;;;;;;
 
 [global]
-pid = /run/php/php7.3-fpm.pid
-error_log = /var/log/php7.3-fpm.log
+pid = /run/php/php7.4-fpm.pid
+error_log = /var/log/php7.4-fpm.log
 
 emergency_restart_threshold = 20
 emergency_restart_interval = 60s
@@ -520,17 +521,17 @@ daemonize = yes
 rlimit_files = 1000000
 rlimit_core = 0
 
-include=/etc/php/7.3/fpm/pool.d/*.conf
+include=/etc/php/7.4/fpm/pool.d/*.conf
 EOF
 
-cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
+cat << EOF > /etc/php/7.4/fpm/pool.d/www.conf
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ;
 ;;;;;;;;;;;;;;;;;;;;
 [www]
 user = www-data
 group = www-data
-listen = /run/php/php7.3-fpm.sock
+listen = /run/php/php7.4-fpm.sock
 listen.owner = www-data
 listen.group = www-data
 listen.backlog = -1
@@ -557,19 +558,19 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
+sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.4/fpm/php.ini
 
-rm -rf /lib/systemd/system/php7.3-fpm.service
-cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
+rm -rf /lib/systemd/system/php7.4-fpm.service
+cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
 [Unit]
-Description=The PHP 7.3 FastCGI Process Manager
+Description=The PHP 7.4 FastCGI Process Manager
 After=network.target
 Wants=network.target
 
 [Service] 
 Type=notify
-PIDFile=/run/php/php7.3-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+PIDFile=/run/php/php7.4-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 RestartSec=2s
@@ -581,8 +582,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable php7.3-fpm
-systemctl restart php7.3-fpm
+systemctl enable php7.4-fpm
+systemctl restart php7.4-fpm
 }
 
 
@@ -685,7 +686,7 @@ server {
   index        index.php index.html index.htm;
 
 location ~* \.php$ {
-  fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
+  fastcgi_pass            unix:/run/php/php7.4-fpm.sock;
   fastcgi_index           index.php;
   fastcgi_split_path_info ^(.+\.php)(.*)$;
   include                 fastcgi_params;
@@ -967,7 +968,7 @@ rm -rf /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
 
 apt update && apt upgrade -y
-apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils ipset unzip wget curl git jq ca-certificates apt-transport-https gnupg2
+apt install --no-install-recommends --no-install-suggests -y sudo locales ipset unzip wget curl git dnsutils jq ca-certificates apt-transport-https gnupg2
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -1039,51 +1040,6 @@ pihole -a -p
 blue "-------------------------------"
 blue  "Change Pi-hole password [done]"
 blue "-------------------------------"
-}
-
-
-
-installBBRplus(){
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-cat << EOF > ~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-sysctl -p
-
-/usr/bin/apt purge -y linux-image*amd64
-update-grub
-
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-
-reboot
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-blue "-----------------------"
-blue  "Install bbrplus [done]"
-blue "-----------------------"
-
-reboot
 }
 
 
@@ -1197,12 +1153,12 @@ else
 fi
 
 
-if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
-    echo "[$statusGOOD] PHP7.3-FPM     [working]"
-elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
-    echo "[$statusBAD] PHP7.3-FPM     [not installed]"
+if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
+    echo "[$statusGOOD] php7.4-FPM     [working]"
+elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] php7.4-FPM     [not installed]"
 else
-    echo "[$statusBAD] PHP7.3-FPM     [start failed]"
+    echo "[$statusBAD] php7.4-FPM     [start failed]"
 fi
 
 
@@ -1226,7 +1182,6 @@ blue "-----------------------------"
     echo
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    green  "3. Install bbrplus and reboot（only Debian 9）"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo
@@ -1238,10 +1193,6 @@ blue "-----------------------------"
     ;;
     2)
     change_piholeAdmin
-    start_menu
-    ;;
-    3)
-    installBBRplus
     start_menu
     ;;
     0)

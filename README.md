@@ -24,15 +24,13 @@ amd64 docker nginx Edition
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ```
+![client](https://i.loli.net/2020/01/11/4o6fJYW2iVHvKR9.png)
 
+
+![client_do](https://i.loli.net/2020/01/11/eYZWOkDwBjm7EdN.png)
 
 amd64 nat forward Edition
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do_fwd)
 ```
-![client](https://i.loli.net/2020/01/11/4o6fJYW2iVHvKR9.png)
-
-
-![client_do](https://i.loli.net/2020/01/11/eYZWOkDwBjm7EdN.png)
-
