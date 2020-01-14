@@ -6,7 +6,7 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-mirrorSite="http://xznat.seso.icu:10178/"
+mirrorSite="http://xznat.seso.icu:10178"
 
 smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
 
@@ -96,7 +96,7 @@ hwclock -w
 
 installDOH(){
 cd ~
-doh=$v2servn
+doh="$domain:$port"
 domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i "1i $domainip $doh" /etc/hosts
@@ -105,6 +105,7 @@ wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 unzip doh.zip
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
 chmod +x /usr/local/bin/doh-client
+rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https/
 cat << EOF > /etc/dns-over-https/doh-client.conf
@@ -192,6 +193,7 @@ mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
 mv -f ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
+rm -rf ~/vtrui*
 
 cat << EOF > /etc/vtrui/config.json
 {
@@ -899,8 +901,6 @@ fi
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
 sed -i "/$doh/d" /etc/hosts
-rm -rf ~/doh*
-rm -rf ~/vtrui*
 }
 
 
@@ -932,7 +932,6 @@ installGWD(){
     read v2path
 
 cd ~
-
 rm -rf /var/www/html/*
 rm -rf /usr/local/bin/ui-*
 
