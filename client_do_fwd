@@ -527,7 +527,7 @@ installV2ray
 
 installIptablesProxy
 
-installWG
+installWGdoPHP
 
 dockerNginx
 
