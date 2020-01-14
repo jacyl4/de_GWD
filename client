@@ -497,6 +497,7 @@ else
     echo "$statusFailed de_GWD server access"
     echo "$statusFailed de_GWD server access"
     echo "$statusFailed de_GWD server access"
+    exit
 fi
 echo
 }

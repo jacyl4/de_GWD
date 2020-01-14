@@ -96,7 +96,7 @@ hwclock -w
 
 installDOH(){
 cd ~
-doh=$domain
+doh=$v2servn
 domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i "1i $domainip $doh" /etc/hosts
@@ -1023,14 +1023,14 @@ pihole restartdns
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-installWebUI
-
 echo $v2servn > /var/www/html/doh.txt
 echo $v2servn >> /var/www/html/doh.txt
 echo $v2servn > /var/www/html/nodename.txt
 echo $v2servn > /var/www/html/domain.txt
 echo $uuidnum > /var/www/html/uuid.txt
 echo $v2path > /var/www/html/path.txt
+
+installWebUI
 
 postInstall
 

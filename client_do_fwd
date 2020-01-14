@@ -334,25 +334,15 @@ installClient_do_fwd(){
 rm -rf /var/www/html/gwd/*
 
 wget -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '/\/etc\/sudoers/,$d' ~/client_do
-cat << EOF >> ~/client_do
-sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
-
-mkdir -p /var/www/html/gwd/
-echo $v2servn > /var/www/html/gwd/doh.txt
-echo $v2servn >> /var/www/html/gwd/doh.txt
-echo $v2servn > /var/www/html/gwd/nodename.txt
-echo $v2servn > /var/www/html/gwd/domain.txt
-echo $uuidnum > /var/www/html/gwd/uuid.txt
-echo $v2path > /var/www/html/gwd/path.txt
-echo $client_do_fwd_uuidnum > /var/www/FWDuuid.txt
-echo $client_do_fwd_v2path > /var/www/FWDpath.txt
-}
-EOF
+sed -i '2d' ~/client_do && sed -i '/installWebUI/,$d' ~/client_do
+echo "}" >> ~/client_do
 chmod +x ~/client_do
 . ~/client_do
 
 installGWD
+
+echo $client_do_fwd_uuidnum > /var/www/FWDuuid.txt
+echo $client_do_fwd_v2path > /var/www/FWDpath.txt
 
 client_do_fwd_installDOHser
 
