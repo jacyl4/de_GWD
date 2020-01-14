@@ -356,9 +356,11 @@ installGWD
 
 client_do_fwd_installDOHser
 
-client_do_fwd_iptablesProxy
+client_do_fwd_installWebUI
 
 client_do_fwd_PostInstall
+
+client_do_fwd_iptablesProxy
 
 client_do_fwd_nginxWebConf
 
@@ -533,9 +535,11 @@ installPihole
 
 client_do_fwd_installDOHser
 
-client_do_fwd_iptablesProxy
+client_do_fwd_installWebUI
 
 client_do_fwd_PostInstall
+
+client_do_fwd_iptablesProxy
 
 client_do_fwd_nginxWebConf
 
