@@ -185,7 +185,7 @@ cd ~
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 
-wget --no-check-certificate  -O ~/vtrui.zip $mirrorSite/vtamd64.zip
+wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
 unzip vtrui.zip
 mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
