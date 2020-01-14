@@ -27,7 +27,7 @@ bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ![client](https://i.loli.net/2020/01/11/4o6fJYW2iVHvKR9.png)
 
 
-![client_do](https://i.loli.net/2020/01/11/eYZWOkDwBjm7EdN.png)
+![client_do](https://i.loli.net/2020/01/14/LnNQ8qTbSzR3FlI.png)
 
 amd64 nat forward Edition
 ```
