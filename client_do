@@ -104,7 +104,6 @@ sed -i "1i $domainip $doh" /etc/hosts
 wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 unzip doh.zip
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
-rm -rf ~/doh*
 chmod +x /usr/local/bin/doh-client
 
 mkdir -p /etc/dns-over-https/
@@ -113,13 +112,13 @@ listen = [ "127.0.0.1:5380" ]
 
 [upstream]
 upstream_selector = "weighted_round_robin"
-
 # DoH1
+
 [[upstream.upstream_ietf]]
     url = "https://xxx.ooo/dq"
     weight = 50
-
 # DoH2
+
 [[upstream.upstream_ietf]]
     url = "https://xxx.ooo/dq"
     weight = 50
@@ -191,7 +190,6 @@ unzip vtrui.zip
 mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
 mv -f ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
-rm -rf ~/vtrui*
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 
@@ -476,13 +474,14 @@ else
     echo "$statusFailed de_GWD server access"
     echo "$statusFailed de_GWD server access"
     echo "$statusFailed de_GWD server access"
+    exit
 fi
 echo
 }
 
 
 
-installWG(){
+installWGdoPHP(){
 cat << EOF > /etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
 deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
@@ -492,11 +491,11 @@ EOF
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" | sudo tee /etc/apt/sources.list.d/docker.list
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io \
 php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync net-tools dialog dhcpcd5 lsof netcat idn2 dns-root-data resolvconf lighttpd
@@ -505,10 +504,6 @@ systemctl enable docker
 systemctl restart docker
 
 cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
-;;;;;;;;;;;;;;;;;;
-; Global Options ;
-;;;;;;;;;;;;;;;;;;
-
 [global]
 pid = /run/php/php7.4-fpm.pid
 error_log = /var/log/php7.4-fpm.log
@@ -698,6 +693,7 @@ EOF
 
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
+
 docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
 docker pull jacyl4/nginx_tls1.3:latest
 
@@ -825,7 +821,8 @@ pihole -f
 
 
 
-postInstall(){
+installWebUI(){
+cd ~
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
@@ -840,8 +837,11 @@ mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 chmod +x /usr/local/bin/*
+}
 
 
+
+postInstall(){
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
@@ -884,13 +884,15 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-cat << EOF > ~/now.cron
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+cat << EOF >> ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
-
 
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
 mkdir -p /etc/wireguard
@@ -902,6 +904,8 @@ fi
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
 sed -i "/$doh/d" /etc/hosts
+rm -rf ~/doh*
+rm -rf ~/vtrui*
 }
 
 
@@ -999,7 +1003,7 @@ echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/l
 
 installIptablesProxy
 
-installWG
+installWGdoPHP
 
 dockerNginx
 
@@ -1018,6 +1022,8 @@ echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 pihole restartdns
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+
+installWebUI
 
 echo $v2servn > /var/www/html/doh.txt
 echo $v2servn >> /var/www/html/doh.txt
@@ -1073,11 +1079,13 @@ installV2ray
 
 installIptablesProxy
 
-installWG
+installWGdoPHP
 
 dockerNginx
 
 installPihole
+
+installWebUI
 
 postInstall
 

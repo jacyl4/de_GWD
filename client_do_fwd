@@ -25,12 +25,8 @@ systemctl restart iptables-proxy
 
 
 client_do_fwd_installDOHser(){
-cd ~
-wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
-unzip doh.zip
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
-rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https
 cat << EOF > /etc/dns-over-https/doh-server.conf
@@ -177,7 +173,7 @@ jacyl4/nginx_tls1.3:latest
 
 
 
-client_do_fwd_PostInstall(){
+client_do_fwd_installWebUI(){
 cd ~
 ln -s /var/www/html/admin  /var/www/html/gwd/admin
 
@@ -231,6 +227,8 @@ systemctl restart vtrui
 EOF
 
 cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow > /dev/null 2>&1
+rm -rf /tmp/v2uuids
+rm -rf /tmp/vtruiConfADD
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/gwd/version.php
@@ -238,7 +236,11 @@ mv -f ~/version.php /var/www/html/gwd/version.php
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 chmod +x /usr/local/bin/*
+}
 
+
+
+client_do_fwd_PostInstall(){
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
@@ -282,13 +284,15 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-cat << EOF > ~/now.cron
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+cat << EOF >> ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
-
 
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
 mkdir -p /etc/wireguard
@@ -300,6 +304,8 @@ fi
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
 sed -i "/$doh/d" /etc/hosts
+rm -rf ~/doh*
+rm -rf ~/vtrui*
 }
 
 
@@ -472,12 +478,11 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-crontab -l > now.cron
-if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]]; then
-echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
-fi
-crontab now.cron
-rm -rf now.cron
+crontab -l > ~/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
 
 docker restart nginx
 }
