@@ -314,19 +314,19 @@ jacyl4/nginx_tls1.3:latest
 
 
 installClient_do_fwd(){
-    green "==========================="
+    green "============================"
     green " client_do_fwd_V2ray Domain"
-    green "==========================="
+    green "============================"
     read client_do_fwd_domain
 
-    green "==========================="
+    green "============================"
     green " client_do_fwd_V2ray UUID"
-    green "==========================="
+    green "============================"
     read client_do_fwd_uuidnum
 
-    green "==========================="
+    green "============================"
     green " client_do_fwd_V2ray Path"
-    green "==========================="
+    green "============================"
     read client_do_fwd_v2path
 
 cd ~
