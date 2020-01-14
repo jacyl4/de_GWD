@@ -498,7 +498,7 @@ echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= |
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io \
-php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync net-tools dialog dhcpcd5 lsof netcat idn2 dns-root-data resolvconf lighttpd
+php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync net-tools dialog dhcpcd5 lsof netcat idn2 libcap2-bin dns-root-data resolvconf lighttpd
 
 systemctl enable docker
 systemctl restart docker
