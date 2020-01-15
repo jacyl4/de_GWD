@@ -448,7 +448,7 @@ makeSSL(){
     green "==========================="
     read CFemail
 
-apt update && apt install -y socat
+apt update && apt install -y netcat socat
 
 cd ~
 mkdir -p /var/www/ssl
@@ -458,6 +458,7 @@ export CF_Key="$CFapikey"
 export CF_Email="$CFemail"
 
 curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --upgrade  --auto-upgrade
 ~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
 ~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
                --keypath        /var/www/ssl/$topDomain.key  \

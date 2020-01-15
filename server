@@ -479,6 +479,7 @@ docker restart nginx > /dev/null 2>&1
 
 mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --upgrade  --auto-upgrade
 ~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html --keylength ec-256
 ~/.acme.sh/acme.sh --installcert -d $vpsdomain --ecc \
                --key-file       /var/www/ssl/$vpsdomain.key  \
@@ -506,12 +507,11 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-crontab -l > now.cron
-if [[ "$(crontab -l | grep 'update_ocsp_cache' | awk '{print $6}')" != "/var/www/ssl/update_ocsp_cache" ]]; then
-echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> now.cron
-fi
-crontab now.cron
-rm -rf now.cron
+crontab -l > ~/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
 }
 
 
@@ -853,7 +853,7 @@ deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERS
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git socat jq unzip ca-certificates apt-transport-https gnupg2
+apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
