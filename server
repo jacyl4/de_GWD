@@ -825,7 +825,7 @@ installGWD(){
     read vpsdomain
    
 v2uuids=$(cat /proc/sys/kernel/random/uuid)
-v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
+v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
@@ -907,7 +907,7 @@ blue "--------------------------------------------"
 blue  "Install de_GWD [done]"
 echo
 blue "Domain： $(yellow "$vpsdomain")"
-blue "UUID： $(yellow "$uuidnum")"
+blue "UUID： $(yellow "$v2uuids")"
 blue "PATH： $(yellow "$v2path")"
 blue "--------------------------------------------"
 }
