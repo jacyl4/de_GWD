@@ -298,7 +298,7 @@ done
 
 cat /tmp/v2clients | while read v2clients
 do
-jq --argjson v2clients "$v2clients" '.inbounds[0].settings.clients+=[$v2clients]' /etc/vtrui/config.json >  && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --argjson v2clients "$v2clients" '.inbounds[0].settings.clients+=[$v2clients]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 done
 rm -rf /tmp/v2clients
 
