@@ -95,8 +95,8 @@ do
   sed -i 's:/var/www/html:/var/www/html/gwd:g' $htmlFILE
 done
 
-rsync -Ir ~/ui-script/* /usr/local/bin
-rsync -Ir ~/ui-web/* /var/www/html/gwd
+rsync -azrI ~/ui-script/* /usr/local/bin
+rsync -azrI ~/ui-web/* /var/www/html/gwd
 rm -rf ~/ui-*
 
 cat << "EOF" > /tmp/vtruiConfADD

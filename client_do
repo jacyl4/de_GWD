@@ -829,8 +829,8 @@ cd ~
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-rsync -Ir ~/ui-script/* /usr/local/bin
-rsync -Ir ~/ui-web/* /var/www/html
+rsync -azrI ~/ui-script/* /usr/local/bin
+rsync -azrI ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php

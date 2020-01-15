@@ -808,7 +808,7 @@ indexpage=$(ls /var/www/html/index.* 2> /dev/null | wc -l)
 if [ "$indexpage" = "0" ]; then 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/sample.zip
 unzip sample.zip
-rsync -r ~/sample/* /var/www/html/
+rsync -azrI ~/sample/* /var/www/html/
 rm -rf ~/sample*
 fi
 
