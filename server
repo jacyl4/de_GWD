@@ -1436,14 +1436,13 @@ statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 statusNONE=$(yellow "-")
 
-if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusGOOD] V2RAY        [working]"
-elif [[ ! -d "/usr/bin/vtrui" ]]; then
-    echo "[$statusBAD] V2RAY        [not Installed]"
+if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+    echo "[$statusGOOD] Pi-hole      [working]"
+elif [[ ! -f "/usr/local/bin/pihole" ]]; then
+    echo "[$statusBAD] Pi-hole      [not installed]"
 else
-    echo "[$statusBAD] V2RAY        [start failed]"
+    echo "[$statusBAD] Pi-hole      [start failed]"
 fi
-
 
 if [[ $(systemctl is-active doh-server) = "active" ]]; then
     echo "[$statusGOOD] DoH server   [working]"
@@ -1453,15 +1452,13 @@ else
     echo "[$statusBAD] DoH server   [start failed]"
 fi
 
-
-if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
-    echo "[$statusGOOD] Pi-hole      [working]"
-elif [[ ! -f "/usr/local/bin/pihole" ]]; then
-    echo "[$statusBAD] Pi-hole      [not installed]"
+if [[ $(systemctl is-active vtrui) = "active" ]]; then
+    echo "[$statusGOOD] V2RAY        [working]"
+elif [[ ! -d "/usr/bin/vtrui" ]]; then
+    echo "[$statusBAD] V2RAY        [not Installed]"
 else
-    echo "[$statusBAD] Pi-hole      [start failed]"
+    echo "[$statusBAD] V2RAY        [start failed]"
 fi
-
 
 if [[ $(systemctl is-active docker) = "active" ]]; then
     echo "[$statusGOOD] Docker       [working]"
@@ -1478,15 +1475,15 @@ else
     echo "[$statusNONE] Nextcloud    [not installed]"
 fi
 
-blue "--------------------------"
+blue "---------------------------"
 blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
-blue "--------------------------"
+blue "---------------------------"
 
-    green "=========================="
-    green "         SERVER"
+    green "==========================="
+    green "       SERVER"
     green "Recommend: Debian 9"
     green "Author:    JacyL4"
-    green "=========================="
+    green "==========================="
 if [[ -f "/usr/local/bin/version.php" ]]; then
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
 fi
