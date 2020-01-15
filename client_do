@@ -501,7 +501,7 @@ curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io \
+apt-get update && apt-get install --no-install-recommends --no-install-suggests -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io \
 php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync net-tools dialog dhcpcd5 lsof netcat idn2 libcap2-bin dns-root-data resolvconf lighttpd
 
 systemctl enable docker
@@ -964,8 +964,7 @@ EOF
 rm -rf /etc/apt/sources.list.d/unstable.list
 rm -rf /etc/apt/preferences.d/limit-unstable
 
-apt update && apt upgrade -y
-apt install --no-install-recommends --no-install-suggests -y sudo locales ipset unzip wget curl git dnsutils jq ca-certificates apt-transport-https gnupg2
+apt-get update && apt-get install --no-install-recommends --no-install-suggests -y sudo locales ipset unzip wget curl git dnsutils jq ca-certificates apt-transport-https gnupg2
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
