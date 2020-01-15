@@ -466,23 +466,14 @@ fi
 
 
 makeSSL(){
-rm -rf /etc/nginx/conf.d/default.conf
-cat << EOF > /etc/nginx/conf.d/default.conf
-server {
-    listen      80;
-    server_name $vpsdomain;
-    root        /var/www/html;
-    index       index.php index.html index.htm;
-}
-EOF
-docker restart nginx > /dev/null 2>&1
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
 
-mkdir -p /var/www/ssl
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --upgrade  --auto-upgrade
-~/.acme.sh/acme.sh --issue -d $vpsdomain -w /var/www/html --keylength ec-256
-~/.acme.sh/acme.sh --installcert -d $vpsdomain --ecc \
-               --key-file       /var/www/ssl/$vpsdomain.key  \
+~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
+~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
+               --keypath        /var/www/ssl/$topDomain.key  \
                --fullchain-file /var/www/ssl/fullchain.cer \
                --reloadcmd     "docker restart nginx > /dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
@@ -515,22 +506,17 @@ rm -rf ~/now.cron
 }
 
 
+
 nginxWebConf(){
 cat << EOF > /etc/nginx/conf.d/default.conf
 server {
-  listen 80;
-  server_name $vpsdomain;
-  return 301 https://\$server_name\$request_uri;
-}
-
-server {
-  listen 443 ssl http2 spdy fastopen=64 reuseport;
-  server_name $vpsdomain;
+  listen $port ssl http2 spdy fastopen=64 reuseport;
+  server_name $domain;
   root /var/www/html;
   index index.php index.html index.htm;
 
   ssl_certificate /var/www/ssl/fullchain.cer;
-  ssl_certificate_key /var/www/ssl/$vpsdomain.key;
+  ssl_certificate_key /var/www/ssl/$topDomain.key;
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
@@ -560,176 +546,6 @@ server {
 location /dq {
   proxy_set_header Host \$host;
   proxy_set_header X-Real-IP \$remote_addr;
-  proxy_pass              http://127.0.0.1:8053/dq;
-}
-
-location $v2path {
-  proxy_http_version      1.1;
-  proxy_set_header Host \$http_host;
-  proxy_set_header Upgrade WebSocket;
-  proxy_set_header Connection "upgrade";
-  proxy_set_header X-Real-IP \$remote_addr;
-  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_read_timeout      86400;
-  keepalive_requests      25600;
-  keepalive_timeout       300 300;
-  proxy_redirect          off;
-  proxy_buffering         off;
-  proxy_pass              http://127.0.0.1:11811;
-}
-
-}
-EOF
-
-docker restart nginx > /dev/null 2>&1
-}
-
-
-nginxNextcloudConf(){
-cat << EOF > /etc/nginx/conf.d/default.conf
-upstream php-handler {
-    server unix:/run/php/php7.4-fpm.sock;
-}
-
-server {
-  listen 80;
-  server_name $vpsdomain;
-  return 301 https://\$server_name\$request_uri;
-}
-
-server {
-  listen 443 ssl http2 spdy fastopen=64 reuseport;
-  server_name $vpsdomain;
-  root /var/www/html;
-  index index.php index.html index.htm;
-
-  ssl_certificate /var/www/ssl/fullchain.cer;
-  ssl_certificate_key /var/www/ssl/$vpsdomain.key;
-  ssl_dhparam /var/www/ssl/dhparam.pem;
-  ssl_protocols TLSv1.2 TLSv1.3;
-  ssl_prefer_server_ciphers on;
-  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
-  ssl_session_timeout 10m;
-  ssl_session_cache shared:le_nginx_SSL:10m;
-  ssl_buffer_size 1400;
-
-  ssl_early_data on;
-  proxy_set_header Early-Data \$ssl_early_data;
-
-  ssl_stapling on;
-  ssl_stapling_verify on;
-  ssl_stapling_file /var/www/ssl/ocsp.resp;
-  resolver 8.8.8.8 valid=600s;
-  resolver_timeout 5s;
-
-  add_header X-Frame-Options SAMEORIGIN;
-  add_header X-Content-Type-Options nosniff;
-  add_header X-Robots-Tag none;
-  add_header X-Download-Options noopen;
-  add_header X-Permitted-Cross-Domain-Policies none;
-  add_header X-XSS-Protection "1; mode=block";
-  add_header Referrer-Policy no-referrer;
-  add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
-
-  location ~ [^/]\.php(/|$) {
-    include fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-    fastcgi_pass unix:/run/php/php7.4-fpm.sock;
-    fastcgi_index index.php;
-  }
-
-    fastcgi_hide_header X-Powered-By;
-
-    location = /robots.txt {
-        allow all;
-        log_not_found off;
-        access_log off;
-    }
-
-    location = /.well-known/carddav {
-      return 301 \$scheme://\$host/nextcloud/remote.php/dav;
-    }
-    location = /.well-known/caldav {
-      return 301 \$scheme://\$host/nextcloud/remote.php/dav;
-    }
-
-    location /.well-known/acme-challenge { }
-
-    location ^~ /nextcloud {
-
-    # set max upload size
-    client_max_body_size 10G;
-    fastcgi_buffers 64 4K;
-
-        # Uncomment if your server is build with the ngx_pagespeed module
-        # This module is currently not supported.
-        #pagespeed off;
-
-        location /nextcloud {
-            rewrite ^ /nextcloud/index.php\$request_uri;
-        }
-
-        location ~ ^\/nextcloud\/(?:build|tests|config|lib|3rdparty|templates|data)\/ {
-            deny all;
-        }
-        location ~ ^\/nextcloud\/(?:\.|autotest|occ|issue|indie|db_|console) {
-            deny all;
-        }
-
-        location ~ ^\/nextcloud\/(?:index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|oc[ms]-provider\/.+)\.php(?:$|\/) {
-            fastcgi_split_path_info ^(.+?\.php)(\/.*|)$;
-            include fastcgi_params;
-            fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-            fastcgi_param PATH_INFO \$fastcgi_path_info;
-            fastcgi_param HTTPS on;
-            #Avoid sending the security headers twice
-            fastcgi_param modHeadersAvailable true;
-            fastcgi_param front_controller_active true;
-            fastcgi_pass php-handler;
-            fastcgi_intercept_errors on;
-            fastcgi_request_buffering off;
-        }
-
-        location ~ ^\/nextcloud\/(?:updater|oc[ms]-provider)(?:$|\/) {
-            try_files \$uri/ =404;
-            index index.php;
-        }
-
-        # Adding the cache control header for js and css files
-        # Make sure it is BELOW the PHP block
-        location ~ ^\/nextcloud\/.+[^\/]\.(?:css|js|woff2?|svg|gif)$ {
-            try_files \$uri /nextcloud/index.php\$request_uri;
-            add_header Cache-Control "public, max-age=15778463";
-            # Add headers to serve security related headers  (It is intended
-            # to have those duplicated to the ones above)
-            # Before enabling Strict-Transport-Security headers please read
-            # into this topic first.
-            # add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;";
-            add_header X-Frame-Options SAMEORIGIN;
-            add_header X-Content-Type-Options nosniff;
-            add_header X-XSS-Protection "1; mode=block";
-            add_header X-Robots-Tag none;
-            add_header X-Download-Options noopen;
-            add_header X-Permitted-Cross-Domain-Policies none;
-            add_header Referrer-Policy no-referrer;
-
-            # Optional: Don't log access to assets
-            access_log off;
-        }
-
-        location ~ ^\/nextcloud\/.+[^\/]\.(?:png|html|ttf|ico|jpg|jpeg)$ {
-            try_files \$uri /nextcloud/index.php\$request_uri;
-            # Optional: Don't log access to other assets
-            access_log off;
-        }
-    }
-
-location /dq {
-  proxy_http_version      1.1;
-  proxy_set_header Host \$host;
-  proxy_set_header X-Real-IP \$remote_addr;
-  proxy_redirect          off;
-  proxy_buffering         off;
   proxy_pass              http://127.0.0.1:8053/dq;
 }
 
@@ -820,10 +636,24 @@ wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_G
 
 installGWD(){
     green "======================"
-    green " Input domain (no www)"
+    green " de_GWD_V2ray Domain"
     green "======================"
-    read vpsdomain
-   
+    read v2domain
+
+    green "==========================="
+    green " Cloudflare API KEY"
+    green "==========================="
+    read CFapikey
+
+    green "==========================="
+    green " Cloudflare Email"
+    green "==========================="
+    read CFemail
+
+domain=$(echo $v2domain | cut -d : -f1)
+port=$(echo $v2domain | cut -d : -f2)
+topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
+
 v2uuids=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
 
@@ -914,7 +744,7 @@ postInstall
 blue "--------------------------------------------"
 blue  "Install de_GWD [done]"
 echo
-blue "Domain： $(yellow "$vpsdomain")"
+blue "Domain： $(yellow "$v2domain")"
 blue "UUID：   $(yellow "$v2uuids")"
 blue "PATH：   $(yellow "$v2path")"
 blue "--------------------------------------------"
@@ -967,221 +797,6 @@ reboot
 
 
 
-installNextcloud(){
-    green "=================="
-    green " Datadase user"
-    green "=================="
-    read sqluser
-
-    green "=================="
-    green " Datadase password"
-    green "=================="
-    read sqlpw
-
-    green "=================="
-    green " Datadase name"
-    green "=================="
-    read sqlname
-
-apt update && apt install -y software-properties-common dirmngr
-
-dpkg --configure -a
-
-echo "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/mariadb.list
-apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
-
-apt update && apt install -y mariadb-server
-
-mysql_secure_installation
-
-green "再次输入刚创建的MariaDB root用户密码"
-read sqlrootpw
-
-cat << EOF > ~/.my.cnf
-[client]
-user=root
-password=$sqlrootpw
-EOF
-
-mysql -e "create database $sqlname default charset utf8 collate utf8_general_ci;"
-mysql -e "CREATE USER '$sqluser'@'localhost' IDENTIFIED BY '$sqlpw';"
-mysql -e "grant all privileges on $sqlname.* TO '$sqluser'@'localhost';"
-
-rm -rf ~/.my.cnf
-
-sed -i "/bind-address/s/^/#/g" /etc/mysql/my.cnf
-sed -i '/skip-networking = 1/d' /etc/mysql/my.cnf
-sed -i '/skip-networking/a\skip-networking = 1' /etc/mysql/my.cnf
-
-systemctl restart mariadb
-
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
-
-apt update && apt install -y php7.4 php7.4-fpm php7.4-cli php7.4-common php7.4-dev php7.4-mysql php7.4-curl php7.4-dom php-dompdf php7.4-json php7.4-gd php7.4-mbstring php7.4-zip php7.4-bz2 php7.4-ldap php7.4-smbclient php7.4-imap php7.4-gmp php7.4-redis php7.4-imagick php7.4-opcache php7.4-xml php7.4-xmlrpc php7.4-intl php7.4-apcu php-redis redis-server imagemagick ffmpeg
-
-cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
-[global]
-pid = /run/php/php7.4-fpm.pid
-error_log = /var/log/php7.4-fpm.log
-
-emergency_restart_threshold = 20
-emergency_restart_interval = 60s
-process_control_timeout = 10s
-daemonize = yes
-
-rlimit_files = 1000000
-rlimit_core = 0
-
-include=/etc/php/7.4/fpm/pool.d/*.conf
-EOF
-
-cat << EOF > /etc/php/7.4/fpm/pool.d/www.conf
-[www]
-user = www-data
-group = www-data
-listen = /run/php/php7.4-fpm.sock
-listen.owner = www-data
-listen.group = www-data
-listen.backlog = -1
-listen.allowed_clients = 127.0.0.1
-listen.mode = 0666
-
-pm = dynamic
-pm.max_children = 20
-pm.start_servers = 5
-pm.min_spare_servers = 5
-pm.max_spare_servers = 20
-pm.max_requests = 500
-pm.process_idle_timeout = 10s
-request_terminate_timeout = 320s
-request_slowlog_timeout = 0
-
-pm.status_path = /status
-
-catch_workers_output = yes
-env[HOSTNAME] = \$HOSTNAME
-env[PATH] = /usr/local/bin:/usr/bin:/bin
-env[TMP] = /tmp
-env[TMPDIR] = /tmp
-env[TEMP] = /tmp
-EOF
-
-sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.4/fpm/php.ini
-
-sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.4/fpm/php.ini
-echo "apc.enable_cli = 1" >> /etc/php/7.4/fpm/php.ini
-
-rm -rf /lib/systemd/system/php7.4-fpm.service
-cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
-[Unit]
-Description=The PHP 7.4 FastCGI Process Manager
-After=network.target
-Wants=network.target
-
-[Service] 
-Type=notify
-PIDFile=/run/php/php7.4-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
-ExecReload=/bin/kill -USR2 $MAINPID
-Restart=always
-RestartSec=5
-LimitNPROC=1000000
-LimitNOFILE=1000000
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload > /dev/null 2>&1
-systemctl enable php7.4-fpm
-systemctl restart php7.4-fpm
-
-vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --complement | rev)
-v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
-
-nginxNextcloudConf
-
-launchNginx
-
-wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
-mv -f ~/setup-nextcloud.php /var/www/html/
-chown -R www-data:www-data /var/www/html/
-chmod -R 755 /var/www/html
-
-blue "------------------------------------"
-blue "  Datadase user:"
-yellow "$sqluser"
-blue "  Datadase password:"
-yellow "$sqlpw"
-blue "  Datadase name:"
-yellow "$sqlname"
-blue "  Nextcloud Installation address:"
-yellow "$vpsdomain/setup-nextcloud.php"
-blue "------------------------------------"
-}
-
-
-
-setNextcloudCache(){
-sed -i "/port 6379/c\port 0" /etc/redis/redis.conf
-sed -i "/unixsocket \/var\/run\/redis\/redis/c\unixsocket \/run\/redis\/redis-server.sock" /etc/redis/redis.conf
-sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
-
-sed -i '/installed/,$d' /var/www/html/nextcloud/config/config.php
-
-cat << "EOF" >> /var/www/html/nextcloud/config/config.php
-'installed' => true,
-
-'enabledPreviewProviders' =>
-  array (
-    0 => 'OC\Preview\PNG',
-    1 => 'OC\Preview\JPEG',
-    2 => 'OC\Preview\GIF',
-    3 => 'OC\Preview\HEIC',
-    4 => 'OC\Preview\BMP',
-    5 => 'OC\Preview\XBitmap',
-    6 => 'OC\Preview\MP3',
-    7 => 'OC\Preview\TXT',
-    8 => 'OC\Preview\MarkDown',
-    9 => 'OC\Preview\Movie',
-    10 => 'OC\Preview\PDF',
-  ),
-
-'memcache.local' => '\\OC\\Memcache\\APCu',
-'memcache.distributed' => '\\OC\\Memcache\\Redis',
-'memcache.locking' => '\\OC\\Memcache\\Redis',
-'filelocking.enabled' => true,
-'filelocking.ttl' => 60*60,
-'filelocking.debug' => false,
-'redis' =>
-  array (
-    'host' => '/var/run/redis/redis-server.sock',
-    'port' => 0,
-    'timeout' => 0.0,
-  ),
-'max_filesize_animated_gifs_public_sharing' => -1,
-'loglevel' => 0,
-);
-EOF
-
-sudo usermod -aG redis www-data
-
-sudo chown -R redis:www-data /run/redis
-
-systemctl restart redis-server
-
-systemctl restart php7.4-fpm
-
-docker restart nginx > /dev/null 2>&1
-
-blue "-----------------------------"
-blue "Config Nextcloud cache [done]"
-blue "-----------------------------"
-}
-
-
-
 changeStaticIP(){
     green "========="
     green "Address"
@@ -1214,14 +829,28 @@ blue "-----------------"
 
 
 changeDomain(){
-    green "================================"
-    green " Input the new domain ( no www )"
-    green "================================"
-    read vpsdomain
+    green "====================="
+    green " de_GWD_V2ray Domain"
+    green "====================="
+    read v2domain
+
+    green "====================="
+    green " Cloudflare API KEY"
+    green "====================="
+    read CFapikey
+
+    green "====================="
+    green " Cloudflare Email"
+    green "====================="
+    read CFemail
+
+domain=$(echo $v2domain | cut -d : -f1)
+port=$(echo $v2domain | cut -d : -f2)
+topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-rm -rf /var/www/ssl
+rm -rf /var/www/ssl/*
 
 makeSSL
 
@@ -1362,7 +991,10 @@ updateGWD(){
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
-vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --complement | rev)
+domain=$(awk '/server_name/ {print$2}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
+port=$(awk '/listen/ {print$2}' /etc/nginx/conf.d/default.conf)
+topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
+
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
@@ -1434,7 +1066,6 @@ fi
 start_menu(){
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
-statusNONE=$(yellow "-")
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY        [working]"
@@ -1471,19 +1102,12 @@ else
     echo "[$statusBAD] Docker       [start failed]"
 fi
 
-
-if [[ -d "/var/www/html/nextcloud" ]]; then
-    echo "[$statusGOOD] Nextcloud    [installed]"
-else
-    echo "[$statusNONE] Nextcloud    [not installed]"
-fi
-
 blue "--------------------------"
 blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "--------------------------"
 
     green "=========================="
-    green "         SERVER"
+    green "        SERVER_nat"
     green "Recommend: Debian 9"
     green "Author:    JacyL4"
     green "=========================="
@@ -1493,8 +1117,6 @@ fi
     echo
     green  "1. Install de_GWD"
     green  "2. Install bbrplus and reboot（only Debian 9）"
-    blue   "3. Install PHP+MariaDB+Nextcloud"
-    blue   "4. Config Nextcloud cache"
     red    "5. Change static IP"
     red    "6. Change domain and issue new certificates"
     yellow "7. Change v2ray UUID & path"
@@ -1512,14 +1134,6 @@ fi
     ;;
     2)
     installBBRplus
-    start_menu
-    ;;
-    3)
-    installNextcloud
-    start_menu
-    ;;
-    4)
-    setNextcloudCache
     start_menu
     ;;
     5)

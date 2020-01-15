@@ -10,6 +10,12 @@ apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
 ![server](https://i.loli.net/2020/01/06/kLZl8XG2KvOcaBd.png)
+```
+apt install -y wget
+bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server_nat)
+```
+
+
 
 ## Client：
 amd64&arm64 Edition
