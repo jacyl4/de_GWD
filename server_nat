@@ -575,7 +575,7 @@ docker restart nginx > /dev/null 2>&1
 postInstall(){
 cat << "EOF" > /usr/local/bin/autoUpdate
 #!/bin/bash
-wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
+wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server_nat
 sed -i '$d' ~/update
 echo "updateGWD" >>  ~/update
 chmod +x ~/update
