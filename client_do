@@ -96,7 +96,14 @@ hwclock -w
 
 installDOH(){
 cd ~
+portcheck=$(echo $port | grep '^[0-9]\+$')
+if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
+doh=$domain
+port="443"
+else
 doh="$domain:$port"
+fi
+
 domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i "1i $domainip $doh" /etc/hosts
@@ -275,11 +282,6 @@ cat << EOF > /etc/vtrui/config.json
 }
 }
 EOF
-
-portcheck=$(echo $port | grep '^[0-9]\+$')
-if [[ $portcheck = "" ]]; then
-port="443"
-fi
 
 jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
