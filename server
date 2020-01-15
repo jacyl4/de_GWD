@@ -1205,6 +1205,7 @@ echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
+reboot
 blue "-----------------"
 blue  "Change IP [done]"
 blue "-----------------"
@@ -1240,9 +1241,6 @@ blue "-----------------------------------------------"
 
 
 changeV2rayVerify(){
-systemctl stop vtrui > /dev/null 2>&1
-docker stop nginx > /dev/null 2>&1
-
     green "=========="
     green " New UUID"
     green "=========="
@@ -1318,8 +1316,7 @@ cat << EOF >> /etc/vtrui/config.json
       "tlsSettings": {
         "serverName": "$upstreamdomain",
         "allowInsecure": false
-        },
-      "sockopt": { "mark": 255 }
+        }
       }
     }
   ]
@@ -1334,10 +1331,8 @@ elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 cat << EOF >> /etc/vtrui/config.json
   "outbounds": [
-    {
-      "protocol": "freedom",
-      "settings": {}
-    }
+  {"protocol": "freedom", "settings": {"domainStrategy": "UseIPv4"}},
+  {"tag": "block", "protocol": "blackhole", "settings": {}}
   ]
 }
 EOF
