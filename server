@@ -915,8 +915,8 @@ blue "--------------------------------------------"
 blue  "Install de_GWD [done]"
 echo
 blue "Domain： $(yellow "$vpsdomain")"
-blue "UUID： $(yellow "$v2uuids")"
-blue "PATH： $(yellow "$v2path")"
+blue "UUID：   $(yellow "$v2uuids")"
+blue "PATH：   $(yellow "$v2path")"
 blue "--------------------------------------------"
 }
 
