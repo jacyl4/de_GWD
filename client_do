@@ -180,7 +180,7 @@ PIDFile=/run/doh-client.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 Restart=always
-RestartSec=2s
+RestartSec=2
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -312,7 +312,7 @@ PIDFile=/run/vtrui.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=always
-RestartSec=2s
+RestartSec=2
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -573,7 +573,7 @@ PIDFile=/run/php/php7.4-fpm.pid
 ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
-RestartSec=2s
+RestartSec=2
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -748,7 +748,7 @@ EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
 Restart=always
-RestartSec=2s
+RestartSec=2
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
