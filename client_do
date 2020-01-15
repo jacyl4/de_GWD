@@ -524,9 +524,6 @@ include=/etc/php/7.4/fpm/pool.d/*.conf
 EOF
 
 cat << EOF > /etc/php/7.4/fpm/pool.d/www.conf
-;;;;;;;;;;;;;;;;;;;;
-; Pool Definitions ;
-;;;;;;;;;;;;;;;;;;;;
 [www]
 user = www-data
 group = www-data
