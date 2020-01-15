@@ -105,7 +105,7 @@ ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-cat << EOF > /etc/apt/apt.conf.d/60user
+cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 EOF
