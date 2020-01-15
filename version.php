@@ -1,4 +1,4 @@
-1.8.07
+1.8.08
 -
 <?php
 $str= file_get_contents('https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php');
