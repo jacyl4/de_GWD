@@ -816,7 +816,14 @@ installGWD(){
     green " Input domain (no www)"
     green "======================"
     read vpsdomain
-    
+   
+uuidnum=$(cat /proc/sys/kernel/random/uuid)
+v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+gatewayaddr=$(ip route show | awk "/$ethernetnum/ {print$3;exit}")
+
 cd ~
 preInstall
 
@@ -856,13 +863,6 @@ apt update && apt install -y docker-ce docker-ce-cli containerd.io
 
 systemctl enable docker
 systemctl restart docker
-
-uuidnum=$(cat /proc/sys/kernel/random/uuid)
-v2path="/$(echo $uuidnum | awk '{print substr($0,length($1)-5)}')"
-
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-gatewayaddr=$(route -n |  awk 'NR==3{print $2}')
 
 cat << EOF > /etc/network/interfaces
 source /etc/network/interfaces.d/*
@@ -1328,7 +1328,7 @@ fi
 
 
 updatePihole(){
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 installPihole
@@ -1346,7 +1346,7 @@ source /etc/profile
 
 preInstall
 
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --complement | rev)

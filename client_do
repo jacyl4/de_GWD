@@ -477,7 +477,7 @@ nameserver 8.8.8.8
 EOF
 
 echo
-if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk 'NR==1{print $1}') =~ "20" ]]; then
+if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk '{print$1;exit}') =~ "20" ]]; then
     echo "$statuSuccess de_GWD server access"
     echo "$statuSuccess de_GWD server access"
     echo "$statuSuccess de_GWD server access"
@@ -943,7 +943,7 @@ rm -rf /usr/local/bin/ui-*
 
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
 piholepw="0000000000000000000000000000000000000000000000000000000000000000"
 
@@ -1064,7 +1064,7 @@ port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 cd ~
