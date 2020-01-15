@@ -558,12 +558,15 @@ server {
   add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
 
 location /dq {
+  proxy_pass              http://127.0.0.1:8053/dq;
   proxy_set_header Host \$host;
   proxy_set_header X-Real-IP \$remote_addr;
-  proxy_pass              http://127.0.0.1:8053/dq;
+  proxy_redirect          off;
+  proxy_buffering         off;
 }
 
 location $v2path {
+  proxy_pass              http://127.0.0.1:11811;
   proxy_http_version      1.1;
   proxy_set_header Host \$http_host;
   proxy_set_header Upgrade WebSocket;
@@ -571,11 +574,13 @@ location $v2path {
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_read_timeout      86400;
+  proxy_redirect          off;
+  proxy_buffering         on;
+  proxy_buffers           32 64k;
+  proxy_buffer_size       64k;
+  proxy_busy_buffers_size 64k;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
-  proxy_redirect          off;
-  proxy_buffering         off;
-  proxy_pass              http://127.0.0.1:11811;
 }
 
 }
