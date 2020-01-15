@@ -309,6 +309,7 @@ addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
 
+systemctl daemon-reload
 systemctl restart iptables-proxy
 }
 
@@ -570,9 +571,6 @@ if [[ -f "/usr/local/bin/ui-amarked" ]]; then
 fi
 
 echo "" > /usr/local/bin/ui-aclifwd
-
-systemctl restart vtrui
-
 blue "----------------------------"
 blue  "de_GWD clifwd Update [done]"
 blue "----------------------------"
