@@ -493,22 +493,25 @@ server {
   resolver 1.1.1.1 valid=600s;
   resolver_timeout 5s;
 
-  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Frame-Options DENY;
   add_header X-Content-Type-Options nosniff;
   add_header X-Robots-Tag none;
   add_header X-Download-Options noopen;
   add_header X-Permitted-Cross-Domain-Policies none;
   add_header X-XSS-Protection "1; mode=block";
   add_header Referrer-Policy no-referrer;
-  add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+  add_header Strict-Transport-Security "max-age=63072000";
 
 location /dq {
+  proxy_pass              http://127.0.0.1:8053/dq;
   proxy_set_header Host \$host;
   proxy_set_header X-Real-IP \$remote_addr;
-  proxy_pass              http://127.0.0.1:8053/dq;
+  proxy_redirect          off;
+  proxy_buffering         off;
 }
 
 location $v2path {
+  proxy_pass              http://127.0.0.1:11811;
   proxy_http_version      1.1;
   proxy_set_header Host \$http_host;
   proxy_set_header Upgrade WebSocket;
@@ -516,11 +519,13 @@ location $v2path {
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_read_timeout      86400;
+  proxy_redirect          off;
+  proxy_buffering         on;
+  proxy_buffers           32 64k;
+  proxy_buffer_size       64k;
+  proxy_busy_buffers_size 64k;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
-  proxy_redirect          off;
-  proxy_buffering         off;
-  proxy_pass              http://127.0.0.1:11811;
 }
 
 }
@@ -612,14 +617,14 @@ installGWD(){
     green "======================"
     read v2domain
 
-    green "==========================="
+    green "======================"
     green " Cloudflare API KEY"
-    green "==========================="
+    green "======================"
     read CFapikey
 
-    green "==========================="
+    green "======================"
     green " Cloudflare Email"
-    green "==========================="
+    green "======================"
     read CFemail
 
 domain=$(echo $v2domain | cut -d : -f1)
@@ -756,9 +761,9 @@ echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-blue "-----------------------"
-blue  "Install bbrplus [done]"
-blue "-----------------------"
+blue "----------------------"
+blue "Install bbrplus [done]"
+blue "----------------------"
 
 reboot
 }
@@ -767,12 +772,12 @@ reboot
 
 changeStaticIP(){
     green "========="
-    green "Address"
+    green " Address"
     green "========="
     read localaddr
 
     green "========="
-    green "Gateway"
+    green " Gateway"
     green "========="
     read gatewayaddr
 
@@ -789,9 +794,10 @@ echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
 reboot
-blue "-----------------"
-blue  "Change IP [done]"
-blue "-----------------"
+
+blue "----------------"
+blue "Change IP [done]"
+blue "----------------"
 }
 
 
@@ -823,6 +829,7 @@ rm -rf /var/www/ssl/*
 makeSSL
 
 docker restart nginx
+
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
 blue "-----------------------------------------------"
@@ -849,35 +856,36 @@ jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /etc/vtrui/
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui > /dev/null 2>&1
-blue "------------------------------"
-blue  "Change v2ray UUID&path [done]"
-blue "------------------------------"
+
+blue "-----------------------------"
+blue "Change v2ray UUID&path [done]"
+blue "-----------------------------"
 }
 
 
 
 changeV2rayUpstream(){
-    green "==================================================="
-    green "Y. Change v2ray upstream / N. Delete v2ray upstream"
-    green "==================================================="
+    green "===================================================="
+    green " Y. Change v2ray upstream / N. Delete v2ray upstream"
+    green "===================================================="
     read v2rayupstreamyn
 
 if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 
-    green "====================="
-    green "v2ray upstream domain"
-    green "====================="
+    green "======================"
+    green " v2ray upstream domain"
+    green "======================"
     read upstreamdomain
 
-    green "====================="
-    green "v2ray upstream UUID"
-    green "====================="
+    green "======================"
+    green " v2ray upstream UUID"
+    green "======================"
     read upstreamuuid
 
-    green "====================="
-    green "v2ray upstream path"
-    green "====================="
+    green "======================"
+    green " v2ray upstream path"
+    green "======================"
     read upstreampath
 
 cat << EOF >> /etc/vtrui/config.json
@@ -913,9 +921,9 @@ cat << EOF >> /etc/vtrui/config.json
 }
 EOF
 systemctl restart vtrui
-blue "-----------------------------"
-blue  "Change v2ray upstream [done]"
-blue "-----------------------------"
+blue "----------------------------"
+blue "Change v2ray upstream [done]"
+blue "----------------------------"
 
 elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
@@ -927,9 +935,10 @@ cat << EOF >> /etc/vtrui/config.json
 }
 EOF
 systemctl restart vtrui
-blue "-----------------------------"
-blue  "Delete v2ray upstream [done]"
-blue "-----------------------------"
+
+blue "----------------------------"
+blue "Delete v2ray upstream [done]"
+blue "----------------------------"
 fi
 }
 
@@ -973,17 +982,18 @@ installV2ray
 installNginx
 
 postInstall
-blue "---------------------"
-blue  "Update de_GWD [done]"
-blue "---------------------"
+
+blue "--------------------"
+blue "Update de_GWD [done]"
+blue "--------------------"
 }
 
 
 
 autoUpdateGWD(){
-    green "=============================================="
-    green "Y. Turn on AutoUpdate / N. Turn off AutoUpdate"
-    green "=============================================="
+    green "==============================================="
+    green " Y. Turn on AutoUpdate / N. Turn off AutoUpdate"
+    green "==============================================="
     read autoUpdateswitch
 
 if [[ "$autoUpdateswitch" = "Y" ]] || [[ "$autoUpdateswitch" = "y" ]]; then 
@@ -1001,15 +1011,17 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
-blue "--------------------------"
-blue  "AutoUpdate turn on [done]"
-blue "--------------------------"
+
+blue "-------------------------"
+blue "AutoUpdate turn on [done]"
+blue "-------------------------"
 
 elif [[ "$autoUpdateswitch" = "N" ]] || [[ "$autoUpdateswitch" = "n" ]]; then
 sed -i '/localver=/,$d' /usr/local/bin/Q2H
-blue "---------------------------"
-blue  "AutoUpdate turn off [done]"
-blue "---------------------------"
+
+blue "--------------------------"
+blue "AutoUpdate turn off [done]"
+blue "--------------------------"
 fi
 }
 
@@ -1053,7 +1065,7 @@ else
 fi
 
 blue "---------------------------"
-blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "---------------------------"
 
     green "==========================="
