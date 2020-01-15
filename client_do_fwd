@@ -240,14 +240,14 @@ server {
   resolver 1.1.1.1 valid=600s;
   resolver_timeout 5s;
 
-  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Frame-Options DENY;
   add_header X-Content-Type-Options nosniff;
   add_header X-Robots-Tag none;
   add_header X-Download-Options noopen;
   add_header X-Permitted-Cross-Domain-Policies none;
   add_header X-XSS-Protection "1; mode=block";
   add_header Referrer-Policy no-referrer;
-  add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+  add_header Strict-Transport-Security "max-age=63072000";
   
 location ~* \.php$ {
   fastcgi_pass            unix:/run/php/php7.4-fpm.sock;
@@ -258,12 +258,15 @@ location ~* \.php$ {
 }
 
 location /dq {
+  proxy_pass              http://127.0.0.1:8053/dq;
   proxy_set_header Host \$host;
   proxy_set_header X-Real-IP \$remote_addr;
-  proxy_pass              http://127.0.0.1:8053/dq;
+  proxy_redirect          off;
+  proxy_buffering         off;
 }
 
-location $client_do_fwd_v2path {
+location $v2path {
+  proxy_pass              http://127.0.0.1:11811;
   proxy_http_version      1.1;
   proxy_set_header Host \$http_host;
   proxy_set_header Upgrade WebSocket;
@@ -271,19 +274,17 @@ location $client_do_fwd_v2path {
   proxy_set_header X-Real-IP \$remote_addr;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_read_timeout      86400;
+  proxy_redirect          off;
+  proxy_buffering         on;
+  proxy_buffers           32 64k;
+  proxy_buffer_size       64k;
+  proxy_busy_buffers_size 64k;
   keepalive_requests      25600;
   keepalive_timeout       300 300;
-  proxy_redirect          off;
-  proxy_buffering         off;
-  proxy_pass              http://127.0.0.1:11811;
 }
 
 }
 EOF
-
-mkdir -p /var/www/ssl
-chown -R www-data:www-data /var/www/ssl
-chmod -R 600 /var/www/ssl
 
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
@@ -372,18 +373,18 @@ client_do_fwd_iptablesProxy
 
 echo "" > /usr/local/bin/ui-aclifwd
 
-blue "-----------------------------"
-blue  "de_GWD clifwd install [done]"
-blue "-----------------------------"
+blue "----------------------------"
+blue "de_GWD clifwd install [done]"
+blue "----------------------------"
 }
 
 
 
 change_clifwd_piholeAdmin(){
 pihole -a -p
-blue "-------------------------------"
-blue  "Change Pi-hole password [done]"
-blue "-------------------------------"
+blue "------------------------------"
+blue "Change Pi-hole password [done]"
+blue "------------------------------"
 }
 
 
@@ -424,9 +425,9 @@ echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-blue "-----------------------"
-blue  "Install bbrplus [done]"
-blue "-----------------------"
+blue "----------------------"
+blue "Install bbrplus [done]"
+blue "----------------------"
 
 reboot
 }
@@ -494,6 +495,9 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 
 docker restart nginx
+blue "-------------------------"
+blue "Issue certificates [done]"
+blue "-------------------------"
 }
 
 
@@ -574,9 +578,9 @@ if [[ -f "/usr/local/bin/ui-amarked" ]]; then
 fi
 
 echo "" > /usr/local/bin/ui-aclifwd
-blue "----------------------------"
-blue  "de_GWD clifwd Update [done]"
-blue "----------------------------"
+blue "---------------------------"
+blue "de_GWD clifwd Update [done]"
+blue "---------------------------"
 }
 
 
@@ -642,7 +646,7 @@ else
 fi
 
 blue "-----------------------------"
-blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "-----------------------------"
 
     green "================================"

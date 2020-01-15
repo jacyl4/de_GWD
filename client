@@ -842,18 +842,18 @@ echo $v2path > /var/www/html/path.txt
 
 postInstall
 
-blue "----------------------"
-blue  "Install de_GWD [done]"
-blue "----------------------"
+blue "---------------------"
+blue "Install de_GWD [done]"
+blue "---------------------"
 }
 
 
 
 change_piholeAdmin(){
 pihole -a -p
-blue "-------------------------------"
-blue  "Change Pi-hole password [done]"
-blue "-------------------------------"
+blue "------------------------------"
+blue "Change Pi-hole password [done]"
+blue "------------------------------"
 }
 
 
@@ -919,9 +919,9 @@ if [[ -f "/usr/local/bin/ui-amarked" ]]; then
 /usr/local/bin/ui-markThis
 fi
 
-blue "---------------------"
-blue  "Update de_GWD [done]"
-blue "---------------------"
+blue "--------------------"
+blue "Update de_GWD [done]"
+blue "--------------------"
 }
 
 
@@ -965,7 +965,7 @@ else
 fi
 
 blue "-----------------------------"
-blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
 blue "-----------------------------"
 
     green "===================================="
