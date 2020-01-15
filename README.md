@@ -10,11 +10,6 @@ apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
 ![server](https://i.loli.net/2020/01/06/kLZl8XG2KvOcaBd.png)
-```
-apt install -y wget
-bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server_nat)
-```
-
 
 
 ## Client：
@@ -36,6 +31,11 @@ bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ![client_do](https://i.loli.net/2020/01/14/LnNQ8qTbSzR3FlI.png)
 
 amd64 nat forward Edition
+```
+apt install -y wget
+bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server_nat)
+```
+
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do_fwd)
