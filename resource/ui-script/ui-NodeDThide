@@ -1,13 +1,8 @@
 #!/bin/bash
 checkV2ad=$(/usr/local/bin/ui-checkV2ad)
+checkDNS=$(/usr/local/bin/ui-checkDNS)
 
-port=$(jq '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
-
-result=$(echo $port | grep '^[0-9]\+$')
-if [[ $result = "" ]]; then
-port="443"
-fi
-
+port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
 domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
@@ -179,10 +174,12 @@ done
 
 rm -rf /etc/vtrui/hosts
 
-systemctl restart vtrui
-
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
 
 if [[ $checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
+fi
+
+if [[ $checkDNS = "GFWlist" ]]; then
+/usr/local/bin/ui-changeNLgfw
 fi
