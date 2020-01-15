@@ -143,18 +143,13 @@ chmod +x /usr/local/bin/*
 
 
 client_do_fwd_iptablesProxy(){
-sed -i '/dport 53 -s/d' /usr/local/bin/iptables-proxy-up
 sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
 
-addRule1="iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT"
-addRule2="iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT"
-addRule3="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
-addRule4="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
 
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule3" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule4" /usr/local/bin/iptables-proxy-up
 
 systemctl restart iptables-proxy
 }
