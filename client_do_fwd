@@ -448,7 +448,7 @@ makeSSL(){
     green "==========================="
     read CFemail
 
-apt-get update && apt-get install --no-install-recommends --no-install-suggests -y socat
+apt update && apt install -y socat
 
 cd ~
 mkdir -p /var/www/ssl
