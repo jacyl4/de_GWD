@@ -22,6 +22,7 @@ statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 
 
+
 preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
@@ -815,7 +816,6 @@ installIptablesProxy
 installWG
 
 mkdir -p /etc/pihole
-
 installPihole
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
