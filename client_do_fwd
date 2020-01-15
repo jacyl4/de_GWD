@@ -364,9 +364,9 @@ client_do_fwd_installWebUI
 
 client_do_fwd_PostInstall
 
-client_do_fwd_iptablesProxy
-
 client_do_fwd_nginxWebConf
+
+client_do_fwd_iptablesProxy
 
 echo "" > /usr/local/bin/ui-aclifwd
 
@@ -543,9 +543,9 @@ client_do_fwd_installWebUI
 
 client_do_fwd_PostInstall
 
-client_do_fwd_iptablesProxy
-
 client_do_fwd_nginxWebConf
+
+client_do_fwd_iptablesProxy
 
 if [[ $client_do_fwd_checkDNS = "GFWlist" ]]; then
 /usr/local/bin/ui-changeNLgfw
