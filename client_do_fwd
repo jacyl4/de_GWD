@@ -620,7 +620,7 @@ fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY          [working]"
-elif [[ ! -f "/usr/bin/vtrui" ]]; then
+elif [[ ! -d "/usr/bin/vtrui" ]]; then
     echo "[$statusBAD] V2RAY          [not Installed]"
 else
     echo "[$statusBAD] V2RAY          [start failed]"
