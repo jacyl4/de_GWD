@@ -506,7 +506,7 @@ client_do_fwd_checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
 client_do_fwd_checkWG=$(/usr/local/bin/ui-checkWG)
 client_do_fwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
-clifwd_domain=$(awk '/server_name/ {print$2}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
+clifwd_domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 clifwd_port=$(awk '/ssl http2 spdy fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
 topDomain=$(echo $clifwd_domain | awk -F. '{print $2"."$3}')
 client_do_fwd_v2path=$(cat /var/www/FWDpath.txt)
