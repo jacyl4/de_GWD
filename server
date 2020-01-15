@@ -828,8 +828,7 @@ deb http://security.debian.org/debian-security $osRelease/updates main
 deb http://deb.debian.org/debian/ $osRelease-updates main
 EOF
 
-apt update && apt upgrade -y
-apt install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils unzip wget curl rsync git jq socat apt-transport-https ca-certificates gnupg2 software-properties-common dirmngr
+apt-get update && apt-get install --no-install-recommends --no-install-suggests -y sudo locales net-tools dnsutils unzip wget curl rsync git jq socat apt-transport-https ca-certificates gnupg2 software-properties-common dirmngr
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -855,7 +854,7 @@ locale-gen en_US.UTF-8
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $osRelease stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
-apt update && apt install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
+apt-get update && apt-get install --no-install-recommends --no-install-suggests -y docker-ce docker-ce-cli containerd.io
 
 systemctl enable docker
 systemctl restart docker
@@ -972,14 +971,11 @@ installNextcloud(){
     green "=================="
     read sqlname
 
-apt update
-
-dpkg --configure -a
-
 echo "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $osRelease main" > /etc/apt/sources.list.d/mariadb.list
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
 
-apt update && apt install --no-install-recommends --no-install-suggests -y mariadb-server
+apt-get update && dpkg --configure -a
+apt-get install --no-install-recommends --no-install-suggests -y mariadb-server
 
 mysql_secure_installation
 
@@ -1007,7 +1003,7 @@ systemctl restart mariadb
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $osRelease main" > /etc/apt/sources.list.d/php.list
 
-apt update && apt install --no-install-recommends --no-install-suggests -y php7.4 php7.4-fpm php7.4-cli php7.4-common php7.4-dev php7.4-mysql php7.4-curl php7.4-dom php-dompdf php7.4-json php7.4-gd php7.4-mbstring php7.4-zip php7.4-bz2 php7.4-ldap php7.4-smbclient php7.4-imap php7.4-gmp php7.4-redis php7.4-imagick php7.4-opcache php7.4-xml php7.4-xmlrpc php7.4-intl php7.4-apcu php-redis redis-server imagemagick ffmpeg
+apt-get update && apt-get install --no-install-recommends --no-install-suggests -y php7.4 php7.4-fpm php7.4-cli php7.4-common php7.4-dev php7.4-mysql php7.4-curl php7.4-dom php-dompdf php7.4-json php7.4-gd php7.4-mbstring php7.4-zip php7.4-bz2 php7.4-ldap php7.4-smbclient php7.4-imap php7.4-gmp php7.4-redis php7.4-imagick php7.4-opcache php7.4-xml php7.4-xmlrpc php7.4-intl php7.4-apcu php-redis redis-server imagemagick ffmpeg
 
 cat > /etc/php/7.4/fpm/php-fpm.conf << EOF
 ;;;;;;;;;;;;;;;;;;
