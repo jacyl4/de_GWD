@@ -142,20 +142,6 @@ chmod +x /usr/local/bin/*
 
 
 
-client_do_fwd_iptablesProxy(){
-sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
-
-addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
-addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
-
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
-
-systemctl restart iptables-proxy
-}
-
-
-
 client_do_fwd_PostInstall(){
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
@@ -310,6 +296,22 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /var/www/html/:/var/www/html/ \
 -v /run/php/:/run/php/ \
 jacyl4/nginx_tls1.3:latest
+}
+
+
+
+client_do_fwd_iptablesProxy(){
+systemctl stop vtrui
+
+sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
+
+addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
+
+systemctl restart iptables-proxy
 }
 
 
