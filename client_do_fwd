@@ -11,6 +11,21 @@ mirrorSite="http://xznat.seso.icu:10178"
 
 
 
+client_do_fwd_iptablesProxy(){
+sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
+
+addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
+
+systemctl daemon-reload
+systemctl restart iptables-proxy
+}
+
+
+
 client_do_fwd_installDOHser(){
 wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 unzip doh.zip
@@ -71,143 +86,6 @@ EOF
 systemctl daemon-reload
 systemctl enable doh-server
 systemctl restart doh-server
-}
-
-
-
-client_do_fwd_installWebUI(){
-cd ~
-ln -s /var/www/html/admin  /var/www/html/gwd/admin
-
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
-
-grep /var/www/html -rl ~/ui-script > /tmp/binFILE
-grep /var/www/html -rl ~/ui-web > /tmp/htmlFILE
-
-cat /tmp/binFILE | while read binFILE
-do
-  sed -i 's:/var/www/html:/var/www/html/gwd:g' $binFILE
-done
-
-cat /tmp/htmlFILE | while read htmlFILE
-do
-  sed -i 's:/var/www/html:/var/www/html/gwd:g' $htmlFILE
-done
-
-rsync -azrI ~/ui-script/* /usr/local/bin
-rsync -azrI ~/ui-web/* /var/www/html/gwd
-rm -rf ~/ui-*
-
-cat << "EOF" > /tmp/vtruiConfADD
-client_do_fwd_v2path=$(cat /var/www/FWDpath.txt)
-client_do_fwd_uuidnum=$(cat /var/www/FWDuuid.txt)
-
-jq 'del(.inbounds[2])' /etc/vtrui/config.json > /etc/vtrui/temp.json
-
-vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path": "/0000"}}}'
-
-jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/temp.json |\
-jq --arg client_do_fwd_v2path "$client_do_fwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$client_do_fwd_v2path' > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
-
-{
-for v2uuids in $client_do_fwd_uuidnum; do
-echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
-done
-} > /tmp/v2uuids
-
-cat /tmp/v2uuids | while read v2uuids
-do
-jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
-done
-
-mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
-rm -rf /tmp/v2uuids
-
-systemctl restart vtrui
-EOF
-
-cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow > /dev/null 2>&1
-rm -rf /tmp/v2uuids
-rm -rf /tmp/vtruiConfADD
-
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
-mv -f ~/version.php /var/www/html/gwd/version.php
-
-chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
-chmod +x /usr/local/bin/*
-}
-
-
-
-client_do_fwd_PostInstall(){
-cat << "EOF" > /usr/local/bin/Q4am
-#!/bin/bash
-wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
-wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
-curl -L 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
-mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
-mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
-mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
-
-{
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
- echo "add chnroute $chnroute"
-done
-} > /usr/local/bin/chnrouteset
-
-ipset -F chnroute
-for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
-done
-EOF
-chmod +x /usr/local/bin/Q4am
-/usr/local/bin/Q4am
-
-cat << "EOF" > /usr/local/bin/Q4H
-#!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
-rm -rf ~/client*
-rm -rf ~/clifwd*
-rm -rf /var/log/*1*
-rm -rf /var/log/*2*
-rm -rf /var/log/*.gz
-rm -rf /tmp/nodecheck*
-rm -rf /var/www/html/gwd/log.log
-
-/usr/local/bin/ui-listBWresolve > /dev/null 2>&1
-EOF
-chmod +x /usr/local/bin/Q4H
-/usr/local/bin/Q4H
-
-crontab -l > ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
-cat << EOF >> ~/now.cron
-0 4 * * * /usr/local/bin/Q4am
-0 */4 * * * /usr/local/bin/Q4H
-EOF
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
-mkdir -p /etc/wireguard
-/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
-fi
-
-/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
-/usr/local/bin/ui-nodeResolve >/dev/null 2>&1
-/usr/local/bin/ui-changeDOH >/dev/null 2>&1
-
-sed -i "/$doh/d" /etc/hosts
-rm -rf ~/doh*
-rm -rf ~/vtrui*
 }
 
 
@@ -289,29 +167,151 @@ EOF
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
+mkdir -p /var/www/ssl
+
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
 -v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
--v /var/www/ssl/:/var/www/ssl/ \
 -v /var/www/html/:/var/www/html/ \
+-v /var/www/ssl/:/var/www/ssl/ \
 -v /run/php/:/run/php/ \
 jacyl4/nginx_tls1.3:latest
 }
 
 
 
-client_do_fwd_iptablesProxy(){
-sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
+client_do_fwd_installWebUI(){
+cd ~
+ln -s /var/www/html/admin  /var/www/html/gwd/admin
 
-addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
-addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
+svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
+grep /var/www/html -rl ~/ui-script > /tmp/binFILE
+grep /var/www/html -rl ~/ui-web > /tmp/htmlFILE
 
-systemctl daemon-reload
-systemctl restart iptables-proxy
+cat /tmp/binFILE | while read binFILE
+do
+  sed -i 's:/var/www/html:/var/www/html/gwd:g' $binFILE
+done
+
+cat /tmp/htmlFILE | while read htmlFILE
+do
+  sed -i 's:/var/www/html:/var/www/html/gwd:g' $htmlFILE
+done
+
+rsync -azrI ~/ui-script/* /usr/local/bin
+rsync -azrI ~/ui-web/* /var/www/html/gwd
+rm -rf ~/ui-*
+
+cat << "EOF" > /tmp/vtruiConfADD
+client_do_fwd_v2path=$(cat /var/www/FWDpath.txt)
+client_do_fwd_uuidnum=$(cat /var/www/FWDuuid.txt)
+
+jq 'del(.inbounds[2])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+
+vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path": "/0000"}}}'
+
+jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/temp.json |\
+jq --arg client_do_fwd_v2path "$client_do_fwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$client_do_fwd_v2path' > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+
+{
+for v2uuids in $client_do_fwd_uuidnum; do
+echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
+done
+} > /tmp/v2uuids
+
+cat /tmp/v2uuids | while read v2uuids
+do
+jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+done
+
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
+rm -rf /tmp/v2uuids
+
+systemctl restart vtrui
+EOF
+
+cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow > /dev/null 2>&1
+
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+mv -f ~/version.php /var/www/html/gwd/version.php
+
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
+chmod +x /usr/local/bin/*
+}
+
+
+
+client_do_fwd_PostInstall(){
+cat << "EOF" > /usr/local/bin/Q4am
+#!/bin/bash
+wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
+wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+curl -L 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
+mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
+mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
+mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
+
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
+
+ipset -F chnroute
+for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
+  ipset add chnroute $ipchnroute
+done
+EOF
+chmod +x /usr/local/bin/Q4am
+/usr/local/bin/Q4am
+
+cat << "EOF" > /usr/local/bin/Q4H
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+rm -rf ~/client*
+rm -rf ~/clifwd*
+rm -rf /var/log/*1*
+rm -rf /var/log/*2*
+rm -rf /var/log/*.gz
+rm -rf /tmp/nodecheck*
+rm -rf /var/www/html/gwd/log.log
+
+/usr/local/bin/ui-listBWresolve > /dev/null 2>&1
+EOF
+chmod +x /usr/local/bin/Q4H
+/usr/local/bin/Q4H
+
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+cat << EOF >> ~/now.cron
+0 4 * * * /usr/local/bin/Q4am
+0 */4 * * * /usr/local/bin/Q4H
+EOF
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
+mkdir -p /etc/wireguard
+/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
+fi
+
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+/usr/local/bin/ui-nodeResolve >/dev/null 2>&1
+/usr/local/bin/ui-changeDOH >/dev/null 2>&1
+
+sed -i "/$doh/d" /etc/hosts
+rm -rf /tmp/v2uuids
+rm -rf /tmp/vtruiConfADD
 }
 
 
@@ -361,15 +361,15 @@ chmod +x ~/client_do
 
 installGWD
 
+client_do_fwd_iptablesProxy
+
 client_do_fwd_installDOHser
+
+client_do_fwd_nginxWebConf
 
 client_do_fwd_installWebUI
 
 client_do_fwd_PostInstall
-
-client_do_fwd_nginxWebConf
-
-client_do_fwd_iptablesProxy
 
 echo "" > /usr/local/bin/ui-aclifwd
 
@@ -453,7 +453,6 @@ makeSSL(){
 apt update && apt install -y netcat socat
 
 cd ~
-mkdir -p /var/www/ssl
 rm -rf /var/www/ssl/*
 
 export CF_Key="$CFapikey"
@@ -541,19 +540,19 @@ installIptablesProxy
 
 installWGdoPHP
 
-dockerNginx
-
 installPihole
 
+dockerNginx
+
+client_do_fwd_iptablesProxy
+
 client_do_fwd_installDOHser
+
+client_do_fwd_nginxWebConf
 
 client_do_fwd_installWebUI
 
 client_do_fwd_PostInstall
-
-client_do_fwd_nginxWebConf
-
-client_do_fwd_iptablesProxy
 
 if [[ $client_do_fwd_checkDNS = "GFWlist" ]]; then
 /usr/local/bin/ui-changeNLgfw

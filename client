@@ -115,7 +115,14 @@ EOF
 
 installDOH(){
 cd ~
+portcheck=$(echo $port | grep '^[0-9]\+$')
+if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
 doh=$domain
+port="443"
+else
+doh="$domain:$port"
+fi
+
 domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
 
 sed -i "1i $domainip $doh" /etc/hosts
@@ -702,13 +709,15 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-cat << EOF > ~/now.cron
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+cat << EOF >> ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
-
 
 if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
 mkdir -p /etc/wireguard
@@ -929,24 +938,6 @@ start_menu(){
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 
-if [[ $(systemctl is-active doh-client) = "active" ]]; then
-    echo "[$statusGOOD] DoH client     [working]"
-elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
-    echo "[$statusBAD] DoH client     [not Installed]"
-else
-    echo "[$statusBAD] DoH client     [start failed]"
-fi
-
-
-if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusGOOD] V2RAY          [working]"
-elif [[ ! -d "/usr/bin/vtrui" ]]; then
-    echo "[$statusBAD] V2RAY          [not Installed]"
-else
-    echo "[$statusBAD] V2RAY          [start failed]"
-fi
-
-
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
     echo "[$statusGOOD] SmartDNS       [working]"
 elif [[ ! -f "/etc/smartdns/smartdns.conf" ]]; then
@@ -955,6 +946,13 @@ else
     echo "[$statusBAD] SmartDNS       [start failed]"
 fi
 
+if [[ $(systemctl is-active doh-client) = "active" ]]; then
+    echo "[$statusGOOD] DoH client     [working]"
+elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
+    echo "[$statusBAD] DoH client     [not Installed]"
+else
+    echo "[$statusBAD] DoH client     [start failed]"
+fi
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusGOOD] Pi-hole        [working]"
@@ -962,6 +960,14 @@ elif [ ! -f "/usr/local/bin/pihole" ]; then
     echo "[$statusBAD] Pi-hole        [not installed]"
 else
     echo "[$statusBAD] Pi-hole        [start failed]"
+fi
+
+if [[ $(systemctl is-active vtrui) = "active" ]]; then
+    echo "[$statusGOOD] V2RAY          [working]"
+elif [[ ! -d "/usr/bin/vtrui" ]]; then
+    echo "[$statusBAD] V2RAY          [not Installed]"
+else
+    echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
 blue "-----------------------------"

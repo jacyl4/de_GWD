@@ -591,6 +591,114 @@ systemctl restart php7.4-fpm
 
 
 
+installPihole(){
+wget -O ~/smartdns.deb $smartdns_amd64
+dpkg -i smartdns.deb
+
+cat << EOF > /etc/smartdns/smartdns.conf
+bind 127.0.0.1:5370
+bind-tcp 127.0.0.1:5370
+
+cache-size 10000
+speed-check-mode ping,tcp:80
+force-AAAA-SOA yes
+
+server 114.114.114.114
+server 114.114.115.115
+server 119.29.29.29
+server 119.28.28.28
+server 223.5.5.5
+server 223.6.6.6
+EOF
+
+echo "" > /run/smartdns.pid
+cat << "EOF" > /lib/systemd/system/smartdns.service
+[Unit]
+Description=Smart DNS server
+After=network-online.target
+Before=nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+PIDFile=/run/smartdns.pid
+EnvironmentFile=/etc/default/smartdns
+ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
+KillMode=process
+Restart=always
+RestartSec=5
+LimitNPROC=1000000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+rm -rf ~/smartdns.deb
+
+systemctl daemon-reload > /dev/null 2>&1
+systemctl enable smartdns > /dev/null 2>&1
+systemctl restart smartdns > /dev/null 2>&1
+
+echo "" > /etc/pihole/adlists.list
+cat << EOF > /etc/pihole/setupVars.conf
+PIHOLE_INTERFACE=$ethernetnum
+IPV4_ADDRESS=$localaddr/24
+PIHOLE_DNS_1=127.0.0.1#5380
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=true
+INSTALL_WEB_INTERFACE=true
+LIGHTTPD_ENABLED=false
+BLOCKING_ENABLED=true
+WEBPASSWORD=$piholepw
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=true
+CONDITIONAL_FORWARDING_IP=$localaddr
+CONDITIONAL_FORWARDING_DOMAIN=lan
+CONDITIONAL_FORWARDING_REVERSE=$(echo $localaddr | awk -F. '{print $3"." $2"."$1}').in-addr.arpa
+EOF
+git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
+bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
+rm -rf ~/Pi-hole
+
+systemctl mask --now dhcpcd > /dev/null 2>&1
+systemctl mask --now lighttpd > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+rm -rf /var/www/html/index.lighttpd.orig
+
+cat << "EOF" > /usr/local/bin/pihole_hotfix
+#!/bin/bash
+ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1)
+sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
+pihole restartdns
+EOF
+chmod +x /usr/local/bin/pihole_hotfix
+
+sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+
+cat << EOF > /etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+port=5390
+EOF
+
+cat << EOF > /etc/pihole/dns-servers.conf
+ DoH;127.0.0.1#5380
+EOF
+
+cat << EOF > /etc/pihole/pihole-FTL.conf
+PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
+EOF
+
+systemctl restart pihole-FTL
+pihole -f
+}
+
+
+
 dockerNginx(){
 mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
@@ -712,114 +820,6 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /var/www/html/:/var/www/html/ \
 -v /run/php/:/run/php/ \
 jacyl4/nginx_tls1.3:latest
-}
-
-
-
-installPihole(){
-wget -O ~/smartdns.deb $smartdns_amd64
-dpkg -i smartdns.deb
-
-cat << EOF > /etc/smartdns/smartdns.conf
-bind 127.0.0.1:5370
-bind-tcp 127.0.0.1:5370
-
-cache-size 10000
-speed-check-mode ping,tcp:80
-force-AAAA-SOA yes
-
-server 114.114.114.114
-server 114.114.115.115
-server 119.29.29.29
-server 119.28.28.28
-server 223.5.5.5
-server 223.6.6.6
-EOF
-
-echo "" > /run/smartdns.pid
-cat << "EOF" > /lib/systemd/system/smartdns.service
-[Unit]
-Description=Smart DNS server
-After=network-online.target
-Before=nss-lookup.target
-Wants=network-online.target
-
-[Service]
-Type=forking
-PIDFile=/run/smartdns.pid
-EnvironmentFile=/etc/default/smartdns
-ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
-KillMode=process
-Restart=always
-RestartSec=5
-LimitNPROC=1000000
-LimitNOFILE=1000000
-
-[Install]
-WantedBy=multi-user.target
-EOF
-rm -rf ~/smartdns.deb
-
-systemctl daemon-reload > /dev/null 2>&1
-systemctl enable smartdns > /dev/null 2>&1
-systemctl restart smartdns > /dev/null 2>&1
-
-echo "" > /etc/pihole/adlists.list
-cat << EOF > /etc/pihole/setupVars.conf
-PIHOLE_INTERFACE=$ethernetnum
-IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=127.0.0.1#5380
-QUERY_LOGGING=true
-INSTALL_WEB_SERVER=true
-INSTALL_WEB_INTERFACE=true
-LIGHTTPD_ENABLED=false
-BLOCKING_ENABLED=true
-WEBPASSWORD=$piholepw
-DNSMASQ_LISTENING=single
-DNS_FQDN_REQUIRED=true
-DNS_BOGUS_PRIV=true
-DNSSEC=false
-CONDITIONAL_FORWARDING=true
-CONDITIONAL_FORWARDING_IP=$localaddr
-CONDITIONAL_FORWARDING_DOMAIN=lan
-CONDITIONAL_FORWARDING_REVERSE=$(echo $localaddr | awk -F. '{print $3"." $2"."$1}').in-addr.arpa
-EOF
-git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
-bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
-rm -rf ~/Pi-hole
-
-systemctl mask --now dhcpcd > /dev/null 2>&1
-systemctl mask --now lighttpd > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-rm -rf /var/www/html/index.lighttpd.orig
-
-cat << "EOF" > /usr/local/bin/pihole_hotfix
-#!/bin/bash
-ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1)
-sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
-pihole restartdns
-EOF
-chmod +x /usr/local/bin/pihole_hotfix
-
-sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-
-cat << EOF > /etc/dnsmasq.conf
-conf-dir=/etc/dnsmasq.d
-port=5390
-EOF
-
-cat << EOF > /etc/pihole/dns-servers.conf
- DoH;127.0.0.1#5380
-EOF
-
-cat << EOF > /etc/pihole/pihole-FTL.conf
-PRIVACYLEVEL=0
-AAAA_QUERY_ANALYSIS=no
-EOF
-
-systemctl restart pihole-FTL
-pihole -f
 }
 
 
@@ -1004,8 +1004,6 @@ installIptablesProxy
 
 installWGdoPHP
 
-dockerNginx
-
 mkdir -p /etc/pihole
 installPihole
 
@@ -1016,6 +1014,8 @@ sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
+
+dockerNginx
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
@@ -1077,9 +1077,9 @@ installIptablesProxy
 
 installWGdoPHP
 
-dockerNginx
-
 installPihole
+
+dockerNginx
 
 installWebUI
 
@@ -1117,27 +1117,10 @@ blue "--------------------"
 }
 
 
+
 start_menu(){
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
-
-if [[ $(systemctl is-active doh-client) = "active" ]]; then
-    echo "[$statusGOOD] DoH client     [working]"
-elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
-    echo "[$statusBAD] DoH client     [not Installed]"
-else
-    echo "[$statusBAD] DoH client     [start failed]"
-fi
-
-
-if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusGOOD] V2RAY          [working]"
-elif [[ ! -d "/usr/bin/vtrui" ]]; then
-    echo "[$statusBAD] V2RAY          [not Installed]"
-else
-    echo "[$statusBAD] V2RAY          [start failed]"
-fi
-
 
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
     echo "[$statusGOOD] SmartDNS       [working]"
@@ -1147,6 +1130,13 @@ else
     echo "[$statusBAD] SmartDNS       [start failed]"
 fi
 
+if [[ $(systemctl is-active doh-client) = "active" ]]; then
+    echo "[$statusGOOD] DoH client     [working]"
+elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
+    echo "[$statusBAD] DoH client     [not Installed]"
+else
+    echo "[$statusBAD] DoH client     [start failed]"
+fi
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusGOOD] Pi-hole        [working]"
@@ -1154,6 +1144,14 @@ elif [ ! -f "/usr/local/bin/pihole" ]; then
     echo "[$statusBAD] Pi-hole        [not installed]"
 else
     echo "[$statusBAD] Pi-hole        [start failed]"
+fi
+
+if [[ $(systemctl is-active vtrui) = "active" ]]; then
+    echo "[$statusGOOD] V2RAY          [working]"
+elif [[ ! -d "/usr/bin/vtrui" ]]; then
+    echo "[$statusBAD] V2RAY          [not Installed]"
+else
+    echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
 
