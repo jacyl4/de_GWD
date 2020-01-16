@@ -262,13 +262,11 @@ cat << EOF > /etc/vtrui/config.json
 ],
 "outbounds": [
   {
-    "protocol": "vmess",
-    "settings": {
-      "vnext": [
-        {
-          "address": "xxxx.ooo",
-          "port": 443,
-          "users": [
+    "protocol":"vmess",
+    "settings":{"vnext":[{
+          "address":"xxxx.ooo",
+          "port":443,
+          "users":[
             {
               "id": "00000000-0000-0000-0000-000000000000",
               "level": 1,
@@ -279,33 +277,30 @@ cat << EOF > /etc/vtrui/config.json
         }
       ]
     },
-    "streamSettings": {
-      "network": "ws",
-      "wsSettings": {
-        "path": "/000000",
-        "headers": {
-          "Host": "xxxx.ooo"
+    "streamSettings":{
+      "network":"ws",
+      "wsSettings":{
+        "path":"/000000",
+        "headers":{
+          "Host":"xxxx.ooo"
         }
       },
-      "security": "tls",
-      "tlsSettings": {
-        "serverName": "xxxx.ooo",
-        "allowInsecure": false
+      "security":"tls",
+      "tlsSettings":{
+        "serverName":"xxxx.ooo",
+        "allowInsecure":false
       },
-      "sockopt": {
-        "mark": 255
-      }
+      "sockopt":{"mark":255}
     }
   },
-  { "tag": "direct", "protocol": "freedom", "streamSettings": { "sockopt": { "mark": 255 } } },
-  { "tag": "dnsout", "protocol": "dns"}
+  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
+  {"tag":"dnsout","protocol":"dns"},
 ],
 "routing": {
   "domainStrategy": "AsIs",
   "rules": [
-    { "type": "field", "inboundTag": "dnsin", "outboundTag": "dnsout" },
-    { "type": "field", "inboundTag": "flow", "outboundTag": "direct" },
-    { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" }
+    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
+    {"type":"field","inboundTag":"flow","outboundTag":"direct"}
   ]
 }
 }
