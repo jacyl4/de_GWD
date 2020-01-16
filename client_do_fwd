@@ -367,7 +367,7 @@ installclifwd(){
     green " de_GWD_fwd_V2ray Domain&Port"
     green "=============================="
     read clifwd_domain
-
+    
     green "=============================="
     green " de_GWD_fwd_V2ray UUID"
     green "=============================="
