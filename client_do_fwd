@@ -367,16 +367,6 @@ installclifwd(){
     green " de_GWD_fwd_V2ray Domain&Port"
     green "=============================="
     read clifwd_domain
-
-    green "=============================="
-    green " Cloudflare API KEY"
-    green "=============================="
-    read CFapikey
-
-    green "=============================="
-    green " Cloudflare Email"
-    green "=============================="
-    read CFemail
     
     green "=============================="
     green " de_GWD_fwd_V2ray UUID"
@@ -388,6 +378,16 @@ installclifwd(){
     green "=============================="
     read clifwd_v2path
 
+    green "=============================="
+    green " Cloudflare API KEY"
+    green "=============================="
+    read CFapikey
+
+    green "=============================="
+    green " Cloudflare Email"
+    green "=============================="
+    read CFemail
+    
 cd ~
 
 clifwd_domain=$(echo $clifwd_domain | cut -d : -f1)
