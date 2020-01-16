@@ -333,50 +333,6 @@ systemctl restart vtrui
 
 
 
-makeSSL_D(){
-mkdir -p /var/www/ssl
-
-export CF_Key="$CFapikey"
-export CF_Email="$CFemail"
-
-curl https://get.acme.sh | sh
-~/.acme.sh/acme.sh --upgrade  --auto-upgrade
-~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
-~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
-               --keypath        /var/www/ssl/$topDomain.key  \
-               --fullchain-file /var/www/ssl/fullchain.cer \
-               --reloadcmd     "docker restart nginx > /dev/null 2>&1"
-openssl dhparam -out /var/www/ssl/dhparam.pem 2048
-
-cat << EOF > /var/www/ssl/update_ocsp_cache
-#!/bin/bash
-wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
-wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
-mv intermediate.pem /var/www/ssl
-mv root.pem /var/www/ssl
-cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
-cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
-
-openssl ocsp -no_nonce \
-    -issuer  /var/www/ssl/intermediate.pem \
-    -cert    /var/www/ssl/fullchain.cer \
-    -CAfile  /var/www/ssl/bundle.pem \
-    -VAfile  /var/www/ssl/bundle.pem \
-    -url     http://ocsp.int-x3.letsencrypt.org \
-    -respout /var/www/ssl/ocsp.resp
-EOF
-chmod +x /var/www/ssl/update_ocsp_cache
-/var/www/ssl/update_ocsp_cache
-
-crontab -l > ~/now.cron
-sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
-echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-}
-
-
-
 installNginx(){
 mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
@@ -541,6 +497,8 @@ docker pull jacyl4/nginx_tls1.3:latest
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
+mkdir -p /var/www/ssl
+
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
@@ -548,6 +506,51 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
 jacyl4/nginx_tls1.3:latest
+}
+
+
+
+makeSSL_D(){
+rm -rf /var/www/ssl/*
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
+~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
+               --keypath        /var/www/ssl/$topDomain.key  \
+               --fullchain-file /var/www/ssl/fullchain.cer \
+               --reloadcmd     "docker restart nginx > /dev/null 2>&1"
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+cat << EOF > /var/www/ssl/update_ocsp_cache
+#!/bin/bash
+wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+mv intermediate.pem /var/www/ssl
+mv root.pem /var/www/ssl
+cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/fullchain.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://ocsp.int-x3.letsencrypt.org \
+    -respout /var/www/ssl/ocsp.resp
+EOF
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+
+crontab -l > ~/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+docker restart nginx
 }
 
 
@@ -593,11 +596,11 @@ EOF
 chmod +x /usr/local/bin/Q2H
 /usr/local/bin/Q2H
 
-crontab -l > now.cron
+crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
-echo '0 */2 * * * /usr/local/bin/Q2H' >> now.cron
-crontab now.cron
-rm -rf now.cron
+echo '0 */2 * * * /usr/local/bin/Q2H' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
 
 indexpage=$(ls /var/www/html/index.* 2> /dev/null | wc -l)
 if [ "$indexpage" = "0" ]; then 
@@ -613,25 +616,25 @@ wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_G
 
 
 installGWD(){
-    green "======================"
-    green " de_GWD_V2ray Domain"
-    green "======================"
-    read v2domain
+    green "==============================="
+    green " de_GWD_nat_V2ray Domain&&Port"
+    green "==============================="
+    read vpsdomainP
 
-    green "======================"
+    green "==============================="
     green " Cloudflare API KEY"
-    green "======================"
+    green "==============================="
     read CFapikey
 
-    green "======================"
+    green "==============================="
     green " Cloudflare Email"
-    green "======================"
+    green "==============================="
     read CFemail
 
 cd ~
 
-domain=$(echo $v2domain | cut -d : -f1)
-port=$(echo $v2domain | cut -d : -f2)
+domain=$(echo $vpsdomainP | cut -d : -f1)
+port=$(echo $vpsdomainP | cut -d : -f2)
 topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
 
 v2uuids=$(cat /proc/sys/kernel/random/uuid)
@@ -718,7 +721,7 @@ postInstall
 blue "--------------------------------------------"
 blue  "Install de_GWD [done]"
 echo
-blue "Domain： $(yellow "$v2domain")"
+blue "Domain： $(yellow "$vpsdomainP")"
 blue "UUID：   $(yellow "$v2uuids")"
 blue "PATH：   $(yellow "$v2path")"
 blue "--------------------------------------------"
@@ -804,28 +807,28 @@ blue "----------------"
 
 
 changeDomain(){
-    green "====================="
-    green " de_GWD_V2ray Domain"
-    green "====================="
-    read v2domain
+    green "==============================="
+    green " de_GWD_nat_V2ray Domain&&Port"
+    green "==============================="
+    read vpsdomainP
 
-    green "====================="
+    green "==============================="
     green " Cloudflare API KEY"
-    green "====================="
+    green "==============================="
     read CFapikey
 
-    green "====================="
+    green "==============================="
     green " Cloudflare Email"
-    green "====================="
+    green "==============================="
     read CFemail
 
-domain=$(echo $v2domain | cut -d : -f1)
-port=$(echo $v2domain | cut -d : -f2)
+domain=$(echo $vpsdomainP | cut -d : -f1)
+port=$(echo $vpsdomainP | cut -d : -f2)
 topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-rm -rf /var/www/ssl/*
+installNginx
 
 makeSSL_D
 
@@ -1003,7 +1006,7 @@ fi
     red    "5. Change static IP"
     red    "6. Change domain and issue new certificates"
     yellow "7. Change v2ray UUID & path"
-    yellow "9. Update Pi-hole"
+    yellow "8. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "00.AutoUpdate turn on/off"
     red    "CTRL+C EXIT"
@@ -1030,7 +1033,7 @@ fi
     changeV2rayVerify
     start_menu
     ;;
-    9)
+    8)
     updatePihole
     start_menu
     ;;
