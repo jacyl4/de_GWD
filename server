@@ -1422,7 +1422,7 @@ fi
     blue   "4. Config Nextcloud cache"
     red    "5. Change static IP"
     red    "6. Change domain and issue new certificates"
-    red.   "7. Change v2ray UUID & path"
+    red    "7. Change v2ray UUID & path"
     yellow "8. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "00.AutoUpdate turn on/off"
