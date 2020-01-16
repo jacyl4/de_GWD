@@ -274,7 +274,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   },
   {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
-  {"tag":"dnsout","protocol":"dns"},
+  {"tag":"dnsout","protocol":"dns"}
 ],
 "routing": {
   "domainStrategy": "AsIs",
@@ -489,14 +489,13 @@ echo
 
 
 installWGdoPHP(){
+cd ~
 cat << EOF > /etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
 deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" | sudo tee /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
@@ -504,11 +503,24 @@ curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt install -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io \
+apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make \
+docker-ce docker-ce-cli containerd.io \
 php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync
 
 systemctl enable docker
 systemctl restart docker
+
+git clone https://git.zx2c4.com/wireguard-linux-compat
+git clone https://git.zx2c4.com/wireguard-tools
+
+make -C wireguard-linux-compat/src -j$(nproc)
+make -C wireguard-linux-compat/src install
+
+make -C wireguard-tools/src -j$(nproc)
+make -C wireguard-tools/src install
+
+rm -rf ~/wireguard-linux-compat
+rm -rf ~/wireguard-tools
 
 cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
 [global]
@@ -1173,7 +1185,7 @@ blue "-----------------------------"
     green "==============================="
     echo
     green  "1. Install de_GWD"
-    yellow "9. Change de_GWD password"
+    yellow "2. Change de_GWD password"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo
@@ -1183,7 +1195,7 @@ blue "-----------------------------"
     installGWD
     start_menu
     ;;
-    9)
+    2)
     change_piholeAdmin
     start_menu
     ;;

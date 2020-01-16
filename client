@@ -294,7 +294,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   },
   {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
-  {"tag":"dnsout","protocol":"dns"},
+  {"tag":"dnsout","protocol":"dns"}
 ],
 "routing": {
   "domainStrategy": "AsIs",
@@ -509,6 +509,7 @@ echo
 
 
 installWG(){
+cd ~
 if [[ $architecture = "amd64" ]]; then
 cat << EOF > /etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
@@ -517,16 +518,25 @@ deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d 
 EOF
 fi
 
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
-
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y wireguard-dkms wireguard-tools linux-headers-odroidxu4
+apt install -y linux-headers-odroidxu4 libmnl-dev libelf-dev bc gcc make 
 elif [[ $architecture = "amd64" ]]; then
-apt install -y wireguard-dkms wireguard-tools linux-headers-$(uname -r)
+apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make 
 fi
+
+git clone https://git.zx2c4.com/wireguard-linux-compat
+git clone https://git.zx2c4.com/wireguard-tools
+
+make -C wireguard-linux-compat/src -j$(nproc)
+make -C wireguard-linux-compat/src install
+
+make -C wireguard-tools/src -j$(nproc)
+make -C wireguard-tools/src install
+
+rm -rf ~/wireguard-linux-compat
+rm -rf ~/wireguard-tools
 }
 
 
@@ -966,7 +976,7 @@ blue "-----------------------------"
     green "===================================="
     echo
     green  "1. Install de_GWD"
-    yellow "9. Change de_GWD password"
+    yellow "2. Change de_GWD password"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo
@@ -976,7 +986,7 @@ blue "-----------------------------"
     installGWD
     start_menu
     ;;
-    9)
+    2)
     change_piholeAdmin
     start_menu
     ;;

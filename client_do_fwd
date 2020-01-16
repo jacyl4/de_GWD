@@ -364,6 +364,16 @@ rm -rf /tmp/vtruiConfADD
 
 installclifwd(){
     green "=============================="
+    green " Cloudflare API KEY"
+    green "=============================="
+    read CFapikey
+
+    green "=============================="
+    green " Cloudflare Email"
+    green "=============================="
+    read CFemail
+    
+    green "=============================="
     green " de_GWD_fwd_V2ray Domain&Port"
     green "=============================="
     read clifwd_domain
@@ -377,16 +387,6 @@ installclifwd(){
     green " de_GWD_fwd_V2ray Path"
     green "=============================="
     read clifwd_v2path
-
-    green "=============================="
-    green " Cloudflare API KEY"
-    green "=============================="
-    read CFapikey
-
-    green "=============================="
-    green " Cloudflare Email"
-    green "=============================="
-    read CFemail
     
 cd ~
 
@@ -677,9 +677,9 @@ blue "-----------------------------"
     green "================================"
     echo
     green  "1. de_GWD clifwd install"
-    green  "2. Install bbrplus and reboot（only Debian 9）"
+    green  "2. Change de_GWD password"
+    green  "3. Install bbrplus and reboot（only Debian 9）"
     red    "6. Change domain and issue new certificates"
-    yellow "9. Change de_GWD password"
     yellow "0. de_GWD clifwd Update"
     red    "CTRL+C EXIT"
     echo
@@ -690,15 +690,15 @@ blue "-----------------------------"
     start_menu
     ;;
     2)
+    change_clifwd_piholeAdmin
+    start_menu
+    ;;
+    3)
     installBBRplus
     start_menu
     ;;
     6)
     changeDomain
-    start_menu
-    ;;
-    9)
-    change_clifwd_piholeAdmin
     start_menu
     ;;
     0)

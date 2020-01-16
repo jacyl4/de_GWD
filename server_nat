@@ -617,11 +617,6 @@ wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_G
 
 installGWD(){
     green "==============================="
-    green " de_GWD_nat_V2ray Domain&&Port"
-    green "==============================="
-    read vpsdomainP
-
-    green "==============================="
     green " Cloudflare API KEY"
     green "==============================="
     read CFapikey
@@ -630,6 +625,11 @@ installGWD(){
     green " Cloudflare Email"
     green "==============================="
     read CFemail
+
+    green "==============================="
+    green " de_GWD_nat_V2ray Domain&&Port"
+    green "==============================="
+    read vpsdomainP
 
 cd ~
 
@@ -808,11 +808,6 @@ blue "----------------"
 
 changeDomain(){
     green "==============================="
-    green " de_GWD_nat_V2ray Domain&&Port"
-    green "==============================="
-    read vpsdomainP
-
-    green "==============================="
     green " Cloudflare API KEY"
     green "==============================="
     read CFapikey
@@ -821,6 +816,11 @@ changeDomain(){
     green " Cloudflare Email"
     green "==============================="
     read CFemail
+    
+    green "==============================="
+    green " de_GWD_nat_V2ray Domain&&Port"
+    green "==============================="
+    read vpsdomainP
 
 domain=$(echo $vpsdomainP | cut -d : -f1)
 port=$(echo $vpsdomainP | cut -d : -f2)
