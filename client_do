@@ -509,7 +509,7 @@ echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= |
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install -y wireguard-dkms wireguard-tools linux-headers-$(uname -r) docker-ce docker-ce-cli containerd.io \
-php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync net-tools dialog dhcpcd5 lsof netcat idn2 libcap2-bin dns-root-data resolvconf lighttpd
+php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync
 
 systemctl enable docker
 systemctl restart docker
@@ -639,6 +639,7 @@ systemctl daemon-reload > /dev/null 2>&1
 systemctl enable smartdns > /dev/null 2>&1
 systemctl restart smartdns > /dev/null 2>&1
 
+mkdir -p /etc/pihole
 echo "" > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
@@ -699,7 +700,7 @@ pihole -f
 
 
 
-dockerNginx(){
+installNginx(){
 mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
 mkdir -p "/var/log/nginx"
@@ -938,8 +939,6 @@ installGWD(){
     read v2path
 
 cd ~
-rm -rf /var/www/html/*
-rm -rf /usr/local/bin/ui-*
 
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
@@ -968,10 +967,7 @@ deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSI
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-rm -rf /etc/apt/sources.list.d/unstable.list
-rm -rf /etc/apt/preferences.d/limit-unstable
-
-apt update && apt install -y sudo locales dnsutils ipset wget curl git jq unzip ca-certificates apt-transport-https gnupg2
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates apt-transport-https gnupg2
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -1004,7 +1000,6 @@ installIptablesProxy
 
 installWGdoPHP
 
-mkdir -p /etc/pihole
 installPihole
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
@@ -1015,7 +1010,7 @@ echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
-dockerNginx
+installNginx
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
@@ -1047,6 +1042,7 @@ blue "------------------------------"
 
 
 updateGWD(){
+cd ~
 source /etc/profile
 
 checkDNS=$(/usr/local/bin/ui-checkDNS)
@@ -1065,8 +1061,6 @@ v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
-cd ~
-
 preInstall
 
 installDOH
@@ -1079,7 +1073,7 @@ installWGdoPHP
 
 installPihole
 
-dockerNginx
+installNginx
 
 installWebUI
 

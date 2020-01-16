@@ -142,6 +142,7 @@ systemctl restart iptablesrules
 
 
 installPihole(){
+mkdir -p /etc/pihole
 echo "" > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
@@ -332,7 +333,7 @@ systemctl restart vtrui
 
 
 
-makeSSL(){
+makeSSL_D(){
 mkdir -p /var/www/ssl
 
 export CF_Key="$CFapikey"
@@ -627,6 +628,8 @@ installGWD(){
     green "======================"
     read CFemail
 
+cd ~
+
 domain=$(echo $v2domain | cut -d : -f1)
 port=$(echo $v2domain | cut -d : -f2)
 topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
@@ -651,7 +654,6 @@ iface $ethernetnum inet static
   gateway $gatewayaddr
 EOF
 
-cd ~
 preInstall
 
 cat << EOF > /etc/apt/sources.list
@@ -693,7 +695,6 @@ systemctl restart docker
 
 installIptablesRules
 
-mkdir -p /etc/pihole
 installPihole
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
@@ -708,9 +709,9 @@ installDOHser
 
 installV2ray
 
-makeSSL
-
 installNginx
+
+makeSSL_D
 
 postInstall
 
@@ -826,7 +827,7 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.j
 
 rm -rf /var/www/ssl/*
 
-makeSSL
+makeSSL_D
 
 docker restart nginx
 
