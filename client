@@ -134,8 +134,8 @@ elif [[ $architecture = "amd64" ]]; then
 fi
 unzip doh.zip
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
-rm -rf ~/doh*
 chmod +x /usr/local/bin/doh-client
+rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https/
 cat << EOF > /etc/dns-over-https/doh-client.conf
@@ -225,9 +225,9 @@ unzip vtrui.zip
 mv -f ~/vtrui/vtrui /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
 mv -f ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
-rm -rf ~/vtrui*
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
+rm -rf ~/vtrui*
 
 cat << EOF > /etc/vtrui/config.json
 {
@@ -309,11 +309,6 @@ cat << EOF > /etc/vtrui/config.json
 }
 }
 EOF
-
-portcheck=$(echo $port | grep '^[0-9]\+$')
-if [[ $portcheck = "" ]]; then
-port="443"
-fi
 
 jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
