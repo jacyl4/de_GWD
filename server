@@ -828,9 +828,9 @@ wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_G
 
 
 installGWD(){
-    green "======================"
-    green " Input domain (no www)"
-    green "======================"
+    green "=================="
+    green " Input VPS domain"
+    green "=================="
     read vpsdomain
 
 cd ~
