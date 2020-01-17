@@ -370,6 +370,7 @@ wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/mast
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
+update-grub
 
 cat << EOF > ~/bbrkernel/clearkernel
 #!/bin/bash
@@ -380,9 +381,6 @@ sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 sysctl -p
-
-/usr/bin/apt purge -y linux-image*amd64
-update-grub
 
 crontab -l > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
@@ -400,9 +398,9 @@ echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-blue "----------------------"
-blue "Install bbrplus [done]"
-blue "----------------------"
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
 
 reboot
 }
