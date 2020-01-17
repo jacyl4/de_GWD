@@ -363,6 +363,51 @@ rm -rf /tmp/vtruiConfADD
 
 
 
+installBBRplus(){
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+cat << EOF > ~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+
+/usr/bin/apt purge -y linux-image*amd64
+update-grub
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+
+reboot
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "----------------------"
+blue "Install bbrplus [done]"
+blue "----------------------"
+
+reboot
+}
+
+
+
 installclifwd(){
     green "=============================="
     green " Cloudflare API KEY"
@@ -443,51 +488,6 @@ pihole -a -p
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"
-}
-
-
-
-installBBRplus(){
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-cat << EOF > ~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-sysctl -p
-
-/usr/bin/apt purge -y linux-image*amd64
-update-grub
-
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-
-reboot
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-blue "----------------------"
-blue "Install bbrplus [done]"
-blue "----------------------"
-
-reboot
 }
 
 
@@ -680,25 +680,25 @@ blue "-----------------------------"
     green "Author:    JacyL4"
     green "================================"
     echo
+    blue   "11.Install bbrplus and reboot（only Debian 9）"
     green  "1. de_GWD clifwd install"
     green  "2. Change de_GWD password"
-    green  "3. Install bbrplus and reboot（only Debian 9）"
     red    "6. Change domain and issue new certificates"
     yellow "0. de_GWD clifwd Update"
     red    "CTRL+C EXIT"
     echo
     read -p "Select:" num
     case "$num" in
+    11)
+    installBBRplus
+    start_menu
+    ;;
     1)
     installclifwd
     start_menu
     ;;
     2)
     change_clifwd_piholeAdmin
-    start_menu
-    ;;
-    3)
-    installBBRplus
     start_menu
     ;;
     6)
