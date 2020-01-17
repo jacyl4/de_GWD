@@ -826,48 +826,6 @@ wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_G
 
 
 
-installBBRplus(){
-apt install -y wget
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-update-grub
-
-cat << EOF > ~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-sysctl -p
-
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-blue "-----------------------"
-blue  "Install bbrplus [done]"
-blue "-----------------------"
-
-reboot
-}
-
-
-
 
 installGWD(){
     green "=================="
@@ -969,6 +927,48 @@ blue "Domain： $(yellow "$vpsdomain")"
 blue "UUID：   $(yellow "$v2uuids")"
 blue "PATH：   $(yellow "$v2path")"
 blue "--------------------------------------------"
+}
+
+
+
+installBBRplus(){
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+update-grub
+
+cat << EOF > ~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
+
+reboot
 }
 
 
@@ -1415,8 +1415,8 @@ if [[ -f "/usr/local/bin/version.php" ]]; then
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
 fi
     echo
-    blue   "11.Install bbrplus and reboot（only Debian 9）"
     green  "1. Install de_GWD"
+    green  "2. Install bbrplus and reboot（only Debian 9）"
     blue   "3. Install PHP+MariaDB+Nextcloud"
     blue   "4. Config Nextcloud cache"
     red    "5. Change static IP"
@@ -1429,12 +1429,12 @@ fi
     echo
     read -p "Select:" num
     case "$num" in
-    11)
-    installBBRplus
-    start_menu
-    ;;
     1)
     installGWD
+    start_menu
+    ;;
+    2)
+    installBBRplus
     start_menu
     ;;
     3)
