@@ -364,6 +364,7 @@ rm -rf /tmp/vtruiConfADD
 
 
 installBBRplus(){
+apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.129-bbrplus.deb
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.129-bbrplus.deb
