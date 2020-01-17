@@ -634,7 +634,7 @@ cd ~
 
 domain=$(echo $vpsdomainP | cut -d : -f1)
 port=$(echo $vpsdomainP | cut -d : -f2)
-topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2uuids=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
@@ -823,7 +823,7 @@ changeDomain(){
 
 domain=$(echo $vpsdomainP | cut -d : -f1)
 port=$(echo $vpsdomainP | cut -d : -f2)
-topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
@@ -884,7 +884,7 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 port=$(awk '/ssl http2 spdy fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
-topDomain=$(echo $domain | awk -F. '{print $2"."$3}')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)

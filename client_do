@@ -507,20 +507,21 @@ apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev lib
 docker-ce docker-ce-cli containerd.io \
 php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync
 
-systemctl enable docker
-systemctl restart docker
-
 git clone https://git.zx2c4.com/wireguard-linux-compat
 git clone https://git.zx2c4.com/wireguard-tools
 
-make -C wireguard-linux-compat/src -j$(nproc)
-make -C wireguard-linux-compat/src install
+cd ~/wireguard-linux-compat/src
+make && make install
 
-make -C wireguard-tools/src -j$(nproc)
-make -C wireguard-tools/src install
+cd ~/wireguard-tools/src
+make && make install
 
+cd ~
 rm -rf ~/wireguard-linux-compat
 rm -rf ~/wireguard-tools
+
+systemctl enable docker
+systemctl restart docker
 
 cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
 [global]

@@ -377,7 +377,7 @@ installclifwd(){
     green "=============================="
     green " de_GWD_fwd_V2ray Domain&Port"
     green "=============================="
-    read clifwd_domain
+    read clifwd_domainP
     
     green "=============================="
     green " de_GWD_fwd_V2ray UUID"
@@ -391,9 +391,9 @@ installclifwd(){
     
 cd ~
 
-clifwd_domain=$(echo $clifwd_domain | cut -d : -f1)
-clifwd_port=$(echo $clifwd_domain | cut -d : -f2)
-topDomain=$(echo $clifwd_domain | awk -F. '{print $2"."$3}')
+clifwd_domain=$(echo $clifwd_domainP | cut -d : -f1)
+clifwd_port=$(echo $clifwd_domainP | cut -d : -f2)
+topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
 sed -i '2d' ~/client_do && sed -i '/\/etc\/sudoers/,$d' ~/client_do
@@ -496,7 +496,7 @@ changeDomain(){
     green "=============================="
     green " de_GWD_fwd_V2ray Domain&Port"
     green "=============================="
-    read clifwd_domain
+    read clifwd_domainP
 
     green "=============================="
     green " Cloudflare API KEY"
@@ -508,9 +508,9 @@ changeDomain(){
     green "=============================="
     read CFemail
 
-clifwd_domain=$(echo $clifwd_domain | cut -d : -f1)
-clifwd_port=$(echo $clifwd_domain | cut -d : -f2)
-topDomain=$(echo $clifwd_domain | awk -F. '{print $2"."$3}')
+clifwd_domain=$(echo $clifwd_domainP | cut -d : -f1)
+clifwd_port=$(echo $clifwd_domainP | cut -d : -f2)
+topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 clifwd_v2path=$(cat /var/www/FWDpath.txt)
 
@@ -540,7 +540,7 @@ piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
 clifwd_domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 clifwd_port=$(awk '/ssl http2 spdy fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
-topDomain=$(echo $clifwd_domain | awk -F. '{print $2"."$3}')
+topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
 clifwd_v2path=$(cat /var/www/FWDpath.txt)
 
 domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
