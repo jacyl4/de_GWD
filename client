@@ -518,25 +518,22 @@ deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d 
 EOF
 fi
 
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 libmnl-dev libelf-dev libc6-dev bc gcc make 
+apt install -y linux-headers-odroidxu4 libmnl-dev libelf-dev libc6-dev bc gcc make wireguard-tools
 elif [[ $architecture = "amd64" ]]; then
-apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev libc6-dev bc gcc make 
+apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev libc6-dev bc gcc make wireguard-tools
 fi
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
-git clone https://git.zx2c4.com/wireguard-tools
-
-make -C wireguard-linux-compat/src -j$(nproc)
-make -C wireguard-linux-compat/src install
-
-make -C wireguard-tools/src -j$(nproc)
-make -C wireguard-tools/src install
-
+cd ~/wireguard-linux-compat/src
+make && make install
 rm -rf ~/wireguard-linux-compat
-rm -rf ~/wireguard-tools
+cd ~
 }
 
 
@@ -970,9 +967,9 @@ blue "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -
 blue "-----------------------------"
 
     green "===================================="
-    green "                CLIENT               "
-    green "Recommend: Debian 9 + (amd64 & arm64)"
-    green "Author:    JacyL4                    "
+    green "                CLIENT"
+    green "Recommend: Debian 10 (amd64 & arm64)"
+    green "Author:    JacyL4"
     green "===================================="
     echo
     green  "1. Install de_GWD"

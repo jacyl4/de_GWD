@@ -417,9 +417,9 @@ chmod +x ~/client_do
 
 installGWD
 
-clifwd_iptablesProxy
-
 clifwd_installDOHser
+
+clifwd_iptablesProxy
 
 clifwd_nginxWebConf
 
@@ -570,9 +570,9 @@ installPihole
 
 installNginx
 
-clifwd_iptablesProxy
-
 clifwd_installDOHser
+
+clifwd_iptablesProxy
 
 clifwd_nginxWebConf
 
