@@ -850,8 +850,6 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
-
-reboot
 EOF
 
 chmod +x ~/bbrkernel/clearkernel
