@@ -503,7 +503,7 @@ curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make \
+apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev libc6-dev bc gcc make \
 docker-ce docker-ce-cli containerd.io \
 php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync
 

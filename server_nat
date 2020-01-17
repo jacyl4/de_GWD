@@ -338,6 +338,7 @@ mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
 mkdir -p "/var/log/nginx"
 mkdir -p "/var/www/html"
+mkdir -p "/var/www/ssl"
 
 rm -rf /etc/nginx/nginx.conf
 cat << EOF > /etc/nginx/nginx.conf
@@ -496,8 +497,6 @@ docker pull jacyl4/nginx_tls1.3:latest
 
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
-
-mkdir -p /var/www/ssl
 
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
@@ -831,8 +830,6 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.j
 installNginx
 
 makeSSL_D
-
-docker restart nginx
 
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"

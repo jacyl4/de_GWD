@@ -521,9 +521,9 @@ fi
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 libmnl-dev libelf-dev bc gcc make 
+apt install -y linux-headers-odroidxu4 libmnl-dev libelf-dev libc6-dev bc gcc make 
 elif [[ $architecture = "amd64" ]]; then
-apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make 
+apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev libc6-dev bc gcc make 
 fi
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
