@@ -184,7 +184,6 @@ jacyl4/nginx_tls1.3:latest
 
 makeSSL_D(){
 apt update && apt install -y netcat socat
-rm -rf /var/www/ssl/*
 
 export CF_Key="$CFapikey"
 export CF_Email="$CFemail"
@@ -515,9 +514,11 @@ topDomain=$(echo $clifwd_domain | awk -F. '{print $2"."$3}')
 
 clifwd_v2path=$(cat /var/www/FWDpath.txt)
 
-makeSSL_D
+rm -rf /var/www/ssl/*
 
 clifwd_nginxWebConf
+
+makeSSL_D
 
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
