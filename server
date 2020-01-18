@@ -560,6 +560,15 @@ server {
   add_header Referrer-Policy no-referrer;
   add_header Strict-Transport-Security "max-age=63072000";
 
+location /dq {
+  proxy_set_header        Host \$host;
+  proxy_set_header        X-Real-IP \$remote_addr;
+  proxy_redirect          off;
+  proxy_buffering         off;
+  proxy_buffer_size       8k;
+  proxy_pass              http://127.0.0.1:8053/dq;
+}
+
 location $v2path {
   proxy_http_version      1.1;
   proxy_set_header        Host \$http_host;
@@ -576,15 +585,6 @@ location $v2path {
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_pass              http://127.0.0.1:11811;
-}
-
-location /dq {
-  proxy_set_header        Host \$host;
-  proxy_set_header        X-Real-IP \$remote_addr;
-  proxy_redirect          off;
-  proxy_buffering         off;
-  proxy_buffer_size       8k;
-  proxy_pass              http://127.0.0.1:8053/dq;
 }
 }
 EOF
@@ -732,6 +732,15 @@ server {
         }
     }
 
+location /dq {
+  proxy_set_header        Host \$host;
+  proxy_set_header        X-Real-IP \$remote_addr;
+  proxy_redirect          off;
+  proxy_buffering         off;
+  proxy_buffer_size       8k;
+  proxy_pass              http://127.0.0.1:8053/dq;
+}
+
 location $v2path {
   proxy_http_version      1.1;
   proxy_set_header        Host \$http_host;
@@ -748,15 +757,6 @@ location $v2path {
   keepalive_requests      25600;
   keepalive_timeout       300 300;
   proxy_pass              http://127.0.0.1:11811;
-}
-
-location /dq {
-  proxy_set_header        Host \$host;
-  proxy_set_header        X-Real-IP \$remote_addr;
-  proxy_redirect          off;
-  proxy_buffering         off;
-  proxy_buffer_size       8k;
-  proxy_pass              http://127.0.0.1:8053/dq;
 }
 }
 EOF
