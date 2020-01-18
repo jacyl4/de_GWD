@@ -479,17 +479,11 @@ location $v2path {
 }
 
 location /dq {
-  proxy_http_version      1.1;
   proxy_set_header        Host \$host;
   proxy_set_header        X-Real-IP \$remote_addr;
-  proxy_read_timeout      86400;
   proxy_redirect          off;
-  proxy_buffering         on;
-  proxy_buffers           16 8k;
+  proxy_buffering         off;
   proxy_buffer_size       8k;
-  proxy_busy_buffers_size 16k;
-  keepalive_requests      25600;
-  keepalive_timeout       300 300;
   proxy_pass              http://127.0.0.1:8053/dq;
 }
 }
