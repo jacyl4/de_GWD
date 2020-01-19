@@ -13,14 +13,14 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 
 
 ## Client：
-amd64&arm64 Edition
+Basic Edition (amd64&arm64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client)
 ```
 
 
-amd64 docker nginx Edition
+Docker nginx Edition (amd64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
@@ -30,12 +30,17 @@ bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 
 ![client_do](https://i.loli.net/2020/01/14/LnNQ8qTbSzR3FlI.png)
 
-amd64 nat forward Edition
+
+
+## Extension edition:
+
+Nat Server (amd64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server_nat)
 ```
 
+Nat forward Client (amd64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do_fwd)
