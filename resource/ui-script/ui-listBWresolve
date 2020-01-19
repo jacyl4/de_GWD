@@ -3,18 +3,18 @@ echo "" > /var/www/html/listBip.txt
 echo "" > /var/www/html/listWip.txt
 
 for listB in $(cat /var/www/html/listB.txt); do
-  echo $(nslookup -port=5380 $listB | awk '/Address/ {print$2}' | sed '1d') | xargs echo -n | xargs -n1 >> /var/www/html/listBip.txt
+  echo $(nslookup -port=5380 $listB | awk '/Address/ {print$2}' | sed '1d') | xargs echo -n | xargs -n1 >> /tmp/listBip
 done
 
 for listW in $(cat /var/www/html/listW.txt); do
-  echo $(nslookup -port=5370 $listW | awk '/Address/ {print$2}' | sed '1d') | xargs echo -n | xargs -n1 >> /var/www/html/listWip.txt
+  echo $(nslookup -port=5370 $listW | awk '/Address/ {print$2}' | sed '1d') | xargs echo -n | xargs -n1 >> /tmp/listWip
 done
 
-sed -i '/[a-z]/d' /var/www/html/listBip.txt
-sed -i '/[a-z]/d' /var/www/html/listWip.txt
+sed -i '/[a-z]/d' /tmp/listBip
+sed -i '/[a-z]/d' /tmp/listWip
 
-sed -i '/^$/d' /var/www/html/listBip.txt
-sed -i '/^$/d' /var/www/html/listWip.txt
+sed -i '/^$/d' /tmp/listBip
+sed -i '/^$/d' /tmp/listWip
 
-echo $(sort -n /var/www/html/listBip.txt | uniq) | xargs echo -n | xargs -n1 > /var/www/html/listBip.txt
-echo $(sort -n /var/www/html/listWip.txt | uniq) | xargs echo -n | xargs -n1 > /var/www/html/listWip.txt
+echo $(sort -n /tmp/listBip | uniq) | xargs echo -n | xargs -n1 > /var/www/html/listBip.txt
+echo $(sort -n /tmp/listWip | uniq) | xargs echo -n | xargs -n1 > /var/www/html/listWip.txt
