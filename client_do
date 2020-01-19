@@ -596,7 +596,7 @@ systemctl restart php7.4-fpm
 
 
 installPihole(){
-wget -O ~/smartdns.deb $smartdns_amd64
+wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i smartdns.deb
 
 cat << EOF > /etc/smartdns/smartdns.conf

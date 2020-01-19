@@ -524,9 +524,9 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools
+apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools zip subversion rsync php7.3-common php7.3-cgi php7.3-sqlite3 sqlite3
 elif [[ $architecture = "amd64" ]]; then
-apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
+apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools zip subversion rsync php7.3-common php7.3-cgi php7.3-sqlite3 sqlite3
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src
@@ -540,9 +540,9 @@ fi
 
 installPihole(){
 if [[ $architecture = "arm64" ]]; then
-  wget -O ~/smartdns.deb $smartdns_arm64
+  wget --no-check-certificate -O ~/smartdns.deb $smartdns_arm64
 elif [[ $architecture = "amd64" ]]; then
-  wget -O ~/smartdns.deb $smartdns_amd64
+  wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 fi
 dpkg -i smartdns.deb
 
@@ -790,7 +790,7 @@ deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut
 EOF
 fi
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl ca-certificates unzip zip git subversion rsync jq
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
