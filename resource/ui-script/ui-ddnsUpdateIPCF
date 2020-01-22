@@ -14,5 +14,5 @@ curl -X PUT "https://api.cloudflare.com/client/v4/zones/$CFzoneid/dns_records/$C
      -H "X-Auth-Email: $CFemail" \
      -H "X-Auth-Key: $CFapikey" \
      -H "Content-Type: application/json" \
-     --data '{"type":"A","name":"'$CFdomain'","content":"'$wanIP'"}'
+     --data '{"type":"A","name":"'$CFdomain'","content":"'$wanIP'","ttl":1,"proxied":false}'
 fi
