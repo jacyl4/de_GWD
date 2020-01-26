@@ -342,26 +342,20 @@ mkdir -p "/var/www/html"
 rm -rf /etc/nginx/nginx.conf
 cat << EOF > /etc/nginx/nginx.conf
 user  www-data www-data;
-worker_processes auto;
 pid   /run/nginx.pid;
 
-    worker_rlimit_nofile 65535;
+worker_processes auto;
+worker_rlimit_nofile 100000;
 
 events {
-    use epoll;
-    worker_connections  65535;
+    worker_connections  2048;
     multi_accept on;
+    use epoll;
 }
 
 http {
   include mime.types;
   default_type application/octet-stream;
-
-  server_names_hash_bucket_size 128;
-  client_header_buffer_size 32k;
-  large_client_header_buffers 4 32k;
-  client_max_body_size 1024m;
-  client_body_buffer_size 10m;
 
   fastcgi_connect_timeout 300;
   fastcgi_send_timeout 300;
@@ -372,21 +366,25 @@ http {
   fastcgi_temp_file_write_size 128k;
   fastcgi_intercept_errors on;
 
-  sendfile            on;
-  tcp_nodelay         on;
-  tcp_nopush          on;
-  keepalive_timeout   10;
-  types_hash_max_size 2048;
-  server_tokens       off;
+  server_tokens             off;
+  sendfile                  on;
+  tcp_nodelay               on;
+  tcp_nopush                on;
+  keepalive_timeout         10;
+  client_header_timeout     10;
+  client_body_timeout       10;
+  reset_timedout_connection on; 
+  send_timeout              10;
+  types_hash_max_size       2048;
 
-  gzip                on;
-  gzip_disable        "MSIE [1-6]\.";
-  gzip_vary           on;
-  gzip_proxied        any;
-  gzip_comp_level     4;
-  gzip_min_length     256;
-  gzip_buffers        16 8k;
-  gzip_http_version   1.0;
+  gzip                      on;
+  gzip_disable              "MSIE [1-6]\.";
+  gzip_vary                 on;
+  gzip_proxied              any;
+  gzip_comp_level           4;
+  gzip_min_length           256;
+  gzip_buffers              16 8k;
+  gzip_http_version         1.0;
   gzip_types    text/plain
                 text/javascript
                 text/css
@@ -408,13 +406,13 @@ http {
                 image/svg+xml
                 image/x-icon;
 
-  brotli              on;
-  brotli_static       on;
-  brotli_comp_level   6;
-  brotli_buffers      16 8k;
-  brotli_min_length   20;
-  brotli_window       16m;
-  brotli_types        *;
+  brotli                    on;
+  brotli_static             on;
+  brotli_comp_level         6;
+  brotli_buffers            16 8k;
+  brotli_min_length         20;
+  brotli_window             16m;
+  brotli_types              *;
 
   access_log off;
   error_log off;
