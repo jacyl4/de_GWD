@@ -465,6 +465,8 @@ location /dq {
   proxy_send_timeout        60;
   proxy_read_timeout        60;
   proxy_redirect            off;
+  proxy_buffering           off;
+  proxy_buffer_size         8k;
   proxy_pass                http://127.0.0.1:8053/dq;
 }
 
@@ -479,6 +481,8 @@ location $v2path {
   proxy_send_timeout        60;
   proxy_read_timeout        60;
   proxy_redirect            off;
+  proxy_buffering           off;
+  proxy_buffer_size         8k;
   proxy_pass                http://127.0.0.1:11811;
 }
 }
