@@ -566,7 +566,7 @@ location /dq {
   proxy_read_timeout        60;
   proxy_redirect            off;
   proxy_buffering           on;
-  proxy_buffer_size         32k;
+  proxy_buffer_size         8k;
   proxy_buffers             8 128k;
   proxy_busy_buffers_size   256k;
   proxy_max_temp_file_size  0;
@@ -745,7 +745,7 @@ location /dq {
   proxy_read_timeout        60;
   proxy_redirect            off;
   proxy_buffering           on;
-  proxy_buffer_size         32k;
+  proxy_buffer_size         8k;
   proxy_buffers             8 128k;
   proxy_busy_buffers_size   256k;
   proxy_max_temp_file_size  0;
