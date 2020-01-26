@@ -370,11 +370,11 @@ http {
   sendfile                  on;
   tcp_nodelay               on;
   tcp_nopush                on;
-  keepalive_timeout         10;
-  client_header_timeout     10;
-  client_body_timeout       10;
-  reset_timedout_connection on; 
-  send_timeout              10;
+  keepalive_timeout         60;
+  client_header_timeout     60;
+  client_body_timeout       60;
+  reset_timedout_connection on;
+  send_timeout              60;
   types_hash_max_size       2048;
 
   gzip                      on;
@@ -564,6 +564,9 @@ location /dq {
   proxy_redirect          off;
   proxy_buffering         off;
   proxy_buffer_size       8k;
+  proxy_connect_timeout   60;
+  proxy_send_timeout      60;
+  proxy_read_timeout      60;
   proxy_pass              http://127.0.0.1:8053/dq;
 }
 
@@ -577,6 +580,9 @@ location $v2path {
   proxy_redirect          off;
   proxy_buffering         off;
   proxy_buffer_size       8k;
+  proxy_connect_timeout   60;
+  proxy_send_timeout      60;
+  proxy_read_timeout      60;
   proxy_pass              http://127.0.0.1:11811;
 }
 }
@@ -731,6 +737,9 @@ location /dq {
   proxy_redirect          off;
   proxy_buffering         off;
   proxy_buffer_size       8k;
+  proxy_connect_timeout   60;
+  proxy_send_timeout      60;
+  proxy_read_timeout      60;
   proxy_pass              http://127.0.0.1:8053/dq;
 }
 
@@ -744,6 +753,9 @@ location $v2path {
   proxy_redirect          off;
   proxy_buffering         off;
   proxy_buffer_size       8k;
+  proxy_connect_timeout   60;
+  proxy_send_timeout      60;
+  proxy_read_timeout      60;
   proxy_pass              http://127.0.0.1:11811;
 }
 }

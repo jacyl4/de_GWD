@@ -740,11 +740,11 @@ http {
   sendfile                  on;
   tcp_nodelay               on;
   tcp_nopush                on;
-  keepalive_timeout         10;
-  client_header_timeout     10;
-  client_body_timeout       10;
-  reset_timedout_connection on; 
-  send_timeout              10;
+  keepalive_timeout         60;
+  client_header_timeout     60;
+  client_body_timeout       60;
+  reset_timedout_connection on;
+  send_timeout              60;
   types_hash_max_size       2048;
 
   gzip                      on;
