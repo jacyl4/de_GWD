@@ -123,26 +123,26 @@ rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https/
 cat << EOF > /etc/dns-over-https/doh-client.conf
-listen = [ "127.0.0.1:5380" ]
+listen = [ "127.0.0.1:5380", ]
 
 [upstream]
-upstream_selector = "weighted_round_robin"
+upstream_selector = "random"
+
 # DoH1
-
 [[upstream.upstream_ietf]]
     url = "https://xxx.ooo/dq"
-    weight = 50
+
 # DoH2
-
 [[upstream.upstream_ietf]]
     url = "https://xxx.ooo/dq"
-    weight = 50
 
 [others]
+bootstrap = []
+passthrough = []
 timeout = 30
-no_cookies = true
-no_ecs = true
-no_ipv6 = true
+no_cookies = false
+no_ecs = false
+no_ipv6 = false
 verbose = false
 EOF
 
