@@ -1324,11 +1324,6 @@ autoUpdateGWD(){
 if [[ "$autoUpdateswitch" = "Y" ]] || [[ "$autoUpdateswitch" = "y" ]]; then 
 sed -i '/localver=/,$d' /usr/local/bin/Q2H
 
-crontab -l > ~/now.cron
-sed -i '/autoUpdate/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
 cat << "EOF" >> /usr/local/bin/Q2H
 localver=$(awk 'NR==1' /usr/local/bin/version.php)
 remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
@@ -1347,6 +1342,12 @@ blue "--------------------------"
 
 elif [[ "$autoUpdateswitch" = "N" ]] || [[ "$autoUpdateswitch" = "n" ]]; then
 sed -i '/localver=/,$d' /usr/local/bin/Q2H
+
+crontab -l > ~/now.cron
+sed -i '/autoUpdate/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
 blue "---------------------------"
 blue  "AutoUpdate turn off [done]"
 blue "---------------------------"
