@@ -139,7 +139,7 @@ rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https/
 cat << EOF > /etc/dns-over-https/doh-client.conf
-listen = [ "127.0.0.1:5380", ]
+listen = [ ":5380", ]
 
 [upstream]
 upstream_selector = "random"
@@ -153,11 +153,9 @@ upstream_selector = "random"
     url = "https://xxx.ooo/dq"
 
 [others]
-bootstrap = []
-passthrough = []
 timeout = 30
-no_cookies = false
-no_ecs = false
+no_cookies = true
+no_ecs = true
 no_ipv6 = false
 verbose = false
 EOF
