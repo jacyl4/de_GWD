@@ -36,7 +36,7 @@ rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https
 cat << EOF > /etc/dns-over-https/doh-server.conf
-listen = [ ":8053", ]
+listen = [ "127.0.0.1:8053", ]
 
 path = "/dq"
 
@@ -144,8 +144,6 @@ location /dq {
   proxy_send_timeout        60;
   proxy_read_timeout        60;
   proxy_redirect            off;
-  proxy_buffering           off;
-  proxy_buffer_size         8k;
   proxy_pass                http://127.0.0.1:8053/dq;
 }
 
