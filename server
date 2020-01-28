@@ -582,8 +582,10 @@ location $v2path {
   proxy_send_timeout        60;
   proxy_read_timeout        60;
   proxy_redirect            off;
-  proxy_buffering           off;
+  proxy_buffering           on;
   proxy_buffer_size         8k;
+  proxy_buffers             8 128k;
+  proxy_busy_buffers_size   256k;
   proxy_pass                http://127.0.0.1:11811;
 }
 }
@@ -755,8 +757,10 @@ location $v2path {
   proxy_send_timeout        60;
   proxy_read_timeout        60;
   proxy_redirect            off;
-  proxy_buffering           off;
+  proxy_buffering           on;
   proxy_buffer_size         8k;
+  proxy_buffers             8 128k;
+  proxy_busy_buffers_size   256k;
   proxy_pass                http://127.0.0.1:11811;
 }
 }
