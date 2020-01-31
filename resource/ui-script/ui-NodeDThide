@@ -19,9 +19,9 @@ cat > /etc/vtrui/config.json << EOF
     },
     "servers": [
       {"address":"127.0.0.1","port":5390},
+      {"address":"127.0.0.1","port":5370,"domains":["geosite:cn"]},
       {"address":"127.0.0.1","port":5370,"domains":["domain:baidu.com"]},
-      {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
-      {"address":"127.0.0.1","port":5370,"domains":["geosite:cn"]}
+      {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]}
                      ]},
   "inbounds": [
     {
