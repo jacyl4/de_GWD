@@ -7,8 +7,6 @@ sed -i "/address/c\address $localip" /etc/network/interfaces
 sed -i "/gateway/c\gateway $upstreamip" /etc/network/interfaces
 
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localip/24" /etc/pihole/setupVars.conf
-sed -i "/CONDITIONAL_FORWARDING_IP=/c\CONDITIONAL_FORWARDING_IP=$localip" /etc/pihole/setupVars.conf
-sed -i "/CONDITIONAL_FORWARDING_REVERSE=/c\CONDITIONAL_FORWARDING_REVERSE=$(echo $localip | awk -F. '{print $3"." $2"."$1}').in-addr.arpa" /etc/pihole/setupVars.conf
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf

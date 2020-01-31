@@ -663,10 +663,7 @@ DNSMASQ_LISTENING=single
 DNS_FQDN_REQUIRED=true
 DNS_BOGUS_PRIV=true
 DNSSEC=false
-CONDITIONAL_FORWARDING=true
-CONDITIONAL_FORWARDING_IP=$localaddr
-CONDITIONAL_FORWARDING_DOMAIN=lan
-CONDITIONAL_FORWARDING_REVERSE=$(echo $localaddr | awk -F. '{print $3"." $2"."$1}').in-addr.arpa
+CONDITIONAL_FORWARDING=false
 EOF
 git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
 bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
