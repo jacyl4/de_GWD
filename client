@@ -158,7 +158,7 @@ upstream_selector = "weighted_round_robin"
 timeout = 30
 no_cookies = true
 no_ecs = true
-no_ipv6 = false
+no_ipv6 = true
 verbose = false
 EOF
 
