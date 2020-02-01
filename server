@@ -560,11 +560,15 @@ server {
   add_header Strict-Transport-Security "max-age=63072000";
 
 location /dq {
+  proxy_http_version        1.1;
   proxy_set_header          Host \$host;
+  proxy_set_header          Connection "";
   proxy_set_header          X-Real-IP \$remote_addr;
-  proxy_connect_timeout     60;
-  proxy_send_timeout        60;
-  proxy_read_timeout        60;
+  proxy_connect_timeout     300;
+  proxy_send_timeout        300;
+  proxy_read_timeout        300;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
   proxy_redirect            off;
   proxy_pass                http://127.0.0.1:8053/dq;
 }
@@ -576,9 +580,11 @@ location $v2path {
   proxy_set_header          Connection "upgrade";
   proxy_set_header          X-Real-IP \$remote_addr;
   proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_connect_timeout     60;
-  proxy_send_timeout        60;
-  proxy_read_timeout        60;
+  proxy_connect_timeout     300;
+  proxy_send_timeout        300;
+  proxy_read_timeout        300;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
   proxy_redirect            off;
   proxy_pass                http://127.0.0.1:11811;
 }
@@ -729,11 +735,15 @@ server {
     }
 
 location /dq {
+  proxy_http_version        1.1;
   proxy_set_header          Host \$host;
+  proxy_set_header          Connection "";
   proxy_set_header          X-Real-IP \$remote_addr;
-  proxy_connect_timeout     60;
-  proxy_send_timeout        60;
-  proxy_read_timeout        60;
+  proxy_connect_timeout     300;
+  proxy_send_timeout        300;
+  proxy_read_timeout        300;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
   proxy_redirect            off;
   proxy_pass                http://127.0.0.1:8053/dq;
 }
@@ -745,9 +755,11 @@ location $v2path {
   proxy_set_header          Connection "upgrade";
   proxy_set_header          X-Real-IP \$remote_addr;
   proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_connect_timeout     60;
-  proxy_send_timeout        60;
-  proxy_read_timeout        60;
+  proxy_connect_timeout     300;
+  proxy_send_timeout        300;
+  proxy_read_timeout        300;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
   proxy_redirect            off;
   proxy_pass                http://127.0.0.1:11811;
 }
@@ -856,8 +868,10 @@ deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERS
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2
+apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
 source /etc/profile
+
+systemctl enable --now haveged
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 cat << EOF > /etc/default/locale
