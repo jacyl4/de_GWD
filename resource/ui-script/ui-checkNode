@@ -10,7 +10,7 @@ fi
 
 nodecheck2=$(echo $nodecheck | cut -d . -f1)
 
-sed -n -e "/$nodecheck/=" /var/www/html/domain.txt > /tmp/nodecheck
-awk -F. '{print$1}' /var/www/html/domain.txt | sed -n -e "/$nodecheck2/=" >> /tmp/nodecheck
+jq -r '.v2node | keys[] as $k | "\($k+1) \(.[$k] | .domain)"' /usr/local/bin/0conf | awk '/'$nodecheck'/ {print$1}' > /tmp/nodecheck
+jq -r '.v2node | keys[] as $k | "\($k+1) \(.[$k] | .domain)"' /usr/local/bin/0conf | cut -d . -f1 | awk '/'$nodecheck2'/ {print$1}' >> /tmp/nodecheck
 
 sort /tmp/nodecheck | uniq -d
