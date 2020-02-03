@@ -406,22 +406,22 @@ for iplanip in $lanip; do
 done
 
 ipset -N hosts hash:net maxelem 65535
-for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
+for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json > /dev/null 2>&1); do
   ipset add hosts $hosts
 done
 
 ipset -N listB hash:net maxelem 65535
-for iplistB in $(cat /var/www/html/listBip.txt); do
+for iplistB in $(jq -r '.listB | to_entries[] | .value' /usr/local/bin/0conf > /dev/null 2>&1); do
   ipset add listB $iplistB
 done
 
 ipset -N listW hash:net maxelem 65535
-for iplistW in $(cat /var/www/html/listWip.txt); do
+for iplistW in $(jq -r '.listW | to_entries[] | .value' /usr/local/bin/0conf > /dev/null 2>&1); do
   ipset add listW $iplistW
 done
 
 ipset -N listWlan hash:net maxelem 65535
-for iplistWlan in $(cat /var/www/html/listWlan.txt); do
+for iplistWlan in $(jq -r '.listWlan[]' /usr/local/bin/0conf > /dev/null 2>&1); do
   ipset add listWlan $iplistWlan
 done
 
@@ -440,7 +440,7 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport $(awk 'NR==2{print}' /var/www/html/WGaddress.txt) -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport $(jq -r '.wireguard.WGport' /usr/local/bin/0conf > /dev/null 2>&1) -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
