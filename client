@@ -883,8 +883,6 @@ blue "------------------------------"
 
 updateGWD(){
 if [[ -f "/var/www/html/domain.txt" ]]||[[ -f "/var/www/html/nodename.txt" ]]||[[ -f "/var/www/html/uuid.txt" ]]||[[ -f "/var/www/html/path.txt" ]]; then
-alias=$(awk NR==1 /var/www/html/markThis.txt)
-
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 gatewayaddr=$(ip route show | awk '/'$ethernetnum'/ {print$3;exit}')
@@ -953,14 +951,15 @@ WGmark7=$(awk NR==7 /var/www/html/WGmark.txt)
 WGmark8=$(awk NR==8 /var/www/html/WGmark.txt)
 
 piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+alias=$(awk NR==1 /var/www/html/markThis.txt)
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
-jq --arg alias "$alias" '.address.alias=$alias' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
 jq --arg dhcpStart "$dhcpStart" '.address.dhcpStart=$dhcpStart' |\
 jq --arg dhcpEnd "$dhcpEnd" '.address.dhcpEnd = $dhcpEnd' |\
+jq --arg alias "$alias" '.address.alias = $alias' |\
 jq '.address={}' |\
 jq --arg piholePW "$piholepw" '.pihole = $piholePW' |\
 jq '.doh={}' |\
