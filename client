@@ -109,6 +109,37 @@ cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 EOF
+
+if [[ $architecture = "amd64" ]]; then
+cat << EOF > /etc/apt/sources.list
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
+deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
+EOF
+fi
+
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip zip subversion rsync ca-certificates
+source /etc/profile
+
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+cat << EOF > /etc/default/locale
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+locale-gen en_US.UTF-8
 }
 
 
@@ -524,9 +555,13 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3 haveged
+apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools haveged php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3
 elif [[ $architecture = "amd64" ]]; then
-apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3 haveged
+apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools haveged php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3
+
+systemctl enable --now haveged
+sed -i "/www-data/d" /etc/sudoers
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src
@@ -534,8 +569,6 @@ make && make install
 rm -rf ~/wireguard-linux-compat
 cd ~
 fi
-
-systemctl enable --now haveged
 }
 
 
@@ -785,37 +818,6 @@ EOF
 
 preInstall
 
-if [[ $architecture = "amd64" ]]; then
-cat << EOF > /etc/apt/sources.list
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
-deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
-EOF
-fi
-
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip zip subversion rsync ca-certificates
-source /etc/profile
-
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat << EOF > /etc/default/locale
-LANG=en_US.UTF-8
-LANGUAGE=en_US.UTF-8
-LC_CTYPE="en_US.UTF-8"
-LC_NUMERIC="en_US.UTF-8"
-LC_TIME="en_US.UTF-8"
-LC_COLLATE="en_US.UTF-8"
-LC_MONETARY="en_US.UTF-8"
-LC_MESSAGES="en_US.UTF-8"
-LC_PAPER="en_US.UTF-8"
-LC_NAME="en_US.UTF-8"
-LC_ADDRESS="en_US.UTF-8"
-LC_TELEPHONE="en_US.UTF-8"
-LC_MEASUREMENT="en_US.UTF-8"
-LC_IDENTIFICATION="en_US.UTF-8"
-LC_ALL=en_US.UTF-8
-EOF
-locale-gen en_US.UTF-8
-
 installDOH
 
 installV2ray
@@ -835,8 +837,6 @@ sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
-
-sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address.localIP=""' /usr/local/bin/0conf |\
