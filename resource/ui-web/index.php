@@ -177,7 +177,7 @@
         <h5 class="modal-title" id="markThisLabel">备注本机</h5>
       </div>
       <div class="modal-body">
-        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php system("cat /var/www/html/markThis.txt"); ?>">
+        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias ?>">
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
@@ -251,7 +251,7 @@
                 <tbody>
                   <tr>
                     <td>1</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==1{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[0]->domain ?></span></td>
                     <td><span id="nodeshow1" class="align-middle"></span></td>
                     <td><span id="ping1" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch1()">切换</button></td>
@@ -259,7 +259,7 @@
                   </tr>
                   <tr>
                     <td>2</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==2{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[1]->domain ?></span></td>
                     <td><span id="nodeshow2" class="align-middle"></span></td>
                     <td><span id="ping2" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch2()">切换</button></td>
@@ -267,7 +267,7 @@
                   </tr>
                   <tr>
                     <td>3</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==3{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[2]->domain ?></span></td>
                     <td><span id="nodeshow3" class="align-middle"></span></td>
                     <td><span id="ping3" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch3()">切换</button></td>
@@ -275,7 +275,7 @@
                   </tr>
                   <tr>
                     <td>4</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==4{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[3]->domain ?></span></td>
                     <td><span id="nodeshow4" class="align-middle"></span></td>
                     <td><span id="ping4" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch4()">切换</button></td>
@@ -283,7 +283,7 @@
                   </tr>
                   <tr>
                     <td>5</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==5{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[4]->domain ?></span></td>
                     <td><span id="nodeshow5" class="align-middle"></span></td>
                     <td><span id="ping5" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch5()">切换</button></td>
@@ -291,7 +291,7 @@
                   </tr>
                   <tr>
                     <td>6</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==6{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[5]->domain ?></span></td>
                     <td><span id="nodeshow6" class="align-middle"></span></td>
                     <td><span id="ping6" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch6()">切换</button></td>
@@ -299,7 +299,7 @@
                   </tr>
                   <tr>
                     <td>7</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==7{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[6]->domain ?></span></td>
                     <td><span id="nodeshow7" class="align-middle"></span></td>
                     <td><span id="ping7" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch7()">切换</button></td>
@@ -307,7 +307,7 @@
                   </tr>
                   <tr>
                     <td>8</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==8{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[7]->domain ?></span></td>
                     <td><span id="nodeshow8" class="align-middle"></span></td>
                     <td><span id="ping8" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch8()">切换</button></td>
@@ -315,7 +315,7 @@
                   </tr>
                   <tr>
                     <td>9</td>
-                    <td><span class="align-middle"><?php echo exec("awk 'NR==9{print}' /var/www/html/domain.txt"); ?></span></td>
+                    <td><span class="align-middle"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[8]->domain ?></span></td>
                     <td><span id="nodeshow9" class="align-middle"></span></td>
                     <td><span id="ping9" class='text-success'></span></td>
                     <td><button type="button" class="btn btn-success btn-xs" onclick="switch9()">切换</button></td>
@@ -350,7 +350,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php echo exec("jq -r '.routing.rules[4].source[]' /etc/vtrui/config.json | xargs"); ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['divertLan'] as $k => $v) {echo "$v ";} ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
@@ -417,7 +417,7 @@
             <div class="form-row">
               <div class="col-md-6 my-1">
               <div class="input-group">
-                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==1{print $2}' | cut -d'/' -f1"); ?>">
+                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh1 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH1">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
@@ -425,7 +425,7 @@
               </div>
               <div class="col-md-6 my-1">
               <div class="input-group">
-                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo shell_exec("awk '/https:/' /etc/dns-over-https/doh-client.conf | awk -F'//' 'NR==2{print $2}' | cut -d'/' -f1"); ?>">
+                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh2 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH2">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
@@ -455,7 +455,7 @@
             <div class="form-row">
               <div class="col-md-6 my-1">
                 <div class="input-group">
-                  <input type="text" id="ipstart" class="form-control" placeholder="起始IP" required="required" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/dhcp.txt"); ?>">
+                  <input type="text" id="dhcpStart" class="form-control" placeholder="起始IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpStart ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">起始</span>
                 </div>
@@ -463,7 +463,7 @@
               </div>
               <div class="col-md-6 my-1">
                 <div class="input-group">
-                  <input type="text" id="ipend" class="form-control" placeholder="结束IP" required="required" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/dhcp.txt"); ?>">
+                  <input type="text" id="dhcpEnd" class="form-control" placeholder="结束IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpEnd ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">结束</span>
                 </div>
@@ -489,7 +489,7 @@
             <div class="form-row">
               <div class="col-md-6 my-1">
                 <div class="input-group">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo exec("awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1"); ?>">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->localIP ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">本机</span>
                 </div>
@@ -497,7 +497,7 @@
               </div>
               <div class="col-md-6 my-1">
                 <div class="input-group">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo exec("sudo route -n |  awk 'NR==3{print $2}'"); ?>">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->upstreamIP ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">上级</span>
                 </div>
@@ -568,10 +568,10 @@ $.get('markThis.php', {markName:markNametxt}, function(result){window.location.r
 }
 
 function NodeDTshow(){
-$.get('switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){ location.reload(); });
+$.get('switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){location.reload();});
 }
 function NodeDThide(){
-$.get('switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){ location.reload(); });
+$.get('switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){location.reload();});
 }
 
 function pingtest(){
@@ -599,6 +599,7 @@ $.get('v2adDEL.php', function(result){window.location.reload();});
 function submitlocalip(){
 localiptxt=$('#nodedttext').val();
 $.get('changeLocalIP.php', {localip:localiptxt}, function(result){ });
+alert("IP已写入");
 }
 
 function changeNLchnw(){
@@ -616,9 +617,8 @@ $.get('changeDOH.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
 }
 
 function submithosts(){
-hostsDefault=$("#hostsDefault").val();
 hostsCustomize=$("#hostsCustomize").val();
-$.get("hostSave.php", {hostsDefault:hostsDefault, hostsCustomize:hostsCustomize}, function(result){ location.reload(); });
+$.get("hostSave.php", {hostsCustomize:hostsCustomize}, function(result){location.reload();});
 }
 
 function submitstaticip(){
@@ -629,25 +629,25 @@ alert("本机已开始重新启动");
 }
 
 function dhcpUP(){
-alert('DHCP服务正在启动，稍后刷新。')
-ipstarttxt=$('#ipstart').val();
-ipendtxt=$('#ipend').val();
-$.get('dhcpUP.php', {ipstart:ipstarttxt, ipend:ipendtxt},function(result){ location.reload(); });
+dhcpStarttxt=$('#dhcpStart').val();
+dhcpEndtxt=$('#dhcpEnd').val();
+$.get('dhcpUP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt}, function(result){location.reload();});
+alert('DHCP服务正在启动');
 }
 
 function dhcpDOWN(){
 $.get('dhcpDOWN.php', function(result){window.location.reload();});
 }
 
-node1 = "<?php echo exec("awk 'NR==1{print}' /var/www/html/nodename.txt"); ?>";
-node2 = "<?php echo exec("awk 'NR==2{print}' /var/www/html/nodename.txt"); ?>";
-node3 = "<?php echo exec("awk 'NR==3{print}' /var/www/html/nodename.txt"); ?>";
-node4 = "<?php echo exec("awk 'NR==4{print}' /var/www/html/nodename.txt"); ?>";
-node5 = "<?php echo exec("awk 'NR==5{print}' /var/www/html/nodename.txt"); ?>";
-node6 = "<?php echo exec("awk 'NR==6{print}' /var/www/html/nodename.txt"); ?>";
-node7 = "<?php echo exec("awk 'NR==7{print}' /var/www/html/nodename.txt"); ?>";
-node8 = "<?php echo exec("awk 'NR==8{print}' /var/www/html/nodename.txt"); ?>";
-node9 = "<?php echo exec("awk 'NR==9{print}' /var/www/html/nodename.txt"); ?>";
+node1 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[0]->name ?>";
+node2 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[1]->name ?>";
+node3 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[2]->name ?>";
+node4 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[3]->name ?>";
+node5 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[4]->name ?>";
+node6 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[5]->name ?>";
+node7 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[6]->name ?>";
+node8 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[7]->name ?>";
+node9 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[8]->name ?>";
 
 nodenum = "checkNode<?php echo exec('/usr/local/bin/ui-checkNode');?>" ;
 nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";

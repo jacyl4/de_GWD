@@ -118,7 +118,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           （走国外线路）<br>
             </span>
           </div>
-            <textarea id="listB" class="form-control" aria-label="listB" rows="11"><?php system("cat /var/www/html/listB.txt"); ?></textarea>
+            <textarea id="listB" class="form-control" aria-label="listB" rows="11"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listB'] as $k => $v) {echo "$k\n";} ?></textarea>
           </div>
           </div>
 
@@ -130,7 +130,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
           （走国内线路）<br>
             </span>
           </div>
-            <textarea id="listW" class="form-control" aria-label="listW" rows="11"><?php system("cat /var/www/html/listW.txt"); ?></textarea>
+            <textarea id="listW" class="form-control" aria-label="listW" rows="11"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listW'] as $k => $v) {echo "$k\n";} ?></textarea>
           </div>
           </div>
 
@@ -143,7 +143,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             （走国内线路）<br>
             </span>
           </div>
-            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="11"><?php system("cat /var/www/html/listWlan.txt"); ?></textarea>
+            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="11"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listWlan'] as $k => $v) {echo "$v\n";} ?></textarea>
           </div>
           </div>
 

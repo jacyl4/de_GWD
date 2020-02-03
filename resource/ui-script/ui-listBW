@@ -1,18 +1,19 @@
 #!/bin/bash
-listB=$(cat /var/www/html/listB.txt | xargs echo -n | xargs -n1)
-listW=$(cat /var/www/html/listW.txt | xargs echo -n | xargs -n1)
-
-echo "$listB" > /var/www/html/listB.txt
-echo "$listW" > /var/www/html/listW.txt
+listB=$(jq -r '.listB[]' /usr/local/bin/0conf)
+listW=$(jq -r '.listW[]' /usr/local/bin/0conf)
 
 jq 'del(.dns.servers[2].domains[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 
 if [[ ! -n "$listW" ]]; then
 	jq '.dns.servers[2].domains=["domain:baidu.com"]' /etc/vtrui/temp.json > /etc/vtrui/config.json
 else
+	jq '.listW={}' /usr/local/bin/0conf > /tmp/0conf_temp
 	for listWpre in $listW; do
 	jq --arg listWpre "domain:$listWpre" '.dns.servers[2].domains+=[$listWpre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+	listWpreIP=$(nslookup -port=5380 $listWpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	jq --arg key $listWpre --arg value $listWpreIP '.listW += {($key): ($value)}' /tmp/0conf_temp > /tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
+	mv -f /tmp/0conf_temp /usr/local/bin/0conf
 	mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 fi
 
@@ -21,8 +22,14 @@ jq 'del(.dns.servers[3].domains[])' /etc/vtrui/config.json > /etc/vtrui/temp.jso
 if [[ ! -n "$listB" ]]; then
 	jq '.dns.servers[3].domains=["domain:google.com"]' /etc/vtrui/temp.json > /etc/vtrui/config.json
 else
+	jq '.listB={}' /usr/local/bin/0conf > /tmp/0conf_temp
 	for listBpre in $listB; do
 	jq --arg listBpre "domain:$listBpre" '.dns.servers[3].domains+=[$listBpre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+	listBpreIP=$(nslookup -port=5380 $listBpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	jq --arg key $listBpre --arg value $listBpreIP '.listB += {($key): ($value)}' /tmp/0conf_temp > /tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
+	mv -f /tmp/0conf_temp /usr/local/bin/0conf
 	mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 fi
+
+chmod 666 /usr/local/bin/0conf

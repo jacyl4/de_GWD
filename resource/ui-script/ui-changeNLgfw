@@ -8,9 +8,6 @@ read -d '' gfwl << EOF
 ]
 EOF
 
-
-jq --argjson gfwl "$gfwl" '.dns.servers = $gfwl'  /etc/vtrui/config.json > /etc/vtrui/temp.json
-
-mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --argjson gfwl "$gfwl" '.dns.servers = $gfwl'  /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui

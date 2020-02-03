@@ -1,18 +1,18 @@
 #!/bin/bash
-doh1=$(awk 'NR==1{print}' /var/www/html/doh.txt)
-doh2=$(awk 'NR==2{print}' /var/www/html/doh.txt)
+doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
 
 dohname1=$(echo $doh1 | cut -d : -f1)
 dohname2=$(echo $doh2 | cut -d : -f1)
 
+doh1ip=$(nslookup -port=5370 $dohname1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh2ip=$(nslookup -port=5370 $dohname2 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+
 doh_upstream1='url = "https:\/\/'$doh1'\/dq"'
 doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==1{print}')s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk 'NR==2{print}')s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
-
-doh1ip=$(nslookup -port=5370 $dohname1 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
-doh2ip=$(nslookup -port=5370 $dohname2 | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 
 jq --arg key1 $dohname1 --arg value1 $doh1ip '.dns.hosts += {($key1): ($value1)}' /etc/vtrui/config.json |\
 jq --arg key2 $dohname2 --arg value2 $doh2ip '.dns.hosts += {($key2): ($value2)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json

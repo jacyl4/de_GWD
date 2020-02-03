@@ -3,10 +3,12 @@
 <?php
 $localip = $_GET['localip'];
 
-$localiptxt = fopen("localip.txt", "w");
-$txt = "$localip\n";
-fwrite($localiptxt, $txt);
-fclose($localiptxt);
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$arr = explode(" ",$localip);
+$arr = array_filter($arr);
+$data['divertLan'] = $arr;
+$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 shell_exec('sudo /usr/local/bin/ui-changeLocalIP');
 ?>

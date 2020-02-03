@@ -1,7 +1,6 @@
 #!/bin/bash
-localip=$(cat /var/www/html/staticIP.txt | awk 'NR==1{print}')
-upstreamip=$(cat /var/www/html/staticIP.txt | awk 'NR==2{print}')
-
+localip=$(jq -r '.address.localIP' /usr/local/bin/0conf)
+upstreamip=$(jq -r '.address.upstreamIP' /usr/local/bin/0conf)
 
 sed -i "/address/c\address $localip" /etc/network/interfaces
 sed -i "/gateway/c\gateway $upstreamip" /etc/network/interfaces
@@ -15,18 +14,5 @@ sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 echo -e "static ip_address=$localip/24" >> /etc/dhcpcd.conf
 echo -e "static routers=$upstreamip" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
-
-rm -rf /var/www/html/staticIP.txt
-
-if [[ -f "/etc/dnsmasq.d/02-pihole-dhcp.conf" ]]; then
-ipstart=$(awk 'NR==1{print}' /var/www/html/dhcp.txt)
-ipend=$(awk 'NR==2{print}' /var/www/html/dhcp.txt)
-
-sudo pihole -a enabledhcp "$ipstart" "$ipend" "$localip" "24" "lan"
-
-sed -i "/dhcp-option=/c\dhcp-option=6,$localip,$localip" /etc/dnsmasq.d/02-pihole-dhcp.conf
-
-pihole restartdns
-fi
 
 reboot

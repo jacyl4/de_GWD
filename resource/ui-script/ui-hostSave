@@ -4,7 +4,7 @@ checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
 jq --arg key "localhost" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json
 
-cat /var/www/html/hostsCustomize.txt >> /tmp/hostsDefault
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >> /tmp/hostsDefault
 
 cat /tmp/hostsDefault | while read line 
 do

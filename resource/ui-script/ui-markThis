@@ -1,5 +1,5 @@
 #!/bin/bash
-markName=$(cat /var/www/html/markThis.txt)
+markName=$(jq -r '.address.alias' /usr/local/bin/0conf)
 
 sed -i "/<title>/c\<title>de_GWD \- $markName</title>" /var/www/html/index.php
 sed -i "/<title>/c\<title>$markName \- DDNS</title>" /var/www/html/!ddns.php

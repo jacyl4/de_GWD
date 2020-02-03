@@ -159,7 +159,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 }
 
 function backup(){
-$.get('backup.php', function(result){window.location.href = "de_GWD_backup.zip"});
+$.get('backup.php', function(result){window.location.href = "0conf"});
 }
 
 function restore(){
@@ -187,7 +187,7 @@ $(".sidebar").toggleClass("toggled");
   var fileName = $(this).val().split("\\").pop();
   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 
-  if( fileName != "de_GWD_backup.zip" ){
+  if( fileName != "0conf" ){
   alert("文件选择错误");
   }
 

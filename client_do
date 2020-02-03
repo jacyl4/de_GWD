@@ -111,7 +111,7 @@ else
 doh="$domain:$port"
 fi
 
-domainip=$(nslookup $domain | awk '/Address/' | awk 'NR==2{print}' | cut -d ' ' -f2)
+domainip=$(nslookup $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 sed -i "1i $domainip $doh" /etc/hosts
 
@@ -360,17 +360,17 @@ for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
 done
 
 ipset -N listB hash:net maxelem 65535
-for iplistB in $(cat /var/www/html/listBip.txt); do
+for iplistB in $(jq -r '.listB | to_entries[] | .value' /usr/local/bin/0conf); do
   ipset add listB $iplistB
 done
 
 ipset -N listW hash:net maxelem 65535
-for iplistW in $(cat /var/www/html/listWip.txt); do
+for iplistW in $(jq -r '.listW | to_entries[] | .value' /usr/local/bin/0conf); do
   ipset add listW $iplistW
 done
 
 ipset -N listWlan hash:net maxelem 65535
-for iplistWlan in $(cat /var/www/html/listWlan.txt); do
+for iplistWlan in $(jq -r '.listWlan[]' /usr/local/bin/0conf); do
   ipset add listWlan $iplistWlan
 done
 
@@ -389,7 +389,7 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport $(awk 'NR==2{print}' /var/www/html/WGaddress.txt) -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport $(jq -r '.wireguard.WGport' /usr/local/bin/0conf) -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
@@ -507,7 +507,9 @@ wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools \
 docker-ce docker-ce-cli containerd.io \
-php7.4-fpm php7.4-common php7.4-cgi php7.4-sqlite3 sqlite3 zip subversion rsync
+php7.4-fpm php7.4-common php7.4-cgi php7.4-json php7.4-sqlite3 sqlite3 zip subversion rsync haveged
+
+systemctl enable --now haveged
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src
@@ -658,7 +660,7 @@ INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true
 LIGHTTPD_ENABLED=false
 BLOCKING_ENABLED=true
-WEBPASSWORD=$piholepw
+WEBPASSWORD=$piholePW
 DNSMASQ_LISTENING=single
 DNS_FQDN_REQUIRED=true
 DNS_BOGUS_PRIV=true
@@ -676,8 +678,8 @@ rm -rf /var/www/html/index.lighttpd.orig
 
 cat << "EOF" > /usr/local/bin/pihole_hotfix
 #!/bin/bash
-ipgateway=$(awk '/IPV4_ADDRESS/' /etc/pihole/setupVars.conf | cut -d = -f2 | cut -d / -f1)
-sed -i "/dhcp-option=/c\dhcp-option=6,$ipgateway,$ipgateway" /etc/dnsmasq.d/02-pihole-dhcp.conf
+localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
+sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
 pihole restartdns
 EOF
 chmod +x /usr/local/bin/pihole_hotfix
@@ -947,7 +949,7 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
-piholepw="0000000000000000000000000000000000000000000000000000000000000000"
+piholePW="0000000000000000000000000000000000000000000000000000000000000000"
 
 cat << EOF > /etc/network/interfaces
 source /etc/network/interfaces.d/*
@@ -1017,12 +1019,24 @@ installNginx
 
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-echo $v2servn > /var/www/html/doh.txt
-echo $v2servn >> /var/www/html/doh.txt
-echo $v2servn > /var/www/html/nodename.txt
-echo $v2servn > /var/www/html/domain.txt
-echo $uuidnum > /var/www/html/uuid.txt
-echo $v2path > /var/www/html/path.txt
+echo "{}" > /usr/local/bin/0conf
+jq '.address.localIP=""' /usr/local/bin/0conf |\
+jq '.address.upstreamIP=""' |\
+jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
+jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
+jq '.doh.doh1=""' |\
+jq '.doh.doh2=""' |\
+jq --arg doh1 "$v2servn" '.doh.doh1=$doh1' |\
+jq --arg doh2 "$v2servn" '.doh.doh2=$doh2' |\
+jq '.v2node[0].domain=""' |\
+jq '.v2node[0].name=""' |\
+jq '.v2node[0].uuid=""' |\
+jq '.v2node[0].path=""' |\
+jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
+jq --arg name "$v2servn" '.v2node[0].name=$name' |\
+jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
+jq --arg path "$v2path" '.v2node[0].path=$path' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf
 
 installWebUI
 
@@ -1037,6 +1051,12 @@ blue "---------------------"
 
 change_piholeAdmin(){
 pihole -a -p
+
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+
+jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf
+
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"
@@ -1045,6 +1065,152 @@ blue "------------------------------"
 
 
 updateGWD(){
+if [[ -f "/var/www/html/domain.txt" ]]||[[ -f "/var/www/html/nodename.txt" ]]||[[ -f "/var/www/html/uuid.txt" ]]||[[ -f "/var/www/html/path.txt" ]]; then
+alias=$(awk NR==1 /var/www/html/markThis.txt)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+gatewayaddr=$(ip route show | awk '/'$ethernetnum'/ {print$3;exit}')
+
+dhcpStart=$(awk NR==1 /var/www/html/dhcp.txt)
+dhcpEnd=$(awk NR==2 /var/www/html/dhcp.txt)
+
+doh1=$(awk NR==1 /var/www/html/doh.txt)
+doh2=$(awk NR==2 /var/www/html/doh.txt)
+
+domain1=$(awk NR==1 /var/www/html/domain.txt)
+domain2=$(awk NR==2 /var/www/html/domain.txt)
+domain3=$(awk NR==3 /var/www/html/domain.txt)
+domain4=$(awk NR==4 /var/www/html/domain.txt)
+domain5=$(awk NR==5 /var/www/html/domain.txt)
+domain6=$(awk NR==6 /var/www/html/domain.txt)
+domain7=$(awk NR==7 /var/www/html/domain.txt)
+domain8=$(awk NR==8 /var/www/html/domain.txt)
+domain9=$(awk NR==9 /var/www/html/domain.txt)
+
+name1=$(awk NR==1 /var/www/html/nodename.txt)
+name2=$(awk NR==2 /var/www/html/nodename.txt)
+name3=$(awk NR==3 /var/www/html/nodename.txt)
+name4=$(awk NR==4 /var/www/html/nodename.txt)
+name5=$(awk NR==5 /var/www/html/nodename.txt)
+name6=$(awk NR==6 /var/www/html/nodename.txt)
+name7=$(awk NR==7 /var/www/html/nodename.txt)
+name8=$(awk NR==8 /var/www/html/nodename.txt)
+name9=$(awk NR==9 /var/www/html/nodename.txt)
+
+uuid1=$(awk NR==1 /var/www/html/uuid.txt)
+uuid2=$(awk NR==2 /var/www/html/uuid.txt)
+uuid3=$(awk NR==3 /var/www/html/uuid.txt)
+uuid4=$(awk NR==4 /var/www/html/uuid.txt)
+uuid5=$(awk NR==5 /var/www/html/uuid.txt)
+uuid6=$(awk NR==6 /var/www/html/uuid.txt)
+uuid7=$(awk NR==7 /var/www/html/uuid.txt)
+uuid8=$(awk NR==8 /var/www/html/uuid.txt)
+uuid9=$(awk NR==9 /var/www/html/uuid.txt)
+
+path1=$(awk NR==1 /var/www/html/path.txt)
+path2=$(awk NR==2 /var/www/html/path.txt)
+path3=$(awk NR==3 /var/www/html/path.txt)
+path4=$(awk NR==4 /var/www/html/path.txt)
+path5=$(awk NR==5 /var/www/html/path.txt)
+path6=$(awk NR==6 /var/www/html/path.txt)
+path7=$(awk NR==7 /var/www/html/path.txt)
+path8=$(awk NR==8 /var/www/html/path.txt)
+path9=$(awk NR==9 /var/www/html/path.txt)
+
+cfDomain=$(awk NR==1 /var/www/html/ddnsCF.txt)
+cfZoneID=$(awk NR==2 /var/www/html/ddnsCF.txt)
+cfAPIkey=$(awk NR==3 /var/www/html/ddnsCF.txt)
+cfEmail=$(awk NR==4 /var/www/html/ddnsCF.txt)
+cfDomainID=$(awk NR==5 /var/www/html/ddnsCF.txt)
+
+WGdomain=$(awk NR==1 /var/www/html/WGaddress.txt)
+WGport=$(awk NR==2 /var/www/html/WGaddress.txt)
+WGmark1=$(awk NR==1 /var/www/html/WGmark.txt)
+WGmark2=$(awk NR==2 /var/www/html/WGmark.txt)
+WGmark3=$(awk NR==3 /var/www/html/WGmark.txt)
+WGmark4=$(awk NR==4 /var/www/html/WGmark.txt)
+WGmark5=$(awk NR==5 /var/www/html/WGmark.txt)
+WGmark6=$(awk NR==6 /var/www/html/WGmark.txt)
+WGmark7=$(awk NR==7 /var/www/html/WGmark.txt)
+WGmark8=$(awk NR==8 /var/www/html/WGmark.txt)
+
+echo "{}" > /usr/local/bin/0conf
+jq '.address={}' /usr/local/bin/0conf |\
+jq --arg alias "$alias" '.address.alias=$alias' |\
+jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
+jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
+jq --arg dhcpStart "$dhcpStart" '.address.dhcpStart=$dhcpStart' |\
+jq --arg dhcpEnd "$dhcpEnd" '.address.dhcpEnd = $dhcpEnd' |\
+jq '.doh={}' |\
+jq --arg doh1 "$doh1" '.doh.doh1=$doh1' |\
+jq --arg doh2 "$doh2" '.doh.doh2=$doh2' |\
+jq '.v2node=[]' |\
+jq --arg domain "$domain1" '.v2node[0].domain=$domain' |\
+jq --arg name "$name1" '.v2node[0].name=$name' |\
+jq --arg uuid "$uuid1" '.v2node[0].uuid=$uuid' |\
+jq --arg path "$path1" '.v2node[0].path=$path' |\
+jq --arg domain "$domain2" '.v2node[1].domain=$domain' |\
+jq --arg name "$name2" '.v2node[1].name=$name' |\
+jq --arg uuid "$uuid2" '.v2node[1].uuid=$uuid' |\
+jq --arg path "$path2" '.v2node[1].path=$path' |\
+jq --arg domain "$domain3" '.v2node[2].domain=$domain' |\
+jq --arg name "$name3" '.v2node[2].name=$name' |\
+jq --arg uuid "$uuid3" '.v2node[2].uuid=$uuid' |\
+jq --arg path "$path3" '.v2node[2].path=$path' |\
+jq --arg domain "$domain4" '.v2node[3].domain=$domain' |\
+jq --arg name "$name4" '.v2node[3].name=$name' |\
+jq --arg uuid "$uuid4" '.v2node[3].uuid=$uuid' |\
+jq --arg path "$path4" '.v2node[3].path=$path' |\
+jq --arg domain "$domain5" '.v2node[4].domain=$domain' |\
+jq --arg name "$name5" '.v2node[4].name=$name' |\
+jq --arg uuid "$uuid5" '.v2node[4].uuid=$uuid' |\
+jq --arg path "$path5" '.v2node[4].path=$path' |\
+jq --arg domain "$domain6" '.v2node[5].domain=$domain' |\
+jq --arg name "$name6" '.v2node[5].name=$name' |\
+jq --arg uuid "$uuid6" '.v2node[5].uuid=$uuid' |\
+jq --arg path "$path6" '.v2node[5].path=$path' |\
+jq --arg domain "$domain7" '.v2node[6].domain=$domain' |\
+jq --arg name "$name7" '.v2node[6].name=$name' |\
+jq --arg uuid "$uuid7" '.v2node[6].uuid=$uuid' |\
+jq --arg path "$path7" '.v2node[6].path=$path' |\
+jq --arg domain "$domain8" '.v2node[7].domain=$domain' |\
+jq --arg name "$name8" '.v2node[7].name=$name' |\
+jq --arg uuid "$uuid8" '.v2node[7].uuid=$uuid' |\
+jq --arg path "$path8" '.v2node[7].path=$path' |\
+jq --arg domain "$domain9" '.v2node[8].domain=$domain' |\
+jq --arg name "$name9" '.v2node[8].name=$name' |\
+jq --arg uuid "$uuid9" '.v2node[8].uuid=$uuid' |\
+jq --arg path "$path9" '.v2node[8].path=$path' |\
+jq '.ddns={}' |\
+jq --arg cfDomain "$cfDomain" '.ddns.ddnsCF.cfDomain=$cfDomain' |\
+jq --arg cfZoneID "$cfZoneID" '.ddns.ddnsCF.cfZoneID=$cfZoneID' |\
+jq --arg cfAPIkey "$cfAPIkey" '.ddns.ddnsCF.cfAPIkey=$cfAPIkey' |\
+jq --arg cfEmail "$cfEmail" '.ddns.ddnsCF.cfEmail=$cfEmail' |\
+jq --arg cfDomainID "$cfDomainID" '.ddns.ddnsCF.cfDomainID=$cfDomainID' |\
+jq '.wireguard={}' |\
+jq --arg WGdomain "$WGdomain" '.wireguard.WGdomain=$WGdomain' |\
+jq --arg WGport "$WGport" '.wireguard.WGport=$WGport' |\
+jq --arg WGmark1 "$WGmark1" '.wireguard.WGmark[0]=$WGmark1' |\
+jq --arg WGmark2 "$WGmark2" '.wireguard.WGmark[1]=$WGmark2' |\
+jq --arg WGmark3 "$WGmark3" '.wireguard.WGmark[2]=$WGmark3' |\
+jq --arg WGmark4 "$WGmark4" '.wireguard.WGmark[3]=$WGmark4' |\
+jq --arg WGmark5 "$WGmark5" '.wireguard.WGmark[4]=$WGmark5' |\
+jq --arg WGmark6 "$WGmark6" '.wireguard.WGmark[5]=$WGmark6' |\
+jq --arg WGmark7 "$WGmark7" '.wireguard.WGmark[6]=$WGmark7' |\
+jq --arg WGmark8 "$WGmark8" '.wireguard.WGmark[7]=$WGmark8' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+
+cat /var/www/html/hostsCustomize.txt | while read line 
+do
+  key=$(echo $line | awk '{print$1}')
+  value=$(echo $line | awk '{print$2}')
+jq --arg key $key --arg value $value '.hosts += {($key): ($value)}' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+done
+chmod -R 666 /usr/local/bin/0conf
+
+rm /var/www/html/*.txt
+fi
+
 cd ~
 source /etc/profile
 
@@ -1054,7 +1220,7 @@ checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
 checkWG=$(/usr/local/bin/ui-checkWG)
 checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
-piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
 port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)

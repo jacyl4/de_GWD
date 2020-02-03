@@ -1,7 +1,9 @@
 #!/bin/bash
-v2servn=$(awk 'NR==1{print}' /var/www/html/nodepre.txt)
-uuidnum=$(awk 'NR==2{print}' /var/www/html/nodepre.txt)
-v2path=$(awk 'NR==3{print}' /var/www/html/nodepre.txt)
+nodenum=$(cat /var/www/html/nodepre.txt)
+
+v2servn=$(jq --argjson nodenum $nodenum -r '.v2node[$nodenum-1].domain' /usr/local/bin/0conf)
+uuidnum=$(jq --argjson nodenum $nodenum -r '.v2node[$nodenum-1].uuid' /usr/local/bin/0conf)
+v2path=$(jq --argjson nodenum $nodenum -r '.v2node[$nodenum-1].path' /usr/local/bin/0conf)
 
 domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
@@ -19,4 +21,4 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
 systemctl restart vtrui
-rm -rf /var/www/html/nodepre.txt
+rm -rf cat /var/www/html/nodepre.txt

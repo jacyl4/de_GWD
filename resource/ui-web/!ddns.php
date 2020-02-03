@@ -127,14 +127,14 @@
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">域名</span>
         </div>
-          <input type="text" id="CFdomain" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/ddnsCF.txt"); ?>">
+          <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfDomain ?>">
       </div>
 
       <div class="col-md-6 input-group my-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Zone ID</span>
         </div>
-          <input type="text" id="CFzoneid" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/ddnsCF.txt"); ?>">
+          <input type="text" id="CFzoneid" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfZoneID ?>">
       </div>
     </div>
 
@@ -143,14 +143,14 @@
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF API KEY</span>
         </div>
-          <input type="text" id="CFapikey" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/ddnsCF.txt"); ?>">
+          <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfAPIkey ?>">
       </div>
 
       <div class="col-md-6 input-group my-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF E-mail</span>
         </div>
-          <input type="text" id="CFemail" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/ddnsCF.txt"); ?>">
+          <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfEmail ?>">
       </div>
     </div>
   </div>
@@ -177,11 +177,11 @@
           <span class="input-group-text justify-content-center">Endpoint</span>
           <span class="input-group-text justify-content-center">域名/公网IP</span>
         </div>
-          <input type="text" id="WGaddress" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGaddress.txt"); ?>">
+          <input type="text" id="WGaddress" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGdomain ?>">
           <div class="input-group-append">
           <span class="input-group-text justify-content-center">UDP端口</span>
           </div>
-          <input type="text" id="WGaddressport" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/WGaddress.txt"); ?>">
+          <input type="text" id="WGaddressport" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGport ?>">
       </div>
 </div>
 
@@ -192,7 +192,7 @@
           <span class="input-group-text justify-content-center w-100">节点1</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark1" class="form-control" value="<?php echo exec("awk 'NR==1{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark1" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[0] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop1" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -201,7 +201,7 @@
           <span class="input-group-text justify-content-center w-100">节点2</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark2" class="form-control" value="<?php echo exec("awk 'NR==2{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark2" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[1] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop2" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>
@@ -212,7 +212,7 @@
           <span class="input-group-text justify-content-center w-100">节点3</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark3" class="form-control" value="<?php echo exec("awk 'NR==3{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark3" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[2] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop3" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -221,7 +221,7 @@
           <span class="input-group-text justify-content-center w-100">节点4</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark4" class="form-control" value="<?php echo exec("awk 'NR==4{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark4" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[3] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop4" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>
@@ -232,7 +232,7 @@
           <span class="input-group-text justify-content-center w-100">节点5</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark5" class="form-control" value="<?php echo exec("awk 'NR==5{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark5" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[4] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop5" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -241,7 +241,7 @@
           <span class="input-group-text justify-content-center w-100">节点6</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark6" class="form-control" value="<?php echo exec("awk 'NR==6{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark6" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[5] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop6" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>
@@ -252,7 +252,7 @@
           <span class="input-group-text justify-content-center w-100">节点7</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark7" class="form-control" value="<?php echo exec("awk 'NR==7{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark7" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[6] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop7" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -261,7 +261,7 @@
           <span class="input-group-text justify-content-center w-100">节点8</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
         </div>
-          <input type="text" id="WGmark8" class="form-control" value="<?php echo exec("awk 'NR==8{print}' /var/www/html/WGmark.txt"); ?>">
+          <input type="text" id="WGmark8" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[7] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop8" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>

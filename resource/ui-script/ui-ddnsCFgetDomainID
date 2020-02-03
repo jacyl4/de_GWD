@@ -1,13 +1,10 @@
 #!/bin/bash
-CFdomain=$(awk 'NR==1{print}' /var/www/html/ddnsCF.txt)
-CFzoneid=$(awk 'NR==2{print}' /var/www/html/ddnsCF.txt)
-CFapikey=$(awk 'NR==3{print}' /var/www/html/ddnsCF.txt)
-CFemail=$(awk 'NR==4{print}' /var/www/html/ddnsCF.txt)
+CFdomain=$(jq -r '.ddns.ddnsCF.cfDomain' /usr/local/bin/0conf)
+CFzoneid=$(jq -r '.ddns.ddnsCF.cfZoneID' /usr/local/bin/0conf)
+CFapikey=$(jq -r '.ddns.ddnsCF.cfAPIkey' /usr/local/bin/0conf)
+CFemail=$(jq -r '.ddns.ddnsCF.cfEmail' /usr/local/bin/0conf)
 
-{
-curl -sX GET "https://api.cloudflare.com/client/v4/zones/$CFzoneid/dns_records" -H "X-Auth-Email: $CFemail" -H "X-Auth-Key: $CFapikey" -H "Content-Type: application/json" | jq .
-} > /tmp/ddnsCF
+CFdomainid=$(curl -sX GET "https://api.cloudflare.com/client/v4/zones/$CFzoneid/dns_records" -H "X-Auth-Email: $CFemail" -H "X-Auth-Key: $CFapikey" -H "Content-Type: application/json" | jq --arg CFdomain "$CFdomain" -r '.result[] | select(.name == $CFdomain).id')
 
-jq --arg CFdomain "$CFdomain" -r '.result[] | select(.name == $CFdomain).id' /tmp/ddnsCF
-
-rm -rf /tmp/ddnsCF
+jq --arg cfDomainID "$CFdomainid" '.ddns.ddnsCF.cfDomainID=$cfDomainID' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf

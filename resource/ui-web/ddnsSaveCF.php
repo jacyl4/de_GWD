@@ -6,23 +6,15 @@ $CFzoneid = $_GET['CFzoneid'];
 $CFapikey = $_GET['CFapikey'];
 $CFemail = $_GET['CFemail'];
 
-$ddnstxt = fopen("ddnsCF.txt", "w");
-$txt = "$CFdomain\n";
-fwrite($ddnstxt, $txt);
-$txt = "$CFzoneid\n";
-fwrite($ddnstxt, $txt);
-$txt = "$CFapikey\n";
-fwrite($ddnstxt, $txt);
-$txt = "$CFemail\n";
-fwrite($ddnstxt, $txt);
-fclose($ddnstxt);
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$data['ddns']['ddnsCF']['cfDomain'] = $CFdomain;
+$data['ddns']['ddnsCF']['cfZoneID'] = $CFzoneid;
+$data['ddns']['ddnsCF']['cfAPIkey'] = $CFapikey;
+$data['ddns']['ddnsCF']['cfEmail'] = $CFemail;
+$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 $CFdomainid = exec('sudo /usr/local/bin/ui-ddnsCFgetDomainID');
-
-$ddnstxt = fopen("ddnsCF.txt", "a");
-$txt = "$CFdomainid";
-fwrite($ddnstxt, $txt);
-fclose($ddnstxt);
 
 exec('sudo /usr/local/bin/ui-ddnsUpdateIPCF');
 exec('sudo /usr/local/bin/ui-ddnsUpdateOnCF');

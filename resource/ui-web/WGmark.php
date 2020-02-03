@@ -10,24 +10,17 @@ $WGmark6 = $_GET['WGmark6'];
 $WGmark7 = $_GET['WGmark7'];
 $WGmark8 = $_GET['WGmark8'];
 
-$WGmarktxt = fopen("WGmark.txt", "w");
-$txt = "$WGmark1\n";
-fwrite($WGmarktxt, $txt);
-$txt = "$WGmark2\n";
-fwrite($WGmarktxt, $txt);
-$txt = "$WGmark3\n";
-fwrite($WGmarktxt, $txt);
-$txt = "$WGmark4\n";
-fwrite($WGmarktxt, $txt);
-$txt = "$WGmark5\n";
-fwrite($WGmarktxt, $txt);
-$txt = "$WGmark6\n";
-fwrite($WGmarktxt, $txt);
-$txt = "$WGmark7\n";
-fwrite($WGmarktxt, $txt);
-$txt = "$WGmark8\n";
-fwrite($WGmarktxt, $txt);
-fclose($WGmarktxt);
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$data['wireguard']['WGmark'][0] = $WGmark1;
+$data['wireguard']['WGmark'][1] = $WGmark2;
+$data['wireguard']['WGmark'][2] = $WGmark3;
+$data['wireguard']['WGmark'][3] = $WGmark4;
+$data['wireguard']['WGmark'][4] = $WGmark5;
+$data['wireguard']['WGmark'][5] = $WGmark6;
+$data['wireguard']['WGmark'][6] = $WGmark7;
+$data['wireguard']['WGmark'][7] = $WGmark8;
+$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 ?>
 <?php }?>

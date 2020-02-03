@@ -5,23 +5,31 @@ $listB = $_GET['listB'];
 $listW = $_GET['listW'];
 $listWlan = $_GET['listWlan'];
 
-$listBtxt = fopen("listB.txt", "w");
-$txt = "$listB\n";
-fwrite($listBtxt, $txt);
-fclose($listBtxt);
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$arr = explode("\n",$listB);
+$arr = array_filter($arr);
+$data['listB'] = array();
+$data['listB'] = $arr;
+$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-$listWtxt = fopen("listW.txt", "w");
-$txt = "$listW\n";
-fwrite($listWtxt, $txt);
-fclose($listWtxt);
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$arr = explode("\n",$listW);
+$arr = array_filter($arr);
+$data['listW'] = array();
+$data['listW'] = $arr;
+$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-$listWlantxt = fopen("listWlan.txt", "w");
-$txt = "$listWlan\n";
-fwrite($listWlantxt, $txt);
-fclose($listWlantxt);
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$arr = explode("\n",$listWlan);
+$arr = array_filter($arr);
+$data['listWlan'] = $arr;
+$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 exec('sudo /usr/local/bin/ui-listBW');
-exec('sudo /usr/local/bin/ui-listBWresolve');
 exec('sudo systemctl restart iptables-proxy');
+
 ?>
 <?php }?>

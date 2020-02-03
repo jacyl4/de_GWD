@@ -1,8 +1,8 @@
 #!/bin/bash
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 
-WGaddress=$(awk 'NR==1{print}' /var/www/html/WGaddress.txt)
-WGaddressport=$(awk 'NR==2{print}' /var/www/html/WGaddress.txt)
+WGaddress=$(jq -r '.wireguard.WGdomain' /usr/local/bin/0conf)
+WGaddressport=$(jq -r '.wireguard.WGport' /usr/local/bin/0conf)
 
 cat > /etc/wireguard/wg0.conf << EOF
 [Interface]
