@@ -11,7 +11,7 @@
   <meta name="description" content="de_GWD">
   <meta name="author" content="JacyL4">
 
-  <title>de_GWD - 概览</title>
+  <title>de_GWD</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">

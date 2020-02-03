@@ -1135,6 +1135,8 @@ WGmark6=$(awk NR==6 /var/www/html/WGmark.txt)
 WGmark7=$(awk NR==7 /var/www/html/WGmark.txt)
 WGmark8=$(awk NR==8 /var/www/html/WGmark.txt)
 
+piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
 jq --arg alias "$alias" '.address.alias=$alias' |\
@@ -1142,6 +1144,8 @@ jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
 jq --arg dhcpStart "$dhcpStart" '.address.dhcpStart=$dhcpStart' |\
 jq --arg dhcpEnd "$dhcpEnd" '.address.dhcpEnd = $dhcpEnd' |\
+jq '.address={}' |\
+jq --arg piholePW "$piholepw" '.pihole = $piholePW' |\
 jq '.doh={}' |\
 jq --arg doh1 "$doh1" '.doh.doh1=$doh1' |\
 jq --arg doh2 "$doh2" '.doh.doh2=$doh2' |\
