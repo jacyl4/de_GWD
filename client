@@ -962,7 +962,6 @@ jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
 jq --arg dhcpStart "$dhcpStart" '.address.dhcpStart=$dhcpStart' |\
 jq --arg dhcpEnd "$dhcpEnd" '.address.dhcpEnd = $dhcpEnd' |\
 jq --arg alias "$alias" '.address.alias = $alias' |\
-jq '.address={}' |\
 jq --arg piholePW "$piholepw" '.pihole = $piholePW' |\
 jq '.doh={}' |\
 jq --arg doh1 "$doh1" '.doh.doh1=$doh1' |\

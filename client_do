@@ -1068,6 +1068,7 @@ blue "------------------------------"
 
 updateGWD(){
 if [[ -f "/var/www/html/domain.txt" ]]||[[ -f "/var/www/html/nodename.txt" ]]||[[ -f "/var/www/html/uuid.txt" ]]||[[ -f "/var/www/html/path.txt" ]]; then
+
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 gatewayaddr=$(ip route show | awk '/'$ethernetnum'/ {print$3;exit}')
@@ -1145,7 +1146,6 @@ jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
 jq --arg dhcpStart "$dhcpStart" '.address.dhcpStart=$dhcpStart' |\
 jq --arg dhcpEnd "$dhcpEnd" '.address.dhcpEnd = $dhcpEnd' |\
 jq --arg alias "$alias" '.address.alias = $alias' |\
-jq '.address={}' |\
 jq --arg piholePW "$piholepw" '.pihole = $piholePW' |\
 jq '.doh={}' |\
 jq --arg doh1 "$doh1" '.doh.doh1=$doh1' |\
