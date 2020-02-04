@@ -118,6 +118,8 @@ deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut
 EOF
 fi
 
+rm -rf /etc/apt/sources.list.d/*
+
 apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip zip subversion rsync ca-certificates
 source /etc/profile
 

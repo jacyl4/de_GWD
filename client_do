@@ -104,6 +104,8 @@ deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSI
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
+rm -rf /etc/apt/sources.list.d/*
+
 apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates apt-transport-https gnupg2
 source /etc/profile
 
