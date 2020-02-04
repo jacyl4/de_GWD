@@ -408,22 +408,22 @@ for iplanip in $lanip; do
 done
 
 ipset -N hosts hash:net maxelem 65535
-for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json > /dev/null 2>&1); do
+for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json 2>&1); do
   ipset add hosts $hosts
 done
 
 ipset -N listB hash:net maxelem 65535
-for iplistB in $(jq -r '.listB | to_entries[] | .value' /usr/local/bin/0conf > /dev/null 2>&1); do
+for iplistB in $(jq -r '.listB | to_entries[] | .value' /usr/local/bin/0conf 2>&1); do
   ipset add listB $iplistB
 done
 
 ipset -N listW hash:net maxelem 65535
-for iplistW in $(jq -r '.listW | to_entries[] | .value' /usr/local/bin/0conf > /dev/null 2>&1); do
+for iplistW in $(jq -r '.listW | to_entries[] | .value' /usr/local/bin/0conf 2>&1); do
   ipset add listW $iplistW
 done
 
 ipset -N listWlan hash:net maxelem 65535
-for iplistWlan in $(jq -r '.listWlan[]' /usr/local/bin/0conf > /dev/null 2>&1); do
+for iplistWlan in $(jq -r '.listWlan[]' /usr/local/bin/0conf 2>&1); do
   ipset add listWlan $iplistWlan
 done
 
@@ -442,7 +442,7 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport $(jq -r '.wireguard.WGport' /usr/local/bin/0conf > /dev/null 2>&1) -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport $(jq -r '.wireguard.WGport' /usr/local/bin/0conf 2>&1) -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
@@ -889,71 +889,71 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 gatewayaddr=$(ip route show | awk '/'$ethernetnum'/ {print$3;exit}')
 
-dhcpStart=$(awk NR==1 /var/www/html/dhcp.txt > /dev/null 2>&1)
-dhcpEnd=$(awk NR==2 /var/www/html/dhcp.txt > /dev/null 2>&1)
+dhcpStart=$(awk NR==1 /var/www/html/dhcp.txt 2>&1)
+dhcpEnd=$(awk NR==2 /var/www/html/dhcp.txt 2>&1)
 
-doh1=$(awk NR==1 /var/www/html/doh.txt > /dev/null 2>&1)
-doh2=$(awk NR==2 /var/www/html/doh.txt > /dev/null 2>&1)
+doh1=$(awk NR==1 /var/www/html/doh.txt 2>&1)
+doh2=$(awk NR==2 /var/www/html/doh.txt 2>&1)
 
-domain1=$(awk NR==1 /var/www/html/domain.txt > /dev/null 2>&1)
-domain2=$(awk NR==2 /var/www/html/domain.txt > /dev/null 2>&1)
-domain3=$(awk NR==3 /var/www/html/domain.txt > /dev/null 2>&1)
-domain4=$(awk NR==4 /var/www/html/domain.txt > /dev/null 2>&1)
-domain5=$(awk NR==5 /var/www/html/domain.txt > /dev/null 2>&1)
-domain6=$(awk NR==6 /var/www/html/domain.txt > /dev/null 2>&1)
-domain7=$(awk NR==7 /var/www/html/domain.txt > /dev/null 2>&1)
-domain8=$(awk NR==8 /var/www/html/domain.txt > /dev/null 2>&1)
-domain9=$(awk NR==9 /var/www/html/domain.txt > /dev/null 2>&1)
+domain1=$(awk NR==1 /var/www/html/domain.txt 2>&1)
+domain2=$(awk NR==2 /var/www/html/domain.txt 2>&1)
+domain3=$(awk NR==3 /var/www/html/domain.txt 2>&1)
+domain4=$(awk NR==4 /var/www/html/domain.txt 2>&1)
+domain5=$(awk NR==5 /var/www/html/domain.txt 2>&1)
+domain6=$(awk NR==6 /var/www/html/domain.txt 2>&1)
+domain7=$(awk NR==7 /var/www/html/domain.txt 2>&1)
+domain8=$(awk NR==8 /var/www/html/domain.txt 2>&1)
+domain9=$(awk NR==9 /var/www/html/domain.txt 2>&1)
 
-name1=$(awk NR==1 /var/www/html/nodename.txt > /dev/null 2>&1)
-name2=$(awk NR==2 /var/www/html/nodename.txt > /dev/null 2>&1)
-name3=$(awk NR==3 /var/www/html/nodename.txt > /dev/null 2>&1)
-name4=$(awk NR==4 /var/www/html/nodename.txt > /dev/null 2>&1)
-name5=$(awk NR==5 /var/www/html/nodename.txt > /dev/null 2>&1)
-name6=$(awk NR==6 /var/www/html/nodename.txt > /dev/null 2>&1)
-name7=$(awk NR==7 /var/www/html/nodename.txt > /dev/null 2>&1)
-name8=$(awk NR==8 /var/www/html/nodename.txt > /dev/null 2>&1)
-name9=$(awk NR==9 /var/www/html/nodename.txt > /dev/null 2>&1)
+name1=$(awk NR==1 /var/www/html/nodename.txt 2>&1)
+name2=$(awk NR==2 /var/www/html/nodename.txt 2>&1)
+name3=$(awk NR==3 /var/www/html/nodename.txt 2>&1)
+name4=$(awk NR==4 /var/www/html/nodename.txt 2>&1)
+name5=$(awk NR==5 /var/www/html/nodename.txt 2>&1)
+name6=$(awk NR==6 /var/www/html/nodename.txt 2>&1)
+name7=$(awk NR==7 /var/www/html/nodename.txt 2>&1)
+name8=$(awk NR==8 /var/www/html/nodename.txt 2>&1)
+name9=$(awk NR==9 /var/www/html/nodename.txt 2>&1)
 
-uuid1=$(awk NR==1 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid2=$(awk NR==2 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid3=$(awk NR==3 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid4=$(awk NR==4 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid5=$(awk NR==5 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid6=$(awk NR==6 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid7=$(awk NR==7 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid8=$(awk NR==8 /var/www/html/uuid.txt > /dev/null 2>&1)
-uuid9=$(awk NR==9 /var/www/html/uuid.txt > /dev/null 2>&1)
+uuid1=$(awk NR==1 /var/www/html/uuid.txt 2>&1)
+uuid2=$(awk NR==2 /var/www/html/uuid.txt 2>&1)
+uuid3=$(awk NR==3 /var/www/html/uuid.txt 2>&1)
+uuid4=$(awk NR==4 /var/www/html/uuid.txt 2>&1)
+uuid5=$(awk NR==5 /var/www/html/uuid.txt 2>&1)
+uuid6=$(awk NR==6 /var/www/html/uuid.txt 2>&1)
+uuid7=$(awk NR==7 /var/www/html/uuid.txt 2>&1)
+uuid8=$(awk NR==8 /var/www/html/uuid.txt 2>&1)
+uuid9=$(awk NR==9 /var/www/html/uuid.txt 2>&1)
 
-path1=$(awk NR==1 /var/www/html/path.txt > /dev/null 2>&1)
-path2=$(awk NR==2 /var/www/html/path.txt > /dev/null 2>&1)
-path3=$(awk NR==3 /var/www/html/path.txt > /dev/null 2>&1)
-path4=$(awk NR==4 /var/www/html/path.txt > /dev/null 2>&1)
-path5=$(awk NR==5 /var/www/html/path.txt > /dev/null 2>&1)
-path6=$(awk NR==6 /var/www/html/path.txt > /dev/null 2>&1)
-path7=$(awk NR==7 /var/www/html/path.txt > /dev/null 2>&1)
-path8=$(awk NR==8 /var/www/html/path.txt > /dev/null 2>&1)
-path9=$(awk NR==9 /var/www/html/path.txt > /dev/null 2>&1)
+path1=$(awk NR==1 /var/www/html/path.txt 2>&1)
+path2=$(awk NR==2 /var/www/html/path.txt 2>&1)
+path3=$(awk NR==3 /var/www/html/path.txt 2>&1)
+path4=$(awk NR==4 /var/www/html/path.txt 2>&1)
+path5=$(awk NR==5 /var/www/html/path.txt 2>&1)
+path6=$(awk NR==6 /var/www/html/path.txt 2>&1)
+path7=$(awk NR==7 /var/www/html/path.txt 2>&1)
+path8=$(awk NR==8 /var/www/html/path.txt 2>&1)
+path9=$(awk NR==9 /var/www/html/path.txt 2>&1)
 
-cfDomain=$(awk NR==1 /var/www/html/ddnsCF.txt > /dev/null 2>&1)
-cfZoneID=$(awk NR==2 /var/www/html/ddnsCF.txt > /dev/null 2>&1)
-cfAPIkey=$(awk NR==3 /var/www/html/ddnsCF.txt > /dev/null 2>&1)
-cfEmail=$(awk NR==4 /var/www/html/ddnsCF.txt > /dev/null 2>&1)
-cfDomainID=$(awk NR==5 /var/www/html/ddnsCF.txt > /dev/null 2>&1)
+cfDomain=$(awk NR==1 /var/www/html/ddnsCF.txt 2>&1)
+cfZoneID=$(awk NR==2 /var/www/html/ddnsCF.txt 2>&1)
+cfAPIkey=$(awk NR==3 /var/www/html/ddnsCF.txt 2>&1)
+cfEmail=$(awk NR==4 /var/www/html/ddnsCF.txt 2>&1)
+cfDomainID=$(awk NR==5 /var/www/html/ddnsCF.txt 2>&1)
 
-WGdomain=$(awk NR==1 /var/www/html/WGaddress.txt > /dev/null 2>&1)
-WGport=$(awk NR==2 /var/www/html/WGaddress.txt > /dev/null 2>&1)
-WGmark1=$(awk NR==1 /var/www/html/WGmark.txt > /dev/null 2>&1)
-WGmark2=$(awk NR==2 /var/www/html/WGmark.txt > /dev/null 2>&1)
-WGmark3=$(awk NR==3 /var/www/html/WGmark.txt > /dev/null 2>&1)
-WGmark4=$(awk NR==4 /var/www/html/WGmark.txt > /dev/null 2>&1)
-WGmark5=$(awk NR==5 /var/www/html/WGmark.txt > /dev/null 2>&1)
-WGmark6=$(awk NR==6 /var/www/html/WGmark.txt > /dev/null 2>&1)
-WGmark7=$(awk NR==7 /var/www/html/WGmark.txt > /dev/null 2>&1)
-WGmark8=$(awk NR==8 /var/www/html/WGmark.txt > /dev/null 2>&1)
+WGdomain=$(awk NR==1 /var/www/html/WGaddress.txt 2>&1)
+WGport=$(awk NR==2 /var/www/html/WGaddress.txt 2>&1)
+WGmark1=$(awk NR==1 /var/www/html/WGmark.txt 2>&1)
+WGmark2=$(awk NR==2 /var/www/html/WGmark.txt 2>&1)
+WGmark3=$(awk NR==3 /var/www/html/WGmark.txt 2>&1)
+WGmark4=$(awk NR==4 /var/www/html/WGmark.txt 2>&1)
+WGmark5=$(awk NR==5 /var/www/html/WGmark.txt 2>&1)
+WGmark6=$(awk NR==6 /var/www/html/WGmark.txt 2>&1)
+WGmark7=$(awk NR==7 /var/www/html/WGmark.txt 2>&1)
+WGmark8=$(awk NR==8 /var/www/html/WGmark.txt 2>&1)
 
 piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
-alias=$(awk NR==1 /var/www/html/markThis.txt > /dev/null 2>&1)
+alias=$(awk NR==1 /var/www/html/markThis.txt 2>&1)
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
