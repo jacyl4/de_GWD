@@ -936,6 +936,8 @@ EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 
+apt update && apt upgrade -y && apt autoremove -y
+
 if [[ ! -f "wg0.conf" ]]; then
 mkdir -p /etc/wireguard
 /usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
