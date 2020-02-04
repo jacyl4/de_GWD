@@ -96,6 +96,9 @@ hwclock -w
 cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
+Dpkg::Options {
+  "--force-confnew";
+};
 EOF
 
 cat << EOF > /etc/apt/sources.list
@@ -538,7 +541,7 @@ wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools haveged \
 docker-ce docker-ce-cli containerd.io \
-php7.4-fpm php7.4-common php7.4-cgi php7.4-json php7.4-sqlite3 sqlite3 zip subversion rsync
+php7.4-fpm php7.4-common php7.4-cgi php7.4-json php7.4-sqlite3 sqlite3 subversion rsync
 
 systemctl enable --now haveged
 sed -i "/www-data/d" /etc/sudoers

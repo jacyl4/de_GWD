@@ -108,6 +108,9 @@ hwclock -w
 cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
+Dpkg::Options {
+  "--force-confnew";
+};
 EOF
 
 if [[ $architecture = "amd64" ]]; then
@@ -120,7 +123,7 @@ fi
 
 rm -rf /etc/apt/sources.list.d/*
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip zip subversion rsync ca-certificates
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip subversion rsync ca-certificates
 source /etc/profile
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -557,9 +560,9 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools haveged php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3
+apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools haveged
 elif [[ $architecture = "amd64" ]]; then
-apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools haveged php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3
+apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools haveged
 
 systemctl enable --now haveged
 sed -i "/www-data/d" /etc/sudoers
