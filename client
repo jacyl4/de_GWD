@@ -642,7 +642,7 @@ INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true
 LIGHTTPD_ENABLED=true
 BLOCKING_ENABLED=true
-WEBPASSWORD=$piholepw
+WEBPASSWORD=$piholePW
 DNSMASQ_LISTENING=single
 DNS_FQDN_REQUIRED=true
 DNS_BOGUS_PRIV=true
@@ -804,7 +804,7 @@ domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
-piholepw="0000000000000000000000000000000000000000000000000000000000000000"
+piholePW="0000000000000000000000000000000000000000000000000000000000000000"
 
 cat << EOF > /etc/network/interfaces
 source /etc/network/interfaces.d/*
@@ -842,18 +842,13 @@ echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
 echo "{}" > /usr/local/bin/0conf
-jq '.address.localIP=""' /usr/local/bin/0conf |\
-jq '.address.upstreamIP=""' |\
+jq '.address={}' /usr/local/bin/0conf |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
-jq '.doh.doh1=""' |\
-jq '.doh.doh2=""' |\
+jq '.doh={}' |\
 jq --arg doh1 "$v2servn" '.doh.doh1=$doh1' |\
 jq --arg doh2 "$v2servn" '.doh.doh2=$doh2' |\
-jq '.v2node[0].domain=""' |\
-jq '.v2node[0].name=""' |\
-jq '.v2node[0].uuid=""' |\
-jq '.v2node[0].path=""' |\
+jq '.v2node=[]' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
@@ -872,9 +867,9 @@ blue "---------------------"
 change_piholeAdmin(){
 pihole -a -p
 
-piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
-jq --arg piholePW "$piholepw" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
 blue "------------------------------"
@@ -894,7 +889,7 @@ gatewayaddr=$(ip route show | awk '/'$ethernetnum'/ {print$3;exit}')
 dhcpStart=$(awk NR==1 /var/www/html/dhcp.txt)
 dhcpEnd=$(awk NR==2 /var/www/html/dhcp.txt)
 
-piholepw=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 alias=$(awk NR==1 /var/www/html/markThis.txt)
 
 doh1=$(awk NR==1 /var/www/html/doh.txt)
@@ -983,7 +978,7 @@ jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
 jq --arg dhcpStart "$dhcpStart" '.address.dhcpStart=$dhcpStart' |\
 jq --arg dhcpEnd "$dhcpEnd" '.address.dhcpEnd = $dhcpEnd' |\
 jq --arg alias "$alias" '.address.alias = $alias' |\
-jq --arg piholePW "$piholepw" '.pihole = $piholePW' |\
+jq --arg piholePW "$piholePW" '.pihole = $piholePW' |\
 jq '.doh={}' |\
 jq --arg doh1 "$doh1" '.doh.doh1=$doh1' |\
 jq --arg doh2 "$doh2" '.doh.doh2=$doh2' |\
