@@ -98,6 +98,7 @@ cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 Dpkg::Options {
+  "--force-confdef";
   "--force-confnew";
 };
 EOF
