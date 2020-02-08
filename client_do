@@ -205,9 +205,9 @@ echo "" > /run/doh-client.pid
 cat << "EOF" > /lib/systemd/system/doh-client.service
 [Unit]
 Description=DNS-over-HTTPS Client
-After=network-online.target
+After=network.target
 Before=nss-lookup.target
-Wants=network-online.target
+Wants=network.target
 
 [Service]
 Type=simple
@@ -334,18 +334,15 @@ echo "" > /run/vtrui.pid
 cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
-After=network-online.target
-Wants=network-online.target
+After=network.target
+Wants=network.target
 
 [Service]
 Type=simple
 PIDFile=/run/vtrui.pid
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=always
-RestartSec=5
-LimitNPROC=1000000
-LimitNOFILE=1000000
+Restart=on-failure
+RestartPreventExitStatus=23
 
 [Install]
 WantedBy=multi-user.target
@@ -662,9 +659,9 @@ echo "" > /run/smartdns.pid
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=Smart DNS server
-After=network-online.target
+After=network.target
 Before=nss-lookup.target
-Wants=network-online.target
+Wants=network.target
 
 [Service]
 Type=forking
@@ -1313,7 +1310,7 @@ if [[ $checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
-if [[ -f "/usr/local/bin/ui-amarked" ]]; then
+if [[ -n $(jq -r '.address.alias' /usr/local/bin/0conf) ]]; then
 /usr/local/bin/ui-markThis
 fi
 

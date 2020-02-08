@@ -426,8 +426,6 @@ clifwd_installWebUI
 
 clifwd_PostInstall
 
-echo "" > /usr/local/bin/ui-aclifwd
-
 blue "----------------------------"
 blue "de_GWD clifwd install [done]"
 blue "----------------------------"
@@ -787,7 +785,7 @@ if [[ $clifwd_checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
-if [[ -f "/usr/local/bin/ui-amarked" ]]; then
+if [[ -n $(jq -r '.address.alias' /usr/local/bin/0conf) ]]; then
 /usr/local/bin/ui-markThis
 fi
 
