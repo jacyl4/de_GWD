@@ -16,6 +16,8 @@ mkswap /swapfile
 swapon /swapfile
 sed -i "/swapfile/d" /etc/fstab
 echo "/swapfile swap swap defaults 0 0" > /etc/fstab
+sed -i "/RESUME=UUID=/c\RESUME=UUID=$(blkid | awk '/swap/ {print$2}' | cut -d'"' -f2)" /etc/initramfs-tools/conf.d/resume
+update-initramfs -u
 fi
 
 rm -rf /etc/resolv.conf
@@ -870,6 +872,94 @@ blue "-----------------------------"
 
 
 
+changev2rayupstream(){
+    green "==================================================="
+    green "Y. Change v2ray upstream / N. Delete v2ray upstream"
+    green "==================================================="
+    read v2rayupstreamyn
+
+if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
+sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
+
+    green "====================="
+    green "v2ray upstream domain"
+    green "====================="
+    read upstreamDomain
+
+    green "====================="
+    green "v2ray upstream UUID"
+    green "====================="
+    read upstreamUUID
+
+    green "====================="
+    green "v2ray upstream path"
+    green "====================="
+    read upstreamPath
+
+cat >> /etc/vtrui/config.json << EOF
+  "outbounds": [
+    {
+    "mux": { "enabled": true },
+    "protocol": "vmess",
+    "settings": { "vnext": [{
+      "address": "$upstreamDomain",
+      "port": 443,
+      "users": [{
+        "id": "$upstreamUUID",
+          "level": 1,
+          "alterId": 4,
+          "security": "auto"
+        }]
+      }]},
+    "streamSettings": {
+      "network": "ws",
+      "wsSettings": {
+        "path": "$upstreamPath",
+        "headers": {
+          "Host": "$upstreamDomain"
+          }
+        },
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "$upstreamDomain",
+        "allowInsecure": false
+        }
+      }
+    }
+  ]
+}
+EOF
+systemctl restart vtrui
+blue "-----------------------------"
+blue  "Change v2ray upstream [done]"
+blue "-----------------------------"
+
+elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
+sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
+cat >> /etc/vtrui/config.json << EOF
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv4"
+      }
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ]
+}
+EOF
+systemctl restart vtrui
+blue "-----------------------------"
+blue  "Delete v2ray upstream [done]"
+blue "-----------------------------"
+fi
+}
+
+
 updatePihole(){
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
@@ -1008,6 +1098,7 @@ fi
     red    "5. Change static IP"
     red    "6. Change domain and issue new certificates"
     yellow "7. Change v2ray UUID & path"
+    yellow "8. Set v2ray upsteram"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "00.AutoUpdate turn on/off"
@@ -1033,6 +1124,10 @@ fi
     ;;
     7)
     changeV2rayVerify
+    start_menu
+    ;;
+    8)
+    changev2rayupstream
     start_menu
     ;;
     9)

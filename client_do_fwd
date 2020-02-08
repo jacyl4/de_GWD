@@ -400,32 +400,19 @@ clifwd_port=$(echo $clifwd_domainP | cut -d : -f2)
 topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '/echo "{}" > \/usr\/local\/bin\/0conf/,$d' ~/client_do
-cat << "EOF" >> ~/client_do
-echo "{}" > /usr/local/bin/0conf
-jq '.address={}' /usr/local/bin/0conf |\
-jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
-jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
-jq '.doh={}' |\
-jq --arg doh1 "$v2servn" '.doh.doh1=$doh1' |\
-jq --arg doh2 "$v2servn" '.doh.doh2=$doh2' |\
-jq '.v2node=[]' |\
-jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
-jq --arg name "$v2servn" '.v2node[0].name=$name' |\
-jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
-jq --arg path "$v2path" '.v2node[0].path=$path' 
-jq '.clifwd={}' |\
-jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |\
-jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
-jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
-jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$uuid]' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
-}
-EOF
+sed -i '2d' ~/client_do && sed -i '/chmod -R 666 \/usr\/local\/bin\/0conf/,$d' ~/client_do
+echo "}" >> ~/client_do
 chmod +x ~/client_do
 . ~/client_do
 
 installGWD
+
+jq '.clifwd={}' /usr/local/bin/0conf |\
+jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |\
+jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
+jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
+jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf
 
 clifwd_installDOHser
 
