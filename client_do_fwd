@@ -232,6 +232,7 @@ docker restart nginx
 
 clifwd_installWebUI(){
 cd ~
+mkdir -p /var/www/html/gwd
 ln -s /var/www/html/admin  /var/www/html/gwd/admin
 
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
@@ -457,6 +458,13 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
+
+cd ~
+git clone https://git.zx2c4.com/wireguard-linux-compat
+cd ~/wireguard-linux-compat/src
+make && make install
+rm -rf ~/wireguard-linux-compat
+cd ~
 EOF
 
 chmod +x ~/bbrkernel/clearkernel
