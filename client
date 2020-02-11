@@ -681,6 +681,11 @@ PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
 EOF
 
+cat << EOF > /run/resolvconf/resolv.conf
+option use-vc
+nameserver 127.0.0.1
+EOF
+
 systemctl restart pihole-FTL
 pihole -f
 }
