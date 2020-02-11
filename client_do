@@ -887,6 +887,7 @@ chmod +x /usr/local/bin/*
 postInstall(){
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
+cd ~
 wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
 wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
 curl -L 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
