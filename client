@@ -521,9 +521,8 @@ systemctl restart iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
+option use-vc
 nameserver 127.0.0.1
-nameserver 1.1.1.1
-nameserver 8.8.8.8
 EOF
 
 echo
