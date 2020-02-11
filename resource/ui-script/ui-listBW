@@ -10,7 +10,7 @@ else
 	jq '.listW={}' /usr/local/bin/0conf > /tmp/0conf_temp
 	for listWpre in $listW; do
 	jq --arg listWpre "domain:$listWpre" '.dns.servers[2].domains+=[$listWpre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
-	listWpreIP=$(nslookup -port=5380 $listWpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	listWpreIP=$(nslookup -port=5370 $listWpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 	jq --arg key $listWpre --arg value $listWpreIP '.listW += {($key): ($value)}' /tmp/0conf_temp > /tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
