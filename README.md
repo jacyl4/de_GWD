@@ -25,10 +25,10 @@ Docker nginx Edition (amd64)
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ```
-![client](https://i.loli.net/2020/01/11/4o6fJYW2iVHvKR9.png)
+![client](https://i.loli.net/2020/02/13/gYab8SdUQqPZX1V.png)
 
 
-![client_do](https://i.loli.net/2020/01/14/LnNQ8qTbSzR3FlI.png)
+![client_do](https://i.loli.net/2020/02/13/n1NsQcvMItDXfid.png)
 
 
 
