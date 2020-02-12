@@ -1008,7 +1008,7 @@ apt update && apt install -y mariadb-server
 
 mysql_secure_installation
 
-green "再次输入刚创建的MariaDB root用户密码"
+green "Enter current password for root again"
 read sqlrootpw
 
 cat << EOF > ~/.my.cnf
