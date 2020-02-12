@@ -28,7 +28,7 @@ bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ![client](https://i.loli.net/2020/02/13/gYab8SdUQqPZX1V.png)
 
 
-![client_do](https://i.loli.net/2020/02/13/n1NsQcvMItDXfid.png)
+![client_do](https://i.loli.net/2020/02/13/H5qwpzQi8SxZ7j1.png)
 
 
 
