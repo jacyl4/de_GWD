@@ -484,7 +484,7 @@ mkdir -p /var/www/ssl
 
 if [[ -d "/etc/php" ]]; then
 mkdir -p /run/php
-echo "" > /run/php/php7.4-fpm.sock
+echo "" > /run/php/php7.3-fpm.sock
 chown -R www-data:www-data /run/php
 
 docker run -d --name=nginx --net=host --restart=always \
@@ -638,7 +638,7 @@ docker restart nginx > /dev/null 2>&1
 nginxNextcloudConf(){
 cat << EOF > /etc/nginx/conf.d/default.conf
 upstream php-handler {
-    server unix:/run/php/php7.4-fpm.sock;
+    server unix:/run/php/php7.3-fpm.sock;
 }
 
 server {
@@ -684,7 +684,7 @@ server {
   location ~ [^/]\.php(/|$) {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-    fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+    fastcgi_pass unix:/run/php/php7.3-fpm.sock;
     fastcgi_index index.php;
   }
 
@@ -1032,12 +1032,12 @@ systemctl restart mariadb
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 
-apt update && apt install -y php7.4 php7.4-fpm php7.4-cli php7.4-common php7.4-dev php7.4-mysql php7.4-curl php7.4-dom php-dompdf php7.4-json php7.4-gd php7.4-mbstring php7.4-zip php7.4-bz2 php7.4-ldap php7.4-smbclient php7.4-imap php7.4-gmp php7.4-redis php7.4-imagick php7.4-opcache php7.4-xml php7.4-xmlrpc php7.4-intl php7.4-apcu php-redis redis-server imagemagick ffmpeg
+apt update && apt install -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-dom php-dompdf php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu php-redis redis-server imagemagick ffmpeg
 
-cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
+cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
-pid = /run/php/php7.4-fpm.pid
-error_log = /var/log/php7.4-fpm.log
+pid = /run/php/php7.3-fpm.pid
+error_log = /var/log/php7.3-fpm.log
 
 emergency_restart_threshold = 20
 emergency_restart_interval = 60s
@@ -1047,14 +1047,14 @@ daemonize = yes
 rlimit_files = 1000000
 rlimit_core = 0
 
-include=/etc/php/7.4/fpm/pool.d/*.conf
+include=/etc/php/7.3/fpm/pool.d/*.conf
 EOF
 
-cat << EOF > /etc/php/7.4/fpm/pool.d/www.conf
+cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
 [www]
 user = www-data
 group = www-data
-listen = /run/php/php7.4-fpm.sock
+listen = /run/php/php7.3-fpm.sock
 listen.owner = www-data
 listen.group = www-data
 listen.backlog = -1
@@ -1081,22 +1081,22 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.4/fpm/php.ini
+sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
 
-sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.4/fpm/php.ini
-echo "apc.enable_cli = 1" >> /etc/php/7.4/fpm/php.ini
+sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
+echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
 
-rm -rf /lib/systemd/system/php7.4-fpm.service
-cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
+rm -rf /lib/systemd/system/php7.3-fpm.service
+cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
 [Unit]
-Description=The PHP 7.4 FastCGI Process Manager
+Description=The PHP 7.3 FastCGI Process Manager
 After=network.target
 Wants=network.target
 
 [Service] 
 Type=notify
-PIDFile=/run/php/php7.4-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
+PIDFile=/run/php/php7.3-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 RestartSec=5
@@ -1108,8 +1108,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable php7.4-fpm
-systemctl restart php7.4-fpm
+systemctl enable php7.3-fpm
+systemctl restart php7.3-fpm
 
 vpsdomain=$(cd /var/www/ssl/ && ls 2>&1 | grep *key | rev | cut -d . -f1 --complement | rev)
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
@@ -1185,7 +1185,7 @@ sudo chown -R redis:www-data /run/redis
 
 systemctl restart redis-server
 
-systemctl restart php7.4-fpm
+systemctl restart php7.3-fpm
 
 docker restart nginx > /dev/null 2>&1
 
