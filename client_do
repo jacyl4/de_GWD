@@ -538,7 +538,7 @@ wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools haveged \
 docker-ce docker-ce-cli containerd.io \
-php7.4-fpm php7.4-common php7.4-cgi php7.4-json php7.4-sqlite3 sqlite3 subversion rsync
+php7.3-fpm php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3 subversion rsync
 
 systemctl enable --now haveged
 sed -i "/www-data/d" /etc/sudoers
@@ -553,10 +553,10 @@ cd ~
 systemctl enable docker
 systemctl restart docker
 
-cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
+cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
-pid = /run/php/php7.4-fpm.pid
-error_log = /var/log/php7.4-fpm.log
+pid = /run/php/php7.3-fpm.pid
+error_log = /var/log/php7.3-fpm.log
 
 emergency_restart_threshold = 20
 emergency_restart_interval = 60s
@@ -566,14 +566,14 @@ daemonize = yes
 rlimit_files = 1000000
 rlimit_core = 0
 
-include=/etc/php/7.4/fpm/pool.d/*.conf
+include=/etc/php/7.3/fpm/pool.d/*.conf
 EOF
 
-cat << EOF > /etc/php/7.4/fpm/pool.d/www.conf
+cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
 [www]
 user = www-data
 group = www-data
-listen = /run/php/php7.4-fpm.sock
+listen = /run/php/php7.3-fpm.sock
 listen.owner = www-data
 listen.group = www-data
 listen.backlog = -1
@@ -600,19 +600,19 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.4/fpm/php.ini
+sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
 
-rm -rf /lib/systemd/system/php7.4-fpm.service
-cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
+rm -rf /lib/systemd/system/php7.3-fpm.service
+cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
 [Unit]
-Description=The PHP 7.4 FastCGI Process Manager
+Description=The PHP 7.3 FastCGI Process Manager
 After=network.target
 Wants=network.target
 
 [Service] 
 Type=notify
-PIDFile=/run/php/php7.4-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
+PIDFile=/run/php/php7.3-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 RestartSec=5
@@ -624,8 +624,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable php7.4-fpm
-systemctl restart php7.4-fpm
+systemctl enable php7.3-fpm
+systemctl restart php7.3-fpm
 }
 
 
@@ -841,7 +841,7 @@ server {
   index        index.php index.html index.htm;
 
 location ~* \.php$ {
-  fastcgi_pass            unix:/run/php/php7.4-fpm.sock;
+  fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
   fastcgi_index           index.php;
   fastcgi_split_path_info ^(.+\.php)(.*)$;
   include                 fastcgi_params;
@@ -1363,12 +1363,12 @@ else
 fi
 
 
-if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
-    echo "[$statusGOOD] php7.4-FPM     [working]"
-elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
-    echo "[$statusBAD] php7.4-FPM     [not installed]"
+if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
+    echo "[$statusGOOD] php7.3-FPM     [working]"
+elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] php7.3-FPM     [not installed]"
 else
-    echo "[$statusBAD] php7.4-FPM     [start failed]"
+    echo "[$statusBAD] php7.3-FPM     [start failed]"
 fi
 
 
