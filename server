@@ -990,11 +990,6 @@ installNextcloud(){
     green "=================="
     read sqlpw
 
-    green "=================="
-    green " Datadase name"
-    green "=================="
-    read sqlname
-
 apt update && apt install -y software-properties-common dirmngr
 
 dpkg --configure -a
@@ -1015,9 +1010,9 @@ user=root
 password=$sqlrootpw
 EOF
 
-mysql -e "create database $sqlname default charset utf8 collate utf8_general_ci;"
+mysql -e "create database nextcloud default charset utf8 collate utf8_general_ci;"
 mysql -e "CREATE USER '$sqluser'@'localhost' IDENTIFIED BY '$sqlpw';"
-mysql -e "grant all privileges on $sqlname.* TO '$sqluser'@'localhost';"
+mysql -e "grant all privileges on nextcloud.* TO '$sqluser'@'localhost';"
 
 rm -rf ~/.my.cnf
 
@@ -1127,7 +1122,7 @@ yellow "$sqluser"
 blue "  Datadase password:"
 yellow "$sqlpw"
 blue "  Datadase name:"
-yellow "$sqlname"
+yellow "nextcloud"
 blue "  Nextcloud Installation address:"
 yellow "$vpsdomain/setup-nextcloud.php"
 blue "------------------------------------"
