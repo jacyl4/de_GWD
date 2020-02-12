@@ -1118,7 +1118,7 @@ nginxNextcloudConf
 
 launchNginx
 
-wget -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
+wget --no-check-certificate -O ~/setup-nextcloud.php https://download.nextcloud.com/server/installer/setup-nextcloud.php
 mv -f ~/setup-nextcloud.php /var/www/html/
 chown -R www-data:www-data /var/www/html/
 chmod -R 755 /var/www/html
