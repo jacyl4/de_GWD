@@ -1016,9 +1016,96 @@ mysql -e "grant all privileges on nextcloud.* TO '$sqluser'@'localhost';"
 
 rm -rf ~/.my.cnf
 
-sed -i "/bind-address/s/^/#/g" /etc/mysql/my.cnf
-sed -i '/skip-networking = 1/d' /etc/mysql/my.cnf
-sed -i '/skip-networking/a\skip-networking = 1' /etc/mysql/my.cnf
+cat << EOF > /etc/mysql/my.cnf
+[client]
+default-character-set = utf8mb4
+port                  = 3306
+socket                = /var/run/mysqld/mysqld.sock
+
+[mysqld_safe]
+socket  = /var/run/mysqld/mysqld.sock
+nice    = 0
+
+[mysqld]
+user      = mysql
+pid-file  = /var/run/mysqld/mysqld.pid
+socket    = /var/run/mysqld/mysqld.sock
+port      = 3306
+basedir   = /usr
+datadir   = /var/lib/mysql
+tmpdir    = /tmp
+lc_messages_dir = /usr/share/mysql
+lc_messages     = en_US
+skip-networking = 1
+skip-external-locking
+
+max_connections         = 100
+connect_timeout         = 5
+wait_timeout            = 600
+max_allowed_packet      = 16M
+thread_cache_size       = 128
+sort_buffer_size        = 4M
+bulk_insert_buffer_size = 16M
+
+myisam_recover_options  = BACKUP
+key_buffer_size         = 64M
+#open-files-limit       = 2000
+table_open_cache        = 400
+myisam_sort_buffer_size = 512M
+concurrent_insert       = 2
+read_buffer_size        = 2M
+read_rnd_buffer_size    = 1M
+
+skip-name-resolve
+default_storage_engine          = InnoDB
+innodb_buffer_pool_instances    = 1
+innodb_buffer_pool_size         = 128M
+innodb_log_buffer_size          = 8M
+innodb_flush_log_at_trx_commit  = 2
+innodb_max_dirty_pages_pct      = 90
+innodb_file_per_table           = 1
+innodb_open_files               = 200
+innodb_io_capacity              = 200
+innodb_flush_method             = O_DIRECT
+innodb_large_prefix             = on
+innodb_file_format              = barracuda
+
+query_cache_type          = 1
+query_cache_limit         = 256K
+query_cache_size          = 64M
+query_cache_min_res_unit  = 2k
+tmp_table_size            = 32M
+max_heap_table_size       = 32M
+
+log_warnings        = 2
+slow_query_log      = 1
+slow_query_log_file = /var/log/mysql/mariadb-slow.log
+long_query_time     = 1
+log_slow_verbosity  = query_plan
+log_bin             = /var/log/mysql/mariadb-bin
+log_bin_index       = /var/log/mysql/mariadb-bin.index
+expire_logs_days    = 10
+max_binlog_size     = 100M
+
+character-set-server  = utf8mb4
+collation-server      = utf8mb4_general_ci
+transaction_isolation = READ-COMMITTED
+binlog_format         = ROW
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet = 16M
+
+[mysql]
+no-auto-rehash
+
+[isamchk]
+key_buffer = 16M
+
+!include /etc/mysql/mariadb.cnf
+!includedir /etc/mysql/conf.d/
+EOF
 
 systemctl restart mariadb
 
@@ -1078,6 +1165,25 @@ sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
 
 sed -i "/memory_limit/c\memory_limit = 512M" /etc/php/7.3/fpm/php.ini
 echo "apc.enable_cli = 1" >> /etc/php/7.3/fpm/php.ini
+
+cat << EOF > /etc/php/7.3/mods-available/pdo_mysql.ini
+# configuration for PHP MySQL module
+extension=pdo_mysql.so
+
+[mysql]
+mysql.allow_local_infile=On
+mysql.allow_persistent=On
+mysql.cache_size=2000
+mysql.max_persistent=-1
+mysql.max_links=-1
+mysql.default_port=
+mysql.default_socket=/var/run/mysqld/mysqld.sock
+mysql.default_host=
+mysql.default_user=
+mysql.default_password=
+mysql.connect_timeout=60
+mysql.trace_mode=Off
+EOF
 
 rm -rf /lib/systemd/system/php7.3-fpm.service
 cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
