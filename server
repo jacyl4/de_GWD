@@ -995,7 +995,7 @@ apt update && apt install -y software-properties-common dirmngr
 dpkg --configure -a
 
 echo "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/mariadb.list
-apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
+apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
 
 apt update && apt install -y mariadb-server
 
@@ -1158,9 +1158,7 @@ cat << "EOF" >> /var/www/html/nextcloud/config/config.php
 'memcache.local' => '\\OC\\Memcache\\APCu',
 'memcache.distributed' => '\\OC\\Memcache\\Redis',
 'memcache.locking' => '\\OC\\Memcache\\Redis',
-'filelocking.enabled' => true,
-'filelocking.ttl' => 60*60,
-'filelocking.debug' => false,
+'filelocking.enabled' => false,
 'redis' =>
   array (
     'host' => '/var/run/redis/redis-server.sock',
@@ -1402,9 +1400,10 @@ else
   nginxWebConf
 fi
 
+launchNginx
+
 postInstall
 
-launchNginx
 blue "---------------------"
 blue  "Update de_GWD [done]"
 blue "---------------------"
