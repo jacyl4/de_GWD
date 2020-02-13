@@ -1158,7 +1158,7 @@ cat << "EOF" >> /var/www/html/nextcloud/config/config.php
 'memcache.local' => '\\OC\\Memcache\\APCu',
 'memcache.distributed' => '\\OC\\Memcache\\Redis',
 'memcache.locking' => '\\OC\\Memcache\\Redis',
-'filelocking.enabled' => false,
+'filelocking.enabled' => true,
 'redis' =>
   array (
     'host' => '/var/run/redis/redis-server.sock',
