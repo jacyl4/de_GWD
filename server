@@ -596,6 +596,7 @@ server {
   resolver 1.1.1.1 valid=600s;
   resolver_timeout 5s;
 
+  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-Robots-Tag none;
   add_header X-Download-Options noopen;
@@ -1160,7 +1161,7 @@ default_charset = "UTF-8"
 doc_root =
 user_dir =
 enable_dl = Off
-cgi.fix_pathinfo=1
+cgi.fix_pathinfo=0
 file_uploads = On
 upload_max_filesize = 1024M
 max_file_uploads = 20
