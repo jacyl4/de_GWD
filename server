@@ -1040,40 +1040,40 @@ open_files_limit  = 65535
 skip-networking   = 1
 skip-external-locking
 
+max_connections         = 300
 table_open_cache        = 100
-max_connections         = 100
-max_allowed_packet      = 16M
+max_allowed_packet      = 32M
 sort_buffer_size        = 4M
 
-myisam_recover_options  = BACKUP
-thread_cache_size       = 128
+thread_cache_size       = 200
 key_buffer_size         = 64M
+myisam_recover_options  = BACKUP
 myisam_sort_buffer_size = 64M
 bulk_insert_buffer_size = 16M
-concurrent_insert       = 2
 read_buffer_size        = 2M
 read_rnd_buffer_size    = 1M
-connect_timeout         = 5
-wait_timeout            = 600
 
 skip-name-resolve
 default_storage_engine          = InnoDB
 innodb_buffer_pool_instances    = 1
-innodb_buffer_pool_size         = 128M
-innodb_open_files               = 200
-innodb_io_capacity              = 200
-innodb_log_buffer_size          = 8M
+innodb_buffer_pool_size         = 256M
+innodb_open_files               = 300
+innodb_io_capacity              = 1000
+innodb_read_io_threads          = 64
+innodb_write_io_threads         = 64
+innodb_log_buffer_size          = 32M
+innodb_log_file_size            = 256M
+innodb_file_per_table           = 1
 innodb_flush_log_at_trx_commit  = 2
 innodb_flush_method             = O_DIRECT
 innodb_max_dirty_pages_pct      = 90
-innodb_file_per_table           = 1
 innodb_large_prefix             = on
 innodb_file_format              = barracuda
 
 query_cache_type          = 1
-query_cache_limit         = 256K
-query_cache_size          = 64M
+query_cache_limit         = 512K
 query_cache_min_res_unit  = 2k
+query_cache_size          = 64M
 tmp_table_size            = 32M
 max_heap_table_size       = 32M
 
@@ -1087,6 +1087,9 @@ log_bin_index       = /var/log/mysql/mariadb-bin.index
 expire_logs_days    = 10
 max_binlog_size     = 100M
 
+concurrent_insert     = 2
+connect_timeout       = 5
+wait_timeout          = 600
 character-set-server  = utf8mb4
 collation-server      = utf8mb4_general_ci
 transaction_isolation = READ-COMMITTED
@@ -1130,7 +1133,7 @@ zend.enable_gc = On
 expose_php = Off
 max_execution_time = 3600
 max_input_time = 3600
-memory_limit = 512m
+memory_limit = 512M
 error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
 display_errors = Off
 display_startup_errors = Off
@@ -1155,7 +1158,7 @@ user_dir =
 enable_dl = Off
 cgi.fix_pathinfo=1
 file_uploads = On
-upload_max_filesize = 2M
+upload_max_filesize = 1024M
 max_file_uploads = 20
 allow_url_fopen = On
 allow_url_include = Off
@@ -1297,7 +1300,7 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 php_value[upload_max_filesize] = 10G
 php_value[post_max_size] = 10G
-php_admin_value[memory_limit] = 512m
+php_admin_value[memory_limit] = 512M
 EOF
 
 cat << EOF > /etc/php/7.3/mods-available/pdo_mysql.ini
