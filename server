@@ -1553,7 +1553,7 @@ cat >> /etc/vtrui/config.json << EOF
       "users": [{
         "id": "$upstreamUUID",
           "level": 1,
-          "alterId": 4,
+          "alterId": 8,
           "security": "auto"
         }]
       }]},
