@@ -1384,31 +1384,33 @@ sed -i "/unixsocketperm 700/c\unixsocketperm 770" /etc/redis/redis.conf
 sed -i '/installed/,$d' /var/www/html/nextcloud/config/config.php
 cat << "EOF" >> /var/www/html/nextcloud/config/config.php
   'installed' => true,
-  'enabledPreviewProviders' => array(
-    'OC\Preview\PNG',
-    'OC\Preview\JPEG',
-    'OC\Preview\GIF',
-    'OC\Preview\HEIC',
-    'OC\Preview\BMP',
-    'OC\Preview\XBitmap',
-    'OC\Preview\MP3',
-    'OC\Preview\TXT',
-    'OC\Preview\MarkDown',
-    'OC\Preview\Movie',
-    'OC\Preview\PDF'
+  'enabledPreviewProviders' => 
+  array (
+    0 => 'OC\\Preview\\PNG',
+    1 => 'OC\\Preview\\JPEG',
+    2 => 'OC\\Preview\\GIF',
+    3 => 'OC\\Preview\\HEIC',
+    4 => 'OC\\Preview\\BMP',
+    5 => 'OC\\Preview\\XBitmap',
+    6 => 'OC\\Preview\\MP3',
+    7 => 'OC\\Preview\\TXT',
+    8 => 'OC\\Preview\\Movie',
+    9 => 'OC\\Preview\\MarkDown',
+    10 => 'OC\\Preview\\PDF',
   ),
-  'memcache.local' => '\OC\Memcache\APCu',
-  'memcache.distributed' => '\OC\Memcache\Redis',
-  'redis' => [
-    'host' => '/var/run/redis/redis-server.sock',
+  'memcache.local' => '\\OC\\Memcache\\APCu',
+  'memcache.distributed' => '\\OC\\Memcache\\Redis',
+  'redis' => 
+  array (
+    'host' => '/run/redis/redis-server.sock',
     'port' => 0,
-    'dbindex'  => 0,
-    'timeout' => 0.0,
-  ],
-  'memcache.locking' => '\OC\Memcache\Redis',
+    'dbindex' => 0,
+    'timeout' => 1.5,
+  ),
+  'memcache.locking' => '\\OC\\Memcache\\Redis',
   'filelocking.enabled' => true,
   'max_filesize_animated_gifs_public_sharing' => -1,
-  'loglevel' => 0,
+  'loglevel' => 1,
 );
 EOF
 
