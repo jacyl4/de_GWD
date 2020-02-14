@@ -1113,7 +1113,7 @@ systemctl restart mariadb
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 
-apt update && apt install -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-dom php-dompdf php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-smbclient php7.3-imap php7.3-gmp php7.3-redis php7.3-imagick php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php7.3-apcu php-redis redis-server imagemagick ffmpeg
+apt update && apt install -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-imap php7.3-gmp php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php-dompdf php-smbclient php-apcu php-redis redis-server php-imagick imagemagick ffmpeg
 
 cat << EOF > /etc/php/7.3/fpm/php.ini
 [PHP]
@@ -1161,8 +1161,6 @@ max_file_uploads = 20
 allow_url_fopen = On
 allow_url_include = Off
 default_socket_timeout = 60
-
-extension=redis.so
 
 [CLI Server]
 cli_server.color = On
@@ -1261,8 +1259,6 @@ opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=10000
 opcache.revalidate_freq=1
 opcache.save_comments=1
-
-apc.enable_cli = 1
 EOF
 
 cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
@@ -1322,6 +1318,11 @@ mysql.default_user=
 mysql.default_password=
 mysql.connect_timeout=60
 mysql.trace_mode=Off
+EOF
+
+cat << EOF > /etc/php/7.3/mods-available/apcu.ini
+extension=apcu.so
+apc.enable_cli=1
 EOF
 
 rm -rf /lib/systemd/system/php7.3-fpm.service
