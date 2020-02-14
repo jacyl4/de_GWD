@@ -1063,7 +1063,6 @@ innodb_buffer_pool_size         = 128M
 innodb_open_files               = 200
 innodb_io_capacity              = 200
 innodb_log_buffer_size          = 8M
-innodb_log_file_size            = 8M
 innodb_flush_log_at_trx_commit  = 2
 innodb_flush_method             = O_DIRECT
 innodb_max_dirty_pages_pct      = 90
