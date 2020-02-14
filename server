@@ -10,13 +10,14 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 preInstall(){
 checkSWAP=`swapon --show`
 if [[ -z "$checkSWAP" ]]; then
-install -o root -g root -m 0600 /dev/null /swapfile
-dd if=/dev/zero of=/swapfile bs=1k count=512k
+fallocate -l 1G /swapfile
+dd if=/dev/zero of=/swapfile bs=1k count=1024k status=progress
+chmod 600 /swapfile
 mkswap /swapfile
 swapon /swapfile
 sed -i "/swapfile/d" /etc/fstab
-echo "/swapfile swap swap defaults 0 0" > /etc/fstab
-sed -i "/RESUME=UUID=/c\RESUME=UUID=$(blkid | awk '/swap/ {print$2}' | cut -d'"' -f2)" /etc/initramfs-tools/conf.d/resume
+echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
+echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
 update-initramfs -u
 fi
 
