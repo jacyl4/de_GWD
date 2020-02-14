@@ -106,10 +106,10 @@ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -
 hwclock -w
 
 cat << EOF > /etc/apt/apt.conf.d/01InstallLess
+APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 Dpkg::Options {
-  "--force-confdef";
   "--force-confnew";
 };
 EOF
