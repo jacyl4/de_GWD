@@ -558,9 +558,6 @@ cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 pid = /run/php/php7.3-fpm.pid
 error_log = /var/log/php7.3-fpm.log
 
-emergency_restart_threshold = 20
-emergency_restart_interval = 60s
-process_control_timeout = 10s
 daemonize = yes
 
 rlimit_files = 1000000
@@ -574,33 +571,38 @@ cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
 user = www-data
 group = www-data
 listen = /run/php/php7.3-fpm.sock
-listen.owner = www-data
-listen.group = www-data
 listen.backlog = -1
 listen.allowed_clients = 127.0.0.1
 listen.mode = 0666
 
-pm = dynamic
-pm.max_children = 20
-pm.start_servers = 5
-pm.min_spare_servers = 5
-pm.max_spare_servers = 20
-pm.max_requests = 500
-pm.process_idle_timeout = 10s
-request_terminate_timeout = 320s
-request_slowlog_timeout = 0
-
-pm.status_path = /status
+pm = ondemand
+pm.max_children = 100
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
 
 catch_workers_output = yes
+clear_env = no
 env[HOSTNAME] = \$HOSTNAME
 env[PATH] = /usr/local/bin:/usr/bin:/bin
 env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
+php_value[upload_max_filesize] = 10M
+php_value[post_max_size] = 10M
 EOF
 
-sed -i "/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0" /etc/php/7.3/fpm/php.ini
+sed -i "/engine =/c\engine = off" /etc/php/7.3/fpm/php.ini
+sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.3/fpm/php.ini
+
+sed -i "/zend_extension=opcache.so/d" /etc/php/7.3/fpm/php.ini
+sed -i "/\[opcache\]/a\zend_extension=opcache.so" /etc/php/7.3/fpm/php.ini
+sed -i "/opcache.enable=/c\opcache.enable=1" /etc/php/7.3/fpm/php.ini
+sed -i "/opcache.memory_consumption=/c\opcache.memory_consumption=128" /etc/php/7.3/fpm/php.ini
+sed -i "/opcache.interned_strings_buffer=/c\opcache.interned_strings_buffer=8" /etc/php/7.3/fpm/php.ini
+sed -i "/opcache.max_accelerated_files=/c\opcache.max_accelerated_files=10000" /etc/php/7.3/fpm/php.ini
+sed -i "/opcache.revalidate_freq=/c\opcache.revalidate_freq=1" /etc/php/7.3/fpm/php.ini
+sed -i "/opcache.save_comments=/c\opcache.save_comments=1" /etc/php/7.3/fpm/php.ini
 
 rm -rf /lib/systemd/system/php7.3-fpm.service
 cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
