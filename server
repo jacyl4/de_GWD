@@ -1763,9 +1763,9 @@ else
     echo "[$statusNONE] Nextcloud    [not installed]"
 fi
 
-blue "---------------------------"
-blue  "当前bbr方案：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
-blue "---------------------------"
+blue "----------------------------------------"
+blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "----------------------------------------"
 
     green "==========================="
     green "       SERVER"
