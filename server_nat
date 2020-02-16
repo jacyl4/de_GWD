@@ -503,7 +503,7 @@ server {
   add_header X-Permitted-Cross-Domain-Policies none;
   add_header X-XSS-Protection "1; mode=block";
   add_header Referrer-Policy no-referrer;
-  add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+  add_header Strict-Transport-Security "max-age=63072000" always;
 
 location /dq {
   proxy_set_header          Host \$host;
