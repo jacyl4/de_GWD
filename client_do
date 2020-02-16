@@ -239,8 +239,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable doh-client > /dev/null 2>&1
-systemctl restart doh-client > /dev/null 2>&1
+systemctl enable --now doh-client
 }
 
 
@@ -512,8 +511,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable iptables-proxy > /dev/null 2>&1
-systemctl restart iptables-proxy > /dev/null 2>&1
+systemctl enable --now iptables-proxy
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -537,8 +535,7 @@ echo
 
 
 
-installWGdoPHP(){
-cd ~
+installDep(){
 cat << EOF > /etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
 deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
@@ -559,17 +556,8 @@ docker-ce docker-ce-cli containerd.io \
 php7.3-fpm php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3 subversion rsync
 
 systemctl enable --now haveged
-sed -i "/www-data/d" /etc/sudoers
-sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-git clone https://git.zx2c4.com/wireguard-linux-compat
-cd ~/wireguard-linux-compat/src
-make && make install
-rm -rf ~/wireguard-linux-compat
-cd ~
-
-systemctl enable docker
-systemctl restart docker
+systemctl enable --now docker
 
 cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
@@ -643,14 +631,14 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 
+sed -i "/www-data/d" /etc/sudoers
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable php7.3-fpm
-systemctl restart php7.3-fpm
-}
+systemctl enable --now php7.3-fpm
 
 
 
-installPihole(){
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i smartdns.deb
 
@@ -699,9 +687,13 @@ EOF
 rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable smartdns > /dev/null 2>&1
-systemctl restart smartdns > /dev/null 2>&1
+systemctl enable --now smartdns
+}
 
+
+
+installPihole(){
+cd ~
 mkdir -p /etc/pihole
 echo "" > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
@@ -884,6 +876,19 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /var/www/html/:/var/www/html/ \
 -v /run/php/:/run/php/ \
 jacyl4/nginx_tls1.3:latest
+apt update && apt upgrade -y && apt autoremove -y
+
+}
+
+
+
+installWGcore(){
+cd ~
+git clone https://git.zx2c4.com/wireguard-linux-compat
+cd ~/wireguard-linux-compat/src
+make && make install
+rm -rf ~/wireguard-linux-compat
+cd ~
 }
 
 
@@ -960,8 +965,6 @@ EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-apt update && apt upgrade -y && apt autoremove -y
-
 if [[ ! -f "wg0.conf" ]]; then
 mkdir -p /etc/wireguard
 /usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
@@ -1033,7 +1036,7 @@ echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/l
 
 installIptablesProxy
 
-installWGdoPHP
+installDep
 
 installPihole
 
@@ -1046,6 +1049,8 @@ echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
 installNginx
+
+installWGcore
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
@@ -1083,6 +1088,20 @@ chmod -R 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"
+}
+
+
+
+updatePihole(){
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+installPihole
+blue "----------------------"
+blue "Install Pi-hole [done]"
+blue "----------------------"
 }
 
 
@@ -1301,9 +1320,7 @@ installV2ray
 
 installIptablesProxy
 
-installWGdoPHP
-
-installPihole
+installDep
 
 installNginx
 
@@ -1333,7 +1350,7 @@ if [[ $checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
-if [[ -n $(jq -r '.address.alias' /usr/local/bin/0conf) ]]; then
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
 fi
 
@@ -1409,7 +1426,9 @@ blue "----------------------------------------"
     green "==============================="
     echo
     green  "1. Install de_GWD"
-    yellow "2. Change de_GWD password"
+    green  "2. Change de_GWD password"
+    yellow "8. Install/Update WiregGard core"
+    yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo
@@ -1421,6 +1440,14 @@ blue "----------------------------------------"
     ;;
     2)
     change_piholeAdmin
+    start_menu
+    ;;
+    8)
+    installWGcore
+    start_menu
+    ;;
+    9)
+    updatePihole
     start_menu
     ;;
     0)
