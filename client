@@ -580,7 +580,6 @@ sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root
 
 installPihole(){
 cd ~
-systemctl mask --now resolvconf > /dev/null 2>&1
 mkdir -p /etc/pihole
 echo "" > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
@@ -601,7 +600,6 @@ CONDITIONAL_FORWARDING=false
 EOF
 wget -O ~/pihole.sh https://install.pi-hole.net
 chmod +x ~/pihole.sh
-sed -i 's/resolvconf//g' ~/pihole.sh
 bash ~/pihole.sh /dev/stdin --unattended
 rm -rf ~/pihole.sh
 
@@ -702,6 +700,26 @@ systemctl enable --now smartdns
 
 
 
+installWebUI(){
+cd ~
+svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
+svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
+
+rsync -azrI ~/ui-script/* /usr/local/bin
+rsync -azrI ~/ui-web/* /var/www/html
+rm -rf ~/ui-*
+
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+mv -f ~/version.php /var/www/html/version.php
+
+mkdir -p /var/www/html/restore
+chown -R www-data:www-data /var/www/html
+chmod +x /var/www/html/*
+chmod +x /usr/local/bin/*
+}
+
+
+
 installWGcore(){
 cd ~
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
@@ -725,26 +743,6 @@ if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
 mkdir -p /etc/wireguard
 /usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
 fi
-}
-
-
-
-installWebUI(){
-cd ~
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
-
-rsync -azrI ~/ui-script/* /usr/local/bin
-rsync -azrI ~/ui-web/* /var/www/html
-rm -rf ~/ui-*
-
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
-mv -f ~/version.php /var/www/html/version.php
-
-mkdir -p /var/www/html/restore
-chown -R www-data:www-data /var/www/html
-chmod +x /var/www/html/*
-chmod +x /usr/local/bin/*
 }
 
 
