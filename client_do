@@ -663,10 +663,10 @@ chmod +x ~/pihole.sh
 bash ~/pihole.sh /dev/stdin --unattended
 rm -rf ~/pihole.sh
 
-systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl mask --now lighttpd > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
 rm -rf /var/www/html/index.lighttpd.orig
+systemctl mask --now dhcpcd > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
 
 cat << "EOF" > /usr/local/bin/pihole_hotfix
 #!/bin/bash
