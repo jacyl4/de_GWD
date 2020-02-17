@@ -980,7 +980,7 @@ rm -rf ~/now.cron
 /usr/local/bin/ui-nodeResolve >/dev/null 2>&1
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
-awk '/127/,NR==end' /etc/hosts >&1 | tee /etc/hosts
+awk '/127.0.0.1/,NR==end' /etc/hosts >&1 | tee /etc/hosts
 }
 
 
