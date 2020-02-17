@@ -257,7 +257,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now doh-client
+systemctl enable --now doh-client > /dev/null 2>&1
 }
 
 
@@ -385,7 +385,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable vtrui
+systemctl enable vtrui > /dev/null 2>&1
 }
 
 
@@ -533,8 +533,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable iptables-proxy > /dev/null 2>&1
-systemctl restart iptables-proxy > /dev/null 2>&1
+systemctl enable --now iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf

@@ -123,8 +123,15 @@ EOF
 
 rm -rf /etc/apt/sources.list.d/*
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates apt-transport-https gnupg2
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged apt-transport-https gnupg2 subversion rsync
 source /etc/profile
+systemctl enable --now haveged
+
+echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
+wget -qO - http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
+
+apt update && apt install -y docker-ce docker-ce-cli containerd.io
+systemctl enable --now docker
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 cat << EOF > /etc/default/locale
@@ -237,7 +244,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now doh-client
+systemctl enable --now doh-client > /dev/null 2>&1
 }
 
 
@@ -361,7 +368,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable vtrui
+systemctl enable vtrui > /dev/null 2>&1
 }
 
 
@@ -509,7 +516,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now iptables-proxy
+systemctl enable --now iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -543,19 +550,11 @@ EOF
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" | sudo tee /etc/apt/sources.list.d/docker.list
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" | sudo tee /etc/apt/sources.list.d/php.list
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools haveged \
-docker-ce docker-ce-cli containerd.io \
-php7.3-fpm php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3 subversion rsync
-
-systemctl enable --now haveged
-
-systemctl enable --now docker
+apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools \
+php7.3-fpm php7.3-common php7.3-cgi php7.3-json php7.3-sqlite3 sqlite3
 
 cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
