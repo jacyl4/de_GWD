@@ -12,6 +12,10 @@ mirrorSite="http://xznat.seso.icu:10178"
 
 
 clifwd_iptablesProxy(){
+sed -i '/net.ipv4.conf.default.accept_source_route =/c\net.ipv4.conf.default.accept_source_route = 0' /etc/sysctl.conf
+sed -i '/net.ipv4.ip_forward =/c\net.ipv4.ip_forward = 0' /etc/sysctl.conf
+sysctl -p
+
 sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
 
 addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
@@ -20,7 +24,7 @@ addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
 
-systemctl daemon-reload
+systemctl daemon-reload > /dev/null 2>&1
 systemctl restart iptables-proxy
 }
 
@@ -297,14 +301,17 @@ cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-No
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/gwd/version.php
 
+mkdir -p /var/www/html/gwd/restore
 chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
+chmod +x /var/www/html/gwd/*
 chmod +x /usr/local/bin/*
 }
 
 
 
 clifwd_PostInstall(){
+apt update && apt upgrade -y && apt autoremove -y
+
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
@@ -356,20 +363,11 @@ EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-apt update && apt upgrade -y && apt autoremove -y
-
-if [[ ! -f "/etc/wireguard/sprivatekey" ]]; then
-mkdir -p /etc/wireguard
-/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
-fi
-
 /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 /usr/local/bin/ui-nodeResolve >/dev/null 2>&1
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
-sed -i "/$doh/d" /etc/hosts
-rm -rf /tmp/v2uuids
-rm -rf /tmp/vtruiConfADD
+awk '/127.0.0.1/,NR==end' /etc/hosts >&1 | tee /etc/hosts
 }
 
 
@@ -421,9 +419,9 @@ jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |
 jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
-clifwd_installDOHser
-
 clifwd_iptablesProxy
+
+clifwd_installDOHser
 
 clifwd_nginxWebConf
 
@@ -464,13 +462,6 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
-
-cd ~
-git clone https://git.zx2c4.com/wireguard-linux-compat
-cd ~/wireguard-linux-compat/src
-make && make install
-rm -rf ~/wireguard-linux-compat
-cd ~
 EOF
 
 chmod +x ~/bbrkernel/clearkernel
@@ -489,7 +480,7 @@ reboot
 
 
 
-change_clifwd_piholeAdmin(){
+clifwd_change_piholeAdmin(){
 pihole -a -p
 
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
@@ -537,6 +528,35 @@ blue "Change domain and issue new certificates [done]"
 blue "-----------------------------------------------"
 }
 
+
+
+clifwd_installWGcore(){
+wget -O ~/client_do $mirrorSite/client_do
+sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
+installWGcore
+}
+
+
+
+clifwd_updatePihole(){
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+wget -O ~/client_do $mirrorSite/client_do
+sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
+installPihole
+blue "----------------------"
+blue "Install Pi-hole [done]"
+blue "----------------------"
+}
 
 
 clifwdUpdate(){
@@ -765,15 +785,15 @@ installV2ray
 
 installIptablesProxy
 
-installWGdoPHP
+installDep
 
-installPihole
+installSmartDNS
 
 installNginx
 
-clifwd_installDOHser
-
 clifwd_iptablesProxy
+
+clifwd_installDOHser
 
 clifwd_nginxWebConf
 
@@ -799,7 +819,7 @@ if [[ $clifwd_checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
-if [[ -n $(jq -r '.address.alias' /usr/local/bin/0conf) ]]; then
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
 fi
 
@@ -885,6 +905,8 @@ blue "----------------------------------------"
     green  "2. Change de_GWD password"
     green  "3. Install bbrplus and reboot（only Debian 9）"
     red    "6. Change domain and issue new certificates"
+    yellow "8. Install/Update WiregGard"
+    yellow "9. Update Pi-hole"
     yellow "0. de_GWD clifwd Update"
     red    "CTRL+C EXIT"
     echo
@@ -895,7 +917,7 @@ blue "----------------------------------------"
     start_menu
     ;;
     2)
-    change_clifwd_piholeAdmin
+    clifwd_change_piholeAdmin
     start_menu
     ;;
     3)
@@ -904,6 +926,14 @@ blue "----------------------------------------"
     ;;
     6)
     changeDomain
+    start_menu
+    ;;
+    8)
+    clifwd_installWGcore
+    start_menu
+    ;;
+    9)
+    clifwd_updatePihole
     start_menu
     ;;
     0)

@@ -8,7 +8,7 @@ uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
 jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' > /etc/vtrui/hosts
-cat /var/www/html/hostsCustomize.txt >> /etc/vtrui/hosts
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >> /etc/vtrui/hosts
 
 cat > /etc/vtrui/config.json << EOF
 {
