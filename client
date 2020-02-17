@@ -603,7 +603,7 @@ wget -O ~/pihole.sh https://install.pi-hole.net
 chmod +x ~/pihole.sh
 sed -i 's/resolvconf//g' ~/pihole.sh
 bash ~/pihole.sh /dev/stdin --unattended
-rm -rf ~/Pi-hole
+rm -rf ~/pihole.sh
 
 systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
