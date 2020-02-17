@@ -96,8 +96,6 @@ fi
 
 sysctl -p
 
-sed -i '/ip6-/d' /etc/hosts
-
 systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 rm -rf /run/resolvconf/interface/systemd-resolved
@@ -363,7 +361,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable vtrui > /dev/null 2>&1
+systemctl enable vtrui
 }
 
 
@@ -640,7 +638,7 @@ systemctl enable --now php7.3-fpm
 
 
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
-dpkg -i smartdns.deb
+dpkg -i ~/smartdns.deb
 
 cat << EOF > /etc/smartdns/smartdns.conf
 bind 127.0.0.1:5370
@@ -876,8 +874,6 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /var/www/html/:/var/www/html/ \
 -v /run/php/:/run/php/ \
 jacyl4/nginx_tls1.3:latest
-apt update && apt upgrade -y && apt autoremove -y
-
 }
 
 
@@ -907,13 +903,15 @@ mv -f ~/version.php /var/www/html/version.php
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
+chmod +x /var/www/html/*
 chmod +x /usr/local/bin/*
 }
 
 
 
 postInstall(){
+apt update && apt upgrade -y && apt autoremove -y
+
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
@@ -974,7 +972,7 @@ fi
 /usr/local/bin/ui-nodeResolve >/dev/null 2>&1
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
-sed -i "/$doh/d" /etc/hosts
+awk '/127/,NR==end' /etc/hosts >&1 | tee /etc/hosts
 }
 
 
@@ -1049,8 +1047,6 @@ echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
 installNginx
-
-installWGcore
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\

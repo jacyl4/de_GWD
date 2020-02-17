@@ -103,8 +103,6 @@ fi
 
 sysctl -p
 
-sed -i '/ip6-/d' /etc/hosts
-
 if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
@@ -139,8 +137,10 @@ fi
 
 rm -rf /etc/apt/sources.list.d/*
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip subversion rsync ca-certificates
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync
 source /etc/profile
+
+systemctl enable --now haveged
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 cat << EOF > /etc/default/locale
@@ -257,8 +257,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable doh-client > /dev/null 2>&1
-systemctl restart doh-client > /dev/null 2>&1
+systemctl enable --now doh-client
 }
 
 
@@ -386,7 +385,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable vtrui > /dev/null 2>&1
+systemctl enable vtrui
 }
 
 
@@ -559,8 +558,7 @@ echo
 
 
 
-installWG(){
-cd ~
+installDep(){
 if [[ $architecture = "amd64" ]]; then
 cat << EOF > /etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
@@ -575,31 +573,11 @@ printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/pref
 apt update
 
 if [[ $architecture = "arm64" ]]; then
-apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools haveged
-elif [[ $architecture = "amd64" ]]; then
-apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools haveged
-
-systemctl enable --now haveged
-sed -i "/www-data/d" /etc/sudoers
-sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
-
-git clone https://git.zx2c4.com/wireguard-linux-compat
-cd ~/wireguard-linux-compat/src
-make && make install
-rm -rf ~/wireguard-linux-compat
-cd ~
-fi
-}
-
-
-
-installPihole(){
-if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -O ~/smartdns.deb $smartdns_arm64
 elif [[ $architecture = "amd64" ]]; then
   wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 fi
-dpkg -i smartdns.deb
+dpkg -i ~/smartdns.deb
 
 cat << EOF > /etc/smartdns/smartdns.conf
 bind 127.0.0.1:5370
@@ -646,9 +624,16 @@ EOF
 rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable smartdns > /dev/null 2>&1
-systemctl restart smartdns > /dev/null 2>&1
+systemctl enable --now smartdns
 
+sed -i "/www-data/d" /etc/sudoers
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+}
+
+
+
+installPihole(){
+cd ~
 mkdir -p /etc/pihole
 echo "" > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
@@ -710,7 +695,25 @@ pihole -f
 
 
 
-postInstall(){
+installWGcore(){
+if [[ $architecture = "arm64" ]]; then
+apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools
+elif [[ $architecture = "amd64" ]]; then
+apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
+
+
+cd ~
+git clone https://git.zx2c4.com/wireguard-linux-compat
+cd ~/wireguard-linux-compat/src
+make && make install
+rm -rf ~/wireguard-linux-compat
+cd ~
+fi
+}
+
+
+
+installWebUI(){
 cd ~
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
@@ -724,8 +727,14 @@ mv -f ~/version.php /var/www/html/version.php
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
+chmod +x /var/www/html/*
 chmod +x /usr/local/bin/*
+}
+
+
+
+postInstall(){
+apt update && apt upgrade -y && apt autoremove -y
 
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
@@ -778,8 +787,6 @@ EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-apt update && apt upgrade -y && apt autoremove -y
-
 if [[ ! -f "wg0.conf" ]]; then
 mkdir -p /etc/wireguard
 /usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
@@ -789,7 +796,7 @@ fi
 /usr/local/bin/ui-nodeResolve >/dev/null 2>&1
 /usr/local/bin/ui-changeDOH >/dev/null 2>&1
 
-sed -i "/$doh/d" /etc/hosts
+awk '/127/,NR==end' /etc/hosts >&1 | tee /etc/hosts
 }
 
 
@@ -851,7 +858,7 @@ echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/l
 
 installIptablesProxy
 
-installWG
+installDep
 
 installPihole
 
@@ -877,6 +884,8 @@ jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
+installWebUI
+
 postInstall
 
 blue "---------------------"
@@ -897,6 +906,20 @@ chmod -R 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"
+}
+
+
+
+updatePihole(){
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+installPihole
+blue "----------------------"
+blue "Install Pi-hole [done]"
+blue "----------------------"
 }
 
 
@@ -1115,9 +1138,9 @@ installV2ray
 
 installIptablesProxy
 
-installWG
+installDep
 
-installPihole
+installWebUI
 
 postInstall
 
@@ -1143,7 +1166,7 @@ if [[ $checkV2ad = "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
-if [[ -n $(jq -r '.address.alias' /usr/local/bin/0conf) ]]; then
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
 fi
 
@@ -1200,7 +1223,9 @@ blue "----------------------------------------"
     green "===================================="
     echo
     green  "1. Install de_GWD"
-    yellow "2. Change de_GWD password"
+    green  "2. Change de_GWD password"
+    yellow "8. Install/Update WiregGard core"
+    yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo
@@ -1212,6 +1237,14 @@ blue "----------------------------------------"
     ;;
     2)
     change_piholeAdmin
+    start_menu
+    ;;
+    8)
+    installWGcore
+    start_menu
+    ;;
+    9)
+    updatePihole
     start_menu
     ;;
     0)
