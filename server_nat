@@ -37,6 +37,8 @@ cat << EOF > /etc/security/limits.conf
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
+sed -i '/ip6-/d' /etc/hosts
+
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 10
@@ -98,8 +100,6 @@ echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 
 sysctl -p
-
-sed -i '/ip6-/d' /etc/hosts
 
 systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1

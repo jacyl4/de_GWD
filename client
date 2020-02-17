@@ -42,6 +42,8 @@ cat << EOF > /etc/security/limits.conf
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
+sed -i '/ip6-/d' /etc/hosts
+
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 10
@@ -103,14 +105,14 @@ fi
 
 sysctl -p
 
+systemctl mask --now systemd-resolved > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+rm -rf /run/resolvconf/interface/systemd-resolved
+
 if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
 fi
-
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-rm -rf /run/resolvconf/interface/systemd-resolved
 
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -139,7 +141,6 @@ rm -rf /etc/apt/sources.list.d/*
 
 apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync
 source /etc/profile
-
 systemctl enable --now haveged
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -306,7 +307,6 @@ cat << EOF > /etc/vtrui/config.json
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
-    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
     "settings": {"network": "tcp,udp", "followRedirect": true},
     "streamSettings": { "sockopt": { "tproxy": "tproxy" } }
   }
@@ -539,7 +539,11 @@ rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 option use-vc
 nameserver 127.0.0.1
+nameserver 8.8.8.8
+nameserver 1.1.1.1
 EOF
+
+systemctl restart networking
 
 echo
 if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk '{print$1;exit}') =~ "20" ]]; then
@@ -566,11 +570,81 @@ deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d 
 EOF
 fi
 
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+apt update 
 
-apt update
+sed -i "/www-data/d" /etc/sudoers
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+}
 
+
+
+installPihole(){
+cd ~
+systemctl mask --now resolvconf > /dev/null 2>&1
+mkdir -p /etc/pihole
+echo "" > /etc/pihole/adlists.list
+cat << EOF > /etc/pihole/setupVars.conf
+PIHOLE_INTERFACE=$ethernetnum
+IPV4_ADDRESS=$localaddr/24
+PIHOLE_DNS_1=127.0.0.1#5380
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=true
+INSTALL_WEB_INTERFACE=true
+LIGHTTPD_ENABLED=true
+BLOCKING_ENABLED=true
+WEBPASSWORD=$piholePW
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=false
+EOF
+wget -O ~/pihole.sh https://install.pi-hole.net
+chmod +x ~/pihole.sh
+sed -i 's/resolvconf//g' ~/pihole.sh
+bash ~/pihole.sh /dev/stdin --unattended
+rm -rf ~/Pi-hole
+
+systemctl mask --now dhcpcd > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+
+cat << "EOF" > /usr/local/bin/pihole_hotfix
+#!/bin/bash
+localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
+sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
+pihole restartdns
+EOF
+chmod +x /usr/local/bin/pihole_hotfix
+
+sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+
+cat << EOF > /etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+port=5390
+EOF
+
+cat << EOF > /etc/pihole/dns-servers.conf
+ DoH;127.0.0.1#5380
+EOF
+
+cat << EOF > /etc/pihole/pihole-FTL.conf
+PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
+EOF
+
+cat << EOF > /etc/resolv.conf
+option use-vc
+nameserver 127.0.0.1
+EOF
+
+systemctl restart pihole-FTL
+pihole -f
+}
+
+
+
+installSmartDNS(){
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -O ~/smartdns.deb $smartdns_arm64
 elif [[ $architecture = "amd64" ]]; then
@@ -624,84 +698,22 @@ rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
 systemctl enable --now smartdns
-
-sed -i "/www-data/d" /etc/sudoers
-sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
-}
-
-
-
-installPihole(){
-cd ~
-mkdir -p /etc/pihole
-echo "" > /etc/pihole/adlists.list
-cat << EOF > /etc/pihole/setupVars.conf
-PIHOLE_INTERFACE=$ethernetnum
-IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=127.0.0.1#5380
-QUERY_LOGGING=true
-INSTALL_WEB_SERVER=true
-INSTALL_WEB_INTERFACE=true
-LIGHTTPD_ENABLED=true
-BLOCKING_ENABLED=true
-WEBPASSWORD=$piholePW
-DNSMASQ_LISTENING=single
-DNS_FQDN_REQUIRED=true
-DNS_BOGUS_PRIV=true
-DNSSEC=false
-CONDITIONAL_FORWARDING=false
-EOF
-git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
-bash ~/Pi-hole/"automated install"/basic-install.sh /dev/stdin --unattended
-rm -rf ~/Pi-hole
-
-systemctl mask --now dhcpcd > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-
-cat << "EOF" > /usr/local/bin/pihole_hotfix
-#!/bin/bash
-localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
-sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
-pihole restartdns
-EOF
-chmod +x /usr/local/bin/pihole_hotfix
-
-sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-
-cat << EOF > /etc/dnsmasq.conf
-conf-dir=/etc/dnsmasq.d
-port=5390
-EOF
-
-cat << EOF > /etc/pihole/dns-servers.conf
- DoH;127.0.0.1#5380
-EOF
-
-cat << EOF > /etc/pihole/pihole-FTL.conf
-PRIVACYLEVEL=0
-AAAA_QUERY_ANALYSIS=no
-EOF
-
-cat << EOF > /run/resolvconf/resolv.conf
-option use-vc
-nameserver 127.0.0.1
-EOF
-
-systemctl restart pihole-FTL
-pihole -f
 }
 
 
 
 installWGcore(){
+cd ~
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
+apt update
+
 if [[ $architecture = "arm64" ]]; then
 apt install -y linux-headers-odroidxu4 wireguard-dkms wireguard-tools
 elif [[ $architecture = "amd64" ]]; then
 apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
 
-
-cd ~
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src
 make && make install
@@ -709,7 +721,7 @@ rm -rf ~/wireguard-linux-compat
 cd ~
 fi
 
-if [[ ! -f "wg0.conf" ]]; then
+if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
 mkdir -p /etc/wireguard
 /usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
 fi
@@ -842,9 +854,9 @@ iface lo inet loopback
 
 auto $ethernetnum
 iface $ethernetnum inet static
-  address $localaddr
-  netmask 255.255.255.0
-  gateway $gatewayaddr
+address $localaddr
+netmask 255.255.255.0
+gateway $gatewayaddr
 EOF
 
 preInstall
@@ -868,6 +880,8 @@ sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
+
+installSmartDNS
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
@@ -1139,6 +1153,8 @@ installIptablesProxy
 
 installDep
 
+installSmartDNS
+
 installWebUI
 
 postInstall
@@ -1223,7 +1239,7 @@ blue "----------------------------------------"
     echo
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "8. Install/Update WiregGard core"
+    yellow "8. Install/Update WiregGard"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
