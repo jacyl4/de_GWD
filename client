@@ -709,6 +709,11 @@ make && make install
 rm -rf ~/wireguard-linux-compat
 cd ~
 fi
+
+if [[ ! -f "wg0.conf" ]]; then
+mkdir -p /etc/wireguard
+/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
+fi
 }
 
 
@@ -786,11 +791,6 @@ cat << EOF >> ~/now.cron
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
-
-if [[ ! -f "wg0.conf" ]]; then
-mkdir -p /etc/wireguard
-/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
-fi
 
 /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 /usr/local/bin/ui-nodeResolve >/dev/null 2>&1
