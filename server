@@ -23,10 +23,10 @@ fi
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
-nameserver 1.1.1.1
 nameserver 8.8.8.8
-nameserver 1.0.0.1
 nameserver 8.8.4.4
+nameserver 1.1.1.1
+nameserver 1.0.0.1
 EOF
 sed -i '/ip6-/d' /etc/hosts
 
@@ -105,9 +105,9 @@ net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_syncookies = 1
-net.ipv4.tcp_fin_timeout = 30
-net.ipv4.tcp_syn_retries = 2
-net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_fin_timeout = 20
+net.ipv4.tcp_syn_retries = 1
+net.ipv4.tcp_synack_retries = 1
 net.ipv4.tcp_sack = 1
 net.ipv4.tcp_max_syn_backlog = 32768
 net.ipv4.tcp_max_tw_buckets = 6000
@@ -229,15 +229,15 @@ systemctl mask --now lighttpd
 systemctl daemon-reload
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
-sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
-sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_2=8.8.8.8' /etc/pihole/setupVars.conf
-sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_3=1.0.0.1' /etc/pihole/setupVars.conf
-sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_4=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
+sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_2=8.8.4.4' /etc/pihole/setupVars.conf
+sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_3=1.1.1.1' /etc/pihole/setupVars.conf
+sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_4=1.0.0.1' /etc/pihole/setupVars.conf
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=8.8.8.8' /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=8.8.4.4' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.1.1.1' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=1.0.0.1' /etc/dnsmasq.d/01-pihole.conf
 
 pihole -f
 }

@@ -29,8 +29,8 @@ systemctl stop iptables-proxy > /dev/null 2>&1
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 119.29.29.29
-nameserver 223.5.5.5
 nameserver 119.28.28.28
+nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
 sed -i '/ip6-/d' /etc/hosts
@@ -112,7 +112,7 @@ net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_syncookies = 1
-net.ipv4.tcp_fin_timeout = 30
+net.ipv4.tcp_fin_timeout = 20
 net.ipv4.tcp_syn_retries = 1
 net.ipv4.tcp_synack_retries = 1
 net.ipv4.tcp_sack = 1
@@ -534,8 +534,8 @@ systemctl enable --now iptables-proxy > /dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
-option use-vc
 nameserver 127.0.0.1
+option use-vc
 EOF
 
 echo
@@ -565,8 +565,12 @@ fi
 
 apt update && apt install -y resolvconf
 
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "" > /etc/resolvconf/resolv.conf.d/tail
+cat << EOF > /etc/resolvconf/resolv.conf.d/base
+nameserver 127.0.0.1
+option use-vc
+EOF
 resolvconf -u
 
 sed -i "/www-data/d" /etc/sudoers
