@@ -739,11 +739,6 @@ for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/chnrouteset
-
-ipset -F chnroute
-for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
-done
 EOF
 chmod +x /usr/local/bin/Q4am
 /usr/local/bin/Q4am
@@ -874,7 +869,6 @@ postInstall
 blue "---------------------"
 blue "Install de_GWD [done]"
 blue "---------------------"
-reboot
 }
 
 
@@ -1189,7 +1183,6 @@ fi
 blue "--------------------"
 blue "Update de_GWD [done]"
 blue "--------------------"
-reboot
 }
 
 
