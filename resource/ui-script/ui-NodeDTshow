@@ -7,6 +7,8 @@ domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
 uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
+localip=$(jq -r '.divertLan | to_entries[] | .value' /usr/local/bin/0conf)
+
 jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' > /etc/vtrui/hosts
 jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >> /etc/vtrui/hosts
 
@@ -221,6 +223,10 @@ jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtr
 done
 
 rm -rf /etc/vtrui/hosts
+
+for localippre in $localip; do
+jq --arg localippre $localippre '.routing.rules[4].source+=[$localippre]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+done
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php
 
