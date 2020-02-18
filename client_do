@@ -553,9 +553,15 @@ wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3 resolvconf
 
+rm -rf /etc/resolv.conf
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
+cat << EOF > /etc/resolvconf/resolv.conf.d/base
+nameserver 127.0.0.1
+EOF
+cat << EOF > /etc/resolvconf/resolv.conf.d/tail
+options use-vc
+EOF
 resolvconf -u
 
 sed -i "/www-data/d" /etc/sudoers
@@ -1054,6 +1060,7 @@ postInstall
 blue "---------------------"
 blue "Install de_GWD [done]"
 blue "---------------------"
+reboot
 }
 
 
@@ -1364,6 +1371,7 @@ fi
 blue "--------------------"
 blue "Update de_GWD [done]"
 blue "--------------------"
+reboot
 }
 
 
