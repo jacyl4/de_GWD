@@ -701,8 +701,8 @@ systemctl enable --now smartdns
 
 installWebUI(){
 cd ~
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
-svn export https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
+svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
+svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
 rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html
