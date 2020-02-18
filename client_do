@@ -560,7 +560,7 @@ cat << EOF > /etc/resolvconf/resolv.conf.d/base
 nameserver 127.0.0.1
 EOF
 cat << EOF > /etc/resolvconf/resolv.conf.d/tail
-options use-vc
+option use-vc
 EOF
 resolvconf -u
 
