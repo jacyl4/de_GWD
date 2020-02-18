@@ -112,9 +112,10 @@ net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_syncookies = 1
-net.ipv4.tcp_fin_timeout = 20
-net.ipv4.tcp_syn_retries = 1
-net.ipv4.tcp_synack_retries = 1
+net.ipv4.tcp_fin_timeout = 30
+net.ipv4.tcp_orphan_retries = 2
+net.ipv4.tcp_syn_retries = 2
+net.ipv4.tcp_synack_retries = 2
 net.ipv4.tcp_sack = 1
 net.ipv4.tcp_max_syn_backlog = 32768
 net.ipv4.tcp_max_tw_buckets = 6000
@@ -568,15 +569,11 @@ fi
 
 apt update && apt install -y resolvconf
 
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
 rm -rf /etc/resolv.conf
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-echo "" > /etc/resolvconf/resolv.conf.d/original
-cat << EOF > /etc/resolvconf/resolv.conf.d/base
-nameserver 127.0.0.1
-EOF
-cat << EOF > /etc/resolvconf/resolv.conf.d/tail
-option use-vc
-EOF
 resolvconf -u
 
 sed -i "/www-data/d" /etc/sudoers
