@@ -376,17 +376,19 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vtrui.pid
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+Restart=always
+RestartSec=5
+LimitNPROC=1000000
+LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
-systemctl enable vtrui
-systemctl restart vtrui
+systemctl daemon-reload > /dev/null 2>&1
+systemctl enable --now vtrui > /dev/null 2>&1
 }
 
 
@@ -519,16 +521,6 @@ server {
 location /dq {
   proxy_set_header          Host \$host;
   proxy_set_header          X-Real-IP \$remote_addr;
-  proxy_connect_timeout     300;
-  proxy_send_timeout        300;
-  proxy_read_timeout        300;
-  keepalive_requests        25600;
-  keepalive_timeout         300 300;
-  proxy_redirect            off;
-  proxy_buffering           off;
-  proxy_buffers             64 4k;
-  proxy_buffer_size         16k;
-  proxy_busy_buffers_size   24k;
   proxy_pass                http://127.0.0.1:8053/dq;
 }
 

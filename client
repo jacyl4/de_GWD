@@ -373,16 +373,19 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vtrui.pid
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+Restart=always
+RestartSec=5
+LimitNPROC=1000000
+LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable vtrui > /dev/null 2>&1
+systemctl enable --now vtrui > /dev/null 2>&1
 }
 
 
@@ -566,11 +569,8 @@ fi
 apt update && apt install -y resolvconf
 
 echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "" > /etc/resolvconf/resolv.conf.d/tail
-cat << EOF > /etc/resolvconf/resolv.conf.d/base
-nameserver 127.0.0.1
-option use-vc
-EOF
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
 resolvconf -u
 
 sed -i "/www-data/d" /etc/sudoers

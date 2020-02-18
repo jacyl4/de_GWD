@@ -144,16 +144,6 @@ location ~* \.php$ {
 location /dq {
   proxy_set_header          Host \$host;
   proxy_set_header          X-Real-IP \$remote_addr;
-  proxy_connect_timeout     300;
-  proxy_send_timeout        300;
-  proxy_read_timeout        300;
-  keepalive_requests        25600;
-  keepalive_timeout         300 300;
-  proxy_redirect            off;
-  proxy_buffering           off;
-  proxy_buffers             64 4k;
-  proxy_buffer_size         16k;
-  proxy_busy_buffers_size   24k;
   proxy_pass                http://127.0.0.1:8053/dq;
 }
 
