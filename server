@@ -28,6 +28,42 @@ nameserver 8.8.8.8
 nameserver 1.0.0.1
 nameserver 8.8.4.4
 EOF
+sed -i '/ip6-/d' /etc/hosts
+
+systemctl mask --now systemd-resolved > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+rm -rf /run/resolvconf/interface/systemd-resolved
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+cat << EOF > /etc/apt/apt.conf.d/01InstallLess
+APT::Get::Assume-Yes "true";
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+Dpkg::Options {
+  "--force-confnew";
+};
+EOF
+
+cat << EOF > /etc/apt/sources.list
+deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
+deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
+deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
+EOF
+
+apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
+source /etc/profile
+systemctl enable --now haveged
+
+echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+
+apt update && apt install -y docker-ce docker-ce-cli containerd.io
+systemctl enable --now docker
 
 cat << EOF > /etc/security/limits.conf
 * soft nofile 1000000
@@ -36,8 +72,6 @@ cat << EOF > /etc/security/limits.conf
 * hard nproc 1000000
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
-
-sed -i '/ip6-/d' /etc/hosts
 
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
@@ -98,38 +132,7 @@ sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
-
 sysctl -p
-
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-rm -rf /run/resolvconf/interface/systemd-resolved
-
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
-cat << EOF > /etc/apt/apt.conf.d/01InstallLess
-APT::Get::Assume-Yes "true";
-APT::Install-Recommends "false";
-APT::Install-Suggests "false";
-Dpkg::Options {
-  "--force-confnew";
-};
-EOF
-
-cat << EOF > /etc/apt/sources.list
-deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
-deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
-deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
-EOF
-
-apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
-source /etc/profile
-
-systemctl enable --now haveged
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 cat << EOF > /etc/default/locale
@@ -150,14 +153,6 @@ LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
-
-echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
-curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-
-apt update && apt install -y docker-ce docker-ce-cli containerd.io
-
-systemctl enable docker
-systemctl restart docker
 }
 
 

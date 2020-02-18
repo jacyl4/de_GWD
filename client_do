@@ -26,6 +26,43 @@ nameserver 223.5.5.5
 nameserver 119.28.28.28
 nameserver 223.6.6.6
 EOF
+sed -i '/ip6-/d' /etc/hosts
+
+systemctl mask --now systemd-resolved > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+rm -rf /run/resolvconf/interface/systemd-resolved
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+cat << EOF > /etc/apt/apt.conf.d/01InstallLess
+APT::Get::Assume-Yes "true";
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+Dpkg::Options {
+  "--force-confnew";
+};
+EOF
+
+rm -rf /etc/apt/sources.list.d/*
+cat << EOF > /etc/apt/sources.list
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
+deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
+EOF
+
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2
+source /etc/profile
+systemctl enable --now haveged
+
+echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
+wget -qO - http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
+
+apt update && apt install -y docker-ce docker-ce-cli containerd.io
+systemctl enable --now docker
 
 cat << EOF > /etc/security/limits.conf
 * soft nofile 1000000
@@ -34,8 +71,6 @@ cat << EOF > /etc/security/limits.conf
 * hard nproc 1000000
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
-
-sed -i '/ip6-/d' /etc/hosts
 
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
@@ -70,8 +105,8 @@ net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_syncookies = 1
 net.ipv4.tcp_fin_timeout = 30
-net.ipv4.tcp_syn_retries = 2
-net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_syn_retries = 1
+net.ipv4.tcp_synack_retries = 1
 net.ipv4.tcp_sack = 1
 net.ipv4.tcp_max_syn_backlog = 32768
 net.ipv4.tcp_max_tw_buckets = 6000
@@ -95,45 +130,7 @@ sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
-
 sysctl -p
-
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-rm -rf /run/resolvconf/interface/systemd-resolved
-
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
-cat << EOF > /etc/apt/apt.conf.d/01InstallLess
-APT::Get::Assume-Yes "true";
-APT::Install-Recommends "false";
-APT::Install-Suggests "false";
-Dpkg::Options {
-  "--force-confnew";
-};
-EOF
-
-cat << EOF > /etc/apt/sources.list
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main
-deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)/updates main
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
-EOF
-
-rm -rf /etc/apt/sources.list.d/*
-
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2
-source /etc/profile
-systemctl enable --now haveged
-
-echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
-wget -qO - http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
-
-apt update && apt install -y docker-ce docker-ce-cli containerd.io
-systemctl enable --now docker
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 cat << EOF > /etc/default/locale
@@ -523,11 +520,7 @@ rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 option use-vc
 nameserver 127.0.0.1
-nameserver 8.8.8.8
-nameserver 1.1.1.1
 EOF
-
-systemctl restart networking
 
 echo
 if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk '{print$1;exit}') =~ "20" ]]; then
@@ -555,7 +548,11 @@ EOF
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
+apt update && apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3 resolvconf
+
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
+resolvconf -u
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
@@ -659,7 +656,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 wget -O ~/pihole.sh https://install.pi-hole.net
-chmod +x ~/pihole.sh
+sed -i 's/resolvconf//g' ~/pihole.sh
 bash ~/pihole.sh /dev/stdin --unattended
 rm -rf ~/pihole.sh
 
@@ -691,11 +688,6 @@ EOF
 cat << EOF > /etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
-EOF
-
-cat << EOF > /etc/resolv.conf
-option use-vc
-nameserver 127.0.0.1
 EOF
 
 systemctl restart pihole-FTL
