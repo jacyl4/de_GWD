@@ -16,13 +16,18 @@ sed -i '/net.ipv4.conf.default.accept_source_route =/c\net.ipv4.conf.default.acc
 sed -i '/net.ipv4.ip_forward =/c\net.ipv4.ip_forward = 0' /etc/sysctl.conf
 sysctl -p
 
-sed -i '/dport 53 -i/d' /usr/local/bin/iptables-proxy-up
+sed -i '/--dport 53 -i/d' /usr/local/bin/iptables-proxy-up
+sed -i '/--dport 8053 -j/d' /usr/local/bin/iptables-proxy-up
 
 addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
 addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+addRule3="iptables -t mangle -A V2PROXY -p udp --dport 8053 -j ACCEPT"
+addRule4="iptables -t mangle -A V2PROXY -p tcp --dport 8053 -j ACCEPT"
 
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
+sed -i "/wireguard.WGport/i$addRule3" /usr/local/bin/iptables-proxy-up
+sed -i "/wireguard.WGport/i$addRule4" /usr/local/bin/iptables-proxy-up
 
 systemctl daemon-reload > /dev/null 2>&1
 systemctl restart iptables-proxy
@@ -318,11 +323,6 @@ for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/chnrouteset
-
-ipset -F chnroute
-for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
-done
 EOF
 chmod +x /usr/local/bin/Q4am
 /usr/local/bin/Q4am

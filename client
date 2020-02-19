@@ -654,7 +654,7 @@ bind 127.0.0.1:5370
 bind-tcp 127.0.0.1:5370
 
 cache-size        10000
-speed-check-mode  ping,tcp:80
+speed-check-mode  tcp:80,ping
 force-AAAA-SOA    yes
 rr-ttl            600
 rr-ttl-min        60
