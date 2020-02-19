@@ -14,6 +14,7 @@ exec('sudo /usr/local/bin/ui-markThis');
 exec('sudo /usr/local/bin/ui-hostSave');
 exec('sudo /usr/local/bin/ui-nodeResolve');
 exec('sudo /usr/local/bin/ui-changeDOH');
+exec('sudo /usr/local/bin/ui-ui-listBW');
 exec('sudo chmod 666 /usr/local/bin/0conf');
 
 ?>
