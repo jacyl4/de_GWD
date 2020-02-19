@@ -9,7 +9,7 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 mirrorSite="http://xznat.seso.icu:10178"
 
-smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release28/smartdns.1.2019.12.15-1028.x86_64-debian-all.deb"
+smartdns_amd64="https://github.com/pymumu/smartdns/releases/download/Release29/smartdns.1.2020.02.20-0202.x86_64-debian-all.deb"
 
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
@@ -40,7 +40,7 @@ APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 Dpkg::Options {
-  "--force-confnew";
+  "--force-confdef";
 };
 EOF
 
@@ -60,6 +60,8 @@ wget -qO - http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
 
 apt update && apt install -y docker-ce docker-ce-cli containerd.io
 systemctl enable --now docker
+
+dpkg --configure -a
 
 cat << EOF > /etc/security/limits.conf
 * soft nofile 1000000
@@ -709,20 +711,25 @@ pihole -f
 
 
 installSmartDNS(){
+dpkg -r smartdns
+rm -rf /etc/smartdns/smartdns.conf
+
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i ~/smartdns.deb
 
 cat << EOF > /etc/smartdns/smartdns.conf
-bind 127.0.0.1:5370
-bind-tcp 127.0.0.1:5370
+bind 127.0.0.1:5370 -force-aaaa-soa
+bind-tcp 127.0.0.1:5370 -force-aaaa-soa
 
-cache-size        10000
-speed-check-mode  tcp:80,ping
 force-AAAA-SOA    yes
+speed-check-mode  tcp:80,ping
+cache-size        10000
 rr-ttl            600
 rr-ttl-min        60
 rr-ttl-max        43200
 prefetch-domain   yes
+serve-expired     yes
+serve-expired-ttl 0
 
 server-tcp 114.114.114.114
 server-tcp 114.114.115.115
