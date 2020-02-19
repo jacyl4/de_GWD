@@ -110,42 +110,52 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             <i class="fas fa-th-list"></i>
             名单编辑</div>
           <div class="card-body">
-          <div class="form-group">
+
+<div class="form-row mb-3">
+          <div class="col-md-3 form-group">
           <div class="input-group">
           <div class="input-group-prepend">
-            <span class="input-group-text">
-            黑名单域名<br>
-          （走国外线路）<br>
+            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
+            黑名单域名（走国外线路）<br>
             </span>
           </div>
-            <textarea id="listB" class="form-control" aria-label="listB" rows="11"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listB'] as $k => $v) {echo "$k\n";} ?></textarea>
+            <textarea id="listB" class="form-control" aria-label="listB" rows="32" placeholder="xxoo.com"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listB'] as $k => $v) {echo "$k\n";} ?></textarea>
           </div>
           </div>
 
-          <div class="form-group">
+          <div class="col-md-3 form-group">
           <div class="input-group">
           <div class="input-group-prepend">
-            <span class="input-group-text">
-            白名单域名<br>
-          （走国内线路）<br>
+            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
+            白名单域名（走国内线路）<br>
             </span>
           </div>
-            <textarea id="listW" class="form-control" aria-label="listW" rows="11"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listW'] as $k => $v) {echo "$k\n";} ?></textarea>
+            <textarea id="listW" class="form-control" aria-label="listW" rows="32" placeholder="xxoo.com"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listW'] as $k => $v) {echo "$k\n";} ?></textarea>
           </div>
           </div>
 
-          <div class="form-group">
+          <div class="col-md-3 form-group">
           <div class="input-group">
           <div class="input-group-prepend">
-            <span class="input-group-text">
-            内网设备白名单<br>
-            IP<br>
-            （走国内线路）<br>
+            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
+            内网设备 黑名单IP（全局走国外线路）<br>
             </span>
           </div>
-            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="11"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listWlan'] as $k => $v) {echo "$v\n";} ?></textarea>
+            <textarea id="listBlan" class="form-control" aria-label="listBlan" rows="32" placeholder="0.0.0.0"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listBlan'] as $k => $v) {echo "$v\n";} ?></textarea>
           </div>
           </div>
+
+          <div class="col-md-3 form-group">
+          <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
+            内网设备 白名单IP（全局走国内线路）<br>
+            </span>
+          </div>
+            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="32" placeholder="0.0.0.0"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listWlan'] as $k => $v) {echo "$v\n";} ?></textarea>
+          </div>
+          </div>
+</div>
 
 <span class="float-left text-secondary">
   <small>
@@ -161,8 +171,9 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 function submitlistBW () {
 listB=$("#listB").val();
 listW=$("#listW").val();
+listBlan=$("#listBlan").val();
 listWlan=$("#listWlan").val();
-$.get("listBWsave.php", {listB:listB, listW:listW, listWlan:listWlan}, function(result){ location.reload(); });
+$.get("listBWsave.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){ location.reload(); });
 alert("黑白名单已提交");
 }
 </script>

@@ -383,6 +383,7 @@ ipset -X hosts
 ipset -X lanip
 ipset -X listB
 ipset -X listW
+ipset -X listBlan
 ipset -X listWlan
 
 lanip="0.0.0.0/8 \
@@ -413,13 +414,18 @@ for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
 done
 
 ipset -N listB hash:net maxelem 65535
-for iplistB in $(jq -r '.listB | to_entries[] | .value' /usr/local/bin/0conf); do
+for iplistB in $(jq -r '.listB | to_entries[] | .value[]' /usr/local/bin/0conf); do
   ipset add listB $iplistB
 done
 
 ipset -N listW hash:net maxelem 65535
-for iplistW in $(jq -r '.listW | to_entries[] | .value' /usr/local/bin/0conf); do
+for iplistW in $(jq -r '.listW | to_entries[] | .value[]' /usr/local/bin/0conf); do
   ipset add listW $iplistW
+done
+
+ipset -N listBlan hash:net maxelem 65535
+for iplistBlan in $(jq -r '.listBlan[]' /usr/local/bin/0conf); do
+  ipset add listBlan $iplistBlan
 done
 
 ipset -N listWlan hash:net maxelem 65535
@@ -454,6 +460,7 @@ iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
@@ -494,6 +501,7 @@ ipset -F hosts
 ipset -F lanip
 ipset -F listB
 ipset -F listW
+ipset -F listBlan
 ipset -F listWlan
 
 ip route flush table 100
