@@ -1,0 +1,749 @@
+#!/bin/bash
+clear
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+
+
+mirrorSite="http://xznat.seso.icu:10178"
+
+
+
+clifwd_iptablesProxy(){
+sed -i '/net.ipv4.conf.default.accept_source_route =/c\net.ipv4.conf.default.accept_source_route = 0' /etc/sysctl.conf
+sed -i '/net.ipv4.ip_forward =/c\net.ipv4.ip_forward = 0' /etc/sysctl.conf
+sysctl -p
+
+sed -i '/--dport 53 -i/d' /usr/local/bin/iptables-proxy-up
+sed -i '/--dport 8053 -j/d' /usr/local/bin/iptables-proxy-up
+
+addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+addRule3="iptables -t mangle -A V2PROXY -p udp --dport 8053 -j ACCEPT"
+addRule4="iptables -t mangle -A V2PROXY -p tcp --dport 8053 -j ACCEPT"
+
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
+sed -i "/wireguard.WGport/i$addRule3" /usr/local/bin/iptables-proxy-up
+sed -i "/wireguard.WGport/i$addRule4" /usr/local/bin/iptables-proxy-up
+
+systemctl daemon-reload > /dev/null 2>&1
+systemctl restart iptables-proxy
+}
+
+
+
+clifwd_installDOHser(){
+cd ~
+wget --no-check-certificate -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
+unzip doh.zip
+mv -f ~/doh/doh-server /usr/local/bin/doh-server
+chmod +x /usr/local/bin/doh-server
+rm -rf ~/doh*
+
+mkdir -p /etc/dns-over-https
+cat << EOF > /etc/dns-over-https/doh-server.conf
+listen = [ "127.0.0.1:8053", ]
+
+path = "/dq"
+
+upstream = [ "tcp:127.0.0.1:5380", ]
+
+timeout = 10
+tries = 3
+verbose = false
+log_guessed_client_ip = false
+EOF
+
+mkdir -p /etc/NetworkManager/dispatcher.d
+cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/doh-server
+
+touch /run/doh-server.pid
+cat << "EOF" > /lib/systemd/system/doh-server.service
+[Unit]
+Description=DNS-over-HTTPS server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/doh-server.pid
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
+Restart=always
+RestartSec=5
+LimitNPROC=1000000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable doh-server
+systemctl restart doh-server
+}
+
+
+
+clifwd_nginxWebConf(){
+rm -rf /etc/nginx/conf.d/default.conf
+cat << EOF > /etc/nginx/conf.d/default.conf
+server {
+  listen $clifwd_port ssl http2 spdy fastopen=64 reuseport;
+  server_name $clifwd_domain;
+  root /var/www/html;
+  index index.php index.html index.htm;
+
+  ssl_certificate /var/www/ssl/fullchain.cer;
+  ssl_certificate_key /var/www/ssl/$topDomain.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_session_timeout 10m;
+  ssl_session_cache shared:le_nginx_SSL:10m;
+  ssl_buffer_size 1400;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
+  resolver 1.1.1.1 valid=600s;
+  resolver_timeout 5s;
+
+  add_header X-Frame-Options DENY;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-Robots-Tag none;
+  add_header X-Download-Options noopen;
+  add_header X-Permitted-Cross-Domain-Policies none;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header Referrer-Policy no-referrer;
+  add_header Strict-Transport-Security "max-age=63072000" always;
+  
+location ~* \.php$ {
+  fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
+  fastcgi_index           index.php;
+  fastcgi_split_path_info ^(.+\.php)(.*)$;
+  include                 fastcgi_params;
+  fastcgi_param           SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+}
+
+location /dq {
+  proxy_set_header          Host \$host;
+  proxy_set_header          X-Real-IP \$remote_addr;
+  proxy_pass                http://127.0.0.1:8053/dq;
+}
+
+location $clifwd_v2path {
+  proxy_http_version        1.1;
+  proxy_set_header          Host \$http_host;
+  proxy_set_header          Upgrade WebSocket;
+  proxy_set_header          Connection "upgrade";
+  proxy_set_header          X-Real-IP \$remote_addr;
+  proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_connect_timeout     300;
+  proxy_send_timeout        300;
+  proxy_read_timeout        300;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
+  proxy_redirect            off;
+  proxy_buffering           off;
+  proxy_buffers             64 4k;
+  proxy_buffer_size         16k;
+  proxy_busy_buffers_size   24k;
+  proxy_pass                http://127.0.0.1:11811;
+}
+}
+EOF
+
+docker stop nginx > /dev/null 2>&1
+docker rm nginx > /dev/null 2>&1
+
+mkdir -p /var/www/ssl
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /var/www/html/:/var/www/html/ \
+-v /var/www/ssl/:/var/www/ssl/ \
+-v /run/php/:/run/php/ \
+jacyl4/nginx_tls1.3:latest
+}
+
+
+
+makeSSL_D(){
+apt update && apt install -y netcat socat
+
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
+~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
+               --keypath        /var/www/ssl/$topDomain.key  \
+               --fullchain-file /var/www/ssl/fullchain.cer \
+               --reloadcmd     "docker restart nginx > /dev/null 2>&1"
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+cat << EOF > /var/www/ssl/update_ocsp_cache
+#!/bin/bash
+wget -O intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget -O root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+mv intermediate.pem /var/www/ssl
+mv root.pem /var/www/ssl
+cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/fullchain.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://ocsp.int-x3.letsencrypt.org \
+    -respout /var/www/ssl/ocsp.resp
+EOF
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+
+crontab -l > ~/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+docker restart nginx
+}
+
+
+
+clifwd_installWebUI(){
+cd ~
+mkdir -p /var/www/html/gwd
+ln -s /var/www/html/admin  /var/www/html/gwd/admin
+
+svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
+svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
+
+grep /var/www/html -rl ~/ui-script > /tmp/binFILE
+grep /var/www/html -rl ~/ui-web > /tmp/htmlFILE
+
+cat /tmp/binFILE | while read binFILE
+do
+  sed -i 's:/var/www/html:/var/www/html/gwd:g' $binFILE
+done
+
+cat /tmp/htmlFILE | while read htmlFILE
+do
+  sed -i 's:/var/www/html:/var/www/html/gwd:g' $htmlFILE
+done
+
+rsync -azrI ~/ui-script/* /usr/local/bin
+rsync -azrI ~/ui-web/* /var/www/html/gwd
+rm -rf ~/ui-*
+
+cat << "EOF" > /tmp/vtruiConfADD
+clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
+clifwd_uuidnum=$(jq -r '.clifwd.clifwd_uuidnum[]' /usr/local/bin/0conf)
+
+jq 'del(.inbounds[2])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+
+vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path": "/0000"}}}'
+
+jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/temp.json |\
+jq --arg clifwd_v2path "$clifwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$clifwd_v2path' > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+
+{
+for v2uuids in $clifwd_uuidnum; do
+echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
+done
+} > /tmp/v2uuids
+
+cat /tmp/v2uuids | while read v2uuids
+do
+jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+done
+
+mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
+rm -rf /tmp/v2uuids
+
+systemctl restart vtrui
+EOF
+
+cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow > /dev/null 2>&1
+
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+mv -f ~/version.php /var/www/html/gwd/version.php
+
+mkdir -p /var/www/html/gwd/restore
+chown -R www-data:www-data /var/www/html
+chmod +x /var/www/html/gwd/*
+chmod +x /usr/local/bin/*
+}
+
+
+
+clifwd_PostInstall(){
+apt update && apt upgrade -y && apt autoremove -y
+
+cat << "EOF" > /usr/local/bin/Q4am
+#!/bin/bash
+wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
+wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat                
+curl -L 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
+mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
+mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
+mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
+
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
+EOF
+chmod +x /usr/local/bin/Q4am
+/usr/local/bin/Q4am
+
+cat << "EOF" > /usr/local/bin/Q4H
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+rm -rf ~/client*
+rm -rf ~/clifwd*
+rm -rf /var/log/*1*
+rm -rf /var/log/*2*
+rm -rf /var/log/*.gz
+rm -rf /tmp/nodecheck*
+rm -rf /var/www/html/gwd/log.log
+EOF
+chmod +x /usr/local/bin/Q4H
+/usr/local/bin/Q4H
+
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+cat << EOF >> ~/now.cron
+0 4 * * * /usr/local/bin/Q4am
+0 */4 * * * /usr/local/bin/Q4H
+EOF
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+/usr/local/bin/ui-nodeResolve >/dev/null 2>&1
+/usr/local/bin/ui-changeDOH >/dev/null 2>&1
+
+awk '/127.0.0.1/,NR==end' /etc/hosts >&1 | tee /etc/hosts
+}
+
+
+
+installclifwd(){
+    green "=============================="
+    green " Cloudflare API KEY"
+    green "=============================="
+    read CFapikey
+
+    green "=============================="
+    green " Cloudflare Email"
+    green "=============================="
+    read CFemail
+    
+    green "=============================="
+    green " de_GWD_fwd_V2ray Domain&Port"
+    green "=============================="
+    read clifwd_domainP
+    
+    green "=============================="
+    green " de_GWD_fwd_V2ray UUID"
+    green "=============================="
+    read clifwd_uuidnum
+
+    green "=============================="
+    green " de_GWD_fwd_V2ray Path"
+    green "=============================="
+    read clifwd_v2path
+    
+cd ~
+
+clifwd_domain=$(echo $clifwd_domainP | cut -d : -f1)
+clifwd_port=$(echo $clifwd_domainP | cut -d : -f2)
+topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+sed -i '2d' ~/client_do && sed -i '/chmod -R 666 \/usr\/local\/bin\/0conf/,$d' ~/client_do
+echo "}" >> ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
+installGWD
+
+jq '.clifwd={}' /usr/local/bin/0conf |\
+jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |\
+jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
+jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
+jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf
+
+clifwd_iptablesProxy
+
+clifwd_installDOHser
+
+clifwd_nginxWebConf
+
+makeSSL_D
+
+clifwd_installWebUI
+
+clifwd_PostInstall
+
+blue "----------------------------"
+blue "de_GWD clifwd install [done]"
+blue "----------------------------"
+}
+
+
+
+installBBRplus(){
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+update-grub
+
+cat << EOF > ~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
+
+reboot
+}
+
+
+
+clifwd_change_piholeAdmin(){
+pihole -a -p
+
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+
+jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf
+
+blue "------------------------------"
+blue "Change Pi-hole password [done]"
+blue "------------------------------"
+}
+
+
+
+changeDomain(){
+    green "=============================="
+    green " de_GWD_fwd_V2ray Domain&Port"
+    green "=============================="
+    read clifwd_domainP
+
+    green "=============================="
+    green " Cloudflare API KEY"
+    green "=============================="
+    read CFapikey
+
+    green "=============================="
+    green " Cloudflare Email"
+    green "=============================="
+    read CFemail
+
+clifwd_domain=$(echo $clifwd_domainP | cut -d : -f1)
+clifwd_port=$(echo $clifwd_domainP | cut -d : -f2)
+topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
+
+rm -rf /var/www/ssl/*
+
+clifwd_nginxWebConf
+
+makeSSL_D
+
+blue "-----------------------------------------------"
+blue "Change domain and issue new certificates [done]"
+blue "-----------------------------------------------"
+}
+
+
+
+clifwd_installWGcore(){
+sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
+installWGcore
+}
+
+
+
+clifwd_updatePihole(){
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
+installPihole
+blue "----------------------"
+blue "Install Pi-hole [done]"
+blue "----------------------"
+}
+
+
+clifwdUpdate(){
+cd ~
+source /etc/profile
+
+clifwd_checkDNS=$(/usr/local/bin/ui-checkDNS)
+clifwd_checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
+clifwd_checkWG=$(/usr/local/bin/ui-checkWG)
+clifwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
+
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+
+clifwd_domain=$(jq -r '.clifwd.clifwd_domain' /usr/local/bin/0conf)
+clifwd_port=$(jq -r '.clifwd.clifwd_port' /usr/local/bin/0conf)
+clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
+topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
+port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
+uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
+v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
+preInstall
+
+installDOH
+
+installV2ray
+
+installIptablesProxy
+
+installDep
+
+installSmartDNS
+
+installNginx
+
+clifwd_iptablesProxy
+
+clifwd_installDOHser
+
+clifwd_nginxWebConf
+
+clifwd_installWebUI
+
+clifwd_PostInstall
+
+if [[ $clifwd_checkDNS = "GFWlist" ]]; then
+/usr/local/bin/ui-changeNLgfw
+else
+/usr/local/bin/ui-changeNLchnw
+fi
+
+if [[ $clifwd_checkDDNScf = "on" ]]; then
+/usr/local/bin/ui-ddnsUpdateOnCF
+fi
+
+if [[ $clifwd_checkWG = "on" ]]; then
+/usr/local/bin/ui-WGon
+fi
+
+if [[ $clifwd_checkV2ad = "on" ]]; then
+/usr/local/bin/ui-v2adADD
+fi
+
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
+/usr/local/bin/ui-markThis
+fi
+
+echo "" > /usr/local/bin/ui-aclifwd
+blue "---------------------------"
+blue "de_GWD clifwd Update [done]"
+blue "---------------------------"
+}
+
+
+start_menu(){
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+
+if [[ $(systemctl is-active smartdns) = "active" ]]; then
+    echo "[$statusGOOD] SmartDNS       [working]"
+elif [[ ! -f "/etc/smartdns/smartdns.conf" ]]; then
+    echo "[$statusBAD] SmartDNS       [not Installed]"
+else
+    echo "[$statusBAD] SmartDNS       [start failed]"
+fi
+
+if [[ $(systemctl is-active doh-client) = "active" ]]; then
+    echo "[$statusGOOD] DoH client     [working]"
+elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
+    echo "[$statusBAD] DoH client     [not Installed]"
+else
+    echo "[$statusBAD] DoH client     [start failed]"
+fi
+
+if [[ $(systemctl is-active doh-server) = "active" ]]; then
+    echo "[$statusGOOD] DoH server     [working]"
+elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
+    echo "[$statusBAD] DoH server     [not Installed]"
+else
+    echo "[$statusBAD] DoH server     [start failed]"
+fi
+
+if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+    echo "[$statusGOOD] Pi-hole        [working]"
+elif [ ! -f "/usr/local/bin/pihole" ]; then
+    echo "[$statusBAD] Pi-hole        [not installed]"
+else
+    echo "[$statusBAD] Pi-hole        [start failed]"
+fi
+
+if [[ $(systemctl is-active vtrui) = "active" ]]; then
+    echo "[$statusGOOD] V2RAY          [working]"
+elif [[ ! -d "/usr/bin/vtrui" ]]; then
+    echo "[$statusBAD] V2RAY          [not Installed]"
+else
+    echo "[$statusBAD] V2RAY          [start failed]"
+fi
+
+if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
+    echo "[$statusGOOD] PHP7.3-FPM     [working]"
+elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] PHP7.3-FPM     [not installed]"
+else
+    echo "[$statusBAD] PHP7.3-FPM     [start failed]"
+fi
+
+
+if [[ $(systemctl is-active docker) = "active" ]]; then
+    echo "[$statusGOOD] Docker         [working]"
+elif [[ ! -f "/usr/bin/docker" ]]; then
+    echo "[$statusBAD] Docker         [not installed]"
+else
+    echo "[$statusBAD] Docker         [start failed]"
+fi
+
+blue "----------------------------------------"
+blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "----------------------------------------"
+
+    green "================================"
+    green "      CLIENT_fwd (Docker)"
+    green "Recommend: Debian 9 (amd64)"
+    green "Author:    JacyL4"
+    green "================================"
+    echo
+    green  "1. de_GWD clifwd install"
+    green  "2. Change de_GWD password"
+    green  "3. Install bbrplus and reboot（only Debian 9）"
+    red    "6. Change domain and issue new certificates"
+    yellow "8. Install/Update WiregGard"
+    yellow "9. Update Pi-hole"
+    yellow "0. de_GWD clifwd Update"
+    red    "CTRL+C EXIT"
+    echo
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installclifwd
+    start_menu
+    ;;
+    2)
+    clifwd_change_piholeAdmin
+    start_menu
+    ;;
+    3)
+    installBBRplus
+    start_menu
+    ;;
+    6)
+    changeDomain
+    start_menu
+    ;;
+    8)
+    clifwd_installWGcore
+    start_menu
+    ;;
+    9)
+    clifwd_updatePihole
+    start_menu
+    ;;
+    0)
+    clifwdUpdate
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
