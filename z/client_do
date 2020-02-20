@@ -51,13 +51,15 @@ EOF
 
 apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2
 source /etc/profile
-systemctl enable --now haveged
+systemctl enable haveged
+systemctl restart haveged
 
 echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 wget -qO - http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
 
 apt update && apt install -y docker-ce docker-ce-cli containerd.io
-systemctl enable --now docker
+systemctl enable docker
+systemctl restart docker
 
 dpkg --configure -a
 
@@ -645,7 +647,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now php7.3-fpm
+systemctl enable php7.3-fpm
+systemctl restart php7.3-fpm
 }
 
 
@@ -764,7 +767,8 @@ EOF
 rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now smartdns
+systemctl enable smartdns
+systemctl restart smartdns
 }
 
 
