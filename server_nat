@@ -30,6 +30,10 @@ nameserver 1.0.0.1
 EOF
 sed -i '/ip6-/d' /etc/hosts
 
+systemctl mask --now systemd-resolved > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+rm -rf /run/resolvconf/interface/systemd-resolved
+
 echo "Asia/Shanghai" > /etc/timezone
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
