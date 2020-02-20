@@ -5,6 +5,8 @@ yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
+export DEBIAN_FRONTEND=noninteractive
+
 
 
 mirrorSite="http://xznat.seso.icu:10178"
@@ -42,6 +44,9 @@ cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
+EOF
+
+cat << EOF > /etc/apt/apt.conf.d/71debconf
 Dpkg::Options { "--force-confdef"; };
 EOF
 
