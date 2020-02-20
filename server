@@ -293,7 +293,6 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
 RestartSec=3
-LimitNPROC=1000000
 LimitNOFILE=1000000
 
 [Install]
