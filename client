@@ -35,10 +35,6 @@ nameserver 223.6.6.6
 EOF
 sed -i '/ip6-/d' /etc/hosts
 
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-rm -rf /run/resolvconf/interface/systemd-resolved
-
 if [[ $architecture = "arm64" ]]; then
 sed -i '/GOVERNOR=/c\GOVERNOR=performance' /etc/default/cpufrequtils
 /etc/init.d/cpufrequtils restart;
@@ -68,7 +64,7 @@ fi
 
 apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync
 source /etc/profile
-systemctl enable --now haveged
+systemctl enable --now haveged > /dev/null 2>&1
 
 dpkg --configure -a
 
@@ -233,21 +229,18 @@ esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-client
 
-echo "" > /run/doh-client.pid
 cat << "EOF" > /lib/systemd/system/doh-client.service
 [Unit]
 Description=DNS-over-HTTPS Client
 After=network.target
-Before=nss-lookup.target
-Wants=network.target
 
 [Service]
+User=nobody
 Type=simple
-PIDFile=/run/doh-client.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 Restart=always
-RestartSec=5
+RestartSec=3
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -365,21 +358,17 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
 jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-echo "" > /run/vtrui.pid
 cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target
-Wants=network.target
 
 [Service]
+User=root
 Type=simple
-PIDFile=/run/vtrui.pid
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=always
-RestartSec=5
-LimitNPROC=1000000
-LimitNOFILE=1000000
+Restart=on-failure
+RestartPreventExitStatus=23
 
 [Install]
 WantedBy=multi-user.target
@@ -530,9 +519,9 @@ cat << EOF > /lib/systemd/system/iptables-proxy.service
 [Unit]
 Description=iptables-proxy
 After=network.target
-Wants=network.target
 
 [Service]
+User=root
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/iptables-proxy-up
@@ -688,8 +677,6 @@ cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=Smart DNS server
 After=network.target
-Before=nss-lookup.target
-Wants=network.target
 
 [Service]
 Type=forking
@@ -698,9 +685,9 @@ EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
 Restart=always
-RestartSec=5
-LimitNPROC=1000000
-LimitNOFILE=1000000
+RestartSec=2
+StartLimitBurst=0
+StartLimitIntervalSec=60
 
 [Install]
 WantedBy=multi-user.target
