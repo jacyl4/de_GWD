@@ -360,7 +360,6 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vtrui.pid
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=always
 RestartSec=5
