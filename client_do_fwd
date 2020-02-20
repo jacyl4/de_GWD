@@ -74,20 +74,18 @@ esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
-touch /run/doh-server.pid
 cat << "EOF" > /lib/systemd/system/doh-server.service
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target
-Wants=network.target
 
 [Service]
+User=nobody
 Type=simple
-PIDFile=/run/doh-server.pid
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
-RestartSec=5
+RestartSec=3
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
