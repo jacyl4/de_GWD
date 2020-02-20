@@ -715,7 +715,7 @@ pihole -f
 
 
 installSmartDNS(){
-dpkg -P smartdns
+dpkg -P smartdns > /dev/null 2>&1
 
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i ~/smartdns.deb

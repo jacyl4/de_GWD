@@ -652,7 +652,7 @@ pihole -f
 
 
 installSmartDNS(){
-dpkg -P smartdns
+dpkg -P smartdns > /dev/null 2>&1
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -O ~/smartdns.deb $smartdns_arm64
