@@ -68,8 +68,7 @@ fi
 
 apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync
 source /etc/profile
-systemctl enable haveged
-systemctl restart haveged
+systemctl enable --now haveged
 
 dpkg --configure -a
 
