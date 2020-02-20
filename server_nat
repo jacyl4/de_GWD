@@ -55,13 +55,15 @@ EOF
 
 apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
 source /etc/profile
-systemctl enable --now haveged
+systemctl enable haveged
+systemctl restart haveged
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
 apt update && apt install -y docker-ce docker-ce-cli containerd.io
-systemctl enable --now docker
+systemctl enable docker
+systemctl restart docker
 
 cat << EOF > /etc/security/limits.conf
 * soft nofile 1000000
@@ -193,7 +195,7 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
+systemctl daemon-reload > /dev/null 2>&1
 systemctl enable iptablesrules
 systemctl restart iptablesrules
 }
@@ -225,7 +227,7 @@ curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 
 systemctl mask --now dhcpcd
 systemctl mask --now lighttpd
-systemctl daemon-reload
+systemctl daemon-reload > /dev/null 2>&1
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_1=8.8.8.8' /etc/pihole/setupVars.conf
@@ -302,7 +304,7 @@ LimitNOFILE=1000000
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl daemon-reload
+systemctl daemon-reload > /dev/null 2>&1
 systemctl enable doh-server
 systemctl restart doh-server
 }
@@ -387,7 +389,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now vtrui > /dev/null 2>&1
+systemctl enable vtrui
+systemctl restart vtrui
 }
 
 

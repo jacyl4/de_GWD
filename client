@@ -68,7 +68,8 @@ fi
 
 apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync
 source /etc/profile
-systemctl enable --now haveged
+systemctl enable haveged
+systemctl restart haveged
 
 dpkg --configure -a
 
@@ -256,7 +257,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now doh-client > /dev/null 2>&1
+systemctl enable doh-client
+systemctl restart doh-client
 }
 
 
@@ -386,7 +388,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now vtrui > /dev/null 2>&1
+systemctl enable vtrui
+systemctl restart vtrui
 }
 
 
@@ -542,7 +545,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now iptables-proxy > /dev/null 2>&1
+systemctl enable iptables-proxy
+systemctl restart iptables-proxy
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -706,7 +710,8 @@ EOF
 rm -rf ~/smartdns.deb
 
 systemctl daemon-reload > /dev/null 2>&1
-systemctl enable --now smartdns
+systemctl enable smartdns
+systemctl restart smartdns
 }
 
 

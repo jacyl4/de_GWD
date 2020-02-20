@@ -94,7 +94,7 @@ LimitNOFILE=1000000
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl daemon-reload
+systemctl daemon-reload > /dev/null 2>&1
 systemctl enable doh-server
 systemctl restart doh-server
 }
