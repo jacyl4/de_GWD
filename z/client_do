@@ -39,9 +39,7 @@ cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
-Dpkg::Options {
-  "--force-confdef";
-};
+Dpkg::Options { "--force-confdef"; };
 EOF
 
 rm -rf /etc/apt/sources.list.d/*
@@ -711,8 +709,7 @@ pihole -f
 
 
 installSmartDNS(){
-dpkg -r smartdns
-rm -rf /etc/smartdns/smartdns.conf
+dpkg -P smartdns
 
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i ~/smartdns.deb

@@ -44,9 +44,7 @@ cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
-Dpkg::Options {
-  "--force-confnew";
-};
+Dpkg::Options { "--force-confdef"; };
 EOF
 
 cat << EOF > /etc/apt/sources.list
