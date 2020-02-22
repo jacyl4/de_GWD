@@ -1288,7 +1288,7 @@ blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_
 blue "----------------------------------------"
 
     green "==============================="
-    green "           CLIENT (Docker)"
+    green "           CLIENT (Nginx)"
     green "Recommend: Debian 10 (amd64)"
     green "Author:    JacyL4"
     green "==============================="

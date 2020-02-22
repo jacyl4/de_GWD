@@ -9,7 +9,7 @@
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
-![server](https://i.loli.net/2020/01/06/kLZl8XG2KvOcaBd.png)
+![server](https://i.loli.net/2020/02/22/XRVOqhWzj2iAfMo.png)
 
 
 ## Client：
@@ -25,10 +25,10 @@ General Edition (amd64)
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
 ```
-![client](https://i.loli.net/2020/02/13/gYab8SdUQqPZX1V.png)
+![client](https://i.loli.net/2020/02/22/5L3go4kPVSmrTID.png)
 
 
-![client_do](https://i.loli.net/2020/02/13/H5qwpzQi8SxZ7j1.png)
+![client_do](https://i.loli.net/2020/02/22/G7fYoSRTAgxV8bM.png)
 
 
 
