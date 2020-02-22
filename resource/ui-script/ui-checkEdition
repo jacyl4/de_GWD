@@ -1,4 +1,4 @@
 #!/bin/bash
-if [[ -d "/etc/docker" ]]; then
-echo "Docker"
+if [[ -d "/etc/nginx" ]]; then
+echo "Nginx"
 fi
