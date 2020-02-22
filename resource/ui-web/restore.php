@@ -12,6 +12,11 @@ if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alia
 exec('sudo /usr/local/bin/ui-markThis');
 }
 
+if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->v2ad))
+{
+exec('sudo /usr/local/bin/ui-v2adADD');
+}
+
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
 {
 exec('sudo /usr/local/bin/ui-updateSave');
