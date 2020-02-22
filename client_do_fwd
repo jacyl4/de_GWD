@@ -724,13 +724,10 @@ else
     echo "[$statusBAD] PHP7.3-FPM     [start failed]"
 fi
 
-
-if [[ $(systemctl is-active docker) = "active" ]]; then
-    echo "[$statusGOOD] Docker         [working]"
-elif [[ ! -f "/usr/bin/docker" ]]; then
-    echo "[$statusBAD] Docker         [not installed]"
+if [[ $(curl -sS 127.0.0.1:$(awk '/listen/ {print$2}' /etc/nginx/conf.d/default.conf | awk 'END {print}' | cut -d';' -f1)/xxx) =~ "40" ]]; then
+    echo "[$statusGOOD] Nginx          [working]"
 else
-    echo "[$statusBAD] Docker         [start failed]"
+    echo "[$statusBAD] Nginx          [start failed]"
 fi
 
 blue "----------------------------------------"
