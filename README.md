@@ -13,14 +13,14 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 
 
 ## Client：
-Basic Edition (amd64&arm64)
+Low-end Edition (amd64&arm64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client)
 ```
 
 
-Nginx Edition (amd64)
+General Edition (amd64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
