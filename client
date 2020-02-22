@@ -1024,6 +1024,9 @@ if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
 fi
 
+if [[ $(jq -r '.updateAddr' /usr/local/bin/0conf) != "null"  ]]; then
+/usr/local/bin/ui-updateSave
+fi
 blue "--------------------"
 blue "Update de_GWD [done]"
 blue "--------------------"

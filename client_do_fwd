@@ -644,7 +644,9 @@ if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
 fi
 
-echo "" > /usr/local/bin/ui-aclifwd
+if [[ $(jq -r '.updateAddr' /usr/local/bin/0conf) != "null"  ]]; then
+/usr/local/bin/ui-updateSave
+fi
 blue "---------------------------"
 blue "de_GWD clifwd Update [done]"
 blue "---------------------------"
