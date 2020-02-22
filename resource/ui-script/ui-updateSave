@@ -1,6 +1,6 @@
 #!/bin/bash
 updateaddr=$(jq -r '.updateAddr' /usr/local/bin/0conf)
-updateCMD="/usr/local/bin/ttyd -p 3000 bash <(wget --no-check-certificate -qO- $updateaddr)"
+updateCMD="/usr/local/bin/ttyd -p 3000 -o bash <(wget --no-check-certificate -qO- $updateaddr)"
 
 localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
 popupWindow="window.open('"http://$localIP:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
