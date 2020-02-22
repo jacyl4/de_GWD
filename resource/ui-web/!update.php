@@ -141,9 +141,10 @@
     <div class="form-row">
       <div class="col-md-8 input-group my-1">
         <div class="input-group-prepend w-25">
-          <span class="input-group-text justify-content-center w-100">更新脚本地址</span>
+          <span class="input-group-text justify-content-center w-100">脚本地址</span>
         </div>
           <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr ?>">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="updateSave()">保存</button>
       </div>
 
       <div class="col-md-4 my-1 float-right">
@@ -152,13 +153,8 @@
     </div>
 
 
-
           </div>
         </div>
-
-
-
-
 
         <!-- Page Content -->
       </div>
@@ -205,10 +201,14 @@ $.ajax({
 alert('设置已恢复')
 }
 
-function update(){
+function updateSave(){
 updateAddr=$('#updateAddr').val();
-$.get('update.php', {updateAddr:updateAddr}, function(result){});
-window.open("/ttyd", "popupWindow", "width=800, height=600, scrollbars=yes");
+$.get('updateSave.php', {updateAddr:updateAddr}, function(result){ location.reload(); });
+}
+
+function update(){
+$.get('updateSave.php', function(result){});
+window.open('', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 }
 
 window.onload = function() {

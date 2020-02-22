@@ -867,16 +867,6 @@ location ~* \.php$ {
   include                 fastcgi_params;
   fastcgi_param           SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
 }
-
-location ~ ^/ttyd(.*)$ {
-    proxy_http_version 1.1;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_pass http://127.0.0.1:3000/\$1;
-}
 }
 EOF
 
