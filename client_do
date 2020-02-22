@@ -718,7 +718,6 @@ cat << EOF > /etc/smartdns/smartdns.conf
 bind 127.0.0.1:5370 -force-aaaa-soa
 bind-tcp 127.0.0.1:5370 -force-aaaa-soa
 
-force-AAAA-SOA    yes
 speed-check-mode  tcp:80,ping
 cache-size        10000
 rr-ttl            600
