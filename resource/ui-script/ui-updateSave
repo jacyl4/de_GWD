@@ -1,25 +1,13 @@
 #!/bin/bash
-checkV2ad=$(/usr/local/bin/ui-checkV2ad)
+updateaddr=$(jq -r '.updateAddr' /usr/local/bin/0conf)
+updateCMD="/usr/local/bin/ttyd -p 3000 -o bash <(wget --no-check-certificate -qO- $updateaddr)"
 
-jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
-jq --arg key "localhost" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json
+localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
+popupWindow="window.open('"http://$localIP:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >> /tmp/hostsDefault
+sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
 
-cat /tmp/hostsDefault | while read line 
-do
-	key=$(echo $line | awk '{print$1}')
-	value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
-done
-
-mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
-systemctl restart vtrui
-
-rm -rf /etc/vtrui/temp*.json
-rm -rf /tmp/hostsDefault
-
-if [[ $checkV2ad = "on" ]]; then
-/usr/local/bin/ui-v2adADD
-fi
+cat << EOF >/usr/local/bin/ui-update
+#!/bin/bash
+$updateCMD
+EOF

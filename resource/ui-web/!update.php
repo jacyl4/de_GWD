@@ -207,7 +207,7 @@ $.get('updateSave.php', {updateAddr:updateAddr}, function(result){ location.relo
 }
 
 function update(){
-$.get('updateSave.php', function(result){});
+$.get('update.php', function(result){});
 window.open('', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 }
 
