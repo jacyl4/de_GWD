@@ -295,6 +295,26 @@ mv -f ~/version.php /var/www/html/version.php
 wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
 mv -f ~/ttyd /usr/local/bin/ttyd
 
+cat << EOF > /lib/systemd/system/ttyd.service
+[Unit]
+Description=ttyd
+After=network.target
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/usr/local/bin/ui-update
+KillMode=process
+RestartSec=2
+StartLimitBurst=2
+StartLimitIntervalSec=2
+TimeoutSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload > /dev/null 2>&1
+
 mkdir -p /var/www/html/gwd/restore
 chown -R www-data:www-data /var/www/html
 chmod +x /var/www/html/gwd/*

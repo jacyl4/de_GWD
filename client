@@ -736,9 +736,12 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
-RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
-ExecStop=killall ttyd
+KillMode=process
+RestartSec=2
+StartLimitBurst=2
+StartLimitIntervalSec=2
+TimeoutSec=2
 
 [Install]
 WantedBy=multi-user.target
