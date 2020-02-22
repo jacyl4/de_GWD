@@ -790,6 +790,8 @@ cat << "EOF" > /usr/local/bin/Q4H
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
+/usr/local/bin/ui-listBW > /dev/null 2>&1
+
 rm -rf ~/client*
 rm -rf /var/log/*1*
 rm -rf /var/log/*2*

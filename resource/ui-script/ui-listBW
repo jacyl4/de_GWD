@@ -1,6 +1,16 @@
 #!/bin/bash
-listB=$(jq -r '.listB[]' /usr/local/bin/0conf)
-listW=$(jq -r '.listW[]' /usr/local/bin/0conf)
+
+if [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	listB=$(jq -r '.listB[]' /usr/local/bin/0conf)
+elif [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	listB=$(jq -r '.listB | keys[]' /usr/local/bin/0conf)
+fi
+
+if [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	listW=$(jq -r '.listW[]' /usr/local/bin/0conf)
+elif [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	listW=$(jq -r '.listW | keys[]' /usr/local/bin/0conf)
+fi
 
 jq 'del(.dns.servers[3].domains[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 if [[ ! -n "$listB" ]]; then
