@@ -198,7 +198,8 @@ $.ajax({
         success: function(data){
         }
       });
-alert('设置已恢复')
+alert('设置已恢复');
+window.location.reload(true);
 }
 
 function updateSave(){
