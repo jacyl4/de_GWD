@@ -9,7 +9,7 @@
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
-![server](https://i.loli.net/2020/02/22/XRVOqhWzj2iAfMo.png)
+![server](https://i.loli.net/2020/02/22/ozgKBlG3Q4WTiJC.png)
 
 
 ## Client：
