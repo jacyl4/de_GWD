@@ -20,7 +20,7 @@ bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client)
 ```
 
 
-Docker nginx Edition (amd64)
+Nginx Edition (amd64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)
