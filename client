@@ -643,8 +643,7 @@ PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
 EOF
 
-systemctl restart pihole-FTL
-pihole -f
+pihole restartdns
 }
 
 
