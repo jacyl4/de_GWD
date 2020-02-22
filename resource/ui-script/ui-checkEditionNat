@@ -1,4 +1,4 @@
 #!/bin/bash
-if [[ -f "/usr/local/bin/doh-server" ]]; then
+if [[ -d "/var/www/html/gwd" ]]; then
 echo "Nat"
 fi
