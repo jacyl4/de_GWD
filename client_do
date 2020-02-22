@@ -909,7 +909,7 @@ rm -rf ~/ui-*
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
 
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/resource/ttyd_linux.x86_64
+wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
 mv -f ~/ttyd_linux.x86_64 /usr/local/bin/ttyd
 
 mkdir -p /var/www/html/restore
