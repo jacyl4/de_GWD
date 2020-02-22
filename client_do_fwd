@@ -289,11 +289,11 @@ EOF
 
 cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow > /dev/null 2>&1
 
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
-mv -f ~/version.php /var/www/html/gwd/version.php
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+mv -f ~/version.php /var/www/html/version.php
 
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
-mv -f ~/ttyd_linux.x86_64 /usr/local/bin/ttyd
+wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
+mv -f ~/ttyd /usr/local/bin/ttyd
 
 mkdir -p /var/www/html/gwd/restore
 chown -R www-data:www-data /var/www/html
