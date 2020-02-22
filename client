@@ -891,7 +891,7 @@ blue "---------------------"
 
 
 change_piholeAdmin(){
-pihole -a -p
+sudo pihole -a -p
 
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 

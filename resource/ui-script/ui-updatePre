@@ -1,0 +1,9 @@
+#!/bin/bash
+updateaddr=$(jq -r '.updateAddr' /usr/local/bin/0conf)
+
+updateCMD="/usr/local/bin/ttyd -p 3000 -o bash <(wget --no-check-certificate -qO- $updateaddr)"
+
+cat << EOF >/usr/local/bin/ui-update
+#!/bin/bash
+$updateCMD
+EOF

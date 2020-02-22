@@ -104,7 +104,7 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-archive"></i>
-            备份-恢复-更新
+            备份-恢复
           <span id="ddnscheckcf" class="badge text-success"></span>
           </div>
           <div class="card-body">
@@ -127,12 +127,37 @@
 </form>
   </div>
 
-  <div class="my-2 float-right">
-<button type="button" class="btn btn-outline-danger float-right" onclick="update()">更新</button>
-  </div>
+          </div>
+        </div>
+
+
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-archive"></i>
+            更新
+          </div>
+          <div class="card-body">
+
+    <div class="form-row">
+      <div class="col-md-8 input-group my-1">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">更新脚本地址</span>
+        </div>
+          <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr ?>">
+      </div>
+
+      <div class="col-md-4 my-1 float-right">
+        <button type="button" class="btn btn-outline-danger float-right" onclick="update()">运行</button>
+      </div>
+    </div>
+
+
 
           </div>
         </div>
+
+
+
 
 
         <!-- Page Content -->
@@ -178,6 +203,12 @@ $.ajax({
         }
       });
 alert('设置已恢复')
+}
+
+function update(){
+updateAddr=$('#updateAddr').val();
+$.get('update.php', {updateAddr:updateAddr}, function(result){});
+window.open("/ttyd", "popupWindow", "width=800, height=600, scrollbars=yes");
 }
 
 window.onload = function() {
