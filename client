@@ -307,6 +307,7 @@ cat << EOF > /etc/vtrui/config.json
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
+    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
     "settings": {"network": "tcp,udp", "followRedirect": true},
     "streamSettings": { "sockopt": { "tproxy": "tproxy" } }
   }
