@@ -20,3 +20,5 @@ mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
+
+rm -rf /etc/vtrui/hosts
