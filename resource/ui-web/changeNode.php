@@ -8,5 +8,6 @@ fwrite($nodepre, $nodenum);
 fclose($nodepre);
 
 exec('sudo /usr/local/bin/ui-changeNode');
+exec('sudo systemctl restart vtrui');
 ?>
 <?php }?>

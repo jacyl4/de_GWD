@@ -17,9 +17,6 @@ jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtr
 done
 mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-rm -rf /etc/vtrui/temp*.json
-rm -rf /etc/vtrui/hosts
-
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi

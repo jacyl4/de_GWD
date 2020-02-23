@@ -20,5 +20,4 @@ jq --arg v2path "$v2path" '.outbounds[1].streamSettings.wsSettings.path=$v2path'
 jq --arg domain "$domain" '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-systemctl restart vtrui
 rm -rf /var/www/html/nodenfpre.txt

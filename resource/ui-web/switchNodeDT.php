@@ -5,9 +5,11 @@ $switchNodeDT = $_GET['switchNodeDT'];
 
 if ( $switchNodeDT === "NodeDTshow"){
 exec('sudo /usr/local/bin/ui-NodeDTshow');
+exec('sudo systemctl restart iptables-proxy');
 }
 elseif ( $switchNodeDT === "NodeDThide"){
 exec('sudo /usr/local/bin/ui-NodeDThide');
+exec('sudo systemctl restart iptables-proxy');
 }
 ?>
 <?php }?>

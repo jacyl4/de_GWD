@@ -13,8 +13,6 @@ done
 
 mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
-systemctl restart vtrui
-
 rm -rf /etc/vtrui/temp*.json
 rm -rf /tmp/hostsDefault
 

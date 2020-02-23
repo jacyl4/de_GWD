@@ -2,5 +2,6 @@
 <?php if (isset($auth) && $auth) {?>
 <?php 
 exec('sudo /usr/local/bin/ui-changeNLchnw');
+exec('sudo systemctl restart vtrui');
 ?>
 <?php }?>

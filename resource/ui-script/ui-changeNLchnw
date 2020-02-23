@@ -9,5 +9,3 @@ read -d '' chnwl << EOF
 EOF
 
 jq --argjson chnwl "$chnwl" '.dns.servers = $chnwl' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-
-systemctl restart vtrui
