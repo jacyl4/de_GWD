@@ -34,12 +34,6 @@ systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 rm -rf /run/resolvconf/interface/systemd-resolved
 
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
 cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
@@ -158,6 +152,12 @@ LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 }
 
 
@@ -238,7 +238,7 @@ Type=simple
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 Restart=always
-RestartSec=3
+RestartSec=2
 LimitNOFILE=1000000
 
 [Install]
@@ -362,9 +362,10 @@ User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=always
-RestartSec=5
-StartLimitBurst=3
-StartLimitIntervalSec=5
+RestartSec=2
+StartLimitBurst=0
+StartLimitIntervalSec=2
+TimeoutSec=0
 
 [Install]
 WantedBy=multi-user.target
@@ -637,7 +638,7 @@ PIDFile=/run/php/php7.3-fpm.pid
 ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
-RestartSec=3
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -750,7 +751,7 @@ EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
 Restart=always
-RestartSec=3
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -913,7 +914,7 @@ ExecStart=/usr/local/bin/ui-update
 KillMode=process
 StartLimitBurst=0
 StartLimitIntervalSec=2
-TimeoutSec=2
+TimeoutSec=0
 
 [Install]
 WantedBy=multi-user.target
@@ -959,20 +960,10 @@ EOF
 chmod +x /usr/local/bin/Q4am
 /usr/local/bin/Q4am
 
-/usr/local/bin/ui-NodeDThide > /dev/null 2>&1
-sleep 5
-/usr/local/bin/ui-nodeResolve > /dev/null 2>&1
-sleep 5
-/usr/local/bin/ui-changeDOH > /dev/null 2>&1
-
-awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
-
 cat << "EOF" > /usr/local/bin/Q4H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
-
-/usr/local/bin/ui-listBW > /dev/null 2>&1
 
 rm -rf ~/client*
 rm -rf /var/log/*1*
@@ -983,6 +974,14 @@ rm -rf /var/www/html/log.log
 EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
+
+/usr/local/bin/ui-NodeDThide > /dev/null 2>&1
+sleep 5
+/usr/local/bin/ui-nodeResolve > /dev/null 2>&1
+sleep 5
+/usr/local/bin/ui-changeDOH > /dev/null 2>&1
+
+awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
