@@ -577,8 +577,9 @@ piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
-rm -rf /var/www/html/admin
-rm -rf /var/www/html/gwd/admin
+systemctl unmask lighttpd
+
+pihole -up
 
 wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
 sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
@@ -586,8 +587,6 @@ chmod +x ~/client_do
 . ~/client_do
 
 installPihole
-
-ln -s /var/www/html/admin  /var/www/html/gwd/admin
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
