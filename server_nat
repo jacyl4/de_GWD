@@ -1083,10 +1083,12 @@ else
     echo "[$statusBAD] V2RAY        [start failed]"
 fi
 
-if [[ $(curl -sS 127.0.0.1:$(awk '/listen/ {print$2}' /etc/nginx/conf.d/default.conf | awk 'END {print}' | cut -d';' -f1)/xxx) =~ "40" ]]; then
-    echo "[$statusGOOD] Nginx        [working]"
+if [[ $(systemctl is-active docker) = "active" ]]; then
+    echo "[$statusGOOD] Docker       [working]"
+elif [[ ! -f "/usr/bin/docker" ]]; then
+    echo "[$statusBAD] Docker       [not installed]"
 else
-    echo "[$statusBAD] Nginx        [start failed]"
+    echo "[$statusBAD] Docker       [start failed]"
 fi
 
 blue "----------------------------------------"

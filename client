@@ -376,8 +376,10 @@ After=network.target
 User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+Restart=always
+RestartSec=5
+StartLimitBurst=3
+StartLimitIntervalSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -694,7 +696,7 @@ KillMode=process
 Restart=always
 RestartSec=2
 StartLimitBurst=0
-StartLimitIntervalSec=60
+StartLimitIntervalSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -785,9 +787,11 @@ EOF
 chmod +x /usr/local/bin/Q4am
 /usr/local/bin/Q4am
 
-/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
-/usr/local/bin/ui-nodeResolve >/dev/null 2>&1
-/usr/local/bin/ui-changeDOH >/dev/null 2>&1
+/usr/local/bin/ui-NodeDThide > /dev/null 2>&1
+sleep 5
+/usr/local/bin/ui-nodeResolve > /dev/null 2>&1
+sleep 5
+/usr/local/bin/ui-changeDOH > /dev/null 2>&1
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
 
