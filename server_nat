@@ -511,7 +511,7 @@ server {
   ssl_stapling on;
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
-  resolver 1.1.1.1 valid=600s;
+  resolver 127.0.0.1 valid=600s;
   resolver_timeout 5s;
 
   add_header X-Frame-Options "SAMEORIGIN";
