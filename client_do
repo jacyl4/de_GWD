@@ -258,7 +258,26 @@ dpkg -P smartdns > /dev/null 2>&1
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i ~/smartdns.deb
 
+cat << EOF > /etc/smartdns/doh.conf
+bind 127.0.0.1:5370 -force-aaaa-soa
+bind-tcp 127.0.0.1:5370 -force-aaaa-soa
+
+speed-check-mode  tcp:443,ping
+cache-size        10000
+rr-ttl            600
+rr-ttl-min        60
+rr-ttl-max        43200
+prefetch-domain   yes
+serve-expired     yes
+serve-expired-ttl 0
+
+server-https https://$doh/dq
+server-https https://$doh/dq
+EOF
+
 cat << EOF > /etc/smartdns/smartdns.conf
+conf-file /etc/smartdns/doh.conf
+
 bind 127.0.0.1:5310 -force-aaaa-soa
 bind-tcp 127.0.0.1:5310 -force-aaaa-soa
 
@@ -277,25 +296,6 @@ server 119.29.29.29
 server 119.28.28.28
 server 223.5.5.5
 server 223.6.6.6
-
-conf-file /etc/smartdns/doh.conf
-EOF
-
-cat << EOF > /etc/smartdns/doh.conf
-bind 127.0.0.1:5370 -force-aaaa-soa
-bind-tcp 127.0.0.1:5370 -force-aaaa-soa
-
-speed-check-mode  tcp:443,ping
-cache-size        10000
-rr-ttl            600
-rr-ttl-min        60
-rr-ttl-max        43200
-prefetch-domain   yes
-serve-expired     yes
-serve-expired-ttl 0
-
-server-https https://$doh/dq
-server-https https://$doh/dq
 EOF
 
 echo "" > /run/smartdns.pid
@@ -348,8 +348,8 @@ cat << EOF > /etc/vtrui/config.json
     "localhost": "127.0.0.1"
   },
   "servers": [
-    {"address": "127.0.0.1","port": 5370},
-    {"address": "127.0.0.1","port": 5380}
+    {"address": "127.0.0.1","port": 5380},
+    {"address": "127.0.0.1","port": 5370}
   ]
 },
 "inbounds": [
