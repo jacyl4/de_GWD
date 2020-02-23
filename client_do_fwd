@@ -649,18 +649,14 @@ clifwd_installWebUI
 
 clifwd_PostInstall
 
-if [[ $clifwd_checkDNS = "GFWlist" ]]; then
-/usr/local/bin/ui-changeNLgfw
-else
-/usr/local/bin/ui-changeNLchnw
-fi
-
-if [[ $clifwd_checkDDNScf = "on" ]]; then
+if [[ $checkDDNScf = "on" ]]; then
 /usr/local/bin/ui-ddnsUpdateOnCF
 fi
 
-if [[ $clifwd_checkWG = "on" ]]; then
-/usr/local/bin/ui-WGon
+if [[ $checkDNS = "GFWlist" ]]; then
+/usr/local/bin/ui-changeNLgfw
+else
+/usr/local/bin/ui-changeNLchnw
 fi
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
@@ -673,6 +669,12 @@ fi
 
 if [[ $(jq -r '.updateAddr' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-updateSave
+fi
+
+if [[ $checkDHCP = "on" ]]; then
+/usr/local/bin/ui-dhcpUP
+else
+pihole restartdns
 fi
 blue "---------------------------"
 blue "de_GWD clifwd Update [done]"
