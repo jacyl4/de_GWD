@@ -2,10 +2,10 @@
 checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 checkDNS=$(/usr/local/bin/ui-checkDNS)
 
-port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
-domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
-uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
-v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
+port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
+v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
 jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' > /etc/vtrui/hosts
 jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >> /etc/vtrui/hosts
