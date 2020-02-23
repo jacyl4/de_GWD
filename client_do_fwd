@@ -135,9 +135,9 @@ server {
   add_header Referrer-Policy "no-referrer";
   add_header Strict-Transport-Security "max-age=63072000" always;
 
-  location ~ /\.(?!well-known).* {
-    deny all;
-  }
+location ~ /\.(?!well-known).* {
+  deny all;
+}
   
 location ~* \.php$ {
   fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
