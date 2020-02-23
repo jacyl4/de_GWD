@@ -36,12 +36,6 @@ systemctl mask --now systemd-resolved > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 rm -rf /run/resolvconf/interface/systemd-resolved
 
-echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
 cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
@@ -160,6 +154,12 @@ LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
 locale-gen en_US.UTF-8
+
+echo "Asia/Shanghai" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 }
 
 
@@ -302,7 +302,7 @@ Type=simple
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
-RestartSec=3
+RestartSec=2
 LimitNOFILE=1000000
 
 [Install]
@@ -380,8 +380,11 @@ After=network.target
 User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+Restart=always
+RestartSec=2
+StartLimitBurst=0
+StartLimitIntervalSec=2
+TimeoutSec=0
 
 [Install]
 WantedBy=multi-user.target
