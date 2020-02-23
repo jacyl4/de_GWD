@@ -983,6 +983,7 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
 /usr/local/bin/ui-changeDOH > /dev/null 2>&1
 /usr/local/bin/ui-nodeResolve > /dev/null 2>&1
+pihole restartdns
 systemctl restart iptables-proxy
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
@@ -1241,8 +1242,6 @@ fi
 
 if [[ $checkDHCP = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
-else
-pihole restartdns
 fi
 blue "--------------------"
 blue "Update de_GWD [done]"
