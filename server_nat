@@ -266,7 +266,7 @@ listen = [ "127.0.0.1:8053", ]
 
 path = "/dq"
 
-upstream = [ "udp:127.0.0.1:53", ]
+upstream = [ "tcp:127.0.0.1:53", ]
 
 timeout = 10
 tries = 3
