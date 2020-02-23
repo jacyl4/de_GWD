@@ -49,7 +49,7 @@ listen = [ "127.0.0.1:8053", ]
 
 path = "/dq"
 
-upstream = [ "tcp:127.0.0.1:5380", ]
+upstream = [ "tcp:127.0.0.1:5390", ]
 
 timeout = 10
 tries = 3
@@ -630,13 +630,13 @@ preInstall
 
 installDOH
 
+installSmartDNS
+
 installV2ray
 
 installIptablesProxy
 
 installDep
-
-installSmartDNS
 
 installNginx
 

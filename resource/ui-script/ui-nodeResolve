@@ -4,7 +4,7 @@ jq --arg key "localhost" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value
 
 for node in $(jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1); do
 	nodename=$(echo $node | cut -d : -f1)
-	nodeip=$(nslookup -port=5370 $nodename | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	nodeip=$(nslookup -port=5310 $nodename | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 jq --arg key $nodename --arg value $nodeip '.dns.hosts += {($key): ($value)}' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
 done
 
