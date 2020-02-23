@@ -732,8 +732,8 @@ echo "" > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=127.0.0.1#5370
-PIHOLE_DNS_2=127.0.0.1#5380
+PIHOLE_DNS_1=127.0.0.1#5380
+PIHOLE_DNS_2=127.0.0.1#5370
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true
@@ -762,11 +762,11 @@ port=5390
 EOF
 
 cat << EOF > /etc/pihole/dns-servers.conf
- DNS over Https;127.0.0.1#5370;127.0.0.1#5380
+ DNS over Https;127.0.0.1#5380;127.0.0.1#5370
 EOF
 sed -i '/server=/d'  /etc/dnsmasq.d/01-pihole.conf
-sed -i '/interface=/i\server=127.0.0.1#5370' /etc/dnsmasq.d/01-pihole.conf
 sed -i '/interface=/i\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
+sed -i '/interface=/i\server=127.0.0.1#5370' /etc/dnsmasq.d/01-pihole.conf
 
 cat << EOF > /etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
