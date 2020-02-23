@@ -750,9 +750,7 @@ EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
 Restart=always
-RestartSec=2
-StartLimitBurst=0
-StartLimitIntervalSec=5
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
@@ -1072,6 +1070,8 @@ installSmartDNS
 
 installNginx
 
+updateAddr="$mirrorSite/client_do"
+
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
@@ -1083,7 +1083,8 @@ jq '.v2node=[]' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
-jq --arg path "$v2path" '.v2node[0].path=$path' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg path "$v2path" '.v2node[0].path=$path' |\
+jq --arg updateAddr "$updateAddr" '.updateAddr=$updateAddr' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
 installWebUI
