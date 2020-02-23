@@ -944,7 +944,6 @@ jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' |\
 jq '.splitDNS="chnw"' |\
-jq '.splitDNS=""' |\
 jq '.v2nodeForUpdate={}' |\
 jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
