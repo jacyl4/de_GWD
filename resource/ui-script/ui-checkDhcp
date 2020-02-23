@@ -1,4 +1,4 @@
 #!/bin/bash
-if [[ -f "/etc/dnsmasq.d/02-pihole-dhcp.conf" ]]; then
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) == "on" ]]; then
 echo "on"
 fi
