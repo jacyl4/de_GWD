@@ -613,14 +613,18 @@ server {
   resolver 1.1.1.1 valid=600s;
   resolver_timeout 5s;
 
-  add_header X-Frame-Options DENY;
-  add_header X-Content-Type-Options nosniff;
-  add_header X-Robots-Tag none;
-  add_header X-Download-Options noopen;
-  add_header X-Permitted-Cross-Domain-Policies none;
+  add_header X-Frame-Options "SAMEORIGIN";
+  add_header X-Content-Type-Options "nosniff";
+  add_header X-Robots-Tag "none";
+  add_header X-Download-Options "noopen";
+  add_header X-Permitted-Cross-Domain-Policies "none";
   add_header X-XSS-Protection "1; mode=block";
-  add_header Referrer-Policy no-referrer;
+  add_header Referrer-Policy "no-referrer";
   add_header Strict-Transport-Security "max-age=63072000" always;
+
+  location ~ /\.(?!well-known).* {
+    deny all;
+  }
 
 location /dq {
   proxy_pass                http://127.0.0.1:8053/dq;
@@ -689,13 +693,17 @@ server {
   resolver 8.8.8.8 valid=600s;
   resolver_timeout 5s;
 
-  add_header X-Content-Type-Options nosniff;
-  add_header X-Robots-Tag none;
-  add_header X-Download-Options noopen;
-  add_header X-Permitted-Cross-Domain-Policies none;
+  add_header X-Content-Type-Options "nosniff";
+  add_header X-Robots-Tag "none";
+  add_header X-Download-Options "noopen";
+  add_header X-Permitted-Cross-Domain-Policies "none";
   add_header X-XSS-Protection "1; mode=block";
-  add_header Referrer-Policy no-referrer;
+  add_header Referrer-Policy "no-referrer";
   add_header Strict-Transport-Security "max-age=63072000" always;
+
+  location ~ /\.(?!well-known).* {
+    deny all;
+  }
 
   location ~ [^/]\.php(/|$) {
     include fastcgi_params;
@@ -765,21 +773,7 @@ server {
         location ~ ^\/nextcloud\/.+[^\/]\.(?:css|js|woff2?|svg|gif)$ {
             try_files \$uri /nextcloud/index.php\$request_uri;
             add_header Cache-Control "public, max-age=15778463";
-            # Add headers to serve security related headers  (It is intended
-            # to have those duplicated to the ones above)
-            # Before enabling Strict-Transport-Security headers please read
-            # into this topic first.
-            # add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;";
-            add_header X-Frame-Options SAMEORIGIN;
-            add_header X-Content-Type-Options nosniff;
-            add_header X-XSS-Protection "1; mode=block";
-            add_header X-Robots-Tag none;
-            add_header X-Download-Options noopen;
-            add_header X-Permitted-Cross-Domain-Policies none;
-            add_header Referrer-Policy no-referrer;
-
-            # Optional: Don't log access to assets
-            access_log off;
+            add_header X-Frame-Options "SAMEORIGIN";
         }
 
         location ~ ^\/nextcloud\/.+[^\/]\.(?:png|html|ttf|ico|jpg|jpeg)$ {
