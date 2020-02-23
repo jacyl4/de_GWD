@@ -801,6 +801,8 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
+/usr/local/bin/ui-updateSave > /dev/null 2>&1
+sleep 5
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
 sleep 5
 /usr/local/bin/ui-nodeResolve > /dev/null 2>&1
@@ -1013,7 +1015,6 @@ checkDNS=$(/usr/local/bin/ui-checkDNS)
 checkDHCP=$(/usr/local/bin/ui-checkDhcp)
 checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
 checkWG=$(/usr/local/bin/ui-checkWG)
-checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
@@ -1059,7 +1060,7 @@ if [[ $checkWG = "on" ]]; then
 /usr/local/bin/ui-WGon
 fi
 
-if [[ $checkV2ad = "on" ]]; then
+if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 

@@ -368,6 +368,8 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
+/usr/local/bin/ui-updateSave > /dev/null 2>&1
+sleep 5
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
 sleep 5
 /usr/local/bin/ui-nodeResolve > /dev/null 2>&1
@@ -604,7 +606,6 @@ source /etc/profile
 clifwd_checkDNS=$(/usr/local/bin/ui-checkDNS)
 clifwd_checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
 clifwd_checkWG=$(/usr/local/bin/ui-checkWG)
-clifwd_checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
@@ -664,7 +665,7 @@ if [[ $clifwd_checkWG = "on" ]]; then
 /usr/local/bin/ui-WGon
 fi
 
-if [[ $clifwd_checkV2ad = "on" ]]; then
+if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 

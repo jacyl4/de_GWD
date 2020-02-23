@@ -1,5 +1,4 @@
 #!/bin/bash
-checkV2ad=$(/usr/local/bin/ui-checkV2ad)
 checkDNS=$(/usr/local/bin/ui-checkDNS)
 
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
@@ -230,7 +229,7 @@ done
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php
 
-if [[ $checkV2ad = "on" ]]; then
+if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 

@@ -1,6 +1,4 @@
 #!/bin/bash
-checkV2ad=$(/usr/local/bin/ui-checkV2ad)
-
 jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
 jq --arg key "localhost" --arg value "127.0.0.1" '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json
 
@@ -22,6 +20,6 @@ mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 rm -rf /etc/vtrui/temp*.json
 rm -rf /etc/vtrui/hosts
 
-if [[ $checkV2ad = "on" ]]; then
+if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
