@@ -1011,8 +1011,6 @@ fi
 cd ~
 source /etc/profile
 
-checkDHCP=$(/usr/local/bin/ui-checkDhcp)
-
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
@@ -1049,10 +1047,6 @@ fi
 
 if [[ $(jq -r '.updateAddr' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-updateSave
-fi
-
-if [[ $checkDHCP = "on" ]]; then
-/usr/local/bin/ui-dhcpUP
 fi
 blue "--------------------"
 blue "Update de_GWD [done]"
