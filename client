@@ -320,6 +320,7 @@ Description=Smart DNS server
 After=network.target
 
 [Service]
+User=root
 Type=forking
 PIDFile=/run/smartdns.pid
 EnvironmentFile=/etc/default/smartdns
