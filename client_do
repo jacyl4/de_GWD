@@ -1110,17 +1110,21 @@ updateAddr="$mirrorSite/client_do"
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
+jq '.address.alias=""' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
+jq '.address.dhcp=""' |\
 jq '.doh={}' |\
 jq --arg doh1 "$v2servn" '.doh.doh1=$doh1' |\
 jq --arg doh2 "$v2servn" '.doh.doh2=$doh2' |\
+jq '.v2ad=""' |\
 jq '.v2node=[]' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' |\
-jq --arg splitDNS "chnw" '.splitDNS=$splitDNS' |\
+jq '.splitDNS="chnw"' |\
+jq '.splitDNS=""' |\
 jq '.v2nodeForUpdate={}' |\
 jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
@@ -1187,9 +1191,13 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 systemctl unmask lighttpd
 
-pihole -up
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 installPihole
+
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+/usr/local/bin/ui-dhcpUP
+fi
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"

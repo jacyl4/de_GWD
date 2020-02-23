@@ -5,3 +5,6 @@ localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
 
 sudo pihole -a enabledhcp "$dhcpStart" "$dhcpEnd" "$localIP" "24" "lan"
 /usr/local/bin/pihole_hotfix
+
+jq '.address.dhcp="oh"' /usr/local/bin/0conf> /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf

@@ -579,7 +579,7 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 systemctl unmask lighttpd
 
-pihole -up
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin /var/www/html/gwd/admin
 
 wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
 sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
@@ -587,6 +587,8 @@ chmod +x ~/client_do
 . ~/client_do
 
 installPihole
+
+ln -s /var/www/html/admin  /var/www/html/gwd/admin
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
