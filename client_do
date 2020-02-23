@@ -348,10 +348,8 @@ cat << EOF > /etc/vtrui/config.json
     "localhost": "127.0.0.1"
   },
   "servers": [
-    {
-      "address": "127.0.0.1",
-      "port": 5380
-    }
+    {"address": "127.0.0.1","port": 5370},
+    {"address": "127.0.0.1","port": 5380}
   ]
 },
 "inbounds": [
