@@ -1,6 +1,4 @@
 #!/bin/bash
-checkDNS=$(/usr/local/bin/ui-checkDNS)
-
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
 port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
 uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
@@ -233,6 +231,6 @@ if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
-if [[ $checkDNS = "GFWlist" ]]; then
+if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
 /usr/local/bin/ui-changeNLgfw
 fi

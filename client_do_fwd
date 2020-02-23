@@ -606,10 +606,6 @@ fi
 cd ~
 source /etc/profile
 
-clifwd_checkDNS=$(/usr/local/bin/ui-checkDNS)
-clifwd_checkDDNScf=$(/usr/local/bin/ui-checkDDNScf)
-clifwd_checkWG=$(/usr/local/bin/ui-checkWG)
-
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
 clifwd_domain=$(jq -r '.clifwd.clifwd_domain' /usr/local/bin/0conf)
@@ -653,16 +649,6 @@ clifwd_nginxWebConf
 clifwd_installWebUI
 
 clifwd_PostInstall
-
-if [[ $checkDDNScf = "on" ]]; then
-/usr/local/bin/ui-ddnsUpdateOnCF
-fi
-
-if [[ $checkDNS = "GFWlist" ]]; then
-/usr/local/bin/ui-changeNLgfw
-else
-/usr/local/bin/ui-changeNLchnw
-fi
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
