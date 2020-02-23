@@ -83,6 +83,6 @@ file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 exec('sudo /usr/local/bin/ui-nodeResolve');
 
-exec('sudo /usr/local/bin/ui-changeDOH');
+exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>
