@@ -21,4 +21,6 @@ if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
 fi
 
+/usr/local/bin/ui-changeDOH
+rm -rf /etc/vtrui/temp*.json
 rm -rf /etc/vtrui/hosts
