@@ -369,11 +369,11 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 /usr/local/bin/ui-updateSave > /dev/null 2>&1
-sleep 5
+sleep 3
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
-sleep 5
+sleep 3
 /usr/local/bin/ui-nodeResolve > /dev/null 2>&1
-sleep 5
+sleep 3
 /usr/local/bin/ui-changeDOH > /dev/null 2>&1
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
