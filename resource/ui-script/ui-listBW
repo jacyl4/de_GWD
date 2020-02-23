@@ -43,3 +43,4 @@ else
 fi
 
 chmod 666 /usr/local/bin/0conf
+systemctl restart iptables-proxy
