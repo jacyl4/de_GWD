@@ -809,12 +809,20 @@ sleep 5
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
 
+cat << "EOF" > /usr/local/bin/Q2H
+#!/bin/bash
+/usr/local/bin/ui-listBW > /dev/null 2>&1
+EOF
+chmod +x /usr/local/bin/Q2H
+
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
 cat << EOF >> ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
+0 */2 * * * /usr/local/bin/Q2H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron

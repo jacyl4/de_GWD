@@ -85,7 +85,7 @@ Type=simple
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
-RestartSec=3
+RestartSec=2
 LimitNPROC=1000000
 LimitNOFILE=1000000
 
@@ -353,18 +353,10 @@ EOF
 chmod +x /usr/local/bin/Q4am
 /usr/local/bin/Q4am
 
-/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
-/usr/local/bin/ui-nodeResolve >/dev/null 2>&1
-/usr/local/bin/ui-changeDOH >/dev/null 2>&1
-
-awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
-
 cat << "EOF" > /usr/local/bin/Q4H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
-
-/usr/local/bin/ui-listBW > /dev/null 2>&1
 
 rm -rf ~/client*
 rm -rf ~/clifwd*
@@ -377,12 +369,28 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
+/usr/local/bin/ui-NodeDThide > /dev/null 2>&1
+sleep 5
+/usr/local/bin/ui-nodeResolve > /dev/null 2>&1
+sleep 5
+/usr/local/bin/ui-changeDOH > /dev/null 2>&1
+
+awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
+
+cat << "EOF" > /usr/local/bin/Q2H
+#!/bin/bash
+/usr/local/bin/ui-listBW > /dev/null 2>&1
+EOF
+chmod +x /usr/local/bin/Q2H
+
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
 cat << EOF >> ~/now.cron
 0 4 * * * /usr/local/bin/Q4am
 0 */4 * * * /usr/local/bin/Q4H
+0 */2 * * * /usr/local/bin/Q2H
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
