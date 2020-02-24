@@ -1180,7 +1180,7 @@ blue "------------------------"
 
 updatePihole(){
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
-systemctl restart iptabeles-proxy
+systemctl restart iptables-proxy
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
@@ -1198,7 +1198,7 @@ fi
 
 /usr/local/bin/ui-NodeDThide
 
-systemctl restart iptabeles-proxy
+systemctl restart iptables-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
