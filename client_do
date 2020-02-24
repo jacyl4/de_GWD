@@ -433,7 +433,6 @@ ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=always
 RestartSec=2
 StartLimitBurst=0
-StartLimitIntervalSec=2
 TimeoutSec=0
 
 [Install]
@@ -743,7 +742,7 @@ DNS_BOGUS_PRIV=true
 DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
-wget -O ~/pihole.sh https://install.pi-hole.net
+wget --no-check-certificate -O ~/pihole.sh https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
 sed -i 's/resolvconf//g' ~/pihole.sh
 bash ~/pihole.sh /dev/stdin --unattended
 rm -rf ~/pihole.sh
@@ -1180,13 +1179,15 @@ blue "------------------------"
 
 
 updatePihole(){
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+systemctl restart iptabeles-proxy
+
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 systemctl unmask lighttpd
-
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 installPihole
@@ -1194,6 +1195,10 @@ installPihole
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
 fi
+
+/usr/local/bin/ui-NodeDThide
+
+systemctl restart iptabeles-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
