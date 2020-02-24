@@ -42,4 +42,5 @@ else
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
+chmod 666 /etc/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

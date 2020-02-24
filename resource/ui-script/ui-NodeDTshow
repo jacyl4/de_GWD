@@ -234,3 +234,5 @@ fi
 if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
 /usr/local/bin/ui-changeNLgfw
 fi
+
+chmod 666 /etc/vtrui/config.json

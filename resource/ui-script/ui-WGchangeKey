@@ -50,7 +50,7 @@ jq --arg cpublickey5 "$cpublickey5" '.wireguard.cpublickey5=$cpublickey5' |\
 jq --arg cpublickey6 "$cpublickey6" '.wireguard.cpublickey6=$cpublickey6' |\
 jq --arg cpublickey7 "$cpublickey7" '.wireguard.cpublickey7=$cpublickey7' |\
 jq --arg cpublickey8 "$cpublickey8" '.wireguard.cpublickey8=$cpublickey8' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
+chmod 666 /usr/local/bin/0conf
 
 rm -rf /etc/wireguard/*key*
 cd ~

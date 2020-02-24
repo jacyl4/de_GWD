@@ -8,3 +8,5 @@ jq --arg localippre $localippre '.routing.rules[4].source+=[$localippre]' /etc/v
 done
 
 mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+
+chmod 666 /etc/vtrui/config.json

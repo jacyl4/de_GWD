@@ -24,3 +24,5 @@ fi
 /usr/local/bin/ui-changeDOH
 rm -rf /etc/vtrui/temp*.json
 rm -rf /etc/vtrui/hosts
+
+chmod 666 /etc/vtrui/config.json

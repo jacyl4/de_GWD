@@ -13,6 +13,8 @@ done
 
 mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
 
+chmod 666 /etc/vtrui/config.json
+
 rm -rf /etc/vtrui/temp*.json
 rm -rf /tmp/hostsDefault
 
