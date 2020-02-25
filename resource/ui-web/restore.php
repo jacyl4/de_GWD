@@ -5,7 +5,7 @@ if ($_FILES["file"]["name"] == "0conf")
 {
 move_uploaded_file($_FILES['file']['tmp_name'], 'restore/' . $_FILES['file']['name']);
 }
-exec('sudo cp -f /var/www/html/0conf /usr/local/bin/');
+exec('sudo cp -f /var/www/html/restore/0conf /usr/local/bin/');
 
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
 {
