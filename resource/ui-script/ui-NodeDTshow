@@ -6,8 +6,8 @@ v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
 localip=$(jq -r '.divertLan | to_entries[] | .value' /usr/local/bin/0conf)
 
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' > /etc/vtrui/hosts
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >> /etc/vtrui/hosts
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf > /etc/vtrui/hosts
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' >> /etc/vtrui/hosts
 
 cat > /etc/vtrui/config.json << EOF
 {
