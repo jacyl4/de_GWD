@@ -180,7 +180,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 }
 
 function backup(){
-$.get('backup.php', function(result){window.location.href = "0conf"});
+$.get('backup.php', function(result){window.location.href = "/restore/0conf"});
 }
 
 function restore(){
