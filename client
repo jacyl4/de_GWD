@@ -360,9 +360,7 @@ cat << EOF > /etc/vtrui/config.json
 {
 "dns": {
   "tag": "flow",
-  "hosts": {
-    "localhost": "127.0.0.1"
-  },
+  "hosts": {"localhost": "127.0.0.1"},
   "servers": [
     {"address": "127.0.0.1","port": 5380},
     {"address": "127.0.0.1","port": 5370}
@@ -572,7 +570,6 @@ systemctl restart vtrui
 if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}') =~ "wg0" ]]; then
 systemctl restart wg-quick@wg0
 fi
-
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
@@ -730,6 +727,8 @@ pihole restartdns
 
 
 installWebUI(){
+rm -rf /usr/local/bin/ui-*
+rm -rf /var/www/html/*.php
 cd ~
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
@@ -822,10 +821,16 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 pihole restartdns
-/usr/local/bin/ui-updateGen > /dev/null 2>&1
+
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
-/usr/local/bin/ui-changeDOH > /dev/null 2>&1
+
 /usr/local/bin/ui-saveNode > /dev/null 2>&1
+
+/usr/local/bin/ui-updateGen > /dev/null 2>&1
+
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
+/usr/local/bin/ui-markThis
+fi
 systemctl restart iptables-proxy
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
@@ -951,7 +956,6 @@ chmod -R 666 /usr/local/bin/0conf
 installWebUI
 
 postInstall
-
 blue "---------------------"
 blue "Install de_GWD [done]"
 blue "---------------------"
@@ -1074,16 +1078,6 @@ installDep
 installWebUI
 
 postInstall
-
-if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-/usr/local/bin/ui-v2adADD
-else
-/usr/local/bin/ui-v2adDEL
-fi
-
-if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
-/usr/local/bin/ui-markThis
-fi
 blue "--------------------"
 blue "Update de_GWD [done]"
 blue "--------------------"

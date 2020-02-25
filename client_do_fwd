@@ -237,6 +237,8 @@ docker restart nginx
 
 
 clifwd_installWebUI(){
+rm -rf /usr/local/bin/ui-*
+rm -rf /var/www/html/gwd/*.php
 cd ~
 mkdir -p /var/www/html/gwd
 ln -s /var/www/html/admin  /var/www/html/gwd/admin
@@ -373,10 +375,16 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 pihole restartdns
-/usr/local/bin/ui-updateGen > /dev/null 2>&1
+
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
-/usr/local/bin/ui-changeDOH > /dev/null 2>&1
+
 /usr/local/bin/ui-saveNode > /dev/null 2>&1
+
+/usr/local/bin/ui-updateGen > /dev/null 2>&1
+
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
+/usr/local/bin/ui-markThis
+fi
 systemctl restart iptables-proxy
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
@@ -460,7 +468,6 @@ makeSSL_D
 clifwd_installWebUI
 
 clifwd_PostInstall
-
 blue "----------------------------"
 blue "de_GWD clifwd install [done]"
 blue "----------------------------"
@@ -661,16 +668,6 @@ clifwd_nginxWebConf
 clifwd_installWebUI
 
 clifwd_PostInstall
-
-if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-/usr/local/bin/ui-v2adADD
-else
-/usr/local/bin/ui-v2adDEL
-fi
-
-if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
-/usr/local/bin/ui-markThis
-fi
 blue "---------------------------"
 blue "de_GWD clifwd Update [done]"
 blue "---------------------------"
