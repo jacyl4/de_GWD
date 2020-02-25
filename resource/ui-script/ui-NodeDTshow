@@ -6,8 +6,8 @@ v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
 localip=$(jq -r '.divertLan | to_entries[] | .value' /usr/local/bin/0conf)
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf > /etc/vtrui/hosts
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' >> /etc/vtrui/hosts
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf > /tmp/hosts
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' >> /tmp/hosts
 
 cat > /etc/vtrui/config.json << EOF
 {
@@ -206,7 +206,7 @@ jq --arg v2path "$v2path" '.outbounds[2].streamSettings.wsSettings.path=$v2path'
 jq --arg domain "$domain" '.outbounds[2].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[2].streamSettings.tlsSettings.serverName=$domain' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
-cat /etc/vtrui/hosts | while read line 
+cat /tmp/hosts | while read line 
 do
   key=$(echo $line | awk '{print$1}')
   value=$(echo $line | awk '{print$2}')
@@ -232,5 +232,3 @@ else
 fi
 
 /usr/local/bin/ui-saveListBW
-
-rm -rf /etc/vtrui/hosts

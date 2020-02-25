@@ -2,8 +2,8 @@
 jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
 jq '.dns.hosts += {"localhost": "127.0.0.1"}' > /tmp/vtrui_temp
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf > /etc/vtrui/hosts
-cat /etc/vtrui/hosts | while read line 
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf > /tmp/hosts
+cat /tmp/hosts | while read line 
 do
 	key=$(echo $line | awk '{print$1}')
 	value=$(echo $line | awk '{print$2}')
@@ -26,6 +26,3 @@ fi
 
 /usr/local/bin/ui-changeDOH
 /usr/local/bin/ui-saveListBW
-
-rm -rf /etc/vtrui/temp*.json
-rm -rf /etc/vtrui/hosts
