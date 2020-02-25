@@ -230,5 +230,3 @@ if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
 else
 /usr/local/bin/ui-changeNLchnw
 fi
-
-/usr/local/bin/ui-saveListBW
