@@ -1,19 +1,20 @@
 #!/bin/bash
-jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
-jq '.dns.hosts += {"localhost": "127.0.0.1"}' > /tmp/vtrui_temp
+jq '.dns.hosts={"localhost": "127.0.0.1"}' /etc/vtrui/config.json > /tmp/vtrui_temp
 
 jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf > /tmp/hosts
-cat /tmp/hosts | while read line 
+cat /tmp/hosts | while read hosts 
 do
-	key=$(echo $line | awk '{print$1}')
-	value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /tmp/vtrui_temp > /tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+	key=$(echo $hosts | awk '{print$1}')
+	value=$(echo $hosts | awk '{print$2}')
+	jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /tmp/vtrui_temp > /tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 done
 
-jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 > /tmp/node
-cat /tmp/node | while read line 
+jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 > /tmp/nodes
+cat /tmp/nodes | while read listWpre 
 do
-	jq --arg node "$line" '.listW+=[$node]' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+	listWpreIP=$(nslookup -port=5310 $listWpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	jq -n --arg listWpreIP "$listWpreIP" '$listWpreIP | split("\n") | to_entries[] | [.value] | @tsv' > /tmp/listWpreIPs
+	jq --arg key $listWpre --slurpfile value /tmp/listWpreIPs '.listW += {($key):$value}' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 done
 
 mv -f /tmp/vtrui_temp /etc/vtrui/config.json
