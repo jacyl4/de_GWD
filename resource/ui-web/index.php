@@ -367,7 +367,7 @@
 
 <div class="row">
         <!-- hosts -->
-<div class="col-md-6 m-auto">      
+<div class="col-md-6">      
         <div class="card mb-3">
           <div class="card-header">
             <i class="far fa-compass"></i>
@@ -385,16 +385,7 @@
             （自定）<br>
             </span>
           </div>
-            <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="4"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
-          </div>
-          <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            hosts<br>
-            （默认）<br>
-            </span>
-          </div>
-            <textarea id="hostsDefault" class="form-control" aria-label="hostsDefault" rows="10" readonly><?php echo shell_exec("sudo /usr/local/bin/ui-hostsDefault"); ?></textarea>
+            <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
           </div>
           </div>
           </div>
@@ -618,7 +609,7 @@ $.get('changeDOH.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.
 
 function submithosts(){
 hostsCustomize=$("#hostsCustomize").val();
-$.get("hostSave.php", {hostsCustomize:hostsCustomize}, function(result){location.reload();});
+$.get("saveHost.php", {hostsCustomize:hostsCustomize}, function(result){location.reload();});
 }
 
 function submitstaticip(){

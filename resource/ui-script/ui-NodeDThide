@@ -11,15 +11,9 @@ cat > /etc/vtrui/config.json << EOF
 {
   "dns": {
     "tag": "flow",
-    "hosts":{
-      "localhost": "127.0.0.1"
-    },
-    "servers": [
-      {"address":"127.0.0.1","port":5390},
-      {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
-      {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
-      {"address":"127.0.0.1","port":5310,"domains":["geosite:cn"]}
-                     ]},
+    "hosts":{"localhost":"127.0.0.1"},
+    "servers": []
+  },
   "inbounds": [
     {
     "tag": "dnsin",
@@ -160,25 +154,29 @@ jq --argjson port "$port" '.outbounds[1].settings.vnext[0].port=$port' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain "$domain" '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
-jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 cat /etc/vtrui/hosts | while read line 
 do
   key=$(echo $line | awk '{print$1}')
   value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 done
-
-rm -rf /etc/vtrui/hosts
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
+else
+/usr/local/bin/ui-v2adDEL
 fi
 
 if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
 /usr/local/bin/ui-changeNLgfw
+else
+/usr/local/bin/ui-changeNLchnw
 fi
 
-chmod 666 /etc/vtrui/config.json
+/usr/local/bin/ui-saveListBW
+
+rm -rf /etc/vtrui/hosts

@@ -1,11 +1,11 @@
 #!/bin/bash
 key="geosite:category-ads"
 value="127.0.0.1"
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 key="ext:h2y.dat:ad"
 value="127.0.0.1"
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 jq '.v2ad="on"' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 

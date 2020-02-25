@@ -265,12 +265,12 @@ cat << "EOF" > /tmp/vtruiConfADD
 clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
 clifwd_uuidnum=$(jq -r '.clifwd.clifwd_uuidnum[]' /usr/local/bin/0conf)
 
-jq 'del(.inbounds[2])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+jq 'del(.inbounds[2])' /etc/vtrui/config.json > /tmp/vtrui_temp
 
 vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path": "/0000"}}}'
 
-jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /etc/vtrui/temp.json |\
-jq --arg clifwd_v2path "$clifwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$clifwd_v2path' > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /tmp/vtrui_temp |\
+jq --arg clifwd_v2path "$clifwd_v2path" '.inbounds[2].streamSettings.wsSettings.path=$clifwd_v2path' > /tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 
 {
 for v2uuids in $clifwd_uuidnum; do
@@ -280,10 +280,10 @@ done
 
 cat /tmp/v2uuids | while read v2uuids
 do
-jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /tmp/vtrui_temp > /tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 done
 
-mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 rm -rf /tmp/v2uuids
 
@@ -373,17 +373,17 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 pihole restartdns
-/usr/local/bin/ui-updateSave > /dev/null 2>&1
+/usr/local/bin/ui-updateGen > /dev/null 2>&1
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
 /usr/local/bin/ui-changeDOH > /dev/null 2>&1
-/usr/local/bin/ui-nodeResolve > /dev/null 2>&1
+/usr/local/bin/ui-saveNode > /dev/null 2>&1
 systemctl restart iptables-proxy
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
-/usr/local/bin/ui-listBW > /dev/null 2>&1
+/usr/local/bin/ui-saveListBW > /dev/null 2>&1
 EOF
 chmod +x /usr/local/bin/Q2H
 
@@ -572,7 +572,7 @@ installWGcore
 
 
 clifwd_updatePihole(){
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 systemctl restart iptables-proxy
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
@@ -664,14 +664,12 @@ clifwd_PostInstall
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
+else
+/usr/local/bin/ui-v2adDEL
 fi
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
-fi
-
-if [[ $(jq -r '.updateAddr' /usr/local/bin/0conf) != "null"  ]]; then
-/usr/local/bin/ui-updateSave
 fi
 blue "---------------------------"
 blue "de_GWD clifwd Update [done]"

@@ -419,7 +419,7 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg domain "$domain" '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
 jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
-jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
@@ -1000,17 +1000,17 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 pihole restartdns
-/usr/local/bin/ui-updateSave > /dev/null 2>&1
+/usr/local/bin/ui-updateGen > /dev/null 2>&1
 /usr/local/bin/ui-NodeDThide > /dev/null 2>&1
 /usr/local/bin/ui-changeDOH > /dev/null 2>&1
-/usr/local/bin/ui-nodeResolve > /dev/null 2>&1
+/usr/local/bin/ui-saveNode > /dev/null 2>&1
 systemctl restart iptables-proxy
 
 awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
-/usr/local/bin/ui-listBW > /dev/null 2>&1
+/usr/local/bin/ui-saveListBW > /dev/null 2>&1
 EOF
 chmod +x /usr/local/bin/Q2H
 
@@ -1179,7 +1179,7 @@ blue "------------------------"
 
 
 updatePihole(){
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 systemctl restart iptables-proxy
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
@@ -1253,14 +1253,12 @@ postInstall
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
+else
+/usr/local/bin/ui-v2adDEL
 fi
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
-fi
-
-if [[ $(jq -r '.updateAddr' /usr/local/bin/0conf) != "null"  ]]; then
-/usr/local/bin/ui-updateSave
 fi
 blue "--------------------"
 blue "Update de_GWD [done]"

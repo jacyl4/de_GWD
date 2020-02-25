@@ -21,14 +21,14 @@ exec('sudo /usr/local/bin/ui-v2adDEL');
 
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
 {
-exec('sudo /usr/local/bin/ui-updateSave');
+exec('sudo /usr/local/bin/ui-updateGen');
 }
 
 exec('sudo /usr/local/bin/ui-restorePW');
 exec('sudo /usr/local/bin/ui-changeDOH');
-exec('sudo /usr/local/bin/ui-nodeResolve');
-exec('sudo /usr/local/bin/ui-hostSave');
-exec('sudo /usr/local/bin/ui-listBW');
+exec('sudo /usr/local/bin/ui-saveNode');
+exec('sudo /usr/local/bin/ui-saveHost');
+exec('sudo /usr/local/bin/ui-saveListBW');
 exec('sudo systemctl restart iptables-proxy');
 exec('sudo chmod 666 /usr/local/bin/0conf');
 

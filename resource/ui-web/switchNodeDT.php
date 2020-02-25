@@ -9,7 +9,7 @@ exec('sudo /usr/local/bin/ui-NodeDTshow');
 elseif ( $switchNodeDT === "NodeDThide"){
 exec('sudo /usr/local/bin/ui-NodeDThide');
 }
-exec('sudo /usr/local/bin/ui-listBW');
+
 exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

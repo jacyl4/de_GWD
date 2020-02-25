@@ -365,11 +365,11 @@ done
 
 cat /tmp/v2clients | while read v2clients
 do
-jq --argjson v2clients "$v2clients" '.inbounds[0].settings.clients+=[$v2clients]' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --argjson v2clients "$v2clients" '.inbounds[0].settings.clients+=[$v2clients]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 done
 rm -rf /tmp/v2clients
 
-jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' /etc/vtrui/config.json > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
@@ -1510,7 +1510,7 @@ sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{prin
 docker restart nginx > /dev/null 2>&1
 
 jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /etc/vtrui/config.json |\
-jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' > /etc/vtrui/temp.json && mv -f /etc/vtrui/temp.json /etc/vtrui/config.json
+jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 systemctl restart vtrui > /dev/null 2>&1
 blue "------------------------------"

@@ -189,7 +189,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
                 </tbody>
               </table>
 <span class="float-right">
-<button type="button" class="btn btn-primary" onclick="savenode()">保存</button>
+<button type="button" class="btn btn-primary" onclick="saveNode()">保存</button>
 </span>
             </div>
           </div>
@@ -214,7 +214,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
   </div>
   <!-- /#wrapper -->
 <script>
-function savenode() {
+function saveNode() {
 nodename1=$("#nodename1").val();
 nodename2=$("#nodename2").val();
 nodename3=$("#nodename3").val();
@@ -255,7 +255,7 @@ path7=$("#path7").val();
 path8=$("#path8").val();
 path9=$("#path9").val();
 
-$.get("nodeSave.php", {
+$.get("saveNode.php", {
 nodename1:nodename1,
 nodename2:nodename2,
 nodename3:nodename3,

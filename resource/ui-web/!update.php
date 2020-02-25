@@ -144,7 +144,7 @@
           <span class="input-group-text justify-content-center w-100">脚本地址</span>
         </div>
           <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="updateSave()">保存</button>
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="updateGen()">保存</button>
       </div>
 
       <div class="col-md-4 my-1 float-right">
@@ -202,9 +202,9 @@ alert('设置已恢复');
 window.location.reload(true);
 }
 
-function updateSave(){
+function updateGen(){
 updateAddr=$('#updateAddr').val();
-$.get('updateSave.php', {updateAddr:updateAddr}, function(result){ location.reload(); });
+$.get('updateGen.php', {updateAddr:updateAddr}, function(result){ location.reload(); });
 }
 
 function update(){
