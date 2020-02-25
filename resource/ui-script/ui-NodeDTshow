@@ -210,7 +210,7 @@ cat /tmp/hosts | while read line
 do
   key=$(echo $line | awk '{print$1}')
   value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 done
 
 for localippre in $localip; do
@@ -230,5 +230,3 @@ if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
 else
 /usr/local/bin/ui-changeNLchnw
 fi
-
-/usr/local/bin/ui-saveListBW

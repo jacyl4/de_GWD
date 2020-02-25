@@ -34,4 +34,3 @@ else
 fi
 
 /usr/local/bin/ui-changeDOH
-/usr/local/bin/ui-saveListBW

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
 	listB=$(jq -r '.listB[]' /usr/local/bin/0conf)
 elif [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
