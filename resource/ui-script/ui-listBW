@@ -12,13 +12,13 @@ elif [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
 	listW=$(jq -r '.listW | keys[]' /usr/local/bin/0conf)
 fi
 
-jq 'del(.dns.servers[3].domains[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
+jq 'del(.dns.servers[1].domains[])' /etc/vtrui/config.json > /etc/vtrui/temp.json
 if [[ ! -n "$listB" ]]; then
-	jq '.dns.servers[3].domains=["domain:google.com"]' /etc/vtrui/temp.json > /etc/vtrui/config.json
+	jq '.dns.servers[1].domains=["domain:google.com"]' /etc/vtrui/temp.json > /etc/vtrui/config.json
 else
 	jq '.listB={}' /usr/local/bin/0conf > /tmp/0conf_temp
 	for listBpre in $listB; do
-	jq --arg listBpre "domain:$listBpre" '.dns.servers[3].domains+=[$listBpre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
+	jq --arg listBpre "domain:$listBpre" '.dns.servers[1].domains+=[$listBpre]' /etc/vtrui/temp.json > /etc/vtrui/temp2.json && mv -f /etc/vtrui/temp2.json /etc/vtrui/temp.json
 	listBpreIP=$(nslookup -port=5380 $listBpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 	jq -n --arg listBpreIP "$listBpreIP" '$listBpreIP | split("\n") | to_entries[] | [.value] | @tsv' > /tmp/listBpreIPs
 	jq --arg key $listBpre --slurpfile value /tmp/listBpreIPs '.listB += {($key):$value}' /tmp/0conf_temp > /tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
