@@ -631,14 +631,9 @@ EOF
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3 resolvconf
+apt update && apt upgrade -y && apt autoremove -y
 
-echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
-rm -rf /etc/resolv.conf
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
+apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
@@ -740,7 +735,6 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 wget --no-check-certificate -O ~/pihole.sh https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
-sed -i 's/resolvconf//g' ~/pihole.sh
 bash ~/pihole.sh /dev/stdin --unattended
 rm -rf ~/pihole.sh
 
@@ -748,6 +742,14 @@ systemctl mask --now lighttpd > /dev/null 2>&1
 rm -rf /var/www/html/index.lighttpd.orig
 systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
+
+rm -rf /etc/resolv.conf
+echo "" > /etc/resolvconf/run/interface/original.resolvconf
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
@@ -953,8 +955,6 @@ chmod +x /usr/local/bin/*
 
 
 postInstall(){
-apt update && apt upgrade -y && apt autoremove -y
-
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
@@ -998,14 +998,10 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-pihole restartdns
-
-/usr/local/bin/ui-NodeDThide > /dev/null 2>&1
-
-/usr/local/bin/ui-saveNode > /dev/null 2>&1
-
-/usr/local/bin/ui-updateGen > /dev/null 2>&1
-
+/usr/local/bin/ui-NodeDThide
+/usr/local/bin/ui-saveNode
+/usr/local/bin/ui-saveListBW
+/usr/local/bin/ui-updateGen
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
 /usr/local/bin/ui-markThis
 fi
