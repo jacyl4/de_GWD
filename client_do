@@ -49,9 +49,10 @@ deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSI
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates lighttpd haveged subversion rsync apt-transport-https gnupg2
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 lighttpd
 source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
+systemctl mask --now lighttpd > /dev/null 2>&1
 
 echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 wget -qO- http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
@@ -724,6 +725,7 @@ systemctl restart php7.3-fpm
 
 
 installPihole(){
+systemctl unmask lighttpd
 cd ~
 mkdir -p /etc/pihole
 echo "" > /etc/pihole/adlists.list
@@ -1194,7 +1196,6 @@ piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
-systemctl unmask lighttpd
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 rm -rf /etc/resolv.conf
