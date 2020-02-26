@@ -45,11 +45,11 @@ rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https
 cat << EOF > /etc/dns-over-https/doh-server.conf
-listen = [ "127.0.0.1:8053", ]
+listen = [ "127.0.0.1:8053" ]
 
 path = "/dq"
 
-upstream = [ "udp:127.0.0.1:5390", ]
+upstream = [ "udp:127.0.0.1:5390" ]
 
 timeout = 10
 tries = 3
@@ -328,8 +328,6 @@ chmod +x /usr/local/bin/*
 
 
 clifwd_PostInstall(){
-apt update && apt upgrade -y && apt autoremove -y
-
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
@@ -375,19 +373,13 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 pihole restartdns
-
-/usr/local/bin/ui-NodeDThide > /dev/null 2>&1
-
-/usr/local/bin/ui-saveNode > /dev/null 2>&1
-
-/usr/local/bin/ui-updateGen > /dev/null 2>&1
-
+output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-updateGen > /dev/null 2>&1)
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
-/usr/local/bin/ui-markThis
+output=$(/usr/local/bin/ui-markThis > /dev/null 2>&1)
 fi
-systemctl restart iptables-proxy
-
-awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
+output=$(systemctl restart iptables-proxy)
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
@@ -524,7 +516,6 @@ piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
 jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
-
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"
@@ -559,7 +550,6 @@ rm -rf /var/www/ssl/*
 clifwd_nginxWebConf
 
 makeSSL_D
-
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
 blue "-----------------------------------------------"
@@ -568,39 +558,58 @@ blue "-----------------------------------------------"
 
 
 clifwd_installWGcore(){
-wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
-chmod +x ~/client_do
-. ~/client_do
+cd ~
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-installWGcore
+apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
+
+git clone https://git.zx2c4.com/wireguard-linux-compat
+cd ~/wireguard-linux-compat/src
+make && make install
+rm -rf ~/wireguard-linux-compat
+cd ~
+
+if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
+mkdir -p /etc/wireguard
+/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
+fi
+blue "------------------------"
+blue "Install WireGuard [done]"
+blue "------------------------"
 }
 
 
 
 clifwd_updatePihole(){
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
-systemctl restart iptables-proxy
-
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 systemctl unmask lighttpd
-rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin /var/www/html/gwd/admin
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
-chmod +x ~/client_do
-. ~/client_do
+rm -rf /etc/resolv.conf
+cat << EOF > /etc/resolv.conf
+nameserver 127.0.0.1
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+option use-vc
+EOF
+
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+output=$(systemctl restart iptables-proxy)
+sleep 3
 
 installPihole
 
-ln -s /var/www/html/admin  /var/www/html/gwd/admin
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+/usr/local/bin/ui-dhcpUP
+fi
 
-/usr/local/bin/ui-NodeDThide
-
+output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
 systemctl restart iptables-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"
@@ -647,9 +656,9 @@ chmod +x ~/client_do
 
 preInstall
 
-installDOH
-
 installSmartDNS
+
+installDOH
 
 installV2ray
 

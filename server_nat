@@ -23,6 +23,9 @@ echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
 update-initramfs -u
 fi
 
+systemctl mask --now systemd-resolved > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 1.1.1.1
@@ -30,11 +33,6 @@ nameserver 1.0.0.1
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
-sed -i '/ip6-/d' /etc/hosts
-
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-rm -rf /run/resolvconf/interface/systemd-resolved
 
 cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
@@ -262,11 +260,11 @@ rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https
 cat << EOF > /etc/dns-over-https/doh-server.conf
-listen = [ "127.0.0.1:8053", ]
+listen = [ "127.0.0.1:8053" ]
 
 path = "/dq"
 
-upstream = [ "udp:127.0.0.1:53", ]
+upstream = [ "udp:127.0.0.1:53" ]
 
 timeout = 10
 tries = 3

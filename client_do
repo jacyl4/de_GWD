@@ -11,7 +11,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 mirrorSite="http://xznat.seso.icu:10178"
 
-smartdns_amd64="$mirrorSite/smartdns.1.2020.02.20-0202.x86_64-debian-all.deb"
+smartdns_amd64="$mirrorSite/smartdns.1.2020.02.25-2212.x86_64-debian-all.deb"
 
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
@@ -21,6 +21,9 @@ statusFailed=$(red "[ failed ]")
 preInstall(){
 systemctl stop iptables-proxy > /dev/null 2>&1
 
+systemctl mask --now systemd-resolved > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
+
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 119.29.29.29
@@ -28,11 +31,6 @@ nameserver 119.28.28.28
 nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
-sed -i '/ip6-/d' /etc/hosts
-
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
-rm -rf /run/resolvconf/interface/systemd-resolved
 
 cat << EOF > /etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
@@ -162,6 +160,77 @@ hwclock -w
 
 
 
+installSmartDNS(){
+dpkg -P smartdns > /dev/null 2>&1
+
+wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
+dpkg -i ~/smartdns.deb
+
+cat << EOF > /etc/smartdns/doh.conf
+bind 127.0.0.1:5370 -force-aaaa-soa
+bind-tcp 127.0.0.1:5370 -force-aaaa-soa
+
+speed-check-mode  ping,tcp:443
+cache-size        10000
+prefetch-domain   yes
+serve-expired     yes
+serve-expired-ttl 0
+
+server-https https://$$domain/dq
+server-https https://$$domain/dq
+EOF
+
+cat << EOF > /etc/smartdns/smartdns.conf
+conf-file /etc/smartdns/doh.conf
+
+bind 127.0.0.1:5310 -force-aaaa-soa
+bind-tcp 127.0.0.1:5310 -force-aaaa-soa
+
+speed-check-mode  ping,tcp:80
+cache-size        10000
+rr-ttl            600
+rr-ttl-min        60
+rr-ttl-max        43200
+prefetch-domain   yes
+serve-expired     yes
+serve-expired-ttl 0
+
+server 114.114.114.114
+server 114.114.115.115
+server 119.29.29.29
+server 119.28.28.28
+server 223.5.5.5
+server 223.6.6.6
+EOF
+
+echo "" > /run/smartdns.pid
+cat << "EOF" > /lib/systemd/system/smartdns.service
+[Unit]
+Description=Smart DNS server
+After=network.target
+
+[Service]
+User=root
+Type=forking
+PIDFile=/run/smartdns.pid
+EnvironmentFile=/etc/default/smartdns
+ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
+KillMode=process
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+rm -rf ~/smartdns.deb
+
+systemctl daemon-reload
+systemctl enable smartdns
+systemctl restart smartdns
+}
+
+
+
 installDOH(){
 cd ~
 portcheck=$(echo $port | grep '^[0-9]\+$')
@@ -174,8 +243,6 @@ fi
 
 domainip=$(nslookup $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
-sed -i "1i $domainip $doh" /etc/hosts
-
 wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 unzip doh.zip
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
@@ -184,7 +251,7 @@ rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https/
 cat << EOF > /etc/dns-over-https/doh-client.conf
-listen = [ "127.0.0.1:5380", ]
+listen = [ "127.0.0.1:5380" ]
 
 [upstream]
 upstream_selector = "weighted_round_robin"
@@ -245,80 +312,9 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload
 systemctl enable doh-client
 systemctl restart doh-client
-}
-
-
-
-installSmartDNS(){
-dpkg -P smartdns > /dev/null 2>&1
-
-wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
-dpkg -i ~/smartdns.deb
-
-cat << EOF > /etc/smartdns/doh.conf
-bind 127.0.0.1:5370 -force-aaaa-soa
-bind-tcp 127.0.0.1:5370 -force-aaaa-soa
-
-speed-check-mode  tcp:443,ping
-cache-size        10000
-prefetch-domain   yes
-serve-expired     yes
-serve-expired-ttl 0
-
-server-https https://$doh/dq
-server-https https://$doh/dq
-EOF
-
-cat << EOF > /etc/smartdns/smartdns.conf
-conf-file /etc/smartdns/doh.conf
-
-bind 127.0.0.1:5310 -force-aaaa-soa
-bind-tcp 127.0.0.1:5310 -force-aaaa-soa
-
-speed-check-mode  tcp:80,ping
-cache-size        10000
-rr-ttl            600
-rr-ttl-min        60
-rr-ttl-max        43200
-prefetch-domain   yes
-serve-expired     yes
-serve-expired-ttl 0
-
-server 114.114.114.114:53
-server 114.114.115.115:53
-server 119.29.29.29:53
-server 119.28.28.28:53
-server 223.5.5.5:53
-server 223.6.6.6:53
-EOF
-
-echo "" > /run/smartdns.pid
-cat << "EOF" > /lib/systemd/system/smartdns.service
-[Unit]
-Description=Smart DNS server
-After=network.target
-
-[Service]
-User=root
-Type=forking
-PIDFile=/run/smartdns.pid
-EnvironmentFile=/etc/default/smartdns
-ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
-KillMode=process
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
-EOF
-rm -rf ~/smartdns.deb
-
-systemctl daemon-reload > /dev/null 2>&1
-systemctl enable smartdns
-systemctl restart smartdns
 }
 
 
@@ -341,10 +337,10 @@ cat << EOF > /etc/vtrui/config.json
 {
 "dns": {
   "tag": "flow",
-  "hosts": {"localhost": "127.0.0.1"},
+  "hosts": {"localhost":"127.0.0.1"},
   "servers": [
-    {"address": "127.0.0.1","port": 5380},
-    {"address": "127.0.0.1","port": 5370}
+    {"address":"127.0.0.1","port":5380},
+    {"address":"127.0.0.1","port":5370}
   ]
 },
 "inbounds": [
@@ -404,7 +400,8 @@ cat << EOF > /etc/vtrui/config.json
   "domainStrategy": "AsIs",
   "rules": [
     {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
-    {"type":"field","inboundTag":"flow","outboundTag":"direct"}
+    {"type":"field","inboundTag":"flow","outboundTag":"direct"},
+    {"type":"field","ip":["geoip:private","geoip:cn","114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"}
   ]
 }
 }
@@ -437,7 +434,7 @@ TimeoutSec=0
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
 }
@@ -445,6 +442,8 @@ systemctl restart vtrui
 
 
 installIptablesProxy(){
+echo $domainip >> /usr/local/bin/chnrouteset
+
 cat << "EOF" > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
@@ -508,8 +507,8 @@ ip route add local 0.0.0.0/0 dev lo table 100
 iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 iptables -A INPUT -p tcp --tcp-flags RST RST -j DROP
 
-iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
 iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
@@ -594,14 +593,16 @@ ExecStop=/usr/local/bin/iptables-proxy-down
 [Install]
 WantedBy=multi-user.target
 EOF
-
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload
 systemctl enable iptables-proxy
-systemctl restart iptables-proxy
+output=$(systemctl restart iptables-proxy)
+sleep 3
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
+nameserver 1.1.1.1
+nameserver 8.8.8.8
 option use-vc
 EOF
 
@@ -633,10 +634,10 @@ wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update && apt upgrade -y && apt autoremove -y
 
-apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
-
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+
+apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
 
 cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
@@ -734,7 +735,7 @@ DNS_BOGUS_PRIV=true
 DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
-wget --no-check-certificate -O ~/pihole.sh https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
+wget --no-check-certificate -O ~/pihole.sh http://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
 bash ~/pihole.sh /dev/stdin --unattended
 rm -rf ~/pihole.sh
 
@@ -753,6 +754,7 @@ resolvconf -u
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
 port=5390
 EOF
 
@@ -935,11 +937,12 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
 KillMode=process
 StartLimitBurst=0
 StartLimitIntervalSec=2
-TimeoutSec=0
+TimeoutSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -971,6 +974,7 @@ fi
 curl -L 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
 if [ $(ls -l ~/chnroute.txt | awk '{print$5}') -gt 102400 ]; then
 mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
+
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
 chnroute=`cat /usr/local/bin/chnroute.txt`
@@ -978,6 +982,7 @@ for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/chnrouteset
+
 fi
 EOF
 chmod +x /usr/local/bin/Q4am
@@ -998,16 +1003,14 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-/usr/local/bin/ui-NodeDThide
-/usr/local/bin/ui-saveNode
-/usr/local/bin/ui-saveListBW
-/usr/local/bin/ui-updateGen
+pihole restartdns
+output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-updateGen > /dev/null 2>&1)
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
-/usr/local/bin/ui-markThis
+output=$(/usr/local/bin/ui-markThis > /dev/null 2>&1)
 fi
-systemctl restart iptables-proxy
-
-awk '/127.0.0.1/,NR==end' /etc/hosts > /tmp/hosts && mv -f /tmp/hosts /etc/hosts
+output=$(systemctl restart iptables-proxy)
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
@@ -1079,9 +1082,9 @@ EOF
 
 preInstall
 
-installDOH
-
 installSmartDNS
+
+installDOH
 
 installV2ray
 
@@ -1132,7 +1135,6 @@ chmod -R 666 /usr/local/bin/0conf
 installWebUI
 
 postInstall
-
 blue "---------------------"
 blue "Install de_GWD [done]"
 blue "---------------------"
@@ -1147,7 +1149,6 @@ piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
 jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
-
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"
@@ -1180,9 +1181,6 @@ blue "------------------------"
 
 
 updatePihole(){
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
-systemctl restart iptables-proxy
-
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
@@ -1191,14 +1189,26 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 systemctl unmask lighttpd
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
+rm -rf /etc/resolv.conf
+cat << EOF > /etc/resolv.conf
+nameserver 127.0.0.1
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+option use-vc
+EOF
+
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+output=$(systemctl restart iptables-proxy)
+sleep 3
+
 installPihole
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
 fi
 
-/usr/local/bin/ui-NodeDThide
-
+output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
 systemctl restart iptables-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"
@@ -1236,9 +1246,9 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 preInstall
 
-installDOH
-
 installSmartDNS
+
+installDOH
 
 installV2ray
 
