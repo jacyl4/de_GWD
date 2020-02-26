@@ -688,9 +688,7 @@ DNS_BOGUS_PRIV=true
 DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
-wget --no-check-certificate -O ~/pihole.sh http://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
-bash ~/pihole.sh /dev/stdin --unattended
-rm -rf ~/pihole.sh
+bash <(wget --no-check-certificate -qO- http://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh) /dev/stdin --unattended
 
 systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1

@@ -582,6 +582,12 @@ blue "------------------------"
 
 
 clifwd_updatePihole(){
+cd ~
+wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
+sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
+chmod +x ~/client_do
+. ~/client_do
+
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
@@ -634,7 +640,7 @@ fi
 cd ~
 source /etc/profile
 
-piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 clifwd_domain=$(jq -r '.clifwd.clifwd_domain' /usr/local/bin/0conf)
 clifwd_port=$(jq -r '.clifwd.clifwd_port' /usr/local/bin/0conf)
