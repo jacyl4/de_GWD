@@ -7,7 +7,7 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-mirrorSite="http://xznat.seso.icu:10178"
+mirrorSite="http://xznat.seso.icu:10290"
 
 
 
@@ -31,6 +31,7 @@ sed -i "/wireguard.WGport/i$addRule4" /usr/local/bin/iptables-proxy-up
 
 systemctl daemon-reload > /dev/null 2>&1
 systemctl restart iptables-proxy
+sleep 3
 }
 
 

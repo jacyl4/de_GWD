@@ -9,7 +9,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 
-mirrorSite="http://xznat.seso.icu:10178"
+mirrorSite="http://xznat.seso.icu:10290"
 
 smartdns_arm64="$mirrorSite/smartdns.1.2020.02.25-2212.aarch64-debian-all.deb"
 smartdns_amd64="$mirrorSite/smartdns.1.2020.02.25-2212.x86_64-debian-all.deb"
@@ -63,7 +63,7 @@ deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut
 EOF
 fi
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates lighttpd haveged subversion rsync
 source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
 
