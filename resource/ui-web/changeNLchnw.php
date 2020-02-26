@@ -2,6 +2,7 @@
 <?php if (isset($auth) && $auth) {?>
 <?php 
 exec('sudo /usr/local/bin/ui-changeNLchnw');
-exec('sudo systemctl restart vtrui');
+exec('sudo /usr/local/bin/ui-saveListBW');
+exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>
