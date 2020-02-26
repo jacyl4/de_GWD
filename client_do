@@ -444,7 +444,7 @@ systemctl restart vtrui
 installIptablesProxy(){
 echo $domainip >> /usr/local/bin/chnrouteset
 
-cat << "EOF" > /usr/local/bin/iptables-proxy-up
+cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
 ipset -X hosts
@@ -472,33 +472,33 @@ lanip="0.0.0.0/8 \
 ipset -R < /usr/local/bin/chnrouteset
 
 ipset -N lanip hash:net maxelem 65535
-for iplanip in $lanip; do
-  ipset add lanip $iplanip
+for iplanip in \$lanip; do
+  ipset add lanip \$iplanip
 done
 
 ipset -N hosts hash:net maxelem 65535
-for hosts in $(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
-  ipset add hosts $hosts
+for hosts in \$(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
+  ipset add hosts \$hosts
 done
 
 ipset -N listB hash:net maxelem 65535
-for iplistB in $(jq -r '.listB | to_entries[] | .value[]' /usr/local/bin/0conf); do
-  ipset add listB $iplistB
+for iplistB in \$(jq -r '.listB | to_entries[] | .value[]' /usr/local/bin/0conf); do
+  ipset add listB \$iplistB
 done
 
 ipset -N listW hash:net maxelem 65535
-for iplistW in $(jq -r '.listW | to_entries[] | .value[]' /usr/local/bin/0conf); do
-  ipset add listW $iplistW
+for iplistW in \$(jq -r '.listW | to_entries[] | .value[]' /usr/local/bin/0conf); do
+  ipset add listW \$iplistW
 done
 
 ipset -N listBlan hash:net maxelem 65535
-for iplistBlan in $(jq -r '.listBlan[]' /usr/local/bin/0conf); do
-  ipset add listBlan $iplistBlan
+for iplistBlan in \$(jq -r '.listBlan[]' /usr/local/bin/0conf); do
+  ipset add listBlan \$iplistBlan
 done
 
 ipset -N listWlan hash:net maxelem 65535
-for iplistWlan in $(jq -r '.listWlan[]' /usr/local/bin/0conf); do
-  ipset add listWlan $iplistWlan
+for iplistWlan in \$(jq -r '.listWlan[]' /usr/local/bin/0conf); do
+  ipset add listWlan \$iplistWlan
 done
 
 ip rule add fwmark 0x9 table 100 pref 100
@@ -509,6 +509,15 @@ iptables -A INPUT -p tcp --tcp-flags RST RST -j DROP
 
 iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
 iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
+
+iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5370 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5370 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5380 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5380 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
@@ -521,7 +530,7 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport $(jq -r '.wireguard.WGport' /usr/local/bin/0conf) -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport \$(jq -r '.wireguard.WGport' /usr/local/bin/0conf) -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
@@ -547,7 +556,7 @@ iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 98
 systemctl restart doh-client
 systemctl restart vtrui
 
-if [[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}') =~ "wg0" ]]; then
+if [[ \$(ip --oneline link show up | grep -v "lo" | awk '{print \$2}') =~ "wg0" ]]; then
 systemctl restart wg-quick@wg0
 fi
 EOF
