@@ -311,7 +311,6 @@ User=root
 Type=oneshot
 ExecStart=/usr/local/bin/ui-update
 KillMode=process
-StartLimitBurst=0
 StartLimitIntervalSec=2
 TimeoutSec=2
 

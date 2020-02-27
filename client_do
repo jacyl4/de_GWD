@@ -428,8 +428,6 @@ Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=always
 RestartSec=2
-StartLimitBurst=0
-TimeoutSec=0
 
 [Install]
 WantedBy=multi-user.target
@@ -949,7 +947,6 @@ Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
 KillMode=process
-StartLimitBurst=0
 StartLimitIntervalSec=2
 TimeoutSec=2
 
