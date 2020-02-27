@@ -39,7 +39,10 @@ APT::Install-Suggests "false";
 EOF
 
 cat << EOF > /etc/apt/apt.conf.d/71debconf
-Dpkg::Options { "--force-confdef"; };
+Dpkg::Options {
+   "--force-confdef";
+   "--force-confold";
+};
 EOF
 
 rm -rf /etc/apt/sources.list.d/*
