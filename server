@@ -381,8 +381,8 @@ After=network.target
 User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=always
-RestartSec=2
+Restart=on-failure
+RestartPreventExitStatus=23
 
 [Install]
 WantedBy=multi-user.target
