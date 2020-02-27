@@ -552,8 +552,8 @@ iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 
-systemctl restart doh-client
 systemctl restart vtrui
+systemctl restart doh-client
 
 if [[ \$(ip --oneline link show up | grep -v "lo" | awk '{print \$2}') =~ "wg0" ]]; then
 systemctl restart wg-quick@wg0
