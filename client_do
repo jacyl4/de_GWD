@@ -479,7 +479,7 @@ for iplanip in \$lanip; do
 done
 
 ipset -N hosts hash:net maxelem 65535
-for hosts in \$(jq -r '.dns.hosts[]' /etc/vtrui/config.json); do
+for hosts in \$(jq -r '.dns.hosts[]' /etc/vtrui/config.json | grep -v '127.0.0.1'); do
   ipset add hosts \$hosts
 done
 
@@ -533,15 +533,14 @@ iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport \$(jq -r '.wireguard.WGport' /usr/local/bin/0conf) -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
-iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
-
-iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
