@@ -66,7 +66,7 @@ deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut
 EOF
 fi
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync lighttpd
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync lighttpd php-common php-cgi php-sqlite3
 source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
 
@@ -961,7 +961,6 @@ postInstall
 blue "---------------------"
 blue "Install de_GWD [done]"
 blue "---------------------"
-reboot
 }
 
 
