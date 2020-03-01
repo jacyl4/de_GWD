@@ -851,7 +851,6 @@ rm -rf ~/now.cron
 fi
 EOF
 chmod +x /usr/local/bin/Q2H
-/usr/local/bin/Q2H
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
