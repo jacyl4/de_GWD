@@ -448,6 +448,9 @@ echo $domainip >> /usr/local/bin/chnrouteset
 
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
+systemctl restart vtrui
+systemctl restart doh-client
+
 ipset -X chnroute
 ipset -X hosts
 ipset -X lanip
@@ -554,9 +557,6 @@ iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 
-systemctl restart vtrui
-systemctl restart doh-client
-
 if [[ \$(ip --oneline link show up | grep -v "lo" | awk '{print \$2}') =~ "wg0" ]]; then
 systemctl restart wg-quick@wg0
 fi
@@ -618,13 +618,13 @@ EOF
 
 echo
 if [[ $(curl -4skI -o /dev/null -w %{http_code} www.google.com | awk '{print$1;exit}') =~ "20" ]]; then
-    echo "$statuSuccess de_GWD server access"
-    echo "$statuSuccess de_GWD server access"
-    echo "$statuSuccess de_GWD server access"
+    echo "$statuSuccess de_GWD server connect"
+    echo "$statuSuccess de_GWD server connect"
+    echo "$statuSuccess de_GWD server connect"
 else
-    echo "$statusFailed de_GWD server access"
-    echo "$statusFailed de_GWD server access"
-    echo "$statusFailed de_GWD server access"
+    echo "$statusFailed de_GWD server connect"
+    echo "$statusFailed de_GWD server connect"
+    echo "$statusFailed de_GWD server connect"
     exit
 fi
 echo
