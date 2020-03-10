@@ -970,20 +970,22 @@ postInstall(){
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
-wget -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
 if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 700000 ]; then
 mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 fi
 
-wget -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
+wget --no-check-certificate -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
 if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 200000 ]; then
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
 fi
 
-curl -L 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > ~/chnroute.txt
-if [ $(ls -l ~/chnroute.txt | awk '{print$5}') -gt 102400 ]; then
-mv -f ~/chnroute.txt /usr/local/bin/chnroute.txt
-
+wget --no-check-certificate -c https://bgp.space/china.html
+sed -i '1,/BEGIN/d' ~/china.html
+sed -i '/END/,$d' ~/china.html
+sed -i 's/<br>//g' ~/china.html
+if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
+mv -f ~/china.html /usr/local/bin/chnroute.txt
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
 chnroute=`cat /usr/local/bin/chnroute.txt`
@@ -991,7 +993,6 @@ for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/chnrouteset
-
 fi
 EOF
 chmod +x /usr/local/bin/Q4am
