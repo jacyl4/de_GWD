@@ -1,5 +1,5 @@
 <?php
 putenv("nodeNUM=4");
-echo shell_exec('/usr/local/bin/pingNODE $nodeNUM');
+echo shell_exec('/usr/local/bin/ui-pingNODE $nodeNUM');
 die();
 ?>
