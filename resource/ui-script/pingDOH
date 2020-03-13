@@ -1,0 +1,4 @@
+#!/bin/bash
+dohNUM=$1
+url=$(jq -r '.doh[]' /usr/local/bin/0conf | awk NR==$dohNUM)
+echo "$(curl -o /dev/null -s -w '%{time_connect}\n' $url) * 1000" | bc | awk '{printf ("%.1f\n",$1)}' 
