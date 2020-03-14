@@ -412,7 +412,7 @@ worker_processes auto;
 worker_rlimit_nofile 100000;
 
 events {
-    worker_connections  2048;
+    worker_connections  4096;
     multi_accept on;
     use epoll;
 }
@@ -438,7 +438,6 @@ http {
   client_header_timeout     60;
   client_body_timeout       60;
   reset_timedout_connection on;
-  send_timeout              60;
   types_hash_max_size       2048;
 
   gzip                      on;
