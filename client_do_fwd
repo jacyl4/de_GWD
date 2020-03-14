@@ -12,11 +12,6 @@ mirrorSite="http://xznat.seso.icu:10290"
 
 
 clifwd_iptablesProxy(){
-sed -i '/net.ipv4.conf.all.accept_source_route =/c\net.ipv4.conf.all.accept_source_route = 0' /etc/sysctl.conf
-sed -i '/net.ipv4.conf.default.accept_source_route =/c\net.ipv4.conf.default.accept_source_route = 0' /etc/sysctl.conf
-sed -i '/net.ipv4.ip_forward =/c\net.ipv4.ip_forward = 0' /etc/sysctl.conf
-sysctl -p
-
 sed -i '/--dport 53 -i/d' /usr/local/bin/iptables-proxy-up
 sed -i '/--dport 8053 -j/d' /usr/local/bin/iptables-proxy-up
 
