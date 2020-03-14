@@ -545,8 +545,6 @@ location $v2path {
   proxy_redirect            off;
   proxy_buffering           off;
   proxy_buffer_size         4k;
-  proxy_buffers             64 4k;
-  proxy_busy_buffers_size   8k;
 }
 }
 EOF
