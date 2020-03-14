@@ -239,8 +239,11 @@ clifwd_installWebUI(){
 rm -rf /usr/local/bin/ui-*
 rm -rf /var/www/html/gwd/*.php
 cd ~
+
+if [[ ! -d "/var/www/html/gwd" ]]; then
 mkdir -p /var/www/html/gwd
 ln -s /var/www/html/admin  /var/www/html/gwd/admin
+fi
 
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
