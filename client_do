@@ -52,7 +52,7 @@ deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSI
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 lighttpd
+apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 lighttpd bc
 source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
 systemctl mask --now lighttpd > /dev/null 2>&1
