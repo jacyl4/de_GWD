@@ -518,7 +518,7 @@ server {
   ssl_stapling on;
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
-  resolver 127.0.0.1 valid=600s;
+  resolver 1.1.1.1 8.8.8.8 valid=600s;
   resolver_timeout 5s;
 
   add_header X-Frame-Options "SAMEORIGIN";
@@ -620,7 +620,7 @@ chmod +x /var/www/ssl/update_ocsp_cache
 
 crontab -l > ~/now.cron
 sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
-echo '0 0 * * 7 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
