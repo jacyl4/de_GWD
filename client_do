@@ -180,11 +180,11 @@ cat << EOF > /etc/smartdns/doh.conf
 bind 127.0.0.1:5370 -force-aaaa-soa
 bind-tcp 127.0.0.1:5370 -force-aaaa-soa
 
-speed-check-mode  ping,tcp:443
+speed-check-mode  tcp:80,ping
 cache-size        10000
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 0
+serve-expired-ttl 2
 
 server-https https://$domain/dq
 server-https https://$domain/dq
@@ -196,14 +196,14 @@ conf-file /etc/smartdns/doh.conf
 bind 127.0.0.1:5310 -force-aaaa-soa
 bind-tcp 127.0.0.1:5310 -force-aaaa-soa
 
-speed-check-mode  ping,tcp:80
+speed-check-mode  tcp:80,ping
 cache-size        10000
 rr-ttl            600
 rr-ttl-min        60
 rr-ttl-max        43200
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 0
+serve-expired-ttl 2
 
 server 114.114.114.114
 server 114.114.115.115
@@ -435,8 +435,11 @@ After=network.target
 User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+KillMode=process
+Restart=always
+RestartSec=2
+StartLimitIntervalSec=2
+TimeoutSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -1274,6 +1277,14 @@ installDep
 installNginx
 
 installWebUI
+
+rm -rf /etc/resolv.conf
+echo "" > /etc/resolvconf/run/interface/original.resolvconf
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 postInstall
 blue "--------------------"

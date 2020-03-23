@@ -379,14 +379,17 @@ After=network.target
 User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
+KillMode=process
+Restart=always
+RestartSec=2
+StartLimitIntervalSec=2
+TimeoutSec=2
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
 }
