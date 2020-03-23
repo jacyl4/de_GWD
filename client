@@ -702,14 +702,6 @@ bash <(wget --no-check-certificate -qO- http://raw.githubusercontent.com/pi-hole
 systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
 
-rm -rf /etc/resolv.conf
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
-echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
-
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
 listen-address=127.0.0.1
@@ -838,6 +830,14 @@ rm -rf /var/www/html/log.log
 EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
+
+rm -rf /etc/resolv.conf
+echo "" > /etc/resolvconf/run/interface/original.resolvconf
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 pihole restartdns
 output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
@@ -1043,6 +1043,16 @@ sleep 3
 
 installPihole
 
+rm -rf /etc/resolv.conf
+echo "" > /etc/resolvconf/run/interface/original.resolvconf
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
+
+pihole restartdns
+
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
 fi
@@ -1097,14 +1107,6 @@ installIptablesProxy
 installDep
 
 installWebUI
-
-rm -rf /etc/resolv.conf
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
-echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
 
 postInstall
 blue "--------------------"
