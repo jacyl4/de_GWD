@@ -379,11 +379,13 @@ After=network.target
 User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
 Restart=always
 RestartSec=2
-StartLimitIntervalSec=2
-TimeoutSec=2
+StartLimitBurst=0
+StartLimitIntervalSec=5
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target

@@ -184,7 +184,7 @@ speed-check-mode  tcp:80,ping
 cache-size        10000
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 2
+serve-expired-ttl 30
 
 server-https https://$domain/dq
 server-https https://$domain/dq
@@ -203,7 +203,7 @@ rr-ttl-min        60
 rr-ttl-max        43200
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 2
+serve-expired-ttl 30
 
 server 114.114.114.114
 server 114.114.115.115
@@ -435,11 +435,13 @@ After=network.target
 User=root
 Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
 Restart=always
 RestartSec=2
-StartLimitIntervalSec=2
-TimeoutSec=2
+StartLimitBurst=0
+StartLimitIntervalSec=5
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -949,9 +951,11 @@ User=root
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
+ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
-StartLimitIntervalSec=2
-TimeoutSec=2
+StartLimitBurst=0
+StartLimitIntervalSec=5
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
