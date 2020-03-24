@@ -190,7 +190,7 @@ cat << EOF > /etc/smartdns/doh.conf
 bind 127.0.0.1:5370 -force-aaaa-soa
 bind-tcp 127.0.0.1:5370 -force-aaaa-soa
 
-speed-check-mode  tcp:80,ping
+speed-check-mode  ping,tcp:80
 cache-size        10000
 prefetch-domain   yes
 serve-expired     yes
@@ -206,7 +206,7 @@ conf-file /etc/smartdns/doh.conf
 bind 127.0.0.1:5310 -force-aaaa-soa
 bind-tcp 127.0.0.1:5310 -force-aaaa-soa
 
-speed-check-mode  tcp:80,ping
+speed-check-mode  ping,tcp:80
 cache-size        10000
 rr-ttl            600
 rr-ttl-min        60
@@ -242,11 +242,12 @@ RestartSec=2
 [Install]
 WantedBy=multi-user.target
 EOF
-rm -rf ~/smartdns.deb
 
 systemctl daemon-reload
 systemctl enable smartdns
 systemctl restart smartdns
+
+rm -rf ~/smartdns.deb
 }
 
 
