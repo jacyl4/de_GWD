@@ -197,7 +197,7 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="NodeDThide()">禁用内网设备分流</button>
           </span>
           </div>
-            <button type="button" class="btn btn-outline-success btn-sm" style="border-radius: 0px;" onclick="pingtest()">Ping</button>
+            <button type="button" class="btn btn-outline-success btn-sm" style="border-radius: 0px;" onclick="pingtest()">Ping (TCP)</button>
 
 
           <div class="card-body">
