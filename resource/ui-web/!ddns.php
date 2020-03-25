@@ -32,8 +32,8 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge badge-pill text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionNat');?></span>
-<span class="float-right badge badge-pill text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
+<span class="float-right badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionNat');?></span>
+<span class="float-right badge text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -113,7 +113,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
-          <span class="badge badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?></span>
+          <span class="badge badge-pill badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsSaveCF()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsStopCF()">关闭</button>
@@ -162,7 +162,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             WireGuard Server
-          <span class="badge badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?></span>
+          <span class="badge badge-pill badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>

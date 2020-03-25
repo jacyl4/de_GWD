@@ -31,8 +31,8 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge badge-pill text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionNat');?></span>
-<span class="float-right badge badge-pill text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
+<span class="float-right badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionNat');?></span>
+<span class="float-right badge text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -230,7 +230,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4 mb-4">
   <div class="input-group-prepend">
-  <label class="input-group-text">V2去广告<span class="badge badge-success align-text-top ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
+  <label class="input-group-text">V2去广告<span class="badge badge-pill badge-success align-text-top ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="v2adADD()">开启</button>
@@ -433,7 +433,7 @@
           <div class="card-header">
             <i class="fas fa-network-wired"></i>
             DHCP 服务
-          <span class="badge badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?></span>
+          <span class="badge badge-pill badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?></span>
 <span class="float-right mt-n1 mb-n2">
 <a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">查看</a>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpUP()">开启</button>
