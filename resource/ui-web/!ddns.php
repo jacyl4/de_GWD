@@ -113,7 +113,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
-          <span id="ddnscheckcf" class="badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?></span>
+          <span class="badge badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsSaveCF()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsStopCF()">关闭</button>
@@ -162,7 +162,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             WireGuard Server
-          <span class="badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?></span>
+          <span class="badge badge-success align-text-top"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>
