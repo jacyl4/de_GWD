@@ -144,11 +144,11 @@
           <span class="input-group-text justify-content-center w-100">脚本地址</span>
         </div>
           <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="updateGen()">保存</button>
       </div>
 
-      <div class="col-md-4 my-1 float-right">
-        <button type="button" class="btn btn-outline-danger float-right" onclick="update()">运行</button>
+      <div class="col-md-4 my-1 text-right">
+        <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
+        <button type="button" class="btn btn-outline-danger text-right" onclick="Rescue()">Rescue</button>
       </div>
     </div>
 
@@ -202,14 +202,15 @@ alert('设置已恢复');
 window.location.reload(true);
 }
 
-function updateGen(){
+function update(){
 updateAddr=$('#updateAddr').val();
-$.get('updateGen.php', {updateAddr:updateAddr}, function(result){ location.reload(); });
+$.get('update.php', {updateAddr:updateAddr}, function(result){});
+window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 }
 
-function update(){
-$.get('update.php', function(result){});
-window.open('', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+function Rescue(){
+$.get('Rescue.php', function(result){});
+alert('救机代码已运行');
 }
 
 window.onload = function() {
