@@ -245,7 +245,7 @@ systemctl restart smartdns
 
 
 installDOH(){
-rm -rf /usr/local/bin/doh-*
+rm -rf /usr/local/bin/doh-client
 
 portcheck=$(echo $port | grep '^[0-9]\+$')
 if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
