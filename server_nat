@@ -254,6 +254,8 @@ pihole restartdns
 
 
 installDOHser(){
+rm -rf /usr/local/bin/doh-*
+
 wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
@@ -317,13 +319,14 @@ systemctl restart doh-server
 
 
 installV2ray(){
+rm -rf /usr/bin/vtrui/*
+
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 mkdir -p ~/vtrui
 
 wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
 unzip ~/vtrui.zip -d ~/vtrui
-rm -rf /usr/bin/vtrui/*
 mv -f ~/vtrui/v2ray /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
 chmod +x /usr/bin/vtrui/vtrui

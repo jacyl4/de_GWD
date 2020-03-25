@@ -33,6 +33,8 @@ sleep 3
 
 
 clifwd_installDOHser(){
+rm -rf /usr/local/bin/doh-*
+
 wget --no-check-certificate -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server

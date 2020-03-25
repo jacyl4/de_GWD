@@ -245,6 +245,8 @@ systemctl restart smartdns
 
 
 installDOH(){
+rm -rf /usr/local/bin/doh-*
+
 portcheck=$(echo $port | grep '^[0-9]\+$')
 if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
 doh=$domain
@@ -332,13 +334,14 @@ systemctl restart doh-client
 
 
 installV2ray(){
+rm -rf /usr/bin/vtrui/*
+
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 mkdir -p ~/vtrui
 
 wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
 unzip ~/vtrui.zip -d ~/vtrui
-rm -rf /usr/bin/vtrui/*
 mv -f ~/vtrui/v2ray /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
 mv -f ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
