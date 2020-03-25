@@ -320,6 +320,7 @@ mkdir -p ~/vtrui
 
 wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
 unzip ~/vtrui.zip -d ~/vtrui
+rm -rf /usr/bin/vtrui/*
 mv -f ~/vtrui/v2ray /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
 chmod +x /usr/bin/vtrui/vtrui

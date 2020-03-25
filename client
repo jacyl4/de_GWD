@@ -353,6 +353,7 @@ elif [[ $architecture = "amd64" ]]; then
     wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
 fi
 unzip ~/vtrui.zip -d ~/vtrui
+rm -rf /usr/bin/vtrui/*
 mv -f ~/vtrui/v2ray /usr/bin/vtrui/vtrui
 mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
 mv -f ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
