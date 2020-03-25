@@ -252,9 +252,8 @@ pihole restartdns
 
 
 installDOHser(){
-cd ~
 wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
-unzip doh.zip
+unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
 rm -rf ~/doh*

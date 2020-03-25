@@ -252,7 +252,6 @@ systemctl restart smartdns
 
 
 installDOH(){
-cd ~
 portcheck=$(echo $port | grep '^[0-9]\+$')
 if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
 doh=$domain
@@ -268,7 +267,7 @@ if [[ $architecture = "arm64" ]]; then
 elif [[ $architecture = "amd64" ]]; then
   wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 fi
-unzip doh.zip
+unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
 chmod +x /usr/local/bin/doh-client
 rm -rf ~/doh*
