@@ -426,7 +426,6 @@ cat << EOF > /etc/vtrui/config.json
   {"tag":"dnsout","protocol":"dns"}
 ],
 "routing": {
-  "domainStrategy": "AsIs",
   "rules": [
     {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"},
     {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},

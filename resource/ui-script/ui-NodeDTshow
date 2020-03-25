@@ -151,7 +151,6 @@ cat > /etc/vtrui/config.json << EOF
     {"tag":"block","protocol":"blackhole"}
   ],
   "routing": {
-    "domainStrategy": "AsIs",
     "rules": [
       { "type": "field", "inboundTag": "DNSflow", "outboundTag": "direct" },
       { "type": "field", "inboundTag": "dnsin", "outboundTag": "dnsout" },
