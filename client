@@ -185,6 +185,7 @@ elif [[ $architecture = "amd64" ]]; then
   wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 fi
 dpkg -i ~/smartdns.deb
+rm -rf ~/smartdns.deb
 
 cat << EOF > /etc/smartdns/doh.conf
 bind 127.0.0.1:5370 -force-aaaa-soa
@@ -246,8 +247,6 @@ EOF
 systemctl daemon-reload
 systemctl enable smartdns
 systemctl restart smartdns
-
-rm -rf ~/smartdns.deb
 }
 
 
