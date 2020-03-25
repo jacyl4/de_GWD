@@ -209,7 +209,7 @@ window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrol
 }
 
 function Rescue(){
-$.get('Rescue.php', function(result){});
+$.get('updateRescue.php', function(result){});
 alert('救机代码已运行');
 }
 
