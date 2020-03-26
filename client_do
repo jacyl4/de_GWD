@@ -365,7 +365,7 @@ cat << EOF > /etc/vtrui/config.json
     "port": 53,
     "listen": "0.0.0.0",
     "protocol": "dokodemo-door",
-    "settings": {"address": "0.0.0.0", "network": "tcp,udp"}
+    "settings": {"network": "tcp,udp", "followRedirect": true}
   },
   {
     "port": 9896,
@@ -414,8 +414,8 @@ cat << EOF > /etc/vtrui/config.json
 ],
 "routing": {
   "rules": [
-    {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"},
     {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
+    {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"},
     {"type":"field","ip":["geoip:private","geoip:cn","114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"}
   ]
 }
@@ -442,6 +442,7 @@ Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
+LimitNOFILE=1000000
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -541,8 +542,8 @@ iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j REDIRECT
+iptables -t mangle -A V2PROXY -p udp --dport 53 -j REDIRECT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5370 -j ACCEPT
