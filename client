@@ -648,7 +648,6 @@ cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
-option use-vc
 EOF
 
 echo
@@ -845,7 +844,7 @@ rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+echo ""  > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
@@ -1044,7 +1043,6 @@ cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
-option use-vc
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380},{"address":"127.0.0.1","port":5370}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
@@ -1057,7 +1055,7 @@ rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+echo ""  > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
