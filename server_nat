@@ -387,6 +387,7 @@ Type=simple
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
+LimitNPROC=500
 LimitNOFILE=1000000
 Restart=always
 RestartSec=2
