@@ -70,8 +70,8 @@ dpkg --configure -a
 cat << EOF > /etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
-* soft nproc 1000000
-* hard nproc 1000000
+* soft nproc 64000
+* hard nproc 64000
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
@@ -301,11 +301,12 @@ After=network.target
 [Service]
 User=nobody
 Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
 RestartSec=2
-LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
@@ -383,15 +384,13 @@ After=network.target
 [Service]
 User=root
 Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
-LimitNPROC=500
-LimitNOFILE=1000000
 Restart=always
 RestartSec=2
-StartLimitBurst=0
-StartLimitIntervalSec=5
 TimeoutSec=5
 
 [Install]
@@ -885,7 +884,7 @@ fi
 
 wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 
-apt update && apt upgrade -y && apt autoremove -y
+apt update && apt upgrade -y && apt autoremove -y && apt autoclean
 }
 
 

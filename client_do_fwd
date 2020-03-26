@@ -80,11 +80,12 @@ After=network.target
 [Service]
 User=nobody
 Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
 RestartSec=2
-LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
@@ -383,7 +384,7 @@ rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "options use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
@@ -615,7 +616,7 @@ cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
-options use-vc
+option use-vc
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
@@ -624,20 +625,7 @@ sleep 3
 
 installPihole
 
-rm -rf /etc/resolv.conf
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
-echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "options use-vc"  > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
-
-pihole restartdns
-
-if [[ ! -d "/var/www/html/gwd" ]]; then
-mkdir -p /var/www/html/gwd
-ln -s /var/www/html/admin /var/www/html/gwd/admin
-fi
+piholeSet
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
@@ -646,6 +634,11 @@ fi
 output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
 output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
 systemctl restart iptables-proxy
+
+if [[ ! -d "/var/www/html/gwd" ]]; then
+mkdir -p /var/www/html/gwd
+ln -s /var/www/html/admin /var/www/html/gwd/admin
+fi
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
@@ -700,6 +693,8 @@ installV2ray
 installIptablesProxy
 
 installDep
+
+piholeSet
 
 installNginx
 

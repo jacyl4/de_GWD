@@ -69,8 +69,8 @@ dpkg --configure -a
 cat << EOF > /etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
-* soft nproc 1000000
-* hard nproc 1000000
+* soft nproc 64000
+* hard nproc 64000
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
@@ -301,11 +301,12 @@ After=network.target
 [Service]
 User=nobody
 Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 Restart=always
 RestartSec=2
-LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
@@ -339,9 +340,7 @@ cat << EOF > /etc/vtrui/config.json
 "dns": {
   "tag": "DNSflow",
   "hosts": {"localhost":"127.0.0.1"},
-  "servers": [
-    {"address":"127.0.0.1","port":5380}
-  ]
+  "servers": [{"address":"127.0.0.1","port":5380}]
 },
 "inbounds": [
   {
@@ -349,15 +348,14 @@ cat << EOF > /etc/vtrui/config.json
     "port": 53,
     "listen": "0.0.0.0",
     "protocol": "dokodemo-door",
-    "settings": {"address": "0.0.0.0", "port": 53, "network": "tcp,udp"}
+    "settings": {"address":"0.0.0.0","port":53,"network":"tcp,udp"}
   },
   {
     "port": 9896,
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
-    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
-    "settings": {"network": "tcp,udp", "followRedirect": true},
-    "streamSettings": { "sockopt": { "tproxy": "tproxy" } }
+    "settings": {"network":"tcp,udp","followRedirect":true},
+    "streamSettings": {"sockopt":{"tproxy":"tproxy"}}
   }
 ],
 "outbounds": [
@@ -423,15 +421,13 @@ After=network.target
 [Service]
 User=root
 Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
-LimitNPROC=500
-LimitNOFILE=1000000
 Restart=always
 RestartSec=2
-StartLimitBurst=0
-StartLimitIntervalSec=5
 TimeoutSec=5
 
 [Install]
@@ -610,7 +606,7 @@ cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
-options use-vc
+option use-vc
 EOF
 
 echo
@@ -640,7 +636,7 @@ EOF
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt upgrade -y && apt autoremove -y
+apt update && apt upgrade -y && apt autoremove -y && apt autoclean
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
@@ -744,11 +740,24 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 bash <(wget --no-check-certificate -qO- http://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh) /dev/stdin --unattended
+}
 
+
+
+
+piholeSet(){
 systemctl mask --now lighttpd > /dev/null 2>&1
 rm -rf /var/www/html/index.lighttpd.orig
 systemctl mask --now dhcpcd > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
+
+rm -rf /etc/resolv.conf
+echo "" > /etc/resolvconf/run/interface/original.resolvconf
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
@@ -1001,15 +1010,6 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-rm -rf /etc/resolv.conf
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
-echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "options use-vc"  > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
-
-pihole restartdns
 output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
 output=$(/usr/local/bin/ui-saveNode > /dev/null 2>&1)
 output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
@@ -1102,6 +1102,8 @@ installIptablesProxy
 installDep
 
 installPihole
+
+piholeSet
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
@@ -1200,7 +1202,7 @@ cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
-options use-vc
+option use-vc
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
@@ -1209,15 +1211,7 @@ sleep 3
 
 installPihole
 
-rm -rf /etc/resolv.conf
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
-echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "options use-vc"  > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
-
-pihole restartdns
+piholeSet
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
@@ -1271,6 +1265,8 @@ installV2ray
 installIptablesProxy
 
 installDep
+
+piholeSet
 
 installNginx
 
