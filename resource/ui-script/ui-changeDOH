@@ -14,15 +14,6 @@ doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 
-doh_smup1="server-https https://$doh1/dq"
-doh_smup2="server-https https://$doh2/dq"
-
-sed -i '/server-https/,$d' /etc/smartdns/doh.conf
-cat << EOF >> /etc/smartdns/doh.conf
-$doh_smup1
-$doh_smup2
-EOF
-
 jq --arg key1 $dohname1 --arg value1 $doh1ip '.dns.hosts += {($key1): ($value1)}' /etc/vtrui/config.json |\
 jq --arg key2 $dohname2 --arg value2 $doh2ip '.dns.hosts += {($key2): ($value2)}' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
