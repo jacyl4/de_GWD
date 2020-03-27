@@ -52,7 +52,7 @@ deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSI
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-apt update && apt install -y sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 lighttpd bc
+apt update && apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 lighttpd bc
 source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
 systemctl mask --now lighttpd > /dev/null 2>&1
@@ -60,7 +60,7 @@ systemctl mask --now lighttpd > /dev/null 2>&1
 echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 wget -qO- http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
 
-apt update && apt install -y docker-ce docker-ce-cli containerd.io
+apt update && apt install docker-ce docker-ce-cli containerd.io
 systemctl enable docker
 systemctl restart docker
 
@@ -637,12 +637,12 @@ EOF
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-apt update && apt upgrade -y && apt autoremove -y && apt autoclean
+apt update && apt upgrade && apt autoremove && apt autoclean
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install -y php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
+apt install php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
 
 cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
@@ -1171,7 +1171,7 @@ cd ~
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
+apt update && apt install linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src

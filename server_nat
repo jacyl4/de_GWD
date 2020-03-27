@@ -54,14 +54,14 @@ deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERS
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
+apt update && apt install sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
 source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
-apt update && apt install -y docker-ce docker-ce-cli containerd.io
+apt update && apt install docker-ce docker-ce-cli containerd.io
 systemctl enable docker
 systemctl restart docker
 
@@ -685,7 +685,7 @@ fi
 
 wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 
-apt update && apt upgrade -y && apt autoremove -y && apt autoclean
+apt update && apt upgrade && apt autoremove && apt autoclean
 }
 
 
@@ -769,7 +769,7 @@ blue "--------------------------------------------"
 
 
 installBBRplus(){
-apt install -y wget
+apt install wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb

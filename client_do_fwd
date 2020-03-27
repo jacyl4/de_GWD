@@ -194,7 +194,7 @@ jacyl4/nginx_tls1.3:latest
 
 
 makeSSL_D(){
-apt update && apt install -y netcat socat
+apt update && apt install netcat socat
 
 export CF_Key="$CFapikey"
 export CF_Email="$CFemail"
@@ -484,7 +484,7 @@ blue "----------------------------"
 
 
 installBBRplus(){
-apt install -y wget
+apt install wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb
@@ -578,7 +578,7 @@ cd ~
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install -y linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
+apt update && apt install linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src

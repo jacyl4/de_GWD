@@ -54,14 +54,14 @@ deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERS
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
-apt update && apt install -y sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
+apt update && apt install sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
 source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
-apt update && apt install -y docker-ce docker-ce-cli containerd.io
+apt update && apt install docker-ce docker-ce-cli containerd.io
 systemctl enable docker
 systemctl restart docker
 
@@ -885,7 +885,7 @@ fi
 
 wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 
-apt update && apt upgrade -y && apt autoremove -y && apt autoclean
+apt update && apt upgrade && apt autoremove && apt autoclean
 }
 
 
@@ -959,7 +959,7 @@ blue "--------------------------------------------"
 
 
 installBBRplus(){
-apt install -y wget
+apt install wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb
 wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)_amd64.deb
@@ -1011,14 +1011,14 @@ installNextcloud(){
     green "=================="
     read sqlpw
 
-apt update && apt install -y software-properties-common dirmngr
+apt update && apt install software-properties-common dirmngr
 
 dpkg --configure -a
 
 echo "deb [arch=amd64] http://mariadb.nethub.com.hk/repo/10.3/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/mariadb.list
 apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
 
-apt update && apt install -y mariadb-server
+apt update && apt install mariadb-server
 
 mysql_secure_installation
 
@@ -1136,7 +1136,7 @@ systemctl restart mariadb
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 
-apt update && apt install -y php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-imap php7.3-gmp php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php-dompdf php-smbclient php-apcu php-redis redis-server php-imagick imagemagick ffmpeg
+apt update && apt install php7.3 php7.3-fpm php7.3-cli php7.3-common php7.3-dev php7.3-mysql php7.3-curl php7.3-json php7.3-gd php7.3-mbstring php7.3-zip php7.3-bz2 php7.3-ldap php7.3-imap php7.3-gmp php7.3-opcache php7.3-xml php7.3-xmlrpc php7.3-intl php-dompdf php-smbclient php-apcu php-redis redis-server php-imagick imagemagick ffmpeg
 
 cat << EOF > /etc/php/7.3/fpm/php.ini
 [PHP]
