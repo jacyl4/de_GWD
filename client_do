@@ -611,7 +611,7 @@ option use-vc
 EOF
 
 echo
-if [[ $(curl -4skI -o /dev/null -w %{http_code} https://www.google.com | awk '{print$1;exit}') =~ "20" ]]; then
+if [[ $(curl -Is  http://www.google.com | head -n 1) =~ "OK" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
