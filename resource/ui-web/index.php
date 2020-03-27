@@ -433,7 +433,7 @@
           <div class="card-header">
             <i class="fas fa-network-wired"></i>
             DHCP 服务
-          <span class="badge badge-pill badge-success mt-auto mb-auto"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?></span>
+          <span class="badge badge-pill badge-success mt-auto mb-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?></span>
 <span class="float-right mt-n1 mb-n2">
 <a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">详情</a>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpUP()">开启</button>
