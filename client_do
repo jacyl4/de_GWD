@@ -665,6 +665,7 @@ user = www-data
 group = www-data
 listen = /run/php/php7.3-fpm.sock
 listen.allowed_clients = 127.0.0.1
+listen.backlog = 65536
 listen.mode = 0666
 
 pm = ondemand
