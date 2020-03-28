@@ -311,6 +311,7 @@ RestartSec=2
 [Install]
 WantedBy=multi-user.target
 EOF
+
 systemctl daemon-reload > /dev/null 2>&1
 systemctl enable doh-server
 systemctl restart doh-server
@@ -379,15 +380,18 @@ jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' 
 cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
-After=network.target
+After=network.target nss-lookup.target
+Wants=network-online.target
 
 [Service]
 User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
+NoNewPrivileges=yes
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-ExecStop=/bin/kill -9 \$MAINPID
+ExecStop=/bin/kill -9 $MAINPID
 Restart=always
 RestartSec=2
 StartLimitBurst=0
