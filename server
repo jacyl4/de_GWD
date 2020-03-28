@@ -1279,8 +1279,8 @@ soap.wsdl_cache_limit = 5
 ldap.max_links = -1
 
 [opcache]
-zend_extension=opcache.so
 opcache.enable=1
+opcache.enable_cli=1
 opcache.memory_consumption=128
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=10000
@@ -1307,6 +1307,7 @@ user = www-data
 group = www-data
 listen = /run/php/php7.3-fpm.sock
 listen.allowed_clients = 127.0.0.1
+listen.backlog = 65536
 listen.mode = 0666
 
 pm = ondemand
