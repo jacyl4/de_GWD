@@ -1,18 +1,20 @@
 #!/bin/bash
-localip=$(jq -r '.address.localIP' /usr/local/bin/0conf)
+localaddr=$(jq -r '.address.localIP' /usr/local/bin/0conf)
 upstreamip=$(jq -r '.address.upstreamIP' /usr/local/bin/0conf)
 
-sed -i "/address/c\address $localip" /etc/network/interfaces
+sed -i "/address/c\address $localaddr" /etc/network/interfaces
 sed -i "/gateway/c\gateway $upstreamip" /etc/network/interfaces
 
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localip/24" /etc/pihole/setupVars.conf
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24" /etc/pihole/setupVars.conf
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 
-echo -e "static ip_address=$localip/24" >> /etc/dhcpcd.conf
+echo -e "static ip_address=$localaddr/24" >> /etc/dhcpcd.conf
 echo -e "static routers=$upstreamip" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
+
+jq --arg localaddr "$localaddr" '.inbounds[0].settings.address=$localaddr' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 reboot

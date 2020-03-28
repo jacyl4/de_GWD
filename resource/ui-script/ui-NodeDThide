@@ -1,4 +1,5 @@
 #!/bin/bash
+localaddr=$(jq -r '.address.localIP' /usr/local/bin/0conf)
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
 port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
 uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
@@ -144,7 +145,8 @@ cat > /etc/vtrui/config.json << EOF
 }
 EOF
 
-jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
+jq --arg localaddr "$localaddr" '.inbounds[0].settings.address=$localaddr' /etc/vtrui/config.json |\
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
