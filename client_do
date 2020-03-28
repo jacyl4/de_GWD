@@ -341,7 +341,7 @@ cat << EOF > /etc/vtrui/config.json
     "port": 53,
     "listen": "0.0.0.0",
     "protocol": "dokodemo-door",
-    "settings": {"address":"0.0.0.0","port":53,"network":"tcp,udp"}
+    "settings": {"address":"1.1.1.1","port":53,"network":"tcp,udp"}
   },
   {
     "port": 9896,
