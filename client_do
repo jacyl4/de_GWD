@@ -57,13 +57,6 @@ source /etc/profile
 systemctl enable --now haveged > /dev/null 2>&1
 systemctl mask --now lighttpd > /dev/null 2>&1
 
-echo "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
-wget -qO- http://mirrors.aliyun.com/docker-ce/linux/debian/gpg | apt-key add -
-
-apt update && apt install docker-ce docker-ce-cli containerd.io
-systemctl enable docker
-systemctl restart docker
-
 dpkg --configure -a
 
 cat << EOF > /etc/security/limits.conf
@@ -635,6 +628,9 @@ deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION=
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1)-updates main
 EOF
 
+echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) main" > /etc/apt/sources.list.d/php.list
 wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
@@ -643,7 +639,10 @@ apt update && apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
+apt install docker-ce docker-ce-cli containerd.io php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
+
+systemctl enable docker
+systemctl restart docker
 
 cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
