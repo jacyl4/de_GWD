@@ -422,8 +422,7 @@ cat << EOF > /etc/vtrui/config.json
 }
 EOF
 
-jq --arg localaddr "$localaddr" '.inbounds[0].settings.address=$localaddr' /etc/vtrui/config.json |\
-jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' |\
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\

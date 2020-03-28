@@ -15,6 +15,4 @@ echo -e "static ip_address=$localaddr/24" >> /etc/dhcpcd.conf
 echo -e "static routers=$upstreamip" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
-jq --arg localaddr "$localaddr" '.inbounds[0].settings.address=$localaddr' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
-
 reboot
