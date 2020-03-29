@@ -341,7 +341,7 @@ cat << EOF > /etc/vtrui/config.json
     "port": 53,
     "listen": "0.0.0.0",
     "protocol": "dokodemo-door",
-    "settings": {"address":"1.1.1.1","port":53,"network":"tcp,udp"}
+    "settings": {"address":"119.29.29.29","port":53,"network":"tcp,udp"}
   },
   {
     "port": 9896,
@@ -389,9 +389,9 @@ cat << EOF > /etc/vtrui/config.json
 ],
 "routing": {
   "rules": [
-    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
     {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"},
-    {"type":"field","ip":["geoip:private","geoip:cn","114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"}
+    {"type":"field","ip":["geoip:private","geoip:cn","114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"},
+    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"}
   ]
 }
 }
