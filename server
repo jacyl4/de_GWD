@@ -1547,20 +1547,28 @@ changev2rayupstream(){
 if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 
-    green "====================="
-    green "v2ray upstream domain"
-    green "====================="
-    read upstreamDomain
+    green "=========================="
+    green "v2ray upstream domain:port"
+    green "=========================="
+    read upstreamDomainP
 
-    green "====================="
+    green "=========================="
     green "v2ray upstream UUID"
-    green "====================="
+    green "=========================="
     read upstreamUUID
 
-    green "====================="
+    green "=========================="
     green "v2ray upstream path"
-    green "====================="
+    green "=========================="
     read upstreamPath
+
+domain=$(echo $upstreamDomainP | cut -d : -f1)
+port=$(echo $upstreamDomainP | cut -d : -f2)
+
+portcheck=$(echo $port | grep '^[0-9]\+$')
+if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
+port="443"
+fi
 
 cat >> /etc/vtrui/config.json << EOF
   "outbounds": [
@@ -1568,8 +1576,8 @@ cat >> /etc/vtrui/config.json << EOF
     "mux": { "enabled": true },
     "protocol": "vmess",
     "settings": { "vnext": [{
-      "address": "$upstreamDomain",
-      "port": 443,
+      "address": "$domain",
+      "port": $port,
       "users": [{
         "id": "$upstreamUUID",
           "level": 1,
@@ -1582,12 +1590,12 @@ cat >> /etc/vtrui/config.json << EOF
       "wsSettings": {
         "path": "$upstreamPath",
         "headers": {
-          "Host": "$upstreamDomain"
+          "Host": "$domain"
           }
         },
       "security": "tls",
       "tlsSettings": {
-        "serverName": "$upstreamDomain",
+        "serverName": "$domain",
         "allowInsecure": false
         }
       }
