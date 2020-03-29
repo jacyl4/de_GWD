@@ -337,7 +337,6 @@ rm -rf ~/vtrui*
 
 cat << EOF > /etc/vtrui/config.json
 {
-  "dns": { "servers": [ "localhost" ] },
   "inbounds": [
     {
     "port": 11811,
@@ -356,7 +355,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol": "freedom", "settings": {"domainStrategy": "UseIPv4"}},
+  {"protocol": "freedom", "settings": {}},
   {"tag": "block", "protocol": "blackhole", "settings": {}}
   ]
 }
@@ -973,9 +972,7 @@ cat >> /etc/vtrui/config.json << EOF
   "outbounds": [
     {
       "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIPv4"
-      }
+      "settings": {}
     },
     {
       "tag": "block",
