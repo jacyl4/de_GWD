@@ -602,7 +602,7 @@ option use-vc
 EOF
 
 echo
-if [[ $(curl -Is  http://www.google.com | head -n 1) =~ "OK" ]]; then
+if [[ $(curl -Is  http://www.google.com | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
