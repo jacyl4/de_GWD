@@ -1227,19 +1227,6 @@ blue "----------------------"
 
 
 updateGWD(){
-if [[ $(jq -r '.v2nodeForUpdate' /usr/local/bin/0conf) = "null" ]]; then
-domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /etc/vtrui/config.json)
-port=$(jq -r '.outbounds[0].settings.vnext[0].port' /etc/vtrui/config.json)
-uuidnum=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /etc/vtrui/config.json)
-v2path=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
-
-jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' /usr/local/bin/0conf |\
-jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
-jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
-jq --arg v2path "$v2path" '.v2nodeForUpdate.path=$v2path' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
-fi
-
 cd ~
 source /etc/profile
 
