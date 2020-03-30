@@ -366,9 +366,6 @@ chmod +x /usr/local/bin/Q4am
 
 cat << "EOF" > /usr/local/bin/Q4H
 #!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
 rm -rf ~/client*
 rm -rf ~/clifwd*
 rm -rf /var/log/*1*
@@ -390,6 +387,9 @@ output=$(systemctl restart iptables-proxy)
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
 /usr/local/bin/ui-saveListBW > /dev/null 2>&1
 EOF
 chmod +x /usr/local/bin/Q2H

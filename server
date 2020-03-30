@@ -376,7 +376,7 @@ rm -rf /tmp/v2clients
 
 jq --arg v2path $v2path '.inbounds[0].streamSettings.wsSettings.path=$v2path' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
-cat << EOF > /lib/systemd/system/vtrui.service
+cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -385,11 +385,12 @@ Wants=network-online.target
 [Service]
 User=root
 Type=simple
-LimitNPROC=64000
+LimitNPROC=500
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-ExecStop=/bin/kill -9 \$MAINPID
+ExecStop=/bin/kill -9 $MAINPID
+KillMode=process
 Restart=always
 RestartSec=2
 StartLimitBurst=0

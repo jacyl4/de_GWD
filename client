@@ -365,7 +365,7 @@ cat << EOF > /etc/vtrui/config.json
     "tag": "dnsin",
     "port": 53,
     "protocol": "dokodemo-door",
-    "settings": {"address":"119.29.29.29","port":53,"network":"tcp,udp"}
+    "settings": {"address":"1.1.1.1","port":53,"network":"tcp,udp"}
   },
   {
     "port": 9896,
@@ -413,9 +413,9 @@ cat << EOF > /etc/vtrui/config.json
 ],
 "routing": {
   "rules": [
+    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
     {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"},
-    {"type":"field","ip":["geoip:private","geoip:cn","114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"},
-    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"}
+    {"type":"field","ip":["geoip:private","geoip:cn","114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"}
   ]
 }
 }
@@ -430,7 +430,7 @@ jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$do
 jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
 jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
-cat << EOF > /lib/systemd/system/vtrui.service
+cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -439,11 +439,12 @@ Wants=network-online.target
 [Service]
 User=root
 Type=simple
-LimitNPROC=64000
+LimitNPROC=500
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-ExecStop=/bin/kill -9 \$MAINPID
+ExecStop=/bin/kill -9 $MAINPID
+KillMode=process
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -814,9 +815,6 @@ chmod +x /usr/local/bin/Q4am
 
 cat << "EOF" > /usr/local/bin/Q4H
 #!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
 rm -rf ~/client*
 rm -rf /var/log/*1*
 rm -rf /var/log/*2*
@@ -847,6 +845,9 @@ output=$(systemctl restart iptables-proxy)
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
 /usr/local/bin/ui-saveListBW > /dev/null 2>&1
 EOF
 chmod +x /usr/local/bin/Q2H
