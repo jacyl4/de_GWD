@@ -738,6 +738,7 @@ rm -rf ~/ui-*
 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
+chmod +x /usr/local/bin/ttyd
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.arm
