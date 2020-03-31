@@ -175,7 +175,11 @@ location $clifwd_v2path {
 }
 }
 EOF
+}
 
+
+
+clifwd_installNginxDo(){
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
@@ -303,6 +307,13 @@ cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-No
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/gwd/version.php
 
+docker restart nginx
+
+mkdir -p /var/www/html/gwd/restore
+chown -R www-data:www-data /var/www/html
+chmod +x /var/www/html/gwd/*
+chmod +x /usr/local/bin/*
+
 wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
 mv -f ~/ttyd /usr/local/bin/ttyd
 
@@ -323,11 +334,6 @@ TimeoutSec=2
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload > /dev/null 2>&1
-
-mkdir -p /var/www/html/gwd/restore
-chown -R www-data:www-data /var/www/html
-chmod +x /var/www/html/gwd/*
-chmod +x /usr/local/bin/*
 }
 
 
@@ -461,6 +467,8 @@ clifwd_iptablesProxy
 clifwd_installDOHser
 
 clifwd_nginxWebConf
+
+clifwd_installNginxDo
 
 makeSSL_D
 
@@ -765,6 +773,7 @@ blue "----------------------------------------"
     green  "2. Change de_GWD password"
     green  "3. Install bbrplus and reboot（only Debian 9）"
     red    "6. Change domain and issue new certificates"
+    yellow "7. update Nginx(docker)"
     yellow "8. Install/Update WiregGard"
     yellow "9. Update Pi-hole"
     yellow "0. de_GWD clifwd Update"
@@ -786,6 +795,10 @@ blue "----------------------------------------"
     ;;
     6)
     changeDomain
+    start_menu
+    ;;
+    7)
+    clifwd_installNginxDo
     start_menu
     ;;
     8)

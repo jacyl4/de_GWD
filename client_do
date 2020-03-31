@@ -791,7 +791,7 @@ pihole restartdns
 
 
 
-installNginx(){
+nginxSet(){
 mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
 mkdir -p "/var/log/nginx"
@@ -898,7 +898,11 @@ location ~* \.php$ {
 }
 }
 EOF
+}
 
+
+
+installNginxDo(){
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
@@ -930,6 +934,13 @@ rm -rf ~/ui-*
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/version.php
 
+docker restart nginx
+
+mkdir -p /var/www/html/restore
+chown -R www-data:www-data /var/www/html
+chmod +x /var/www/html/*
+chmod +x /usr/local/bin/*
+
 wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
 mv -f ~/ttyd /usr/local/bin/ttyd
 
@@ -953,11 +964,6 @@ TimeoutSec=5
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload > /dev/null 2>&1
-
-mkdir -p /var/www/html/restore
-chown -R www-data:www-data /var/www/html
-chmod +x /var/www/html/*
-chmod +x /usr/local/bin/*
 }
 
 
@@ -1112,7 +1118,9 @@ echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
-installNginx
+nginxSet
+
+installNginxDo
 
 updateAddr="$mirrorSite/client_do"
 
@@ -1254,7 +1262,7 @@ installDep
 
 piholeSet
 
-installNginx
+nginxSet
 
 installWebUI
 
@@ -1332,6 +1340,7 @@ blue "----------------------------------------"
     echo
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
+    yellow "7. update Nginx(docker)"
     yellow "8. Install/Update WiregGard"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
@@ -1345,6 +1354,10 @@ blue "----------------------------------------"
     ;;
     2)
     change_piholeAdmin
+    start_menu
+    ;;
+    7)
+    installNginxDo
     start_menu
     ;;
     8)
