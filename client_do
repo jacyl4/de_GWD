@@ -973,13 +973,13 @@ postInstall(){
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
-wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dlc.dat
-if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 700000 ]; then
+wget --no-check-certificate -c https://raw.githubusercontent.com/v2ray/domain-list-community/release/dlc.dat
+if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 100000 ]; then
 mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
 fi
 
 wget --no-check-certificate -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
-if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 200000 ]; then
+if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 100000 ]; then
 mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
 fi
 
