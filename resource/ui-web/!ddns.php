@@ -271,8 +271,11 @@
 注：需要主路由映射所需UDP端口到de_GWD的地址。
   </small>
 </span>
-
-
+          </div>
+        </div>
+        <!-- Page Content -->
+      </div>
+      
 <!-- Modal -->
 <div class="modal fade" id="wgqrpop1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -377,10 +380,6 @@
     </div>
   </div>
 </div>
-          </div>
-        </div>
-        <!-- Page Content -->
-      </div>
       <!-- /.container-fluid -->
 
       <!-- Sticky Footer -->
