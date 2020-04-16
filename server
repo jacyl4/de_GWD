@@ -119,7 +119,6 @@ net.ipv4.tcp_wmem = 4096 87380 8388608
 net.ipv4.tcp_keepalive_time = 1800
 net.ipv4.tcp_keepalive_intvl = 15
 net.ipv4.tcp_keepalive_probes = 3
-net.ipv4.tcp_ecn = 0
 net.ipv4.tcp_rfc1337 = 1
 EOF
 
