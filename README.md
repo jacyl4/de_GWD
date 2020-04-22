@@ -9,8 +9,8 @@
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
-![server](https://i.loli.net/2020/02/23/EZldb3zPtgKGprX.png)
 
+![Snipaste_2020-04-23_04-03-56.png](https://i.loli.net/2020/04/23/kyuN9EzKdVQfI1A.png)
 
 ## Client：
 Compatible Edition (amd64&arm64)
@@ -18,7 +18,6 @@ Compatible Edition (amd64&arm64)
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10290/client)
 ```
-
 
 General Edition (amd64)
 ```
