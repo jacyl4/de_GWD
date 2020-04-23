@@ -1110,7 +1110,7 @@ else
 fi
 
 blue "----------------------------------------"
-blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control) | cut -d ' ' -f3)"
+blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null) | cut -d ' ' -f3)"
 blue "----------------------------------------"
 
     green "==========================="
