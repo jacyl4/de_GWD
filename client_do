@@ -417,7 +417,6 @@ LimitNPROC=64000
 LimitNOFILE=1000000
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 $MAINPID
-KillMode=process
 Restart=always
 RestartSec=2
 StartLimitBurst=0
