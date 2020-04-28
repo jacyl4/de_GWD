@@ -324,7 +324,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:none">
+<div id="shnodedt" style="display:block">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -365,69 +365,110 @@
         </div>
 
 
-<div class="row">
-        <!-- hosts -->
-<div class="col-md-6">      
+        <!-- row2 -->
         <div class="card mb-3">
           <div class="card-header">
             <i class="far fa-compass"></i>
-            静态解析
-          <span class="float-right mt-n1 mb-n2">
-            <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submithosts()">提交</button>
-          </span>
-          </div>
-
-          <div class="card-body">
-          <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-            hosts<br>
-            （自定）<br>
-            </span>
-          </div>
-            <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
-          </div>
-          </div>
-          </div>
-</div>
-
-<div class="col-md-6"> 
-        <!-- DoH -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-bezier-curve"></i>
-            Dns over Https
+            DNS
           <span class="float-right mt-n1 mb-n2">
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLchnw()">大陆白名单</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLgfw()">GFWlist</button>
-                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submitdoh()">应用</button>
+                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submitDNS()">提交</button>
           </span>
           </div>
+
           <div class="card-body">
-          <div class="form-group">
             <div class="form-row">
-              <div class="col-md-6 my-1">
-              <div class="input-group">
+              <div class="col-md-3">
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                  DoH 1<br>
+                  </span>
+                </div>
                 <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh1 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH1">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
-              </div>
-              <div class="col-md-6 my-1">
-              <div class="input-group">
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                  DoH 2<br>
+                  </span>
+                </div>
                 <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh2 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH2">00.0</span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
               </div>
+
+              <div class="col-md-3">
+                <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                  DNS<br>
+                  国内<br>
+                  </span>
+                </div>
+                  <textarea id="chinaDNS" class="form-control" aria-label="chinaDNS" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-getDNS"); ?></textarea>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                  hosts<br>
+                  静态解析<br>
+                  </span>
+                </div>
+                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          </div>
+
+
+        <!-- row3 -->
+<div class="form-row">
+<div class="col-md-6">      
+        <!-- 静态地址 -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-exchange-alt"></i>
+            IP地址
+          <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submitstaticip()">重启</button>
+          </span>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="col-md-6 mb-3">
+                <div class="input-group">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->localIP ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">本机</span>
+                </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="input-group">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->upstreamIP ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">上级</span>
+                </div>
+                </div>
+              </div>
             </div>
           </div>
           </div>
-          </div>
+</div>
 
-
+<div class="col-md-6"> 
         <!-- DHCP -->
         <div class="card mb-3">
           <div class="card-header">
@@ -440,11 +481,9 @@
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpDOWN()">关闭</button>
 </span>
           </div>
-
           <div class="card-body">
-          <div class="form-group">
             <div class="form-row">
-              <div class="col-md-6 my-1">
+              <div class="col-md-6 mb-3">
                 <div class="input-group">
                   <input type="text" id="dhcpStart" class="form-control" placeholder="起始IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpStart ?>">
                 <div class="input-group-append">
@@ -452,7 +491,7 @@
                 </div>
                 </div>
               </div>
-              <div class="col-md-6 my-1">
+              <div class="col-md-6 mb-3">
                 <div class="input-group">
                   <input type="text" id="dhcpEnd" class="form-control" placeholder="结束IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpEnd ?>">
                 <div class="input-group-append">
@@ -463,42 +502,6 @@
             </div>
           </div>
           </div>
-          </div>
-
-
-        <!-- 静态地址 -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-exchange-alt"></i>
-            静态地址
-          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submitstaticip()">重启</button>
-          </span>
-          </div>
-          <div class="card-body">
-          <div class="form-group">
-            <div class="form-row">
-              <div class="col-md-6 my-1">
-                <div class="input-group">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->localIP ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">本机</span>
-                </div>
-                </div>
-              </div>
-              <div class="col-md-6 my-1">
-                <div class="input-group">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->upstreamIP ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">上级</span>
-                </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
-          </div>
-
 
 </div>
 
@@ -601,15 +604,12 @@ function changeNLgfw(){
 $.get('changeNLgfw.php', function(result){window.location.reload();});
 }
 
-function submitdoh(){
+function submitDNS(){
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-$.get('changeDOH.php', {DoH1:dohtxt1, DoH2:dohtxt2}, function(result){ location.reload() });
-}
-
-function submithosts(){
+chinaDNS=$("#chinaDNS").val();
 hostsCustomize=$("#hostsCustomize").val();
-$.get("saveHost.php", {hostsCustomize:hostsCustomize}, function(result){location.reload();});
+$.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, chinaDNS:chinaDNS, hostsCustomize:hostsCustomize}, function(result){location.reload();});
 }
 
 function submitstaticip(){
