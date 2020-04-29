@@ -62,6 +62,9 @@ echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-re
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
 apt update && apt install docker-ce docker-ce-cli containerd.io
+sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
+sed -i "/LimitNPROC=/c\LimitNPROC=1000000"  /lib/systemd/system/docker.service
+systemctl daemon-reload > /dev/null 2>&1
 systemctl enable docker
 systemctl restart docker
 
