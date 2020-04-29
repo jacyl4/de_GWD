@@ -596,7 +596,7 @@ server {
 }
 
 server {
-  listen 443 ssl http2 spdy fastopen=64 reuseport;
+  listen 443 ssl http2 fastopen=64 reuseport;
   server_name $vpsdomain;
   root /var/www/html;
   index index.php index.html index.htm;
