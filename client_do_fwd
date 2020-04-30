@@ -181,6 +181,9 @@ clifwd_installNginxDo(){
 docker stop nginx > /dev/null 2>&1
 docker rm nginx > /dev/null 2>&1
 
+docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
+docker pull jacyl4/nginx_tls1.3:latest
+
 mkdir -p /var/www/ssl
 
 docker run -d --name=nginx --net=host --restart=always \
