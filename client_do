@@ -359,7 +359,7 @@ cat << EOF > /etc/vtrui/config.json
               "id": "00000000-0000-0000-0000-000000000000",
               "level": 1,
               "alterId": 8,
-              "security": "auto"
+              "security": "none"
             }
           ]
         }

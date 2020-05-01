@@ -968,7 +968,7 @@ cat >> /etc/vtrui/config.json << EOF
         "id": "$upstreamUUID",
           "level": 1,
           "alterId": 8,
-          "security": "auto"
+          "security": "none"
         }]
       }]},
     "streamSettings": {
