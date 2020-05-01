@@ -684,8 +684,6 @@ installDep
 
 piholeSet
 
-installNginx
-
 clifwd_iptablesProxy
 
 clifwd_installDOHser
