@@ -11,8 +11,8 @@ export DEBIAN_FRONTEND=noninteractive
 
 mirrorSite="http://xznat.seso.icu:10290"
 
-smartdns_arm64="$mirrorSite/smartdns.1.2020.02.25-2212.aarch64-debian-all.deb"
-smartdns_amd64="$mirrorSite/smartdns.1.2020.02.25-2212.x86_64-debian-all.deb"
+smartdns_arm64="$mirrorSite/smartdns.1.2020.05.03-1702.aarch64-debian-all.deb"
+smartdns_amd64="$mirrorSite/smartdns.1.2020.05.03-1702.x86_64-debian-all.deb"
 
 architecture=""
 case $(uname -m) in
