@@ -11,7 +11,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 mirrorSite="http://xznat.seso.icu:10290"
 
-smartdns_amd64="$mirrorSite/smartdns.1.2020.05.03-1702.x86_64-debian-all.deb"
+smartdns_amd64="$mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb"
 
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
