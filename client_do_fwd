@@ -561,12 +561,21 @@ clifwd_port=$(echo $clifwd_domainP | cut -d : -f2)
 topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
+clifwd_uuidnum=$(jq -r '.clifwd.clifwd_uuidnum[]' /usr/local/bin/0conf)
 
 rm -rf /var/www/ssl/*
 
 clifwd_nginxWebConf
 
 makeSSL_D
+
+jq '.clifwd={}' /usr/local/bin/0conf |\
+jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |\
+jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
+jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
+jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod -R 666 /usr/local/bin/0conf
+
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
 blue "-----------------------------------------------"
