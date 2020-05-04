@@ -408,7 +408,7 @@ systemctl restart vtrui
 
 
 
-launchNginx(){
+installNginx(){
 mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
 mkdir -p "/var/log/nginx"
@@ -856,7 +856,7 @@ installV2ray
 
 if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
-launchNginx
+installNginx
 
 makeSSL_D
 
@@ -864,7 +864,7 @@ nginxWebConf
 
 else
 
-launchNginx
+installNginx
 
 makeSSL_W
 
@@ -1160,7 +1160,7 @@ installDOHser
 
 installV2ray
 
-launchNginx
+installNginx
 
 nginxWebConf
 
