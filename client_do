@@ -1082,6 +1082,10 @@ doh2=$doh1
 
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
+portCheck=$(echo $port | grep '^[0-9]\+$')
+if [[ -z $portCheck ]]; then
+port="443"
+fi
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
