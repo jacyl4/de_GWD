@@ -197,8 +197,10 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="NodeDThide()">禁用内网设备分流</button>
           </span>
           </div>
-            <button type="button" class="btn btn-outline-success btn-sm" style="border-radius: 0px;" onclick="pingtest()">Ping (TCP)</button>
-
+          <div style="display: flex;flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingICMP()">Ping (ICMP)</button>
+            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingTCP()">Ping (TCP)</button>
+          </div>
 
           <div class="card-body">
             <div class="table-responsive">
@@ -324,7 +326,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:block">
+<div id="shnodedt" style="display:none">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -568,18 +570,32 @@ function NodeDThide(){
 $.get('switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){location.reload();});
 }
 
-function pingtest(){
-$.get('ping1.php', function(data) { $('#ping1').text(data) });
-$.get("ping2.php", function(data) { $('#ping2').text(data) });
-$.get("ping3.php", function(data) { $('#ping3').text(data) });
-$.get("ping4.php", function(data) { $('#ping4').text(data) });
-$.get("ping5.php", function(data) { $('#ping5').text(data) });
-$.get("ping6.php", function(data) { $('#ping6').text(data) });
-$.get("ping7.php", function(data) { $('#ping7').text(data) });
-$.get("ping8.php", function(data) { $('#ping8').text(data) });
-$.get("ping9.php", function(data) { $('#ping9').text(data) });
-$.get("pingDOH1.php", function(data) { $('#pingDOH1').text(data) });
-$.get("pingDOH2.php", function(data) { $('#pingDOH2').text(data) });
+function pingICMP(){
+$.get('pingICMP1.php', function(data) { $('#ping1').text(data) });
+$.get("pingICMP2.php", function(data) { $('#ping2').text(data) });
+$.get("pingICMP3.php", function(data) { $('#ping3').text(data) });
+$.get("pingICMP4.php", function(data) { $('#ping4').text(data) });
+$.get("pingICMP5.php", function(data) { $('#ping5').text(data) });
+$.get("pingICMP6.php", function(data) { $('#ping6').text(data) });
+$.get("pingICMP7.php", function(data) { $('#ping7').text(data) });
+$.get("pingICMP8.php", function(data) { $('#ping8').text(data) });
+$.get("pingICMP9.php", function(data) { $('#ping9').text(data) });
+$.get("pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) });
+$.get("pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) });
+}
+
+function pingTCP(){
+$.get('pingTCP1.php', function(data) { $('#ping1').text(data) });
+$.get("pingTCP2.php", function(data) { $('#ping2').text(data) });
+$.get("pingTCP3.php", function(data) { $('#ping3').text(data) });
+$.get("pingTCP4.php", function(data) { $('#ping4').text(data) });
+$.get("pingTCP5.php", function(data) { $('#ping5').text(data) });
+$.get("pingTCP6.php", function(data) { $('#ping6').text(data) });
+$.get("pingTCP7.php", function(data) { $('#ping7').text(data) });
+$.get("pingTCP8.php", function(data) { $('#ping8').text(data) });
+$.get("pingTCP9.php", function(data) { $('#ping9').text(data) });
+$.get("pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) });
+$.get("pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) });
 }
 
 function v2adADD(){
