@@ -4,8 +4,8 @@ port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
 uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf > /tmp/hosts
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' >> /tmp/hosts
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' >>/tmp/hosts
 
 cat > /etc/vtrui/config.json << EOF
 {
@@ -154,13 +154,13 @@ jq --argjson port $port '.outbounds[1].settings.vnext[0].port=$port' |\
 jq --arg uuidnum $uuidnum '.outbounds[1].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path $v2path '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain $domain '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
-jq --arg domain $domain '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg domain $domain '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 cat /tmp/hosts | while read line 
 do
   key=$(echo $line | awk '{print$1}')
   value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 done
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php

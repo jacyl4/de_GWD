@@ -15,6 +15,6 @@ sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
 
 jq --arg key1 $doh1Domain --arg value1 $doh1IP '.dns.hosts += {($key1): ($value1)}' /etc/vtrui/config.json |\
-jq --arg key2 $doh2Domain --arg value2 $doh2IP '.dns.hosts += {($key2): ($value2)}' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg key2 $doh2Domain --arg value2 $doh2IP '.dns.hosts += {($key2): ($value2)}' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 chmod 666 /etc/vtrui/config.json

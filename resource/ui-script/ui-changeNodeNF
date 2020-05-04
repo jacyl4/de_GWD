@@ -18,7 +18,7 @@ jq --argjson port "$port" '.outbounds[1].settings.vnext[0].port=$port' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain "$domain" '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
-jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 chmod 666 /etc/vtrui/config.json
 

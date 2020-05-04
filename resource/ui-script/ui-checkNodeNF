@@ -10,7 +10,7 @@ fi
 
 nodecheck2=$(echo $nodecheck | cut -d . -f1)
 
-jq -r '.v2node | keys[] as $k | "\($k) \(.[$k] | .domain)"' /usr/local/bin/0conf | awk '/'$nodecheck'/ {print$1}' > /tmp/nodechecknf
-jq -r '.v2node | keys[] as $k | "\($k) \(.[$k] | .domain)"' /usr/local/bin/0conf | cut -d . -f1 | awk '/'$nodecheck2'/ {print$1}' >> /tmp/nodechecknf
+jq -r '.v2node | keys[] as $k | "\($k) \(.[$k] | .domain)"' /usr/local/bin/0conf | awk '/'$nodecheck'/ {print$1}' >/tmp/nodechecknf
+jq -r '.v2node | keys[] as $k | "\($k) \(.[$k] | .domain)"' /usr/local/bin/0conf | cut -d . -f1 | awk '/'$nodecheck2'/ {print$1}' >>/tmp/nodechecknf
 
 sort /tmp/nodechecknf | uniq -d

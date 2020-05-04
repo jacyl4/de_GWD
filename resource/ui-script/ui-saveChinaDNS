@@ -1,7 +1,7 @@
 #!/bin/bash
 sed -i '/server /d' /etc/smartdns/smartdns.conf
 
-echo "" >> /tmp/chinaDNS
+echo "" >>/tmp/chinaDNS
 
 cat /tmp/chinaDNS | while read chinaDNS
 do

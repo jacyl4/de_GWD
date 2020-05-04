@@ -399,7 +399,7 @@ jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |
 jq --arg domain $domain '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
 jq --arg key $doh1Domain --arg value $doh1IP '.dns.hosts += {($key): ($value)}' |\
-jq --arg key $doh2Domain --arg value $doh2IP '.dns.hosts += {($key): ($value)}' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg key $doh2Domain --arg value $doh2IP '.dns.hosts += {($key): ($value)}' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]
@@ -432,7 +432,8 @@ systemctl restart vtrui
 
 
 installIptablesProxy(){
-echo $domainip >> /usr/local/bin/chnrouteset
+echo $doh1IP >> /usr/local/bin/chnrouteset
+echo $doh2IP >> /usr/local/bin/chnrouteset
 
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
@@ -1152,7 +1153,7 @@ jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
 jq --arg v2path "$v2path" '.v2nodeForUpdate.path=$v2path' |\
-jq --arg updateAddr "$updateAddr" '.updateAddr=$updateAddr' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg updateAddr "$updateAddr" '.updateAddr=$updateAddr' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
 installWebUI
@@ -1170,7 +1171,7 @@ sudo pihole -a -p
 
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
-jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
@@ -1219,7 +1220,7 @@ nameserver 8.8.8.8
 option use-vc
 EOF
 
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 output=$(systemctl restart iptables-proxy)
 sleep 3
 

@@ -1,14 +1,14 @@
 #!/bin/bash
 jq 'del(.dns.hosts[])' /etc/vtrui/config.json |\
-jq '.dns.hosts += {"localhost": "127.0.0.1"}' > /tmp/vtrui_temp
+jq '.dns.hosts += {"localhost": "127.0.0.1"}' >/tmp/vtrui_temp
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >> /tmp/hosts
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >>/tmp/hosts
 
 cat /tmp/hosts | while read line 
 do
 	key=$(echo $line | awk '{print$1}')
 	value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /tmp/vtrui_temp > /tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 done
 mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 

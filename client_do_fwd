@@ -257,8 +257,8 @@ fi
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
 
-grep /var/www/html -rl ~/ui-script > /tmp/binFILE
-grep /var/www/html -rl ~/ui-web > /tmp/htmlFILE
+grep /var/www/html -rl ~/ui-script >/tmp/binFILE
+grep /var/www/html -rl ~/ui-web >/tmp/htmlFILE
 
 cat /tmp/binFILE | while read binFILE
 do
@@ -274,26 +274,26 @@ rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html/gwd
 rm -rf ~/ui-*
 
-cat << "EOF" > /tmp/vtruiConfADD
+cat << "EOF" >/tmp/vtruiConfADD
 clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
 clifwd_uuidnum=$(jq -r '.clifwd.clifwd_uuidnum[]' /usr/local/bin/0conf)
 
-jq 'del(.inbounds[2])' /etc/vtrui/config.json > /tmp/vtrui_temp
+jq 'del(.inbounds[2])' /etc/vtrui/config.json >/tmp/vtrui_temp
 
 vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path": "/0000"}}}'
 
 jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /tmp/vtrui_temp |\
-jq --arg clifwd_v2path $clifwd_v2path '.inbounds[2].streamSettings.wsSettings.path=$clifwd_v2path' > /tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+jq --arg clifwd_v2path $clifwd_v2path '.inbounds[2].streamSettings.wsSettings.path=$clifwd_v2path' >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 
 {
 for v2uuids in $clifwd_uuidnum; do
 echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
 done
-} > /tmp/v2uuids
+} >/tmp/v2uuids
 
 cat /tmp/v2uuids | while read v2uuids
 do
-jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /tmp/vtrui_temp > /tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+jq --argjson v2uuids "$v2uuids" '.inbounds[2].settings.clients+=[$v2uuids]' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 done
 
 mv -f /tmp/vtrui_temp /etc/vtrui/config.json
@@ -461,7 +461,7 @@ jq '.clifwd={}' /usr/local/bin/0conf |\
 jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |\
 jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
 jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
-jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
 clifwd_iptablesProxy
@@ -531,7 +531,7 @@ sudo pihole -a -p
 
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d = -f2)
 
-jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
@@ -573,7 +573,7 @@ jq '.clifwd={}' /usr/local/bin/0conf |\
 jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |\
 jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
 jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
-jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' > /tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
 blue "-----------------------------------------------"
@@ -629,7 +629,7 @@ nameserver 8.8.8.8
 option use-vc
 EOF
 
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 output=$(systemctl restart iptables-proxy)
 sleep 3
 
