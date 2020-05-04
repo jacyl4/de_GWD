@@ -235,14 +235,6 @@ systemctl restart smartdns
 installDOH(){
 rm -rf /usr/local/bin/doh-client
 
-portcheck=$(echo $port | grep '^[0-9]\+$')
-if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
-doh=$domain
-port="443"
-else
-doh="$domain:$port"
-fi
-
 domainip=$(nslookup $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 if [[ $architecture = "arm64" ]]; then
@@ -280,8 +272,11 @@ no_ipv6 = true
 verbose = false
 EOF
 
-doh_upstream='url = "https:\/\/'$doh'\/dq"'
-sed -i "/url/c\\$doh_upstream" /etc/dns-over-https/doh-client.conf
+doh_upstream1='url = "https:\/\/'$doh1'"'
+doh_upstream2='url = "https:\/\/'$doh2'"'
+
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
 cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
@@ -871,6 +866,11 @@ installGWD(){
     read gatewayaddr
 
     green "========================="
+    green " DoH"
+    green "========================="
+    read doh1
+
+    green "========================="
     green " V2ray domain"
     green "========================="
     read v2servn
@@ -887,8 +887,11 @@ installGWD(){
 
 cd ~
 
+doh2=$doh1
+
 domain=$(echo $v2servn | cut -d : -f1)
 port=$(echo $v2servn | cut -d : -f2)
+
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
 piholePW="0000000000000000000000000000000000000000000000000000000000000000"
@@ -941,8 +944,8 @@ jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
 jq '.address.dhcp=""' |\
 jq '.doh={}' |\
-jq --arg doh1 "$v2servn" '.doh.doh1=$doh1' |\
-jq --arg doh2 "$v2servn" '.doh.doh2=$doh2' |\
+jq --arg doh1 "$doh1" '.doh.doh1=$doh1' |\
+jq --arg doh2 "$doh2" '.doh.doh2=$doh2' |\
 jq '.v2ad=""' |\
 jq '.v2node=[]' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
@@ -1055,6 +1058,9 @@ cd ~
 source /etc/profile
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+
+doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
 
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
 port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)

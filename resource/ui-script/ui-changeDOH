@@ -8,8 +8,8 @@ dohname2=$(echo $doh2 | cut -d : -f1)
 doh1ip=$(nslookup -port=5310 $dohname1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 doh2ip=$(nslookup -port=5310 $dohname2 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
-doh_upstream1='url = "https:\/\/'$doh1'\/dq"'
-doh_upstream2='url = "https:\/\/'$doh2'\/dq"'
+doh_upstream1='url = "https:\/\/'$doh1'"'
+doh_upstream2='url = "https:\/\/'$doh2'"'
 
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
 sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
