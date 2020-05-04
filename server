@@ -629,7 +629,7 @@ rm -rf ~/now.cron
 nginxWebConf(){
 rm -rf /etc/nginx/conf.d/default.conf
 
-if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
 cat << EOF > /etc/nginx/conf.d/default.conf
 server {
@@ -797,10 +797,10 @@ installGWD(){
 
 domain=$(echo $vpsdomainP | cut -d : -f1)
 port=$(echo $vpsdomainP | cut -d : -f2)
-portcheck=$(echo $port | grep '^[0-9]\+$')
+portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
-if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
     green "==============================="
     green " Cloudflare API KEY"
@@ -854,7 +854,7 @@ installDOHser
 
 installV2ray
 
-if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
 launchNginx
 
@@ -967,10 +967,10 @@ changeDomain(){
 
 domain=$(echo $vpsdomainP | cut -d : -f1)
 port=$(echo $vpsdomainP | cut -d : -f2)
-portcheck=$(echo $port | grep '^[0-9]\+$')
+portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
-if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
     green "==============================="
     green " Cloudflare API KEY"
@@ -986,7 +986,7 @@ fi
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 makeSSL_D
 else
 makeSSL_W
@@ -1054,8 +1054,8 @@ sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 domain=$(echo $upstreamDomainP | cut -d : -f1)
 port=$(echo $upstreamDomainP | cut -d : -f2)
 
-portcheck=$(echo $port | grep '^[0-9]\+$')
-if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
+portCheck=$(echo $port | grep '^[0-9]\+$')
+if [[ $portCheck = "" ]] || [[ $portCheck = "443" ]]; then
 port="443"
 fi
 
@@ -1143,7 +1143,7 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 port=$(awk '/ssl http2 fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
-portcheck=$(echo $port | grep '^[0-9]\+$')
+portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)

@@ -8,8 +8,8 @@ v2path=$(jq --argjson nodenum $nodenum -r '.v2node[$nodenum-1].path' /usr/local/
 domain=$(echo -e $v2servn | cut -d : -f1)
 port=$(echo -e $v2servn | cut -d : -f2)
 
-result=$(echo $port | grep '^[0-9]\+$')
-if [[ $result = "" ]]; then
+portCheck=$(echo $port | grep '^[0-9]\+$')
+if [[ $portCheck = "" ]]; then
 port="443"
 fi
 
