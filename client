@@ -235,6 +235,10 @@ systemctl restart smartdns
 installDOH(){
 rm -rf /usr/local/bin/doh-client
 
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 domainip=$(nslookup $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 if [[ $architecture = "arm64" ]]; then
@@ -275,8 +279,8 @@ EOF
 doh_upstream1='url = "https:\/\/'$doh1'"'
 doh_upstream2='url = "https:\/\/'$doh2'"'
 
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s/.*/$doh_upstream1/" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s/.*/$doh_upstream2/" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
 cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
@@ -415,7 +419,8 @@ jq --arg uuidnum $uuidnum '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum'
 jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain $domain '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
-jq --arg key $doh --arg value $domainip '.dns.hosts += {($key): ($value)}' |\
+jq --arg key $doh1Domain --arg value $doh1IP '.dns.hosts += {($key): ($value)}' |\
+jq --arg key $doh2Domain --arg value $doh2IP '.dns.hosts += {($key): ($value)}' |\
 jq --arg key $domain --arg value $domainip '.dns.hosts += {($key): ($value)}' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
