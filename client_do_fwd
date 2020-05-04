@@ -661,6 +661,9 @@ source /etc/profile
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
+doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+
 clifwd_domain=$(jq -r '.clifwd.clifwd_domain' /usr/local/bin/0conf)
 clifwd_port=$(jq -r '.clifwd.clifwd_port' /usr/local/bin/0conf)
 clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
