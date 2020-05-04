@@ -278,8 +278,8 @@ EOF
 doh_upstream1='url = "https:\/\/'$doh1'"'
 doh_upstream2='url = "https:\/\/'$doh2'"'
 
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -n -e '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
 
 mkdir -p /etc/NetworkManager/dispatcher.d/
 cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
@@ -895,8 +895,8 @@ cd ~
 
 doh2=$doh1
 
-domain=$(echo $v2servn | cut -d : -f1)
-port=$(echo $v2servn | cut -d : -f2)
+domain=$(echo $v2servn | cut -d: -f1)
+port=$(echo $v2servn | cut -d: -f2)
 portCheck=$(echo $port | grep '^[0-9]\+$')
 if [[ -z $portCheck ]]; then
 port="443"
