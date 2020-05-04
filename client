@@ -26,10 +26,10 @@ statusFailed=$(red "[ failed ]")
 
 
 preInstall(){
-systemctl stop iptables-proxy > /dev/null 2>&1
+systemctl stop iptables-proxy >/dev/null 2>&1
 
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
+systemctl mask --now systemd-resolved >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -63,7 +63,7 @@ fi
 
 apt update && apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync lighttpd php-common php-cgi php-sqlite3 bc
 source /etc/profile
-systemctl enable --now haveged > /dev/null 2>&1
+systemctl enable --now haveged >/dev/null 2>&1
 
 dpkg --configure -a
 
@@ -174,7 +174,7 @@ hwclock -w
 
 
 installSmartDNS(){
-dpkg -P smartdns > /dev/null 2>&1
+dpkg -P smartdns >/dev/null 2>&1
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -O ~/smartdns.deb $smartdns_arm64
@@ -288,10 +288,10 @@ cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
 #!/bin/bash
 case "$2" in
     up)
-        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        /usr/bin/systemctl is-active doh-client.service >/dev/null && /usr/bin/systemctl restart doh-client.service
         ;;
     down)
-        /usr/bin/systemctl is-active doh-client.service > /dev/null && /usr/bin/systemctl restart doh-client.service
+        /usr/bin/systemctl is-active doh-client.service >/dev/null && /usr/bin/systemctl restart doh-client.service
         ;;
     *)
         exit 0
@@ -678,8 +678,8 @@ bash <(wget --no-check-certificate -qO- http://raw.githubusercontent.com/pi-hole
 
 
 piholeSet(){
-systemctl mask --now dhcpcd > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
+systemctl mask --now dhcpcd >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
@@ -763,7 +763,7 @@ TimeoutSec=5
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
@@ -826,12 +826,12 @@ ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
 pihole restartdns
-output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveNode > /dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
-output=$(/usr/local/bin/ui-updateGen > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
+output=$(/usr/local/bin/ui-saveNode >/dev/null 2>&1)
+output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
+output=$(/usr/local/bin/ui-updateGen >/dev/null 2>&1)
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null"  ]]; then
-output=$(/usr/local/bin/ui-markThis > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-markThis >/dev/null 2>&1)
 fi
 output=$(systemctl restart iptables-proxy)
 
@@ -840,7 +840,7 @@ cat << "EOF" > /usr/local/bin/Q2H
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-/usr/local/bin/ui-saveListBW > /dev/null 2>&1
+/usr/local/bin/ui-saveListBW >/dev/null 2>&1
 EOF
 chmod +x /usr/local/bin/Q2H
 
@@ -1040,8 +1040,8 @@ if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
 fi
 
-output=$(/usr/local/bin/ui-NodeDThide > /dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW > /dev/null 2>&1)
+output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
+output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
 systemctl restart iptables-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"

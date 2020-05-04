@@ -23,8 +23,8 @@ echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
 update-initramfs -u
 fi
 
-systemctl mask --now systemd-resolved > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
+systemctl mask --now systemd-resolved  >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -56,7 +56,7 @@ EOF
 
 apt update && apt install sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
 source /etc/profile
-systemctl enable --now haveged > /dev/null 2>&1
+systemctl enable --now haveged >/dev/null 2>&1
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d '(' -f2 | cut -d ')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
@@ -64,7 +64,7 @@ curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 apt update && apt install docker-ce docker-ce-cli containerd.io
 sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
 sed -i "/LimitNPROC=/c\LimitNPROC=1000000"  /lib/systemd/system/docker.service
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 systemctl enable docker
 systemctl restart docker
 
@@ -205,7 +205,7 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 systemctl enable iptablesrules
 systemctl restart iptablesrules
 }
@@ -237,7 +237,7 @@ curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 
 systemctl mask --now dhcpcd
 systemctl mask --now lighttpd
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 
 sed -i '/PIHOLE_DNS/d'  /etc/pihole/setupVars.conf
 sed -i '/QUERY_LOGGING=/i\PIHOLE_DNS_1=1.1.1.1' /etc/pihole/setupVars.conf
@@ -283,10 +283,10 @@ cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
 #!/bin/bash
 case "$2" in
     up)
-        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
         ;;
     down)
-        /usr/bin/systemctl is-active doh-server.service > /dev/null && /usr/bin/systemctl restart doh-server.service
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
         ;;
     *)
         exit 0
@@ -295,7 +295,6 @@ esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
-echo "" > /run/doh-server.pid
 cat << "EOF" > /lib/systemd/system/doh-server.service
 [Unit]
 Description=DNS-over-HTTPS server
@@ -315,7 +314,7 @@ RestartSec=2
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload > /dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 systemctl enable doh-server
 systemctl restart doh-server
 }
@@ -409,7 +408,7 @@ systemctl restart vtrui
 
 
 
-installNginx(){
+launchNginx(){
 mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d"
 mkdir -p "/var/log/nginx"
@@ -498,6 +497,140 @@ http {
 EOF
 
 rm -rf /etc/nginx/conf.d/default.conf
+echo "" > /etc/nginx/conf.d/default.conf
+
+docker stop nginx >/dev/null 2>&1
+docker rm nginx >/dev/null 2>&1
+
+docker rmi jacyl4/nginx_tls1.3:latest >/dev/null 2>&1
+docker pull jacyl4/nginx_tls1.3:latest
+
+if [[ -d "/etc/php" ]]; then
+mkdir -p /run/php
+echo "" > /run/php/php7.3-fpm.sock
+chown -R www-data:www-data /run/php
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /run/php/:/run/php/ \
+-v /var/www/html/:/var/www/html/ \
+-v /var/www/ssl/:/var/www/ssl/ \
+jacyl4/nginx_tls1.3:latest
+else
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /var/www/html/:/var/www/html/ \
+-v /var/www/ssl/:/var/www/ssl/ \
+jacyl4/nginx_tls1.3:latest
+fi
+}
+
+
+
+makeSSL_D(){
+rm -rf /var/www/ssl/*
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
+~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
+               --keypath        /var/www/ssl/$topDomain.key  \
+               --fullchain-file /var/www/ssl/fullchain.cer \
+               --reloadcmd     "docker restart nginx >/dev/null 2>&1"
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+cat << EOF > /var/www/ssl/update_ocsp_cache
+#!/bin/bash
+wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+mv ~/intermediate.pem /var/www/ssl
+mv ~/root.pem /var/www/ssl
+cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/fullchain.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://ocsp.int-x3.letsencrypt.org \
+    -respout /var/www/ssl/ocsp.resp
+EOF
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+
+crontab -l > ~/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+}
+
+
+
+makeSSL_W(){
+rm -rf /etc/nginx/conf.d/default.conf
+cat << EOF > /etc/nginx/conf.d/default.conf
+server {
+    listen      80;
+    server_name $domain;
+    root        /var/www/html;
+    index       index.php index.html index.htm;
+}
+EOF
+docker restart nginx
+
+rm -rf /var/www/ssl/*
+
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --issue -d $domain -w /var/www/html --keylength ec-256
+~/.acme.sh/acme.sh --installcert -d $domain --ecc \
+               --key-file       /var/www/ssl/$domain.key  \
+               --fullchain-file /var/www/ssl/fullchain.cer \
+               --reloadcmd     "docker restart nginx >/dev/null 2>&1"
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+cat << EOF > /var/www/ssl/update_ocsp_cache
+#!/bin/bash
+wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+mv ~/intermediate.pem /var/www/ssl
+mv ~/root.pem /var/www/ssl
+cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/fullchain.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://ocsp.int-x3.letsencrypt.org \
+    -respout /var/www/ssl/ocsp.resp
+EOF
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+
+crontab -l > ~/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+}
+
+
+
+nginxWebConf(){
+rm -rf /etc/nginx/conf.d/default.conf
+
+if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+
 cat << EOF > /etc/nginx/conf.d/default.conf
 server {
   listen $port ssl http2 fastopen=64 reuseport;
@@ -507,6 +640,30 @@ server {
 
   ssl_certificate /var/www/ssl/fullchain.cer;
   ssl_certificate_key /var/www/ssl/$topDomain.key;
+EOF
+
+else
+
+cat << EOF > /etc/nginx/conf.d/default.conf
+server {
+  listen 80;
+  server_name $domain;
+  return 301 https://\$server_name\$request_uri;
+}
+
+server {
+  listen 443 ssl http2 fastopen=64 reuseport;
+  server_name $domain;
+  root /var/www/html;
+  index index.php index.html index.htm;
+
+  ssl_certificate /var/www/ssl/fullchain.cer;
+  ssl_certificate_key /var/www/ssl/$domain.key;
+EOF
+
+fi
+
+cat << EOF >> /etc/nginx/conf.d/default.conf
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
@@ -534,7 +691,7 @@ server {
   location ~ /\.(?!well-known).* {
     deny all;
   }
-  
+
 location /dq {
   proxy_pass                http://127.0.0.1:8053/dq;
   proxy_set_header          Host \$host;
@@ -565,66 +722,6 @@ location $v2path {
 }
 EOF
 
-docker stop nginx > /dev/null 2>&1
-docker rm nginx > /dev/null 2>&1
-
-docker rmi jacyl4/nginx_tls1.3:latest > /dev/null 2>&1
-docker pull jacyl4/nginx_tls1.3:latest
-
-docker stop nginx > /dev/null 2>&1
-docker rm nginx > /dev/null 2>&1
-
-docker run -d --name=nginx --net=host --restart=always \
--v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
--v /var/www/html/:/var/www/html/ \
--v /var/www/ssl/:/var/www/ssl/ \
-jacyl4/nginx_tls1.3:latest
-}
-
-
-
-makeSSL_D(){
-rm -rf /var/www/ssl/*
-export CF_Key="$CFapikey"
-export CF_Email="$CFemail"
-
-curl https://get.acme.sh | sh
-~/.acme.sh/acme.sh --upgrade  --auto-upgrade
-~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
-~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
-               --keypath        /var/www/ssl/$topDomain.key  \
-               --fullchain-file /var/www/ssl/fullchain.cer \
-               --reloadcmd     "docker restart nginx > /dev/null 2>&1"
-openssl dhparam -out /var/www/ssl/dhparam.pem 2048
-
-cat << EOF > /var/www/ssl/update_ocsp_cache
-#!/bin/bash
-wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
-wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
-mv ~/intermediate.pem /var/www/ssl
-mv ~/root.pem /var/www/ssl
-cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
-cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
-
-openssl ocsp -no_nonce \
-    -issuer  /var/www/ssl/intermediate.pem \
-    -cert    /var/www/ssl/fullchain.cer \
-    -CAfile  /var/www/ssl/bundle.pem \
-    -VAfile  /var/www/ssl/bundle.pem \
-    -url     http://ocsp.int-x3.letsencrypt.org \
-    -respout /var/www/ssl/ocsp.resp
-EOF
-chmod +x /var/www/ssl/update_ocsp_cache
-/var/www/ssl/update_ocsp_cache
-
-crontab -l > ~/now.cron
-sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
-echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
 docker restart nginx
 }
 
@@ -633,7 +730,7 @@ docker restart nginx
 postInstall(){
 cat << "EOF" > /usr/local/bin/autoUpdate
 #!/bin/bash
-wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server_nat
+wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
 sed -i '$d' ~/update
 echo "updateGWD" >>  ~/update
 chmod +x ~/update
@@ -657,10 +754,10 @@ rm -rf /var/log/*1
 rm -rf /var/log/*2
 rm -rf /var/log/*gz
 
-localver=$(awk 'NR==1' /usr/local/bin/version.php)
-remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
+localVer=$(awk 'NR==1' /usr/local/bin/version.php)
+remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
 
-if [[ $localver != $remotever ]]; then
+if [[ $localVer != $remoteVer ]]; then
 crontab -l > ~/now.cron
 sed -i '/autoUpdate/d' ~/now.cron
 echo '30 4 * * *  /usr/local/bin/autoUpdate' >> ~/now.cron
@@ -676,7 +773,7 @@ echo '0 */2 * * * /usr/local/bin/Q2H' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-indexpage=$(ls /var/www/html/index.* 2> /dev/null | wc -l)
+indexpage=$(ls /var/www/html/index.* 2>/dev/null | wc -l)
 if [ "$indexpage" = "0" ]; then 
 wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/sample.zip
 unzip sample.zip
@@ -693,6 +790,18 @@ apt update && apt upgrade && apt autoremove && apt autoclean
 
 
 installGWD(){
+    green "=================="
+    green " Input VPS domain"
+    green "=================="
+    read vpsdomainP
+
+domain=$(echo $vpsdomainP | cut -d : -f1)
+port=$(echo $vpsdomainP | cut -d : -f2)
+portcheck=$(echo $port | grep '^[0-9]\+$')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+
     green "==============================="
     green " Cloudflare API KEY"
     green "==============================="
@@ -703,16 +812,9 @@ installGWD(){
     green "==============================="
     read CFemail
 
-    green "==============================="
-    green " de_GWD_nat_V2ray Domain&&Port"
-    green "==============================="
-    read vpsdomainP
+fi
 
 cd ~
-
-domain=$(echo $vpsdomainP | cut -d : -f1)
-port=$(echo $vpsdomainP | cut -d : -f2)
-topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2uuids=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
@@ -752,19 +854,34 @@ installDOHser
 
 installV2ray
 
-installNginx
+if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+
+launchNginx
 
 makeSSL_D
 
+nginxWebConf
+
+else
+
+launchNginx
+
+makeSSL_W
+
+nginxWebConf
+
+fi
+
 postInstall
 
-blue "--------------------------------------------"
+blue "---------------------------------------------"
 blue  "Install de_GWD [done]"
 echo
-blue "Domain： $(yellow "$vpsdomainP")"
-blue "UUID：   $(yellow "$v2uuids")"
-blue "PATH：   $(yellow "$v2path")"
-blue "--------------------------------------------"
+blue "DoH:    $(yellow "$vpsdomainP/dq")"
+blue "Domain: $(yellow "$vpsdomainP")"
+blue "UUID:   $(yellow "$v2uuids")"
+blue "PATH:   $(yellow "$v2path")"
+blue "---------------------------------------------"
 }
 
 
@@ -813,12 +930,12 @@ reboot
 
 changeStaticIP(){
     green "========="
-    green " Address"
+    green "Address"
     green "========="
     read localaddr
 
     green "========="
-    green " Gateway"
+    green "Gateway"
     green "========="
     read gatewayaddr
 
@@ -835,15 +952,26 @@ echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
 reboot
-
-blue "----------------"
-blue "Change IP [done]"
-blue "----------------"
+blue "-----------------"
+blue  "Change IP [done]"
+blue "-----------------"
 }
 
 
 
 changeDomain(){
+    green "=================="
+    green " Input new domain"
+    green "=================="
+    read vpsdomainP
+
+domain=$(echo $vpsdomainP | cut -d : -f1)
+port=$(echo $vpsdomainP | cut -d : -f2)
+portcheck=$(echo $port | grep '^[0-9]\+$')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
+
     green "==============================="
     green " Cloudflare API KEY"
     green "==============================="
@@ -853,21 +981,18 @@ changeDomain(){
     green " Cloudflare Email"
     green "==============================="
     read CFemail
-    
-    green "==============================="
-    green " de_GWD_nat_V2ray Domain&&Port"
-    green "==============================="
-    read vpsdomainP
 
-domain=$(echo $vpsdomainP | cut -d : -f1)
-port=$(echo $vpsdomainP | cut -d : -f2)
-topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+fi
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
 
-installNginx
-
+if [[ -n $portcheck ]] && [[ $portcheck != "443" ]]; then
 makeSSL_D
+else
+makeSSL_W
+fi
+
+nginxWebConf
 
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
@@ -889,16 +1014,15 @@ changeV2rayVerify(){
 
 sed -i "$(sed -n -e '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
-docker restart nginx > /dev/null 2>&1
+docker restart nginx >/dev/null 2>&1
 
 jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /etc/vtrui/config.json |\
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' > /tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
-systemctl restart vtrui > /dev/null 2>&1
-
-blue "-----------------------------"
-blue "Change v2ray UUID&path [done]"
-blue "-----------------------------"
+systemctl restart vtrui >/dev/null 2>&1
+blue "------------------------------"
+blue  "Change v2ray UUID&path [done]"
+blue "------------------------------"
 }
 
 
@@ -912,20 +1036,28 @@ changev2rayupstream(){
 if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 
-    green "====================="
-    green "v2ray upstream domain"
-    green "====================="
-    read upstreamDomain
+    green "=========================="
+    green "v2ray upstream domain:port"
+    green "=========================="
+    read upstreamDomainP
 
-    green "====================="
+    green "=========================="
     green "v2ray upstream UUID"
-    green "====================="
+    green "=========================="
     read upstreamUUID
 
-    green "====================="
+    green "=========================="
     green "v2ray upstream path"
-    green "====================="
+    green "=========================="
     read upstreamPath
+
+domain=$(echo $upstreamDomainP | cut -d : -f1)
+port=$(echo $upstreamDomainP | cut -d : -f2)
+
+portcheck=$(echo $port | grep '^[0-9]\+$')
+if [[ $portcheck = "" ]] || [[ $portcheck = "443" ]]; then
+port="443"
+fi
 
 cat >> /etc/vtrui/config.json << EOF
   "outbounds": [
@@ -933,8 +1065,8 @@ cat >> /etc/vtrui/config.json << EOF
     "mux": { "enabled": true },
     "protocol": "vmess",
     "settings": { "vnext": [{
-      "address": "$upstreamDomain",
-      "port": 443,
+      "address": "$domain",
+      "port": $port,
       "users": [{
         "id": "$upstreamUUID",
           "level": 1,
@@ -947,12 +1079,12 @@ cat >> /etc/vtrui/config.json << EOF
       "wsSettings": {
         "path": "$upstreamPath",
         "headers": {
-          "Host": "$upstreamDomain"
+          "Host": "$domain"
           }
         },
       "security": "tls",
       "tlsSettings": {
-        "serverName": "$upstreamDomain",
+        "serverName": "$domain",
         "allowInsecure": false
         }
       }
@@ -989,9 +1121,12 @@ fi
 }
 
 
+
 updatePihole(){
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 installPihole
 
@@ -1008,6 +1143,7 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 port=$(awk '/ssl http2 fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
+portcheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)
@@ -1024,31 +1160,58 @@ installDOHser
 
 installV2ray
 
-installNginx
+launchNginx
+
+nginxWebConf
 
 postInstall
 
-blue "--------------------"
-blue "Update de_GWD [done]"
-blue "--------------------"
+blue "---------------------"
+blue  "Update de_GWD [done]"
+blue "---------------------"
+}
+
+
+
+printNode(){
+vpsdomain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
+port=$(awk '/ssl http2 fastopen=64 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
+
+if [[ $port = "443" ]]; then
+vpsdomainP=$vpsdomain
+else
+vpsdomainP=$vpsdomain:$port
+fi
+
+v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)
+v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+
+blue "---------------------------------------------"
+green "V2ray node information"
+echo
+blue "DoH:    $(yellow "$vpsdomainP/dq")"
+blue "Domain: $(yellow "$vpsdomainP")"
+blue "UUID:   $(yellow "$v2uuids")"
+blue "PATH:   $(yellow "$v2path")"
+blue "---------------------------------------------"
 }
 
 
 
 autoUpdateGWD(){
-    green "==============================================="
-    green " Y. Turn on AutoUpdate / N. Turn off AutoUpdate"
-    green "==============================================="
+    green "=============================================="
+    green "Y. Turn on AutoUpdate / N. Turn off AutoUpdate"
+    green "=============================================="
     read autoUpdateswitch
 
 if [[ "$autoUpdateswitch" = "Y" ]] || [[ "$autoUpdateswitch" = "y" ]]; then 
-sed -i '/localver=/,$d' /usr/local/bin/Q2H
+sed -i '/localVer=/,$d' /usr/local/bin/Q2H
 
 cat << "EOF" >> /usr/local/bin/Q2H
-localver=$(awk 'NR==1' /usr/local/bin/version.php)
-remotever=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
+localVer=$(awk 'NR==1' /usr/local/bin/version.php)
+remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
 
-if [[ $localver != $remotever ]]; then
+if [[ $localVer != $remoteVer ]]; then
 crontab -l > ~/now.cron
 sed -i '/autoUpdate/d' ~/now.cron
 echo '30 4 * * *  /usr/local/bin/autoUpdate' >> ~/now.cron
@@ -1056,26 +1219,30 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
-
-blue "-------------------------"
-blue "AutoUpdate turn on [done]"
-blue "-------------------------"
+blue "--------------------------"
+blue  "AutoUpdate turn on [done]"
+blue "--------------------------"
 
 elif [[ "$autoUpdateswitch" = "N" ]] || [[ "$autoUpdateswitch" = "n" ]]; then
-sed -i '/localver=/,$d' /usr/local/bin/Q2H
+sed -i '/localVer=/,$d' /usr/local/bin/Q2H
 
-blue "--------------------------"
-blue "AutoUpdate turn off [done]"
-blue "--------------------------"
+crontab -l > ~/now.cron
+sed -i '/autoUpdate/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "---------------------------"
+blue  "AutoUpdate turn off [done]"
+blue "---------------------------"
 fi
 }
-
 
 
 
 start_menu(){
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
+statusNONE=$(yellow "-")
 
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusGOOD] Pi-hole      [working]"
@@ -1114,7 +1281,7 @@ blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_
 blue "----------------------------------------"
 
     green "==========================="
-    green "       SERVER_nat"
+    green "       SERVER"
     green "Recommend: Debian 9"
     green "Author:    JacyL4"
     green "==========================="
@@ -1126,10 +1293,11 @@ fi
     green  "2. Install bbrplus and reboot（only Debian 9）"
     red    "5. Change static IP"
     red    "6. Change domain and issue new certificates"
-    yellow "7. Change v2ray UUID & path"
+    red    "7. Change v2ray UUID & path"
     green  "8. Set v2ray upsteram"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
+    green  "11.Print v2ray node information"
     red    "00.AutoUpdate turn on/off"
     red    "CTRL+C EXIT"
     echo
@@ -1165,6 +1333,10 @@ fi
     ;;
     0)
     updateGWD
+    start_menu
+    ;;
+    11)
+    printNode
     start_menu
     ;;
     00)

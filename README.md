@@ -32,12 +32,6 @@ bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10290/client_do)
 
 ## Extension edition:
 
-Nat Server (amd64)
-```
-apt install -y wget
-bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server_nat)
-```
-
 Nat forward Client (amd64)
 ```
 apt install -y wget
