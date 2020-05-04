@@ -1,4 +1,4 @@
 #!/bin/bash
 nodeNUM=$1
 url=$(jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d : -f1  | awk NR==$nodeNUM)
-echo "$(ping -n -c1 -w1 $url | grep 'time=' | cut -d = -f 4 | cut -d' ' -f 1)"
+ping -n -c1 -w1 $url | grep 'time=' | cut -d = -f4 | cut -d' ' -f1
