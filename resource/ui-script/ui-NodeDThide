@@ -27,7 +27,7 @@ cat > /etc/vtrui/config.json << EOF
     "protocol":"dokodemo-door",
     "sniffing":{"enabled":true,"destOverride":["http","tls"]},
     "settings":{"network":"tcp,udp","followRedirect":true},
-    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+    "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy"}}
     }
   ],
   "outbounds": [
