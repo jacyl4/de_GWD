@@ -9,17 +9,17 @@ jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json
 
 cat > /etc/vtrui/config.json << EOF
 {
-  "dns": {
+  "dns":{
     "tag":"DNSflow",
     "hosts":{"localhost":"127.0.0.1"},
     "servers":[]
   },
-  "inbounds": [
+  "inbounds":[
     {
     "tag":"dnsin",
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"}
+    "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
     },
     {
     "port":9896,
@@ -65,7 +65,8 @@ cat > /etc/vtrui/config.json << EOF
           "allowInsecure": false
         },
         "sockopt": {
-          "mark": 255
+          "mark": 255,
+          "tcpFastOpen": true
         }
       }
     },
@@ -102,12 +103,13 @@ cat > /etc/vtrui/config.json << EOF
           "allowInsecure": false
         },
         "sockopt": {
-          "mark": 255
+          "mark": 255,
+          "tcpFastOpen": true
         }
       }
     },
-    {"tag":"dnsout","protocol":"dns"},
-    {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
+    {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255,"tcpFastOpen": true}}},
+    {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255,"tcpFastOpen": true}}},
     {"tag":"block","protocol":"blackhole"}
   ],
   "routing": {
