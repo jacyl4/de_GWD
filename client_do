@@ -376,6 +376,9 @@ cat << EOF > /etc/vtrui/config.json
       "tlsSettings":{
         "serverName":"xxxx.ooo",
         "allowInsecure":false
+      },
+      "sockopt":{
+        "mark":255
       }
     }
   },
