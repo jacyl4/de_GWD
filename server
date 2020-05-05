@@ -631,6 +631,7 @@ rm -rf ~/now.cron
 nginxWebConf(){
 rm -rf /etc/nginx/conf.d/default.conf
 
+portCheck=$(echo $port | grep '^[0-9]\+$')
 if [[ $portCheck = "443" ]]; then
 
 cat << EOF > /etc/nginx/conf.d/default.conf
@@ -1136,7 +1137,6 @@ blue "---------------------"
 updateGWD(){
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
-portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)
