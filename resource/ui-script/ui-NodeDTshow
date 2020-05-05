@@ -12,9 +12,9 @@ jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json
 cat > /etc/vtrui/config.json << EOF
 {
   "dns": {
-    "tag": "DNSflow",
+    "tag":"DNSflow",
     "hosts":{"localhost":"127.0.0.1"},
-    "servers": []
+    "servers":[]
   },
   "inbounds": [
     {
@@ -146,7 +146,7 @@ cat > /etc/vtrui/config.json << EOF
       }
     },
     {"tag":"dnsout","protocol":"dns"},
-    {"tag":"direct","protocol":"freedom",streamSettings":{"sockopt":{"mark":255}}},
+    {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
     {"tag":"block","protocol":"blackhole"}
   ],
   "routing": {
