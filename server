@@ -631,20 +631,7 @@ rm -rf ~/now.cron
 nginxWebConf(){
 rm -rf /etc/nginx/conf.d/default.conf
 
-if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
-
-cat << EOF > /etc/nginx/conf.d/default.conf
-server {
-  listen $port ssl http2 fastopen=128 reuseport;
-  server_name $domain;
-  root /var/www/html;
-  index index.php index.html index.htm;
-
-  ssl_certificate /var/www/ssl/fullchain.cer;
-  ssl_certificate_key /var/www/ssl/$topDomain.key;
-EOF
-
-else
+if [[ $portCheck = "443" ]]; then
 
 cat << EOF > /etc/nginx/conf.d/default.conf
 server {
@@ -661,6 +648,19 @@ server {
 
   ssl_certificate /var/www/ssl/fullchain.cer;
   ssl_certificate_key /var/www/ssl/$domain.key;
+EOF
+
+else
+
+cat << EOF > /etc/nginx/conf.d/default.conf
+server {
+  listen $port ssl http2 fastopen=128 reuseport;
+  server_name $domain;
+  root /var/www/html;
+  index index.php index.html index.htm;
+
+  ssl_certificate /var/www/ssl/fullchain.cer;
+  ssl_certificate_key /var/www/ssl/$topDomain.key;
 EOF
 
 fi
@@ -1134,9 +1134,6 @@ blue "---------------------"
 
 
 updateGWD(){
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
 portCheck=$(echo $port | grep '^[0-9]\+$')
@@ -1144,6 +1141,9 @@ topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /etc/vtrui/config.json)
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /etc/vtrui/config.json)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 cd ~
 source /etc/profile
