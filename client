@@ -206,7 +206,6 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-rm -rf /run/smartdns.pid
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=Smart DNS server
