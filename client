@@ -364,7 +364,7 @@ cat << EOF > /etc/vtrui/config.json
     "listen": "127.0.0.1",
     "protocol": "dokodemo-door",
     "settings": {"network":"tcp,udp","followRedirect":true},
-    "streamSettings": {"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy"}}
+    "streamSettings": {"sockopt":{"tproxy":"tproxy"}}
   }
 ],
 "outbounds": [
@@ -396,11 +396,10 @@ cat << EOF > /etc/vtrui/config.json
       "tlsSettings":{
         "serverName":"xxxx.ooo",
         "allowInsecure":false
-      },
-      "sockopt":{"mark":255,"tcpFastOpen":true}
+      }
     }
   },
-  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
+  {"tag":"direct","protocol":"freedom"},
   {"tag":"dnsout","protocol":"dns"}
 ],
 "routing": {
