@@ -377,12 +377,10 @@ cat << EOF > /etc/vtrui/config.json
         "serverName":"xxxx.ooo",
         "allowInsecure":false
       },
-      "sockopt":{
-        "mark":255
-      }
+      "sockopt":{"mark":255}
     }
   },
-  {"tag":"direct","protocol":"freedom"},
+  {"tag":"direct","protocol":"freedom","setting":{"streamSettings":{"sockopt":{"mark":255}}}},
   {"tag":"dnsout","protocol":"dns"}
 ],
 "routing": {

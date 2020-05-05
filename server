@@ -344,7 +344,7 @@ cat << EOF > /etc/vtrui/config.json
     "port":11811,
     "listen":"127.0.0.1",
     "protocol":"vmess",
-    "sniffing":{"enabled":true,"destOverride":["http", "tls"]},
+    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
     "settings":{
       "clients": []
       },
@@ -357,8 +357,8 @@ cat << EOF > /etc/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom"},
-  {"tag":"block","protocol":"blackhole"}
+  {"protocol":"freedom","settings": {}},
+  {"tag":"block","protocol":"blackhole","settings": {}}
   ]
 }
 EOF
