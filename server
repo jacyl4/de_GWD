@@ -800,9 +800,9 @@ installGWD(){
 
 domain=$(echo $vpsdomainP | cut -d: -f1)
 port=$(echo $vpsdomainP | cut -d: -f2)
-portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
+portCheck=$(echo $port | grep '^[0-9]\+$')
 if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
     green "==============================="
