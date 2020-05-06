@@ -135,6 +135,9 @@
           <div class="card-header">
             <i class="fas fa-archive"></i>
             更新
+        <span class="float-right mt-n1 mb-n2">
+        <button type="button" class="btn btn-outline-dark btn-sm mt-1" onclick="Rescue()">救援</button>
+        </span>
           </div>
           <div class="card-body">
 
@@ -144,12 +147,11 @@
           <span class="input-group-text justify-content-center w-100">脚本地址</span>
         </div>
           <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr ?>">
+        <div class="input-group-append">
+          <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
+        </div>
       </div>
-
-      <div class="col-md-4 my-1 text-right">
-        <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
-        <button type="button" class="btn btn-outline-danger text-right" onclick="Rescue()">Rescue</button>
-      </div>
+      
     </div>
 
 
