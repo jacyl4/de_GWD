@@ -354,7 +354,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom","settings":{}},
+  {"protocol":"freedom"},
   {"tag":"block","protocol":"blackhole"}
   ]
 }
@@ -1109,7 +1109,7 @@ elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 cat >> /etc/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom","settings":{}},
+  {"protocol":"freedom"},
   {"tag":"block","protocol":"blackhole"}
   ]
 }
