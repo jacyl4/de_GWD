@@ -1,4 +1,4 @@
 #!/bin/bash
-if [[ $(jq -r '.clifwd' /usr/local/bin/0conf) != "null" ]]; then
+if [[ -n $(jq -r '.clifwd' /usr/local/bin/0conf) ]]; then
 echo "Nat"
 fi
