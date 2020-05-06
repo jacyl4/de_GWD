@@ -634,7 +634,20 @@ touch /etc/nginx/conf.d/supp_head
 cat /etc/nginx/conf.d/supp_head > /etc/nginx/conf.d/default.conf
 
 portCheck=$(echo $port | grep '^[0-9]\+$')
-if [[ $portCheck = "443" ]]; then
+if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
+
+cat << EOF >> /etc/nginx/conf.d/default.conf
+server {
+  listen $port ssl http2 fastopen=128 reuseport;
+  server_name $domain;
+  root /var/www/html;
+  index index.php index.html index.htm;
+
+  ssl_certificate /var/www/ssl/fullchain.cer;
+  ssl_certificate_key /var/www/ssl/$topDomain.key;
+EOF
+
+else
 
 cat << EOF >> /etc/nginx/conf.d/default.conf
 server {
@@ -651,19 +664,6 @@ server {
 
   ssl_certificate /var/www/ssl/fullchain.cer;
   ssl_certificate_key /var/www/ssl/$domain.key;
-EOF
-
-else
-
-cat << EOF >> /etc/nginx/conf.d/default.conf
-server {
-  listen $port ssl http2 fastopen=128 reuseport;
-  server_name $domain;
-  root /var/www/html;
-  index index.php index.html index.htm;
-
-  ssl_certificate /var/www/ssl/fullchain.cer;
-  ssl_certificate_key /var/www/ssl/$topDomain.key;
 EOF
 
 fi
