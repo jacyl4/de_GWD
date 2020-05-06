@@ -343,7 +343,6 @@ cat << EOF > /etc/vtrui/config.json
     "port":11811,
     "listen":"127.0.0.1",
     "protocol":"vmess",
-    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
     "settings":{
       "clients":[]
       },
@@ -354,8 +353,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom"},
-  {"tag":"block","protocol":"blackhole"}
+  {"protocol":"freedom","settings":{}}
   ]
 }
 EOF
@@ -1109,8 +1107,7 @@ elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 cat >> /etc/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom"},
-  {"tag":"block","protocol":"blackhole"}
+  {"protocol":"freedom","settings":{}}
   ]
 }
 EOF

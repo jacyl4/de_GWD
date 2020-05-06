@@ -400,7 +400,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   },
   {"tag":"dnsout","protocol":"dns"},
-  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}}
+  {"tag":"direct","protocol":"freedom","settings":{},"streamSettings":{"sockopt":{"mark":255}}}
 ],
 "routing": {
   "rules": [
