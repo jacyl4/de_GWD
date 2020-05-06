@@ -350,8 +350,7 @@ cat << EOF > /etc/vtrui/config.json
       },
     "streamSettings": {
       "network":"ws",
-      "wsSettings":{"path":"/0000"},
-      "sockopt":{"tcpFastOpen":true}
+      "wsSettings":{"path":"/0000"}
       }
     }
   ],
@@ -1098,8 +1097,7 @@ cat >> /etc/vtrui/config.json << EOF
       "tlsSettings":{
         "serverName":"$domain",
         "allowInsecure":false
-        },
-      "sockopt":{"tcpFastOpen":true}
+        }
       }
     }
   ]
