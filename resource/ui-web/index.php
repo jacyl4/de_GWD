@@ -564,10 +564,10 @@ $.get('markThis.php', {markName:markNametxt}, function(result){window.location.r
 }
 
 function NodeDTshow(){
-$.get('switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){location.reload();});
+$.get('switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){window.location.reload();});
 }
 function NodeDThide(){
-$.get('switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){location.reload();});
+$.get('switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){window.location.reload();});
 }
 
 function pingICMP(){
@@ -625,7 +625,7 @@ dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
 chinaDNS=$("#chinaDNS").val();
 hostsCustomize=$("#hostsCustomize").val();
-$.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, chinaDNS:chinaDNS, hostsCustomize:hostsCustomize}, function(result){location.reload();});
+$.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, chinaDNS:chinaDNS, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
 }
 
 function submitstaticip(){
@@ -638,7 +638,7 @@ alert("本机已开始重新启动");
 function dhcpUP(){
 dhcpStarttxt=$('#dhcpStart').val();
 dhcpEndtxt=$('#dhcpEnd').val();
-$.get('dhcpUP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt}, function(result){location.reload();});
+$.get('dhcpUP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt}, function(result){window.location.reload();});
 alert('DHCP服务正在启动');
 }
 

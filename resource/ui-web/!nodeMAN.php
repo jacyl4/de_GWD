@@ -295,7 +295,7 @@ path6:path6,
 path7:path7,
 path8:path8,
 path9:path9,
-}, function(result){ location.reload(); });
+}, function(result){window.location.reload();});
 alert("节点信息已保存");
 }
 
