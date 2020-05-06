@@ -291,8 +291,7 @@ User=nobody
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
-NoNewPrivileges=yes
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 Restart=always
 RestartSec=2
@@ -336,12 +335,13 @@ cat << EOF > /etc/vtrui/config.json
     "tag":"dnsin",
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"}
+    "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
   },
   {
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
+    "sniffing": {"enabled": true, "destOverride": ["http", "tls"]},
     "settings":{"network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
@@ -412,8 +412,6 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
-NoNewPrivileges=yes
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 $MAINPID
 Restart=always
