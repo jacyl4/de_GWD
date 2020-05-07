@@ -615,6 +615,12 @@ echo
 
 installDep(){
 rm -rf /etc/apt/sources.list.d/docker.list
+
+if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
+apt purge `dpkg -l | grep php7.3| awk '{print $2}' | tr "\n" " "`
+rm -rf /etc/php/7.3
+fi
+
 cat << EOF > /etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main
 deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main
@@ -632,7 +638,7 @@ apt update && apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install docker-ce docker-ce-cli containerd.io php7.3-fpm php7.3-common php7.3-cgi php7.3-opcache php7.3-json php7.3-sqlite3 sqlite3
+apt install docker-ce docker-ce-cli containerd.io php7.4-fpm php7.4-common php7.4-cgi php7.4-opcache php7.4-json php7.4-sqlite3 sqlite3
 
 sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
 sed -i "/LimitNPROC=/c\LimitNPROC=1000000"  /lib/systemd/system/docker.service
@@ -640,20 +646,18 @@ systemctl daemon-reload >/dev/null 2>&1
 systemctl enable docker
 systemctl restart docker
 
-cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
+cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
 [global]
 pid = /run/php/php-fpm.pid
 error_log = /var/log/php-fpm.log
 
-daemonize = yes
+emergency_restart_threshold = 10
+emergency_restart_interval = 1m
 
-rlimit_files = 1024
-rlimit_core = 0
-
-include=/etc/php/7.3/fpm/pool.d/*.conf
+include=/etc/php/7.4/fpm/pool.d/*.conf
 EOF
 
-cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
+cat << EOF > /etc/php/7.4/fpm/pool.d/www.conf
 [www]
 user = www-data
 group = www-data
@@ -679,28 +683,28 @@ php_value[upload_max_filesize] = 10M
 php_value[post_max_size] = 10M
 EOF
 
-sed -i "/engine =/c\engine = off" /etc/php/7.3/fpm/php.ini
-sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.3/fpm/php.ini
+sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
+sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
+sed -i "/zend_extension=opcache.so/d" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.enable=/c\opcache.enable=1" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.enable_cli=/c\opcache.enable_cli=1" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.memory_consumption=/c\opcache.memory_consumption=128" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.interned_strings_buffer=/c\opcache.interned_strings_buffer=8" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.max_accelerated_files=/c\opcache.max_accelerated_files=200" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.revalidate_freq=/c\opcache.revalidate_freq=60" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.fast_shutdown=/c\opcache.fast_shutdown=1" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.save_comments=/c\opcache.save_comments=1" /etc/php/7.4/fpm/php.ini
 
-sed -i "/zend_extension=opcache.so/d" /etc/php/7.3/fpm/php.ini
-sed -i "/opcache.enable=/c\opcache.enable=1" /etc/php/7.3/fpm/php.ini
-sed -i "/opcache.enable_cli=/c\opcache.enable_cli=1" /etc/php/7.3/fpm/php.ini
-sed -i "/opcache.memory_consumption=/c\opcache.memory_consumption=128" /etc/php/7.3/fpm/php.ini
-sed -i "/opcache.interned_strings_buffer=/c\opcache.interned_strings_buffer=8" /etc/php/7.3/fpm/php.ini
-sed -i "/opcache.max_accelerated_files=/c\opcache.max_accelerated_files=10000" /etc/php/7.3/fpm/php.ini
-sed -i "/opcache.revalidate_freq=/c\opcache.revalidate_freq=1" /etc/php/7.3/fpm/php.ini
-sed -i "/opcache.save_comments=/c\opcache.save_comments=1" /etc/php/7.3/fpm/php.ini
-
-rm -rf /lib/systemd/system/php7.3-fpm.service
-cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
+rm -rf /lib/systemd/system/php*-fpm.service
+cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
 [Unit]
-Description=The PHP 7.3 FastCGI Process Manager
+Description=The PHP 7.4 FastCGI Process Manager
 After=network.target
 
 [Service]
 Type=notify
 PIDFile=/run/php/php-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 RestartSec=2
@@ -710,8 +714,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload >/dev/null 2>&1
-systemctl enable php7.3-fpm
-systemctl restart php7.3-fpm
+systemctl enable php7.4-fpm
+systemctl restart php7.4-fpm
 }
 
 
@@ -1334,12 +1338,12 @@ else
 fi
 
 
-if [[ $(systemctl is-active php7.3-fpm) = "active" ]]; then
-    echo "[$statusGOOD] php7.3-FPM     [working]"
-elif [ ! -f "/etc/php/7.3/fpm/php-fpm.conf" ]; then
-    echo "[$statusBAD] php7.3-FPM     [not installed]"
+if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
+    echo "[$statusGOOD] php7.4-FPM     [working]"
+elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] php7.4-FPM     [not installed]"
 else
-    echo "[$statusBAD] php7.3-FPM     [start failed]"
+    echo "[$statusBAD] php7.4-FPM     [start failed]"
 fi
 
 
