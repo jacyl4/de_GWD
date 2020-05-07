@@ -691,7 +691,7 @@ sed -i "/opcache.enable_cli=/c\opcache.enable_cli=1" /etc/php/7.4/fpm/php.ini
 sed -i "/opcache.memory_consumption=/c\opcache.memory_consumption=128" /etc/php/7.4/fpm/php.ini
 sed -i "/opcache.interned_strings_buffer=/c\opcache.interned_strings_buffer=8" /etc/php/7.4/fpm/php.ini
 sed -i "/opcache.max_accelerated_files=/c\opcache.max_accelerated_files=200" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.revalidate_freq=/c\opcache.revalidate_freq=60" /etc/php/7.4/fpm/php.ini
+sed -i "/opcache.revalidate_freq=/c\opcache.revalidate_freq=1" /etc/php/7.4/fpm/php.ini
 sed -i "/opcache.fast_shutdown=/c\opcache.fast_shutdown=1" /etc/php/7.4/fpm/php.ini
 sed -i "/opcache.save_comments=/c\opcache.save_comments=1" /etc/php/7.4/fpm/php.ini
 
