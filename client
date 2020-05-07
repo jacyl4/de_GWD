@@ -726,6 +726,9 @@ pihole restartdns
 installWebUI(){
 rm -rf /usr/local/bin/ui-*
 rm -rf /var/www/html/*.php
+rm -rf /var/www/html/vendor
+rm -rf /var/www/html/css
+rm -rf /var/www/html/js
 cd ~
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
 svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
