@@ -338,6 +338,7 @@ rm -rf ~/vtrui*
 
 cat << EOF > /etc/vtrui/config.json
 {
+  "dns":{"servers":["127.0.0.1"]},
   "inbounds": [
     {
     "port":11811,
@@ -353,7 +354,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom","settings":{}}
+  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
   ]
 }
 EOF
@@ -1107,7 +1108,7 @@ elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 cat >> /etc/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom","settings":{}}
+  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
   ]
 }
 EOF
