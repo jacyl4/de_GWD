@@ -642,12 +642,12 @@ systemctl restart docker
 
 cat << EOF > /etc/php/7.3/fpm/php-fpm.conf
 [global]
-pid = /run/php/php7.3-fpm.pid
-error_log = /var/log/php7.3-fpm.log
+pid = /run/php/php-fpm.pid
+error_log = /var/log/php-fpm.log
 
 daemonize = yes
 
-rlimit_files = 1000000
+rlimit_files = 1024
 rlimit_core = 0
 
 include=/etc/php/7.3/fpm/pool.d/*.conf
@@ -657,7 +657,7 @@ cat << EOF > /etc/php/7.3/fpm/pool.d/www.conf
 [www]
 user = www-data
 group = www-data
-listen = /run/php/php7.3-fpm.sock
+listen = /run/php/php-fpm.sock
 listen.allowed_clients = 127.0.0.1
 listen.backlog = 65536
 listen.mode = 0666
@@ -699,7 +699,7 @@ After=network.target
 
 [Service]
 Type=notify
-PIDFile=/run/php/php7.3-fpm.pid
+PIDFile=/run/php/php-fpm.pid
 ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
@@ -889,7 +889,7 @@ location ~ /\.(?!well-known).* {
 }
 
 location ~* \.php$ {
-  fastcgi_pass            unix:/run/php/php7.3-fpm.sock;
+  fastcgi_pass            unix:/run/php/php-fpm.sock;
   fastcgi_index           index.php;
   fastcgi_split_path_info ^(.+\.php)(.*)$;
   include                 fastcgi_params;

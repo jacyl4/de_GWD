@@ -504,7 +504,6 @@ docker pull jacyl4/nginx_tls1.3:latest
 
 if [[ -d "/etc/php" ]]; then
 mkdir -p /run/php
-touch /run/php/php7.3-fpm.sock
 chown -R www-data:www-data /run/php
 
 docker run -d --name=nginx --net=host --restart=always \
