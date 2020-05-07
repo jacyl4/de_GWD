@@ -236,7 +236,11 @@ CONDITIONAL_FORWARDING=false
 EOF
 
 curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+}
 
+
+
+piholeSet(){
 systemctl mask --now dhcpcd
 systemctl mask --now lighttpd
 systemctl daemon-reload >/dev/null 2>&1
@@ -846,6 +850,8 @@ installIptablesRules
 
 installPihole
 
+piholeSet
+
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
 sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
@@ -1137,6 +1143,8 @@ systemctl daemon-reload
 
 installPihole
 
+piholeSet
+
 blue "---------------------"
 blue "Update Pi-hole [done]"
 blue "---------------------"
@@ -1161,6 +1169,8 @@ source /etc/profile
 preInstall
 
 installIptablesRules
+
+piholeSet
 
 installDOHser
 
