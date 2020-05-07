@@ -241,7 +241,7 @@ systemctl mask --now dhcpcd
 systemctl mask --now lighttpd
 systemctl daemon-reload >/dev/null 2>&1
 
-pihole restartdns
+pihole logging off
 }
 
 
