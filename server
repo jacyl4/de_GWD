@@ -1125,8 +1125,10 @@ fi
 
 
 updatePihole(){
-rm -rf /etc/resolv.conf
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
+rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 1.1.1.1
 nameserver 8.8.8.8
@@ -1134,8 +1136,8 @@ nameserver 1.0.0.1
 nameserver 8.8.4.4
 EOF
 
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 
 rm -rf /etc/dnsmasq* /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
