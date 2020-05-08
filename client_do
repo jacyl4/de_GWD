@@ -1367,8 +1367,8 @@ blue "----------------------------------------"
     echo
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "7. update Nginx(docker)"
-    yellow "8. Install/Update WiregGard"
+    yellow "3. Install/Update WiregGard"
+    yellow "8. update Nginx(docker)"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
@@ -1383,12 +1383,12 @@ blue "----------------------------------------"
     change_piholeAdmin
     start_menu
     ;;
-    7)
-    installNginxDo
+    3)
+    installWGcore
     start_menu
     ;;
     8)
-    installWGcore
+    installNginxDo
     start_menu
     ;;
     9)

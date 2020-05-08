@@ -795,8 +795,8 @@ blue "----------------------------------------"
     green  "2. Change de_GWD password"
     green  "3. Install bbrplus and reboot（only Debian 9）"
     red    "6. Change domain and issue new certificates"
-    yellow "7. update Nginx(docker)"
-    yellow "8. Install/Update WiregGard"
+    yellow "7. Install/Update WiregGard"
+    yellow "8. update Nginx(docker)"
     yellow "9. Update Pi-hole"
     yellow "0. de_GWD clifwd Update"
     red    "CTRL+C EXIT"
@@ -820,11 +820,11 @@ blue "----------------------------------------"
     start_menu
     ;;
     7)
-    clifwd_installNginxDo
+    clifwd_installWGcore
     start_menu
     ;;
     8)
-    clifwd_installWGcore
+    clifwd_installNginxDo
     start_menu
     ;;
     9)
