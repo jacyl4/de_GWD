@@ -5,7 +5,6 @@
 ## Server：
 
 ![Snipaste_2020-05-09_08-33-46.png](https://i.loli.net/2020/05/09/NbAYPetxiHWjKql.png)
-
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
