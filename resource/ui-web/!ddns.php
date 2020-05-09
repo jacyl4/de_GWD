@@ -106,7 +106,7 @@
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Wan IP</span>
         </div>
-          <span class="form-control text-center"><?php echo exec("curl http://members.3322.org/dyndns/getip"); ?></span>
+          <span class="form-control text-center"><?php echo shell_exec("curl http://members.3322.org/dyndns/getip"); ?></span>
       </div>
       
         <div class="card mb-3">
