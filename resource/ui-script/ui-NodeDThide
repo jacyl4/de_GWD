@@ -15,7 +15,7 @@ cat > /etc/vtrui/config.json << EOF
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
     "sniffing":{"enabled":true,"destOverride":["http","tls"]},
-    "settings":{"network":"tcp,udp","followRedirect":true},
+    "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
     }
   ],
@@ -32,7 +32,6 @@ cat > /etc/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "level": 1,
                 "alterId": 8,
                 "security": "none"
               }
@@ -43,10 +42,7 @@ cat > /etc/vtrui/config.json << EOF
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/000000",
-          "headers": {
-            "Host": "xxxx.ooo"
-          }
+          "path": "/000000"
         },
         "security": "tls",
         "tlsSettings": {
@@ -69,7 +65,6 @@ cat > /etc/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "level": 1,
                 "alterId": 8,
                 "security": "none"
               }
@@ -80,10 +75,7 @@ cat > /etc/vtrui/config.json << EOF
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/000000",
-          "headers": {
-            "Host": "xxxx.ooo"
-          }
+          "path": "/000000"
         },
         "security": "tls",
         "tlsSettings": {

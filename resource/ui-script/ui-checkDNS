@@ -1,6 +1,6 @@
 #!/bin/bash
-if [[ $(cat /etc/vtrui/config.json) =~ "geosite:cn" ]]; then
+if [[ $(cat /usr/local/bin/v2dns/config.json) =~ "geosite:cn" ]]; then
     echo "大陆白名单"
-elif [[ $(cat /etc/vtrui/config.json) =~ "gfw" ]]; then
+elif [[ $(cat /usr/local/bin/v2dns/config.json) =~ "gfw" ]]; then
     echo "GFWlist"
 fi

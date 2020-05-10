@@ -318,7 +318,7 @@ systemctl disable --now vtrui >/dev/null 2>&1
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/bin/vtrui
 rm -rf /etc/vtrui
-
+mkdir -p /usr/local/bin/v2dns
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
 wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
@@ -328,7 +328,7 @@ yes|cp ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
 yes|cp ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
 yes|cp ~/vtrui/v2ray /usr/bin/vtrui/vtrui
 yes|cp ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
-yes|cp ~/vtrui/v2ctl /usr/bin/vtrui/geoip.dat
+yes|cp ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
 chmod +x /usr/local/bin/v2dns/v2dns
 chmod +x /usr/local/bin/v2dns/v2ctl
 chmod +x /usr/bin/vtrui/vtrui
@@ -347,7 +347,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
-  "settings":{"address":"$localaddr","port":53,"network":"tcp,udp"}
+  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"}
   }
 ],
 "outbounds":[
@@ -371,7 +371,7 @@ cat << EOF > /etc/vtrui/config.json
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp,udp","followRedirect":true},
+    "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
 ],
@@ -384,7 +384,6 @@ cat << EOF > /etc/vtrui/config.json
           "users":[
             {
               "id":"00000000-0000-0000-0000-000000000000",
-              "level":1,
               "alterId":8,
               "security":"none"
             }
@@ -395,10 +394,7 @@ cat << EOF > /etc/vtrui/config.json
     "streamSettings":{
       "network":"ws",
       "wsSettings":{
-        "path":"/000000",
-        "headers":{
-          "Host":"xxxx.ooo"
-        }
+        "path":"/000000"
       },
       "security":"tls",
       "tlsSettings":{
@@ -444,7 +440,6 @@ ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
 Restart=always
 RestartSec=2
 StartLimitBurst=0
-StartLimitIntervalSec=5
 TimeoutSec=5
 
 [Install]
@@ -471,7 +466,6 @@ ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=always
 RestartSec=2
 StartLimitBurst=0
-StartLimitIntervalSec=5
 TimeoutSec=5
 
 [Install]
@@ -984,8 +978,8 @@ rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
 cd ~
-svn export --force https://github.com/jacyl4/de_GWD/branchs/$branch/resource/ui-script
-svn export --force https://github.com/jacyl4/de_GWD/branchs/$branch/resource/ui-web
+svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-script
+svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-web
 
 rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html
@@ -1380,6 +1374,14 @@ else
     echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
+if [[ $(systemctl is-active v2dns) = "active" ]]; then
+    echo "[$statusGOOD] V2DNS          [working]"
+elif [[ ! -d "/usr/local/bin/v2dns" ]]; then
+    echo "[$statusBAD] V2DNS          [not Installed]"
+else
+    echo "[$statusBAD] V2DNS          [start failed]"
+fi
+
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY          [working]"
 elif [[ ! -d "/usr/bin/vtrui" ]]; then
@@ -1388,7 +1390,6 @@ else
     echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
-
 if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
     echo "[$statusGOOD] php7.4-FPM     [working]"
 elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
@@ -1396,7 +1397,6 @@ elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
 else
     echo "[$statusBAD] php7.4-FPM     [start failed]"
 fi
-
 
 if [[ $(systemctl is-active docker) = "active" ]]; then
     echo "[$statusGOOD] Docker         [working]"

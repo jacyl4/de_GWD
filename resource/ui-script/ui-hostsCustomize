@@ -1,7 +1,7 @@
 #!/bin/bash
 hostsCustomizeKey=$(jq -r '.hosts | to_entries[] | [.key] | @tsv' /usr/local/bin/0conf)
 
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json >/tmp/hostsCustomize
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/v2dns/config.json >/tmp/hostsCustomize
 
 {
 for key in $hostsCustomizeKey; do
