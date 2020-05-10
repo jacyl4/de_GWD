@@ -309,7 +309,7 @@ Description=DNS-over-HTTPS server
 After=network.target
 
 [Service]
-User=nobody
+User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
