@@ -580,9 +580,6 @@ chmod +x /usr/local/bin/iptables-proxy-up
 
 cat << EOF > /usr/local/bin/iptables-proxy-down
 #!/bin/bash
-systemctl stop doh-client
-systemctl stop vtrui
-
 iptables -t mangle -F
 iptables -t mangle -X
 iptables -t nat -F

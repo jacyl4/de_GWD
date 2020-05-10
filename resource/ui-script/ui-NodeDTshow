@@ -183,10 +183,10 @@ jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /usr/local/
 done
 
 if [[ -z "$localip" ]]; then
-  jq 'del(.routing.rules[2])' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+  jq 'del(.routing.rules[1])' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 else
   for localippre in $localip; do
-  jq --arg localippre $localippre '.routing.rules[2].source+=[$localippre]' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+  jq --arg localippre $localippre '.routing.rules[1].source+=[$localippre]' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
   done
 fi
 
