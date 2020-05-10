@@ -1,4 +1,14 @@
 #!/bin/bash
+jq '.dns.hosts={"localhost": "127.0.0.1"}' /etc/vtrui/config.json >/tmp/vtrui_temp
+
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+cat /tmp/hosts | while read hosts 
+do
+	key=$(echo $hosts | awk '{print$1}')
+	value=$(echo $hosts | awk '{print$2}')
+	jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+done
+
 if [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
 	listW=$(jq -r '.listW[]' /usr/local/bin/0conf)
 elif [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
@@ -14,6 +24,13 @@ for listWpre in $(cat /tmp/listW); do
 	jq --arg listWpre $listWpre '.listW += [$listWpre]' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 done
 
+mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 mv -f /tmp/0conf_temp /usr/local/bin/0conf
+
+if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-v2adADD
+else
+/usr/local/bin/ui-v2adDEL
+fi
 
 /usr/local/bin/ui-changeDOH
