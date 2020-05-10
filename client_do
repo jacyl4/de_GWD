@@ -328,7 +328,6 @@ yes|cp ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
 yes|cp ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
 yes|cp ~/vtrui/v2ray /usr/bin/vtrui/vtrui
 yes|cp ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
-yes|cp ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
 chmod +x /usr/local/bin/v2dns/v2dns
 chmod +x /usr/local/bin/v2dns/v2ctl
 chmod +x /usr/bin/vtrui/vtrui
