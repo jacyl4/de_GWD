@@ -380,7 +380,7 @@ cat << EOF > /etc/vtrui/config.json
     }
   },
   {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}},
-  {"tag":"direct","protocol":"freedom","settings":{},"streamSettings":{"sockopt":{"mark":255}}}
+  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}}
 ],
 "routing": {
   "rules": [
@@ -412,7 +412,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 $MAINPID
 Restart=always
@@ -434,9 +434,7 @@ systemctl restart vtrui
 
 installOverture(){
 systemctl disable --now overture >/dev/null 2>&1
-rm -rf /usr/local/bin/overture
 
-mkdir -p /usr/local/bin/overture
 wget --no-check-certificate -O ~/overture.zip $mirrorSite/overture-linux-amd64.zip
 unzip ~/overture.zip -d ~/overture
 mv -f ~/overture/overture-linux-amd64 /usr/bin/overture
@@ -1030,8 +1028,8 @@ rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
 cd ~
-svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
-svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
+svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-script
+svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-web
 
 rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html
@@ -1084,15 +1082,15 @@ wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-L
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-List/master/ads.txt
 
 if [ $(ls -l ~/chinaDomain.txt | awk '{print$5}') -gt 13000 ]; then
-mv -f ~/chinaDomain.txt /usr/local/bin/overture/chinaDomain.txt
+mv -f ~/chinaDomain.txt /etc/overture/chinaDomain.txt
 fi
 
 if [ $(ls -l ~/gfwlist.txt | awk '{print$5}') -gt 750000 ]; then
-mv -f ~/gfwlist.txt /usr/local/bin/overture/gfwlist.txt
+mv -f ~/gfwlist.txt /etc/overture/gfwlist.txt
 fi
 
 if [ $(ls -l ~/ads.txt | awk '{print$5}') -gt 100000 ]; then
-mv -f ~/ads.txt /usr/local/bin/overture/ads.txt
+mv -f ~/ads.txt /etc/overture/ads.txt
 fi
 
 wget --no-check-certificate -c https://bgp.space/china.html
