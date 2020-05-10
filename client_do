@@ -1081,11 +1081,11 @@ wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-L
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-List/master/gfwlist.txt
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-List/master/ads.txt
 
-if [ $(ls -l ~/chinaDomain.txt | awk '{print$5}') -gt 13000 ]; then
+if [ $(ls -l ~/chinaDomain.txt | awk '{print$5}') -gt 10000 ]; then
 mv -f ~/chinaDomain.txt /etc/overture/chinaDomain.txt
 fi
 
-if [ $(ls -l ~/gfwlist.txt | awk '{print$5}') -gt 750000 ]; then
+if [ $(ls -l ~/gfwlist.txt | awk '{print$5}') -gt 75000 ]; then
 mv -f ~/gfwlist.txt /etc/overture/gfwlist.txt
 fi
 
