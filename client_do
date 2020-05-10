@@ -8,6 +8,7 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 export DEBIAN_FRONTEND=noninteractive
 
 
+branch="dev"
 
 mirrorSite="http://xznat.seso.icu:10290"
 
@@ -291,7 +292,6 @@ User=nobody
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
 Restart=always
 RestartSec=2
@@ -412,6 +412,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 $MAINPID
 Restart=always
@@ -427,6 +428,105 @@ EOF
 systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
+}
+
+
+
+installOverture(){
+systemctl disable --now overture >/dev/null 2>&1
+rm -rf /usr/local/bin/overture
+
+mkdir -p /usr/local/bin/overture
+wget --no-check-certificate -O ~/overture.zip $mirrorSite/overture-linux-amd64.zip
+unzip ~/overture.zip -d ~/overture
+mv -f ~/overture/overture-linux-amd64 /usr/bin/overture
+chmod +x /usr/bin/overture
+
+cat << EOF > /etc/overture/config.json
+{
+  "BindAddress": ":53",
+  "DebugHTTPAddress": "",
+  "PrimaryDNS": [
+    {
+      "Name": "Pi-Hole",
+      "Address": "127.0.0.1:5390",
+      "Protocol": "udp",
+      "SOCKS5Address": "",
+      "Timeout": 6,
+      "EDNSClientSubnet": {
+        "Policy": "disable",
+        "ExternalIP": "",
+        "NoCookie": true
+      }
+    }
+  ],
+  "AlternativeDNS": [
+    {
+      "Name": "SmartDNS",
+      "Address": "127.0.0.1:5310",
+      "Protocol": "udp",
+      "SOCKS5Address": "",
+      "Timeout": 6,
+      "EDNSClientSubnet": {
+        "Policy": "disable",
+        "ExternalIP": "",
+        "NoCookie": true
+      }
+    }
+  ],
+  "OnlyPrimaryDNS": false,
+  "IPv6UseAlternativeDNS": false,
+  "AlternativeDNSConcurrent": false,
+  "PoolIdleTimeout": 15,
+  "PoolMaxCapacity": 15,
+  "WhenPrimaryDNSAnswerNoneUse": "PrimaryDNS",
+  "IPNetworkFile": {
+    "Primary": "",
+    "Alternative": ""
+  },
+  "DomainFile": {
+    "Primary": "",
+    "Alternative": "/etc/overture/chinaDomain.txt",
+    "Matcher":  "regex-list"
+  },
+  "HostsFile": {
+    "HostsFile": "/etc/overture/hosts",
+    "Finder": "regex-list"
+  },
+  "MinimumTTL": 60,
+  "DomainTTLFile" : "",
+  "CacheSize" : 10000,
+  "RejectQType": [255]
+}
+EOF
+
+cat << EOF > /etc/overture/hosts
+127.0.0.1 localhost
+EOF
+
+cat << "EOF" > /lib/systemd/system/overture.service
+[Unit]
+Description=overture
+After=network.target
+
+[Service]
+User=nobody
+Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/local/bin/overture -c /etc/overture/config.json
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable overture
+
+rm -rf ~/overture*
 }
 
 
@@ -937,7 +1037,7 @@ rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
 
-wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
 mv -f ~/version.php /var/www/html/version.php
 
 docker restart nginx
@@ -947,7 +1047,7 @@ chown -R www-data:www-data /var/www/html
 chmod +x /var/www/html/*
 chmod +x /usr/local/bin/*
 
-wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
+wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ttyd_linux.x86_64
 mv -f ~/ttyd /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 
@@ -979,14 +1079,20 @@ postInstall(){
 cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
-wget --no-check-certificate -c https://raw.githubusercontent.com/v2ray/domain-list-community/release/dlc.dat
-if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 100000 ]; then
-mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-List/master/chinaDomain.txt
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-List/master/gfwlist.txt
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/Domain-List/master/ads.txt
+
+if [ $(ls -l ~/chinaDomain.txt | awk '{print$5}') -gt 13000 ]; then
+mv -f ~/chinaDomain.txt /usr/local/bin/overture/chinaDomain.txt
 fi
 
-wget --no-check-certificate -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
-if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 100000 ]; then
-mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
+if [ $(ls -l ~/gfwlist.txt | awk '{print$5}') -gt 750000 ]; then
+mv -f ~/gfwlist.txt /usr/local/bin/overture/gfwlist.txt
+fi
+
+if [ $(ls -l ~/ads.txt | awk '{print$5}') -gt 100000 ]; then
+mv -f ~/ads.txt /usr/local/bin/overture/ads.txt
 fi
 
 wget --no-check-certificate -c https://bgp.space/china.html
@@ -1023,6 +1129,9 @@ rm -rf /var/www/html/log.log
 EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
+
+systemctl stop vtrui
+systemctl restart overture
 
 output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
 output=$(/usr/local/bin/ui-saveNode >/dev/null 2>&1)
@@ -1123,6 +1232,8 @@ installSmartDNS
 installDOH
 
 installV2ray
+
+installOverture
 
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 
@@ -1282,6 +1393,8 @@ installSmartDNS
 installDOH
 
 installV2ray
+
+installOverture
 
 installIptablesProxy
 
