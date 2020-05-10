@@ -168,6 +168,7 @@ hwclock -w
 
 
 installSmartDNS(){
+systemctl disable --now smartdns >/dev/null 2>&1
 dpkg -P smartdns >/dev/null 2>&1
 
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
@@ -204,6 +205,8 @@ After=network.target
 [Service]
 User=root
 Type=forking
+LimitNPROC=64000
+LimitNOFILE=1000000
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
@@ -222,6 +225,7 @@ systemctl restart smartdns
 
 
 installDOH(){
+systemctl disable --now doh-client >/dev/null 2>&1
 rm -rf /usr/local/bin/doh-client
 
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
@@ -289,7 +293,7 @@ Description=DNS-over-HTTPS Client
 After=network.target
 
 [Service]
-User=nobody
+User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
@@ -309,22 +313,29 @@ systemctl restart doh-client
 
 
 installV2ray(){
-rm -rf /usr/bin/vtrui/*
+systemctl disable --now v2dns >/dev/null 2>&1
+systemctl disable --now vtrui >/dev/null 2>&1
+rm -rf /usr/local/bin/v2dns
+rm -rf /usr/bin/vtrui
+rm -rf /etc/vtrui
 
 mkdir -p /usr/bin/vtrui
 mkdir -p /etc/vtrui
-mkdir -p ~/vtrui
-
 wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
+mkdir -p ~/vtrui
 unzip ~/vtrui.zip -d ~/vtrui
-mv -f ~/vtrui/v2ray /usr/bin/vtrui/vtrui
-mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
-mv -f ~/vtrui/geoip.dat /usr/bin/vtrui/geoip.dat
+yes|cp ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
+yes|cp ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
+yes|cp ~/vtrui/v2ray /usr/bin/vtrui/vtrui
+yes|cp ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
+yes|cp ~/vtrui/v2ctl /usr/bin/vtrui/geoip.dat
+chmod +x /usr/local/bin/v2dns/v2dns
+chmod +x /usr/local/bin/v2dns/v2ctl
 chmod +x /usr/bin/vtrui/vtrui
 chmod +x /usr/bin/vtrui/v2ctl
 rm -rf ~/vtrui*
 
-cat << EOF > /etc/vtrui/config.json
+cat << EOF > /usr/local/bin/v2dns/config.json
 {
 "dns":{
   "tag":"DNSflow",
@@ -333,16 +344,33 @@ cat << EOF > /etc/vtrui/config.json
 },
 "inbounds":[
   {
-    "tag":"dnsin",
-    "port":53,
-    "protocol":"dokodemo-door",
-    "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
-  },
+  "tag":"dnsin",
+  "port":53,
+  "protocol":"dokodemo-door",
+  "settings":{"address":"$localaddr","port":53,"network":"tcp,udp"}
+  }
+],
+"outbounds":[
+  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
+  {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}}
+],
+"routing": {
+  "rules": [
+    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
+    {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"},
+    {"type":"field","ip":["114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"}
+  ]
+}
+}
+EOF
+
+cat << EOF > /etc/vtrui/config.json
+{
+"inbounds":[
   {
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
     "settings":{"network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
@@ -380,27 +408,52 @@ cat << EOF > /etc/vtrui/config.json
       "sockopt":{"mark":255}
     }
   },
-  {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}},
-  {"tag":"direct","protocol":"freedom","settings":{},"streamSettings":{"sockopt":{"mark":255}}}
+  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}}
 ],
 "routing": {
   "rules": [
-    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
-    {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"},
     {"type":"field","ip":["geoip:private","geoip:cn","114.114.114.114","114.114.115.115","119.29.29.29","119.28.28.28","223.5.5.5","223.6.6.6"],"outboundTag":"direct"}
   ]
 }
 }
 EOF
 
+jq --arg key $doh1Domain --arg value $doh1IP '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
+jq --arg key $doh2Domain --arg value $doh2IP '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+
 jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
 jq --argjson port $port '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum $uuidnum '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain $domain '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
-jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
-jq --arg key $doh1Domain --arg value $doh1IP '.dns.hosts += {($key): ($value)}' |\
-jq --arg key $doh2Domain --arg value $doh2IP '.dns.hosts += {($key): ($value)}' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+
+cat << "EOF" > /lib/systemd/system/v2dns.service
+[Unit]
+Description=v2dns Service
+After=network.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+User=root
+Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
+Restart=always
+RestartSec=2
+StartLimitBurst=0
+StartLimitIntervalSec=5
+TimeoutSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable v2dns
+systemctl restart v2dns
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]
@@ -413,9 +466,8 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
-ExecStop=/bin/kill -9 $MAINPID
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -759,7 +811,7 @@ rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+echo ""  > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
@@ -963,10 +1015,7 @@ User=root
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
-ExecStop=/bin/kill -9 \$MAINPID
-KillMode=process
 StartLimitBurst=0
-StartLimitIntervalSec=5
 TimeoutSec=5
 
 [Install]
@@ -982,13 +1031,13 @@ cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
 wget --no-check-certificate -c https://raw.githubusercontent.com/v2ray/domain-list-community/release/dlc.dat
-if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 100000 ]; then
-mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
+if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 240000 ]; then
+mv -f ~/dlc.dat /usr/local/bin/v2dns/geosite.dat
 fi
 
 wget --no-check-certificate -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
-if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 100000 ]; then
-mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
+if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 240000 ]; then
+mv -f ~/h2y.dat /usr/local/bin/v2dns/h2y.dat
 fi
 
 wget --no-check-certificate -c https://bgp.space/china.html
@@ -1238,7 +1287,7 @@ nameserver 8.8.8.8
 option use-vc
 EOF
 
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 output=$(systemctl restart iptables-proxy)
 sleep 3
 

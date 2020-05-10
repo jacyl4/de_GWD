@@ -11,3 +11,5 @@ cat << EOF >/usr/local/bin/ui-update
 #!/bin/bash
 $updateCMD
 EOF
+
+chmod 666 /usr/local/bin/0conf
