@@ -21,6 +21,8 @@ statusFailed=$(red "[ failed ]")
 
 
 preInstall(){
+systemctl stop v2dns >/dev/null 2>&1
+systemctl stop vtrui >/dev/null 2>&1
 systemctl stop iptables-proxy >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
