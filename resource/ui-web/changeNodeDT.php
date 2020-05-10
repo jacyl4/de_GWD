@@ -9,5 +9,6 @@ fclose($nodedtpre);
 
 exec('sudo /usr/local/bin/ui-changeNodeDT');
 exec('sudo systemctl restart vtrui');
+
 ?>
 <?php }?>
