@@ -4,23 +4,9 @@ port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
 uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' >>/tmp/hosts
-
 cat > /etc/vtrui/config.json << EOF
 {
-  "dns":{
-    "tag":"DNSflow",
-    "hosts":{"localhost":"127.0.0.1"},
-    "servers":[]
-  },
   "inbounds":[
-    {
-    "tag":"dnsin",
-    "port":53,
-    "protocol":"dokodemo-door",
-    "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
-    },
     {
     "port":9896,
     "listen":"127.0.0.1",
@@ -106,13 +92,10 @@ cat > /etc/vtrui/config.json << EOF
         }
       }
     },
-    {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}},
     {"tag":"direct","protocol":"freedom","settings":{},"streamSettings":{"sockopt":{"mark":255}}}
   ],
   "routing": {
     "rules": [
-      { "type": "field", "inboundTag": "dnsin", "outboundTag": "dnsout" },
-      { "type": "field", "inboundTag": "DNSflow", "outboundTag": "direct" },
       { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" },
       {
         "type": "field",
@@ -155,23 +138,4 @@ jq --arg v2path $v2path '.outbounds[1].streamSettings.wsSettings.path=$v2path' |
 jq --arg domain $domain '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain $domain '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
-cat /tmp/hosts | while read line 
-do
-  key=$(echo $line | awk '{print$1}')
-  value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
-done
-
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
-
-if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-/usr/local/bin/ui-v2adADD
-else
-/usr/local/bin/ui-v2adDEL
-fi
-
-if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
-/usr/local/bin/ui-changeNLgfw
-else
-/usr/local/bin/ui-changeNLchnw
-fi
