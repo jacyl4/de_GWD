@@ -318,22 +318,22 @@ installV2ray(){
 systemctl disable --now v2dns >/dev/null 2>&1
 systemctl disable --now vtrui >/dev/null 2>&1
 rm -rf /usr/local/bin/v2dns
-rm -rf /usr/bin/vtrui
+rm -rf /usr/local/bin/vtrui
 rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/v2dns
-mkdir -p /usr/bin/vtrui
+mkdir -p /usr/local/bin/vtrui
 mkdir -p /etc/vtrui
 wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
 mkdir -p ~/vtrui
 unzip ~/vtrui.zip -d ~/vtrui
 yes|cp ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
 yes|cp ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
-yes|cp ~/vtrui/v2ray /usr/bin/vtrui/vtrui
-yes|cp ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
+yes|cp ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
+yes|cp ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
 chmod +x /usr/local/bin/v2dns/v2dns
 chmod +x /usr/local/bin/v2dns/v2ctl
-chmod +x /usr/bin/vtrui/vtrui
-chmod +x /usr/bin/vtrui/v2ctl
+chmod +x /usr/local/bin/vtrui/vtrui
+chmod +x /usr/local/bin/vtrui/v2ctl
 rm -rf ~/vtrui*
 
 cat << EOF > /usr/local/bin/v2dns/config.json
@@ -456,7 +456,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+ExecStart=/usr/local/bin/vtrui/vtrui -config /etc/vtrui/config.json
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -469,6 +469,8 @@ EOF
 systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
+
+rm -rf /usr/bin/vtrui
 }
 
 
@@ -1371,7 +1373,7 @@ fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY          [working]"
-elif [[ ! -d "/usr/bin/vtrui" ]]; then
+elif [[ ! -d "/usr/local/bin/vtrui" ]]; then
     echo "[$statusBAD] V2RAY          [not Installed]"
 else
     echo "[$statusBAD] V2RAY          [start failed]"
