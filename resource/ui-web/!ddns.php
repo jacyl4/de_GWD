@@ -106,7 +106,8 @@
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Wan IP</span>
         </div>
-          <span class="form-control text-center"><?php echo shell_exec("curl http://members.3322.org/dyndns/getip"); ?></span>
+          <span class="form-control text-center" id="wanIP"></span>
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="showIP()">查询</button>
       </div>
       
         <div class="card mb-3">
@@ -399,6 +400,10 @@
 <script>
 function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+}
+
+function showIP(){
+$.get('checkDDNSip.php', function(data) { $('#wanIP').text(data) });
 }
 
 function ddnsSaveCF(){
