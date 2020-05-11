@@ -29,11 +29,11 @@ exec('sudo /usr/local/bin/ui-changeDOH');
 exec('sudo /usr/local/bin/ui-saveNode');
 exec('sudo /usr/local/bin/ui-saveHost');
 exec('sudo /usr/local/bin/ui-saveListBW');
+exec('sudo systemctl restart iptables-proxy');
 exec('sudo systemctl restart smartdns');
 exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart v2dns');
 exec('sudo systemctl restart vtrui');
-exec('sudo systemctl restart iptables-proxy');
 exec('sudo chmod 666 /usr/local/bin/0conf');
 
 ?>
