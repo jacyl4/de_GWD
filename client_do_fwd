@@ -805,7 +805,7 @@ blue "----------------------------------------"
     green "Recommend: Debian 9 (amd64)"
     green "Author:    JacyL4"
     green "================================"
-    echo
+    echo ""
     green  "1. de_GWD clifwd install"
     green  "2. Change de_GWD password"
     green  "3. Install bbrplus and reboot（only Debian 9）"
@@ -815,7 +815,7 @@ blue "----------------------------------------"
     yellow "9. Update Pi-hole"
     yellow "0. de_GWD clifwd Update"
     red    "CTRL+C EXIT"
-    echo
+    echo ""
     read -p "Select:" num
     case "$num" in
     1)

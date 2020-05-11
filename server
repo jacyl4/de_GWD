@@ -885,7 +885,7 @@ postInstall
 
 blue "---------------------------------------------"
 blue  "Install de_GWD [done]"
-echo
+echo ""
 blue "DoH:    $(yellow "$vpsdomainP/dq")"
 blue "Domain: $(yellow "$vpsdomainP")"
 blue "UUID:   $(yellow "$v2uuids")"
@@ -1212,7 +1212,7 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /usr/local/bin/vtru
 
 blue "---------------------------------------------"
 green "V2ray node information"
-echo
+echo ""
 blue "DoH:    $(yellow "$vpsdomainP/dq")"
 blue "Domain: $(yellow "$vpsdomainP")"
 blue "UUID:   $(yellow "$v2uuids")"
@@ -1312,7 +1312,7 @@ blue "----------------------------------------"
 if [[ -f "/usr/local/bin/version.php" ]]; then
     blue  "Version:$(echo $(awk 'NR==1' /usr/local/bin/version.php))"
 fi
-    echo
+    echo ""
     green  "1. Install de_GWD"
     green  "2. Install bbrplus and reboot（only Debian 9）"
     red    "5. Change static IP"
@@ -1324,7 +1324,7 @@ fi
     green  "11.Print v2ray node information"
     red    "00.AutoUpdate turn on/off"
     red    "CTRL+C EXIT"
-    echo
+    echo ""
     read -p "Select:" num
     case "$num" in
     1)
