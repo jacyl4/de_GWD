@@ -11,7 +11,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 branch="master"
 
-mirrorSite="http://xznat.seso.icu:10290"
+mirrorSite="http://xl-fs-cm.accfwd.cf:11405"
 
 smartdns_amd64="$mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb"
 

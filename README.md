@@ -15,14 +15,14 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 General Edition (amd64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10290/client_do)
+bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)
 ```
 
 ![Snipaste_2020-05-09_08-34-08.png](https://i.loli.net/2020/05/09/YKIRUT6JHbS71ak.png)
 Compatible Edition (amd64&arm64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10290/client)
+bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
 ```
 
 
@@ -31,5 +31,5 @@ bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10290/client)
 Nat forward Client (amd64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xznat.seso.icu:10290/client_do_fwd)
+bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do_fwd)
 ```
