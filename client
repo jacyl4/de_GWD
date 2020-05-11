@@ -733,8 +733,6 @@ EOF
 
 echo "" > /etc/pihole/dns-servers.conf
 
-sed -i '/server=/c\server=127.0.0.1#5380' /etc/dnsmasq.d/01-pihole.conf
-
 cat << EOF > /etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no

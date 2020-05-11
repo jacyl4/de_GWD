@@ -241,16 +241,9 @@ curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 
 
 piholeSet(){
-systemctl mask --now dhcpcd
 systemctl mask --now lighttpd
+systemctl mask --now dhcpcd
 systemctl daemon-reload >/dev/null 2>&1
-
-cat << EOF > /etc/pihole/pihole-FTL.conf
-PRIVACYLEVEL=0
-AAAA_QUERY_ANALYSIS=no
-EOF
-
-pihole logging off
 
 rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
@@ -259,6 +252,13 @@ echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 echo "" > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
+
+cat << EOF > /etc/pihole/pihole-FTL.conf
+PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
+EOF
+
+pihole logging off
 }
 
 
@@ -313,7 +313,6 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
 RestartSec=2
