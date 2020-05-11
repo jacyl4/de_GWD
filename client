@@ -219,8 +219,6 @@ After=network.target
 [Service]
 User=root
 Type=forking
-LimitNPROC=64000
-LimitNOFILE=1000000
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=process
