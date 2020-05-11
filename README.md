@@ -1,6 +1,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 
-[![telegram](https://i.loli.net/2019/10/23/Ol9PX7io5b3hZsz.png)](https://t.me/de_GWD)
+[![Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/de_GWD)  
+
 
 ![Snipaste_2020-04-28_19-05-37.png](https://i.loli.net/2020/04/28/GrEYR3LJ51sDA9Q.png)
 
