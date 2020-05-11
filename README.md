@@ -14,23 +14,22 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 
 
 ## Client：
-
+General Edition (amd64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)
 ```
-
+    
+Compatible Edition (amd64&arm64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
 ```
 
 ![Snipaste_2020-05-09_08-34-34.png](https://i.loli.net/2020/05/09/r1etxqvofSXlOGJ.png)
-General Edition (amd64)
 
 
 ![Snipaste_2020-05-09_08-34-08.png](https://i.loli.net/2020/05/09/YKIRUT6JHbS71ak.png)
-Compatible Edition (amd64&arm64)
 
 
 ## Extension edition:
