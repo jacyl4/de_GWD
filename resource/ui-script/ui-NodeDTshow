@@ -121,8 +121,7 @@ cat > /etc/vtrui/config.json << EOF
           "mark": 255
         }
       }
-    },
-    {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}}
+    }
   ],
   "routing": {
     "rules": [

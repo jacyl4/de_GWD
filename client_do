@@ -346,7 +346,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
-  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"}
+  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp","followRedirect":true}
   }
 ],
 "outbounds":[
@@ -355,6 +355,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 ],
 "routing": {
   "rules": [
+    {"type":"field","network": "tcp,udp","port": 53,"outboundTag":"dnsout"},
     {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
     {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"}
   ]
@@ -401,8 +402,7 @@ cat << EOF > /etc/vtrui/config.json
       },
       "sockopt":{"mark":255}
     }
-  },
-  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}}
+  }
 ]
 }
 EOF
@@ -628,9 +628,6 @@ output=$(systemctl restart iptables-proxy)
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
-nameserver 1.1.1.1
-nameserver 8.8.8.8
-option use-vc
 EOF
 
 echo
@@ -793,7 +790,7 @@ rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "option use-vc"  > /etc/resolvconf/resolv.conf.d/tail
+echo ""  > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
@@ -1271,9 +1268,6 @@ rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/p
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
-nameserver 1.1.1.1
-nameserver 8.8.8.8
-option use-vc
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
