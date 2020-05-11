@@ -457,7 +457,6 @@ EOF
 
 systemctl daemon-reload
 systemctl enable v2dns
-systemctl restart v2dns
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]
@@ -483,7 +482,6 @@ EOF
 
 systemctl daemon-reload
 systemctl enable vtrui
-systemctl restart vtrui
 
 rm -rf /usr/bin/vtrui
 }
@@ -641,7 +639,9 @@ EOF
 
 systemctl daemon-reload
 systemctl enable iptables-proxy
-output=$(systemctl restart iptables-proxy)
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -855,6 +855,7 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
+output=""
 output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
 output=$(/usr/local/bin/ui-saveNode >/dev/null 2>&1)
 output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
