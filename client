@@ -800,12 +800,15 @@ User=root
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
+ExecStop=/bin/kill -9 \$MAINPID
+KillMode=process
 StartLimitBurst=0
 TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
 systemctl daemon-reload >/dev/null 2>&1
 }
 
