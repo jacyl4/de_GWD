@@ -179,17 +179,18 @@ rm -rf ~/smartdns.deb
 
 rm -rf /etc/smartdns/*.conf
 cat << EOF > /etc/smartdns/smartdns.conf
-bind 127.0.0.1:5310 -force-aaaa-soa
-bind-tcp 127.0.0.1:5310 -force-aaaa-soa
+bind 127.0.0.1:5310
+bind-tcp 127.0.0.1:5310
 
 speed-check-mode  ping,tcp:80
 cache-size        10000
 rr-ttl            600
 rr-ttl-min        60
 rr-ttl-max        43200
+force-aaaa-soa    yes
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 30
+serve-expired-ttl 0
 
 server 114.114.114.114
 server 114.114.115.115
@@ -207,9 +208,11 @@ After=network.target
 [Service]
 User=root
 Type=forking
+LimitNPROC=64000
+LimitNOFILE=1000000
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
-KillMode=process
+KillMode=mixed
 Restart=always
 RestartSec=2
 
