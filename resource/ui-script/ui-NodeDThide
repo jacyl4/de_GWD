@@ -5,28 +5,17 @@ uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
 jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /etc/vtrui/config.json | sed '/127.0.0.1/d' >>/tmp/hosts
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/v2dns/config.json | sed '/127.0.0.1/d' >>/tmp/hosts
 
 cat > /etc/vtrui/config.json << EOF
 {
-  "dns":{
-    "tag":"DNSflow",
-    "hosts":{"localhost":"127.0.0.1"},
-    "servers":[]
-  },
   "inbounds":[
-    {
-    "tag":"dnsin",
-    "port":53,
-    "protocol":"dokodemo-door",
-    "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
-    },
     {
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
     "sniffing":{"enabled":true,"destOverride":["http","tls"]},
-    "settings":{"network":"tcp,udp","followRedirect":true},
+    "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
     }
   ],
@@ -43,7 +32,6 @@ cat > /etc/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "level": 1,
                 "alterId": 8,
                 "security": "none"
               }
@@ -54,10 +42,7 @@ cat > /etc/vtrui/config.json << EOF
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/000000",
-          "headers": {
-            "Host": "xxxx.ooo"
-          }
+          "path": "/000000"
         },
         "security": "tls",
         "tlsSettings": {
@@ -80,7 +65,6 @@ cat > /etc/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "level": 1,
                 "alterId": 8,
                 "security": "none"
               }
@@ -91,10 +75,7 @@ cat > /etc/vtrui/config.json << EOF
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/000000",
-          "headers": {
-            "Host": "xxxx.ooo"
-          }
+          "path": "/000000"
         },
         "security": "tls",
         "tlsSettings": {
@@ -106,14 +87,10 @@ cat > /etc/vtrui/config.json << EOF
         }
       }
     },
-    {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}},
-    {"tag":"direct","protocol":"freedom","settings":{},"streamSettings":{"sockopt":{"mark":255}}}
+    {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}}
   ],
   "routing": {
     "rules": [
-      { "type": "field", "inboundTag": "dnsin", "outboundTag": "dnsout" },
-      { "type": "field", "inboundTag": "DNSflow", "outboundTag": "direct" },
-      { "type": "field", "ip": [ "geoip:private", "geoip:cn", "114.114.114.114", "114.114.115.115", "119.29.29.29", "119.28.28.28", "223.5.5.5", "223.6.6.6" ], "outboundTag": "direct" },
       {
         "type": "field",
         "domain": [
@@ -146,20 +123,18 @@ jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /etc/v
 jq --argjson port $port '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum $uuidnum '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
-jq --arg domain $domain '.outbounds[0].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
 jq --arg domain $domain '.outbounds[1].settings.vnext[0].address=$domain' |\
 jq --argjson port $port '.outbounds[1].settings.vnext[0].port=$port' |\
 jq --arg uuidnum $uuidnum '.outbounds[1].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path $v2path '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
-jq --arg domain $domain '.outbounds[1].streamSettings.wsSettings.headers.Host=$domain' |\
 jq --arg domain $domain '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
 
 cat /tmp/hosts | while read line 
 do
   key=$(echo $line | awk '{print$1}')
   value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 done
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
@@ -175,3 +150,7 @@ if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
 else
 /usr/local/bin/ui-changeNLchnw
 fi
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /etc/vtrui/config.json
+chmod 666 /usr/local/bin/0conf

@@ -85,6 +85,8 @@ exec('sudo /usr/local/bin/ui-saveNode');
 
 exec('sudo /usr/local/bin/ui-saveListBW');
 
+exec('sudo systemctl restart v2dns');
+exec('sudo systemctl restart vtrui');
 exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

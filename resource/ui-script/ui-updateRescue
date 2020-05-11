@@ -1,6 +1,8 @@
 #!/bin/bash
 systemctl stop ttyd
 
+systemctl stop v2dns
+systemctl stop vtrui
 systemctl stop iptables-proxy
 
 rm -rf /etc/resolv.conf

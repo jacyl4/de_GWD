@@ -309,7 +309,7 @@ Description=DNS-over-HTTPS server
 After=network.target
 
 [Service]
-User=nobody
+User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
@@ -330,18 +330,16 @@ systemctl restart doh-server
 
 
 installV2ray(){
-rm -rf /usr/bin/vtrui/*
-
-mkdir -p /usr/bin/vtrui
+rm -rf /usr/local/bin/vtrui
+mkdir -p /usr/local/bin/vtrui
 mkdir -p /etc/vtrui
 mkdir -p ~/vtrui
-
 wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
 unzip ~/vtrui.zip -d ~/vtrui
-mv -f ~/vtrui/v2ray /usr/bin/vtrui/vtrui
-mv -f ~/vtrui/v2ctl /usr/bin/vtrui/v2ctl
-chmod +x /usr/bin/vtrui/vtrui
-chmod +x /usr/bin/vtrui/v2ctl
+yes|cp ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
+yes|cp ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
+chmod +x /usr/local/bin/vtrui/vtrui
+chmod +x /usr/local/bin/vtrui/v2ctl
 rm -rf ~/vtrui*
 
 cat << EOF > /etc/vtrui/config.json
@@ -394,7 +392,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-ExecStart=/usr/bin/vtrui/vtrui -config /etc/vtrui/config.json
+ExecStart=/usr/local/bin/vtrui/vtrui -config /etc/vtrui/config.json
 ExecStop=/bin/kill -9 $MAINPID
 Restart=always
 RestartSec=2
@@ -409,6 +407,8 @@ EOF
 systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
+
+rm -rf /usr/bin/vtrui
 }
 
 
@@ -839,6 +839,7 @@ iface lo inet loopback
 
 auto $ethernetnum
 iface $ethernetnum inet static
+  mtu 1488
   address $localaddr
   netmask 255.255.255.0
   gateway $gatewayaddr
@@ -1280,7 +1281,7 @@ fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY        [working]"
-elif [[ ! -d "/usr/bin/vtrui" ]]; then
+elif [[ ! -d "/usr/local/bin/vtrui" ]]; then
     echo "[$statusBAD] V2RAY        [not Installed]"
 else
     echo "[$statusBAD] V2RAY        [start failed]"

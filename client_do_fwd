@@ -6,6 +6,7 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
+branch="dev"
 
 mirrorSite="http://xznat.seso.icu:10290"
 
@@ -35,7 +36,7 @@ sleep 3
 clifwd_installDOHser(){
 rm -rf /usr/local/bin/doh-server
 
-wget --no-check-certificate -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
+wget --no-check-certificate -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/dohamd64.zip
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
@@ -78,11 +79,10 @@ Description=DNS-over-HTTPS server
 After=network.target
 
 [Service]
-User=nobody
+User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
 Restart=always
 RestartSec=2
@@ -90,7 +90,7 @@ RestartSec=2
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl daemon-reload >/dev/null 2>&1
+systemctl daemon-reload
 systemctl enable doh-server
 systemctl restart doh-server
 }
@@ -243,8 +243,8 @@ mkdir -p /var/www/html/gwd
 ln -s /var/www/html/admin /var/www/html/gwd/admin
 fi
 
-svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-script
-svn export --force https://github.com/jacyl4/de_GWD/trunk/resource/ui-web
+svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-script
+svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-web
 
 grep /var/www/html -rl ~/ui-script >/tmp/binFILE
 grep /var/www/html -rl ~/ui-web >/tmp/htmlFILE
@@ -269,7 +269,7 @@ clifwd_uuidnum=$(jq -r '.clifwd.clifwd_uuidnum[]' /usr/local/bin/0conf)
 
 jq 'del(.inbounds[2])' /etc/vtrui/config.json >/tmp/vtrui_temp
 
-vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","sniffing":{"enabled":true,"destOverride":["http","tls"]},"settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"}}}'
+vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"}}}'
 
 jq --argjson vtruiIn "$vtruiIn" '.inbounds[2] = $vtruiIn' /tmp/vtrui_temp |\
 jq --arg clifwd_v2path $clifwd_v2path '.inbounds[2].streamSettings.wsSettings.path=$clifwd_v2path' >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
@@ -294,7 +294,7 @@ EOF
 
 cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
 
-wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
 mv -f ~/version.php /var/www/html/gwd/version.php
 
 docker restart nginx
@@ -304,7 +304,7 @@ chown -R www-data:www-data /var/www/html
 chmod +x /var/www/html/gwd/*
 chmod +x /usr/local/bin/*
 
-wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
+wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ttyd_linux.x86_64
 mv -f ~/ttyd /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 
@@ -316,10 +316,10 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
-KillMode=process
-StartLimitIntervalSec=2
-TimeoutSec=2
+StartLimitBurst=0
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -334,13 +334,13 @@ cat << "EOF" > /usr/local/bin/Q4am
 #!/bin/bash
 cd ~
 wget --no-check-certificate -c https://raw.githubusercontent.com/v2ray/domain-list-community/release/dlc.dat
-if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 100000 ]; then
-mv -f ~/dlc.dat /usr/bin/vtrui/geosite.dat
+if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 240000 ]; then
+mv -f ~/dlc.dat /usr/local/bin/v2dns/geosite.dat
 fi
 
 wget --no-check-certificate -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
-if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 100000 ]; then
-mv -f ~/h2y.dat /usr/bin/vtrui/h2y.dat
+if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 240000 ]; then
+mv -f ~/h2y.dat /usr/local/bin/v2dns/h2y.dat
 fi
 
 wget --no-check-certificate -c https://bgp.space/china.html
@@ -385,6 +385,10 @@ output=$(/usr/local/bin/ui-updateGen >/dev/null 2>&1)
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
 output=$(/usr/local/bin/ui-markThis >/dev/null 2>&1)
 fi
+output=$(systemctl restart smartdns)
+output=$(systemctl restart doh-client)
+output=$(systemctl restart v2dns)
+output=$(systemctl restart vtrui)
 output=$(systemctl restart iptables-proxy)
 
 cat << "EOF" > /usr/local/bin/Q2H
@@ -479,8 +483,8 @@ blue "----------------------------"
 installBBRplus(){
 apt install wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 update-grub
@@ -593,6 +597,7 @@ jacyl4/nginx_tls1.3:latest
 }
 
 
+
 clifwd_installWGcore(){
 cd ~
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
@@ -639,7 +644,8 @@ nameserver 8.8.8.8
 option use-vc
 EOF
 
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+output=$(systemctl restart v2dns)
 output=$(systemctl restart iptables-proxy)
 sleep 3
 
@@ -653,7 +659,9 @@ fi
 
 output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
 output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
-systemctl restart iptables-proxy
+output=$(systemctl restart v2dns)
+output=$(systemctl restart vtrui)
+output=$(systemctl restart iptables-proxy)
 
 if [[ ! -d "/var/www/html/gwd" ]]; then
 mkdir -p /var/www/html/gwd
@@ -757,9 +765,17 @@ else
     echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
+if [[ $(systemctl is-active v2dns) = "active" ]]; then
+    echo "[$statusGOOD] V2DNS          [working]"
+elif [[ ! -d "/usr/local/bin/v2dns" ]]; then
+    echo "[$statusBAD] V2DNS          [not Installed]"
+else
+    echo "[$statusBAD] V2DNS          [start failed]"
+fi
+
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY          [working]"
-elif [[ ! -d "/usr/bin/vtrui" ]]; then
+elif [[ ! -d "/usr/local/bin/vtrui" ]]; then
     echo "[$statusBAD] V2RAY          [not Installed]"
 else
     echo "[$statusBAD] V2RAY          [start failed]"
