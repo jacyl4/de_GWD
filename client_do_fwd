@@ -380,16 +380,15 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-output=""
-output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-updateGen >/dev/null 2>&1)
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+/usr/local/bin/ui-saveListBW >/dev/null 2>&1
+/usr/local/bin/ui-updateGen >/dev/null 2>&1
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-output=$(/usr/local/bin/ui-markThis >/dev/null 2>&1)
+/usr/local/bin/ui-markThis >/dev/null 2>&1
 fi
-output=$(systemctl restart iptables-proxy)
-output=$(systemctl restart v2dns)
-output=$(systemctl restart vtrui)
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
@@ -643,9 +642,9 @@ option use-vc
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-output=$(systemctl restart iptables-proxy)
-output=$(systemctl restart v2dns)
-output=$(systemctl restart vtrui)
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 sleep 3
 
 installPihole
@@ -656,11 +655,11 @@ if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 /usr/local/bin/ui-dhcpUP
 fi
 
-output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
-output=$(systemctl restart iptables-proxy)
-output=$(systemctl restart v2dns)
-output=$(systemctl restart vtrui)
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+/usr/local/bin/ui-saveListBW >/dev/null 2>&1
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 
 if [[ ! -d "/var/www/html/gwd" ]]; then
 mkdir -p /var/www/html/gwd
