@@ -20,3 +20,6 @@ if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 else
 /usr/local/bin/ui-v2adDEL
 fi
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /usr/local/bin/0conf

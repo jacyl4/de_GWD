@@ -9,6 +9,5 @@ fclose($nodenfpre);
 
 exec('sudo /usr/local/bin/ui-changeNodeNF');
 exec('sudo systemctl restart vtrui');
-
 ?>
 <?php }?>

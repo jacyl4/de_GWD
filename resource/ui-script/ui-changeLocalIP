@@ -12,6 +12,7 @@ if [[ ! -z "$localip" ]]; then
 	done
 
 	mv -f /tmp/vtrui_temp /etc/vtrui/config.json
-
-	chmod 666 /etc/vtrui/config.json
 fi
+
+chmod 666 /etc/vtrui/config.json
+chmod 666 /usr/local/bin/0conf
