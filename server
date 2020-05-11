@@ -1154,6 +1154,14 @@ blue "---------------------"
 
 
 updateGWD(){
+if [[ -f /etc/vtrui/config.json ]];then
+mkdir -p /usr/local/bin/vtrui
+cp -f /etc/vtrui/config.json /usr/local/bin/vtrui/config.json
+rm -rf /usr/local/bin/vtrui
+fi
+
+
+
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
