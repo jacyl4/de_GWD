@@ -12,7 +12,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>de_GWD - 更新</title>
+  <title>更新</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -31,6 +31,8 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
+<span class="float-right badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionNat');?></span>
+<span class="float-right badge text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -38,13 +40,6 @@
 
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
-      <li class="nav-item no-arrow mx-1">
-        <a class="nav-link" href="/ariang">
-          <i class="fas fa-cloud-download-alt"></i>
-          <span>AriaNG</span>
-        </a>
-      </li>
-      
       <li class="nav-item no-arrow mx-1">
         <a class="nav-link" href="/admin">
           <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -71,12 +66,12 @@
           <span>DDNS & WireGuard</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="!nodeman.php">
+        <a class="nav-link" href="!nodeMAN.php">
           <i class="fas fa-fw fa-stream"></i>
           <span>节点管理</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="!listbw.php">
+        <a class="nav-link" href="!listBW.php">
           <i class="fas fa-fw fa-th-list"></i>
           <span>黑白名单</span></a>
       </li>
@@ -109,7 +104,7 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-archive"></i>
-            备份-恢复-更新
+            备份-恢复
           <span id="ddnscheckcf" class="badge text-success"></span>
           </div>
           <div class="card-body">
@@ -132,13 +127,36 @@
 </form>
   </div>
 
-  <div class="my-2 float-right">
-<button type="button" class="btn btn-outline-danger float-right" onclick="update()">更新</button>
-  </div>
-
           </div>
         </div>
 
+
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-archive"></i>
+            更新
+        <span class="float-right mt-n1 mb-n2">
+        <button type="button" class="btn btn-outline-dark btn-sm mt-1" onclick="Rescue()">救援</button>
+        </span>
+          </div>
+          <div class="card-body">
+
+    <div class="form-row">
+      <div class="col-md-8 input-group my-1">
+        <div class="input-group-prepend w-25">
+          <span class="input-group-text justify-content-center w-100">脚本地址</span>
+        </div>
+          <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr ?>">
+        <div class="input-group-append">
+          <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
+        </div>
+      </div>
+      
+    </div>
+
+
+          </div>
+        </div>
 
         <!-- Page Content -->
       </div>
@@ -148,7 +166,7 @@
       <footer class="sticky-footer">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by JacyL4 2019</span>
+            <span>Copyright © de_GWD by JacyL4 2020</span>
           </div>
         </div>
       </footer>
@@ -164,7 +182,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 }
 
 function backup(){
-$.get('backup.php', function(result){window.location.href = "de_GWD_backup.zip"});
+$.get('backup.php', function(result){window.location.href = "/restore/0conf"});
 }
 
 function restore(){
@@ -182,7 +200,19 @@ $.ajax({
         success: function(data){
         }
       });
-alert('设置已恢复')
+alert('设置已恢复');
+window.location.reload(true);
+}
+
+function update(){
+updateAddr=$('#updateAddr').val();
+$.get('update.php', {updateAddr:updateAddr}, function(result){});
+window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+}
+
+function Rescue(){
+$.get('updateRescue.php', function(result){});
+alert('救机代码已运行');
 }
 
 window.onload = function() {
@@ -192,7 +222,7 @@ $(".sidebar").toggleClass("toggled");
   var fileName = $(this).val().split("\\").pop();
   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 
-  if( fileName != "de_GWD_backup.zip" ){
+  if( fileName != "0conf" ){
   alert("文件选择错误");
   }
 

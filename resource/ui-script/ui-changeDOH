@@ -1,0 +1,21 @@
+#!/bin/bash
+doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+
+doh1IP=$(nslookup -port=5310 $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh2IP=$(nslookup -port=5310 $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+
+doh_upstream1='url = "https:\/\/'$doh1'"'
+doh_upstream2='url = "https:\/\/'$doh2'"'
+
+sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
+
+jq --arg key1 $doh1Domain --arg value1 $doh1IP '.dns.hosts += {($key1): ($value1)}' /usr/local/bin/v2dns/config.json |\
+jq --arg key2 $doh2Domain --arg value2 $doh2IP '.dns.hosts += {($key2): ($value2)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /usr/local/bin/0conf

@@ -1,0 +1,45 @@
+#!/bin/bash
+if [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	listB=$(jq -r '.listB[]' /usr/local/bin/0conf)
+elif [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	listB=$(jq -r '.listB | keys[]' /usr/local/bin/0conf)
+fi
+
+if [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	listW=$(jq -r '.listW[]' /usr/local/bin/0conf)
+elif [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	listW=$(jq -r '.listW | keys[]' /usr/local/bin/0conf)
+fi
+
+jq 'del(.dns.servers[1].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
+if [[ ! -n "$listB" ]]; then
+	jq '.dns.servers[1].domains=["domain:google.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
+else
+	jq '.listB={}' /usr/local/bin/0conf >/tmp/0conf_temp
+	for listBpre in $listB; do
+	jq --arg listBpre "keyword:$listBpre" '.dns.servers[1].domains+=[$listBpre]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+	listBpreIP=$(nslookup -port=5380 $listBpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	jq -n --arg listBpreIP "$listBpreIP" '$listBpreIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBpreIPs
+	jq --arg key $listBpre --slurpfile value /tmp/listBpreIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+	done
+	mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+	mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
+jq 'del(.dns.servers[2].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
+if [[ ! -n "$listW" ]]; then
+	jq '.dns.servers[2].domains=["domain:baidu.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
+else
+	jq '.listW={}' /usr/local/bin/0conf >/tmp/0conf_temp
+	for listWpre in $listW; do
+	jq --arg listWpre "keyword:$listWpre" '.dns.servers[2].domains+=[$listWpre]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+	listWpreIP=$(nslookup -port=5310 $listWpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	jq -n --arg listWpreIP "$listWpreIP" '$listWpreIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWpreIPs
+	jq --arg key $listWpre --slurpfile value /tmp/listWpreIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+	done
+	mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+	mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /usr/local/bin/0conf

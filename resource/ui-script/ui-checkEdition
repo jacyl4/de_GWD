@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ -d "/etc/nginx" ]]; then
+echo "Nginx"
+fi

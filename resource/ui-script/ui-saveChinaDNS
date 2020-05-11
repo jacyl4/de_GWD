@@ -1,0 +1,13 @@
+#!/bin/bash
+sed -i '/server /d' /etc/smartdns/smartdns.conf
+
+echo "" >>/tmp/chinaDNS
+
+cat /tmp/chinaDNS | while read chinaDNS
+do
+if [[ -n $chinaDNS ]]; then
+echo "server $chinaDNS" >> /etc/smartdns/smartdns.conf
+fi
+done
+
+rm -rf /tmp/chinaDNS

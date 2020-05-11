@@ -1,0 +1,2 @@
+#!/bin/bash
+awk '/server / {print$2}' /etc/smartdns/smartdns.conf

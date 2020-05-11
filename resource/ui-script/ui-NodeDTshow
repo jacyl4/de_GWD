@@ -1,0 +1,208 @@
+#!/bin/bash
+domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
+port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
+v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
+
+localip=$(jq -r '.divertLan | to_entries[] | .value' /usr/local/bin/0conf)
+
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/v2dns/config.json | sed '/127.0.0.1/d' >>/tmp/hosts
+
+cat > /etc/vtrui/config.json << EOF
+{
+  "inbounds":[
+    {
+    "port":9896,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
+    "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
+    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "mux": {"enabled": true},
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "alterId": 8,
+                "security": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      }
+    },
+    {
+      "tag": "netflix",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "alterId": 8,
+                "security": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      }
+    },
+    {
+      "tag": "diverttraffic",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "alterId": 8,
+                "security": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      }
+    }
+  ],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "domain": [
+          "domain:netflix.com",
+          "domain:netflix.net",
+          "domain:nflxext.com",
+          "domain:nflximg.com",
+          "domain:nflximg.net",
+          "domain:nflxso.net",
+          "domain:nflxvideo.net",
+          "domain:netflixdnstest0.com",
+          "domain:netflixdnstest1.com",
+          "domain:netflixdnstest2.com",
+          "domain:netflixdnstest3.com",
+          "domain:netflixdnstest4.com",
+          "domain:netflixdnstest5.com",
+          "domain:netflixdnstest6.com",
+          "domain:netflixdnstest7.com",
+          "domain:netflixdnstest8.com",
+          "domain:netflixdnstest9.com"
+        ],
+        "outboundTag": "netflix"
+      },
+      {
+        "type": "field",
+        "source": [ ],
+        "outboundTag": "diverttraffic"
+      }
+    ]
+  }
+}
+EOF
+
+jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
+jq --argjson port $port '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum $uuidnum '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
+jq --arg domain $domain '.outbounds[1].settings.vnext[0].address=$domain' |\
+jq --argjson port $port '.outbounds[1].settings.vnext[0].port=$port' |\
+jq --arg uuidnum $uuidnum '.outbounds[1].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path $v2path '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain $domain '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' |\
+jq --arg domain $domain '.outbounds[2].settings.vnext[0].address=$domain' |\
+jq --argjson port $port '.outbounds[2].settings.vnext[0].port=$port' |\
+jq --arg uuidnum $uuidnum '.outbounds[2].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path $v2path '.outbounds[2].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain $domain '.outbounds[2].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+
+cat /tmp/hosts | while read line 
+do
+  key=$(echo $line | awk '{print$1}')
+  value=$(echo $line | awk '{print$2}')
+jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+done
+
+if [[ -z "$localip" ]]; then
+  jq 'del(.routing.rules[1])' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+else
+  for localippre in $localip; do
+  jq --arg localippre $localippre '.routing.rules[1].source+=[$localippre]' /etc/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+  done
+fi
+
+sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php
+
+if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-v2adADD
+else
+/usr/local/bin/ui-v2adDEL
+fi
+
+if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+/usr/local/bin/ui-changeNLgfw
+else
+/usr/local/bin/ui-changeNLchnw
+fi
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /etc/vtrui/config.json
+chmod 666 /usr/local/bin/0conf

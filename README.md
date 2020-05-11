@@ -1,22 +1,39 @@
 [![telegram](https://i.loli.net/2019/10/23/Ol9PX7io5b3hZsz.png)](https://t.me/de_GWD)
 
-
-![de_GWD](https://i.loli.net/2019/11/05/93WjAt5mFG61xwU.png)
+![Snipaste_2020-04-28_19-05-37.png](https://i.loli.net/2020/04/28/GrEYR3LJ51sDA9Q.png)
 
 ## Server：
 
+![Snipaste_2020-05-09_08-33-46.png](https://i.loli.net/2020/05/09/NbAYPetxiHWjKql.png)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
-![server](https://i.loli.net/2019/11/16/Jr1fcSWspeDkm5g.png)
 
 ## Client：
-
+![Snipaste_2020-05-09_08-34-34.png](https://i.loli.net/2020/05/09/r1etxqvofSXlOGJ.png)
+General Edition (amd64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- https://acccoc.top/gwd/client)
+bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)
 ```
+
+![Snipaste_2020-05-09_08-34-08.png](https://i.loli.net/2020/05/09/YKIRUT6JHbS71ak.png)
+Compatible Edition (amd64&arm64)
+```
+apt install -y wget
+bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
+```
+
+
+## Extension edition:
+
+Nat forward Client (amd64)
+```
+apt install -y wget
+bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do_fwd)
+```
+
 ![client](https://i.loli.net/2019/11/01/qf37QxZbmhKBcjp.png)
 
 ## Contributors
