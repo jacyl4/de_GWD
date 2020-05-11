@@ -385,8 +385,6 @@ output=$(/usr/local/bin/ui-updateGen >/dev/null 2>&1)
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
 output=$(/usr/local/bin/ui-markThis >/dev/null 2>&1)
 fi
-output=$(systemctl restart smartdns)
-output=$(systemctl restart doh-client)
 output=$(systemctl restart v2dns)
 output=$(systemctl restart vtrui)
 output=$(systemctl restart iptables-proxy)
