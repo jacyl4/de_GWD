@@ -40,7 +40,7 @@ bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_d
 ### Code Contributors
 
 This project exists thanks to all the people who contribute. 
-
+<a href="https://github.com/jacyl4/de_GWD/graphs/contributors"><img src="https://opencollective.com/de_GWD/contributors.svg?width=890&button=false" /></a>
 ### Financial Contributors
 
 Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/de_GWD/contribute)]
