@@ -354,7 +354,8 @@ cat << EOF > /etc/vtrui/config.json
       },
     "streamSettings": {
       "network":"ws",
-      "wsSettings":{"path":"/0000"}
+      "wsSettings":{"path":"/0000"},
+      "sockopt":{"tcpFastOpen":true}
       }
     }
   ],
