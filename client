@@ -380,7 +380,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 }
 EOF
 
-cat << EOF > /etc/vtrui/config.json
+cat << EOF > /usr/local/bin/config.json
 {
 "inbounds":[
   {
@@ -427,11 +427,11 @@ EOF
 jq --arg key $doh1Domain --arg value $doh1IP '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
 jq --arg key $doh2Domain --arg value $doh2IP '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 
-jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
+jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/config.json |\
 jq --argjson port $port '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum $uuidnum '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
-jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/config.json
 
 cat << "EOF" > /lib/systemd/system/v2dns.service
 [Unit]
@@ -444,7 +444,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_ADMIN
 ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
 Restart=always
 RestartSec=2
@@ -471,7 +471,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/local/bin/vtrui/vtrui -config /etc/vtrui/config.json
+ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/config.json
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -527,7 +527,7 @@ for iplanip in \$lanip; do
 done
 
 ipset -N hosts hash:net maxelem 65535
-for hosts in \$(jq -r '.dns.hosts[]' /etc/vtrui/config.json | grep -v '127.0.0.1'); do
+for hosts in \$(jq -r '.dns.hosts[]' /usr/local/bin/config.json | grep -v '127.0.0.1'); do
   ipset add hosts \$hosts
 done
 

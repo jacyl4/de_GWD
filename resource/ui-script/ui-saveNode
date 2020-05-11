@@ -36,5 +36,5 @@ fi
 /usr/local/bin/ui-changeDOH
 
 chmod 666 /usr/local/bin/v2dns/config.json
-chmod 666 /etc/vtrui/config.json
+chmod 666 /usr/local/bin/config.json
 chmod 666 /usr/local/bin/0conf
