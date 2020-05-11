@@ -1188,22 +1188,6 @@ else
     echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
-if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
-    echo "[$statusGOOD] php7.4-FPM     [working]"
-elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
-    echo "[$statusBAD] php7.4-FPM     [not installed]"
-else
-    echo "[$statusBAD] php7.4-FPM     [start failed]"
-fi
-
-if [[ $(systemctl is-active docker) = "active" ]]; then
-    echo "[$statusGOOD] Docker         [working]"
-elif [[ ! -f "/usr/bin/docker" ]]; then
-    echo "[$statusBAD] Docker         [not installed]"
-else
-    echo "[$statusBAD] Docker         [start failed]"
-fi
-
 blue "----------------------------------------"
 blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null) | cut -d' ' -f3)"
 blue "----------------------------------------"
