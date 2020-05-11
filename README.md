@@ -37,7 +37,7 @@ apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do_fwd)
 ```
 
-![client](https://i.loli.net/2019/11/01/qf37QxZbmhKBcjp.png)
+- - - -
 
 ## Contributors
 
