@@ -1154,12 +1154,11 @@ blue "---------------------"
 
 
 updateGWD(){
-if [[ -f /etc/vtrui/config.json ]];then
+if [[ -d "/etc/vtrui" ]]; then
 mkdir -p /usr/local/bin/vtrui
 cp -f /etc/vtrui/config.json /usr/local/bin/vtrui/config.json
-rm -rf /usr/local/bin/vtrui
+rm -rf /etc/vtrui
 fi
-
 
 
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
