@@ -260,7 +260,7 @@ upstream_selector = "weighted_round_robin"
 timeout = 30
 no_cookies = true
 no_ecs = true
-no_ipv6 = true
+no_ipv6 = false
 verbose = false
 EOF
 
@@ -346,16 +346,16 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
-  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp","followRedirect":true}
+  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"},
+  "streamSettings":{"sockopt":{"tcpFastOpen":true}}
   }
 ],
 "outbounds":[
-  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
-  {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}}
+  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}},
+  {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}}
 ],
 "routing": {
   "rules": [
-    {"type":"field","network": "tcp,udp","port": 53,"outboundTag":"dnsout"},
     {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
     {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"}
   ]
@@ -371,7 +371,7 @@ cat << EOF > /etc/vtrui/config.json
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
     "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
-    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+    "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy"}}
   }
 ],
 "outbounds":[
@@ -400,7 +400,7 @@ cat << EOF > /etc/vtrui/config.json
         "serverName":"xxxx.ooo",
         "allowInsecure":false
       },
-      "sockopt":{"mark":255}
+      "sockopt":{"mark":255,"tcpFastOpen":true}
     }
   }
 ]
@@ -793,7 +793,7 @@ rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo ""  > /etc/resolvconf/resolv.conf.d/tail
+echo "" > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 

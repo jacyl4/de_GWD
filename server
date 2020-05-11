@@ -256,7 +256,7 @@ rm -rf /etc/resolv.conf
 echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo ""  > /etc/resolvconf/resolv.conf.d/tail
+echo "" > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 }
@@ -356,11 +356,14 @@ cat << EOF > /etc/vtrui/config.json
     "streamSettings": {
       "network":"ws",
       "wsSettings":{"path":"/0000"}
+      "sockopt": {
+          "tcpFastOpen": true
+        }
       }
     }
   ],
   "outbounds": [
-  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
+  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"},"streamSettings":{"sockopt":{"tcpFastOpen": true}}}
   ]
 }
 EOF
@@ -1111,7 +1114,7 @@ elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /etc/vtrui/config.json
 cat >> /etc/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
+  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4","streamSettings":{"sockopt":{"tcpFastOpen": true}}}
   ]
 }
 EOF

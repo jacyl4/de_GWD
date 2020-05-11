@@ -18,7 +18,7 @@ cat > /etc/vtrui/config.json << EOF
     "protocol":"dokodemo-door",
     "sniffing":{"enabled":true,"destOverride":["http","tls"]},
     "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
-    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+    "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy"}}
     }
   ],
   "outbounds": [
@@ -52,7 +52,8 @@ cat > /etc/vtrui/config.json << EOF
           "allowInsecure": false
         },
         "sockopt": {
-          "mark": 255
+          "mark": 255,
+          "tcpFastOpen": true
         }
       }
     },
@@ -85,7 +86,8 @@ cat > /etc/vtrui/config.json << EOF
           "allowInsecure": false
         },
         "sockopt": {
-          "mark": 255
+          "mark": 255,
+          "tcpFastOpen": true
         }
       }
     },
@@ -118,7 +120,8 @@ cat > /etc/vtrui/config.json << EOF
           "allowInsecure": false
         },
         "sockopt": {
-          "mark": 255
+          "mark": 255,
+          "tcpFastOpen": true
         }
       }
     }
