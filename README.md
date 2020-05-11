@@ -27,7 +27,7 @@ Compatible Edition (amd64&arm64)
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
 ```
-
+- - - -
 
 ## Extension edition:
 
@@ -36,8 +36,8 @@ Nat forward Client (amd64)
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do_fwd)
 ```
-
 - - - -
+
 
 ## Contributors
 
