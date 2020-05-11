@@ -39,8 +39,7 @@ bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_d
 
 ### Code Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/jacyl4/de_GWD/graphs/contributors"><img src="https://opencollective.com/de_GWD/contributors.svg?width=890&button=false" /></a>
+This project exists thanks to all the people who contribute. 
 
 ### Financial Contributors
 
