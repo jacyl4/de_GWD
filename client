@@ -345,10 +345,10 @@ elif [[ $architecture = "amd64" ]]; then
     wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
 fi
 unzip ~/vtrui.zip -d ~/vtrui
-yes|cp ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
-yes|cp ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
-yes|cp ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
-yes|cp ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
+cp -f ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
+cp -f ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
+cp -f ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
+cp -f ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
 chmod +x /usr/local/bin/v2dns/v2dns
 chmod +x /usr/local/bin/v2dns/v2ctl
 chmod +x /usr/local/bin/vtrui/vtrui

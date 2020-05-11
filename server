@@ -336,8 +336,8 @@ mkdir -p /etc/vtrui
 mkdir -p ~/vtrui
 wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
 unzip ~/vtrui.zip -d ~/vtrui
-yes|cp ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
-yes|cp ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
+cp -f ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
+cp -f ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
 chmod +x /usr/local/bin/vtrui/vtrui
 chmod +x /usr/local/bin/vtrui/v2ctl
 rm -rf ~/vtrui*
