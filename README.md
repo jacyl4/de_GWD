@@ -32,7 +32,7 @@ bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
 ![Snipaste_2020-05-09_08-34-08.png](https://i.loli.net/2020/05/09/YKIRUT6JHbS71ak.png)
 
 
-## Extension edition:
+#### Extension edition:
 
 Nat forward Client (amd64)
 ```
