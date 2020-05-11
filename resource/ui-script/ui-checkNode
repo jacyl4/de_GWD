@@ -1,6 +1,6 @@
 #!/bin/bash
-port=$(jq '.outbounds[0].settings.vnext[0].port' /usr/local/bin/config.json)
-domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /usr/local/bin/config.json)
+port=$(jq '.outbounds[0].settings.vnext[0].port' /usr/local/bin/vtrui/config.json)
+domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /usr/local/bin/vtrui/config.json)
 
 if [[ "$port" -eq "443" ]]; then
 nodecheck=$domain

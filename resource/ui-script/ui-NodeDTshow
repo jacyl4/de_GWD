@@ -9,7 +9,7 @@ localip=$(jq -r '.divertLan | to_entries[] | .value' /usr/local/bin/0conf)
 jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
 jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/v2dns/config.json | sed '/127.0.0.1/d' >>/tmp/hosts
 
-cat > /usr/local/bin/config.json << EOF
+cat > /usr/local/bin/vtrui/config.json << EOF
 {
   "inbounds":[
     {
@@ -158,7 +158,7 @@ cat > /usr/local/bin/config.json << EOF
 }
 EOF
 
-jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/config.json |\
+jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/vtrui/config.json |\
 jq --argjson port $port '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum $uuidnum '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
@@ -172,7 +172,7 @@ jq --arg domain $domain '.outbounds[2].settings.vnext[0].address=$domain' |\
 jq --argjson port $port '.outbounds[2].settings.vnext[0].port=$port' |\
 jq --arg uuidnum $uuidnum '.outbounds[2].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path $v2path '.outbounds[2].streamSettings.wsSettings.path=$v2path' |\
-jq --arg domain $domain '.outbounds[2].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/config.json
+jq --arg domain $domain '.outbounds[2].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 cat /tmp/hosts | while read line 
 do
@@ -182,10 +182,10 @@ jq --arg key $key --arg value $value '.dns.hosts+={($key):($value)}' /usr/local/
 done
 
 if [[ -z "$localip" ]]; then
-  jq 'del(.routing.rules[1])' /usr/local/bin/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/config.json
+  jq 'del(.routing.rules[1])' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 else
   for localippre in $localip; do
-  jq --arg localippre $localippre '.routing.rules[1].source+=[$localippre]' /usr/local/bin/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/config.json
+  jq --arg localippre $localippre '.routing.rules[1].source+=[$localippre]' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
   done
 fi
 
@@ -204,5 +204,5 @@ else
 fi
 
 chmod 666 /usr/local/bin/v2dns/config.json
-chmod 666 /usr/local/bin/config.json
+chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

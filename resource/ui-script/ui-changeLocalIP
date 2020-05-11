@@ -1,18 +1,18 @@
 #!/bin/bash
-jq 'del(.routing.rules[1])' /usr/local/bin/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/config.json
+jq 'del(.routing.rules[1])' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 localip=$(jq -r '.divertLan | to_entries[] | .value' /usr/local/bin/0conf)
 
 if [[ ! -z "$localip" ]]; then
-	jq '.routing.rules[1].type="field"' /usr/local/bin/config.json |\
+	jq '.routing.rules[1].type="field"' /usr/local/bin/vtrui/config.json |\
 	jq '.routing.rules[1].outboundTag="diverttraffic"' >/tmp/vtrui_temp
 
 	for localippre in $localip; do
 	jq --arg localippre $localippre '.routing.rules[1].source+=[$localippre]' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 	done
 
-	mv -f /tmp/vtrui_temp /usr/local/bin/config.json
+	mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 fi
 
-chmod 666 /usr/local/bin/config.json
+chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

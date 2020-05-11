@@ -267,7 +267,7 @@ cat << "EOF" >/tmp/vtruiConfADD
 clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
 clifwd_uuidnum=$(jq -r '.clifwd.clifwd_uuidnum[]' /usr/local/bin/0conf)
 
-jq 'del(.inbounds[1])' /usr/local/bin/config.json >/tmp/vtrui_temp
+jq 'del(.inbounds[1])' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp
 
 vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"},"sockopt":{"tcpFastOpen":true}}}'
 
@@ -285,7 +285,7 @@ do
 jq --argjson v2uuids "$v2uuids" '.inbounds[1].settings.clients+=[$v2uuids]' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 done
 
-mv -f /tmp/vtrui_temp /usr/local/bin/config.json
+mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 rm -rf /tmp/v2uuids
 
