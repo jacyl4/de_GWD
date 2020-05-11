@@ -5,18 +5,15 @@ yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
-export DEBIAN_FRONTEND=noninteractive
-
-
-
 branch="master"
 
-mirrorSite="http://xl-fs-cm.accfwd.cf:11405"
+installCMD="bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)"
+
+mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
 
 smartdns_arm64="$mirrorSite/smartdns.1.2020.05.04-0005.aarch64-debian-all.deb"
 smartdns_amd64="$mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb"
 
-architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
     aarch64)  architecture="arm64" ;;
@@ -24,6 +21,8 @@ esac
 
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
+
+export DEBIAN_FRONTEND=noninteractive
 
 
 
@@ -976,8 +975,6 @@ echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
-updateAddr="$mirrorSite/client"
-
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
 jq '.address.alias=""' |\
@@ -999,7 +996,7 @@ jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
 jq --arg v2path "$v2path" '.v2nodeForUpdate.path=$v2path' |\
-jq --arg updateAddr "$updateAddr" '.updateAddr=$updateAddr' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
 installWebUI
