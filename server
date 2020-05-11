@@ -839,7 +839,6 @@ iface lo inet loopback
 
 auto $ethernetnum
 iface $ethernetnum inet static
-  mtu 1488
   address $localaddr
   netmask 255.255.255.0
   gateway $gatewayaddr
