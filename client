@@ -419,7 +419,7 @@ cat << EOF > /etc/vtrui/config.json
         "serverName":"xxxx.ooo",
         "allowInsecure":false
       },
-      "sockopt":{"mark":255,"tcpFastOpen":true}
+      "sockopt":{"mark":255}
     }
   }
 ]
