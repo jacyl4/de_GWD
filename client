@@ -359,7 +359,6 @@ rm -rf ~/vtrui*
 cat << EOF > /usr/local/bin/v2dns/config.json
 {
 "dns":{
-  "tag":"DNSflow",
   "hosts":{"localhost":"127.0.0.1"},
   "servers":[{"address":"127.0.0.1","port":5380}]
 },
@@ -378,7 +377,8 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 "routing": {
   "rules": [
     {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
-    {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"}
+    {"type":"field","port":"5310,5380,5390","outboundTag":"direct"},
+    {"type":"field","ip":"127.0.0.1","outboundTag":"direct"}
   ]
 }
 }
