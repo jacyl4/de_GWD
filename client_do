@@ -350,7 +350,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
-  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"}
+  "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
   }
 ],
 "outbounds":[
