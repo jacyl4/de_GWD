@@ -16,13 +16,13 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 General Edition (amd64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)
+bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)
 ```
     
 Compatible Edition (amd64&arm64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
+bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client)
 ```
 
 
@@ -31,7 +31,7 @@ bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
 Nat forward Client (amd64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do_fwd)
+bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do_fwd)
 ```
 - - - -
 

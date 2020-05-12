@@ -7,7 +7,7 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 branch="master"
 
-installCMD="bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)"
+installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)"
 
 mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
 
@@ -796,12 +796,10 @@ systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
-echo "" > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "" > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
+cat << EOF > /etc/resolv.conf
+nameserver 127.0.0.1
+option use-vc
+EOF
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
@@ -1165,7 +1163,19 @@ installDOH
 
 installV2ray
 
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
+cd ~
+wget --no-check-certificate -c https://bgp.space/china.html
+sed -i '1,/BEGIN/d' ~/china.html
+sed -i '/END/,$d' ~/china.html
+sed -i 's/<br>//g' ~/china.html
+mv -f ~/china.html /usr/local/bin/chnroute.txt
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
 
 installIptablesProxy
 
