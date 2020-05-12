@@ -54,7 +54,7 @@ deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERS
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main
 EOF
 
-apt update && apt install sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged
+apt update && apt install sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged resolvconf
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
@@ -248,10 +248,12 @@ systemctl mask --now dhcpcd
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-cat << EOF > /etc/resolv.conf
-nameserver 127.0.0.1
-option use-vc
-EOF
+echo "" > /etc/resolvconf/run/interface/original.resolvconf
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 cat << EOF > /etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0

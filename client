@@ -684,7 +684,7 @@ fi
 
 apt update && apt upgrade && apt autoremove && apt autoclean
 
-apt install php-common php-cgi php-sqlite3
+apt install php-common php-cgi php-sqlite3 resolvconf
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
@@ -722,10 +722,12 @@ systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-cat << EOF > /etc/resolv.conf
-nameserver 127.0.0.1
-option use-vc
-EOF
+echo "" > /etc/resolvconf/run/interface/original.resolvconf
+echo "" > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
