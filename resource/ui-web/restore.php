@@ -19,6 +19,13 @@ exec('sudo /usr/local/bin/ui-v2adADD');
 exec('sudo /usr/local/bin/ui-v2adDEL');
 }
 
+if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
+{
+exec('sudo /usr/local/bin/ui-dhcpUP');
+} else {
+exec('sudo pihole -a disabledhcp');
+}
+
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
 {
 exec('sudo /usr/local/bin/ui-updateGen');
