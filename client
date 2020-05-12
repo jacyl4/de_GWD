@@ -27,9 +27,9 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 preInstall(){
+systemctl stop iptables-proxy >/dev/null 2>&1
 systemctl stop v2dns >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
-systemctl stop iptables-proxy >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
@@ -246,6 +246,7 @@ doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+domainIP=$(nslookup $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -O ~/doh.zip $mirrorSite/doharm64.zip
@@ -278,7 +279,7 @@ upstream_selector = "weighted_round_robin"
 timeout = 30
 no_cookies = true
 no_ecs = true
-no_ipv6 = false
+no_ipv6 = true
 verbose = false
 EOF
 
@@ -364,15 +365,15 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 "inbounds":[
   {
   "tag":"dnsin",
-  "listen":"0.0.0.0",
   "port":53,
+  "listen":"0.0.0.0",
   "protocol":"dokodemo-door",
-  "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
+  "settings":{"auth":"noauth","address":"0.0.0.0","port":53,"network":"tcp,udp","followRedirect":false}
   }
 ],
 "outbounds":[
   {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
-  {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}}
+  {"tag":"dnsout","protocol":"dns"}
 ],
 "routing": {
   "rules": [
@@ -419,7 +420,7 @@ cat << EOF > /usr/local/bin/vtrui/config.json
         "serverName":"xxxx.ooo",
         "allowInsecure":false
       },
-      "sockopt":{"mark":255,"sockopt":{"tcpFastOpen":true}}
+      "sockopt":{"mark":255,"tcpFastOpen":true}
     }
   }
 ]
@@ -491,8 +492,10 @@ rm -rf /usr/bin/vtrui
 
 
 installIptablesProxy(){
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 echo $doh1IP >> /usr/local/bin/chnrouteset
 echo $doh2IP >> /usr/local/bin/chnrouteset
+echo $domainIP >> /usr/local/bin/chnrouteset
 
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
@@ -527,7 +530,7 @@ for iplanip in \$lanip; do
 done
 
 ipset -N hosts hash:net maxelem 65535
-for hosts in \$(jq -r '.dns.hosts[]' /usr/local/bin/vtrui/config.json | grep -v '127.0.0.1'); do
+for hosts in \$(jq -r '.dns.hosts[]' /usr/local/bin/v2dns/config.json | grep -v '127.0.0.1'); do
   ipset add hosts \$hosts
 done
 
@@ -618,6 +621,14 @@ ipset -F listW
 ipset -F listBlan
 ipset -F listWlan
 
+ipset -X chnroute
+ipset -X hosts
+ipset -X lanip
+ipset -X listB
+ipset -X listW
+ipset -X listBlan
+ipset -X listWlan
+
 ip route flush table 100
 ip rule del fwmark 0x9
 EOF
@@ -641,10 +652,10 @@ EOF
 
 systemctl daemon-reload
 systemctl enable iptables-proxy
-systemctl restart iptables-proxy
-systemctl restart doh-client
-systemctl restart v2dns
-systemctl restart vtrui
+
+output=`systemctl restart iptables-proxy`
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -868,7 +879,6 @@ if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
 output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
 systemctl restart iptables-proxy
-systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart vtrui
 
@@ -962,8 +972,6 @@ installSmartDNS
 installDOH
 
 installV2ray
-
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 
 installIptablesProxy
 
@@ -1077,7 +1085,6 @@ EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 systemctl restart iptables-proxy
-systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart vtrui
 sleep 3
@@ -1093,7 +1100,6 @@ if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 output=`/usr/local/bin/ui-dhcpUP`
 fi
 systemctl restart iptables-proxy
-systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart vtrui
 blue "----------------------"
