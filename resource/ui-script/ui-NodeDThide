@@ -141,15 +141,15 @@ done
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-output=`/usr/local/bin/ui-v2adADD`
+/usr/local/bin/ui-v2adADD
 else
-output=`/usr/local/bin/ui-v2adDEL`
+/usr/local/bin/ui-v2adDEL
 fi
 
 if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
-output=`/usr/local/bin/ui-changeNLgfw`
+/usr/local/bin/ui-changeNLgfw
 else
-output=`/usr/local/bin/ui-changeNLchnw`
+/usr/local/bin/ui-changeNLchnw
 fi
 
 chmod 666 /usr/local/bin/v2dns/config.json
