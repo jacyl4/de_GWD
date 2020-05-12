@@ -380,11 +380,13 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
-/usr/local/bin/ui-saveListBW >/dev/null 2>&1
-/usr/local/bin/ui-updateGen >/dev/null 2>&1
+output=""
+output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+output=`/usr/local/bin/ui-saveNode >/dev/null 2>&1`
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-/usr/local/bin/ui-markThis >/dev/null 2>&1
+output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
 systemctl restart iptables-proxy
 systemctl restart v2dns
@@ -653,12 +655,12 @@ installPihole
 
 piholeSet
 
+output=""
+output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-/usr/local/bin/ui-dhcpUP
+output=`/usr/local/bin/ui-dhcpUP`
 fi
-
-/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
-/usr/local/bin/ui-saveListBW >/dev/null 2>&1
 systemctl restart iptables-proxy
 systemctl restart v2dns
 systemctl restart vtrui
