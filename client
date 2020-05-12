@@ -7,9 +7,9 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 branch="master"
 
-installCMD="bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)"
+installCMD="bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)"
 
-mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
+mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client)??')
 
 smartdns_arm64="$mirrorSite/smartdns.1.2020.05.04-0005.aarch64-debian-all.deb"
 smartdns_amd64="$mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb"
