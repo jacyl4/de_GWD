@@ -366,9 +366,8 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   {
   "tag":"dnsin",
   "port":53,
-  "listen":"0.0.0.0",
   "protocol":"dokodemo-door",
-  "settings":{"auth":"noauth","address":"0.0.0.0","port":53,"network":"tcp,udp","followRedirect":false}
+  "settings":{"auth":"noauth","address":"1.1.1.1","port":53,"network":"tcp,udp","followRedirect":false}
   }
 ],
 "outbounds":[
