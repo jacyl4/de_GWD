@@ -10,8 +10,6 @@ elseif ( $switchNodeDT === "NodeDThide"){
 exec('sudo /usr/local/bin/ui-NodeDThide');
 }
 
-exec('sudo /usr/local/bin/ui-saveListBW');
-
 exec('sudo systemctl restart v2dns');
 exec('sudo systemctl restart vtrui');
 ?>
