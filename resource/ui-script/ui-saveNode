@@ -28,12 +28,12 @@ mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-/usr/local/bin/ui-v2adADD
+output=`/usr/local/bin/ui-v2adADD`
 else
-/usr/local/bin/ui-v2adDEL
+output=`/usr/local/bin/ui-v2adDEL`
 fi
 
-/usr/local/bin/ui-changeDOH
+output=`/usr/local/bin/ui-changeDOH`
 
 chmod 666 /usr/local/bin/v2dns/config.json
 chmod 666 /usr/local/bin/vtrui/config.json
