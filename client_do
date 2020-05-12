@@ -359,8 +359,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 "routing": {
   "rules": [
     {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
-    {"type":"field","port":"5310,5380,5390","outboundTag":"direct"},
-    {"type":"field","ip":"127.0.0.1","outboundTag":"direct"}
+    {"type":"field","port":"5310,5380,5390","outboundTag":"direct"}
   ]
 }
 }
