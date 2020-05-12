@@ -797,12 +797,11 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
-resolvconf -u
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
@@ -1063,7 +1062,7 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-output=""
+
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 output=`/usr/local/bin/ui-saveNode >/dev/null 2>&1`
 output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
@@ -1298,7 +1297,7 @@ installPihole
 
 piholeSet
 
-output=""
+
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
