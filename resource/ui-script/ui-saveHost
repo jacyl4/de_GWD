@@ -16,9 +16,9 @@ rm -rf /tmp/v2dns_temp*
 rm -rf /tmp/hosts
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-/usr/local/bin/ui-v2adADD
+output=`/usr/local/bin/ui-v2adADD`
 else
-/usr/local/bin/ui-v2adDEL
+output=`/usr/local/bin/ui-v2adDEL`
 fi
 
 chmod 666 /usr/local/bin/v2dns/config.json
