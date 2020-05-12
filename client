@@ -492,7 +492,6 @@ rm -rf /usr/bin/vtrui
 
 
 installIptablesProxy(){
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 echo $doh1IP >> /usr/local/bin/chnrouteset
 echo $doh2IP >> /usr/local/bin/chnrouteset
 echo $domainIP >> /usr/local/bin/chnrouteset
@@ -620,14 +619,6 @@ ipset -F listB
 ipset -F listW
 ipset -F listBlan
 ipset -F listWlan
-
-ipset -X chnroute
-ipset -X hosts
-ipset -X lanip
-ipset -X listB
-ipset -X listW
-ipset -X listBlan
-ipset -X listWlan
 
 ip route flush table 100
 ip rule del fwmark 0x9
@@ -972,6 +963,8 @@ installSmartDNS
 installDOH
 
 installV2ray
+
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
 
 installIptablesProxy
 
