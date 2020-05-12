@@ -364,6 +364,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 "inbounds":[
   {
   "tag":"dnsin",
+  "listen":"0.0.0.0",
   "port":53,
   "protocol":"dokodemo-door",
   "settings":{"address":"0.0.0.0","port":53,"network":"tcp,udp"}
@@ -388,7 +389,7 @@ cat << EOF > /usr/local/bin/vtrui/config.json
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
+    "settings":{"auth":"noauth","network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
 ],
@@ -641,6 +642,7 @@ EOF
 systemctl daemon-reload
 systemctl enable iptables-proxy
 systemctl restart iptables-proxy
+systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart vtrui
 
@@ -866,6 +868,7 @@ if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
 output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
 systemctl restart iptables-proxy
+systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart vtrui
 
@@ -1074,6 +1077,7 @@ EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 systemctl restart iptables-proxy
+systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart vtrui
 sleep 3
@@ -1089,6 +1093,7 @@ if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 output=`/usr/local/bin/ui-dhcpUP`
 fi
 systemctl restart iptables-proxy
+systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart vtrui
 blue "----------------------"
