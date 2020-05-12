@@ -192,7 +192,7 @@ rr-ttl-max        43200
 force-aaaa-soa    yes
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 0
+serve-expired-ttl 43200
 
 server 114.114.114.114
 server 114.114.115.115
