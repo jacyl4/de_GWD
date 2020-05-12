@@ -367,7 +367,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
-  "settings":{"auth":"noauth","address":"1.1.1.1","port":53,"network":"tcp,udp","followRedirect":false}
+  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"}
   }
 ],
 "outbounds":[
@@ -389,7 +389,7 @@ cat << EOF > /usr/local/bin/vtrui/config.json
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "settings":{"auth":"noauth","network":"tcp,udp","followRedirect":true},
+    "settings":{"network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
 ],
