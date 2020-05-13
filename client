@@ -968,6 +968,7 @@ sed -i '1,/BEGIN/d' ~/china.html
 sed -i '/END/,$d' ~/china.html
 sed -i 's/<br>//g' ~/china.html
 mv -f ~/china.html /usr/local/bin/chnroute.txt
+
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
 chnroute=`cat /usr/local/bin/chnroute.txt`
