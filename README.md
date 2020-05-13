@@ -1,5 +1,3 @@
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/jacyl4/de_GWD/releases)
-
 [![Telegram](https://cdn.rawgit.com/Patrolavia/telegram-badge/8fe3382b/chat.svg)](https://t.me/de_GWD)  
 
 
