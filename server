@@ -109,7 +109,6 @@ net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_fastopen_blackhole_timeout_sec = 0
 net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_tw_reuse = 1
-net.ipv4.tcp_tw_recycle = 0
 net.ipv4.tcp_syncookies = 1
 net.ipv4.tcp_fin_timeout = 15
 net.ipv4.tcp_orphan_retries = 3
