@@ -725,15 +725,22 @@ EOF
 
 sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
 sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
-sed -i "/zend_extension=opcache.so/d" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.enable=/c\opcache.enable=1" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.enable_cli=/c\opcache.enable_cli=1" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.memory_consumption=/c\opcache.memory_consumption=128" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.interned_strings_buffer=/c\opcache.interned_strings_buffer=8" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.max_accelerated_files=/c\opcache.max_accelerated_files=200" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.revalidate_freq=/c\opcache.revalidate_freq=1" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.fast_shutdown=/c\opcache.fast_shutdown=1" /etc/php/7.4/fpm/php.ini
-sed -i "/opcache.save_comments=/c\opcache.save_comments=1" /etc/php/7.4/fpm/php.ini
+
+sed -i "s/^zend_extension/;&/g" /etc/php/7.4/fpm/php.ini
+sed -i "s/^opcache/;&/g" /etc/php/7.4/fpm/php.ini
+cat << EOF > /etc/php/7.4/opcache.ini
+; configuration for php opcache module
+; priority=10
+zend_extension=opcache.so
+opcache.enable=1
+opcache.enable_cli=1
+opcache.memory_consumption=128
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=10000
+opcache.revalidate_freq=1
+opcache.fast_shutdown=1
+opcache.save_comments=1
+EOF
 
 rm -rf /lib/systemd/system/php*-fpm.service
 cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
