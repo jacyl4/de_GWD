@@ -1,4 +1,5 @@
-[![Telegram](https://cdn.rawgit.com/Patrolavia/telegram-badge/8fe3382b/chat.svg)](https://t.me/de_GWD)  
+
+[![Telegram](https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg)](https://t.me/de_GWD)  
 
 
 ![Snipaste_2020-04-28_19-05-37.png](https://i.loli.net/2020/04/28/GrEYR3LJ51sDA9Q.png)
