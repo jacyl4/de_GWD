@@ -614,10 +614,12 @@ alert("IP已写入");
 
 function changeNLchnw(){
 $.get('changeNLchnw.php', function(result){window.location.reload();});
+alert("正在切换大陆白名单。。。");
 }
 
 function changeNLgfw(){
 $.get('changeNLgfw.php', function(result){window.location.reload();});
+alert("正在切换GFWlist。。。");
 }
 
 function submitDNS(){
@@ -626,6 +628,7 @@ dohtxt2=$('#DoH2').val();
 chinaDNS=$("#chinaDNS").val();
 hostsCustomize=$("#hostsCustomize").val();
 $.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, chinaDNS:chinaDNS, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
+alert("正在保存DNS设置。。。");
 }
 
 function submitstaticip(){

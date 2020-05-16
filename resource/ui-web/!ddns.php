@@ -412,7 +412,7 @@ cfzoneid=$('#CFzoneid').val();
 cfapikey=$('#CFapikey').val();
 cfemail=$('#CFemail').val();
 $.get('ddnsSaveCF.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
-alert("正在开启DDNS，请等待");
+alert("正在开启DDNS。。。");
 }
 
 function ddnsStopCF(){
@@ -427,7 +427,7 @@ function WGon(){
 WGaddress=$('#WGaddress').val();
 WGaddressport=$('#WGaddressport').val();
 $.get('WGon.php', {WGaddress:WGaddress, WGaddressport:WGaddressport}, function(result){ location.reload() });
-alert("正在开启WireGuard，请等待");
+alert("正在开启WireGuard。。。");
 }
 
 function WGoff(){

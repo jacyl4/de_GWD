@@ -140,12 +140,6 @@ done
 
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
 
-if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
-output=`/usr/local/bin/ui-changeNLgfw`
-else
-output=`/usr/local/bin/ui-changeNLchnw`
-fi
-
 rm -rf /tmp/v2dns_temp*
 rm -rf /tmp/hosts
 
