@@ -380,6 +380,9 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 }
 EOF
 
+jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
+jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+
 cat << EOF > /usr/local/bin/vtrui/config.json
 {
 "inbounds":[
@@ -423,9 +426,6 @@ cat << EOF > /usr/local/bin/vtrui/config.json
 ]
 }
 EOF
-
-jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
-jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 
 jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/vtrui/config.json |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\

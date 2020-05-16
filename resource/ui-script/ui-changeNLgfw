@@ -30,7 +30,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 }
 EOF
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >>/tmp/hosts
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
 
 cat /tmp/hosts | while read line 
 do

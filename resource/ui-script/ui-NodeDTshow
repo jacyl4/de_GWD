@@ -200,6 +200,9 @@ else
 output=`/usr/local/bin/ui-changeNLchnw`
 fi
 
+rm -rf /tmp/v2dns_temp*
+rm -rf /tmp/hosts
+
 chmod 666 /usr/local/bin/v2dns/config.json
 chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf
