@@ -725,8 +725,8 @@ EOF
 sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
 sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
 
-sed -i "s/^zend_extension/;&/g" /etc/php/7.4/fpm/php.ini
-sed -i "s/^opcache/;&/g" /etc/php/7.4/fpm/php.ini
+sed -i "s/^zend_extension/;&/" /etc/php/7.4/fpm/php.ini
+sed -i "s/^opcache/;&/" /etc/php/7.4/fpm/php.ini
 cat << EOF > /etc/php/7.4/opcache.ini
 ; configuration for php opcache module
 ; priority=10
