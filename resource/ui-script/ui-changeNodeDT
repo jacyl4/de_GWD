@@ -1,9 +1,9 @@
 #!/bin/bash
 nodedtnum=$(cat /var/www/html/nodedtpre.txt)
 
-v2servn=$(jq --argjson nodedtnum $nodedtnum -r '.v2node[$nodedtnum-1].domain' /usr/local/bin/0conf)
-uuidnum=$(jq --argjson nodedtnum $nodedtnum -r '.v2node[$nodedtnum-1].uuid' /usr/local/bin/0conf)
-v2path=$(jq --argjson nodedtnum $nodedtnum -r '.v2node[$nodedtnum-1].path' /usr/local/bin/0conf)
+v2servn=$(jq --argjson nodedtnum "$nodedtnum" -r '.v2node[$nodedtnum-1].domain' /usr/local/bin/0conf)
+uuidnum=$(jq --argjson nodedtnum "$nodedtnum" -r '.v2node[$nodedtnum-1].uuid' /usr/local/bin/0conf)
+v2path=$(jq --argjson nodedtnum "$nodedtnum" -r '.v2node[$nodedtnum-1].path' /usr/local/bin/0conf)
 
 domain=$(echo -e $v2servn | cut -d: -f1)
 port=$(echo -e $v2servn | cut -d: -f2)

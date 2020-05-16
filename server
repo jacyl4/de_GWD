@@ -380,7 +380,7 @@ jq --argjson v2clients "$v2clients" '.inbounds[0].settings.clients+=[$v2clients]
 done
 rm -rf /tmp/v2clients
 
-jq --arg v2path $v2path '.inbounds[0].streamSettings.wsSettings.path=$v2path' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
+jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]

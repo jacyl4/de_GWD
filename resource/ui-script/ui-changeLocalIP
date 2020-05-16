@@ -8,7 +8,7 @@ if [[ ! -z "$localip" ]]; then
 	jq '.routing.rules[1].outboundTag="diverttraffic"' >/tmp/vtrui_temp
 
 	for localippre in $localip; do
-	jq --arg localippre $localippre '.routing.rules[1].source+=[$localippre]' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+	jq --arg localippre "$localippre" '.routing.rules[1].source+=[$localippre]' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 	done
 
 	mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json

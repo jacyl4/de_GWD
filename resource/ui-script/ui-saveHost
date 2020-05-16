@@ -8,7 +8,7 @@ cat /tmp/hosts | while read line
 do
 	key=$(echo $line | awk '{print$1}')
 	value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 done
 mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 

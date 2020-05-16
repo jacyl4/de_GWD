@@ -275,7 +275,7 @@ jq 'del(.inbounds[1])' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp
 vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"},"sockopt":{"tcpFastOpen":true}}}'
 
 jq --argjson vtruiIn "$vtruiIn" '.inbounds[1] = $vtruiIn' /tmp/vtrui_temp |\
-jq --arg clifwd_v2path $clifwd_v2path '.inbounds[1].streamSettings.wsSettings.path=$clifwd_v2path' >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+jq --arg clifwd_v2path "$clifwd_v2path" '.inbounds[1].streamSettings.wsSettings.path=$clifwd_v2path' >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 
 {
 for v2uuids in $clifwd_uuidnum; do

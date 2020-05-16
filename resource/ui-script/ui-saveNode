@@ -6,7 +6,7 @@ cat /tmp/hosts | while read hosts
 do
 	key=$(echo $hosts | awk '{print$1}')
 	value=$(echo $hosts | awk '{print$2}')
-	jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+	jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 done
 
 if [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
@@ -21,7 +21,7 @@ if [[ -n "$listW" ]]; then
 fi
 jq '.listW=[]' /usr/local/bin/0conf >/tmp/0conf_temp
 for listWpre in $(cat /tmp/listW); do
-	jq --arg listWpre $listWpre '.listW += [$listWpre]' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+	jq --arg listWpre "$listWpre" '.listW += [$listWpre]' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 done
 
 mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json

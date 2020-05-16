@@ -20,7 +20,7 @@ else
 	jq --arg listBpre "keyword:$listBpre" '.dns.servers[1].domains+=[$listBpre]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 	listBpreIP=$(nslookup -port=5380 $listBpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 	jq -n --arg listBpreIP "$listBpreIP" '$listBpreIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBpreIPs
-	jq --arg key $listBpre --slurpfile value /tmp/listBpreIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+	jq --arg key "$listBpre" --slurpfile value /tmp/listBpreIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
 	mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
@@ -35,7 +35,7 @@ else
 	jq --arg listWpre "keyword:$listWpre" '.dns.servers[2].domains+=[$listWpre]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 	listWpreIP=$(nslookup -port=5310 $listWpre | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 	jq -n --arg listWpreIP "$listWpreIP" '$listWpreIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWpreIPs
-	jq --arg key $listWpre --slurpfile value /tmp/listWpreIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+	jq --arg key "$listWpre" --slurpfile value /tmp/listWpreIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
 	mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf

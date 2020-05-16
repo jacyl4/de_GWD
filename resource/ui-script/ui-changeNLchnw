@@ -36,7 +36,7 @@ cat /tmp/hosts | while read line
 do
   key=$(echo $line | awk '{print$1}')
   value=$(echo $line | awk '{print$2}')
-jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 done
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
