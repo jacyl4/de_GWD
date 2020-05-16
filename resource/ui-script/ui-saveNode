@@ -33,8 +33,6 @@ else
 output=`/usr/local/bin/ui-changeNLchnw`
 fi
 
-output=`/usr/local/bin/ui-changeDOH`
-
 rm -rf /tmp/v2dns_temp*
 
 chmod 666 /usr/local/bin/v2dns/config.json

@@ -32,9 +32,7 @@ exec('sudo /usr/local/bin/ui-updateGen');
 }
 
 exec('sudo /usr/local/bin/ui-restorePW');
-exec('sudo /usr/local/bin/ui-changeDOH');
 exec('sudo /usr/local/bin/ui-saveNode');
-exec('sudo /usr/local/bin/ui-saveHost');
 exec('sudo /usr/local/bin/ui-saveListBW');
 exec('sudo systemctl restart iptables-proxy');
 exec('sudo systemctl restart smartdns');

@@ -30,8 +30,9 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 }
 EOF
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+output=`/usr/local/bin/ui-changeDOH`
 
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
 cat /tmp/hosts | while read line 
 do
   key=$(echo $line | awk '{print$1}')
@@ -44,8 +45,6 @@ output=`/usr/local/bin/ui-v2adADD`
 else
 output=`/usr/local/bin/ui-v2adDEL`
 fi
-
-output=`/usr/local/bin/ui-changeDOH`
 
 
 
