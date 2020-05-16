@@ -323,7 +323,6 @@ rm -rf /usr/local/bin/vtrui
 rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/v2dns
 mkdir -p /usr/local/bin/vtrui
-mkdir -p /etc/vtrui
 wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
 mkdir -p ~/vtrui
 unzip ~/vtrui.zip -d ~/vtrui

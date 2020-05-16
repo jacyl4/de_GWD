@@ -331,8 +331,8 @@ systemctl restart doh-server
 
 installV2ray(){
 rm -rf /usr/local/bin/vtrui
+rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/vtrui
-mkdir -p /etc/vtrui
 mkdir -p ~/vtrui
 wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
 unzip ~/vtrui.zip -d ~/vtrui

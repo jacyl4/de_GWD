@@ -27,10 +27,10 @@ done
 mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
-if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-output=`/usr/local/bin/ui-v2adADD`
+if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+output=`/usr/local/bin/ui-changeNLgfw`
 else
-output=`/usr/local/bin/ui-v2adDEL`
+output=`/usr/local/bin/ui-changeNLchnw`
 fi
 
 output=`/usr/local/bin/ui-changeDOH`

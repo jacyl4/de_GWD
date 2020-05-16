@@ -1,16 +1,54 @@
 #!/bin/bash
-read -d '' gfwl << EOF
-[
-{"address":"127.0.0.1","port":5310},
-{"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
-{"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
-{"address":"127.0.0.1","port":5390,"domains":["ext:h2y.dat:gfw"]}
-]
+cat << EOF > /usr/local/bin/v2dns/config.json
+{
+"dns":{
+  "hosts":{"localhost":"127.0.0.1"},
+  "servers":[
+  {"address":"127.0.0.1","port":5310},
+  {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
+  {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
+  {"address":"127.0.0.1","port":5390,"domains":["ext:h2y.dat:gfw"]}
+  ]
+},
+"inbounds":[
+  {
+  "tag":"dnsin",
+  "port":53,
+  "protocol":"dokodemo-door",
+  "settings":{"address":"1.1.1.1","port":53,"network":"tcp,udp"}
+  }
+],
+"outbounds":[
+  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
+  {"tag":"dnsout","protocol":"dns","streamSettings":{"sockopt":{"mark":255}}}
+],
+"routing": {
+  "rules": [
+    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"}
+  ]
+}
+}
 EOF
 
-jq --argjson gfwl "$gfwl" '.dns.servers = $gfwl' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >>/tmp/hosts
+
+cat /tmp/hosts | while read line 
+do
+  key=$(echo $line | awk '{print$1}')
+  value=$(echo $line | awk '{print$2}')
+jq --arg key $key --arg value $value '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+done
+
+if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+output=`/usr/local/bin/ui-changeNLgfw`
+else
+output=`/usr/local/bin/ui-changeNLchnw`
+fi
+
 jq --arg splitDNS "gfw" '.splitDNS=$splitDNS' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
+rm -rf /tmp/v2dns_temp*
+rm -rf /tmp/hosts
+
 chmod 666 /usr/local/bin/v2dns/config.json
-chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

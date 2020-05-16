@@ -338,7 +338,6 @@ rm -rf /usr/local/bin/vtrui
 rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/v2dns
 mkdir -p /usr/local/bin/vtrui
-mkdir -p /etc/vtrui
 if [[ $architecture = "arm64" ]]; then
     wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtarm64.zip
 elif [[ $architecture = "amd64" ]]; then

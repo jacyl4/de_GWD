@@ -1,4 +1,4 @@
 #!/bin/bash
-if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
+if [[ $(jq -r '.dns.hosts' /usr/local/bin/v2dns/config.json) =~ "category-ads" ]]; then
 echo "on"
 fi
