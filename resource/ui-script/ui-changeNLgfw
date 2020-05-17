@@ -74,7 +74,7 @@ fi
 
 
 
-jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listB
+jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listB 2>/dev/null
 if [[ -n $(cat /tmp/listB)  ]]; then
   cat /tmp/listB | while read line 
   do
@@ -82,7 +82,7 @@ if [[ -n $(cat /tmp/listB)  ]]; then
   done
 fi
 
-jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listW
+jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listW 2>/dev/null
 cat /tmp/listW | while read line 
 do
 jq --arg listW "keyword:$line" '.dns.servers[2].domains+=[$listW]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
