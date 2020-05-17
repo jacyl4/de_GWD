@@ -4,9 +4,6 @@ port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
 uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/v2dns/config.json | sed '/127.0.0.1/d' >>/tmp/hosts
-
 cat > /usr/local/bin/vtrui/config.json << EOF
 {
   "inbounds":[
@@ -131,18 +128,7 @@ jq --arg uuidnum "$uuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$uuidnu
 jq --arg v2path "$v2path" '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
-cat /tmp/hosts | while read line 
-do
-  key=$(echo $line | awk '{print$1}')
-  value=$(echo $line | awk '{print$2}')
-jq --arg key "$key" --arg value "$value" '.dns.hosts+={($key):($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-done
-
 sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:none">' /var/www/html/index.php
 
-rm -rf /tmp/v2dns_temp*
-rm -rf /tmp/hosts
-
-chmod 666 /usr/local/bin/v2dns/config.json
 chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

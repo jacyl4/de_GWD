@@ -81,7 +81,6 @@ $data['v2node'][8]['path'] = $path9;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-exec('sudo /usr/local/bin/ui-saveNode');
 exec('sudo /usr/local/bin/ui-saveListBW');
 exec('sudo systemctl restart iptables-proxy');
 exec('sudo systemctl restart v2dns');

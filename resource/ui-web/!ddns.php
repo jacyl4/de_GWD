@@ -114,7 +114,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             CloudFlare DDNS
-          <span class="badge badge-pill badge-success mt-auto mb-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?></span>
+          <span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsSaveCF()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsStopCF()">关闭</button>
@@ -163,7 +163,7 @@
           <div class="card-header">
             <i class="fas fa-ethernet"></i>
             WireGuard Server
-          <span class="badge badge-pill badge-success mt-auto mb-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?></span>
+          <span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?></span>
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>
@@ -412,7 +412,7 @@ cfzoneid=$('#CFzoneid').val();
 cfapikey=$('#CFapikey').val();
 cfemail=$('#CFemail').val();
 $.get('ddnsSaveCF.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
-alert("正在开启DDNS。。。");
+alert("开启DDNS。。。");
 }
 
 function ddnsStopCF(){
@@ -427,7 +427,7 @@ function WGon(){
 WGaddress=$('#WGaddress').val();
 WGaddressport=$('#WGaddressport').val();
 $.get('WGon.php', {WGaddress:WGaddress, WGaddressport:WGaddressport}, function(result){ location.reload() });
-alert("正在开启WireGuard。。。");
+alert("开启WireGuard。。。");
 }
 
 function WGoff(){

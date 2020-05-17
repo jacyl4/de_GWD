@@ -2,6 +2,7 @@
 <?php if (isset($auth) && $auth) {?>
 <?php 
 exec('sudo /usr/local/bin/ui-changeNLchnw');
+exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart v2dns');
 ?>
 <?php }?>

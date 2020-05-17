@@ -174,7 +174,7 @@ listW=$("#listW").val();
 listBlan=$("#listBlan").val();
 listWlan=$("#listWlan").val();
 $.get("saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){window.location.reload();});
-alert("黑白名单已提交");
+alert("提交黑白名单。。。");
 }
 </script>
           </div>

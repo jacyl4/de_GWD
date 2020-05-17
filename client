@@ -190,14 +190,15 @@ rm -rf ~/smartdns.deb
 
 rm -rf /etc/smartdns/*.conf
 cat << EOF > /etc/smartdns/smartdns.conf
-bind 127.0.0.1:5310 -force-aaaa-soa
-bind-tcp 127.0.0.1:5310 -force-aaaa-soa
+bind 127.0.0.1:5310
+bind-tcp 127.0.0.1:5310
 
 speed-check-mode  ping,tcp:80
 cache-size        10000
 rr-ttl            600
 rr-ttl-min        60
 rr-ttl-max        43200
+force-AAAA-SOA    yes
 prefetch-domain   yes
 serve-expired     yes
 serve-expired-ttl 43200
@@ -210,6 +211,7 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
+rm -rf /run/smartdns.pid
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=Smart DNS server
@@ -860,7 +862,6 @@ chmod +x /usr/local/bin/Q4H
 
 
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-output=`/usr/local/bin/ui-saveNode >/dev/null 2>&1`
 output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then

@@ -32,8 +32,16 @@ exec('sudo /usr/local/bin/ui-updateGen');
 }
 
 exec('sudo /usr/local/bin/ui-restorePW');
-exec('sudo /usr/local/bin/ui-saveNode');
 exec('sudo /usr/local/bin/ui-saveListBW');
+
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+if ( $data['splitDNS'] === "gfw" ){
+	exec('sudo /usr/local/bin/ui-changeNLgfw');
+}
+elseif ( $data['splitDNS'] === "chnw" ){
+	exec('sudo /usr/local/bin/ui-changeNLchnw');
+}
+
 exec('sudo systemctl restart iptables-proxy');
 exec('sudo systemctl restart smartdns');
 exec('sudo systemctl restart doh-client');

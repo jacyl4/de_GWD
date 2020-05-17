@@ -200,7 +200,7 @@ $.ajax({
         success: function(data){
         }
       });
-alert('设置已恢复');
+alert('恢复设置。。。');
 window.location.reload(true);
 }
 

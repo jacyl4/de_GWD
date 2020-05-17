@@ -232,7 +232,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4 mb-4">
   <div class="input-group-prepend">
-  <label class="input-group-text">V2去广告<span class="badge badge-pill badge-success mt-auto mb-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
+  <label class="input-group-text">V2去广告<span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="v2adADD()">开启</button>
@@ -476,7 +476,7 @@
           <div class="card-header">
             <i class="fas fa-network-wired"></i>
             DHCP 服务
-          <span class="badge badge-pill badge-success mt-auto mb-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?></span>
+          <span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?></span>
 <span class="float-right mt-n1 mb-n2">
 <a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">详情</a>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpUP()">开启</button>
@@ -554,7 +554,6 @@ $('#testGoogle').text("✗ 国外线路不通");
 }
 
 function restartProxy(){
-alert('确认重启代理进程');
 $.get('restartProxy.php', function(result){window.location.reload();});
 }
 
@@ -608,18 +607,17 @@ $.get('v2adDEL.php', function(result){window.location.reload();});
 
 function submitlocalip(){
 localiptxt=$('#nodedttext').val();
-$.get('changeLocalIP.php', {localip:localiptxt}, function(result){ });
-alert("IP已写入");
+$.get('changeLocalIP.php', {localip:localiptxt}, function(result){window.location.reload();});
 }
 
 function changeNLchnw(){
 $.get('changeNLchnw.php', function(result){window.location.reload();});
-alert("正在切换大陆白名单。。。");
+alert("切换至大陆白名单。。。");
 }
 
 function changeNLgfw(){
 $.get('changeNLgfw.php', function(result){window.location.reload();});
-alert("正在切换GFWlist。。。");
+alert("切换至GFWlist。。。");
 }
 
 function submitDNS(){
@@ -628,7 +626,7 @@ dohtxt2=$('#DoH2').val();
 chinaDNS=$("#chinaDNS").val();
 hostsCustomize=$("#hostsCustomize").val();
 $.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, chinaDNS:chinaDNS, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
-alert("正在保存DNS设置。。。");
+alert("保存DNS设置。。。");
 }
 
 function submitstaticip(){
@@ -642,7 +640,7 @@ function dhcpUP(){
 dhcpStarttxt=$('#dhcpStart').val();
 dhcpEndtxt=$('#dhcpEnd').val();
 $.get('dhcpUP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt}, function(result){window.location.reload();});
-alert('DHCP服务正在启动');
+alert('启动DHCP服务。。。');
 }
 
 function dhcpDOWN(){

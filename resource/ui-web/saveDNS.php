@@ -31,9 +31,16 @@ $data['hosts'] = $arr2;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-exec('sudo /usr/local/bin/ui-saveHost');
-exec('sudo /usr/local/bin/ui-changeDOH');
 exec('sudo /usr/local/bin/ui-saveChinaDNS');
+
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+if ( $data['splitDNS'] === "gfw" ){
+	exec('sudo /usr/local/bin/ui-changeNLgfw');
+}
+elseif ( $data['splitDNS'] === "chnw" ){
+	exec('sudo /usr/local/bin/ui-changeNLchnw');
+}
+
 exec('sudo systemctl restart smartdns');
 exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart v2dns');
