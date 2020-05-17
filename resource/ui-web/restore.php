@@ -32,7 +32,7 @@ exec('sudo /usr/local/bin/ui-updateGen');
 }
 
 exec('sudo /usr/local/bin/ui-restorePW');
-exec('sudo /usr/local/bin/ui-saveListBW');
+exec('sudo /usr/local/bin/ui-NodeDThide');
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['splitDNS'] === "gfw" ){
@@ -43,7 +43,6 @@ elseif ( $data['splitDNS'] === "chnw" ){
 }
 
 exec('sudo systemctl restart iptables-proxy');
-exec('sudo systemctl restart smartdns');
 exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart v2dns');
 exec('sudo systemctl restart vtrui');
