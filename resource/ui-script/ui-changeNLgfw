@@ -53,7 +53,7 @@ jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($va
 
 
 if [[ $(jq -r '.hosts' /usr/local/bin/0conf) = "null" ]]; then
-  jq '.address={}' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  jq '.hosts={}' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 else
   jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
   cat /tmp/hosts | while read line 
