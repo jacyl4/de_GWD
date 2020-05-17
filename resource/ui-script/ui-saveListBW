@@ -28,7 +28,7 @@ else
 fi
 
 jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >>/tmp/listWpre2
-sort /tmp/listWpre2 | uniq -d >/tmp/listWpre
+sort /tmp/listWpre2 | uniq -u >/tmp/listWpre
 
 jq 'del(.dns.servers[2].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listWpre) ]]; then
@@ -46,6 +46,8 @@ else
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
+rm -rf /tmp/listB*
+rm -rf /tmp/listW*
 rm -rf /tmp/v2dns_temp*
 
 chmod 666 /usr/local/bin/v2dns/config.json
