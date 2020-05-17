@@ -52,13 +52,19 @@ jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($va
 
 
 
-jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
-cat /tmp/hosts | while read line 
-do
-  key=$(echo $line | awk '{print$1}')
-  value=$(echo $line | awk '{print$2}')
-jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-done
+if [[ $(jq -r '.hosts' /usr/local/bin/0conf) = "null" ]]; then
+  jq '.address={}' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+else
+  jq -r '.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+  cat /tmp/hosts | while read line 
+  do
+    key=$(echo $line | awk '{print$1}')
+    value=$(echo $line | awk '{print$2}')
+  jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+  done
+fi
+
+
 
 if [[ $(jq -r '.v2ad' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-v2adADD
