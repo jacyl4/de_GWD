@@ -687,13 +687,13 @@ cat << EOF >> /etc/nginx/conf.d/default.conf
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
 
-  add_header X-Frame-Options "SAMEORIGIN";
-  add_header X-Content-Type-Options "nosniff";
-  add_header X-Robots-Tag "none";
-  add_header X-Download-Options "noopen";
-  add_header X-Permitted-Cross-Domain-Policies "none";
-  add_header X-XSS-Protection "1; mode=block";
-  add_header Referrer-Policy "no-referrer";
+  add_header Referrer-Policy "no-referrer" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Download-Options "noopen" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header X-Permitted-Cross-Domain-Policies "none" always;
+  add_header X-Robots-Tag "none" always;
+  add_header X-XSS-Protection "1; mode=block" always;
   add_header Strict-Transport-Security "max-age=63072000" always;
 
   location ~ /\.(?!well-known).* {
