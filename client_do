@@ -707,11 +707,11 @@ listen.allowed_clients = 127.0.0.1
 listen.backlog = 65536
 listen.mode = 0666
 
-pm = ondemand
-pm.max_children = 100
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
+pm = dynamic
+pm.max_children = 120
+pm.start_servers = 12
+pm.min_spare_servers = 6
+pm.max_spare_servers = 18
 
 catch_workers_output = yes
 clear_env = no
@@ -720,8 +720,9 @@ env[PATH] = /usr/local/bin:/usr/bin:/bin
 env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
-php_value[upload_max_filesize] = 10M
-php_value[post_max_size] = 10M
+php_value[upload_max_filesize] = 1G
+php_value[post_max_size] = 1G
+php_admin_value[memory_limit] = 1024M
 EOF
 
 sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
