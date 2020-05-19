@@ -28,8 +28,8 @@ foreach($arr as $k=>$v){
         $arr = explode(',',$v);
         $arr2[$arr[0]] = $arr[1];
 }
-$data['hosts'] = array();
-$data['hosts'] = $arr2;
+$data['dns']['hosts'] = array();
+$data['dns']['hosts'] = $arr2;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-hostsCustomizeKey=$(jq -r '.hosts | to_entries[] | [.key] | @tsv' /usr/local/bin/0conf)
+hostsCustomizeKey=$(jq -r '.dns.hosts | to_entries[] | [.key] | @tsv' /usr/local/bin/0conf)
 
 jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/v2dns/config.json >/tmp/hostsCustomize
 
