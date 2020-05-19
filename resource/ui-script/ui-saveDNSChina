@@ -1,0 +1,12 @@
+#!/bin/bash
+sed -i '/server /d' /etc/smartdns/smartdns.conf
+
+if [[ -z $(jq '.dns.china' /usr/local/bin/0conf | grep '^[0-9]\+$') ]]; then
+jq --arg DNSChina "114.114.114.114\n114.114.115.115\n119.29.29.29\n119.28.28.28\n223.5.5.5\n223.6.6.6" '.dns.china=$DNSChina' /usr/local/bin/vtrui/config.json >/tmp/DNSChinaTemp && mv -f /tmp/DNSChinaTemp /usr/local/bin/vtrui/config.json
+fi
+
+for DNSChina in $(jq -r '.dns.china' /usr/local/bin/vtrui/config.json | sed 's?\\n?\n?g') ; do
+if [[ -n $DNSChina ]]; then
+echo "server $DNSChina" >> /etc/smartdns/smartdns.conf
+fi
+done
