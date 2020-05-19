@@ -1217,6 +1217,7 @@ installNginxDo
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
 jq '.dns={}' |\
+jq '.dns.hosts={}' |\
 jq '.v2node=[]' |\
 jq '.divertLan=[]' |\
 jq '.v2nodeForUpdate={}' |\
