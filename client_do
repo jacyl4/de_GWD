@@ -722,7 +722,7 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 php_value[upload_max_filesize] = 1G
 php_value[post_max_size] = 1G
-php_admin_value[memory_limit] = 1024M
+php_admin_value[memory_limit] = 512M
 EOF
 
 sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
