@@ -383,6 +383,7 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 
+output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
   output=`/usr/local/bin/ui-changeNLgfw`
@@ -394,6 +395,7 @@ if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
 systemctl restart iptables-proxy
+systemctl restart smartdns
 systemctl restart v2dns
 systemctl restart vtrui
 
