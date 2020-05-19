@@ -3,12 +3,12 @@
 <?php
 $DoH1 = $_GET['DoH1'];
 $DoH2 = $_GET['DoH2'];
-$DNSChina = $_GET['DNSChina'];
+$dnsChina = $_GET['dnsChina'];
 $hostsCustomize = $_GET['hostsCustomize'];
 
-$DNSChinaLine = str_replace(PHP_EOL, ' ', $DNSChina);
+$dnsChinaLine = str_replace(PHP_EOL, ' ', $dnsChina);
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-$data['dns']['china'] = $DNSChinaLine;
+$data['dns']['china'] = $dnsChinaLine;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
@@ -33,7 +33,7 @@ $data['dns']['hosts'] = $arr2;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-exec('sudo /usr/local/bin/ui-saveDNSChina');
+exec('sudo /usr/local/bin/ui-savednsChina');
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['DNSsplit'] === "gfw" ){

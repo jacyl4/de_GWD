@@ -414,7 +414,7 @@
                   国内<br>
                   </span>
                 </div>
-                  <textarea id="DNSChina" class="form-control" aria-label="DNSChina" rows="6"><?php echo str_replace(' ', "\n", json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->china) ?></textarea>
+                  <textarea id="dnsChina" class="form-control" aria-label="dnsChina" rows="6"><?php echo str_replace(' ', "\n", json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->china) ?></textarea>
                 </div>
               </div>
 
@@ -623,9 +623,9 @@ alert("切换至GFWlist。。。");
 function submitDNS(){
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-DNSChina=$("#DNSChina").val();
+dnsChina=$("#dnsChina").val();
 hostsCustomize=$("#hostsCustomize").val();
-$.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, DNSChina:DNSChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
+$.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
 alert("保存DNS设置。。。");
 }
 
