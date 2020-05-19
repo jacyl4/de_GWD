@@ -6,8 +6,9 @@ $DoH2 = $_GET['DoH2'];
 $DNSChina = $_GET['DNSChina'];
 $hostsCustomize = $_GET['hostsCustomize'];
 
+$DNSChinaLine = str_replace(PHP_EOL, ' ', $DNSChina);
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-$data['dns']['china'] = $DNSChina;
+$data['dns']['china'] = $DNSChinaLine;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 sed -i '/server /d' /etc/smartdns/smartdns.conf
 
-if [[ -z $(jq '.dns.china' /usr/local/bin/0conf | grep '^[0-9]\+$') ]]; then
-jq --arg DNSChina "114.114.114.114\n114.114.115.115\n119.29.29.29\n119.28.28.28\n223.5.5.5\n223.6.6.6" '.dns.china=$DNSChina' /usr/local/bin/0conf >/tmp/DNSChinaTemp && mv -f /tmp/DNSChinaTemp /usr/local/bin/0conf
+if [[ -z $(jq '.dns.china' /usr/local/bin/0conf | grep '[0-9]') ]]; then
+jq --arg DNSChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 223.5.5.5 223.6.6.6" '.dns.china=$DNSChina' /usr/local/bin/0conf >/tmp/DNSChinaTemp && mv -f /tmp/DNSChinaTemp /usr/local/bin/0conf
 fi
 
-for DNSChina in $(jq -r '.dns.china' /usr/local/bin/0conf | sed 's?\\n?\n?g') ; do
+for DNSChina in $(jq -r '.dns.china' /usr/local/bin/0conf); do
 if [[ -n $DNSChina ]]; then
 echo "server $DNSChina" >> /etc/smartdns/smartdns.conf
 fi

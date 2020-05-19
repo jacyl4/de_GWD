@@ -414,7 +414,7 @@
                   国内<br>
                   </span>
                 </div>
-                  <textarea id="DNSChina" class="form-control" aria-label="DNSChina" rows="6"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->china ?></textarea>
+                  <textarea id="DNSChina" class="form-control" aria-label="DNSChina" rows="6"><?php echo str_replace(' ', "\n", json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->china) ?></textarea>
                 </div>
               </div>
 
