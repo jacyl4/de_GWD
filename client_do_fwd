@@ -709,7 +709,7 @@ fi
 cd ~
 source /etc/profile
 
-piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 
 doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
