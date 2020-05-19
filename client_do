@@ -1073,9 +1073,9 @@ chmod +x /usr/local/bin/Q4H
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
 systemctl restart smartdns
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+if [[ $(jq -r '.dns.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
   output=`/usr/local/bin/ui-changeNLgfw`
-elif [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
+elif [[ $(jq -r '.dns.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
   output=`/usr/local/bin/ui-changeNLchnw`
 fi
 output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
@@ -1228,7 +1228,7 @@ jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' |\
-jq '.splitDNS="chnw"' |\
+jq '.dns.splitDNS="chnw"' |\
 jq '.v2nodeForUpdate={}' |\
 jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\

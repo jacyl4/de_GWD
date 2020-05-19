@@ -386,9 +386,9 @@ chmod +x /usr/local/bin/Q4H
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
 systemctl restart smartdns
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+if [[ $(jq -r '.dns.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
   output=`/usr/local/bin/ui-changeNLgfw`
-elif [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
+elif [[ $(jq -r '.dns.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
   output=`/usr/local/bin/ui-changeNLchnw`
 fi
 output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
