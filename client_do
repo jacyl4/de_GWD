@@ -1215,21 +1215,18 @@ installNginxDo
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
-jq '.address.alias=""' |\
+jq '.dns={}' |\
+jq '.v2node=[]' |\
+jq '.divertLan=[]' |\
+jq '.v2nodeForUpdate={}' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
-jq '.address.dhcp=""' |\
-jq '.dns.doh={}' |\
 jq --arg doh1 "$doh1" '.dns.doh.doh1=$doh1' |\
 jq --arg doh2 "$doh2" '.dns.doh.doh2=$doh2' |\
-jq '.dns.v2ad=""' |\
-jq '.v2node=[]' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' |\
-jq '.dns.DNSsplit="chnw"' |\
-jq '.v2nodeForUpdate={}' |\
 jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
