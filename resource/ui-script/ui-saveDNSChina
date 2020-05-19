@@ -10,3 +10,5 @@ if [[ -n $DNSChina ]]; then
 echo "server $DNSChina" >> /etc/smartdns/smartdns.conf
 fi
 done
+
+rm -rf /tmp/DNSChinaTemp
