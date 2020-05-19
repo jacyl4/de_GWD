@@ -1,13 +1,2 @@
 #!/bin/bash
-hostsCustomizeKey=$(jq -r '.dns.hosts | to_entries[] | [.key] | @tsv' /usr/local/bin/0conf)
-
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/v2dns/config.json >/tmp/hostsCustomize
-
-{
-for key in $hostsCustomizeKey; do
-	awk "/$key/" /tmp/hostsCustomize
-done 
-} >/tmp/hosts
-
-cat /tmp/hosts
-rm -rf /tmp/hosts
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf
