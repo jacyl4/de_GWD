@@ -1071,7 +1071,7 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 
-output=`/usr/local/bin/ui-savednsChina >/dev/null 2>&1`
+output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
 systemctl restart smartdns
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
