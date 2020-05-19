@@ -71,6 +71,7 @@ cat << EOF > /etc/security/limits.conf
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
+modprobe ip_conntrack
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 10
