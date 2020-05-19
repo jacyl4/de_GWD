@@ -32,8 +32,8 @@ EOF
 
 
 
-doh1=$(jq -r '.dns.doh.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.dns.doh.doh2' /usr/local/bin/0conf)
+doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
 
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)

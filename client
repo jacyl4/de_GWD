@@ -1011,8 +1011,8 @@ jq '.divertLan=[]' |\
 jq '.v2nodeForUpdate={}' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
-jq --arg doh1 "$doh1" '.dns.doh.doh1=$doh1' |\
-jq --arg doh2 "$doh2" '.dns.doh.doh2=$doh2' |\
+jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
+jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
@@ -1126,8 +1126,8 @@ source /etc/profile
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
-doh1=$(jq -r '.dns.doh.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.dns.doh.doh2' /usr/local/bin/0conf)
+doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
 
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
 port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
