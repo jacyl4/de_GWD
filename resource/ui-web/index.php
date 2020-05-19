@@ -388,7 +388,7 @@
                   DoH 1<br>
                   </span>
                 </div>
-                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh1 ?>">
+                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->doh->doh1 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH1"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
@@ -399,7 +399,7 @@
                   DoH 2<br>
                   </span>
                 </div>
-                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh2 ?>">
+                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->doh->doh2 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH2"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
