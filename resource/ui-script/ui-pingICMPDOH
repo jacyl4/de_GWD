@@ -1,4 +1,4 @@
 #!/bin/bash
 dohNUM=$1
-url=$(jq -r '.dns.doh[]' /usr/local/bin/0conf | cut -d: -f1 | awk NR==$dohNUM)
+url=$(awk '/url =/' /etc/dns-over-https/doh-client.conf | cut -d/ -f3 | cut -d: -f1 | awk NR==$dohNUM)
 ping -n -c1 -w1 $url | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1
