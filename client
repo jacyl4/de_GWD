@@ -1129,17 +1129,17 @@ v2ad=$(jq -r '.v2ad' /usr/local/bin/0conf)
 DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
-jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' /usr/local/bin/0conf |\
+jq 'del(.doh)' /usr/local/bin/0conf |\
+jq 'del(.hosts)' |\
+jq 'del(.v2ad)' |\
+jq 'del(.splitDNS)' |\
+jq 'del(.pihole)' |\
+jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' |\
 jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
 jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
 jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
 jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
-jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' |\
-jq 'del(.doh)' |\
-jq 'del(.hosts)' |\
-jq 'del(.v2ad)' |\
-jq 'del(.splitDNS)' |\
-jq 'del(.pihole)' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
 cd ~
