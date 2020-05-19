@@ -71,6 +71,7 @@ cat << EOF > /etc/security/limits.conf
 EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
+modprobe ip_conntrack
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 10
@@ -1070,10 +1071,13 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 
+output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
+systemctl restart smartdns
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
   output=`/usr/local/bin/ui-changeNLgfw`
-elif [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
+else
   output=`/usr/local/bin/ui-changeNLchnw`
 fi
 output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
@@ -1213,21 +1217,19 @@ installNginxDo
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
-jq '.address.alias=""' |\
+jq '.dns={}' |\
+jq '.dns.hosts={}' |\
+jq '.v2node=[]' |\
+jq '.divertLan=[]' |\
+jq '.v2nodeForUpdate={}' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
-jq '.address.dhcp=""' |\
-jq '.doh={}' |\
-jq --arg doh1 "$doh1" '.doh.doh1=$doh1' |\
-jq --arg doh2 "$doh2" '.doh.doh2=$doh2' |\
-jq '.v2ad=""' |\
-jq '.v2node=[]' |\
+jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
+jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' |\
-jq '.splitDNS="chnw"' |\
-jq '.v2nodeForUpdate={}' |\
 jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
@@ -1250,7 +1252,7 @@ sudo pihole -a -p
 
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d= -f2)
 
-jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg piholePW "$piholePW" '.address.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
@@ -1326,13 +1328,34 @@ blue "----------------------"
 
 
 updateGWD(){
+if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
+doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
+v2ad=$(jq -r '.v2ad' /usr/local/bin/0conf)
+DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+
+jq 'del(.doh)' /usr/local/bin/0conf |\
+jq 'del(.hosts)' |\
+jq 'del(.v2ad)' |\
+jq 'del(.splitDNS)' |\
+jq 'del(.pihole)' |\
+jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' |\
+jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
+jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
+jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
+jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
+jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
 cd ~
 source /etc/profile
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
-doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
 
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
 port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)

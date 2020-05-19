@@ -388,7 +388,7 @@
                   DoH 1<br>
                   </span>
                 </div>
-                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh1 ?>">
+                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->doh1 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH1"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
@@ -399,7 +399,7 @@
                   DoH 2<br>
                   </span>
                 </div>
-                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->doh->doh2 ?>">
+                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->doh2 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH2"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
@@ -414,7 +414,7 @@
                   国内<br>
                   </span>
                 </div>
-                  <textarea id="chinaDNS" class="form-control" aria-label="chinaDNS" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-getDNS"); ?></textarea>
+                  <textarea id="dnsChina" class="form-control" aria-label="dnsChina" rows="6"><?php echo str_replace(' ', "\n", json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->china) ?></textarea>
                 </div>
               </div>
 
@@ -623,9 +623,9 @@ alert("切换至GFWlist。。。");
 function submitDNS(){
 dohtxt1=$('#DoH1').val();
 dohtxt2=$('#DoH2').val();
-chinaDNS=$("#chinaDNS").val();
+dnsChina=$("#dnsChina").val();
 hostsCustomize=$("#hostsCustomize").val();
-$.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, chinaDNS:chinaDNS, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
+$.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
 alert("保存DNS设置。。。");
 }
 

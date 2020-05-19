@@ -383,10 +383,13 @@ chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 
+output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
+systemctl restart smartdns
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
   output=`/usr/local/bin/ui-changeNLgfw`
-elif [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
+else
   output=`/usr/local/bin/ui-changeNLchnw`
 fi
 output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
@@ -534,7 +537,7 @@ sudo pihole -a -p
 
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d= -f2)
 
-jq --arg piholePW "$piholePW" '.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg piholePW "$piholePW" '.address.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
@@ -682,13 +685,34 @@ blue "----------------------"
 
 
 clifwdUpdate(){
+if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
+doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
+v2ad=$(jq -r '.v2ad' /usr/local/bin/0conf)
+DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+
+jq 'del(.doh)' /usr/local/bin/0conf |\
+jq 'del(.hosts)' |\
+jq 'del(.v2ad)' |\
+jq 'del(.splitDNS)' |\
+jq 'del(.pihole)' |\
+jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' |\
+jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
+jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
+jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
+jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
+jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
 cd ~
 source /etc/profile
 
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
-doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
 
 clifwd_domain=$(jq -r '.clifwd.clifwd_domain' /usr/local/bin/0conf)
 clifwd_port=$(jq -r '.clifwd.clifwd_port' /usr/local/bin/0conf)
