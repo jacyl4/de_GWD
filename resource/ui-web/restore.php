@@ -19,21 +19,33 @@ exec('sudo /usr/local/bin/ui-v2adADD');
 exec('sudo /usr/local/bin/ui-v2adDEL');
 }
 
+if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
+{
+exec('sudo /usr/local/bin/ui-dhcpUP');
+} else {
+exec('sudo pihole -a disabledhcp');
+}
+
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
 {
 exec('sudo /usr/local/bin/ui-updateGen');
 }
 
 exec('sudo /usr/local/bin/ui-restorePW');
-exec('sudo /usr/local/bin/ui-changeDOH');
-exec('sudo /usr/local/bin/ui-saveNode');
-exec('sudo /usr/local/bin/ui-saveHost');
-exec('sudo /usr/local/bin/ui-saveListBW');
-exec('sudo systemctl restart smartdns');
+exec('sudo /usr/local/bin/ui-NodeDThide');
+
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+if ( $data['splitDNS'] === "gfw" ){
+	exec('sudo /usr/local/bin/ui-changeNLgfw');
+}
+elseif ( $data['splitDNS'] === "chnw" ){
+	exec('sudo /usr/local/bin/ui-changeNLchnw');
+}
+
+exec('sudo systemctl restart iptables-proxy');
 exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart v2dns');
 exec('sudo systemctl restart vtrui');
-exec('sudo systemctl restart iptables-proxy');
 exec('sudo chmod 666 /usr/local/bin/0conf');
 
 ?>

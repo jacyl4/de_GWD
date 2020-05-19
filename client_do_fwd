@@ -8,8 +8,9 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 branch="master"
 
-mirrorSite="http://xl-fs-cm.accfwd.cf:11405"
+installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)"
 
+mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
 
 
 clifwd_iptablesProxy(){
@@ -28,6 +29,8 @@ sed -i "/wireguard.WGport/i$addRule4" /usr/local/bin/iptables-proxy-up
 
 systemctl daemon-reload >/dev/null 2>&1
 systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 sleep 3
 }
 
@@ -48,7 +51,7 @@ listen = [ "127.0.0.1:8053" ]
 
 path = "/dq"
 
-upstream = [ "udp:127.0.0.1:5390" ]
+upstream = [ "tcp:127.0.0.1:5390" ]
 
 timeout = 10
 tries = 3
@@ -170,13 +173,13 @@ server {
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
 
-  add_header X-Frame-Options "SAMEORIGIN";
-  add_header X-Content-Type-Options "nosniff";
-  add_header X-Robots-Tag "none";
-  add_header X-Download-Options "noopen";
-  add_header X-Permitted-Cross-Domain-Policies "none";
-  add_header X-XSS-Protection "1; mode=block";
-  add_header Referrer-Policy "no-referrer";
+  add_header Referrer-Policy "no-referrer" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Download-Options "noopen" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header X-Permitted-Cross-Domain-Policies "none" always;
+  add_header X-Robots-Tag "none" always;
+  add_header X-XSS-Protection "1; mode=block" always;
   add_header Strict-Transport-Security "max-age=63072000" always;
 
 location ~ /\.(?!well-known).* {
@@ -205,9 +208,9 @@ location $clifwd_v2path {
   proxy_set_header          Connection "upgrade";
   proxy_set_header          X-Real-IP \$remote_addr;
   proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
-  proxy_connect_timeout     300;
-  proxy_send_timeout        300;
-  proxy_read_timeout        300;
+  proxy_connect_timeout     432000;
+  proxy_send_timeout        432000;
+  proxy_read_timeout        432000;
   proxy_redirect            off;
   proxy_buffering           off;
   proxy_buffer_size         4k;
@@ -267,12 +270,12 @@ cat << "EOF" >/tmp/vtruiConfADD
 clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
 clifwd_uuidnum=$(jq -r '.clifwd.clifwd_uuidnum[]' /usr/local/bin/0conf)
 
-jq 'del(.inbounds[1])' /etc/vtrui/config.json >/tmp/vtrui_temp
+jq 'del(.inbounds[1])' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp
 
 vtruiIn='{"port":11811,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"},"sockopt":{"tcpFastOpen":true}}}'
 
 jq --argjson vtruiIn "$vtruiIn" '.inbounds[1] = $vtruiIn' /tmp/vtrui_temp |\
-jq --arg clifwd_v2path $clifwd_v2path '.inbounds[1].streamSettings.wsSettings.path=$clifwd_v2path' >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
+jq --arg clifwd_v2path "$clifwd_v2path" '.inbounds[1].streamSettings.wsSettings.path=$clifwd_v2path' >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 
 {
 for v2uuids in $clifwd_uuidnum; do
@@ -285,7 +288,7 @@ do
 jq --argjson v2uuids "$v2uuids" '.inbounds[1].settings.clients+=[$v2uuids]' /tmp/vtrui_temp >/tmp/vtrui_temp2 && mv -f /tmp/vtrui_temp2 /tmp/vtrui_temp
 done
 
-mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 rm -rf /tmp/v2uuids
 
@@ -379,22 +382,28 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-updateGen >/dev/null 2>&1)
-if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-output=$(/usr/local/bin/ui-markThis >/dev/null 2>&1)
+
+output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+  output=`/usr/local/bin/ui-changeNLgfw`
+elif [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
+  output=`/usr/local/bin/ui-changeNLchnw`
 fi
-output=$(systemctl restart v2dns)
-output=$(systemctl restart vtrui)
-output=$(systemctl restart iptables-proxy)
+output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
+  output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
+fi
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
+
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-/usr/local/bin/ui-saveListBW >/dev/null 2>&1
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 EOF
 chmod +x /usr/local/bin/Q2H
 
@@ -611,7 +620,7 @@ cd ~
 
 if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
 mkdir -p /etc/wireguard
-/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
+output=`/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1`
 fi
 blue "------------------------"
 blue "Install WireGuard [done]"
@@ -643,23 +652,24 @@ option use-vc
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-output=$(systemctl restart v2dns)
-output=$(systemctl restart iptables-proxy)
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 sleep 3
 
 installPihole
 
 piholeSet
 
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-/usr/local/bin/ui-dhcpUP
-fi
 
-output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
-output=$(systemctl restart v2dns)
-output=$(systemctl restart vtrui)
-output=$(systemctl restart iptables-proxy)
+output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+output=`/usr/local/bin/ui-dhcpUP`
+fi
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 
 if [[ ! -d "/var/www/html/gwd" ]]; then
 mkdir -p /var/www/html/gwd
@@ -804,7 +814,7 @@ blue "----------------------------------------"
     green "Recommend: Debian 9 (amd64)"
     green "Author:    JacyL4"
     green "================================"
-    echo
+    echo ""
     green  "1. de_GWD clifwd install"
     green  "2. Change de_GWD password"
     green  "3. Install bbrplus and reboot（only Debian 9）"
@@ -814,7 +824,7 @@ blue "----------------------------------------"
     yellow "9. Update Pi-hole"
     yellow "0. de_GWD clifwd Update"
     red    "CTRL+C EXIT"
-    echo
+    echo ""
     read -p "Select:" num
     case "$num" in
     1)

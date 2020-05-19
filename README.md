@@ -1,35 +1,64 @@
-[![telegram](https://i.loli.net/2019/10/23/Ol9PX7io5b3hZsz.png)](https://t.me/de_GWD)
+
+[![Telegram](https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg)](https://t.me/de_GWD)  
+
 
 ![Snipaste_2020-04-28_19-05-37.png](https://i.loli.net/2020/04/28/GrEYR3LJ51sDA9Q.png)
 
 ## Server：
-
-![Snipaste_2020-05-09_08-33-46.png](https://i.loli.net/2020/05/09/NbAYPetxiHWjKql.png)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/master/server)
 ```
 
+
 ## Client：
-![Snipaste_2020-05-09_08-34-34.png](https://i.loli.net/2020/05/09/r1etxqvofSXlOGJ.png)
 General Edition (amd64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do)
+bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)
 ```
-
-![Snipaste_2020-05-09_08-34-08.png](https://i.loli.net/2020/05/09/YKIRUT6JHbS71ak.png)
+    
 Compatible Edition (amd64&arm64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client)
+bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client)
 ```
 
 
-## Extension edition:
+#### Extension edition:
 
 Nat forward Client (amd64)
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- http://xl-fs-cm.accfwd.cf:11405/client_do_fwd)
+bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do_fwd)
 ```
+- - - -
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. 
+<a href="https://github.com/jacyl4/de_GWD/graphs/contributors"><img src="https://opencollective.com/de_GWD/contributors.svg?width=890&button=false" /></a>
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/de_GWD/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/de_GWD"><img src="https://opencollective.com/de_GWD/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/de_GWD/contribute)]
+
+<a href="https://opencollective.com/de_GWD/organization/0/website"><img src="https://opencollective.com/de_GWD/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/1/website"><img src="https://opencollective.com/de_GWD/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/2/website"><img src="https://opencollective.com/de_GWD/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/3/website"><img src="https://opencollective.com/de_GWD/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/4/website"><img src="https://opencollective.com/de_GWD/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/5/website"><img src="https://opencollective.com/de_GWD/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/6/website"><img src="https://opencollective.com/de_GWD/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/7/website"><img src="https://opencollective.com/de_GWD/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/8/website"><img src="https://opencollective.com/de_GWD/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/de_GWD/organization/9/website"><img src="https://opencollective.com/de_GWD/organization/9/avatar.svg"></a>

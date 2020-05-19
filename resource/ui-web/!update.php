@@ -142,11 +142,11 @@
           <div class="card-body">
 
     <div class="form-row">
-      <div class="col-md-8 input-group my-1">
-        <div class="input-group-prepend w-25">
-          <span class="input-group-text justify-content-center w-100">脚本地址</span>
+      <div class="col-md-10 input-group my-2">
+        <div class="input-group-prepend w-15">
+          <span class="input-group-text justify-content-center w-100">CMD</span>
         </div>
-          <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr ?>">
+          <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateCMD ?>">
         <div class="input-group-append">
           <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
         </div>
@@ -200,13 +200,13 @@ $.ajax({
         success: function(data){
         }
       });
-alert('设置已恢复');
+alert('恢复设置。。。');
 window.location.reload(true);
 }
 
 function update(){
-updateAddr=$('#updateAddr').val();
-$.get('update.php', {updateAddr:updateAddr}, function(result){});
+updateCMD=$('#updateCMD').val();
+$.get('update.php', {updateCMD:updateCMD}, function(result){});
 window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 }
 

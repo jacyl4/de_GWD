@@ -10,4 +10,4 @@ done
 } >/tmp/hosts
 
 cat /tmp/hosts
-rm -rf /tmp/hosts*
+rm -rf /tmp/hosts

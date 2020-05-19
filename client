@@ -5,18 +5,15 @@ yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
-export DEBIAN_FRONTEND=noninteractive
-
-
-
 branch="master"
 
-mirrorSite="http://xl-fs-cm.accfwd.cf:11405"
+installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client)"
+
+mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client)??')
 
 smartdns_arm64="$mirrorSite/smartdns.1.2020.05.04-0005.aarch64-debian-all.deb"
 smartdns_amd64="$mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb"
 
-architecture=""
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
     aarch64)  architecture="arm64" ;;
@@ -25,12 +22,14 @@ esac
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 
+export DEBIAN_FRONTEND=noninteractive
+
 
 
 preInstall(){
+systemctl stop iptables-proxy >/dev/null 2>&1
 systemctl stop v2dns >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
-systemctl stop iptables-proxy >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
@@ -116,13 +115,14 @@ net.ipv4.ip_forward = 1
 net.ipv4.ip_local_port_range = 1025 65535
 net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_fastopen_blackhole_timeout_sec = 0
 net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_syncookies = 1
 net.ipv4.tcp_fin_timeout = 15
-net.ipv4.tcp_orphan_retries = 2
-net.ipv4.tcp_syn_retries = 2
-net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_orphan_retries = 3
+net.ipv4.tcp_syn_retries = 3
+net.ipv4.tcp_synack_retries = 3
 net.ipv4.tcp_sack = 1
 net.ipv4.tcp_max_syn_backlog = 32768
 net.ipv4.tcp_max_tw_buckets = 6000
@@ -178,8 +178,7 @@ hwclock -w
 
 
 installSmartDNS(){
-systemctl disable --now smartdns >/dev/null 2>&1
-dpkg -P smartdns >/dev/null 2>&1
+dpkg --purge --force-all smartdns >/dev/null 2>&1
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -O ~/smartdns.deb $smartdns_arm64
@@ -191,17 +190,18 @@ rm -rf ~/smartdns.deb
 
 rm -rf /etc/smartdns/*.conf
 cat << EOF > /etc/smartdns/smartdns.conf
-bind 127.0.0.1:5310 -force-aaaa-soa
-bind-tcp 127.0.0.1:5310 -force-aaaa-soa
+bind 127.0.0.1:5310
+bind-tcp 127.0.0.1:5310
 
 speed-check-mode  ping,tcp:80
 cache-size        10000
 rr-ttl            600
 rr-ttl-min        60
 rr-ttl-max        43200
+force-AAAA-SOA    yes
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 30
+serve-expired-ttl 43200
 
 server 114.114.114.114
 server 114.114.115.115
@@ -211,6 +211,7 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
+rm -rf /run/smartdns.pid
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=Smart DNS server
@@ -219,9 +220,11 @@ After=network.target
 [Service]
 User=root
 Type=forking
+LimitNPROC=64000
+LimitNOFILE=1000000
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
-KillMode=process
+KillMode=mixed
 Restart=always
 RestartSec=2
 
@@ -244,6 +247,7 @@ doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+domainIP=$(nslookup $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -O ~/doh.zip $mirrorSite/doharm64.zip
@@ -276,7 +280,7 @@ upstream_selector = "weighted_round_robin"
 timeout = 30
 no_cookies = true
 no_ecs = true
-no_ipv6 = false
+no_ipv6 = true
 verbose = false
 EOF
 
@@ -336,7 +340,6 @@ rm -rf /usr/local/bin/vtrui
 rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/v2dns
 mkdir -p /usr/local/bin/vtrui
-mkdir -p /etc/vtrui
 if [[ $architecture = "arm64" ]]; then
     wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtarm64.zip
 elif [[ $architecture = "amd64" ]]; then
@@ -356,7 +359,6 @@ rm -rf ~/vtrui*
 cat << EOF > /usr/local/bin/v2dns/config.json
 {
 "dns":{
-  "tag":"DNSflow",
   "hosts":{"localhost":"127.0.0.1"},
   "servers":[{"address":"127.0.0.1","port":5380}]
 },
@@ -374,21 +376,23 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 ],
 "routing": {
   "rules": [
-    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"},
-    {"type":"field","inboundTag":"DNSflow","outboundTag":"direct"}
+    {"type":"field","inboundTag":"dnsin","outboundTag":"dnsout"}
   ]
 }
 }
 EOF
 
-cat << EOF > /etc/vtrui/config.json
+jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
+jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+
+cat << EOF > /usr/local/bin/vtrui/config.json
 {
 "inbounds":[
   {
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
+    "settings":{"network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
 ],
@@ -418,21 +422,18 @@ cat << EOF > /etc/vtrui/config.json
         "serverName":"xxxx.ooo",
         "allowInsecure":false
       },
-      "sockopt":{"mark":255}
+      "sockopt":{"mark":255,"tcpFastOpen":true}
     }
   }
 ]
 }
 EOF
 
-jq --arg key $doh1Domain --arg value $doh1IP '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
-jq --arg key $doh2Domain --arg value $doh2IP '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-
-jq --arg domain $domain '.outbounds[0].settings.vnext[0].address=$domain' /etc/vtrui/config.json |\
-jq --argjson port $port '.outbounds[0].settings.vnext[0].port=$port' |\
-jq --arg uuidnum $uuidnum '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
-jq --arg v2path $v2path '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
-jq --arg domain $domain '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /etc/vtrui/config.json
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/vtrui/config.json |\
+jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 cat << "EOF" > /lib/systemd/system/v2dns.service
 [Unit]
@@ -445,7 +446,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_ADMIN
 ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
 Restart=always
 RestartSec=2
@@ -458,7 +459,6 @@ EOF
 
 systemctl daemon-reload
 systemctl enable v2dns
-systemctl restart v2dns
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]
@@ -472,7 +472,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/local/bin/vtrui/vtrui -config /etc/vtrui/config.json
+ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -484,7 +484,6 @@ EOF
 
 systemctl daemon-reload
 systemctl enable vtrui
-systemctl restart vtrui
 
 rm -rf /usr/bin/vtrui
 }
@@ -494,6 +493,7 @@ rm -rf /usr/bin/vtrui
 installIptablesProxy(){
 echo $doh1IP >> /usr/local/bin/chnrouteset
 echo $doh2IP >> /usr/local/bin/chnrouteset
+echo $domainIP >> /usr/local/bin/chnrouteset
 
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
@@ -528,7 +528,7 @@ for iplanip in \$lanip; do
 done
 
 ipset -N hosts hash:net maxelem 65535
-for hosts in \$(jq -r '.dns.hosts[]' /etc/vtrui/config.json | grep -v '127.0.0.1'); do
+for hosts in \$(jq -r '.dns.hosts[]' /usr/local/bin/v2dns/config.json | grep -v '127.0.0.1'); do
   ipset add hosts \$hosts
 done
 
@@ -574,14 +574,14 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport \$(jq -r '.wireguard.WGport' /usr/local/bin/0conf) -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
-iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
@@ -642,7 +642,10 @@ EOF
 
 systemctl daemon-reload
 systemctl enable iptables-proxy
-output=$(systemctl restart iptables-proxy)
+
+output=`systemctl restart iptables-proxy`
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
 
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
@@ -652,8 +655,9 @@ nameserver 8.8.8.8
 option use-vc
 EOF
 
-echo
-if [[ $(curl -Is  http://www.google.com | head -n 1) =~ "HTTP" ]]; then
+(curl -Is  google.com | head -n 1) >/dev/null 2>&1
+echo ""
+if [[ $(curl -Is  google.com | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
@@ -663,7 +667,7 @@ else
     echo "$statusFailed de_GWD server connect"
     exit
 fi
-echo
+echo ""
 }
 
 
@@ -679,7 +683,7 @@ fi
 
 apt update && apt upgrade && apt autoremove && apt autoclean
 
-apt install php-common php-cgi php-sqlite3
+apt install php-common php-cgi php-sqlite3 resolvconf
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
@@ -717,10 +721,10 @@ systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-echo "" > /etc/resolvconf/run/interface/original.resolvconf
+rm -rf /run/resolvconf/interface
 echo "" > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-echo "" > /etc/resolvconf/resolv.conf.d/tail
+echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
@@ -856,23 +860,28 @@ EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
-output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveNode >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-updateGen >/dev/null 2>&1)
-if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-output=$(/usr/local/bin/ui-markThis >/dev/null 2>&1)
+
+output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+if [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "gfw" ]]; then
+  output=`/usr/local/bin/ui-changeNLgfw`
+elif [[ $(jq -r '.splitDNS' /usr/local/bin/0conf) = "chnw" ]]; then
+  output=`/usr/local/bin/ui-changeNLchnw`
 fi
-output=$(systemctl restart v2dns)
-output=$(systemctl restart vtrui)
-output=$(systemctl restart iptables-proxy)
+output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
+  output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
+fi
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
+
 
 cat << "EOF" > /usr/local/bin/Q2H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-/usr/local/bin/ui-saveListBW >/dev/null 2>&1
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 EOF
 chmod +x /usr/local/bin/Q2H
 
@@ -958,7 +967,20 @@ installDOH
 
 installV2ray
 
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteset
+cd ~
+wget --no-check-certificate -c https://bgp.space/china.html
+sed -i '1,/BEGIN/d' ~/china.html
+sed -i '/END/,$d' ~/china.html
+sed -i 's/<br>//g' ~/china.html
+mv -f ~/china.html /usr/local/bin/chnroute.txt
+
+{
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
+chnroute=`cat /usr/local/bin/chnroute.txt`
+for chnroute in $chnroute ; do
+ echo "add chnroute $chnroute"
+done
+} > /usr/local/bin/chnrouteset
 
 installIptablesProxy
 
@@ -975,8 +997,6 @@ sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
-
-updateAddr="$mirrorSite/client"
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
@@ -999,7 +1019,7 @@ jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
 jq --arg v2path "$v2path" '.v2nodeForUpdate.path=$v2path' |\
-jq --arg updateAddr "$updateAddr" '.updateAddr=$updateAddr' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod -R 666 /usr/local/bin/0conf
 
 installWebUI
@@ -1047,7 +1067,7 @@ fi
 
 if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
 mkdir -p /etc/wireguard
-/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1
+output=`/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1`
 fi
 blue "------------------------"
 blue "Install WireGuard [done]"
@@ -1073,23 +1093,24 @@ option use-vc
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-output=$(systemctl restart v2dns)
-output=$(systemctl restart iptables-proxy)
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 sleep 3
 
 installPihole
 
 piholeSet
 
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-/usr/local/bin/ui-dhcpUP
-fi
 
-output=$(/usr/local/bin/ui-NodeDThide >/dev/null 2>&1)
-output=$(/usr/local/bin/ui-saveListBW >/dev/null 2>&1)
-output=$(systemctl restart v2dns)
-output=$(systemctl restart vtrui)
-output=$(systemctl restart iptables-proxy)
+output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+output=`/usr/local/bin/ui-dhcpUP`
+fi
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
@@ -1190,14 +1211,14 @@ blue "----------------------------------------"
     green "Recommend: Debian 10 (amd64 & arm64)"
     green "Author:    JacyL4"
     green "===================================="
-    echo
+    echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
     yellow "3. Install/Update WiregGard"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
-    echo
+    echo ""
     read -p "Select:" num
     case "$num" in
     1)
