@@ -19,9 +19,9 @@ $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-$hostsCustomize=str_replace("\t", " ", $hostsCustomize);
-$hostsCustomize=preg_replace("/\s(?=\s)/", "\\1", $hostsCustomize);
-$hostsCustomize=str_replace(" ", ",", $hostsCustomize);
+$hostsCustomize = str_replace(TAB1, ' ', $hostsCustomize);
+$hostsCustomize = preg_replace("/\s(?=\s)/", "\\1", $hostsCustomize);
+$hostsCustomize = str_replace(" ", ",", $hostsCustomize);
 $arr = explode("\n",$hostsCustomize);
 $arr = array_filter($arr);
 foreach($arr as $k=>$v){
@@ -39,7 +39,7 @@ $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['DNSsplit'] === "gfw" ){
 	exec('sudo /usr/local/bin/ui-changeNLgfw');
 }
-elseif ( $data['DNSsplit'] === "chnw" ){
+else {
 	exec('sudo /usr/local/bin/ui-changeNLchnw');
 }
 
