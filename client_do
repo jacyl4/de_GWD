@@ -172,7 +172,7 @@ hwclock -w
 
 
 installSmartDNS(){
-dpkg --purge --force-all smartdns >/dev/null 2>&1
+dpkg --purge smartdns >/dev/null 2>&1
 
 wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i ~/smartdns.deb
