@@ -3,7 +3,7 @@ jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listBpre2
 
 jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listWpre2
 
-sort /tmp/listBpre2 | uniq >/tmp/listBpre
+sort /tmp/listBpre2 | uniq | sed '/^\s*$/d' >/tmp/listBpre
 
 jq 'del(.dns.servers[1].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listBpre) ]]; then
@@ -22,7 +22,7 @@ else
 fi
 
 jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >>/tmp/listWpre2
-sort /tmp/listWpre2 | uniq >/tmp/listWpre
+sort /tmp/listWpre2 | uniq | sed '/^\s*$/d' >/tmp/listWpre
 
 jq 'del(.dns.servers[2].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listWpre) ]]; then
