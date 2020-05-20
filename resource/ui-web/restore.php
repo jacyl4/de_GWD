@@ -7,32 +7,11 @@ move_uploaded_file($_FILES['file']['tmp_name'], 'restore/' . $_FILES['file']['na
 }
 exec('sudo cp -f /var/www/html/restore/0conf /usr/local/bin/');
 
-if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
-{
-exec('sudo /usr/local/bin/ui-markThis');
-}
-
-if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->v2ad))
-{
-exec('sudo /usr/local/bin/ui-v2adADD');
-} else {
-exec('sudo /usr/local/bin/ui-v2adDEL');
-}
-
-if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
-{
-exec('sudo /usr/local/bin/ui-dhcpUP');
-} else {
-exec('sudo pihole -a disabledhcp');
-}
-
-if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
-{
-exec('sudo /usr/local/bin/ui-updateGen');
-}
-
 exec('sudo /usr/local/bin/ui-restorePW');
+exec('sudo /usr/local/bin/ui-saveDNSChina');
+exec('sudo systemctl restart smartdns');
 exec('sudo /usr/local/bin/ui-NodeDThide');
+exec('sudo /usr/local/bin/ui-saveListBW');
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['DNSsplit'] === "gfw" ){
@@ -42,11 +21,26 @@ elseif ( $data['DNSsplit'] === "chnw" ){
 	exec('sudo /usr/local/bin/ui-changeNLchnw');
 }
 
+if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
+{
+exec('sudo /usr/local/bin/ui-updateGen');
+}
+
+if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
+{
+exec('sudo /usr/local/bin/ui-markThis');
+}
+
 exec('sudo systemctl restart iptables-proxy');
 exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart v2dns');
 exec('sudo systemctl restart vtrui');
-exec('sudo chmod 666 /usr/local/bin/0conf');
 
+if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
+{
+exec('sudo /usr/local/bin/ui-dhcpUP');
+} else {
+exec('sudo pihole -a disabledhcp');
+}
 ?>
 <?php }?>
