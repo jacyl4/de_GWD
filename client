@@ -1079,7 +1079,7 @@ blue "------------------------"
 
 
 updatePihole(){
-piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)

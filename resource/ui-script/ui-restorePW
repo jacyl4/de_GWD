@@ -1,4 +1,4 @@
 #!/bin/bash
-piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
+piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 
 sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
