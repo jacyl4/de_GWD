@@ -1,15 +1,9 @@
 #!/bin/bash
-if [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
-	jq -r '.listB[]' /usr/local/bin/0conf >/tmp/listBpre
-elif [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
-	jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listBpre
-fi
+jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listBpre2
 
-if [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
-	jq -r '.listW[]' /usr/local/bin/0conf >/tmp/listWpre2
-elif [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
-	jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listWpre2
-fi
+jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listWpre2
+
+sort /tmp/listBpre2 | uniq >/tmp/listBpre
 
 jq 'del(.dns.servers[1].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listBpre) ]]; then
