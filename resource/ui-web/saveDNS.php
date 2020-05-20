@@ -38,8 +38,7 @@ exec('sudo /usr/local/bin/ui-saveDNSChina');
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['DNSsplit'] === "gfw" ){
 	exec('sudo /usr/local/bin/ui-changeNLgfw');
-}
-else {
+} else {
 	exec('sudo /usr/local/bin/ui-changeNLchnw');
 }
 

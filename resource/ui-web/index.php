@@ -536,8 +536,7 @@ $.get('testBaidu.php',function(data) {
 var checklink1 = data;
 if ( $.trim(checklink1) == "ONLINE" ) {
 $('#testBaidu').text("✓ 国内线路畅通");
-}
-else {
+} else {
 $('#testBaidu').text("✗ 国内线路不通");
 }
 });
@@ -546,8 +545,7 @@ $.get('testGoogle.php',function(data) {
 var checklink2 = data;
 if ( $.trim(checklink2) == "ONLINE" ) {
 $('#testGoogle').text("✓ 国外线路畅通");
-}
-else {
+} else {
 $('#testGoogle').text("✗ 国外线路不通");
 }
 });
@@ -852,8 +850,7 @@ var vera = $.trim(currentvernum);
 var verb = $.trim(remotevernum);
 if (vera == verb) {
 $('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
-}
-else {
+} else {
 $('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
 };
 });
