@@ -200,8 +200,8 @@ $.ajax({
         success: function(data){
         }
       });
-window.location.reload(true);
 alert('恢复设置。。。');
+window.location.reload(true);
 }
 
 function update(){
