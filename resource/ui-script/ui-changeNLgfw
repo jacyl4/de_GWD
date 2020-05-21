@@ -19,7 +19,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   }
 ],
 "outbounds":[
-  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
+  {"tag":"direct","protocol":"freedom","settings":{},"streamSettings":{"sockopt":{"mark":255}}},
   {"tag":"dnsout","protocol":"dns"}
 ],
 "routing": {
