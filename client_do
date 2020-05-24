@@ -1078,7 +1078,7 @@ chmod +x /usr/local/bin/Q4H
 
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-systemctl restart smartdns
+output=`systemctl restart smartdns >/dev/null 2>&1`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
@@ -1192,11 +1192,9 @@ sed -i '1,/BEGIN/d' ~/china.html
 sed -i '/END/,$d' ~/china.html
 sed -i 's/<br>//g' ~/china.html
 mv -f ~/china.html /usr/local/bin/chnroute.txt
-
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
+for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/IPchnroute
