@@ -397,9 +397,9 @@ output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart iptables-proxy >/dev/null 2>&1`
+output=`systemctl restart v2dns >/dev/null 2>&1`
+output=`systemctl restart vtrui >/dev/null 2>&1`
 
 
 cat << "EOF" > /usr/local/bin/Q2H
