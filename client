@@ -492,6 +492,12 @@ rm -rf /usr/bin/vtrui
 
 
 installIptablesProxy(){
+touch /usr/local/bin/IPhosts
+touch /usr/local/bin/IPlistB
+touch /usr/local/bin/IPlistW
+touch /usr/local/bin/IPlistBlan
+touch /usr/local/bin/IPlistWlan
+
 echo $doh1IP >> /usr/local/bin/IPlistW
 echo $doh2IP >> /usr/local/bin/IPlistW
 echo $domainIP >> /usr/local/bin/IPlistW
@@ -986,13 +992,6 @@ for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/IPchnroute
-
-touch /usr/local/bin/IPhosts
-touch /usr/local/bin/IPlistB
-touch /usr/local/bin/IPlistW
-touch /usr/local/bin/IPlistBlan
-touch /usr/local/bin/IPlistWlan
-chmod -R 666 /usr/local/bin/IP*
 
 installIptablesProxy
 
