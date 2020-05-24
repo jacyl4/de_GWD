@@ -8,6 +8,7 @@ sort /tmp/listBpre2 | uniq | sed '/^\s*$/d' >/tmp/listBpre
 jq 'del(.dns.servers[1].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listBpre) ]]; then
 	jq '.dns.servers[1].domains=["domain:google.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
+	cat /dev/null >/usr/local/bin/IPlistB
 else
 	jq '.listB={}' /usr/local/bin/0conf >/tmp/0conf_temp
 	cat /dev/null > /usr/local/bin/IPlistB
@@ -15,7 +16,7 @@ else
 	do
 		jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 		listBIP=$(nslookup -port=5380 $listB | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
-		echo $listBIP >> /usr/local/bin/IPlistB
+		echo $listBIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistB
 		jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
 		jq --arg key "$listB" --slurpfile value /tmp/listBIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
@@ -29,6 +30,7 @@ sort /tmp/listWpre2 | uniq | sed '/^\s*$/d' >/tmp/listWpre
 jq 'del(.dns.servers[2].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listWpre) ]]; then
 	jq '.dns.servers[2].domains=["domain:baidu.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
+	cat /dev/null >/usr/local/bin/IPlistB
 else
 	jq '.listW={}' /usr/local/bin/0conf >/tmp/0conf_temp
 	cat /dev/null > /usr/local/bin/IPlistW
@@ -36,7 +38,7 @@ else
 	do
 		jq --arg listW "keyword:$listW" '.dns.servers[2].domains+=[$listW]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 		listWIP=$(nslookup -port=5310 $listW | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
-		echo $listWIP >> /usr/local/bin/IPlistW
+		echo $listWIP |sed 's/ /\n/g ' >> /usr/local/bin/IPlistW
 		jq -n --arg listWIP "$listWIP" '$listWIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWIPs
 		jq --arg key "$listW" --slurpfile value /tmp/listWIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
