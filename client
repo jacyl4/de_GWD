@@ -856,6 +856,8 @@ rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
 rm -rf /tmp/nodecheck*
 rm -rf /var/www/html/log.log
+
+rm -rf /usr/local/bin/chnrouteset
 EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
