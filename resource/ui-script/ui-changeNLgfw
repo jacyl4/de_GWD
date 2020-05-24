@@ -50,6 +50,8 @@ sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.
 jq --arg key1 "$doh1Domain" --arg value1 "$doh1IP" '.dns.hosts += {($key1): ($value1)}' /usr/local/bin/v2dns/config.json |\
 jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($value2)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 
+echo $doh1IP >/usr/local/bin/IPdoh
+echo $doh2IP >>/usr/local/bin/IPdoh
 
 
 if [[ $(jq -r '.dns.hosts' /usr/local/bin/0conf) = "null" ]]; then

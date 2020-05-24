@@ -216,7 +216,7 @@ systemctl restart iptablesrules
 
 installPihole(){
 mkdir -p /etc/pihole
-echo "" > /etc/pihole/adlists.list
+cat /dev/null > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
@@ -249,7 +249,7 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
-echo "" > /etc/resolvconf/resolv.conf.d/original
+cat /dev/null > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
@@ -503,7 +503,7 @@ http {
 EOF
 
 rm -rf /etc/nginx/conf.d/default.conf
-echo "" > /etc/nginx/conf.d/default.conf
+cat /dev/null > /etc/nginx/conf.d/default.conf
 
 docker stop nginx >/dev/null 2>&1
 docker rm nginx >/dev/null 2>&1

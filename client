@@ -492,15 +492,21 @@ rm -rf /usr/bin/vtrui
 
 
 installIptablesProxy(){
-echo $doh1IP >> /usr/local/bin/chnrouteset
-echo $doh2IP >> /usr/local/bin/chnrouteset
-echo $domainIP >> /usr/local/bin/chnrouteset
+touch /usr/local/bin/IPdoh
+touch /usr/local/bin/IPlistB
+touch /usr/local/bin/IPlistW
+touch /usr/local/bin/IPlistBlan
+touch /usr/local/bin/IPlistWlan
+
+echo $doh1IP >> /usr/local/bin/IPdoh
+echo $doh2IP >> /usr/local/bin/IPdoh
+echo $domainIP >> /usr/local/bin/IPlistW
 
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
-ipset -X hosts
 ipset -X lanip
+ipset -X doh
 ipset -X listB
 ipset -X listW
 ipset -X listBlan
@@ -521,35 +527,35 @@ lanip="0.0.0.0/8 \
 223.5.5.5/32 \
 223.6.6.6/32"
 
-ipset -R < /usr/local/bin/chnrouteset
+ipset -R < /usr/local/bin/IPchnroute
 
-ipset -N lanip hash:net maxelem 65535
+ipset -N lanip hash:net family inet hashsize 2048 maxelem 65535
 for iplanip in \$lanip; do
   ipset add lanip \$iplanip
 done
 
-ipset -N hosts hash:net maxelem 65535
-for hosts in \$(jq -r '.dns.hosts[]' /usr/local/bin/v2dns/config.json | grep -v '127.0.0.1'); do
-  ipset add hosts \$hosts
+ipset -N doh hash:net family inet hashsize 2048 maxelem 65535
+for ipdoh in \$(cat /usr/local/bin/IPdoh); do
+  ipset add doh \$ipdoh
 done
 
-ipset -N listB hash:net maxelem 65535
-for iplistB in \$(jq -r '.listB | to_entries[] | .value[]' /usr/local/bin/0conf); do
+ipset -N listB hash:net family inet hashsize 2048 maxelem 65535
+for iplistB in \$(cat /usr/local/bin/IPlistB); do
   ipset add listB \$iplistB
 done
 
-ipset -N listW hash:net maxelem 65535
-for iplistW in \$(jq -r '.listW | to_entries[] | .value[]' /usr/local/bin/0conf); do
+ipset -N listW hash:net family inet hashsize 2048 maxelem 65535
+for iplistW in \$(cat /usr/local/bin/IPlistW); do
   ipset add listW \$iplistW
 done
 
-ipset -N listBlan hash:net maxelem 65535
-for iplistBlan in \$(jq -r '.listBlan[]' /usr/local/bin/0conf); do
+ipset -N listBlan hash:net family inet hashsize 2048 maxelem 65535
+for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
   ipset add listBlan \$iplistBlan
 done
 
-ipset -N listWlan hash:net maxelem 65535
-for iplistWlan in \$(jq -r '.listWlan[]' /usr/local/bin/0conf); do
+ipset -N listWlan hash:net family inet hashsize 2048 maxelem 65535
+for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
   ipset add listWlan \$iplistWlan
 done
 
@@ -575,13 +581,12 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set hosts dst -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport \$(jq -r '.wireguard.WGport' /usr/local/bin/0conf) -j ACCEPT
-iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
-iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
@@ -613,8 +618,8 @@ iptables -F
 iptables -X
 
 ipset -F chnroute
-ipset -F hosts
 ipset -F lanip
+ipset -F doh
 ipset -F listB
 ipset -F listW
 ipset -F listBlan
@@ -695,7 +700,7 @@ sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root
 installPihole(){
 cd ~
 mkdir -p /etc/pihole
-echo "" > /etc/pihole/adlists.list
+cat /dev/null > /etc/pihole/adlists.list
 cat << EOF > /etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
@@ -723,7 +728,7 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
-echo "" > /etc/resolvconf/resolv.conf.d/original
+cat /dev/null > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 echo "option use-vc" > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
@@ -735,7 +740,7 @@ listen-address=127.0.0.1
 port=5390
 EOF
 
-echo "" > /etc/pihole/dns-servers.conf
+cat /dev/null > /etc/pihole/dns-servers.conf
 
 cat << EOF > /etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
@@ -834,15 +839,14 @@ if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
 mv -f ~/china.html /usr/local/bin/chnroute.txt
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
+for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
  echo "add chnroute $chnroute"
 done
-} > /usr/local/bin/chnrouteset
+} > /usr/local/bin/IPchnroute
 
 ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
+  ipset add chnroute $ipchnroute >/dev/null 2>&1
 done
 fi
 EOF
@@ -857,13 +861,15 @@ rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
 rm -rf /tmp/nodecheck*
 rm -rf /var/www/html/log.log
+
+rm -rf /usr/local/bin/chnrouteset
 EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-systemctl restart smartdns
+output=`systemctl restart smartdns >/dev/null 2>&1`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
@@ -875,9 +881,9 @@ output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart iptables-proxy >/dev/null 2>&1`
+output=`systemctl restart v2dns >/dev/null 2>&1`
+output=`systemctl restart vtrui >/dev/null 2>&1`
 
 
 cat << "EOF" > /usr/local/bin/Q2H
@@ -977,14 +983,12 @@ sed -i '1,/BEGIN/d' ~/china.html
 sed -i '/END/,$d' ~/china.html
 sed -i 's/<br>//g' ~/china.html
 mv -f ~/china.html /usr/local/bin/chnroute.txt
-
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
+for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
  echo "add chnroute $chnroute"
 done
-} > /usr/local/bin/chnrouteset
+} > /usr/local/bin/IPchnroute
 
 installIptablesProxy
 

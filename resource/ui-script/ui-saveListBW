@@ -10,10 +10,12 @@ if [[ -z $(cat /tmp/listBpre) ]]; then
 	jq '.dns.servers[1].domains=["domain:google.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
 else
 	jq '.listB={}' /usr/local/bin/0conf >/tmp/0conf_temp
+	cat /dev/null > /usr/local/bin/IPlistB
 	cat /tmp/listBpre | while read listB 
 	do
 		jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 		listBIP=$(nslookup -port=5380 $listB | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+		echo $listBIP >> /usr/local/bin/IPlistB
 		jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
 		jq --arg key "$listB" --slurpfile value /tmp/listBIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
@@ -29,15 +31,32 @@ if [[ -z $(cat /tmp/listWpre) ]]; then
 	jq '.dns.servers[2].domains=["domain:baidu.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
 else
 	jq '.listW={}' /usr/local/bin/0conf >/tmp/0conf_temp
+	cat /dev/null > /usr/local/bin/IPlistW
 	cat /tmp/listWpre | while read listW
 	do
 		jq --arg listW "keyword:$listW" '.dns.servers[2].domains+=[$listW]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 		listWIP=$(nslookup -port=5310 $listW | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+		echo $listWIP >> /usr/local/bin/IPlistW
 		jq -n --arg listWIP "$listWIP" '$listWIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWIPs
 		jq --arg key "$listW" --slurpfile value /tmp/listWIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
 	mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
+listBlan=$(jq -r '.listBlan[]' /usr/local/bin/0conf)
+if [[ $listBlan = "null" ]] || [[ -z $listBlan ]]; then
+	cat /dev/null >/usr/local/bin/IPlistBlan
+else
+	echo $listBlan >/usr/local/bin/IPlistBlan
+fi
+
+
+listWlan=$(jq -r '.listWlan[]' /usr/local/bin/0conf)
+if [[ $listWlan = "null" ]] || [[ -z $listWlan ]]; then
+	cat /dev/null >/usr/local/bin/listWlan
+else
+	echo $listWlan >/usr/local/bin/listWlan
 fi
 
 rm -rf /tmp/listB*

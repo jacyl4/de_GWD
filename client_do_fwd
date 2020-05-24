@@ -354,15 +354,14 @@ if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
 mv -f ~/china.html /usr/local/bin/chnroute.txt
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
+for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
  echo "add chnroute $chnroute"
 done
-} > /usr/local/bin/chnrouteset
+} > /usr/local/bin/IPchnroute
 
 ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
+  ipset add chnroute $ipchnroute >/dev/null 2>&1
 done
 fi
 EOF
@@ -378,13 +377,15 @@ rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
 rm -rf /tmp/nodecheck*
 rm -rf /var/www/html/gwd/log.log
+
+rm -rf /usr/local/bin/chnrouteset
 EOF
 chmod +x /usr/local/bin/Q4H
 /usr/local/bin/Q4H
 
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-systemctl restart smartdns
+output=`systemctl restart smartdns >/dev/null 2>&1`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
@@ -396,9 +397,9 @@ output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart iptables-proxy >/dev/null 2>&1`
+output=`systemctl restart v2dns >/dev/null 2>&1`
+output=`systemctl restart vtrui >/dev/null 2>&1`
 
 
 cat << "EOF" > /usr/local/bin/Q2H
