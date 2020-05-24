@@ -1,14 +1,13 @@
 #!/bin/bash
 jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listBpre2
-
 jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listWpre2
 
 sort /tmp/listBpre2 | uniq | sed '/^\s*$/d' >/tmp/listBpre
 
+cat /dev/null >/usr/local/bin/IPlistB
 jq 'del(.dns.servers[1].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listBpre) ]]; then
 	jq '.dns.servers[1].domains=["domain:google.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
-	cat /dev/null >/usr/local/bin/IPlistB
 else
 	jq '.listB={}' /usr/local/bin/0conf >/tmp/0conf_temp
 	cat /dev/null > /usr/local/bin/IPlistB
@@ -27,10 +26,10 @@ fi
 jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >>/tmp/listWpre2
 sort /tmp/listWpre2 | uniq | sed '/^\s*$/d' >/tmp/listWpre
 
+cat /dev/null >/usr/local/bin/IPlistW
 jq 'del(.dns.servers[2].domains[])' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 if [[ -z $(cat /tmp/listWpre) ]]; then
 	jq '.dns.servers[2].domains=["domain:baidu.com"]' /tmp/v2dns_temp > /usr/local/bin/v2dns/config.json
-	cat /dev/null >/usr/local/bin/IPlistB
 else
 	jq '.listW={}' /usr/local/bin/0conf >/tmp/0conf_temp
 	cat /dev/null > /usr/local/bin/IPlistW
@@ -46,18 +45,15 @@ else
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
+cat /dev/null >/usr/local/bin/IPlistBlan
 listBlan=$(jq -r '.listBlan[]' /usr/local/bin/0conf)
-if [[ $listBlan = "null" ]] || [[ -z $listBlan ]]; then
-	cat /dev/null >/usr/local/bin/IPlistBlan
-else
+if [[ $listBlan != "null" ]] && [[ -n $listBlan ]]; then
 	echo $listBlan >/usr/local/bin/IPlistBlan
 fi
 
-
+cat /dev/null >/usr/local/bin/listWlan
 listWlan=$(jq -r '.listWlan[]' /usr/local/bin/0conf)
-if [[ $listWlan = "null" ]] || [[ -z $listWlan ]]; then
-	cat /dev/null >/usr/local/bin/listWlan
-else
+if [[ $listWlan != "null" ]] && [[ -n $listWlan ]]; then
 	echo $listWlan >/usr/local/bin/listWlan
 fi
 
