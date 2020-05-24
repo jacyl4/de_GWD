@@ -79,6 +79,7 @@ fi
 
 jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listB 2>/dev/null
 if [[ -n $(cat /tmp/listB)  ]]; then
+  jq '.dns.servers[1].domains=[]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
   cat /tmp/listB | while read line 
   do
   jq --arg listB "keyword:$line" '.dns.servers[1].domains+=[$listB]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
