@@ -6,7 +6,7 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-branch="master"
+branch="dev"
 
 installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)"
 
@@ -358,7 +358,7 @@ chnroute=`cat /usr/local/bin/chnroute.txt`
 for chnroute in $chnroute ; do
  echo "add chnroute $chnroute"
 done
-} > /usr/local/bin/chnrouteset
+} > /usr/local/bin/IPchnroute
 
 ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
