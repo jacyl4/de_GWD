@@ -830,8 +830,7 @@ if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
 mv -f ~/china.html /usr/local/bin/chnroute.txt
 {
 echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-chnroute=`cat /usr/local/bin/chnroute.txt`
-for chnroute in $chnroute ; do
+for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
  echo "add chnroute $chnroute"
 done
 } > /usr/local/bin/IPchnroute
