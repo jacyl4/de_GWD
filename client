@@ -846,7 +846,7 @@ done
 
 ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute
+  ipset add chnroute $ipchnroute >/dev/null 2>&1
 done
 fi
 EOF
