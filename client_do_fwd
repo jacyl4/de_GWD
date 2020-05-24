@@ -24,8 +24,8 @@ addRule4="iptables -t mangle -A V2PROXY -p tcp --dport 8053 -j ACCEPT"
 
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
 sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
-sed -i "/wireguard.WGport/i$addRule3" /usr/local/bin/iptables-proxy-up
-sed -i "/wireguard.WGport/i$addRule4" /usr/local/bin/iptables-proxy-up
+sed -i "/udp --dport 5390/a$addRule4" /usr/local/bin/iptables-proxy-up
+sed -i "/udp --dport 5390/a$addRule3" /usr/local/bin/iptables-proxy-up
 
 systemctl daemon-reload >/dev/null 2>&1
 systemctl restart iptables-proxy
