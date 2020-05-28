@@ -81,7 +81,7 @@ echo "ulimit -n 1000000" > ~/.bash_profile
 modprobe ip_conntrack
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
-vm.swappiness = 10
+vm.swappiness = 0
 fs.file-max = 1000000
 fs.inotify.max_user_instances = 1000000
 fs.inotify.max_user_watches = 1000000
