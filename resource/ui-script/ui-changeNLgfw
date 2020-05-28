@@ -15,12 +15,12 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
-  "settings":{"network":"tcp,udp","followRedirect":true}
+  "settings":{"network":"udp","followRedirect":true}
   }
 ],
 "outbounds":[
   {"tag":"direct","protocol":"freedom","settings":{},"streamSettings":{"sockopt":{"mark":255}}},
-  {"tag":"dnsout","protocol":"dns"}
+  {"tag":"dnsout","protocol":"dns","settings":{"network":"udp"}}
 ],
 "routing": {
   "rules": [
