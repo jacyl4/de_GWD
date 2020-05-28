@@ -15,7 +15,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
-  "settings":{"network":"udp","followRedirect":true}
+  "settings":{"network":"udp","address":"1.1.1.1","port":53}
   }
 ],
 "outbounds":[
