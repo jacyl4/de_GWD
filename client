@@ -875,7 +875,7 @@ output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) != "on" ]]; then
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   output=`/usr/local/bin/ui-udpON >/dev/null 2>&1`
 else
   output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
