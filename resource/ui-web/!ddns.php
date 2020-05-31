@@ -124,14 +124,14 @@
           <div class="card-body">
   <div class="form-group">
     <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">域名</span>
         </div>
           <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfDomain ?>">
       </div>
 
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Zone ID</span>
         </div>
@@ -140,14 +140,14 @@
     </div>
 
     <div class="form-row">
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF API KEY</span>
         </div>
           <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfAPIkey ?>">
       </div>
 
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">CF E-mail</span>
         </div>
@@ -173,7 +173,7 @@
           <div class="card-body">
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1 ml-auto mr-auto ">
+      <div class="col-md-6 input-group mb-1 ml-auto mr-auto ">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">Endpoint</span>
           <span class="input-group-text justify-content-center">域名/公网IP</span>
@@ -188,7 +188,7 @@
 
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点1</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
@@ -197,7 +197,7 @@
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop1" onclick="submitWGmark()">显示二维码</button>
       </div>
 
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点2</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
@@ -208,7 +208,7 @@
 </div>
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点3</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
@@ -217,7 +217,7 @@
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop3" onclick="submitWGmark()">显示二维码</button>
       </div>
 
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点4</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
@@ -228,7 +228,7 @@
 </div>
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点5</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
@@ -237,7 +237,7 @@
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop5" onclick="submitWGmark()">显示二维码</button>
       </div>
 
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点6</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
@@ -248,7 +248,7 @@
 </div>
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点7</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>
@@ -257,7 +257,7 @@
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop7" onclick="submitWGmark()">显示二维码</button>
       </div>
 
-      <div class="col-md-6 input-group my-1">
+      <div class="col-md-6 input-group mb-1">
         <div class="input-group-prepend w-50">
           <span class="input-group-text justify-content-center w-100">节点8</span>
           <span class="input-group-text justify-content-center w-100">备注：</span>

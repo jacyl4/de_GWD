@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+echo "on"
+fi

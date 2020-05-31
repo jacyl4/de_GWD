@@ -546,7 +546,6 @@ ip route add local 0.0.0.0/0 dev lo table 100
 iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 iptables -A INPUT -p tcp --tcp-flags RST RST -j DROP
 
-iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5380 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5380 -i $ethernetnum -j DROP
@@ -554,9 +553,7 @@ iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
@@ -573,16 +570,12 @@ iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
-iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
 
 iptables -t mangle -I OUTPUT -p tcp -j V2PROXY
-iptables -t mangle -I OUTPUT -p udp -j V2PROXY
 
 iptables -t mangle -I PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
-iptables -t mangle -I PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 
 iptables -t mangle -I PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
-iptables -t mangle -I PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 
 if [[ \$(ip --oneline link show up | grep -v lo | awk '{print\$2}') =~ "wg0" ]]; then
 iptables -I FORWARD -i wg0 -j ACCEPT
@@ -1090,6 +1083,11 @@ fi
 output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
+fi
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  output=`/usr/local/bin/ui-udpON >/dev/null 2>&1`
+else
+  output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
 fi
 output=`systemctl restart iptables-proxy >/dev/null 2>&1`
 output=`systemctl restart v2dns >/dev/null 2>&1`
