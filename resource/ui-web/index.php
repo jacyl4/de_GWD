@@ -352,7 +352,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP" value="<?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['divertLan'] as $k => $v) {echo "$v ";} ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['divertLan'] as $k => $v) {echo "$v ";} ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
