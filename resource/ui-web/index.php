@@ -232,11 +232,11 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4 mb-4">
   <div class="input-group-prepend">
-  <label class="input-group-text">V2去广告<span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
+  <label class="input-group-text">UDP代理<span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkUDP');?></span></label>
   </div>
   <div class="input-group-append">
-    <button class="btn btn-secondary" type="button" onclick="v2adADD()">开启</button>
-    <button class="btn btn-secondary" type="button" onclick="v2adDEL()">关闭</button>
+    <button class="btn btn-secondary" type="button" onclick="udpON()">关闭</button>
+    <button class="btn btn-secondary" type="button" onclick="udpOFF()">关闭</button>
   </div>
 </div>
 </span>
@@ -382,6 +382,17 @@
           <div class="card-body">
             <div class="form-row">
               <div class="col-md-3">
+
+              <div class="input-group mt-1 mr-4 mb-4">
+                <div class="input-group-prepend">
+                <label class="input-group-text">V2去广告<span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
+                </div>
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button" onclick="v2adADD()">开启</button>
+                  <button class="btn btn-outline-secondary" type="button" onclick="v2adDEL()">关闭</button>
+                </div>
+              </div>
+
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
@@ -393,7 +404,7 @@
                   <span class="input-group-text text-success" id="pingDOH1"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
-              <div class="input-group mb-3">
+              <div class="input-group mb-1">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   DoH 2<br>
@@ -407,7 +418,7 @@
               </div>
 
               <div class="col-md-3">
-                <div class="input-group mb-3">
+                <div class="input-group mb-1">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   DNS<br>
@@ -419,7 +430,7 @@
               </div>
 
               <div class="col-md-6">
-                <div class="input-group mb-3">
+                <div class="input-group mb-1">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   hosts<br>
@@ -449,7 +460,7 @@
           </div>
           <div class="card-body">
             <div class="form-row">
-              <div class="col-md-6 mb-3">
+              <div class="col-md-6 mb-1">
                 <div class="input-group">
                   <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->localIP ?>">
                 <div class="input-group-append">
@@ -457,7 +468,7 @@
                 </div>
                 </div>
               </div>
-              <div class="col-md-6 mb-3">
+              <div class="col-md-6 mb-1">
                 <div class="input-group">
                   <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->upstreamIP ?>">
                 <div class="input-group-append">
@@ -485,7 +496,7 @@
           </div>
           <div class="card-body">
             <div class="form-row">
-              <div class="col-md-6 mb-3">
+              <div class="col-md-6 mb-1">
                 <div class="input-group">
                   <input type="text" id="dhcpStart" class="form-control" placeholder="起始IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpStart ?>">
                 <div class="input-group-append">
@@ -493,7 +504,7 @@
                 </div>
                 </div>
               </div>
-              <div class="col-md-6 mb-3">
+              <div class="col-md-6 mb-1">
                 <div class="input-group">
                   <input type="text" id="dhcpEnd" class="form-control" placeholder="结束IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpEnd ?>">
                 <div class="input-group-append">
@@ -595,12 +606,12 @@ $.get("pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) });
 $.get("pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) });
 }
 
-function v2adADD(){
-$.get('v2adADD.php', function(result){window.location.reload();});
+function udpON(){
+$.get('udpON.php', function(result){window.location.reload();});
 }
 
-function v2adDEL(){
-$.get('v2adDEL.php', function(result){window.location.reload();});
+function udpOFF(){
+$.get('udpOFF.php', function(result){window.location.reload();});
 }
 
 function submitlocalip(){
@@ -625,6 +636,14 @@ dnsChina=$("#dnsChina").val();
 hostsCustomize=$("#hostsCustomize").val();
 $.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
 alert("保存DNS设置。。。");
+}
+
+function v2adADD(){
+$.get('v2adADD.php', function(result){window.location.reload();});
+}
+
+function v2adDEL(){
+$.get('v2adDEL.php', function(result){window.location.reload();});
 }
 
 function submitstaticip(){
