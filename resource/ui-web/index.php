@@ -235,7 +235,7 @@
   <label class="input-group-text">UDP代理<span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkUDP');?></span></label>
   </div>
   <div class="input-group-append">
-    <button class="btn btn-secondary" type="button" onclick="udpON()">关闭</button>
+    <button class="btn btn-secondary" type="button" onclick="udpON()">开启</button>
     <button class="btn btn-secondary" type="button" onclick="udpOFF()">关闭</button>
   </div>
 </div>
