@@ -573,16 +573,12 @@ iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
-iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
 
 iptables -t mangle -I OUTPUT -p tcp -j V2PROXY
-iptables -t mangle -I OUTPUT -p udp -j V2PROXY
 
 iptables -t mangle -I PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
-iptables -t mangle -I PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 
 iptables -t mangle -I PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
-iptables -t mangle -I PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 
 if [[ \$(ip --oneline link show up | grep -v lo | awk '{print\$2}') =~ "wg0" ]]; then
 iptables -I FORWARD -i wg0 -j ACCEPT
