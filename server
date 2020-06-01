@@ -545,8 +545,8 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --upgrade  --auto-upgrade
 ~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
 ~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
-               --keypath        /var/www/ssl/$topDomain.key  \
-               --fullchain-file /var/www/ssl/fullchain.cer \
+               --key-file       /var/www/ssl/$topDomain.key  \
+               --fullchain-file /var/www/ssl/$topDomain.cer \
                --reloadcmd     "docker restart nginx >/dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
@@ -598,7 +598,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --issue -d $domain -w /var/www/html --keylength ec-256
 ~/.acme.sh/acme.sh --installcert -d $domain --ecc \
                --key-file       /var/www/ssl/$domain.key  \
-               --fullchain-file /var/www/ssl/fullchain.cer \
+               --fullchain-file /var/www/ssl/$domain.cer \
                --reloadcmd     "docker restart nginx >/dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
