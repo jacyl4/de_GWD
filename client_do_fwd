@@ -114,7 +114,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
 ~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/$topDomain.key  \
-               --fullchain-file /var/www/ssl/fullchain.cer \
+               --fullchain-file /var/www/ssl/$topDomain.cer \
                --reloadcmd     "docker restart nginx >/dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
@@ -129,7 +129,7 @@ cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
 
 openssl ocsp -no_nonce \
     -issuer  /var/www/ssl/intermediate.pem \
-    -cert    /var/www/ssl/fullchain.cer \
+    -cert    /var/www/ssl/$topDomain.cer \
     -CAfile  /var/www/ssl/bundle.pem \
     -VAfile  /var/www/ssl/bundle.pem \
     -url     http://ocsp.int-x3.letsencrypt.org \
@@ -156,7 +156,7 @@ server {
   root /var/www/html;
   index index.php index.html index.htm;
 
-  ssl_certificate /var/www/ssl/fullchain.cer;
+  ssl_certificate /var/www/ssl/$topDomain.cer;
   ssl_certificate_key /var/www/ssl/$topDomain.key;
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
@@ -733,6 +733,10 @@ v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+if [[ -f /var/www/ssl/fullchain.cer ]]; then
+  mv -f /var/www/ssl/fullchain.cer /var/www/ssl/$topDomain.cer
+fi
 
 wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
 sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
