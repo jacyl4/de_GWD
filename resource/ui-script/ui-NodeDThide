@@ -47,8 +47,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
           "allowInsecure": false
         },
         "sockopt": {
-          "mark": 255,
-          "sockopt":{"tcpFastOpen":true}
+          "mark": 255
         }
       }
     },
@@ -81,8 +80,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
           "allowInsecure": false
         },
         "sockopt": {
-          "mark": 255,
-          "sockopt":{"tcpFastOpen":true}
+          "mark": 255
         }
       }
     }
