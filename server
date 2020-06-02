@@ -631,18 +631,17 @@ rm -rf ~/now.cron
 
 
 nginxWebConf(){
-rm -rf /etc/nginx/conf.d/default.conf
-
-touch /etc/nginx/conf.d/supp_head
-cat /etc/nginx/conf.d/supp_head > /etc/nginx/conf.d/default.conf
-
 if [[ -z $htmldir ]]; then
   $htmldir="/var/www/html"
 fi
+rm -rf /etc/nginx/conf.d/default.conf
+
+touch /etc/nginx/conf.d/supp_head
+touch /etc/nginx/conf.d/supp_body
 
 if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
-cat << EOF >> /etc/nginx/conf.d/default.conf
+cat << EOF > /etc/nginx/conf.d/1_default1
 server {
   listen $port ssl http2 fastopen=128 reuseport;
   server_name $domain;
@@ -655,7 +654,7 @@ EOF
 
 else
 
-cat << EOF >> /etc/nginx/conf.d/default.conf
+cat << EOF >> /etc/nginx/conf.d/1_serverHead
 server {
   listen 80;
   server_name $domain;
@@ -674,7 +673,7 @@ EOF
 
 fi
 
-cat << EOF >> /etc/nginx/conf.d/default.conf
+cat << EOF > /etc/nginx/conf.d/2_tlsParameter
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
@@ -705,10 +704,7 @@ cat << EOF >> /etc/nginx/conf.d/default.conf
 
 EOF
 
-touch /etc/nginx/conf.d/supp_body
-cat /etc/nginx/conf.d/supp_body >> /etc/nginx/conf.d/default.conf
-
-cat << EOF >> /etc/nginx/conf.d/default.conf
+cat << EOF > /etc/nginx/conf.d/3_proxyPath
 location /dq {
   proxy_pass                http://127.0.0.1:8053/dq;
   proxy_set_header          Host \$host;
@@ -732,6 +728,17 @@ location $v2path {
 }
 }
 EOF
+
+cat << EOF > /etc/nginx/conf.d/merge.sh
+#!/bin/bash
+cat /etc/nginx/conf.d/supp_head > /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/1_serverHead >> /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/supp_body >> /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/3_proxyPath >> /etc/nginx/conf.d/default.conf
+EOF
+chmod +x /etc/nginx/conf.d/merge.sh
+/etc/nginx/conf.d/merge.sh
 
 docker restart nginx
 }
