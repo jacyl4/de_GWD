@@ -654,7 +654,7 @@ EOF
 
 else
 
-cat << EOF >> /etc/nginx/conf.d/1_serverHead
+cat << EOF > /etc/nginx/conf.d/1_serverHead
 server {
   listen 80;
   server_name $domain;
