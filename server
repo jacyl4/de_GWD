@@ -991,6 +991,8 @@ port=$(echo $vpsdomainP | cut -d: -f2)
 portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
+htmldir=$(awk '/root/ {print$2;exit}' /etc/nginx/conf.d/default.conf | cut -d';' -f1)
+
 if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
     green "==============================="
