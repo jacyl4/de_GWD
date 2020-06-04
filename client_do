@@ -353,7 +353,7 @@ cat << EOF > /usr/local/bin/v2dns/config.json
   }
 ],
 "outbounds":[
-  {"tag":"direct","protocol":"freedom","streamSettings":{"sockopt":{"mark":255}}},
+  {"tag":"direct","protocol":"freedom"},
   {"tag":"dnsout","protocol":"dns","settings":{"network":"udp"}}
 ],
 "routing": {
@@ -378,7 +378,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
 Restart=always
 RestartSec=2
