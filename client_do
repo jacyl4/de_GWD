@@ -711,10 +711,11 @@ listen.backlog = 65536
 listen.mode = 0666
 
 pm = dynamic
-pm.max_children = 120
+pm.max_children = 50
 pm.start_servers = 12
-pm.min_spare_servers = 6
-pm.max_spare_servers = 18
+pm.min_spare_servers = 12
+pm.max_spare_servers = 24
+pm.max_requests = 500
 
 catch_workers_output = yes
 clear_env = no
@@ -730,9 +731,14 @@ EOF
 
 sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
 sed -i "/disable_functions =/c\disable_functions = pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals," /etc/php/7.4/fpm/php.ini
-
+sed -i "/^upload_max_filesize/c\upload_max_filesize = 1G" /etc/php/7.4/fpm/php.ini
+sed -i "/^post_max_size/c\post_max_size = 1G" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_input_time/c\max_input_time = 3600" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_execution_time/c\max_execution_time = 3600" /etc/php/7.4/fpm/php.ini
+sed -i "/^memory_limit/c\memory_limit = 512m" /etc/php/7.4/fpm/php.ini
 sed -i "s/^zend_extension/;&/" /etc/php/7.4/fpm/php.ini
 sed -i "s/^opcache/;&/" /etc/php/7.4/fpm/php.ini
+
 cat << EOF > /etc/php/7.4/mods-available/opcache.ini
 ; configuration for php opcache module
 ; priority=10
