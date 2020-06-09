@@ -632,10 +632,6 @@ rm -rf ~/now.cron
 
 
 nginxWebConf(){
-if [[ -z "$htmldir" ]]; then
-  $htmldir="/var/www/html"
-fi
-
 touch /etc/nginx/conf.d/supp_head
 touch /etc/nginx/conf.d/supp_body
 
@@ -842,6 +838,8 @@ v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 gatewayaddr=$(ip route show | awk '/'$ethernetnum'/ {print$3;exit}')
+
+$htmldir="/var/www/html"
 
 cat << EOF > /etc/network/interfaces
 source /etc/network/interfaces.d/*
