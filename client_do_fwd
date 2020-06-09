@@ -496,53 +496,6 @@ blue "----------------------------"
 
 
 
-installBBRplus(){
-apt install wget
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-export DEBIAN_FRONTEND=noninteractive
-apt purge -y linux-image-amd64
-apt purge -y linux-image-*-amd64
-update-grub
-
-cat << EOF > ~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-sysctl -p
-
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-
-systemctl restart sshd
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-blue "-----------------------"
-blue  "Install bbrplus [done]"
-blue "-----------------------"
-
-reboot
-}
-
-
 
 clifwd_change_piholeAdmin(){
 sudo pihole -a -p
@@ -858,7 +811,6 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. de_GWD clifwd install"
     green  "2. Change de_GWD password"
-    green  "3. Install bbrplus and reboot"
     red    "6. Change domain and issue new certificates"
     yellow "7. Install/Update WiregGard"
     yellow "8. update Nginx(docker)"
@@ -874,10 +826,6 @@ blue "-----------------------------------------------"
     ;;
     2)
     clifwd_change_piholeAdmin
-    start_menu
-    ;;
-    3)
-    installBBRplus
     start_menu
     ;;
     6)
