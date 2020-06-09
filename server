@@ -936,6 +936,8 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
+
+systemctl restart sshd
 EOF
 
 chmod +x ~/bbrkernel/clearkernel
