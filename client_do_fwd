@@ -499,10 +499,14 @@ blue "----------------------------"
 installBBRplus(){
 apt install wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.182-bbrplus.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.182-bbrplus.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
+
+export DEBIAN_FRONTEND=noninteractive
+apt purge -y linux-image-amd64
+apt purge -y linux-image-*-amd64
 update-grub
 
 cat << EOF > ~/bbrkernel/clearkernel
@@ -840,19 +844,19 @@ else
     echo "[$statusBAD] Docker         [start failed]"
 fi
 
-blue "----------------------------------------"
-blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null) | cut -d' ' -f3)"
-blue "----------------------------------------"
+blue "-----------------------------------------------"
+blue "Current tcp congestion control ：$(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
+blue "-----------------------------------------------"
 
     green "================================"
     green "      CLIENT_fwd (Docker)"
-    green "Recommend: Debian 9 (amd64)"
+    green "Recommend: Debian 10 (amd64)"
     green "Author:    JacyL4"
     green "================================"
     echo ""
     green  "1. de_GWD clifwd install"
     green  "2. Change de_GWD password"
-    green  "3. Install bbrplus and reboot（only Debian 9）"
+    green  "3. Install bbrplus and reboot"
     red    "6. Change domain and issue new certificates"
     yellow "7. Install/Update WiregGard"
     yellow "8. update Nginx(docker)"

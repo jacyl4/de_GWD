@@ -136,14 +136,16 @@ net.ipv4.tcp_keepalive_probes = 3
 net.ipv4.tcp_rfc1337 = 1
 EOF
 
-if [[ "$(uname -r)" =~ "bbrplus" ]]; then
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+if [[ "$(uname -r)" =~ "bbrplus" ]]; then
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+elif [[ $(uname -r | awk -F. '{print $1"."$2}') = "4.19" ]] || [[ $(echo "$(uname -r | awk -F. '{print $1"."$2}') > 4.19" | bc) -eq 1 ]]; then
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 else
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
@@ -1237,9 +1239,9 @@ else
     echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
-blue "----------------------------------------"
-blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null) | cut -d' ' -f3)"
-blue "----------------------------------------"
+blue "-----------------------------------------------"
+blue "Current tcp congestion control ：$(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
+blue "-----------------------------------------------"
 
     green "===================================="
     green "                CLIENT"

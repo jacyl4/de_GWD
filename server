@@ -127,15 +127,16 @@ net.ipv4.tcp_keepalive_probes = 3
 net.ipv4.tcp_rfc1337 = 1
 EOF
 
-if [[ "$(uname -r)" =~ "bbrplus" ]]; then
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+if [[ "$(uname -r)" =~ "bbrplus" ]]; then
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-
+elif [[ $(uname -r | awk -F. '{print $1"."$2}') = "4.19" ]] || [[ $(echo "$(uname -r | awk -F. '{print $1"."$2}') > 4.19" | bc) -eq 1 ]]; then
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 else
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
@@ -910,10 +911,14 @@ blue "---------------------------------------------"
 installBBRplus(){
 apt install wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-1-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.182-bbrplus.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.182-bbrplus.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
+
+export DEBIAN_FRONTEND=noninteractive
+apt purge -y linux-image-amd64
+apt purge -y linux-image-*-amd64
 update-grub
 
 cat << EOF > ~/bbrkernel/clearkernel
@@ -1324,13 +1329,13 @@ else
     echo "[$statusBAD] Docker       [start failed]"
 fi
 
-blue "----------------------------------------"
-blue "Current tcp congestion control ：$(echo $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null) | cut -d' ' -f3)"
-blue "----------------------------------------"
+blue "-----------------------------------------------"
+blue "Current tcp congestion control ：$(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
+blue "-----------------------------------------------"
 
     green "==========================="
     green "       SERVER"
-    green "Recommend: Debian 9"
+    green "Recommend: Debian 10"
     green "Author:    JacyL4"
     green "==========================="
 if [[ -f "/usr/local/bin/version.php" ]]; then
@@ -1338,7 +1343,7 @@ if [[ -f "/usr/local/bin/version.php" ]]; then
 fi
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot（only Debian 9）"
+    green  "2. Install bbrplus and reboot"
     red    "5. Change static IP"
     red    "6. Change domain and issue new certificates"
     red    "7. Change v2ray UUID & path"
