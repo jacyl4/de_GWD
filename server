@@ -632,7 +632,7 @@ rm -rf ~/now.cron
 
 
 nginxWebConf(){
-if [[ -z $htmldir ]]; then
+if [[ -z "$htmldir" ]]; then
   $htmldir="/var/www/html"
 fi
 
