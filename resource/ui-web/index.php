@@ -381,9 +381,9 @@
 
           <div class="card-body">
             <div class="form-row">
-              <div class="col-md-3">
+              <div class="col-md-4">
 
-              <div class="input-group mt-1 mr-4 mb-4">
+              <div class="input-group mt-1 mb-4 ml-4">
                 <div class="input-group-prepend">
                 <label class="input-group-text">V2去广告<span class="badge badge-pill badge-success my-auto ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?></span></label>
                 </div>
@@ -404,7 +404,7 @@
                   <span class="input-group-text text-success" id="pingDOH1"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
-              <div class="input-group mb-1">
+              <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   DoH 2<br>
@@ -417,8 +417,8 @@
               </div>
               </div>
 
-              <div class="col-md-3">
-                <div class="input-group mb-1">
+              <div class="col-md-4">
+                <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   DNS<br>
@@ -429,8 +429,8 @@
                 </div>
               </div>
 
-              <div class="col-md-6">
-                <div class="input-group mb-1">
+              <div class="col-md-4">
+                <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   hosts<br>
