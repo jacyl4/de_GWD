@@ -110,7 +110,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             <i class="fas fa-th-list"></i>
             名单编辑
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsSaveCF()">保存</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="submitlistBW()">保存</button>
 </span>
           </div>
           <div class="card-body">
