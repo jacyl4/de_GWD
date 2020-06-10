@@ -945,11 +945,10 @@ echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
+reboot
 blue "-----------------------"
 blue  "Install bbrplus [done]"
 blue "-----------------------"
-
-reboot
 }
 
 
