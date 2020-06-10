@@ -108,10 +108,14 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-th-list"></i>
-            名单编辑</div>
+            名单编辑
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsSaveCF()">保存</button>
+</span>
+          </div>
           <div class="card-body">
 
-<div class="form-row mb-3">
+<div class="form-row">
           <div class="col-md-3 form-group">
           <div class="input-group">
           <div class="input-group-prepend">
@@ -155,17 +159,11 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
             <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="32" placeholder="0.0.0.0"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listWlan'] as $k => $v) {echo "$v\n";} ?></textarea>
           </div>
           </div>
+<span class="float-left text-secondary">
+  <small>注：一行一个地址<br></small>
+</span>
 </div>
 
-<span class="float-left text-secondary">
-  <small>
-注：一行一个地址<br>
-  </small>
-</span>
-
-<span class="float-right">
-<button type="button" class="btn btn-primary" onclick="submitlistBW()">应用</button>
-</span>
 
 <script>
 function submitlistBW () {

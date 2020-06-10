@@ -109,7 +109,11 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-stream"></i>
-            节点编辑</div>
+            节点编辑
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="saveNode()">保存</button>
+</span>
+          </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-bordered table-striped" id="dataTable">
@@ -188,9 +192,6 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
                   </tr>
                 </tbody>
               </table>
-<span class="float-right">
-<button type="button" class="btn btn-primary" onclick="saveNode()">保存</button>
-</span>
             </div>
           </div>
         </div>
