@@ -1292,6 +1292,12 @@ if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
 mkdir -p /etc/wireguard
 output=`/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1`
 fi
+
+if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
+cd /lib/modules/
+rm -rf $(ls | grep -v $(uname -r | awk NR==1))
+fi
+
 blue "------------------------"
 blue "Install WireGuard [done]"
 blue "------------------------"
