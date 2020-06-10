@@ -949,13 +949,12 @@ location ~ /\.(?!well-known).* {
   deny all;
 }
 
-location ~* \.php$ {
-  fastcgi_pass            unix:/run/php/php-fpm.sock;
-  fastcgi_index           index.php;
-  fastcgi_split_path_info ^(.+\.php)(.*)$;
-  include                 fastcgi_params;
-  fastcgi_param           SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-}
+location ~ [^/]\.php(/|$) {
+          fastcgi_pass unix:/run/php/php-fpm.sock;
+          fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+          fastcgi_index index.php;
+          include fastcgi_params;
+        }
 }
 EOF
 }

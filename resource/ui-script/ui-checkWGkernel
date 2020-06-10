@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
+	echo "installed"
+else
+	echo "not installed"
+fi
