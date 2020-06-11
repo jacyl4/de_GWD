@@ -10,7 +10,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 preInstall(){
-if [[ $(free -m | awk 'NR==3{print$2}') != "0" ]]; then
+if [[ $(free -m | awk 'NR==3{print$2}') = "0" ]]; then
 fallocate -l 1G /swapfile
 dd if=/dev/zero of=/swapfile bs=1k count=1024k status=progress
 chmod 600 /swapfile
@@ -52,7 +52,9 @@ deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERS
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main
 EOF
 
-apt update && apt install sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged resolvconf
+apt update && apt upgrade && apt autoremove && apt autoclean
+
+apt install sudo locales net-tools dnsutils wget curl rsync git jq unzip netcat socat ca-certificates apt-transport-https gnupg2 haveged resolvconf
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
@@ -796,8 +798,6 @@ rm -rf ~/sample*
 fi
 
 wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
-
-apt update && apt upgrade && apt autoremove && apt autoclean
 }
 
 
