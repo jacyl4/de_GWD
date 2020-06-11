@@ -54,7 +54,7 @@ EOF
 
 apt update && apt upgrade && apt autoremove && apt autoclean
 
-apt install sudo locales net-tools netcat dnsutils resolvconf wget curl rsync git jq unzip socat ca-certificates apt-transport-https gnupg2 haveged
+apt install sudo locales net-tools netcat dnsutils resolvconf wget curl rsync git jq unzip ca-certificates apt-transport-https gnupg2 haveged socat
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
