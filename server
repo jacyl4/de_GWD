@@ -10,7 +10,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 preInstall(){
-if [[ $(free -m | awk 'NR==3{print$1}') != "Swap:" ]]; then
+if [[ $(free -m | awk 'NR==3{print$2}') != "0" ]]; then
 fallocate -l 1G /swapfile
 dd if=/dev/zero of=/swapfile bs=1k count=1024k status=progress
 chmod 600 /swapfile
