@@ -10,8 +10,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 preInstall(){
-checkSWAP=`swapon --show`
-if [[ -z "$checkSWAP" ]]; then
+if [[ $(free -m | awk 'NR==3{print$1}') != "Swap:" ]]; then
 fallocate -l 1G /swapfile
 dd if=/dev/zero of=/swapfile bs=1k count=1024k status=progress
 chmod 600 /swapfile
@@ -20,7 +19,6 @@ swapon /swapfile
 sed -i "/swapfile/d" /etc/fstab
 echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
 echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
-update-initramfs -u
 fi
 
 systemctl mask --now systemd-resolved  >/dev/null 2>&1
