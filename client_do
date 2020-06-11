@@ -1115,7 +1115,7 @@ cat << "EOF" > /usr/local/bin/Q2H
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+/usr/local/bin/ui-saveListBW >/dev/null 2>&1
 EOF
 chmod +x /usr/local/bin/Q2H
 
