@@ -642,9 +642,9 @@ nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
 
-(curl -Is  google.com | head -n 1) >/dev/null 2>&1
+(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
 echo ""
-if [[ $(curl -Is  google.com | head -n 1) =~ "HTTP" ]]; then
+if [[ $(curl -Is  http://www.google.com/ncr | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
