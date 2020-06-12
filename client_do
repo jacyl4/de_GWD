@@ -732,7 +732,7 @@ php_admin_value[memory_limit] = 512M
 EOF
 
 sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
-sed -i "/disable_functions =/c\disable_functions = pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals," /etc/php/7.4/fpm/php.ini
+sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
 sed -i "/^upload_max_filesize/c\upload_max_filesize = 1G" /etc/php/7.4/fpm/php.ini
 sed -i "/^post_max_size/c\post_max_size = 1G" /etc/php/7.4/fpm/php.ini
 sed -i "/^max_input_time/c\max_input_time = 3600" /etc/php/7.4/fpm/php.ini
