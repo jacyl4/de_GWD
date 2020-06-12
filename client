@@ -648,16 +648,16 @@ EOF
 systemctl daemon-reload
 systemctl enable iptables-proxy
 
-output=`systemctl restart iptables-proxy`
-output=`systemctl restart v2dns`
-output=`systemctl restart vtrui`
-
 rm -rf /etc/resolv.conf
 cat << EOF > /etc/resolv.conf
 nameserver 127.0.0.1
 nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
+
+output=`systemctl restart iptables-proxy`
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
 
 (curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
 echo ""
