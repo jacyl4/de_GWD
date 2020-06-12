@@ -6,11 +6,13 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
+
 branch="master"
 
 installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)"
 
 mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
+
 
 
 clifwd_iptablesProxy(){
@@ -28,9 +30,9 @@ sed -i "/udp --dport 5390/a$addRule4" /usr/local/bin/iptables-proxy-up
 sed -i "/udp --dport 5390/a$addRule3" /usr/local/bin/iptables-proxy-up
 
 systemctl daemon-reload >/dev/null 2>&1
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
+output=`systemctl restart iptables-proxy`
 sleep 3
 }
 
@@ -346,17 +348,14 @@ mv -f ~/h2y.dat /usr/local/bin/v2dns/h2y.dat
 fi
 
 wget --no-check-certificate -c https://bgp.space/china.html
+if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
 sed -i '1,/BEGIN/d' ~/china.html
 sed -i '/END/,$d' ~/china.html
 sed -i 's/<br>//g' ~/china.html
-if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
 mv -f ~/china.html /usr/local/bin/chnroute.txt
-{
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
- echo "add chnroute $chnroute"
-done
-} > /usr/local/bin/IPchnroute
+cp -f /usr/local/bin/chnroute.txt /usr/local/bin/IPchnroute
+sed -i 's/^/add chnroute &/g' /usr/local/bin/IPchnroute
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/IPchnroute
 
 ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
@@ -407,9 +406,9 @@ if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
 else
   output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
 fi
-output=`systemctl restart iptables-proxy >/dev/null 2>&1`
-output=`systemctl restart v2dns >/dev/null 2>&1`
-output=`systemctl restart vtrui >/dev/null 2>&1`
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
+output=`systemctl restart iptables-proxy`
 
 
 cat << "EOF" > /usr/local/bin/Q2H
@@ -672,9 +671,9 @@ nameserver 8.8.8.8
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
+output=`systemctl restart iptables-proxy`
 sleep 3
 
 installPihole
@@ -689,9 +688,9 @@ if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
 else
   output=`/usr/local/bin/ui-changeNLchnw`
 fi
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
+output=`systemctl restart iptables-proxy`
 
 if [[ ! -d "/var/www/html/gwd" ]]; then
 mkdir -p /var/www/html/gwd

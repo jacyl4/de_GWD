@@ -4,6 +4,10 @@ blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+statuSuccess=$(green "[ OK ]")
+statusFailed=$(red "[ failed ]")
+
+
 
 branch="master"
 
@@ -19,8 +23,7 @@ case $(uname -m) in
     aarch64)  architecture="arm64" ;;
 esac
 
-statuSuccess=$(green "[ OK ]")
-statusFailed=$(red "[ failed ]")
+
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -113,7 +116,7 @@ net.ipv4.conf.default.secure_redirects = 1
 net.ipv4.conf.all.accept_source_route = 1
 net.ipv4.conf.default.accept_source_route = 1
 net.ipv4.ip_forward = 1
-net.ipv4.ip_local_port_range = 1025 65535
+net.ipv4.ip_local_port_range = 1024 65535
 net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_fastopen_blackhole_timeout_sec = 0
@@ -399,7 +402,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
 Restart=always
 RestartSec=2
@@ -412,6 +415,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable v2dns
+systemctl restart v2dns
 
 cat << EOF > /usr/local/bin/vtrui/config.json
 {
@@ -474,7 +478,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
 Restart=always
 RestartSec=2
@@ -487,7 +491,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable vtrui
-
+systemctl restart vtrui
 rm -rf /usr/bin/vtrui
 }
 
@@ -500,9 +504,9 @@ touch /usr/local/bin/IPlistW
 touch /usr/local/bin/IPlistBlan
 touch /usr/local/bin/IPlistWlan
 
-echo $doh1IP >> /usr/local/bin/IPdoh
+echo $doh1IP > /usr/local/bin/IPdoh
 echo $doh2IP >> /usr/local/bin/IPdoh
-echo $domainIP >> /usr/local/bin/IPlistW
+echo $domainIP > /usr/local/bin/IPlistW
 
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
@@ -632,7 +636,6 @@ chmod +x /usr/local/bin/iptables-proxy-down
 cat << EOF > /lib/systemd/system/iptables-proxy.service
 [Unit]
 Description=iptables-proxy
-After=network.target
 
 [Service]
 User=root
@@ -656,8 +659,6 @@ nameserver 8.8.8.8
 EOF
 
 output=`systemctl restart iptables-proxy`
-output=`systemctl restart v2dns`
-output=`systemctl restart vtrui`
 
 (curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
 echo ""
@@ -830,17 +831,14 @@ mv -f ~/h2y.dat /usr/local/bin/v2dns/h2y.dat
 fi
 
 wget --no-check-certificate -c https://bgp.space/china.html
+if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
 sed -i '1,/BEGIN/d' ~/china.html
 sed -i '/END/,$d' ~/china.html
 sed -i 's/<br>//g' ~/china.html
-if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
 mv -f ~/china.html /usr/local/bin/chnroute.txt
-{
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
- echo "add chnroute $chnroute"
-done
-} > /usr/local/bin/IPchnroute
+cp -f /usr/local/bin/chnroute.txt /usr/local/bin/IPchnroute
+sed -i 's/^/add chnroute &/g' /usr/local/bin/IPchnroute
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/IPchnroute
 
 ipset -F chnroute
 for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
@@ -889,9 +887,9 @@ if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
 else
   output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
 fi
-output=`systemctl restart iptables-proxy >/dev/null 2>&1`
-output=`systemctl restart v2dns >/dev/null 2>&1`
-output=`systemctl restart vtrui >/dev/null 2>&1`
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
+output=`systemctl restart iptables-proxy`
 
 
 cat << "EOF" > /usr/local/bin/Q2H
@@ -991,12 +989,9 @@ sed -i '1,/BEGIN/d' ~/china.html
 sed -i '/END/,$d' ~/china.html
 sed -i 's/<br>//g' ~/china.html
 mv -f ~/china.html /usr/local/bin/chnroute.txt
-{
-echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535"
-for chnroute in $(cat /usr/local/bin/chnroute.txt) ; do
- echo "add chnroute $chnroute"
-done
-} > /usr/local/bin/IPchnroute
+cp -f /usr/local/bin/chnroute.txt /usr/local/bin/IPchnroute
+sed -i 's/^/add chnroute &/g' /usr/local/bin/IPchnroute
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/IPchnroute
 
 installIptablesProxy
 
@@ -1107,9 +1102,9 @@ nameserver 8.8.8.8
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
+output=`systemctl restart iptables-proxy`
 sleep 3
 
 installPihole
@@ -1129,9 +1124,9 @@ fi
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 output=`/usr/local/bin/ui-dhcpUP`
 fi
-systemctl restart iptables-proxy
-systemctl restart v2dns
-systemctl restart vtrui
+output=`systemctl restart v2dns`
+output=`systemctl restart vtrui`
+output=`systemctl restart iptables-proxy`
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
