@@ -1087,7 +1087,6 @@ fi
 cat >> /usr/local/bin/vtrui/config.json << EOF
   "outbounds": [
     {
-    "mux":{"enabled":true},
     "protocol":"vmess",
     "settings":{"vnext":[{
       "address":"$domain",
