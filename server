@@ -346,7 +346,7 @@ rm -rf ~/vtrui*
 
 cat << EOF > /usr/local/bin/vtrui/config.json
 {
-  "dns":{"servers":["127.0.0.1"]},
+  "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
   "inbounds": [
     {
     "port":11811,

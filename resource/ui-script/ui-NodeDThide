@@ -6,6 +6,7 @@ v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
 cat > /usr/local/bin/vtrui/config.json << EOF
 {
+  "dns":{"servers":[{"address":"127.0.0.1","port":5310}]},
   "inbounds":[
     {
     "port":9896,
