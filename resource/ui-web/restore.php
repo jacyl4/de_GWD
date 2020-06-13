@@ -31,8 +31,8 @@ exec('sudo /usr/local/bin/ui-markThis');
 }
 
 exec('sudo systemctl restart iptables-proxy');
-exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart v2dns');
+exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart vtrui');
 
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
