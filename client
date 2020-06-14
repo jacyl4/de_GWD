@@ -689,7 +689,7 @@ fi
 
 apt update && apt upgrade && apt autoremove && apt autoclean
 
-apt install php-common php-cgi php-sqlite3 resolvconf
+apt install resolvconf
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers

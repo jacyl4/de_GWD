@@ -1,6 +1,8 @@
 #!/bin/bash
 if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
 	echo "installed"
+elif [[ $(uname -m) = "aarch64" ]] && [[ -d "/lib/modules/$(uname -r | awk NR==1)/kernel/net/wireguard" ]]; then
+	echo "installed"
 else
 	echo "not installed"
 fi
