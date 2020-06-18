@@ -317,9 +317,9 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
-Restart=on-failure
+Restart=always
+RestartSec=2
 StartLimitBurst=0
-TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -395,11 +395,11 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
-Restart=on-failure
+Restart=always
+RestartSec=2
 StartLimitBurst=0
-TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
