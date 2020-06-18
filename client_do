@@ -219,10 +219,12 @@ Type=forking
 LimitNPROC=64000
 LimitNOFILE=1000000
 EnvironmentFile=/etc/default/smartdns
+ExecStartPost=/bin/sh -c "echo $MAINPID > /run/smartdns.pid"
 ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
 KillMode=mixed
-Restart=always
-RestartSec=2
+Restart=on-failure
+StartLimitBurst=0
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -310,8 +312,9 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
-Restart=always
-RestartSec=2
+Restart=on-failure
+StartLimitBurst=0
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -386,8 +389,7 @@ LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
-Restart=always
-RestartSec=2
+Restart=on-failure
 StartLimitBurst=0
 TimeoutSec=5
 
@@ -463,8 +465,7 @@ LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
-Restart=always
-RestartSec=2
+Restart=on-failure
 StartLimitBurst=0
 TimeoutSec=5
 
@@ -768,8 +769,9 @@ Type=notify
 PIDFile=/run/php/php-fpm.pid
 ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
-Restart=always
-RestartSec=2
+Restart=on-failure
+StartLimitBurst=0
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target

@@ -89,8 +89,9 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
-Restart=always
-RestartSec=2
+Restart=on-failure
+StartLimitBurst=0
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -322,12 +323,15 @@ User=root
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/ui-update
+ExecStop=/bin/kill -9 \$MAINPID
+KillMode=process
 StartLimitBurst=0
 TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
 systemctl daemon-reload >/dev/null 2>&1
 }
 
