@@ -355,20 +355,14 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 },
 "inbounds":[
   {
-  "tag":"dnsin",
   "port":53,
   "protocol":"dokodemo-door",
   "settings":{"network":"tcp,udp","address":"1.1.1.1","port":53}
   }
 ],
 "outbounds":[
-  {"tag":"dnsout","protocol":"dns"}
-],
-"routing": {
-  "rules": [
-    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
-  ]
-}
+  {"protocol":"dns"}
+]
 }
 EOF
 
