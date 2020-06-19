@@ -25,7 +25,7 @@
         if ($GWDpwhash = $_COOKIE["persistentlogin"])
         {
             $auth = true;
-            setcookie('persistentlogin', $GWDpwhash, time()+60*60*24*7);
+            setcookie('persistentlogin', $GWDpwhash, time()+60*60*24*7, '/; samesite=strict');
         }
         else
         {
