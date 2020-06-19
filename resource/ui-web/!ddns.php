@@ -122,7 +122,6 @@
           </div>
 
           <div class="card-body">
-  <div class="form-group">
     <div class="form-row">
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend w-25">
@@ -154,7 +153,6 @@
           <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfEmail ?>">
       </div>
     </div>
-  </div>
           </div>
         </div>
 
