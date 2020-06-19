@@ -87,13 +87,8 @@
           <span>注销</span></a>
       </li>
     </ul>
-<script>
-function logout () {
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
-</script>
 
-    <div id="content-wrapper">
+    <div id="content-wrapper" class="mx-auto" style="max-width: 1600px;">
 
       <div class="container-fluid">
 
@@ -215,6 +210,10 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
   </div>
   <!-- /#wrapper -->
 <script>
+function logout () {
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+}
+
 function saveNode() {
 nodename1=$("#nodename1").val();
 nodename2=$("#nodename2").val();

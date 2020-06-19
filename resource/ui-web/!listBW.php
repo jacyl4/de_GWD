@@ -86,13 +86,8 @@
           <span>注销</span></a>
       </li>
     </ul>
-<script>
-function logout () {
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
-</script>
 
-    <div id="content-wrapper">
+    <div id="content-wrapper" class="mx-auto" style="max-width: 1600px;">
 
       <div class="container-fluid">
 
@@ -165,16 +160,6 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 </div>
 
 
-<script>
-function submitlistBW () {
-listB=$("#listB").val();
-listW=$("#listW").val();
-listBlan=$("#listBlan").val();
-listWlan=$("#listWlan").val();
-$.get("saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){window.location.reload();});
-alert("提交黑白名单。。。");
-}
-</script>
           </div>
           </div>
 
@@ -196,6 +181,19 @@ alert("提交黑白名单。。。");
   </div>
   <!-- /#wrapper -->
 <script> 
+function logout(){
+$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+}
+
+function submitlistBW () {
+listB=$("#listB").val();
+listW=$("#listW").val();
+listBlan=$("#listBlan").val();
+listWlan=$("#listWlan").val();
+$.get("saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){window.location.reload();});
+alert("提交黑白名单。。。");
+}
+
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
