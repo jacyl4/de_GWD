@@ -1,6 +1,15 @@
 #!/bin/bash
-jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listBpre2
-jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listWpre2
+if [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	jq -r '.listB[]' /usr/local/bin/0conf >/tmp/listBpre2
+elif [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listBpre2
+fi
+
+if [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	jq -r '.listW[]' /usr/local/bin/0conf >/tmp/listWpre2
+elif [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listWpre2
+fi
 
 sort /tmp/listBpre2 | uniq | sed '/^\s*$/d' >/tmp/listBpre
 
