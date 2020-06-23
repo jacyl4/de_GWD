@@ -777,6 +777,7 @@ svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui
 rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html
 rm -rf ~/ui-*
+rm -rf ~/ui_*
 
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
 mv -f ~/version.php /var/www/html/version.php
@@ -821,7 +822,7 @@ postInstall(){
 /usr/local/bin/ui_2h
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-output=`systemctl restart smartdns >/dev/null 2>&1`
+systemctl restart smartdns
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`

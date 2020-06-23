@@ -267,6 +267,7 @@ done
 rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html/gwd
 rm -rf ~/ui-*
+rm -rf ~/ui_*
 
 cat << "EOF" >/tmp/vtruiConfADD
 clifwd_v2path=$(jq -r '.clifwd.clifwd_v2path' /usr/local/bin/0conf)
@@ -340,7 +341,7 @@ clifwd_PostInstall(){
 /usr/local/bin/ui_2h
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-output=`systemctl restart smartdns >/dev/null 2>&1`
+systemctl restart smartdns
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
