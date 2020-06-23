@@ -4,7 +4,8 @@ hwclock -w
 
 
 
-jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp
+jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp2
+sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
 
 cat /dev/null >/usr/local/bin/IPv2node
 ipset -F v2node
