@@ -238,8 +238,8 @@ rm -rf /usr/local/bin/doh-client
 
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
-doh1IP=$(nslookup $doh1Domain 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
-doh2IP=$(nslookup $doh2Domain 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 unzip ~/doh.zip -d ~/
