@@ -27,7 +27,7 @@ lanip="0.0.0.0/8 \
 223.5.5.5/32 \
 223.6.6.6/32"
 
-ipset -R < /usr/local/bin/IPchnroute
+ipset -R < /usr/local/bin/chnrouteSET
 
 ipset -N lanip hash:net family inet hashsize 2048 maxelem 65535
 for iplanip in \$lanip; do

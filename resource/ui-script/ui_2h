@@ -2,4 +2,24 @@
 date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-/usr/local/bin/ui-saveListBW
+if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
+  output=`/usr/local/bin/ui-changeNLgfw`
+else
+  output=`/usr/local/bin/ui-changeNLchnw`
+fi
+  output=`/usr/local/bin/ui-saveListBW`
+
+ipset -F v2node
+for IPv2node in $(cat /usr/local/bin/IPv2node); do
+  ipset add v2node $IPv2node
+done
+
+ipset -F listB
+for iplistB in $(cat /usr/local/bin/IPlistB); do
+  ipset add listB $iplistB
+done
+
+ipset -F listW
+for iplistW in $(cat /usr/local/bin/IPlistW); do
+  ipset add listW $iplistW
+done
