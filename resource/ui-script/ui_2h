@@ -11,7 +11,7 @@ ipset -F v2node
 
 cat /tmp/v2node_temp | while read line 
 do
-	ipv2node=$(nslookup -port=5380 $line | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	ipv2node=$(nslookup -port=5380 $line 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 	echo $ipv2node >>/usr/local/bin/IPv2node
 	ipset add v2node $ipv2node
 done

@@ -31,8 +31,8 @@ doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 
-doh1IP=$(nslookup -port=5310 $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
-doh2IP=$(nslookup -port=5310 $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh1IP=$(nslookup -port=5310 $doh1Domain 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh2IP=$(nslookup -port=5310 $doh2Domain 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 doh_upstream1='url = "https:\/\/'$doh1'"'
 doh_upstream2='url = "https:\/\/'$doh2'"'
