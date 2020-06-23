@@ -44,6 +44,7 @@ if ( $data['DNSsplit'] === "gfw" ){
 	exec('sudo /usr/local/bin/ui-changeNLchnw');
 }
 
+exec('sudo /usr/local/bin/ui-saveListBW');
 exec('sudo systemctl restart v2dns');
 exec('sudo systemctl restart doh-client');
 exec('sudo systemctl restart iptables-proxy');
