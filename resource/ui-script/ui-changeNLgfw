@@ -48,11 +48,12 @@ echo $doh2IP >>/usr/local/bin/IPdoh
 
 
 cat /dev/null >/usr/local/bin/IPv2node
-jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp
+jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp2
+sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
 cat /tmp/v2node_temp | while read line 
 do
   key=$line
-  value=$(nslookup -port=5380 $line | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+  value=$(nslookup -port=5380 $line 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 echo $value >>/usr/local/bin/IPv2node
 jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 done
