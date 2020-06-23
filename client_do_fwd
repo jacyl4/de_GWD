@@ -237,6 +237,7 @@ jacyl4/nginx_tls1.3:latest
 
 clifwd_installWebUI(){
 rm -rf /usr/local/bin/ui-*
+rm -rf /usr/local/bin/ui_*
 rm -rf /var/www/html/gwd/*.php
 rm -rf /var/www/html/gwd/vendor
 rm -rf /var/www/html/gwd/css

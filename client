@@ -764,6 +764,7 @@ pihole restartdns
 
 installWebUI(){
 rm -rf /usr/local/bin/ui-*
+rm -rf /usr/local/bin/ui_*
 rm -rf /var/www/html/*.php
 rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
