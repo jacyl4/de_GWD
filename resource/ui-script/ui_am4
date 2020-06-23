@@ -1,0 +1,23 @@
+#!/bin/bash
+cd ~
+wget --no-check-certificate -c https://raw.githubusercontent.com/v2ray/domain-list-community/release/dlc.dat
+if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 240000 ]; then
+mv -f ~/dlc.dat /usr/local/bin/v2dns/geosite.dat
+fi
+
+wget --no-check-certificate -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
+if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 240000 ]; then
+mv -f ~/h2y.dat /usr/local/bin/v2dns/h2y.dat
+fi
+
+curl https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt > /usr/local/bin/chnroute.txt
+if [ $(ls -l /usr/local/bin/chnroute.txt | awk '{print$5}') -gt 80000 ]; then
+cp -f /usr/local/bin/chnroute.txt /usr/local/bin/IPchnroute
+sed -i 's/^/add chnroute &/g' /usr/local/bin/IPchnroute
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/IPchnroute
+
+ipset -F chnroute
+for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
+  ipset add chnroute $ipchnroute >/dev/null 2>&1
+done
+fi

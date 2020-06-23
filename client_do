@@ -240,7 +240,6 @@ doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
-domainIP=$(nslookup $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 
 wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
 unzip ~/doh.zip -d ~/
@@ -362,8 +361,10 @@ cat << EOF > /usr/local/bin/v2dns/config.json
 }
 EOF
 
+domainIP=$(nslookup -port=5380 $domain | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
-jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
+jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 
 cat << "EOF" > /lib/systemd/system/v2dns.service
 [Unit]
@@ -471,6 +472,7 @@ rm -rf /usr/bin/vtrui
 
 installIptablesProxy(){
 touch /usr/local/bin/IPdoh
+touch /usr/local/bin/IPv2node
 touch /usr/local/bin/IPlistB
 touch /usr/local/bin/IPlistW
 touch /usr/local/bin/IPlistBlan
@@ -478,13 +480,14 @@ touch /usr/local/bin/IPlistWlan
 
 echo $doh1IP > /usr/local/bin/IPdoh
 echo $doh2IP >> /usr/local/bin/IPdoh
-echo $domainIP > /usr/local/bin/IPlistW
+echo $domainIP > /usr/local/bin/IPv2node
 
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
 ipset -X lanip
 ipset -X doh
+ipset -X v2node
 ipset -X listB
 ipset -X listW
 ipset -X listBlan
@@ -515,6 +518,11 @@ done
 ipset -N doh hash:net family inet hashsize 2048 maxelem 65535
 for ipdoh in \$(cat /usr/local/bin/IPdoh); do
   ipset add doh \$ipdoh
+done
+
+ipset -N v2node hash:net family inet hashsize 2048 maxelem 65535
+for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+  ipset add v2node \$IPv2node
 done
 
 ipset -N listB hash:net family inet hashsize 2048 maxelem 65535
@@ -560,6 +568,7 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
@@ -596,6 +605,7 @@ iptables -X
 ipset -F chnroute
 ipset -F lanip
 ipset -F doh
+ipset -F v2node
 ipset -F listB
 ipset -F listW
 ipset -F listBlan
@@ -1020,56 +1030,8 @@ systemctl daemon-reload >/dev/null 2>&1
 
 
 postInstall(){
-cat << "EOF" > /usr/local/bin/Q4am
-#!/bin/bash
-cd ~
-wget --no-check-certificate -c https://raw.githubusercontent.com/v2ray/domain-list-community/release/dlc.dat
-if [ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 240000 ]; then
-mv -f ~/dlc.dat /usr/local/bin/v2dns/geosite.dat
-fi
-
-wget --no-check-certificate -c https://raw.githubusercontent.com/ToutyRater/V2Ray-SiteDAT/master/geofiles/h2y.dat
-if [ $(ls -l ~/h2y.dat | awk '{print$5}') -gt 240000 ]; then
-mv -f ~/h2y.dat /usr/local/bin/v2dns/h2y.dat
-fi
-
-wget --no-check-certificate -c https://bgp.space/china.html
-if [ $(ls -l ~/china.html | awk '{print$5}') -gt 50000 ]; then
-sed -i '1,/BEGIN/d' ~/china.html
-sed -i '/END/,$d' ~/china.html
-sed -i 's/<br>//g' ~/china.html
-mv -f ~/china.html /usr/local/bin/chnroute.txt
-cp -f /usr/local/bin/chnroute.txt /usr/local/bin/IPchnroute
-sed -i 's/^/add chnroute &/g' /usr/local/bin/IPchnroute
-sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/IPchnroute
-
-ipset -F chnroute
-for ipchnroute in $(cat /usr/local/bin/chnroute.txt); do
-  ipset add chnroute $ipchnroute >/dev/null 2>&1
-done
-fi
-EOF
-chmod +x /usr/local/bin/Q4am
-/usr/local/bin/Q4am
-
-cat << "EOF" > /usr/local/bin/Q4H
-#!/bin/bash
-rm -rf ~/client*
-rm -rf /var/log/*1*
-rm -rf /var/log/*2*
-rm -rf /var/log/*.gz
-rm -rf /tmp/nodecheck*
-rm -rf /var/www/html/log.log
-
-if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
-cd /lib/modules/
-rm -rf $(ls | grep -v $(uname -r | awk NR==1))
-fi
-
-rm -rf /usr/local/bin/chnrouteset
-EOF
-chmod +x /usr/local/bin/Q4H
-/usr/local/bin/Q4H
+/usr/local/bin/ui_am4
+/usr/local/bin/ui_4h
 
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
@@ -1095,23 +1057,17 @@ output=`systemctl restart vtrui`
 output=`systemctl restart iptables-proxy`
 
 
-cat << "EOF" > /usr/local/bin/Q2H
-#!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
-/usr/local/bin/ui-saveListBW >/dev/null 2>&1
-EOF
-chmod +x /usr/local/bin/Q2H
-
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
 cat << EOF >> ~/now.cron
-0 4 * * * /usr/local/bin/Q4am
-0 */4 * * * /usr/local/bin/Q4H
-0 */2 * * * /usr/local/bin/Q2H
+0 4 * * * /usr/local/bin/ui_am4
+0 */4 * * * /usr/local/bin/ui_4h
+0 */2 * * * /usr/local/bin/ui_2h
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1356,6 +1312,10 @@ jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
 jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
 jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
+rm -rf /usr/local/bin/Q4am
+rm -rf /usr/local/bin/Q4H
+rm -rf /usr/local/bin/Q2H
+
 
 cd ~
 source /etc/profile

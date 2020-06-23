@@ -81,9 +81,14 @@ $data['v2node'][8]['path'] = $path9;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-exec('sudo /usr/local/bin/ui-saveListBW');
+$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+if ( $data['DNSsplit'] === "gfw" ){
+	exec('sudo /usr/local/bin/ui-changeNLgfw');
+} else {
+	exec('sudo /usr/local/bin/ui-changeNLchnw');
+}
+
 exec('sudo systemctl restart v2dns');
-exec('sudo systemctl restart vtrui');
 exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

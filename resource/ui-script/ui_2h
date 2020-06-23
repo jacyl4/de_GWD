@@ -1,0 +1,20 @@
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+
+
+jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp
+
+cat /dev/null >/usr/local/bin/IPv2node
+ipset -F v2node
+
+cat /tmp/v2node_temp | while read line 
+do
+	ipv2node=$(nslookup -port=5380 $line | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+	echo $ipv2node >>/usr/local/bin/IPv2node
+	ipset add v2node $ipv2node
+done
+
+
+/usr/local/bin/ui-saveListBW

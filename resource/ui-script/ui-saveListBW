@@ -22,7 +22,7 @@ else
 	cat /dev/null > /usr/local/bin/IPlistB
 	cat /tmp/listBpre | while read listB 
 	do
-		jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+		jq --arg listB "domain:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 		listBIP=$(nslookup -port=5380 $listB | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
 		echo $listBIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistB
 		jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
@@ -32,7 +32,6 @@ else
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
-jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >>/tmp/listWpre2
 sort /tmp/listWpre2 | uniq | sed '/^\s*$/d' >/tmp/listWpre
 
 cat /dev/null >/usr/local/bin/IPlistW
@@ -44,9 +43,9 @@ else
 	cat /dev/null > /usr/local/bin/IPlistW
 	cat /tmp/listWpre | while read listW
 	do
-		jq --arg listW "keyword:$listW" '.dns.servers[2].domains+=[$listW]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+		jq --arg listW "domain:$listW" '.dns.servers[2].domains+=[$listW]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
 		listWIP=$(nslookup -port=5310 $listW | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
-		echo $listWIP |sed 's/ /\n/g ' >> /usr/local/bin/IPlistW
+		echo $listWIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistW
 		jq -n --arg listWIP "$listWIP" '$listWIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWIPs
 		jq --arg key "$listW" --slurpfile value /tmp/listWIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
 	done
