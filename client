@@ -499,7 +499,6 @@ echo $doh1IP > /usr/local/bin/IPdoh
 echo $doh2IP >> /usr/local/bin/IPdoh
 echo $domainIP > /usr/local/bin/IPv2node
 
-rm -rf /usr/local/bin/iptables-proxy-up
 cat << EOF > /usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
@@ -611,7 +610,6 @@ fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
-rm -rf /usr/local/bin/iptables-proxy-down
 cat << EOF > /usr/local/bin/iptables-proxy-down
 #!/bin/bash
 iptables -t mangle -F

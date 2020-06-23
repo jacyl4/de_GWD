@@ -7,6 +7,7 @@ cat << EOF > /usr/local/bin/iptables-proxy-up
 ipset -X chnroute
 ipset -X lanip
 ipset -X doh
+ipset -X v2node
 ipset -X listB
 ipset -X listW
 ipset -X listBlan
@@ -35,8 +36,13 @@ for iplanip in \$lanip; do
 done
 
 ipset -N doh hash:net family inet hashsize 2048 maxelem 65535
-for ipdoh in \$(cat /usr/local/bin/IPdoh); do
-  ipset add doh \$ipdoh
+for IPdoh in \$(cat /usr/local/bin/IPdoh); do
+  ipset add doh \$IPdoh
+done
+
+ipset -N v2node hash:net family inet hashsize 2048 maxelem 65535
+for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+  ipset add v2node \$IPv2node
 done
 
 ipset -N listB hash:net family inet hashsize 2048 maxelem 65535
@@ -82,6 +88,7 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
@@ -109,6 +116,29 @@ iptables -t nat -I POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
 fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
+
+cat << EOF > /usr/local/bin/iptables-proxy-down
+#!/bin/bash
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -F
+iptables -X
+
+ipset -F chnroute
+ipset -F lanip
+ipset -F doh
+ipset -F v2node
+ipset -F listB
+ipset -F listW
+ipset -F listBlan
+ipset -F listWlan
+
+ip route flush table 100
+ip rule del fwmark 0x9
+EOF
+chmod +x /usr/local/bin/iptables-proxy-down
 
 jq '.address.udp="on"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
