@@ -1034,7 +1034,7 @@ postInstall(){
 /usr/local/bin/ui_2h
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-systemctl restart smartdns
+output=`systemctl restart smartdns`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
