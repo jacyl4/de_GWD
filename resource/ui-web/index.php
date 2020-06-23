@@ -437,7 +437,7 @@
                   静态解析<br>
                   </span>
                 </div>
-                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
+                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6" placeholder="IP 空格 域名"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
                 </div>
               </div>
             </div>

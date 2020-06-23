@@ -4,7 +4,6 @@
 $DoH1 = $_GET['DoH1'];
 $DoH2 = $_GET['DoH2'];
 $dnsChina = $_GET['dnsChina'];
-$dnsChinaLine = str_replace(PHP_EOL, ' ', $dnsChina);
 
 $hostsCustomize = $_GET['hostsCustomize'];
 $hostsCustomize = str_replace("\t", ' ', $hostsCustomize);
@@ -18,6 +17,7 @@ foreach($arr as $k=>$v){
 }
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$dnsChinaLine = str_replace(PHP_EOL, ' ', $dnsChina);
 $data['dns']['china'] = $dnsChinaLine;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);

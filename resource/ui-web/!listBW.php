@@ -118,7 +118,7 @@
             黑名单域名（走国外线路）<br>
             </span>
           </div>
-            <textarea id="listB" class="form-control" aria-label="listB" rows="32" placeholder="xxoo.com"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listB'] as $k => $v) {echo "$k\n";} ?></textarea>
+            <textarea id="listB" class="form-control" aria-label="listB" rows="32" placeholder="域名"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listB'] as $k => $v) {echo "$k\n";} ?></textarea>
           </div>
           </div>
 
@@ -129,7 +129,7 @@
             白名单域名（走国内线路）<br>
             </span>
           </div>
-            <textarea id="listW" class="form-control" aria-label="listW" rows="32" placeholder="xxoo.com"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listW'] as $k => $v) {echo "$k\n";} ?></textarea>
+            <textarea id="listW" class="form-control" aria-label="listW" rows="32" placeholder="域名"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listW'] as $k => $v) {echo "$k\n";} ?></textarea>
           </div>
           </div>
 
@@ -140,7 +140,7 @@
             内网设备 黑名单IP（全局走国外线路）<br>
             </span>
           </div>
-            <textarea id="listBlan" class="form-control" aria-label="listBlan" rows="32" placeholder="0.0.0.0"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listBlan'] as $k => $v) {echo "$v\n";} ?></textarea>
+            <textarea id="listBlan" class="form-control" aria-label="listBlan" rows="32" placeholder="IP"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listBlan'] as $k => $v) {echo "$v\n";} ?></textarea>
           </div>
           </div>
 
@@ -151,7 +151,7 @@
             内网设备 白名单IP（全局走国内线路）<br>
             </span>
           </div>
-            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="32" placeholder="0.0.0.0"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listWlan'] as $k => $v) {echo "$v\n";} ?></textarea>
+            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="32" placeholder="IP"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['listWlan'] as $k => $v) {echo "$v\n";} ?></textarea>
           </div>
           </div>
 <span class="float-left text-secondary">
