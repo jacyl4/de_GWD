@@ -336,7 +336,6 @@ systemctl daemon-reload >/dev/null 2>&1
 
 clifwd_PostInstall(){
 /usr/local/bin/ui_am4
-/usr/local/bin/ui_4h
 
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
@@ -376,6 +375,7 @@ EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
 /usr/local/bin/ui_2h
+/usr/local/bin/ui_4h
 }
 
 
