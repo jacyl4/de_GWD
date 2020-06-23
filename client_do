@@ -698,9 +698,6 @@ cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
 pid = /run/php/php-fpm.pid
 error_log = /var/log/php-fpm.log
 
-emergency_restart_threshold = 10
-emergency_restart_interval = 1m
-
 include=/etc/php/7.4/fpm/pool.d/*.conf
 EOF
 
@@ -718,7 +715,7 @@ pm.max_children = 50
 pm.start_servers = 12
 pm.min_spare_servers = 12
 pm.max_spare_servers = 24
-pm.max_requests = 500
+pm.max_requests = 1000
 
 catch_workers_output = yes
 clear_env = no
