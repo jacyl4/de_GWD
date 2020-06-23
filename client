@@ -821,7 +821,6 @@ postInstall(){
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
 output=`systemctl restart smartdns >/dev/null 2>&1`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
   output=`/usr/local/bin/ui-changeNLgfw`
 else
@@ -840,7 +839,6 @@ output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
 output=`systemctl restart iptables-proxy`
 
-
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
@@ -855,6 +853,7 @@ cat << EOF >> ~/now.cron
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
+/usr/local/bin/ui_2h
 }
 
 
