@@ -123,6 +123,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     }
   ],
   "routing": {
+    "domainStrategy": "AsIs",
     "rules": [
       {
         "type": "field",
