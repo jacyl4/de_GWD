@@ -409,7 +409,7 @@ systemctl restart v2dns
 
 cat << EOF > /usr/local/bin/vtrui/config.json
 {
-"dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+"dns":{"servers":[{"localhost"}]},
 "inbounds":[
   {
     "port":9896,
