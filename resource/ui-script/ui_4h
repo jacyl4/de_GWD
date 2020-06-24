@@ -11,4 +11,15 @@ cd /lib/modules/
 rm -rf $(ls | grep -v $(uname -r | awk NR==1))
 fi
 
-rm -rf /usr/local/bin/chnrouteset
+
+
+if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
+  /usr/local/bin/ui-changeNLgfw
+else
+  /usr/local/bin/ui-changeNLchnw
+fi
+
+ipset -F v2node
+for IPv2node in $(cat /usr/local/bin/IPv2node); do
+  ipset add v2node $IPv2node
+done
