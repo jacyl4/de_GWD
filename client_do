@@ -515,22 +515,22 @@ for iplanip in \$lanip; do
   ipset add lanip \$iplanip
 done
 
-ipset -N doh hash:net family inet hashsize 2048 maxelem 65535
+ipset -N doh hash:ip family inet hashsize 2048 maxelem 65535
 for IPdoh in \$(cat /usr/local/bin/IPdoh); do
   ipset add doh \$IPdoh
 done
 
-ipset -N v2node hash:net family inet hashsize 2048 maxelem 65535
+ipset -N v2node hash:ip family inet hashsize 2048 maxelem 65535
 for IPv2node in \$(cat /usr/local/bin/IPv2node); do
   ipset add v2node \$IPv2node
 done
 
-ipset -N listB hash:net family inet hashsize 2048 maxelem 65535
+ipset -N listB hash:ip family inet hashsize 2048 maxelem 65535
 for iplistB in \$(cat /usr/local/bin/IPlistB); do
   ipset add listB \$iplistB
 done
 
-ipset -N listW hash:net family inet hashsize 2048 maxelem 65535
+ipset -N listW hash:ip family inet hashsize 2048 maxelem 65535
 for iplistW in \$(cat /usr/local/bin/IPlistW); do
   ipset add listW \$iplistW
 done
