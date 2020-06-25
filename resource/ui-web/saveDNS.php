@@ -13,7 +13,7 @@ $arr = explode("\n",$hostsCustomize);
 $arr = array_filter($arr);
 foreach($arr as $k=>$v){
         $arr = explode(',',$v);
-        $hosts[$arr[0]] = $arr[1];
+        $hosts[$arr[1]] = $arr[0];
 }
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
