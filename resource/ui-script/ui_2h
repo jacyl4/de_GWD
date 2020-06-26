@@ -7,7 +7,6 @@ rm -rf ~/client*
 rm -rf /var/log/*1*
 rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
-rm -rf /tmp/nodecheck*
 rm -rf /var/www/html/log.log
 
 if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then

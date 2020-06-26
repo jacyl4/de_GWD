@@ -1,12 +1,47 @@
 #!/bin/bash
-/usr/local/bin/ui-saveListBW
 
-if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  /usr/local/bin/ui-changeNLgfw
-else
-  /usr/local/bin/ui-changeNLchnw
+
+
+doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+doh1IP=$(nslookup -port=5310 $doh1Domain 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+doh2IP=$(nslookup -port=5310 $doh2Domain 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+jq --arg key1 "$doh1Domain" --arg value1 "$doh1IP" '.dns.hosts += {($key1): ($value1)}' /usr/local/bin/v2dns/config.json |\
+jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($value2)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+echo $doh1IP >/usr/local/bin/IPdoh
+echo $doh2IP >>/usr/local/bin/IPdoh
+
+cat /dev/null >/usr/local/bin/IPv2node
+jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp2
+sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
+cat /tmp/v2node_temp | while read line 
+do
+  key=$line
+  value=$(nslookup -port=5390 $line 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | sed '/[a-z]/d')
+echo $value >>/usr/local/bin/IPv2node
+jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+done
+
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+if [[ -n $(cat /tmp/hosts) ]]; then
+  cat /tmp/hosts | while read line 
+  do
+    key=$(echo $line | awk '{print$1}')
+    value=$(echo $line | awk '{print$2}')
+  jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+  done
 fi
 
+if [[ $(jq -r '.dns.v2ad' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-v2adADD
+else
+/usr/local/bin/ui-v2adDEL
+fi
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /usr/local/bin/0conf
 
 ipset -F v2node
 for IPv2node in $(cat /usr/local/bin/IPv2node); do
