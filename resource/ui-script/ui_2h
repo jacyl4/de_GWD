@@ -2,14 +2,16 @@
 date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-/usr/local/bin/ui-saveListBW
 
-ipset -F listB
-for iplistB in $(cat /usr/local/bin/IPlistB); do
-  ipset add listB $iplistB
-done
+rm -rf ~/client*
+rm -rf /var/log/*1*
+rm -rf /var/log/*2*
+rm -rf /var/log/*.gz
+rm -rf /tmp/nodecheck*
+rm -rf /var/www/html/log.log
 
-ipset -F listW
-for iplistW in $(cat /usr/local/bin/IPlistW); do
-  ipset add listW $iplistW
-done
+if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
+cd /lib/modules/
+rm -rf $(ls | grep -v $(uname -r | awk NR==1))
+fi
+
