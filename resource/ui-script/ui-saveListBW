@@ -72,10 +72,10 @@ fi
 
 
 if [[ -n $(awk '/listWlan/ {print;exit}' /usr/local/bin/0conf) ]]; then
-	cat /dev/null >/usr/local/bin/listWlan
+	cat /dev/null >/usr/local/bin/IPlistWlan
 	listWlan=$(jq -r '.listWlan[]' /usr/local/bin/0conf)
 	if [[ $listWlan != "null" ]] && [[ -n $listWlan ]]; then
-		echo $listWlan >/usr/local/bin/listWlan
+		echo $listWlan >/usr/local/bin/IPlistWlan
 	fi
 fi
 
