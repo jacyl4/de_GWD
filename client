@@ -858,8 +858,6 @@ cat << EOF >> ~/now.cron
 EOF
 crontab ~/now.cron
 rm -rf ~/now.cron
-/usr/local/bin/ui_2h
-/usr/local/bin/ui_4h
 }
 
 
