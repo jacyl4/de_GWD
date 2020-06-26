@@ -541,19 +541,15 @@ for iplanip in \$lanip; do
   ipset add lanip \$iplanip
 done
 
-if [[ -n \$(cat /usr/local/bin/IPdoh) ]]; then
-  ipset -N doh hash:ip family inet
-  for IPdoh in \$(cat /usr/local/bin/IPdoh); do
-    ipset add doh \$IPdoh
-  done
-fi
+ipset -N doh hash:ip family inet
+for IPdoh in \$(cat /usr/local/bin/IPdoh); do
+  ipset add doh \$IPdoh
+done
 
-if [[ -n \$(cat /usr/local/bin/IPv2node) ]]; then
-  ipset -N v2node hash:ip family inet
-  for IPv2node in \$(cat /usr/local/bin/IPv2node); do
-    ipset add v2node \$IPv2node
-  done
-fi
+ipset -N v2node hash:ip family inet
+for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+  ipset add v2node \$IPv2node
+done
 
 if [[ -n \$(cat /usr/local/bin/IPlistB) ]]; then
   ipset -N listB hash:ip family inet
