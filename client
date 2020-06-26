@@ -541,35 +541,47 @@ for iplanip in \$lanip; do
   ipset add lanip \$iplanip
 done
 
-ipset -N doh hash:ip family inet
-for IPdoh in \$(cat /usr/local/bin/IPdoh); do
-  ipset add doh \$IPdoh
-done
+if [[ -n \$(cat /usr/local/bin/IPdoh) ]]; then
+  ipset -N doh hash:ip family inet
+  for IPdoh in \$(cat /usr/local/bin/IPdoh); do
+    ipset add doh \$IPdoh
+  done
+fi
 
-ipset -N v2node hash:ip family inet
-for IPv2node in \$(cat /usr/local/bin/IPv2node); do
-  ipset add v2node \$IPv2node
-done
+if [[ -n \$(cat /usr/local/bin/IPv2node) ]]; then
+  ipset -N v2node hash:ip family inet
+  for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+    ipset add v2node \$IPv2node
+  done
+fi
 
-ipset -N listB hash:ip family inet
-for iplistB in \$(cat /usr/local/bin/IPlistB); do
-  ipset add listB \$iplistB
-done
+if [[ -n \$(cat /usr/local/bin/IPlistB) ]]; then
+  ipset -N listB hash:ip family inet
+  for iplistB in \$(cat /usr/local/bin/IPlistB); do
+    ipset add listB \$iplistB
+  done
+fi
 
-ipset -N listW hash:ip family inet
-for iplistW in \$(cat /usr/local/bin/IPlistW); do
-  ipset add listW \$iplistW
-done
+if [[ -n \$(cat /usr/local/bin/IPlistW) ]]; then
+  ipset -N listW hash:ip family inet
+  for iplistW in \$(cat /usr/local/bin/IPlistW); do
+    ipset add listW \$iplistW
+  done
+fi
 
-ipset -N listBlan hash:net family inet
-for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
-  ipset add listBlan \$iplistBlan
-done
+if [[ -n \$(cat /usr/local/bin/IPlistBlan) ]]; then
+  ipset -N listBlan hash:net family inet
+  for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
+    ipset add listBlan \$iplistBlan
+  done
+fi
 
-ipset -N listWlan hash:net family inet
-for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
-  ipset add listWlan \$iplistWlan
-done
+if [[ -n \$(cat /usr/local/bin/IPlistWlan) ]]; then
+  ipset -N listWlan hash:net family inet
+  for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
+    ipset add listWlan \$iplistWlan
+  done
+fi
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
