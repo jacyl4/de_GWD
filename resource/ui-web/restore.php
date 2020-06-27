@@ -11,7 +11,6 @@ exec('sudo /usr/local/bin/ui-restorePW');
 exec('sudo /usr/local/bin/ui-saveDNSChina');
 exec('sudo systemctl restart smartdns');
 exec('sudo /usr/local/bin/ui-NodeDThide');
-exec('sudo /usr/local/bin/ui-saveListBW');
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['DNSsplit'] === "gfw" ){
@@ -19,6 +18,7 @@ if ( $data['DNSsplit'] === "gfw" ){
 } else {
 	exec('sudo /usr/local/bin/ui-changeNLchnw');
 }
+exec('sudo /usr/local/bin/ui-saveListBW');
 
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
 {
