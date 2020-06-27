@@ -64,7 +64,7 @@ fi
 if [[ -n $(awk '/listBlan/ {print;exit}' /usr/local/bin/0conf) ]]; then
 	cat /dev/null >/usr/local/bin/IPlistBlan
 	listBlan=$(jq -r '.listBlan[]' /usr/local/bin/0conf)
-	if [[ $listBlan != "null" ]] && [[ -n $listBlan ]]; then
+	if [[ -n $listBlan ]]; then
 		echo $listBlan >/usr/local/bin/IPlistBlan
 	fi
 fi
@@ -74,7 +74,7 @@ fi
 if [[ -n $(awk '/listWlan/ {print;exit}' /usr/local/bin/0conf) ]]; then
 	cat /dev/null >/usr/local/bin/IPlistWlan
 	listWlan=$(jq -r '.listWlan[]' /usr/local/bin/0conf)
-	if [[ $listWlan != "null" ]] && [[ -n $listWlan ]]; then
+	if [[ -n $listWlan ]]; then
 		echo $listWlan >/usr/local/bin/IPlistWlan
 	fi
 fi

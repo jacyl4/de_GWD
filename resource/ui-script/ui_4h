@@ -1,4 +1,19 @@
 #!/bin/bash
+/usr/local/bin/ui-saveListBW
+
+if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
+  ipset -F listB
+  for iplistB in $(cat /usr/local/bin/IPlistB); do
+    ipset add listB $iplistB
+  done
+fi
+
+if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
+  ipset -F listW
+  for iplistW in $(cat /usr/local/bin/IPlistW); do
+    ipset add listW $iplistW
+  done
+fi
 
 
 
@@ -40,26 +55,11 @@ else
 /usr/local/bin/ui-v2adDEL
 fi
 
+ipset -F v2node
+for IPv2node in $(cat /usr/local/bin/IPv2node); do
+  ipset add v2node $IPv2node
+done
+
+
 chmod 666 /usr/local/bin/v2dns/config.json
 chmod 666 /usr/local/bin/0conf
-
-if [[ -n $(cat /usr/local/bin/IPv2node) ]]; then
-  ipset -F v2node
-  for IPv2node in $(cat /usr/local/bin/IPv2node); do
-    ipset add v2node $IPv2node
-  done
-fi
-
-if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
-  ipset -F listB
-  for iplistB in $(cat /usr/local/bin/IPlistB); do
-    ipset add listB $iplistB
-  done
-fi
-
-if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
-  ipset -F listW
-  for iplistW in $(cat /usr/local/bin/IPlistW); do
-    ipset add listW $iplistW
-  done
-fi
