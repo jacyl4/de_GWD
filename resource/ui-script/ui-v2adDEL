@@ -1,9 +1,11 @@
 #!/bin/bash
-jq 'del(.dns.hosts["geosite:category-ads"])' /usr/local/bin/v2dns/config.json | jq 'del(.dns.hosts["ext:h2y.dat:ad"])' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq 'del(.dns.hosts["geosite:category-ads"])' /usr/local/bin/v2dns/config.json | jq 'del(.dns.hosts["ext:h2y.dat:ad"])' >/tmp/v2dns_config
 
 jq 'del(.dns.v2ad)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
-rm -rf /tmp/v2dns_temp*
+if [[ -n $(cat /tmp/v2dns_config) ]]; then
+  mv -f /tmp/v2dns_config /usr/local/bin/v2dns/config.json
+fi
 
 chmod 666 /usr/local/bin/v2dns/config.json
 chmod 666 /usr/local/bin/0conf
