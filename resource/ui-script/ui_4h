@@ -27,7 +27,3 @@ if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
     ipset add listW $iplistW
   done
 fi
-
-
-chmod 666 /usr/local/bin/v2dns/config.json
-chmod 666 /usr/local/bin/0conf
