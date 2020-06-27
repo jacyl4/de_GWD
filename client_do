@@ -1053,7 +1053,7 @@ postInstall(){
 /usr/local/bin/ui_2h
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-output=`systemctl restart smartdns`
+systemctl restart smartdns
 sleep 3
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
