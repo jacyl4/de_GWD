@@ -6,7 +6,7 @@ else
 fi
 
 for IPv2node in $(cat /usr/local/bin/IPv2node); do
-  ipset add v2node $IPv2node
+  ipset add v2node $IPv2node >/dev/null 2>&1
 done
 
 
@@ -15,12 +15,12 @@ done
 
 if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
   for iplistB in $(cat /usr/local/bin/IPlistB); do
-    ipset add listB $iplistB
+    ipset add listB $iplistB >/dev/null 2>&1
   done
 fi
 
 if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
   for iplistW in $(cat /usr/local/bin/IPlistW); do
-    ipset add listW $iplistW
+    ipset add listW $iplistW >/dev/null 2>&1
   done
 fi
