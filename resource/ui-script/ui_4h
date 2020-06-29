@@ -5,7 +5,6 @@ else
   output=`/usr/local/bin/ui-changeNLchnw`
 fi
 
-ipset -F v2node
 for IPv2node in $(cat /usr/local/bin/IPv2node); do
   ipset add v2node $IPv2node
 done
@@ -15,14 +14,12 @@ done
 /usr/local/bin/ui-saveListBW
 
 if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
-  ipset -F listB
   for iplistB in $(cat /usr/local/bin/IPlistB); do
     ipset add listB $iplistB
   done
 fi
 
 if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
-  ipset -F listW
   for iplistW in $(cat /usr/local/bin/IPlistW); do
     ipset add listW $iplistW
   done
