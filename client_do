@@ -54,9 +54,9 @@ EOF
 
 rm -rf /etc/apt/sources.list.d/*
 cat << EOF > /etc/apt/sources.list
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main
-deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
 apt update && apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 lighttpd bc
@@ -683,15 +683,15 @@ installDep(){
 rm -rf /etc/apt/sources.list.d/docker.list
 
 cat << EOF > /etc/apt/sources.list
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main
-deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
-echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
+echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free" > /etc/apt/sources.list.d/php.list
 wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then

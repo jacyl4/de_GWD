@@ -61,9 +61,9 @@ EOF
 rm -rf /etc/apt/sources.list.d/*
 if [[ $architecture = "amd64" ]]; then
 cat << EOF > /etc/apt/sources.list
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main
-deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 fi
 
@@ -695,9 +695,9 @@ echo ""
 installDep(){
 if [[ $architecture = "amd64" ]]; then
 cat << EOF > /etc/apt/sources.list
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main
-deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 fi
 
