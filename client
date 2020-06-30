@@ -836,8 +836,6 @@ postInstall(){
 /usr/local/bin/ui_2h
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-systemctl restart smartdns
-sleep 3
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
@@ -847,6 +845,7 @@ if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
 else
   output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
 fi
+output=`systemctl restart smartdns`
 output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
 output=`systemctl restart iptables-proxy`
