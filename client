@@ -91,8 +91,8 @@ cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 2
 net.unix.max_dgram_qlen = 1024
-net.nf_conntrack_max = 25165824
-net.netfilter.nf_conntrack_max = 25165824
+net.nf_conntrack_max = 1000000
+net.netfilter.nf_conntrack_max = 1000000
 net.netfilter.nf_conntrack_checksum = 0
 net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 5
 fs.file-max = 1000000
