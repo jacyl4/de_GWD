@@ -4,7 +4,7 @@ port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
 uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
 
-localip=$(jq -r '.divertLan | to_entries[] | .value' /usr/local/bin/0conf)
+localip=$(jq -r '.divertLan.ip | to_entries[] | .value' /usr/local/bin/0conf)
 
 cat > /usr/local/bin/vtrui/config.json << EOF
 {
@@ -183,7 +183,7 @@ else
 fi
 
 
-sed -i '/div id="shnodedt" style=/c\<div id="shnodedt" style="display:block">' /var/www/html/index.php
+jq '.divertLan.display="block"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
 chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

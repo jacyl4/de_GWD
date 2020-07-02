@@ -979,7 +979,8 @@ jq '.address={}' /usr/local/bin/0conf |\
 jq '.dns={}' |\
 jq '.dns.hosts={}' |\
 jq '.v2node=[]' |\
-jq '.divertLan=[]' |\
+jq '.divertLan.display="none"' |\
+jq '.divertLan.ip=[]' |\
 jq '.v2nodeForUpdate={}' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
@@ -1117,6 +1118,12 @@ jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
 jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
 jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
 jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
+if [[ $(awk '/divertLan/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+jq '.divertLan={}' /usr/local/bin/0conf |\
+jq '.divertLan.display="none"' |\
+jq '.divertLan.ip=[]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 rm -rf /usr/local/bin/chnrouteset
 rm -rf /usr/local/bin/chnroute.txt

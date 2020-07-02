@@ -1,7 +1,7 @@
 #!/bin/bash
 jq 'del(.routing.rules[1])' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp
 
-localip=$(jq -r '.divertLan[]' /usr/local/bin/0conf | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+localip=$(jq -r '.divertLan.ip[]' /usr/local/bin/0conf | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 
 if [[ -n "$localip" ]]; then
 	jq '.routing.rules[1].type="field"' /tmp/vtrui_temp |\
