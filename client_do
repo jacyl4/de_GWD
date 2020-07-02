@@ -1200,7 +1200,7 @@ jq '.address={}' /usr/local/bin/0conf |\
 jq '.dns={}' |\
 jq '.dns.hosts={}' |\
 jq '.v2node=[]' |\
-jq '.divertLan={}' |\
+jq '.divertLan=[]' |\
 jq '.v2nodeForUpdate={}' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
@@ -1339,7 +1339,6 @@ rm -rf /usr/local/bin/Q4am
 rm -rf /usr/local/bin/Q4H
 rm -rf /usr/local/bin/Q2H
 rm -rf /etc/modules-load.d/nf_conntrack.conf
-jq '.divertLan={}' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
 cd ~
 source /etc/profile

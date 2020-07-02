@@ -326,7 +326,7 @@
                 </tbody>
               </table>
 
-<div id="shnodedt" style="display:<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->divertLan->display; ?>">
+<div id="shnodedt" style="display:none">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
@@ -352,7 +352,7 @@
 <span class="float-right">
 <div class="input-group mt-1 mr-4">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['divertLan']['ip'] as $k => $v) {echo "$v ";} ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['divertLan'] as $k => $v) {echo "$v ";} ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
@@ -572,11 +572,9 @@ $.get('markThis.php', {markName:markNametxt}, function(result){window.location.r
 }
 
 function NodeDTshow(){
-$("#shnodedt").css("display", "block");
 $.get('switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){window.location.reload();});
 }
 function NodeDThide(){
-$("#shnodedt").css("display", "none");
 $.get('switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){window.location.reload();});
 }
 
