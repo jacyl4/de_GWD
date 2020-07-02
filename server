@@ -79,10 +79,6 @@ EOF
 echo "ulimit -n 1000000" > ~/.bash_profile
 
 modprobe ip_conntrack
-cat << EOF > /etc/modules-load.d/nf_conntrack.conf
-nf_conntrack
-nf_conntrack_ipv4
-EOF
 
 cat << EOF > /etc/sysctl.conf
 vm.overcommit_memory = 1
