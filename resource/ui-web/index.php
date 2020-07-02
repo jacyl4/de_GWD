@@ -375,7 +375,7 @@
           <span class="float-right mt-n1 mb-n2">
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLchnw()">大陆白名单</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLgfw()">GFWlist</button>
-                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submitDNS()">提交</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="submitDNS()">提交</button>
           </span>
           </div>
 
@@ -488,7 +488,7 @@
             <i class="fas fa-network-wired"></i>
             DHCP 服务
 <span class="float-right mt-n1 mb-n2">
-<a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">详情</a>
+<a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;">详情</a>
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpUP()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpDOWN()">关闭</button>
 </span>
