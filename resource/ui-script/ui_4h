@@ -11,7 +11,7 @@ done
 
 
 
-/usr/local/bin/ui-saveListBW
+  output=`/usr/local/bin/ui-saveListBW`
 
 if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
   for iplistB in $(cat /usr/local/bin/IPlistB); do
