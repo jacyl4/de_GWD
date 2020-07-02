@@ -205,8 +205,8 @@ rm -rf ~/smartdns.deb
 
 rm -rf /etc/smartdns/*.conf
 cat << EOF > /etc/smartdns/smartdns.conf
-bind [::]:5310
-bind-tcp [::]:5310
+bind :5310
+bind-tcp :5310
 
 speed-check-mode  ping,tcp:80
 cache-size        10000
