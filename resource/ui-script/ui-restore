@@ -1,6 +1,5 @@
 #!/bin/bash
 piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
-
 sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
@@ -15,7 +14,7 @@ output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
 output=`systemctl restart iptables-proxy`
 
-/usr/local/bin/ui_4h
+output=`/usr/local/bin/ui_4h`
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
