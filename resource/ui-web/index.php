@@ -389,7 +389,7 @@
                 </div>
                 <div class="input-group-append">
                   <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?>" type="button" onclick="v2adADD()">开启</button>
-                  <button class="btn btn-outline-secondary" type="button" onclick="v2adDEL()">关闭</button>
+                  <button class="btn btn-secondary" type="button" onclick="v2adDEL()">关闭</button>
                 </div>
               </div>
 
