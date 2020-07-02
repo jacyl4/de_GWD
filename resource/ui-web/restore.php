@@ -9,20 +9,27 @@ exec('sudo cp -f /var/www/html/restore/0conf /usr/local/bin/');
 
 exec('sudo /usr/local/bin/ui-restorePW');
 exec('sudo /usr/local/bin/ui-saveDNSChina');
-exec('sudo systemctl restart smartdns');
 exec('sudo /usr/local/bin/ui-NodeDThide');
 
-$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-if ( $data['DNSsplit'] === "gfw" ){
-	exec('sudo /usr/local/bin/ui-changeNLgfw');
+if ( json_decode(file_get_contents('/usr/local/bin/0conf'))->address->udp === "on" ){
+  	exec('sudo /usr/local/bin/ui-udpON');
 } else {
-	exec('sudo /usr/local/bin/ui-changeNLchnw');
+  	exec('sudo /usr/local/bin/ui-udpOFF');
 }
-exec('sudo /usr/local/bin/ui-saveListBW');
 
-if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->updateAddr))
+exec('sudo systemctl restart smartdns');
+exec('sudo systemctl restart doh-client');
+exec('sudo systemctl restart v2dns');
+exec('sudo systemctl restart vtrui');
+exec('sudo systemctl restart iptables-proxy');
+
+exec('sudo /usr/local/bin/ui_4h');
+
+if (json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcp === "on")
 {
-exec('sudo /usr/local/bin/ui-updateGen');
+exec('sudo /usr/local/bin/ui-dhcpUP');
+} else {
+exec('sudo pihole -a disabledhcp');
 }
 
 if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
@@ -30,16 +37,6 @@ if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alia
 exec('sudo /usr/local/bin/ui-markThis');
 }
 
-exec('sudo systemctl restart doh-client');
-exec('sudo systemctl restart v2dns');
-exec('sudo systemctl restart vtrui');
-exec('sudo systemctl restart iptables-proxy');
-
-if (!empty(json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias))
-{
-exec('sudo /usr/local/bin/ui-dhcpUP');
-} else {
-exec('sudo pihole -a disabledhcp');
-}
+exec('sudo /usr/local/bin/ui-updateGen');
 ?>
 <?php }?>
