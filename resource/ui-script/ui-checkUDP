@@ -1,4 +1,6 @@
 #!/bin/bash
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-echo "on"
+	echo "success"
+else
+	echo "secondary"
 fi

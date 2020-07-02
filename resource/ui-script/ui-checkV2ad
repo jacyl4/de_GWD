@@ -1,4 +1,6 @@
 #!/bin/bash
 if [[ $(jq -r '.dns.hosts' /usr/local/bin/v2dns/config.json) =~ "category-ads" ]]; then
-echo "on"
+	echo "success"
+else
+	echo "outline-secondary"
 fi
