@@ -254,7 +254,7 @@ systemctl restart smartdns
 
 
 installDOH(){
-systemctl disable --now doh-client >/dev/null 2>&1
+systemctl stop doh-client >/dev/null 2>&1
 rm -rf /usr/local/bin/doh-client
 
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
