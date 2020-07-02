@@ -1182,6 +1182,9 @@ if [[ -f /etc/vtrui/config.json ]]; then
   cp -f /etc/vtrui/config.json /usr/local/bin/vtrui/config.json
   rm -rf /etc/vtrui
 fi
+rm -rf /etc/modules-load.d/nf_conntrack.conf
+
+
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)

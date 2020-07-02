@@ -1122,6 +1122,7 @@ rm -rf /usr/local/bin/chnroute.txt
 rm -rf /usr/local/bin/Q4am
 rm -rf /usr/local/bin/Q4H
 rm -rf /usr/local/bin/Q2H
+rm -rf /etc/modules-load.d/nf_conntrack.conf
 
 cd ~
 source /etc/profile
