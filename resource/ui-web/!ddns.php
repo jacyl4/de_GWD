@@ -162,7 +162,7 @@
             FRP
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="installFRP()">install</button>
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkFRP');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
 </span>
           </div>
