@@ -16,6 +16,10 @@ output=`systemctl restart vtrui`
 
 output=`/usr/local/bin/ui_4h`
 
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+output=`/usr/local/bin/ui-dhcpUP`
+fi
+
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
 fi
