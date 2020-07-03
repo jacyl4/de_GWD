@@ -1,5 +1,5 @@
 #!/bin/bash
-ads1="geosite:category-ads"
+ads1="geosite:category-ads-all"
 ads2="ext:h2y.dat:ad"
 fakeIP="127.0.0.1"
 
