@@ -3,13 +3,13 @@ piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
+output=`systemctl restart smartdns`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   output=`/usr/local/bin/ui-udpON >/dev/null 2>&1`
 else
   output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
 fi
-output=`systemctl restart smartdns`
 output=`systemctl restart iptables-proxy`
 output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
