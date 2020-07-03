@@ -2,11 +2,6 @@
 updateCMD=$(jq -r '.updateCMD' /usr/local/bin/0conf)
 CMD="/usr/local/bin/ttyd -p 3000 -o $updateCMD"
 
-localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
-popupWindow="window.open('"http://$localIP:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
-
-sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
-
 cat << EOF >/usr/local/bin/ui-update
 #!/bin/bash
 $CMD
