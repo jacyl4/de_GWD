@@ -167,7 +167,7 @@
 </span>
           </div>
 
-          <div class="card-body"  style="display:<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->display ?>">
+          <div class="card-body" id="checkFRP" style="display:none">
   <div class="form-row">
       <div class="col-md-6">
         <H6 class="my-auto mr-3">
@@ -543,6 +543,10 @@ $.get('WGmark.php', {WGmark1:WGmark1, WGmark2:WGmark2, WGmark3:WGmark3, WGmark4:
 window.onload = function() {
 $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
+
+$.get("checkFRP.php", function(data) {
+if (data == "installed") { $("#checkFRP").css("display", "block"); };
+});
 
 $.get('WGqrTXT1.php', function(data){
 jQuery('#qrcode1').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 

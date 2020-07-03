@@ -1,6 +1,0 @@
-#!/bin/bash
-if [[ $(jq -r '.FRP.status' /usr/local/bin/0conf) == "on" ]]; then
-	echo "success"
-else
-	echo "outline-dark"
-fi
