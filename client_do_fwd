@@ -7,8 +7,6 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 
-branch="master"
-
 installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)"
 
 mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
@@ -40,7 +38,7 @@ output=`systemctl restart vtrui`
 clifwd_installDOHser(){
 rm -rf /usr/local/bin/doh-server
 
-wget --no-check-certificate -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/dohamd64.zip
+wget --no-check-certificate -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
@@ -241,8 +239,8 @@ mkdir -p /var/www/html/gwd
 ln -s /var/www/html/admin /var/www/html/gwd/admin
 fi
 
-svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-script
-svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-web
+svn export --force https://github.com/jacyl4/de_GWD/branches/master/resource/ui-script
+svn export --force https://github.com/jacyl4/de_GWD/branches/master/resource/ui-web
 
 if [[ -f ~/ui-script/ui_am4 ]] && [[ -d ~/ui-web/vendor/jquery ]]; then
 rm -rf /usr/local/bin/ui-*
@@ -302,7 +300,7 @@ EOF
 
 cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
 
-wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/gwd/version.php
 
 docker restart nginx
@@ -312,7 +310,7 @@ chown -R www-data:www-data /var/www/html
 chmod +x /var/www/html/gwd/*
 chmod +x /usr/local/bin/*
 
-wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ttyd_linux.x86_64
+wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
 mv -f ~/ttyd /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 
