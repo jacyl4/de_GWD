@@ -1,8 +1,8 @@
 #!/bin/bash
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  output=`/usr/local/bin/ui-changeNLgfw >/dev/null 2>&1`
+  output=`/usr/local/bin/ui-dnsGFW >/dev/null 2>&1`
 else
-  output=`/usr/local/bin/ui-changeNLchnw >/dev/null 2>&1`
+  output=`/usr/local/bin/ui-dnsCHNW >/dev/null 2>&1`
 fi
 
 for IPv2node in $(cat /usr/local/bin/IPv2node); do

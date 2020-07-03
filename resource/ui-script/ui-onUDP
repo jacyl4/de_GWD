@@ -2,7 +2,7 @@
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
-cat << EOF > /usr/local/bin/iptables-proxy-up
+cat << EOF >/usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
 ipset -X lanip
@@ -106,12 +106,16 @@ iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
 
 iptables -t mangle -A OUTPUT -p tcp -j V2PROXY
+iptables -t mangle -A OUTPUT -p udp -j V2PROXY
 
 iptables -t mangle -A PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 
 iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 
 if [[ \$(ip --oneline link show up | grep -v lo | awk '{print\$2}') =~ "wg0" ]]; then
 iptables -I FORWARD -i wg0 -j ACCEPT
@@ -121,6 +125,6 @@ fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
-jq '.address.udp="off"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq '.address.udp="on"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
 chmod 666 /usr/local/bin/0conf

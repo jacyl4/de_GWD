@@ -1,0 +1,45 @@
+#!/bin/bash
+FRPdomain=$(jq -r '.FRP.domain' /usr/local/bin/0conf)
+FRPbindPort=$(jq -r '.FRP.bindPort' /usr/local/bin/0conf)
+FRPtoken=$(jq -r '.FRP.token' /usr/local/bin/0conf)
+FRPremotePort=$(jq -r '.FRP.remotePort' /usr/local/bin/0conf)
+FRPlocalPort=$(jq -r '.FRP.localPort' /usr/local/bin/0conf)
+FRPprotocol=$(jq -r '.FRP.protocol' /usr/local/bin/0conf)
+
+cat << EOF >/lib/systemd/system/frpc.service
+[Unit]
+Description=Frp Client Service
+After=network.target
+
+[Service]
+User=root
+Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+ExecStart=/usr/local/bin/frp/frpc -c /usr/local/bin/frp/frpc.ini
+Restart=always
+RestartSec=2
+StartLimitBurst=0
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat << EOF >/usr/local/bin/frp/frpc.ini
+[common]
+server_addr = $FRPdomain
+server_port = $FRPbindPort
+token = $FRPtoken
+
+[Wireguard]
+type = $FRPprotocol
+local_ip = 127.0.0.1
+remote_port = $FRPremotePort
+local_port = $FRPlocalPort
+EOF
+
+
+jq '.FRP.status="on"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+
+chmod 666 /usr/local/bin/0conf

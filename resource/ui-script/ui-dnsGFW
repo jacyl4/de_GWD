@@ -1,5 +1,5 @@
 #!/bin/bash
-cat << EOF > /tmp/v2dns_config
+cat << EOF >/tmp/v2dns_config
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
@@ -96,7 +96,7 @@ chmod 666 /usr/local/bin/v2dns/config.json
 chmod 666 /usr/local/bin/0conf
 
 if [[ $(jq -r '.dns.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-/usr/local/bin/ui-v2adADD
+/usr/local/bin/ui-onV2ad
 else
-/usr/local/bin/ui-v2adDEL
+/usr/local/bin/ui-offV2ad
 fi

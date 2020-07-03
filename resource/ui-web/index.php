@@ -235,8 +235,8 @@
   <label class="input-group-text">UDP代理</label>
   </div>
   <div class="input-group-append">
-    <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkUDP');?>" type="button" onclick="udpON()">开启</button>
-    <button class="btn btn-secondary" type="button" onclick="udpOFF()">关闭</button>
+    <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkUDP');?>" type="button" onclick="onUDP()">开启</button>
+    <button class="btn btn-secondary" type="button" onclick="offUDP()">关闭</button>
   </div>
 </div>
 </span>
@@ -373,8 +373,8 @@
             <i class="far fa-compass"></i>
             DNS
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLchnw()">大陆白名单</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="changeNLgfw()">GFWlist</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="dnsCHNW()">大陆白名单</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="dnsGFW()">GFWlist</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="submitDNS()">提交</button>
           </span>
           </div>
@@ -388,8 +388,8 @@
                 <label class="input-group-text">V2去广告</label>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?>" type="button" onclick="v2adADD()">开启</button>
-                  <button class="btn btn-secondary" type="button" onclick="v2adDEL()">关闭</button>
+                  <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkV2ad');?>" type="button" onclick="onV2ad()">开启</button>
+                  <button class="btn btn-secondary" type="button" onclick="offV2ad()">关闭</button>
                 </div>
               </div>
 
@@ -489,8 +489,8 @@
             DHCP 服务
 <span class="float-right mt-n1 mb-n2">
 <a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;">详情</a>
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpUP()">开启</button>
-<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="dhcpDOWN()">关闭</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="onDHCP()">开启</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="offDHCP()">关闭</button>
 </span>
           </div>
           <div class="card-body">
@@ -607,12 +607,12 @@ $.get("pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) });
 $.get("pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) });
 }
 
-function udpON(){
-$.get('udpON.php', function(result){window.location.reload();});
+function onUDP(){
+$.get('onUDP.php', function(result){window.location.reload();});
 }
 
-function udpOFF(){
-$.get('udpOFF.php', function(result){window.location.reload();});
+function offUDP(){
+$.get('offUDP.php', function(result){window.location.reload();});
 }
 
 function submitlocalip(){
@@ -620,13 +620,13 @@ localiptxt=$('#nodedttext').val();
 $.get('changeLocalIP.php', {localip:localiptxt}, function(result){window.location.reload();});
 }
 
-function changeNLchnw(){
-$.get('changeNLchnw.php', function(result){window.location.reload();});
+function dnsCHNW(){
+$.get('dnsCHNW.php', function(result){window.location.reload();});
 alert("切换至大陆白名单。。。");
 }
 
-function changeNLgfw(){
-$.get('changeNLgfw.php', function(result){window.location.reload();});
+function dnsGFW(){
+$.get('dnsGFW.php', function(result){window.location.reload();});
 alert("切换至GFWlist。。。");
 }
 
@@ -639,12 +639,12 @@ $.get("saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustom
 alert("保存DNS设置。。。");
 }
 
-function v2adADD(){
-$.get('v2adADD.php', function(result){window.location.reload();});
+function onV2ad(){
+$.get('onV2ad.php', function(result){window.location.reload();});
 }
 
-function v2adDEL(){
-$.get('v2adDEL.php', function(result){window.location.reload();});
+function offV2ad(){
+$.get('offV2ad.php', function(result){window.location.reload();});
 }
 
 function submitstaticip(){
@@ -654,15 +654,15 @@ $.get('changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(
 alert("本机已开始重新启动");
 }
 
-function dhcpUP(){
+function onDHCP(){
 dhcpStarttxt=$('#dhcpStart').val();
 dhcpEndtxt=$('#dhcpEnd').val();
-$.get('dhcpUP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt}, function(result){window.location.reload();});
+$.get('onDHCP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt}, function(result){window.location.reload();});
 alert('启动DHCP服务。。。');
 }
 
-function dhcpDOWN(){
-$.get('dhcpDOWN.php', function(result){window.location.reload();});
+function offDHCP(){
+$.get('offDHCP.php', function(result){window.location.reload();});
 }
 
 node1 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[0]->name ?>";

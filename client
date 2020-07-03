@@ -38,20 +38,20 @@ systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-cat << EOF > /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
 
-cat << EOF > /etc/apt/apt.conf.d/01InstallLess
+cat << EOF >/etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 EOF
 
-cat << EOF > /etc/apt/apt.conf.d/71debconf
+cat << EOF >/etc/apt/apt.conf.d/71debconf
 Dpkg::Options {
    "--force-confdef";
    "--force-confold";
@@ -60,7 +60,7 @@ EOF
 
 rm -rf /etc/apt/sources.list.d/*
 if [[ $architecture = "amd64" ]]; then
-cat << EOF > /etc/apt/sources.list
+cat << EOF >/etc/apt/sources.list
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
 deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
@@ -73,7 +73,7 @@ systemctl enable --now haveged >/dev/null 2>&1
 
 dpkg --configure -a
 
-cat << EOF > /etc/security/limits.conf
+cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
 * soft nproc 64000
@@ -83,7 +83,7 @@ echo "ulimit -n 1000000" > ~/.bash_profile
 
 modprobe ip_conntrack
 
-cat << EOF > /etc/sysctl.conf
+cat << EOF >/etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 2
 net.unix.max_dgram_qlen = 1024
@@ -162,7 +162,7 @@ fi
 sysctl -p
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat << EOF > /etc/default/locale
+cat << EOF >/etc/default/locale
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
 LC_CTYPE="en_US.UTF-8"
@@ -203,7 +203,7 @@ dpkg -i ~/smartdns.deb
 rm -rf ~/smartdns.deb
 
 rm -rf /etc/smartdns/*.conf
-cat << EOF > /etc/smartdns/smartdns.conf
+cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
@@ -272,7 +272,7 @@ chmod +x /usr/local/bin/doh-client
 rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https/
-cat << EOF > /etc/dns-over-https/doh-client.conf
+cat << EOF >/etc/dns-over-https/doh-client.conf
 listen = [ "127.0.0.1:5380" ]
 
 [upstream]
@@ -369,7 +369,7 @@ chmod +x /usr/local/bin/vtrui/vtrui
 chmod +x /usr/local/bin/vtrui/v2ctl
 rm -rf ~/vtrui*
 
-cat << EOF > /usr/local/bin/v2dns/config.json
+cat << EOF >/usr/local/bin/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
@@ -426,7 +426,7 @@ systemctl daemon-reload
 systemctl enable v2dns
 systemctl restart v2dns
 
-cat << EOF > /usr/local/bin/vtrui/config.json
+cat << EOF >/usr/local/bin/vtrui/config.json
 {
 "dns":{"servers":["localhost"]},
 "inbounds":[
@@ -518,7 +518,7 @@ echo $doh1IP > /usr/local/bin/IPdoh
 echo $doh2IP >> /usr/local/bin/IPdoh
 echo $domainIP > /usr/local/bin/IPv2node
 
-cat << EOF > /usr/local/bin/iptables-proxy-up
+cat << EOF >/usr/local/bin/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute
 ipset -X lanip
@@ -637,7 +637,7 @@ fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
-cat << EOF > /usr/local/bin/iptables-proxy-down
+cat << EOF >/usr/local/bin/iptables-proxy-down
 #!/bin/bash
 iptables -t mangle -F
 iptables -t mangle -X
@@ -660,7 +660,7 @@ ip rule del fwmark 0x9
 EOF
 chmod +x /usr/local/bin/iptables-proxy-down
 
-cat << EOF > /lib/systemd/system/iptables-proxy.service
+cat << EOF >/lib/systemd/system/iptables-proxy.service
 [Unit]
 Description=iptables-proxy
 
@@ -679,7 +679,7 @@ systemctl daemon-reload
 systemctl enable iptables-proxy
 
 rm -rf /etc/resolv.conf
-cat << EOF > /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
 nameserver 127.0.0.1
 EOF
 
@@ -704,7 +704,7 @@ echo ""
 
 installDep(){
 if [[ $architecture = "amd64" ]]; then
-cat << EOF > /etc/apt/sources.list
+cat << EOF >/etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
 deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
@@ -733,7 +733,7 @@ installPihole(){
 cd ~
 mkdir -p /etc/pihole
 cat /dev/null > /etc/pihole/adlists.list
-cat << EOF > /etc/pihole/setupVars.conf
+cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
 PIHOLE_DNS_1=127.0.0.1#5380
@@ -758,7 +758,7 @@ piholeSet(){
 systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
-cat << EOF > /etc/dnsmasq.conf
+cat << EOF >/etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
 listen-address=127.0.0.1
 port=5390
@@ -766,7 +766,7 @@ EOF
 
 cat /dev/null > /etc/pihole/dns-servers.conf
 
-cat << EOF > /etc/pihole/pihole-FTL.conf
+cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
 EOF
@@ -822,7 +822,7 @@ fi
 mv -f ~/ttyd /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 
-cat << EOF > /lib/systemd/system/ttyd.service
+cat << EOF >/lib/systemd/system/ttyd.service
 [Unit]
 Description=ttyd
 After=network.target
@@ -850,9 +850,9 @@ output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
 output=`systemctl restart smartdns`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  output=`/usr/local/bin/ui-udpON >/dev/null 2>&1`
+  output=`/usr/local/bin/ui-onUDP >/dev/null 2>&1`
 else
-  output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
+  output=`/usr/local/bin/ui-offUDP >/dev/null 2>&1`
 fi
 output=`systemctl restart iptables-proxy`
 output=`systemctl restart vtrui`
@@ -928,7 +928,7 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 
 piholePW="0000000000000000000000000000000000000000000000000000000000000000"
 
-cat << EOF > /etc/network/interfaces
+cat << EOF >/etc/network/interfaces
 source /etc/network/interfaces.d/*
 
 auto lo
@@ -1062,7 +1062,7 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 rm -rf /etc/resolv.conf
-cat << EOF > /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
 nameserver 127.0.0.1
 EOF
 
@@ -1078,15 +1078,15 @@ piholeSet
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  output=`/usr/local/bin/ui-changeNLgfw`
+  output=`/usr/local/bin/ui-dnsGFW`
 else
-  output=`/usr/local/bin/ui-changeNLchnw`
+  output=`/usr/local/bin/ui-dnsCHNW`
 fi
 
 output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-output=`/usr/local/bin/ui-dhcpUP`
+output=`/usr/local/bin/ui-onDHCP`
 fi
 output=`systemctl restart iptables-proxy`
 output=`systemctl restart v2dns`

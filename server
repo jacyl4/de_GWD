@@ -25,20 +25,20 @@ systemctl mask --now systemd-resolved  >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-cat << EOF > /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
 nameserver 1.1.1.1
 nameserver 8.8.8.8
 nameserver 1.0.0.1
 nameserver 8.8.4.4
 EOF
 
-cat << EOF > /etc/apt/apt.conf.d/01InstallLess
+cat << EOF >/etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 EOF
 
-cat << EOF > /etc/apt/apt.conf.d/71debconf
+cat << EOF >/etc/apt/apt.conf.d/71debconf
 Dpkg::Options {
    "--force-confdef";
    "--force-confold";
@@ -46,7 +46,7 @@ Dpkg::Options {
 EOF
 
 rm -rf /etc/apt/sources.list.d/*
-cat << EOF > /etc/apt/sources.list
+cat << EOF >/etc/apt/sources.list
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
 deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
@@ -70,7 +70,7 @@ systemctl restart docker
 
 dpkg --configure -a
 
-cat << EOF > /etc/security/limits.conf
+cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
 * soft nproc 64000
@@ -80,7 +80,7 @@ echo "ulimit -n 1000000" > ~/.bash_profile
 
 modprobe ip_conntrack
 
-cat << EOF > /etc/sysctl.conf
+cat << EOF >/etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 2
 net.unix.max_dgram_qlen = 1024
@@ -150,7 +150,7 @@ fi
 sysctl -p
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-cat << EOF > /etc/default/locale
+cat << EOF >/etc/default/locale
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
 LC_CTYPE="en_US.UTF-8"
@@ -179,7 +179,7 @@ hwclock -w
 
 
 installIptablesRules(){
-cat << EOF > /usr/local/bin/iptablesrules-up
+cat << EOF >/usr/local/bin/iptablesrules-up
 #!/bin/bash
 iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
 iptables -A INPUT -p tcp --tcp-flags RST RST -j DROP
@@ -192,14 +192,14 @@ iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP
 EOF
 chmod +x /usr/local/bin/iptablesrules-up
 
-cat << EOF > /usr/local/bin/iptablesrules-down
+cat << EOF >/usr/local/bin/iptablesrules-down
 #!/bin/bash
 iptables -F
 iptables -X
 EOF
 chmod +x /usr/local/bin/iptablesrules-down
 
-cat << EOF > /lib/systemd/system/iptablesrules.service
+cat << EOF >/lib/systemd/system/iptablesrules.service
 [Unit]
 Description=iptablesrules
 After=network.target
@@ -225,7 +225,7 @@ systemctl restart iptablesrules
 installPihole(){
 mkdir -p /etc/pihole
 cat /dev/null > /etc/pihole/adlists.list
-cat << EOF > /etc/pihole/setupVars.conf
+cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
 PIHOLE_DNS_1=1.1.1.1
@@ -263,7 +263,7 @@ cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
 ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
-cat << EOF > /etc/pihole/pihole-FTL.conf
+cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
 EOF
@@ -283,7 +283,7 @@ chmod +x /usr/local/bin/doh-server
 rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https
-cat << EOF > /etc/dns-over-https/doh-server.conf
+cat << EOF >/etc/dns-over-https/doh-server.conf
 listen = [ "127.0.0.1:8053" ]
 
 path = "/dq"
@@ -352,7 +352,7 @@ chmod +x /usr/local/bin/vtrui/vtrui
 chmod +x /usr/local/bin/vtrui/v2ctl
 rm -rf ~/vtrui*
 
-cat << EOF > /usr/local/bin/vtrui/config.json
+cat << EOF >/usr/local/bin/vtrui/config.json
 {
   "dns":{"servers":["localhost"]},
   "inbounds": [
@@ -429,7 +429,7 @@ mkdir -p "/var/www/html"
 mkdir -p "/var/www/ssl"
 
 rm -rf /etc/nginx/nginx.conf
-cat << EOF > /etc/nginx/nginx.conf
+cat << EOF >/etc/nginx/nginx.conf
 user  www-data www-data;
 pid   /run/nginx.pid;
 
@@ -557,7 +557,7 @@ curl https://get.acme.sh | sh
                --reloadcmd     "docker restart nginx >/dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
-cat << EOF > /var/www/ssl/update_ocsp_cache
+cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
 wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
 wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
@@ -588,7 +588,7 @@ rm -rf ~/now.cron
 
 makeSSL_W(){
 rm -rf /etc/nginx/conf.d/default.conf
-cat << EOF > /etc/nginx/conf.d/default.conf
+cat << EOF >/etc/nginx/conf.d/default.conf
 server {
     listen      80;
     server_name $domain;
@@ -609,7 +609,7 @@ curl https://get.acme.sh | sh
                --reloadcmd     "docker restart nginx >/dev/null 2>&1"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
-cat << EOF > /var/www/ssl/update_ocsp_cache
+cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
 wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
 wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
@@ -644,7 +644,7 @@ touch /etc/nginx/conf.d/supp_body
 
 if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
-cat << EOF > /etc/nginx/conf.d/1_serverHead
+cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
   listen $port ssl http2 fastopen=128 reuseport;
   server_name $domain;
@@ -657,7 +657,7 @@ EOF
 
 else
 
-cat << EOF > /etc/nginx/conf.d/1_serverHead
+cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
   listen 80;
   server_name $domain;
@@ -676,7 +676,7 @@ EOF
 
 fi
 
-cat << EOF > /etc/nginx/conf.d/2_tlsParameter
+cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
@@ -707,7 +707,7 @@ cat << EOF > /etc/nginx/conf.d/2_tlsParameter
 
 EOF
 
-cat << EOF > /etc/nginx/conf.d/3_proxyPath
+cat << EOF >/etc/nginx/conf.d/3_proxyPath
 location /dq {
   proxy_pass                http://127.0.0.1:8053/dq;
   proxy_set_header          Host \$host;
@@ -732,7 +732,7 @@ location $v2path {
 }
 EOF
 
-cat << EOF > /etc/nginx/conf.d/merge.sh
+cat << EOF >/etc/nginx/conf.d/merge.sh
 #!/bin/bash
 rm -rf /etc/nginx/conf.d/default.conf
 
@@ -846,7 +846,7 @@ gatewayaddr=$(ip route show | awk '/'$ethernetnum'/ {print$3;exit}')
 
 htmldir="/var/www/html"
 
-cat << EOF > /etc/network/interfaces
+cat << EOF >/etc/network/interfaces
 source /etc/network/interfaces.d/*
 
 auto lo
@@ -924,7 +924,7 @@ apt purge -y linux-image-amd64
 apt purge -y linux-image-*-amd64
 update-grub
 
-cat << EOF > ~/bbrkernel/clearkernel
+cat << EOF >~/bbrkernel/clearkernel
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
@@ -1150,7 +1150,7 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 rm -rf /etc/resolv.conf
-cat << EOF > /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
 nameserver 1.1.1.1
 nameserver 8.8.8.8
 nameserver 1.0.0.1

@@ -40,9 +40,9 @@ exec('sudo systemctl restart doh-client');
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['DNSsplit'] === "gfw" ){
-	exec('sudo /usr/local/bin/ui-changeNLgfw');
+	exec('sudo /usr/local/bin/ui-dnsGFW');
 } else {
-	exec('sudo /usr/local/bin/ui-changeNLchnw');
+	exec('sudo /usr/local/bin/ui-dnsCHNW');
 }
 
 exec('sudo /usr/local/bin/ui-saveListBW');

@@ -102,7 +102,7 @@
         </ol>
 
         <!-- Page Content -->
-      <div class="col-md-6 input-group ml-auto mr-auto mb-3">
+      <div class="col-md-6 input-group mx-auto mb-3">
         <div class="input-group-prepend w-25">
           <span class="input-group-text justify-content-center w-100">Wan IP</span>
         </div>
@@ -112,7 +112,7 @@
       
         <div class="card mb-3">
           <div class="card-header">
-            <i class="fas fa-ethernet"></i>
+            <i class="fas fa-cloud"></i>
             CloudFlare DDNS
 <span class="float-right mt-n1 mb-n2">
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsSaveCF()">开启</button>
@@ -156,9 +156,82 @@
         </div>
 
 
+          <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-bacon"></i>
+            FRP
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="installFRP()">install</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkFRP');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
+</span>
+          </div>
+
+          <div class="card-body"  style="display:<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->display ?>">
+  <div class="form-row">
+      <div class="col-md-6">
+        <H6 class="my-auto mr-3">
+        <i class="fas fa-globe-asia my-1 ml-4 mr-2"></i>服务端：
+        </H6>
+      <div class="input-group my-2">
+        <div class="input-group-prepend col-xs-5">
+          <span class="input-group-text align-self-center">服务器域名</span>
+        </div>
+        <input type="text" id="FRPdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->domain ?>">
+
+        <div class="input-group-append">
+          <span class="input-group-text align-self-center">Bind-Port</span>
+        </div>
+          <input type="text" id="FRPbindPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->bindPort ?>">
+
+        <div class="input-group-append">
+          <span class="input-group-text align-self-center">Token</span>
+        </div>
+          <input type="text" id="FRPtoken" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->token ?>">
+      </div>
+      </div>
+
+      <div class="col-md-6">
+        <H6 class="my-auto mr-3">
+        <i class="fas fa-ethernet my-1 ml-4 mr-2"></i>本地端：
+        </H6>
+      <div class="input-group my-2">
+        <div class="input-group-prepend">
+          <span class="input-group-text align-self-center">服务器端口</span>
+        </div>
+          <input type="text" id="FRPremotePort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->remotePort ?>">
+
+        <div class="input-group-append">
+          <span class="input-group-text align-self-center">本地端口</span>
+        </div>
+          <input type="text" id="FRPlocalPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->localPort ?>">  
+
+        <div class="input-group-prepend">
+          <button id="FRPprotocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->protocol ?></button>
+            <div class="dropdown-menu">
+            <a class="dropdown-item" onclick="FRPprotocolSWtcp()" href="#">TCP</a>
+            <a class="dropdown-item" onclick="FRPprotocolSWudp()" href="#">UDP</a>
+            </div>
+        </div>  
+      </div>
+      </div>
+  </div>
+
+    <div class="form-row mt-3">
+      <div class="col-md-12 input-group">
+        <input class="form-control" type="text" placeholder="服务端安装指令" readonly>
+        <div class="input-group-append">
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="genFRPcmd()">生成安装指令</button>
+        </div> 
+      </div>
+    </div>
+          </div>
+        </div>
+
+
         <div class="card mb-3">
           <div class="card-header">
-            <i class="fas fa-ethernet"></i>
+            <i class="fas fa-archway"></i>
             WireGuard Server
           <span class="badge badge-pill badge-info align-center ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWGkernel');?></span>
 <span class="float-right mt-n1 mb-n2">
@@ -170,7 +243,7 @@
           <div class="card-body">
 
 <div class="form-row mb-3">
-      <div class="col-md-6 input-group mb-1 ml-auto mr-auto ">
+      <div class="col-md-6 input-group mb-1 mx-auto">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">Endpoint</span>
           <span class="input-group-text justify-content-center">域名/公网IP</span>
@@ -415,6 +488,25 @@ alert("开启DDNS。。。");
 function ddnsStopCF(){
 $.get('ddnsStopCF.php', function(result){window.location.reload();});
 }
+
+function FRPprotocolSWtcp(){$('#FRPprotocol').html("TCP"); };
+function FRPprotocolSWudp(){$('#FRPprotocol').html("UDP"); };
+
+function onFRP(){
+FRPdomain=$('#FRPdomain').val();
+FRPbindPort=$('#FRPbindPort').val();
+FRPtoken=$('#FRPtoken').val();
+FRPremotePort=$('#FRPremotePort').val();
+FRPlocalPort=$('#FRPlocalPort').val();
+FRPprotocol=$('#FRPprotocol').html();
+$.get('onFRP.php', {FRPdomain:FRPdomain, FRPbindPort:FRPbindPort, FRPtoken:FRPtoken, FRPremotePort:FRPremotePort, FRPlocalPort:FRPlocalPort, FRPprotocol:FRPprotocol}, function(result){ location.reload() });
+};
+
+function offFRP(){
+$.get('offFRP.php', function(result){window.location.reload();});
+};
+
+
 
 function WGchangeKey(){
 $.get('WGchangeKey.php', function(result){window.location.reload();});
