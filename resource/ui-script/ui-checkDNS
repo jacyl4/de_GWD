@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ $(cat /usr/local/bin/v2dns/config.json) =~ "geosite:geolocation-cn" ]]; then
+if [[ $(cat /usr/local/bin/v2dns/config.json) =~ "geosite:cn" ]]; then
     echo "大陆白名单"
 elif [[ $(cat /usr/local/bin/v2dns/config.json) =~ "gfw" ]]; then
     echo "GFWlist"
