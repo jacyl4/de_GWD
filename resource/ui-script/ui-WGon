@@ -9,7 +9,7 @@ cat > /etc/wireguard/wg0.conf << EOF
 PrivateKey = $(jq -r '.wireguard.sprivatekey' /usr/local/bin/0conf)
 Address = 172.16.66.1/32
 ListenPort = $WGaddressport
-DNS = 172.16.66.1
+DNS = 127.0.0.1
 MTU = 1420
 PostUp   = iptables -I FORWARD -i wg0 -j ACCEPT; iptables -I FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
 PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
