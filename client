@@ -716,6 +716,14 @@ apt update && apt upgrade && apt autoremove && apt autoclean
 
 apt install resolvconf
 
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat /dev/null > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
+
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 }
@@ -750,14 +758,6 @@ bash <(wget --no-check-certificate -qO- http://raw.githubusercontent.com/pi-hole
 piholeSet(){
 systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
-
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
-cat /dev/null > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d

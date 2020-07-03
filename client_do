@@ -723,6 +723,14 @@ systemctl daemon-reload >/dev/null 2>&1
 systemctl enable docker
 systemctl restart docker
 
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat /dev/null > /etc/resolvconf/resolv.conf.d/original
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
+ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
+
 cat << EOF > /etc/php/7.4/fpm/php-fpm.conf
 [global]
 pid = /run/php/php-fpm.pid
@@ -841,14 +849,6 @@ systemctl mask --now lighttpd >/dev/null 2>&1
 rm -rf /var/www/html/index.lighttpd.orig
 systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
-
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
-cat /dev/null > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
 
 cat << EOF > /etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
