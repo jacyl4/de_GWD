@@ -29,8 +29,6 @@ sed -i "/udp --dport 5390/a$addRule3" /usr/local/bin/iptables-proxy-up
 
 systemctl daemon-reload >/dev/null 2>&1
 output=`systemctl restart iptables-proxy`
-output=`systemctl restart v2dns`
-output=`systemctl restart vtrui`
 }
 
 
