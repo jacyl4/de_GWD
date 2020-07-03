@@ -324,7 +324,7 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
-ExecStart=/usr/local/bin/ui-update
+ExecStart=/bin/bash /usr/local/bin/ui-update
 ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
 StartLimitBurst=0

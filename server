@@ -208,8 +208,8 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
-ExecStart=/usr/local/bin/iptablesrules-up
-ExecStop=/usr/local/bin/iptablesrules-down
+ExecStart=/bin/bash /usr/local/bin/iptablesrules-up
+ExecStop=/bin/bash /usr/local/bin/iptablesrules-down
 RemainAfterExit=yes
 
 [Install]
