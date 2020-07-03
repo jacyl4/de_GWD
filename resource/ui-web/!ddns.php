@@ -266,7 +266,7 @@
 
 <span class="float-left text-secondary">
   <small>
-注：需要主路由映射所需UDP端口到de_GWD的地址。
+注：需要主路由映射所需UDP端口到de_GWD的地址。显示二维码的同时，即保存备注。
   </small>
 </span>
           </div>
