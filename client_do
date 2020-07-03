@@ -1072,9 +1072,9 @@ else
   output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
 fi
 output=`systemctl restart smartdns`
+output=`systemctl restart iptables-proxy`
 output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
-output=`systemctl restart iptables-proxy`
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
@@ -1284,10 +1284,9 @@ nameserver 127.0.0.1
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+output=`systemctl restart iptables-proxy`
 output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
-output=`systemctl restart iptables-proxy`
-sleep 3
 
 installPihole
 
@@ -1306,9 +1305,9 @@ output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 output=`/usr/local/bin/ui-dhcpUP`
 fi
+output=`systemctl restart iptables-proxy`
 output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
-output=`systemctl restart iptables-proxy`
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"

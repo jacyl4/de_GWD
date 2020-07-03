@@ -10,9 +10,9 @@ else
   output=`/usr/local/bin/ui-udpOFF >/dev/null 2>&1`
 fi
 output=`systemctl restart smartdns`
+output=`systemctl restart iptables-proxy`
 output=`systemctl restart v2dns`
 output=`systemctl restart vtrui`
-output=`systemctl restart iptables-proxy`
 
 output=`/usr/local/bin/ui_4h`
 

@@ -88,7 +88,7 @@ if ( $data['DNSsplit'] === "gfw" ){
 	exec('sudo /usr/local/bin/ui-changeNLchnw');
 }
 
-exec('sudo systemctl restart v2dns');
 exec('sudo systemctl restart iptables-proxy');
+exec('sudo systemctl restart v2dns');
 ?>
 <?php }?>
