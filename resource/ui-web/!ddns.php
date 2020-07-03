@@ -494,7 +494,7 @@ function FRPprotocolSWudp(){$('#FRPprotocol').html("UDP"); };
 
 function installFRP(){
 $.get('installFRP.php', function(result){window.location.reload();});
-window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+window.open('http://0.0.0.0:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 };
 
 function onFRP(){

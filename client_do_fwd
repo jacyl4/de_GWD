@@ -312,9 +312,9 @@ wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl
 mv -f ~/ttyd /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 
-popupWindow="window.open('"http://$localIP:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
-sed -i "?window.open('http://?c\\$popupWindow" /var/www/html/gwd/!ddns.php
-sed -i "?window.open('http://?c\\$popupWindow" /var/www/html/gwd/!update.php
+popupWindow="window.open('"http://$localaddr:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
+sed -i "/popupWindow/c\\$popupWindow" /var/www/html/gwd/!ddns.php
+sed -i "/popupWindow/c\\$popupWindow" /var/www/html/gwd/!update.php
 }
 
 
