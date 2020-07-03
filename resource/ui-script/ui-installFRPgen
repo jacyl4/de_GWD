@@ -1,17 +1,16 @@
 #!/bin/bash
-updateCMD=$(jq -r '.updateCMD' /usr/local/bin/0conf)
-CMD="/usr/local/bin/ttyd -p 3000 -o $updateCMD"
+installFRPcmd=$(jq -r '.updateCMD' /usr/local/bin/0conf)
+CMD="/usr/local/bin/ttyd -p 3000 -o $installFRPcmd"
 
-localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
 popupWindow="window.open('"http://$localIP:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
 
-sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
+sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!ddns.php
 
-cat << EOF >/usr/local/bin/ui-update
+cat << EOF >/usr/local/bin/ui-installFRP
 #!/bin/bash
 $CMD
 EOF
-chmod +x /usr/local/bin/ui-update
+chmod +x ui-installFRP
 
 cat << EOF >/lib/systemd/system/ttyd.service
 [Unit]
@@ -21,7 +20,7 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
-ExecStart=/bin/bash /usr/local/bin/ui-update
+ExecStart=/bin/bash /usr/local/bin/ui-installFRP
 ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
 StartLimitBurst=0

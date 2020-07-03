@@ -492,6 +492,11 @@ $.get('ddnsStopCF.php', function(result){window.location.reload();});
 function FRPprotocolSWtcp(){$('#FRPprotocol').html("TCP"); };
 function FRPprotocolSWudp(){$('#FRPprotocol').html("UDP"); };
 
+function installFRP(){
+$.get('installFRP.php', function(result){window.location.reload();});
+window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+};
+
 function onFRP(){
 FRPdomain=$('#FRPdomain').val();
 FRPbindPort=$('#FRPbindPort').val();
