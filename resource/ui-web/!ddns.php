@@ -160,12 +160,12 @@
           <div class="card-header">
             <i class="fas fa-bacon"></i>
             FRP
-<span class="float-right mt-n1 mb-n2" id="FRPbutton" style="display:none">
+<span class="float-right mt-n1 mb-n2 ml-4" id="FRPbutton" style="display:none">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-4" style="border-Radius: 0px;" onclick="installFRP()">install</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="installFRP()">install</button>
 </span>
           </div>
 
@@ -235,12 +235,12 @@
           <div class="card-header">
             <i class="fas fa-archway"></i>
             WireGuard Server
-<span class="float-right mt-n1 mb-n2" id="WGbutton" style="display:none">
+<span class="float-right mt-n1 mb-n2 ml-4" id="WGbutton" style="display:none">
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="WGoff()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-4" style="border-Radius: 0px;" onclick="installWG()">install</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="installWG()">install</button>
 </span>
           </div>
           <div class="card-body" id="WGbody" style="display:none">
