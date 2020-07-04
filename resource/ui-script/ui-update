@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/local/bin/ttyd -p 3000 -o $(jq -r '.updateCMD' /usr/local/bin/0conf)
