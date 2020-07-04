@@ -27,4 +27,4 @@ fi
 
 systemctl restart v2dns >/dev/null 2>&1
 
-echo "DNS OK"
+echo "DNS done"
