@@ -256,7 +256,7 @@
           <span class="input-group-text justify-content-center">UDP端口</span>
           </div>
           <input type="text" id="WGaddressport" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGport ?>">
-          <button type="button" class="btn btn-outline-dark btn-sm" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
+          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
       </div>
 </div>
 
