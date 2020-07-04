@@ -4,21 +4,3 @@ cat << EOF >/usr/local/bin/ui-update
 /usr/local/bin/ttyd -p 3000 -o $(jq -r '.updateCMD' /usr/local/bin/0conf)
 EOF
 chmod +x /usr/local/bin/ui-update
-
-cat << EOF >/lib/systemd/system/ttyd.service
-[Unit]
-Description=ttyd
-After=network.target
-
-[Service]
-User=root
-Type=oneshot
-ExecStart=/bin/bash /usr/local/bin/ui-update
-ExecStop=/bin/kill -9 \$MAINPID
-KillMode=process
-StartLimitBurst=0
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl daemon-reload >/dev/null 2>&1

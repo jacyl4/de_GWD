@@ -822,6 +822,24 @@ fi
 mv -f ~/ttyd /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 
+cat << EOF >/lib/systemd/system/updateGWD.service
+[Unit]
+Description=ttyd
+After=network.target
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/bin/bash /usr/local/bin/ui-update
+ExecStop=/bin/kill -9 \$MAINPID
+KillMode=process
+StartLimitBurst=0
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload >/dev/null 2>&1
+
 popupWindow="window.open('"http://$localaddr:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!ddns.php
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
@@ -1117,6 +1135,8 @@ rm -rf /usr/local/bin/Q4am
 rm -rf /usr/local/bin/Q4H
 rm -rf /usr/local/bin/Q2H
 rm -rf /etc/modules-load.d/nf_conntrack.conf
+rm -rf /lib/systemd/system/ttyd.service
+systemctl daemon-reload >/dev/null 2>&1
 
 cd ~
 source /etc/profile
