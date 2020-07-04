@@ -36,7 +36,7 @@ server_port = $FRPbindPort
 protocol = $(echo $FRPbindProtocol | tr '[:upper:]' '[:lower:]')
 token = $FRPtoken
 
-[Wireguard]
+[FRP]
 type = $(echo $FRPprotocol | tr '[:upper:]' '[:lower:]')
 local_ip = 127.0.0.1
 remote_port = $FRPremotePort
