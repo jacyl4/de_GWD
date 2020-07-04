@@ -26,3 +26,5 @@ if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
 fi
 
 output=`systemctl restart v2dns >/dev/null 2>&1`
+
+echo "DNS ok"

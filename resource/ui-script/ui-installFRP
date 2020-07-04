@@ -49,7 +49,7 @@ start_menu(){
     start_menu
     ;;
     2)
-    installFRP
+    uninstallFRP
     start_menu
     ;;
     *)
