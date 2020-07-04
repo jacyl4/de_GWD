@@ -2,8 +2,13 @@
 cat << "EOF" >/usr/local/bin/ui-installFRP
 #!/bin/bash
 clear
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
-deployFRP(){
+
+installFRP(){
 cd ~
 wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/frp_linux_amd64.tar.gz
 tar zxvf ~/frp.tar.gz
@@ -11,33 +16,34 @@ tar zxvf ~/frp.tar.gz
 mkdir -p /usr/local/bin/frp
 mv -f ~/frp_*/frpc /usr/local/bin/frp/frpc
 chmod +x /usr/local/bin/frp/frpc
+
 }
 
-read -p "Do you wish to install FRP?" yn
-    case $yn in
-        [Yy]* ) deployFRP;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
+
+start_menu(){
+    green "==============================="
+    green "		FRP install"
+    green "==============================="
+    echo ""
+    green  "1. Install FRP"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installFRP
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
     esac
+}
+
+start_menu
 EOF
 chmod +x /usr/local/bin/ui-installFRP
 
-rm -rf /lib/systemd/system/ttyd.service
-cat << EOF >/lib/systemd/system/ttyd.service
-[Unit]
-Description=ttyd
-After=network.target
-
-[Service]
-User=root
-Type=oneshot
-ExecStart=/usr/local/bin/ttyd -p 3000 -o  /usr/local/bin/ui-installFRP
-KillMode=process
-StartLimitBurst=0
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl daemon-reload >/dev/null 2>&1
-
-chmod 666 /usr/local/bin/0conf
+nohup /usr/local/bin/ttyd -p 3000 -o /usr/local/bin/ui-installFRP >/dev/null 2>&1

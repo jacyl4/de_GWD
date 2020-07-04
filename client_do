@@ -1332,6 +1332,8 @@ rm -rf /usr/local/bin/Q4am
 rm -rf /usr/local/bin/Q4H
 rm -rf /usr/local/bin/Q2H
 rm -rf /etc/modules-load.d/nf_conntrack.conf
+rm -rf /lib/systemd/system/ttyd.service
+systemctl daemon-reload >/dev/null 2>&1
 
 cd ~
 source /etc/profile
