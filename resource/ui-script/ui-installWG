@@ -1,0 +1,54 @@
+#!/bin/bash
+clear
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+
+installWGcore(){
+cd ~
+echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+
+apt update && apt install linux-headers-$(uname -r) libmnl-dev libelf-dev gcc make wireguard-tools
+
+git clone https://git.zx2c4.com/wireguard-linux-compat
+cd ~/wireguard-linux-compat/src
+make && make install
+rm -rf ~/wireguard-linux-compat
+cd ~
+
+if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
+mkdir -p /etc/wireguard
+output=`/usr/local/bin/ui-WGchangeKey >/dev/null 2>&1`
+fi
+
+blue "------------------------"
+blue "Install WireGuard [done]"
+blue "------------------------"
+}
+
+
+start_menu(){
+    green "==============================="
+    green "         Wireguard"
+    green "==============================="
+    green  "1. Install Wireguard"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installWGcore
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu

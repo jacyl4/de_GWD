@@ -40,7 +40,7 @@ start_menu(){
     green "         FRP"
     green "==============================="
     green  "1. Install FRP"
-    green  "2. Uninnstall FRP"
+    red  "2. Uninnstall FRP"
     echo ""
     read -p "Select:" num
     case "$num" in

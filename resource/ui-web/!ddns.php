@@ -165,11 +165,11 @@
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="installFRP()">install</button>
+<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-4" style="border-Radius: 0px;" onclick="installFRP()">install</button>
 </span>
           </div>
 
-          <div class="card-body" id="checkFRP" style="display:none">
+          <div class="card-body" id="FRPbody" style="display:none">
   <div class="form-row">
       <div class="col-md-6">
         <H6 class="my-auto mr-3">
@@ -235,14 +235,15 @@
           <div class="card-header">
             <i class="fas fa-archway"></i>
             WireGuard Server
-          <span class="badge badge-pill badge-info align-center ml-1"><?php echo shell_exec('sudo /usr/local/bin/ui-checkWGkernel');?></span>
-<span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
+<span class="float-right mt-n1 mb-n2" id="WGbutton" style="display:none">
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="WGoff()">关闭</button>
 </span>
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-4" style="border-Radius: 0px;" onclick="installWG()">install</button>
+</span>
           </div>
-          <div class="card-body">
+          <div class="card-body" id="WGbody" style="display:none">
 
 <div class="form-row mb-3">
       <div class="col-md-6 input-group mb-1 mx-auto">
@@ -255,6 +256,7 @@
           <span class="input-group-text justify-content-center">UDP端口</span>
           </div>
           <input type="text" id="WGaddressport" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGport ?>">
+          <button type="button" class="btn btn-outline-dark btn-sm" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
       </div>
 </div>
 
@@ -513,7 +515,10 @@ function offFRP(){
 $.get('offFRP.php', function(result){window.location.reload();});
 };
 
-
+function installWG(){
+$.get('installWG.php', function(result){});
+window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+};
 
 function WGchangeKey(){
 $.get('WGchangeKey.php', function(result){window.location.reload();});
@@ -547,9 +552,16 @@ $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
 
 $.get("checkFRP.php", function(data) {
-if (data == "installed") { 
-$("#checkFRP").css("display", "block"); 
+if ($.trim(data) == "installed") {
 $("#FRPbutton").css("display", "block"); 
+$("#FRPbody").css("display", "block"); 
+};
+});
+
+$.get("checkWG.php", function(data) {
+if ($.trim(data) == "installed") {
+$("#WGbutton").css("display", "block");
+$("#WGbody").css("display", "block");
 };
 });
 
