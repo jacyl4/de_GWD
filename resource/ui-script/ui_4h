@@ -1,8 +1,8 @@
 #!/bin/bash
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  output=`/usr/local/bin/ui-dnsGFW >/dev/null 2>&1`
+  /usr/local/bin/ui-dnsGFW >/dev/null 2>&1
 else
-  output=`/usr/local/bin/ui-dnsCHNW >/dev/null 2>&1`
+  /usr/local/bin/ui-dnsCHNW >/dev/null 2>&1
 fi
 
 for IPv2node in $(cat /usr/local/bin/IPv2node); do
@@ -11,7 +11,7 @@ done
 
 
 
-output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+/usr/local/bin/ui-saveListBW >/dev/null 2>&1
 
 if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
   for iplistB in $(cat /usr/local/bin/IPlistB); do
@@ -25,6 +25,6 @@ if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
   done
 fi
 
-output=`systemctl restart v2dns >/dev/null 2>&1`
+systemctl restart v2dns >/dev/null 2>&1
 
 echo "DNS ok"
