@@ -507,7 +507,7 @@ function FRPprotocolTCP(){$('#FRPprotocol').html("TCP"); };
 function FRPprotocolUDP(){$('#FRPprotocol').html("UDP"); };
 
 function installFRP(){
-$.get('installFRP.php', function(result){});
+$.get('installFRPc.php', function(result){});
 window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 };
 
