@@ -13,7 +13,8 @@ tar zxvf ~/frp.tar.gz
 
 mkdir -p /usr/local/bin/frp
 mv -f ~/frp_*/frpc /usr/local/bin/frp/frpc
-chmod +x /usr/local/bin/frp/frpc
+chmod -R 755 /usr/local/bin/frp
+chown -R root:root /usr/local/bin/frp
 
 rm -rf ~/frp*
 blue "--------------------"
