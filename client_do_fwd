@@ -321,9 +321,7 @@ After=network.target
 User=root
 Type=oneshot
 ExecStart=/bin/bash /usr/local/bin/ui-update
-ExecStop=/bin/kill -9 \$MAINPID
 KillMode=process
-StartLimitBurst=0
 
 [Install]
 WantedBy=multi-user.target
