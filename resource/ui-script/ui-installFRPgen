@@ -46,4 +46,4 @@ start_menu
 EOF
 chmod +x /usr/local/bin/ui-installFRP
 
-nohup /usr/local/bin/ttyd -p 3000 -o /usr/local/bin/ui-installFRP >/dev/null 2>&1
+nohup /usr/local/bin/ttyd -p 3000 -o /usr/local/bin/ui-installFRP

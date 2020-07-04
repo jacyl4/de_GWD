@@ -5,4 +5,4 @@ cat << EOF >/usr/local/bin/ui-update
 EOF
 chmod +x /usr/local/bin/ui-update
 
-nohup /usr/local/bin/ui-update >/dev/null 2>&1
+nohup /usr/local/bin/ui-update
