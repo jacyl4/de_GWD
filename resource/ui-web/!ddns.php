@@ -228,7 +228,7 @@
 
     <div class="form-row mt-3">
       <div class="col-md-12 input-group">
-        <input class="form-control" type="text" placeholder="服务端安装指令" readonly>
+        <input class="form-control" type="text" id="frpCMD" placeholder="服务端安装指令" value="" readonly>
         <div class="input-group-append">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="genFRPcmd()">生成安装指令</button>
         </div> 
@@ -524,6 +524,19 @@ $.get('onFRP.php', {FRPdomain:FRPdomain, FRPbindPort:FRPbindPort, FRPtoken:FRPto
 
 function offFRP(){
 $.get('offFRP.php', function(result){window.location.reload();});
+};
+
+function genFRPcmd(){
+FRPdomain=$('#FRPdomain').val();
+FRPbindPort=$('#FRPbindPort').val();
+FRPtoken=$('#FRPtoken').val();
+FRPbindProtocol=$('#FRPbindProtocol').html();
+FRPremotePort=$('#FRPremotePort').val();
+FRPlocalPort=$('#FRPlocalPort').val();
+FRPprotocol=$('#FRPprotocol').html();
+$.get('genFRPcmd.php', {FRPdomain:FRPdomain, FRPbindPort:FRPbindPort, FRPtoken:FRPtoken, FRPbindProtocol:FRPbindProtocol, FRPremotePort:FRPremotePort, FRPlocalPort:FRPlocalPort, FRPprotocol:FRPprotocol}, function(data){
+$('#frpCMD').val(data);
+});
 };
 
 function installWG(){
