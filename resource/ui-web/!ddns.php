@@ -160,10 +160,12 @@
           <div class="card-header">
             <i class="fas fa-bacon"></i>
             FRP
-<span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="installFRP()">install</button>
+<span class="float-right mt-n1 mb-n2" id="FRPbutton" style="display:none">
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
+</span>
+<span class="float-right mt-n1 mb-n2">
+<button type="button" class="btn btn-outline-dark btn-sm mt-1 mr-5" style="border-Radius: 0px;" onclick="installFRP()">install</button>
 </span>
           </div>
 
@@ -545,7 +547,10 @@ $("body").toggleClass("sidebar-toggled");
 $(".sidebar").toggleClass("toggled");
 
 $.get("checkFRP.php", function(data) {
-if (data == "installed") { $("#checkFRP").css("display", "block"); };
+if (data == "installed") { 
+$("#checkFRP").css("display", "block"); 
+$("#FRPbutton").css("display", "block"); 
+};
 });
 
 $.get('WGqrTXT1.php', function(data){
