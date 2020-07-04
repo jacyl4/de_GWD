@@ -25,6 +25,7 @@ StartLimitBurst=0
 [Install]
 WantedBy=multi-user.target
 EOF
+systemctl daemon-reload
 
 cat << EOF >/usr/local/bin/frp/frpc.ini
 [common]
@@ -33,7 +34,7 @@ server_port = $FRPbindPort
 token = $FRPtoken
 
 [Wireguard]
-type = $FRPprotocol
+type = $(echo $FRPprotocol | tr '[:upper:]' '[:lower:]')
 local_ip = 127.0.0.1
 remote_port = $FRPremotePort
 local_port = $FRPlocalPort

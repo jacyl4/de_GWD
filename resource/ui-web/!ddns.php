@@ -161,7 +161,7 @@
             <i class="fas fa-bacon"></i>
             FRP
 <span class="float-right mt-n1 mb-n2 ml-4" id="FRPbutton" style="display:none">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkFRP'); ?> btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
 <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
