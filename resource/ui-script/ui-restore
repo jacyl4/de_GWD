@@ -4,7 +4,6 @@ sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
 
 output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
 output=`systemctl restart smartdns`
-output=`/usr/local/bin/ui_4h`
 output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
 output=`systemctl restart vtrui`
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
@@ -13,6 +12,7 @@ else
   output=`/usr/local/bin/ui-offUDP >/dev/null 2>&1`
 fi
 output=`systemctl restart iptables-proxy`
+output=`/usr/local/bin/ui_4h`
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 output=`/usr/local/bin/ui-onDHCP`
