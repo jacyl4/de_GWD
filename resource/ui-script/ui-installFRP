@@ -16,18 +16,35 @@ mv -f ~/frp_*/frpc /usr/local/bin/frp/frpc
 chmod +x /usr/local/bin/frp/frpc
 
 rm -rf ~/frp*
+blue "--------------------"
+blue  "install FRP [done]"
+blue "--------------------"
 }
 
+uninstallFRP(){
+rm -rf /lib/systemd/system/frpc.service
+systemctl daemon-reload
+
+rm -rf /usr/local/bin/frp
+blue "--------------------"
+blue  "uninstall FRP [done]"
+blue "--------------------"
+}
 
 start_menu(){
     green "==============================="
     green "         FRP"
     green "==============================="
     green  "1. Install FRP"
+    green  "2. Uninnstall FRP"
     echo ""
     read -p "Select:" num
     case "$num" in
     1)
+    installFRP
+    start_menu
+    ;;
+    2)
     installFRP
     start_menu
     ;;
