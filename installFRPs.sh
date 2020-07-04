@@ -87,6 +87,17 @@ blue "--------------------"
 }
 
 start_menu(){
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+
+if [[ $(systemctl is-active frps) = "active" ]]; then
+    echo " [$statusGOOD] FRP         [working]"
+elif [[ ! -f "/usr/local/bin/frp/frps" ]]; then
+    echo " [$statusBAD] FRP         [not Installed]"
+else
+    echo " [$statusBAD] FRP         [start failed]"
+fi
+
     green "==============================="
     green "         FRPs"
     green "==============================="
