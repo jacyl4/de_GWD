@@ -23,6 +23,7 @@ blue "--------------------"
 }
 
 uninstallFRP(){
+systemctl stop frpc
 rm -rf /lib/systemd/system/frpc.service
 systemctl daemon-reload
 
