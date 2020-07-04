@@ -12,7 +12,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>DDNS & WireGuard</title>
+  <title>DDNS & LINK</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -64,7 +64,7 @@
       <li class="nav-item active">
         <a class="nav-link" href="!ddns.php">
           <i class="fas fa-fw fa-ethernet"></i>
-          <span>DDNS & WireGuard</span></a>
+          <span>DDNS & LINK</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="!nodeMAN.php">

@@ -63,7 +63,7 @@
       <li class="nav-item">
         <a class="nav-link" href="!ddns.php">
           <i class="fas fa-fw fa-ethernet"></i>
-          <span>DDNS & WireGuard</span></a>
+          <span>DDNS & LINK</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="!nodeMAN.php">
