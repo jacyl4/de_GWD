@@ -1,6 +1,4 @@
 #!/bin/bash
-cat << "EOF" >/usr/local/bin/ui-installFRP
-#!/bin/bash
 clear
 blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
@@ -17,14 +15,14 @@ mkdir -p /usr/local/bin/frp
 mv -f ~/frp_*/frpc /usr/local/bin/frp/frpc
 chmod +x /usr/local/bin/frp/frpc
 
+rm -rf ~/frp*
 }
 
 
 start_menu(){
     green "==============================="
-    green "		FRP install"
+    green "         FRP"
     green "==============================="
-    echo ""
     green  "1. Install FRP"
     echo ""
     read -p "Select:" num
@@ -43,7 +41,3 @@ start_menu(){
 }
 
 start_menu
-EOF
-chmod +x /usr/local/bin/ui-installFRP
-
-nohup /usr/local/bin/ttyd -p 3000 -o /usr/local/bin/ui-installFRP
