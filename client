@@ -71,6 +71,10 @@ apt update && apt install sudo locales net-tools dnsutils ipset wget curl git jq
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
+chmod -R 755 /var/log/lighttpd
+chown -R www-data:www-data /var/log/lighttpd
+systemctl restart lighttpd
+
 dpkg --configure -a
 
 cat << EOF >/etc/security/limits.conf
