@@ -62,7 +62,7 @@ sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
 cat /tmp/v2node_temp | while read line 
 do
   key=$line
-  value=$(nslookup -port=5390 $line 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+  value=$(nslookup -port=5380 $line 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 echo $value >>/usr/local/bin/IPv2node
 jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
 done
