@@ -136,7 +136,7 @@
             <i class="fas fa-archive"></i>
             更新
         <span class="float-right mt-n1 mb-n2">
-        <button type="button" class="btn btn-outline-dark btn-sm mt-1" onclick="Rescue()">救援</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="Rescue()">救援</button>
         </span>
           </div>
           <div class="card-body">

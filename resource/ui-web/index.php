@@ -101,20 +101,32 @@
 
         <!-- Icon Cards -->
         <div class="row">
-
           <div class="col-xl-3 col-sm-6 mb-3">
             <div class="card text-white bg-dark o-hidden h-100">
               <div class="card-body">
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-rocket"></i>
                 </div>
-                <div class="mr-5">联网状态</div>
+                <div class="">联网状态</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <span id="testBaidu" class="float-left">
-                </span>
-                <span id="testGoogle" class="float-right">
-                </span>
+                <span id="testBaidu" class="float-left"></span>
+                <span id="testGoogle" class="float-right"></span>
+              </a>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card text-white bg-dark o-hidden h-100">
+              <div class="card-body">
+                <div class="card-body-icon">
+                  <i class="fas fa-fw fa-bell"></i>
+                </div>
+                <div class="">版本检测</div>
+              </div>
+              <a class="card-footer text-white clearfix small z-1">
+                <h6 class="float-left" style="margin-bottom: 0"><span id="currentver" class="badge badge-pill badge-light"></span></h6>
+                <h6 class="float-right" style="margin-bottom: 0"><span id="remotever" class=""></span></h6>
               </a>
             </div>
           </div>
@@ -125,47 +137,27 @@
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-toggle-on"></i>
                 </div>
-                <div class="mr-5">代理模式</div>
+                <div class="">调节开关</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <span class="float-left"><?php echo shell_exec('sudo /usr/local/bin/ui-checkDNS');?></span>
-                <button class="btn btn-light float-right" style="padding: 0.25rem 0.25rem;font-size: 0.7rem;line-height: 0.8;border-radius: 0.2rem;" onclick="restartProxy()">重启进程</button>
-              </a>
-            </div>
-          </div>
-
-
-          <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-dark o-hidden h-100">
-              <div class="card-body">
-                <div class="card-body-icon">
-                  <i class="fas fa-fw fa-bell"></i>
-                </div>
-                <div class="mr-5">版本检测</div>
-              </div>
-              <a class="card-footer text-white clearfix small z-1">
-                <h6><span id="currentver" class="badge badge-pill badge-light float-left mb-n2"></span></h6>
-                <h6><span id="remotever" class=""></span></h6>
+                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" onclick="restartProxy()">重启进程</button></h6>
+                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" data-toggle="modal" data-target="#markThis">备注本机</button></h6>
               </a>
             </div>
           </div>
 
           <div class="col-xl-3 col-sm-6 mb-3">
             <div class="card text-white bg-dark o-hidden h-100">
-              <div class="card-body">
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-clock"></i>
                 </div>
-                <div class="mr-5">运行时长</div>
-              </div>
-              <a class="card-footer text-white clearfix small z-1">
-                <button type="button" class="btn btn-light float-left" style="padding: 0.25rem 0.25rem;font-size: 0.7rem;line-height: 0.8;border-radius: 0.2rem;" data-toggle="modal" data-target="#markThis">备注本机</button>
-                <span id="uptime" class="float-right">
-                </span>
-              </a>
+                <div class="clearfix small ml-4 my-auto py-3">
+                <span>运行时长：</span><br>
+                <span id="uptime"></span><br>
+                <span><?php echo shell_exec('sudo /usr/local/bin/ui-checkStatus');?></span>
+                </div>
             </div>
           </div>
-
         </div>
 
 
@@ -373,8 +365,8 @@
             <i class="far fa-compass"></i>
             DNS
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="dnsCHNW()">大陆白名单</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="dnsGFW()">GFWlist</button>
+                <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDNSchnw') ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsCHNW()">大陆白名单</button>
+                <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDNSgfw') ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsGFW()">GFWlist</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="submitDNS()">提交</button>
           </span>
           </div>
@@ -455,7 +447,7 @@
             <i class="fas fa-exchange-alt"></i>
             IP地址
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="submitstaticip()">重启</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="submitstaticip()">重启</button>
           </span>
           </div>
           <div class="card-body">
@@ -488,9 +480,9 @@
             <i class="fas fa-network-wired"></i>
             DHCP 服务
 <span class="float-right mt-n1 mb-n2">
-<a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;">详情</a>
+<a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">详情</a>
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="onDHCP()">开启</button>
-<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-radius: 0px;" onclick="offDHCP()">关闭</button>
+<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="offDHCP()">关闭</button>
 </span>
           </div>
           <div class="card-body">
@@ -860,18 +852,17 @@ $("#"+nodenum).html(nodestatust);
 $.get('uptime.php', function(data) { $('#uptime').text(data) });
 
 $.get("version.php", function(data) {
-var strver=data;
-var currentvernum = strver.split("-")[0].substring(0);
-var remotevernum = strver.split("-")[1].substring(0);
+var currentvernum = data.split("-")[0].substring(0);
+var remotevernum = data.split("-")[1].substring(0);
 $('#currentver').html(currentvernum+'本机');
 $('#remotever').html(remotevernum+' 发布');
 
 var vera = $.trim(currentvernum);
 var verb = $.trim(remotevernum);
 if (vera == verb) {
-$('#remotever').addClass('badge badge-pill badge-light float-right mt-n2');
+$('#remotever').addClass('badge badge-pill badge-light');
 } else {
-$('#remotever').addClass('badge badge-pill badge-warning float-right mt-n2');
+$('#remotever').addClass('badge badge-pill badge-warning');
 };
 });
 

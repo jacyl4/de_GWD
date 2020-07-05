@@ -2,5 +2,5 @@
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) == "on" ]]; then
 	echo "success"
 else
-	echo "outline-dark"
+	echo "outline-secondary"
 fi

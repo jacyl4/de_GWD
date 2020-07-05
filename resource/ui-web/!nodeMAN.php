@@ -106,7 +106,7 @@
             <i class="fas fa-stream"></i>
             节点编辑
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-dark btn-sm mt-1" style="border-Radius: 0px;" onclick="saveNode()">保存</button>
+<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="saveNode()">保存</button>
 </span>
           </div>
           <div class="card-body">
