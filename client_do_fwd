@@ -240,7 +240,7 @@ fi
 svn export --force https://github.com/jacyl4/de_GWD/branches/master/resource/ui-script
 svn export --force https://github.com/jacyl4/de_GWD/branches/master/resource/ui-web
 
-if [[ -f ~/ui-script/ui_am4 ]] && [[ -d ~/ui-web/vendor/jquery ]]; then
+if [[ -f ~/ui-script/ui_am4 ]] && [[ -d ~/ui-web/vendor ]]; then
 rm -rf /usr/local/bin/ui-*
 rm -rf /usr/local/bin/ui_*
 rm -rf /var/www/html/gwd/*.php

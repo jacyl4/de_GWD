@@ -148,14 +148,16 @@
 
           <div class="col-xl-3 col-sm-6 mb-3">
             <div class="card text-white bg-dark o-hidden h-100">
+              <div class="card-body">
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-clock"></i>
                 </div>
-                <div class="clearfix small ml-4 my-auto py-3">
-                <span>运行时长：</span>
-                <span id="uptime"></span><br>
-                <span><?php echo shell_exec('sudo /usr/local/bin/ui-checkStatus');?></span>
-                </div>
+                  <div class="">运行时长</div>
+              </div>
+              <a class="card-footer text-white clearfix small z-1">
+                <span id="uptime" class="float-left"></span>
+                <span class="float-right"><?php echo shell_exec('sudo /usr/local/bin/ui-checkStatus');?></span>
+              </a>
             </div>
           </div>
         </div>
