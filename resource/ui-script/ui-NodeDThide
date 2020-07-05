@@ -91,6 +91,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
       {
         "type": "field",
         "domain": [
+          "domain:netflix.ca",
           "domain:netflix.com",
           "domain:netflix.net",
           "domain:nflxext.com",
@@ -98,6 +99,8 @@ cat > /usr/local/bin/vtrui/config.json << EOF
           "domain:nflximg.net",
           "domain:nflxso.net",
           "domain:nflxvideo.net",
+          "domain:nflxsearch.net",
+          "domain:netflixinvestor.com",
           "domain:netflixdnstest0.com",
           "domain:netflixdnstest1.com",
           "domain:netflixdnstest2.com",
