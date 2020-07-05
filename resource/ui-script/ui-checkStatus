@@ -1,4 +1,4 @@
 #!/bin/bash
-echo "大陆IP：$(ipset list chnroute | grep 'Number of entries' | cut -d: -f2)个"
+echo "已装载大陆IP：$(ipset list chnroute | grep 'Number of entries' | cut -d: -f2)"
 echo "<br/>"
 echo "规则更新时间：$(date '+%m月%d日 %H:%M:%S' -d @$(stat -c %Y /usr/local/bin/v2dns/geosite.dat))"
