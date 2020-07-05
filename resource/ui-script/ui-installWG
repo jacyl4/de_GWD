@@ -6,18 +6,27 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
+case $(uname -m) in
+    x86_64)  architecture="amd64" ;;
+    aarch64)  architecture="arm64" ;;
+esac
+
+
 installWGcore(){
-cd ~
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+apt update
 
-apt update && apt install linux-headers-$(uname -r) libmnl-dev libelf-dev gcc make wireguard-tools
-
+if [[ $architecture = "amd64" ]]; then
+apt install linux-headers-$(uname -r) libmnl-dev libelf-dev gcc make wireguard-tools
+cd ~
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src
 make && make install
 rm -rf ~/wireguard-linux-compat
-cd ~
+elif [[ $architecture = "arm64" ]]; then
+apt install wireguard-dkms wireguard-tools
+fi
 
 if [[ ! -f "/etc/wireguard/wg0.conf" ]]; then
 mkdir -p /etc/wireguard
