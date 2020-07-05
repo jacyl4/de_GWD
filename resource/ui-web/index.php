@@ -125,8 +125,8 @@
                 <div class="">调节开关</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" onclick="restartProxy()">重启进程</button></h6>
-                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" data-toggle="modal" data-target="#markThis">备注本机</button></h6>
+                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" onclick="restartProxy()">重启进程</button></h6>
+                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" data-toggle="modal" data-target="#markThis">备注本机</button></h6>
               </a>
             </div>
           </div>
