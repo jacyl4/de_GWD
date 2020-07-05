@@ -22,4 +22,4 @@ for IPchnroute in $(cat /usr/local/bin/IPchnroute); do
 done
 fi
 
-echo "IP rules done"
+echo "IP & Domain rules done"

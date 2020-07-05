@@ -3,4 +3,6 @@ if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
 	echo "installed"
 elif [[ $(uname -m) = "aarch64" ]] && [[ -f "/lib/modules/$(uname -r | awk NR==1)/kernel/net/wireguard/wireguard.ko" ]]; then
 	echo "installed"
+elif [[ $(uname -m) = "aarch64" ]] && [[ -d "/var/lib/dkms/wireguard" ]]; then
+	echo "installed"
 fi

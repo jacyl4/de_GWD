@@ -2,5 +2,5 @@
 if [[ "$(crontab -l)" =~ "ddnsUpdateIPCF" ]]; then
 	echo "success"
 else
-	echo "outline-dark"
+	echo "outline-secondary"
 fi
