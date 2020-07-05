@@ -120,6 +120,21 @@
             <div class="card text-white bg-dark o-hidden h-100">
               <div class="card-body">
                 <div class="card-body-icon">
+                  <i class="fas fa-fw fa-toggle-on"></i>
+                </div>
+                <div class="">调节开关</div>
+              </div>
+              <a class="card-footer text-white clearfix small z-1">
+                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" onclick="restartProxy()">重启进程</button></h6>
+                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" data-toggle="modal" data-target="#markThis">备注本机</button></h6>
+              </a>
+            </div>
+          </div>
+          
+          <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card text-white bg-dark o-hidden h-100">
+              <div class="card-body">
+                <div class="card-body-icon">
                   <i class="fas fa-fw fa-bell"></i>
                 </div>
                 <div class="">版本检测</div>
@@ -133,26 +148,11 @@
 
           <div class="col-xl-3 col-sm-6 mb-3">
             <div class="card text-white bg-dark o-hidden h-100">
-              <div class="card-body">
-                <div class="card-body-icon">
-                  <i class="fas fa-fw fa-toggle-on"></i>
-                </div>
-                <div class="">调节开关</div>
-              </div>
-              <a class="card-footer text-white clearfix small z-1">
-                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" onclick="restartProxy()">重启进程</button></h6>
-                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:700;line-height:0.35;border-radius:10rem;" data-toggle="modal" data-target="#markThis">备注本机</button></h6>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-dark o-hidden h-100">
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-clock"></i>
                 </div>
                 <div class="clearfix small ml-4 my-auto py-3">
-                <span>运行时长：</span><br>
+                <span>运行时长：</span>
                 <span id="uptime"></span><br>
                 <span><?php echo shell_exec('sudo /usr/local/bin/ui-checkStatus');?></span>
                 </div>
