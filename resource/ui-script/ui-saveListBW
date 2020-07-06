@@ -18,7 +18,7 @@ if [[ -n $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) ]]; then
 		cat /tmp/listBpre | while read listB 
 		do
 			jq --arg listB "domain:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
-			listBIP=$(nslookup -port=5380 $listB 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+			listBIP=$(dig @127.0.0.1 $listB -p 5380 +short A | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 			echo $listBIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistB
 			jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
 			jq --arg key "$listB" --slurpfile value /tmp/listBIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
@@ -49,7 +49,7 @@ if [[ -n $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) ]]; then
 		cat /tmp/listWpre | while read listW
 		do
 			jq --arg listW "domain:$listW" '.dns.servers[2].domains+=[$listW]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
-			listWIP=$(nslookup -port=5310 $listW 127.0.0.1 | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+			listWIP=$(dig @127.0.0.1 $listW -p 5310 +short A | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 			echo $listWIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistW
 			jq -n --arg listWIP "$listWIP" '$listWIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWIPs
 			jq --arg key "$listW" --slurpfile value /tmp/listWIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
