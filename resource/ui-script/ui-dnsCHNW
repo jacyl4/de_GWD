@@ -52,9 +52,9 @@ sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.
 jq --arg key1 "$doh1Domain" --arg value1 "$doh1IP" '.dns.hosts += {($key1): ($value1)}' /tmp/v2dns_config |\
 jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($value2)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
 
-echo $doh1IP >/usr/local/bin/IPdoh
-echo $doh2IP >>/usr/local/bin/IPdoh
-
+echo $doh1IP >/tmp/IPdoh
+echo $doh2IP >>/tmp/IPdoh
+sort /tmp/IPdoh | uniq | sed '/^\s*$/d' >/usr/local/bin/IPdoh
 
 cat /dev/null >/usr/local/bin/IPv2node
 jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp2
@@ -69,7 +69,6 @@ done
 
 jq 'del(.dns.hosts[] | select(. == ""))' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
 
-
 jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
 if [[ -n $(cat /tmp/hosts) ]]; then
   cat /tmp/hosts | while read line 
@@ -79,8 +78,6 @@ if [[ -n $(cat /tmp/hosts) ]]; then
   jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
   done
 fi
-
-
 
 jq '.dns.DNSsplit="chnw"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
