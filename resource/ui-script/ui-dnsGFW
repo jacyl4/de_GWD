@@ -62,7 +62,7 @@ sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
 cat /tmp/v2node_temp | while read line 
 do
   key=$line
-  value=$(dig @127.0.0.1 $line -p 5380 +short A | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+  value=$(dig @127.0.0.1 $line -p 5390 +short A | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 echo $value >>/usr/local/bin/IPv2node
 jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
 done
