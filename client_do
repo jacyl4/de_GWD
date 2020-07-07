@@ -1036,6 +1036,8 @@ chmod +x /var/www/html/*
 chmod +x /usr/local/bin/*
 
 wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ttyd_linux.x86_64
+
+if [ $(ls -l ~/ttyd | awk '{print$5}') -gt 2000000 ]; then
 mv -f ~/ttyd /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 
@@ -1054,6 +1056,7 @@ KillMode=process
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload >/dev/null 2>&1
+fi
 
 popupWindow="window.open('"http://$localaddr:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!ddns.php
