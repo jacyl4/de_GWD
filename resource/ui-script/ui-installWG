@@ -28,7 +28,7 @@ elif [[ $architecture = "arm64" ]]; then
 apt install wireguard-dkms wireguard-tools
 fi
 
-if [[ -z $(cat /etc/wireguard/wg0.conf) ]]; then
+if [[ -z $(jq -r '.wireguard' /usr/local/bin/0conf) ]]; then
 mkdir -p /etc/wireguard
 output=`/usr/local/bin/ui-WGchangeKey`
 fi
