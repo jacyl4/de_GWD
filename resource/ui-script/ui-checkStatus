@@ -8,7 +8,7 @@ fi
 echo "|"
 
 if [[ $(systemctl is-active doh-client) = "active" ]]; then
-	echo "DOH: OK"
+	echo "DoH: OK"
 else
-	echo "DOH:failed"
+	echo "DoH:failed"
 fi
