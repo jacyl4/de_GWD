@@ -238,7 +238,6 @@ After=network.target
 [Service]
 Type=forking
 EnvironmentFile=/etc/default/smartdns
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStartPost=/bin/sh -c "echo $MAINPID > /run/smartdns.pid"
 ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
 KillMode=mixed
