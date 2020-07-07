@@ -1068,23 +1068,23 @@ sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
 postInstall(){
 /usr/local/bin/ui_am4
 
-output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-output=`systemctl restart smartdns`
-output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-output=`systemctl restart vtrui`
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  output=`/usr/local/bin/ui-onUDP >/dev/null 2>&1`
-else
-  output=`/usr/local/bin/ui-offUDP >/dev/null 2>&1`
-fi
-output=`systemctl restart iptables-proxy`
+/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1
+systemctl restart smartdns
 /usr/local/bin/ui_4h
-/usr/local/bin/ui_2h
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+systemctl restart vtrui
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onUDP >/dev/null 2>&1
+else
+  /usr/local/bin/ui-offUDP >/dev/null 2>&1
+fi
+systemctl restart iptables-proxy
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-  output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
+  /usr/local/bin/ui-markThis >/dev/null 2>&1
 fi
-output=`/usr/local/bin/ui-updateGen >/dev/null 2>&1`
+/usr/local/bin/ui-updateGEN
+/usr/local/bin/ui_2h
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
