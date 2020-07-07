@@ -122,7 +122,7 @@
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-toggle-on"></i>
                 </div>
-                <div class="">调节开关</div>
+                <div class="">快捷选项</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
                 <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" onclick="restartProxy()">重启进程</button></h6>
