@@ -97,6 +97,7 @@ fi
 
 rm -rf /tmp/v2dns*
 rm -rf /tmp/v2node*
+rm -rf /tmp/IPdoh*
 rm -rf /tmp/hosts
 rm -rf /tmp/listB
 rm -rf /tmp/listW
