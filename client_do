@@ -1403,7 +1403,7 @@ statusBAD=$(red "✕")
 
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
     echo "[$statusGOOD] SmartDNS       [working]"
-elif [[ ! -f "/etc/smartdns/smartdns.conf" ]]; then
+elif [[ ! -f "/usr/sbin/smartdns" ]]; then
     echo "[$statusBAD] SmartDNS       [not Installed]"
 else
     echo "[$statusBAD] SmartDNS       [start failed]"
