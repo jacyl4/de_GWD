@@ -870,7 +870,6 @@ systemctl restart iptables-proxy
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis >/dev/null 2>&1
 fi
-/usr/local/bin/ui-updateGEN
 /usr/local/bin/ui_2h
 
 crontab -l > ~/now.cron
