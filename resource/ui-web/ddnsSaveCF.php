@@ -14,9 +14,9 @@ $data['ddns']['ddnsCF']['cfEmail'] = $CFemail;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-$CFdomainid = exec('sudo /usr/local/bin/ui-ddnsCFgetDomainID');
+$CFdomainid = shell_exec('sudo /usr/local/bin/ui-ddnsCFgetDomainID');
 
-exec('sudo /usr/local/bin/ui-ddnsUpdateIPCF');
-exec('sudo /usr/local/bin/ui-ddnsUpdateOnCF');
+shell_exec('sudo /usr/local/bin/ui-ddnsUpdateIPCF');
+shell_exec('sudo /usr/local/bin/ui-ddnsUpdateOnCF');
 ?>
 <?php }?>

@@ -669,7 +669,7 @@ node7 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2no
 node8 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[7]->name ?>";
 node9 = "<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[8]->name ?>";
 
-nodenum = "checkNode<?php echo exec('/usr/local/bin/ui-checkNode');?>" ;
+nodenum = "checkNode<?php echo shell_exec('/usr/local/bin/ui-checkNode');?>" ;
 nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
 nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
