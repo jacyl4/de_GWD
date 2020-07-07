@@ -81,6 +81,7 @@ fi
 
 rm -rf /tmp/listB*
 rm -rf /tmp/listW*
+rm -rf /tmp/v2dns*
 
 chmod 666 /usr/local/bin/v2dns/config.json
 chmod 666 /usr/local/bin/0conf
