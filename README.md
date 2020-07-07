@@ -2,7 +2,7 @@
 [![Telegram](https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg)](https://t.me/de_GWD)  
 
 
-![de_GWD](https://i.loli.net/2020/07/08/YT1jIUJpnslRVhm.png)
+![de_GWD](https://i.loli.net/2020/07/08/5Zgr29H4TR7WCtQ.png)
 
 ## Server：
 ```
