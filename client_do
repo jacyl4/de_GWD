@@ -391,7 +391,7 @@ cat << EOF >/usr/local/bin/v2dns/config.json
   }
 ],
 "routing":{
-  "domainStrategy":"AsIs",
+  "domainStrategy":"IPIfNonMatch",
   "rules":[
     {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
   ]
