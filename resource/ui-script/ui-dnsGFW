@@ -25,7 +25,7 @@ cat << EOF >/tmp/v2dns_config
   }
 ],
 "routing":{
-  "domainStrategy":"IPIfNonMatch",
+  "domainStrategy":"AsIs",
   "rules":[
     {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
   ]
