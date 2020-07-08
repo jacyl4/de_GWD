@@ -199,9 +199,6 @@ bind-tcp 127.0.0.1:5370 -force-aaaa-soa
 
 speed-check-mode  ping,tcp:80
 cache-size        0
-rr-ttl            5
-rr-ttl-min        5
-rr-ttl-max        43200
 prefetch-domain   no
 serve-expired     yes
 serve-expired-ttl 0
