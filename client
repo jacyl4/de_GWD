@@ -208,18 +208,17 @@ rm -rf ~/smartdns.deb
 
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/remote.conf
-bind 127.0.0.1:5370
-bind-tcp 127.0.0.1:5370
+bind 127.0.0.1:5370 -force-aaaa-soa
+bind-tcp 127.0.0.1:5370 -force-aaaa-soa
 
 speed-check-mode  ping,tcp:80
-cache-size        512
-rr-ttl            300
-rr-ttl-min        60
+cache-size        0
+rr-ttl            5
+rr-ttl-min        5
 rr-ttl-max        43200
-force-AAAA-SOA    yes
-prefetch-domain   yes
+prefetch-domain   no
 serve-expired     yes
-serve-expired-ttl 43200
+serve-expired-ttl 0
 
 server 1.1.1.1
 server 1.0.0.1
@@ -241,7 +240,7 @@ rr-ttl-max        43200
 force-AAAA-SOA    yes
 prefetch-domain   yes
 serve-expired     yes
-serve-expired-ttl 43200
+serve-expired-ttl 0
 
 server 114.114.114.114
 server 114.114.115.115
