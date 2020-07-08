@@ -2,22 +2,24 @@
 piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
 
-output=`/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1`
-output=`systemctl restart smartdns`
-output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
-output=`systemctl restart vtrui`
+/usr/local/bin/ui-saveDNSChina
+systemctl restart smartdns
+/usr/local/bin/ui_4h
+systemctl restart doh-client
+systemctl restart v2dns
+/usr/local/bin/ui-NodeDThide
+systemctl restart vtrui
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  output=`/usr/local/bin/ui-onUDP >/dev/null 2>&1`
+  /usr/local/bin/ui-onUDP
 else
-  output=`/usr/local/bin/ui-offUDP >/dev/null 2>&1`
+  /usr/local/bin/ui-offUDP
 fi
-output=`systemctl restart iptables-proxy`
-output=`/usr/local/bin/ui_4h`
+systemctl restart iptables-proxy
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-output=`/usr/local/bin/ui-onDHCP`
+  /usr/local/bin/ui-onDHCP
 fi
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-  output=`/usr/local/bin/ui-markThis >/dev/null 2>&1`
+  /usr/local/bin/ui-markThis
 fi

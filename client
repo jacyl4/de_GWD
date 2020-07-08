@@ -1101,9 +1101,9 @@ nameserver 127.0.0.1
 EOF
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-output=`systemctl restart v2dns`
-output=`systemctl restart vtrui`
-output=`systemctl restart iptables-proxy`
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 
 installPihole
 
@@ -1123,9 +1123,9 @@ if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 output=`/usr/local/bin/ui-onDHCP`
 fi
 
-output=`systemctl restart v2dns`
-output=`systemctl restart vtrui`
-output=`systemctl restart iptables-proxy`
+systemctl restart iptables-proxy
+systemctl restart v2dns
+systemctl restart vtrui
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"

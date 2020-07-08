@@ -6,6 +6,6 @@ $data['address']['dhcp'] = "";
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-exec('sudo pihole -a disabledhcp');
+shell_exec('sudo pihole -a disabledhcp');
 ?>
 <?php }?>

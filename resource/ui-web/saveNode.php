@@ -83,12 +83,12 @@ file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 if ( $data['DNSsplit'] === "gfw" ){
-	exec('sudo /usr/local/bin/ui-dnsGFW');
+	shell_exec('sudo /usr/local/bin/ui-dnsGFW');
 } else {
-	exec('sudo /usr/local/bin/ui-dnsCHNW');
+	shell_exec('sudo /usr/local/bin/ui-dnsCHNW');
 }
 
-exec('sudo systemctl restart v2dns');
-exec('sudo systemctl restart iptables-proxy');
+shell_exec('sudo systemctl restart iptables-proxy');
+shell_exec('sudo systemctl restart v2dns');
 ?>
 <?php }?>

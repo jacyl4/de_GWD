@@ -30,7 +30,7 @@ fi
 
 if [[ -z $(jq -r '.wireguard' /usr/local/bin/0conf) ]]; then
 mkdir -p /etc/wireguard
-output=`/usr/local/bin/ui-WGchangeKey`
+/usr/local/bin/ui-WGchangeKey
 fi
 
 blue "------------------------"

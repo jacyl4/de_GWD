@@ -7,7 +7,7 @@ $nodedtpre = fopen("nodedtpre.txt", "w");
 fwrite($nodedtpre, $nodedtnum);
 fclose($nodedtpre);
 
-exec('sudo /usr/local/bin/ui-changeNodeDT');
-exec('sudo systemctl restart vtrui');
+shell_exec('sudo /usr/local/bin/ui-changeNodeDT');
+shell_exec('sudo systemctl restart vtrui');
 ?>
 <?php }?>

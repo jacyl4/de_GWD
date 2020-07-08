@@ -4,12 +4,12 @@
 $switchNodeDT = $_GET['switchNodeDT'];
 
 if ( $switchNodeDT === "NodeDTshow"){
-exec('sudo /usr/local/bin/ui-NodeDTshow');
+    shell_exec('sudo /usr/local/bin/ui-NodeDTshow');
 }
 elseif ( $switchNodeDT === "NodeDThide"){
-exec('sudo /usr/local/bin/ui-NodeDThide');
+    shell_exec('sudo /usr/local/bin/ui-NodeDThide');
 }
 
-exec('sudo systemctl restart vtrui');
+shell_exec('sudo systemctl restart vtrui');
 ?>
 <?php }?>
