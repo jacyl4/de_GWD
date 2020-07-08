@@ -25,6 +25,4 @@ if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
   done
 fi
 
-systemctl restart v2dns >/dev/null 2>&1
-
 echo "DNS done"
