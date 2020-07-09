@@ -1247,7 +1247,7 @@ jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
 jq --arg v2path "$v2path" '.v2nodeForUpdate.path=$v2path' |\
 jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
+chmod 666 /usr/local/bin/0conf
 
 installWebUI
 
@@ -1265,7 +1265,7 @@ sudo pihole -a -p
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d= -f2)
 
 jq --arg piholePW "$piholePW" '.address.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
+chmod 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"

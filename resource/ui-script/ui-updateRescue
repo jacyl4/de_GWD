@@ -1,5 +1,5 @@
 #!/bin/bash
-systemctl stop ttyd
+systemctl stop updateGWD
 
 systemctl stop v2dns
 systemctl stop vtrui
@@ -12,3 +12,9 @@ nameserver 119.28.28.28
 nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
+
+sed -i '/^\s*$/d' /usr/local/bin/0conf
+if [[ -z $(cat /usr/local/bin/0conf) ]]; then
+	cp -f /usr/local/bin/0conf_bak /usr/local/bin/0conf
+	chmod 666 /usr/local/bin/0conf
+fi

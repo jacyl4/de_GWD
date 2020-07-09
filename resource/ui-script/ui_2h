@@ -15,3 +15,10 @@ cd /lib/modules/
 rm -rf $(ls | grep -v $(uname -r | awk NR==1))
 fi
 
+sed -i '/^\s*$/d' /usr/local/bin/0conf
+if [[ -n $(cat /usr/local/bin/0conf) ]]; then
+	cp -f /usr/local/bin/0conf /usr/local/bin/0conf_bak
+elif [[ -z $(cat /usr/local/bin/0conf) ]]; then
+	cp -f /usr/local/bin/0conf_bak /usr/local/bin/0conf
+	chmod 666 /usr/local/bin/0conf
+fi

@@ -423,7 +423,7 @@ jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |
 jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
 jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
 jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
+chmod 666 /usr/local/bin/0conf
 
 clifwd_iptablesProxy
 
@@ -450,7 +450,7 @@ sudo pihole -a -p
 piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d= -f2)
 
 jq --arg piholePW "$piholePW" '.address.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
+chmod 666 /usr/local/bin/0conf
 blue "------------------------------"
 blue "Change Pi-hole password [done]"
 blue "------------------------------"
@@ -539,7 +539,7 @@ jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |
 jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
 jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
 jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-chmod -R 666 /usr/local/bin/0conf
+chmod 666 /usr/local/bin/0conf
 
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
