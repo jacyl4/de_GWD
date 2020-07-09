@@ -899,9 +899,6 @@ fi
 /usr/local/bin/ui_2h
 
 crontab -l > ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
@@ -1171,6 +1168,15 @@ systemctl daemon-reload >/dev/null 2>&1
 
 cd ~
 source /etc/profile
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
 
 piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 
