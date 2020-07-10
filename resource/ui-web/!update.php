@@ -221,7 +221,7 @@ $(".sidebar").toggleClass("toggled");
   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 
   if( fileName != "de_GWD_bak" ){
-  alert("文件选择错误");
+  alert("文件选择错误，备份文件名为 de_GWD_bak ");
   }
 
 });
