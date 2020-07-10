@@ -182,7 +182,7 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 }
 
 function backup(){
-$.get('backup.php', function(result){window.location.href = "/restore/0conf"});
+$.get('backup.php', function(result){window.location.href = "/restore/de_GWD_bak"});
 }
 
 function restore(){
@@ -191,7 +191,6 @@ var form_data = new FormData();
 form_data.append('file', file_data);
 $.ajax({
         url: 'restore.php',
-        dataType: 'zip',
         cache: false,
         contentType: false,
         processData: false,
@@ -222,7 +221,7 @@ $(".sidebar").toggleClass("toggled");
   var fileName = $(this).val().split("\\").pop();
   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 
-  if( fileName != "0conf" ){
+  if( fileName != "de_GWD_bak" ){
   alert("文件选择错误");
   }
 
