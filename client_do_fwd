@@ -243,6 +243,7 @@ svn export --force https://github.com/jacyl4/de_GWD/branches/master/resource/ui-
 if [[ -f ~/ui-script/ui_am4 ]] && [[ -d ~/ui-web/vendor ]]; then
 rm -rf /usr/local/bin/ui-*
 rm -rf /usr/local/bin/ui_*
+rm -rf /var/www/html/gwd/restore/*
 rm -rf /var/www/html/gwd/*.php
 rm -rf /var/www/html/gwd/vendor
 rm -rf /var/www/html/gwd/css
