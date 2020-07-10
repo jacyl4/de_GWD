@@ -199,7 +199,6 @@ $.ajax({
         success: function(data){
         }
       });
-alert('恢复设置。。。');
 window.location.reload(true);
 }
 
