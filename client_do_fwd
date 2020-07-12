@@ -409,7 +409,7 @@ clifwd_port=$(echo $clifwd_domainP | cut -d: -f2)
 topDomain=$(echo $clifwd_domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 wget --no-check-certificate -O ~/client_do $mirrorSite/client_do
-sed -i '2d' ~/client_do && sed -i '/chmod -R 666 \/usr\/local\/bin\/0conf/,$d' ~/client_do
+sed -i '2d' ~/client_do && sed -i '/chmod 666 \/usr\/local\/bin\/0conf/,$d' ~/client_do
 echo "}" >> ~/client_do
 chmod +x ~/client_do
 . ~/client_do
