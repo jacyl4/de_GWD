@@ -841,6 +841,7 @@ systemctl restart php7.4-fpm
 
 
 installPihole(){
+export PIHOLE_SKIP_OS_CHECK=true
 systemctl unmask lighttpd
 cd ~
 mkdir -p /etc/pihole

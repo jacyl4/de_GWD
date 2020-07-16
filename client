@@ -758,7 +758,7 @@ sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root
 
 
 installPihole(){
-cd ~
+export PIHOLE_SKIP_OS_CHECK=true
 mkdir -p /etc/pihole
 cat /dev/null > /etc/pihole/adlists.list
 cat << EOF >/etc/pihole/setupVars.conf
