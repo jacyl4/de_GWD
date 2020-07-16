@@ -223,6 +223,7 @@ systemctl restart iptablesrules
 
 
 installPihole(){
+export PIHOLE_SKIP_OS_CHECK=true
 mkdir -p /etc/pihole
 cat /dev/null > /etc/pihole/adlists.list
 cat << EOF >/etc/pihole/setupVars.conf
