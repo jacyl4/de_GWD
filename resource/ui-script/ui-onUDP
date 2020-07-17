@@ -45,29 +45,29 @@ for IPv2node in \$(cat /usr/local/bin/IPv2node); do
   ipset add v2node \$IPv2node
 done
 
+ipset -N listB hash:ip family inet
 if [[ -n \$(cat /usr/local/bin/IPlistB) ]]; then
-  ipset -N listB hash:ip family inet
   for iplistB in \$(cat /usr/local/bin/IPlistB); do
     ipset add listB \$iplistB
   done
 fi
 
+ipset -N listW hash:ip family inet
 if [[ -n \$(cat /usr/local/bin/IPlistW) ]]; then
-  ipset -N listW hash:ip family inet
   for iplistW in \$(cat /usr/local/bin/IPlistW); do
     ipset add listW \$iplistW
   done
 fi
 
+ipset -N listBlan hash:net family inet
 if [[ -n \$(cat /usr/local/bin/IPlistBlan) ]]; then
-  ipset -N listBlan hash:net family inet
   for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
     ipset add listBlan \$iplistBlan
   done
 fi
 
+ipset -N listWlan hash:net family inet
 if [[ -n \$(cat /usr/local/bin/IPlistWlan) ]]; then
-  ipset -N listWlan hash:net family inet
   for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
     ipset add listWlan \$iplistWlan
   done

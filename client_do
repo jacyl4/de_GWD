@@ -4,40 +4,56 @@ blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+statusInstalled=$(green "[ installed ]")
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
 
 
+mirrorSite="http://gwd.seso.icu:10290"
+installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client_do)"
 
+tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"; }
+
+aptLocal="mirrors.aliyun.com"
+aptGlobal="deb.debian.org"
 branch="master"
-
-installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)"
-
-mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
-
-smartdns_amd64="$mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb"
 
 
 
 export DEBIAN_FRONTEND=noninteractive
+export PIHOLE_SKIP_OS_CHECK=true
 
 
 
-preInstall(){
+preDownload() {
+tcpTime && hwclock -w
 systemctl stop iptables-proxy >/dev/null 2>&1
 systemctl stop v2dns >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
 
-systemctl mask --now systemd-resolved >/dev/null 2>&1
-systemctl daemon-reload >/dev/null 2>&1
-
 rm -rf /etc/resolv.conf
+
 cat << EOF >/etc/resolv.conf
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
+
+wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb
+
+wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/dohamd64.zip
+
+wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/vtamd64.zip
+
+wget --no-check-certificate -c -O ~/ttyd $mirrorSite/ttyd_linux.x86_64
+}
+
+
+
+preInstall(){
 
 cat << EOF >/etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
@@ -53,17 +69,21 @@ Dpkg::Options {
 EOF
 
 rm -rf /etc/apt/sources.list.d/*
+
 cat << EOF >/etc/apt/sources.list
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://mirrors.aliyun.com/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
-deb http://mirrors.aliyun.com/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
+deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
-apt update && apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 lighttpd bc
+apt update
+apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 bc resolvconf lighttpd
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now lighttpd >/dev/null 2>&1
 
+systemctl mask --now systemd-resolved >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 dpkg --configure -a
 
 cat << EOF >/etc/security/limits.conf
@@ -72,6 +92,7 @@ cat << EOF >/etc/security/limits.conf
 * soft nproc 64000
 * hard nproc 64000
 EOF
+
 echo "ulimit -n 1000000" > ~/.bash_profile
 
 modprobe ip_conntrack
@@ -142,7 +163,6 @@ net.ipv4.neigh.default.gc_thresh2 = 2048
 net.ipv4.neigh.default.gc_thresh3 = 4096
 EOF
 
-
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
@@ -156,6 +176,7 @@ fi
 sysctl -p
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+
 cat << EOF >/etc/default/locale
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
@@ -173,13 +194,11 @@ LC_MEASUREMENT="en_US.UTF-8"
 LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
+
 locale-gen en_US.UTF-8
 
 echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
+ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 }
 
 
@@ -187,12 +206,9 @@ hwclock -w
 installSmartDNS(){
 systemctl stop smartdns >/dev/null 2>&1
 dpkg --purge smartdns >/dev/null 2>&1
-
-wget --no-check-certificate -O ~/smartdns.deb $smartdns_amd64
 dpkg -i ~/smartdns.deb
-rm -rf ~/smartdns.deb
-
 rm -rf /etc/smartdns/*.conf
+
 cat << EOF >/etc/smartdns/remote.conf
 bind 127.0.0.1:5370 -force-aaaa-soa
 bind-tcp 127.0.0.1:5370 -force-aaaa-soa
@@ -234,6 +250,7 @@ server 223.6.6.6
 EOF
 
 rm -rf /run/smartdns.pid
+
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=Smart DNS server
@@ -256,26 +273,24 @@ EOF
 systemctl daemon-reload
 systemctl enable smartdns
 systemctl restart smartdns
+echo "$statusInstalled smartdns"
 }
 
 
 
 installDOH(){
-systemctl stop doh-client >/dev/null 2>&1
-rm -rf /usr/local/bin/doh-client
-
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 doh1IP=$(dig $doh1Domain +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 doh2IP=$(dig $doh2Domain +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 
-wget --no-check-certificate -O ~/doh.zip $mirrorSite/dohamd64.zip
+systemctl stop doh-client >/dev/null 2>&1
+rm -rf /usr/local/bin/doh-client
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
 chmod +x /usr/local/bin/doh-client
-rm -rf ~/doh*
-
 mkdir -p /etc/dns-over-https/
+
 cat << EOF >/etc/dns-over-https/doh-client.conf
 listen = [ "127.0.0.1:5380" ]
 
@@ -305,8 +320,8 @@ doh_upstream2='url = "https:\/\/'$doh2'"'
 
 sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /etc/dns-over-https/doh-client.conf
 sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
-
 mkdir -p /etc/NetworkManager/dispatcher.d/
+
 cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
 #!/bin/bash
 case "$2" in
@@ -321,6 +336,7 @@ case "$2" in
         ;;
 esac
 EOF
+
 chmod +x /etc/NetworkManager/dispatcher.d/doh-client
 
 cat << "EOF" > /lib/systemd/system/doh-client.service
@@ -345,6 +361,8 @@ EOF
 systemctl daemon-reload
 systemctl enable doh-client
 systemctl restart doh-client
+rm -rf ~/doh
+echo "$statusInstalled doh-client"
 }
 
 
@@ -352,13 +370,13 @@ systemctl restart doh-client
 installV2ray(){
 systemctl disable --now v2dns >/dev/null 2>&1
 systemctl disable --now vtrui >/dev/null 2>&1
+rm -rf /usr/bin/vtrui
+rm -rf /etc/vtrui
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/local/bin/vtrui
-rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/v2dns
 mkdir -p /usr/local/bin/vtrui
-wget --no-check-certificate -O ~/vtrui.zip $mirrorSite/vtamd64.zip
-mkdir -p ~/vtrui
+
 unzip ~/vtrui.zip -d ~/vtrui
 cp -f ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
 cp -f ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
@@ -368,7 +386,6 @@ chmod +x /usr/local/bin/v2dns/v2dns
 chmod +x /usr/local/bin/v2dns/v2ctl
 chmod +x /usr/local/bin/vtrui/vtrui
 chmod +x /usr/local/bin/vtrui/v2ctl
-rm -rf ~/vtrui*
 
 cat << EOF >/usr/local/bin/v2dns/config.json
 {
@@ -400,6 +417,7 @@ cat << EOF >/usr/local/bin/v2dns/config.json
 EOF
 
 domainIP=$(dig @127.0.0.1 $domain -p 5380 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
+
 jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
 jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
@@ -503,7 +521,8 @@ EOF
 systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
-rm -rf /usr/bin/vtrui
+rm -rf ~/vtrui
+echo "$statusInstalled v2dns && vtrui"
 }
 
 
@@ -553,43 +572,39 @@ for iplanip in \$lanip; do
   ipset add lanip \$iplanip
 done
 
-if [[ -n \$(cat /usr/local/bin/IPdoh) ]]; then
-  ipset -N doh hash:ip family inet
-  for IPdoh in \$(cat /usr/local/bin/IPdoh); do
-    ipset add doh \$IPdoh
-  done
-fi
+ipset -N doh hash:ip family inet
+for IPdoh in \$(cat /usr/local/bin/IPdoh); do
+  ipset add doh \$IPdoh
+done
 
-if [[ -n \$(cat /usr/local/bin/IPv2node) ]]; then
-  ipset -N v2node hash:ip family inet
-  for IPv2node in \$(cat /usr/local/bin/IPv2node); do
-    ipset add v2node \$IPv2node
-  done
-fi
+ipset -N v2node hash:ip family inet
+for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+  ipset add v2node \$IPv2node
+done
 
+ipset -N listB hash:ip family inet
 if [[ -n \$(cat /usr/local/bin/IPlistB) ]]; then
-  ipset -N listB hash:ip family inet
   for iplistB in \$(cat /usr/local/bin/IPlistB); do
     ipset add listB \$iplistB
   done
 fi
 
+ipset -N listW hash:ip family inet
 if [[ -n \$(cat /usr/local/bin/IPlistW) ]]; then
-  ipset -N listW hash:ip family inet
   for iplistW in \$(cat /usr/local/bin/IPlistW); do
     ipset add listW \$iplistW
   done
 fi
 
+ipset -N listBlan hash:net family inet
 if [[ -n \$(cat /usr/local/bin/IPlistBlan) ]]; then
-  ipset -N listBlan hash:net family inet
   for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
     ipset add listBlan \$iplistBlan
   done
 fi
 
+ipset -N listWlan hash:net family inet
 if [[ -n \$(cat /usr/local/bin/IPlistWlan) ]]; then
-  ipset -N listWlan hash:net family inet
   for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
     ipset add listWlan \$iplistWlan
   done
@@ -646,6 +661,7 @@ iptables -I FORWARD -o wg0 -j ACCEPT
 iptables -t nat -I POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
 fi
 EOF
+
 chmod +x /usr/local/bin/iptables-proxy-up
 
 cat << EOF >/usr/local/bin/iptables-proxy-down
@@ -669,6 +685,7 @@ ipset -F listWlan
 ip route flush table 100
 ip rule del fwmark 0x9
 EOF
+
 chmod +x /usr/local/bin/iptables-proxy-down
 
 cat << EOF >/lib/systemd/system/iptables-proxy.service
@@ -690,13 +707,17 @@ systemctl daemon-reload
 systemctl enable iptables-proxy
 
 rm -rf /etc/resolv.conf
-cat << EOF >/etc/resolv.conf
-nameserver 127.0.0.1
-EOF
+rm -rf /run/resolvconf/interface
+cat /dev/null > /etc/resolvconf/resolv.conf.d/original
+cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
-output=`systemctl restart iptables-proxy`
+systemctl restart iptables-proxy
+echo "$statusInstalled iptables-proxy"
 
-(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
+$(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
 echo ""
 if [[ $(curl -Is  http://www.google.com/ncr | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
@@ -714,45 +735,32 @@ echo ""
 
 
 installDep(){
-rm -rf /etc/apt/sources.list.d/docker.list
 
 cat << EOF >/etc/apt/sources.list
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://deb.debian.org/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
+deb http://$aptGlobal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://$aptGlobal/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://$aptGlobal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
-
-echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" > /etc/apt/sources.list.d/docker.list
-curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
 wget -qO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
-if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
-rm -rf /etc/php/7.3/
-apt purge `dpkg -l | grep php7.3| awk '{print $2}' | tr "\n" " "`
-fi
+echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" > /etc/apt/sources.list.d/docker.list
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 
-apt update && apt upgrade && apt autoremove && apt autoclean
+apt update
+apt upgrade && apt autoremove && apt autoclean
 
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install docker-ce docker-ce-cli containerd.io php7.4-fpm php7.4-common php7.4-cgi php7.4-xml php7.4-opcache php7.4-json php7.4-sqlite3 php-intl sqlite3 resolvconf
+apt install docker-ce docker-ce-cli containerd.io php7.4-common php7.4-cgi php7.4-fpm php7.4-xml php7.4-opcache php7.4-json
 
 sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
 sed -i "/LimitNPROC=/c\LimitNPROC=64000"  /lib/systemd/system/docker.service
 systemctl daemon-reload >/dev/null 2>&1
 systemctl enable docker
 systemctl restart docker
-
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
-cat /dev/null > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
-cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
 
 cat << EOF >/etc/php/7.4/fpm/php-fpm.conf
 [global]
@@ -814,7 +822,6 @@ opcache.fast_shutdown=1
 opcache.save_comments=1
 EOF
 
-rm -rf /lib/systemd/system/php*-fpm.service
 cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
 [Unit]
 Description=The PHP 7.4 FastCGI Process Manager
@@ -841,11 +848,12 @@ systemctl restart php7.4-fpm
 
 
 installPihole(){
-export PIHOLE_SKIP_OS_CHECK=true
-systemctl unmask lighttpd
-cd ~
+systemctl unmask lighttpd >/dev/null 2>&1
+
 mkdir -p /etc/pihole
+
 cat /dev/null > /etc/pihole/adlists.list
+
 cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
@@ -862,15 +870,16 @@ DNS_BOGUS_PRIV=true
 DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
-bash <(wget --no-check-certificate -qO- http://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh) /dev/stdin --unattended
+
+curl -fsSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
 }
 
 
 
 
 piholeSet(){
-systemctl mask --now lighttpd >/dev/null 2>&1
 rm -rf /var/www/html/index.lighttpd.orig
+systemctl mask --now lighttpd >/dev/null 2>&1
 systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
@@ -893,6 +902,7 @@ localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
 sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
 pihole restartdns
 EOF
+
 chmod +x /usr/local/bin/pihole_hotfix
 
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
@@ -909,6 +919,7 @@ mkdir -p "/etc/nginx/conf.d"
 mkdir -p "/var/log/nginx"
 
 rm -rf /etc/nginx/nginx.conf
+
 cat << EOF >/etc/nginx/nginx.conf
 user  www-data www-data;
 pid   /run/nginx.pid;
@@ -990,6 +1001,7 @@ http {
 EOF
 
 rm -rf /etc/nginx/conf.d/default.conf
+
 cat << EOF >/etc/nginx/conf.d/default.conf
 server {
   listen       80;
@@ -1009,6 +1021,7 @@ location ~ [^/]\.php(/|$) {
         }
 }
 EOF
+
 }
 
 
@@ -1047,8 +1060,6 @@ rm -rf /var/www/html/js
 
 rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html
-rm -rf ~/ui-script
-rm -rf ~/ui-web
 fi
 
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
@@ -1060,8 +1071,6 @@ mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
 chmod +x /var/www/html/*
 chmod +x /usr/local/bin/*
-
-wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ttyd_linux.x86_64
 
 if [ $(ls -l ~/ttyd | awk '{print$5}') -gt 2000000 ]; then
 mv -f ~/ttyd /usr/local/bin/ttyd
@@ -1081,12 +1090,16 @@ KillMode=process
 [Install]
 WantedBy=multi-user.target
 EOF
+
 systemctl daemon-reload >/dev/null 2>&1
 fi
 
 popupWindow="window.open('"http://$localaddr:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!ddns.php
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
+
+rm -rf ~/ui-script
+rm -rf ~/ui-web
 }
 
 
@@ -1117,13 +1130,18 @@ crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
+
 cat << EOF >> ~/now.cron
 0 4 * * * /usr/local/bin/ui_am4
 0 */4 * * * /usr/local/bin/ui_4h
 0 */2 * * * /usr/local/bin/ui_2h
 EOF
+
 crontab ~/now.cron
 rm -rf ~/now.cron
+rm -rf ~/smartdns.deb
+rm -rf ~/doh.zip
+rm -rf ~/vtrui.zip
 }
 
 
@@ -1186,6 +1204,8 @@ address $localaddr
 netmask 255.255.255.0
 gateway $gatewayaddr
 EOF
+
+preDownload
 
 preInstall
 
@@ -1277,7 +1297,8 @@ cd ~
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install linux-headers-$(uname -r) libmnl-dev libelf-dev gcc make wireguard-tools
+apt update
+apt install linux-headers-$(uname -r) libmnl-dev libelf-dev gcc make wireguard-tools
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src
@@ -1287,7 +1308,7 @@ cd ~
 
 if [[ -z $(jq -r '.wireguard' /usr/local/bin/0conf) ]]; then
 mkdir -p /etc/wireguard
-output=`/usr/local/bin/ui-WGchangeKey`
+/usr/local/bin/ui-WGchangeKey
 fi
 
 blue "------------------------"
@@ -1305,11 +1326,6 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-rm -rf /etc/resolv.conf
-cat << EOF >/etc/resolv.conf
-nameserver 127.0.0.1
-EOF
-
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 systemctl restart iptables-proxy
 systemctl restart v2dns
@@ -1319,18 +1335,18 @@ installPihole
 
 piholeSet
 
-output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  output=`/usr/local/bin/ui-dnsGFW`
+  /usr/local/bin/ui-dnsGFW
 else
-  output=`/usr/local/bin/ui-dnsCHNW`
+  /usr/local/bin/ui-dnsCHNW
 fi
 
-output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+/usr/local/bin/ui-saveListBW >/dev/null 2>&1
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-output=`/usr/local/bin/ui-onDHCP`
+  /usr/local/bin/ui-onDHCP
 fi
 
 systemctl restart iptables-proxy
@@ -1344,6 +1360,11 @@ blue "----------------------"
 
 
 updateGWD(){
+if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
+rm -rf /etc/php/7.3/
+apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
+fi
+
 if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
 doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
@@ -1409,6 +1430,8 @@ if [[ -z $domain ]] || [[ -z $uuidnum ]] || [[ -z $v2path ]]; then
   exit
 fi
 
+preDownload
+
 preInstall
 
 installSmartDNS
@@ -1436,9 +1459,6 @@ blue "--------------------"
 
 
 start_menu(){
-statusGOOD=$(green "✓")
-statusBAD=$(red "✕")
-
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
     echo "[$statusGOOD] SmartDNS       [working]"
 elif [[ ! -f "/usr/sbin/smartdns" ]]; then

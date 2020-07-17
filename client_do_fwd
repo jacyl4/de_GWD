@@ -4,97 +4,12 @@ blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
 
 
 
-installCMD="bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)"
-
-mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
-
-
-
-clifwd_iptablesProxy(){
-sed -i '/--dport 53 -i/d' /usr/local/bin/iptables-proxy-up
-sed -i '/--dport 8053 -j/d' /usr/local/bin/iptables-proxy-up
-
-addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
-addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
-addRule3="iptables -t mangle -A V2PROXY -p udp --dport 8053 -j ACCEPT"
-addRule4="iptables -t mangle -A V2PROXY -p tcp --dport 8053 -j ACCEPT"
-
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/iptables-proxy-up
-sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/iptables-proxy-up
-sed -i "/udp --dport 5390/a$addRule4" /usr/local/bin/iptables-proxy-up
-sed -i "/udp --dport 5390/a$addRule3" /usr/local/bin/iptables-proxy-up
-
-systemctl daemon-reload >/dev/null 2>&1
-output=`systemctl restart iptables-proxy`
-}
-
-
-
-clifwd_installDOHser(){
-rm -rf /usr/local/bin/doh-server
-
-wget --no-check-certificate -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
-unzip ~/doh.zip -d ~/
-mv -f ~/doh/doh-server /usr/local/bin/doh-server
-chmod +x /usr/local/bin/doh-server
-rm -rf ~/doh*
-
-mkdir -p /etc/dns-over-https
-cat << EOF >/etc/dns-over-https/doh-server.conf
-listen = [ "127.0.0.1:8053" ]
-
-path = "/dq"
-
-upstream = [ "udp:127.0.0.1:5390" ]
-
-timeout = 10
-tries = 3
-verbose = false
-log_guessed_client_ip = false
-EOF
-
-mkdir -p /etc/NetworkManager/dispatcher.d
-cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
-#!/bin/bash
-case "$2" in
-    up)
-        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
-        ;;
-    down)
-        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
-        ;;
-    *)
-        exit 0
-        ;;
-esac
-EOF
-chmod +x /etc/NetworkManager/dispatcher.d/doh-server
-
-cat << "EOF" > /lib/systemd/system/doh-server.service
-[Unit]
-Description=DNS-over-HTTPS server
-After=network.target
-
-[Service]
-User=root
-Type=simple
-LimitNPROC=64000
-LimitNOFILE=1000000
-ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
-Restart=always
-RestartSec=2
-StartLimitBurst=0
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl daemon-reload
-systemctl enable doh-server
-systemctl restart doh-server
-}
+mirrorSite="http://gwd.seso.icu:10290"
 
 
 
@@ -133,6 +48,7 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
 EOF
+
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
@@ -147,6 +63,7 @@ rm -rf ~/now.cron
 
 clifwd_nginxWebConf(){
 rm -rf /etc/nginx/conf.d/default.conf
+
 cat << EOF >/etc/nginx/conf.d/default.conf
 server {
   listen $clifwd_port ssl http2 fastopen=128 reuseport;
@@ -231,12 +148,10 @@ jacyl4/nginx_tls1.3:latest
 
 
 clifwd_installWebUI(){
-cd ~
-if [[ ! -d "/var/www/html/gwd" ]]; then
 mkdir -p /var/www/html/gwd
-ln -s /var/www/html/admin /var/www/html/gwd/admin
-fi
+ln -fs /var/www/html/admin /var/www/html/gwd/admin
 
+cd ~
 svn export --force https://github.com/jacyl4/de_GWD/branches/master/resource/ui-script
 svn export --force https://github.com/jacyl4/de_GWD/branches/master/resource/ui-web
 
@@ -264,8 +179,6 @@ done
 
 rsync -azrI ~/ui-script/* /usr/local/bin
 rsync -azrI ~/ui-web/* /var/www/html/gwd
-rm -rf ~/ui-script
-rm -rf ~/ui-web
 fi
 
 cat << "EOF" >/tmp/vtruiConfADD
@@ -299,6 +212,14 @@ EOF
 
 cat /tmp/vtruiConfADD | tee -a /usr/local/bin/ui-NodeDThide /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
 
+addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/ui-onUDP
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/ui-onUDP
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /usr/local/bin/ui-offUDP
+sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /usr/local/bin/ui-offUDP
+
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 mv -f ~/version.php /var/www/html/gwd/version.php
 
@@ -308,8 +229,6 @@ mkdir -p /var/www/html/gwd/restore
 chown -R www-data:www-data /var/www/html
 chmod +x /var/www/html/gwd/*
 chmod +x /usr/local/bin/*
-
-wget --no-check-certificate -c -O ~/ttyd https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/ttyd_linux.x86_64
 
 if [ $(ls -l ~/ttyd | awk '{print$5}') -gt 2000000 ]; then
 mv -f ~/ttyd /usr/local/bin/ttyd
@@ -329,12 +248,16 @@ KillMode=process
 [Install]
 WantedBy=multi-user.target
 EOF
+
 systemctl daemon-reload >/dev/null 2>&1
 fi
 
 popupWindow="window.open('"http://$localaddr:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/gwd/!ddns.php
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/gwd/!update.php
+
+rm -rf ~/ui-script
+rm -rf ~/ui-web
 }
 
 
@@ -365,13 +288,18 @@ crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
+
 cat << EOF >> ~/now.cron
 0 4 * * * /usr/local/bin/ui_am4
 0 */4 * * * /usr/local/bin/ui_4h
 0 */2 * * * /usr/local/bin/ui_2h
 EOF
+
 crontab ~/now.cron
 rm -rf ~/now.cron
+rm -rf ~/smartdns.deb
+rm -rf ~/doh.zip
+rm -rf ~/vtrui.zip
 }
 
 
@@ -422,10 +350,6 @@ jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
 jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
 jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod 666 /usr/local/bin/0conf
-
-clifwd_iptablesProxy
-
-clifwd_installDOHser
 
 makeSSL_D
 
@@ -537,6 +461,7 @@ jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |
 jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
 jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
 jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+sed -i 's/client_do/client_do_fwd/g' /usr/local/bin/0conf
 chmod 666 /usr/local/bin/0conf
 
 blue "-----------------------------------------------"
@@ -570,7 +495,8 @@ cd ~
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
-apt update && apt install linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
+apt update
+apt install linux-headers-$(uname -r) libmnl-dev libelf-dev bc gcc make wireguard-tools
 
 git clone https://git.zx2c4.com/wireguard-linux-compat
 cd ~/wireguard-linux-compat/src
@@ -604,11 +530,6 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin /var/www/html/gwd/admin
 
-rm -rf /etc/resolv.conf
-cat << EOF >/etc/resolv.conf
-nameserver 127.0.0.1
-EOF
-
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 systemctl restart iptables-proxy
 systemctl restart v2dns
@@ -634,7 +555,7 @@ systemctl restart vtrui
 
 if [[ ! -d "/var/www/html/gwd" ]]; then
 mkdir -p /var/www/html/gwd
-ln -s /var/www/html/admin /var/www/html/gwd/admin
+ln -fs /var/www/html/admin /var/www/html/gwd/admin
 fi
 blue "----------------------"
 blue "Install Pi-hole [done]"
@@ -731,10 +652,6 @@ installDep
 
 piholeSet
 
-clifwd_iptablesProxy
-
-clifwd_installDOHser
-
 clifwd_nginxWebConf
 
 clifwd_installWebUI
@@ -747,9 +664,6 @@ blue "---------------------------"
 
 
 start_menu(){
-statusGOOD=$(green "✓")
-statusBAD=$(red "✕")
-
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
     echo "[$statusGOOD] SmartDNS       [working]"
 elif [[ ! -f "/usr/sbin/smartdns" ]]; then

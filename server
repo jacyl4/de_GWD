@@ -4,8 +4,12 @@ blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+statusNONE=$(yellow "-")
 
 export DEBIAN_FRONTEND=noninteractive
+export PIHOLE_SKIP_OS_CHECK=true
 
 
 
@@ -21,10 +25,11 @@ echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
 echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
 fi
 
-systemctl mask --now systemd-resolved  >/dev/null 2>&1
-systemctl daemon-reload >/dev/null 2>&1
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 
 rm -rf /etc/resolv.conf
+
 cat << EOF >/etc/resolv.conf
 nameserver 1.1.1.1
 nameserver 8.8.8.8
@@ -46,28 +51,31 @@ Dpkg::Options {
 EOF
 
 rm -rf /etc/apt/sources.list.d/*
+
 cat << EOF >/etc/apt/sources.list
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
 deb http://security.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 deb http://deb.debian.org/debian/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
-apt update && apt upgrade && apt autoremove && apt autoclean
-
-apt install sudo locales net-tools netcat dnsutils resolvconf wget curl rsync git jq unzip ca-certificates apt-transport-https gnupg2 haveged socat
-source /etc/profile
-systemctl enable --now haveged >/dev/null 2>&1
-
 echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" > /etc/apt/sources.list.d/docker.list
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
-apt update && apt install docker-ce docker-ce-cli containerd.io
+apt update
+apt upgrade && apt autoremove && apt autoclean
+
+apt install sudo locales net-tools netcat dnsutils resolvconf wget curl rsync git jq unzip ca-certificates apt-transport-https gnupg2 haveged socat docker-ce docker-ce-cli containerd.io
+source /etc/profile
+systemctl enable --now haveged >/dev/null 2>&1
+
 sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
 sed -i "/LimitNPROC=/c\LimitNPROC=64000"  /lib/systemd/system/docker.service
 systemctl daemon-reload >/dev/null 2>&1
 systemctl enable docker
 systemctl restart docker
 
+systemctl mask --now systemd-resolved  >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 dpkg --configure -a
 
 cat << EOF >/etc/security/limits.conf
@@ -76,6 +84,7 @@ cat << EOF >/etc/security/limits.conf
 * soft nproc 64000
 * hard nproc 64000
 EOF
+
 echo "ulimit -n 1000000" > ~/.bash_profile
 
 modprobe ip_conntrack
@@ -150,6 +159,7 @@ fi
 sysctl -p
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+
 cat << EOF >/etc/default/locale
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
@@ -167,18 +177,17 @@ LC_MEASUREMENT="en_US.UTF-8"
 LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=en_US.UTF-8
 EOF
+
 locale-gen en_US.UTF-8
 
 echo "Asia/Shanghai" > /etc/timezone
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
+ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 }
 
 
 
 installIptablesRules(){
+
 cat << EOF >/usr/local/bin/iptablesrules-up
 #!/bin/bash
 iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
@@ -190,6 +199,7 @@ iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j
 iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP
 EOF
+
 chmod +x /usr/local/bin/iptablesrules-up
 
 cat << EOF >/usr/local/bin/iptablesrules-down
@@ -197,6 +207,7 @@ cat << EOF >/usr/local/bin/iptablesrules-down
 iptables -F
 iptables -X
 EOF
+
 chmod +x /usr/local/bin/iptablesrules-down
 
 cat << EOF >/lib/systemd/system/iptablesrules.service
@@ -223,9 +234,10 @@ systemctl restart iptablesrules
 
 
 installPihole(){
-export PIHOLE_SKIP_OS_CHECK=true
 mkdir -p /etc/pihole
+
 cat /dev/null > /etc/pihole/adlists.list
+
 cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
@@ -261,7 +273,7 @@ rm -rf /run/resolvconf/interface
 cat /dev/null > /etc/resolvconf/resolv.conf.d/original
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
-ln -s /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
 cat << EOF >/etc/pihole/pihole-FTL.conf
@@ -284,6 +296,7 @@ chmod +x /usr/local/bin/doh-server
 rm -rf ~/doh*
 
 mkdir -p /etc/dns-over-https
+
 cat << EOF >/etc/dns-over-https/doh-server.conf
 listen = [ "127.0.0.1:8053" ]
 
@@ -298,6 +311,7 @@ log_guessed_client_ip = false
 EOF
 
 mkdir -p /etc/NetworkManager/dispatcher.d
+
 cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
 #!/bin/bash
 case "$2" in
@@ -312,6 +326,7 @@ case "$2" in
         ;;
 esac
 EOF
+
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
 cat << "EOF" > /lib/systemd/system/doh-server.service
@@ -430,6 +445,7 @@ mkdir -p "/var/www/html"
 mkdir -p "/var/www/ssl"
 
 rm -rf /etc/nginx/nginx.conf
+
 cat << EOF >/etc/nginx/nginx.conf
 user  www-data www-data;
 pid   /run/nginx.pid;
@@ -575,6 +591,7 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
 EOF
+
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
@@ -589,6 +606,7 @@ rm -rf ~/now.cron
 
 makeSSL_W(){
 rm -rf /etc/nginx/conf.d/default.conf
+
 cat << EOF >/etc/nginx/conf.d/default.conf
 server {
     listen      80;
@@ -597,6 +615,7 @@ server {
     index       index.php index.html index.htm;
 }
 EOF
+
 docker restart nginx
 
 rm -rf /var/www/ssl/*
@@ -627,6 +646,7 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
 EOF
+
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
@@ -745,6 +765,7 @@ cat /etc/nginx/conf.d/3_proxyPath >> /etc/nginx/conf.d/default.conf
 
 docker restart nginx
 EOF
+
 chmod +x /etc/nginx/conf.d/merge.sh
 /etc/nginx/conf.d/merge.sh
 }
@@ -752,6 +773,7 @@ chmod +x /etc/nginx/conf.d/merge.sh
 
 
 postInstall(){
+
 cat << "EOF" > /usr/local/bin/autoUpdate
 #!/bin/bash
 wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
@@ -766,6 +788,7 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/update
 EOF
+
 chmod +x /usr/local/bin/autoUpdate
 
 cat << "EOF" > /usr/local/bin/Q2H
@@ -789,6 +812,7 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
+
 chmod +x /usr/local/bin/Q2H
 
 crontab -l > ~/now.cron
@@ -1047,12 +1071,12 @@ changeV2rayVerify(){
 
 sed -i "$(sed -ne '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
-docker restart nginx >/dev/null 2>&1
+docker restart nginx
 
 jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /usr/local/bin/vtrui/config.json |\
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
-systemctl restart vtrui >/dev/null 2>&1
+systemctl restart vtrui
 blue "------------------------------"
 blue  "Change v2ray UUID&path [done]"
 blue "------------------------------"
@@ -1092,7 +1116,7 @@ if [[ $portCheck = "" ]] || [[ $portCheck = "443" ]]; then
 port="443"
 fi
 
-cat >> /usr/local/bin/vtrui/config.json << EOF
+cat << EOF >> /usr/local/bin/vtrui/config.json
   "outbounds": [
     {
     "protocol":"vmess",
@@ -1124,6 +1148,7 @@ cat >> /usr/local/bin/vtrui/config.json << EOF
   ]
 }
 EOF
+
 systemctl restart vtrui
 blue "-----------------------------"
 blue  "Change v2ray upstream [done]"
@@ -1131,12 +1156,14 @@ blue "-----------------------------"
 
 elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /usr/local/bin/vtrui/config.json
+
 cat >> /usr/local/bin/vtrui/config.json << EOF
   "outbounds": [
   {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
   ]
 }
 EOF
+
 systemctl restart vtrui
 blue "-----------------------------"
 blue  "Delete v2ray upstream [done]"
@@ -1151,6 +1178,7 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 rm -rf /etc/resolv.conf
+
 cat << EOF >/etc/resolv.conf
 nameserver 1.1.1.1
 nameserver 8.8.8.8
@@ -1279,6 +1307,7 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 fi
 EOF
+
 blue "--------------------------"
 blue  "AutoUpdate turn on [done]"
 blue "--------------------------"
@@ -1300,10 +1329,6 @@ fi
 
 
 start_menu(){
-statusGOOD=$(green "✓")
-statusBAD=$(red "✕")
-statusNONE=$(yellow "-")
-
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusGOOD] Pi-hole      [working]"
 elif [[ ! -f "/usr/local/bin/pihole" ]]; then
