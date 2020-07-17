@@ -506,7 +506,7 @@ cd ~
 
 if [[ -z $(jq -r '.wireguard' /usr/local/bin/0conf) ]]; then
 mkdir -p /etc/wireguard
-output=`/usr/local/bin/ui-WGchangeKey`
+/usr/local/bin/ui-WGchangeKey
 fi
 
 blue "------------------------"
@@ -539,15 +539,15 @@ installPihole
 
 piholeSet
 
-output=`/usr/local/bin/ui-NodeDThide >/dev/null 2>&1`
+/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  output=`/usr/local/bin/ui-dnsGFW`
+  /usr/local/bin/ui-dnsGFW
 else
-  output=`/usr/local/bin/ui-dnsCHNW`
+  /usr/local/bin/ui-dnsCHNW
 fi
 
-output=`/usr/local/bin/ui-saveListBW >/dev/null 2>&1`
+/usr/local/bin/ui-saveListBW >/dev/null 2>&1
 
 systemctl restart iptables-proxy
 systemctl restart v2dns
