@@ -682,14 +682,6 @@ else
     echo "[$statusBAD] DoH client     [start failed]"
 fi
 
-if [[ $(systemctl is-active doh-server) = "active" ]]; then
-    echo "[$statusGOOD] DoH server     [working]"
-elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
-    echo "[$statusBAD] DoH server     [not Installed]"
-else
-    echo "[$statusBAD] DoH server     [start failed]"
-fi
-
 if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
     echo "[$statusGOOD] Pi-hole        [working]"
 elif [ ! -f "/usr/local/bin/pihole" ]; then
