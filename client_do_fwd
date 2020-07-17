@@ -638,6 +638,8 @@ sed -i '2d' ~/client_do && sed -i '/start_menu/,$d' ~/client_do
 chmod +x ~/client_do
 . ~/client_do
 
+preDownload
+
 preInstall
 
 installSmartDNS

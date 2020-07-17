@@ -270,9 +270,10 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
+cat /dev/null > /etc/resolvconf/resolv.conf.d/head
 cat /dev/null > /etc/resolvconf/resolv.conf.d/original
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
+echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
