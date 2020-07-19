@@ -350,6 +350,7 @@ jq --arg clifwd_domain "$clifwd_domain" '.clifwd.clifwd_domain=$clifwd_domain' |
 jq --arg clifwd_port "$clifwd_port" '.clifwd.clifwd_port=$clifwd_port' |\
 jq --arg clifwd_v2path "$clifwd_v2path" '.clifwd.clifwd_v2path=$clifwd_v2path' |\
 jq --arg clifwd_uuidnum "$clifwd_uuidnum" '.clifwd.clifwd_uuidnum=[$clifwd_uuidnum]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+sed -i 's/client_do/client_do_fwd/g' /usr/local/bin/0conf
 chmod 666 /usr/local/bin/0conf
 
 makeSSL_D
