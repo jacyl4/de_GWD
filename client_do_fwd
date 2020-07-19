@@ -257,6 +257,13 @@ rm -rf ~/ui-web
 
 
 clifwd_PostInstall(){
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+sysctl -p
+
 /usr/local/bin/ui_am4
 
 /usr/local/bin/ui-saveDNSChina >/dev/null 2>&1
@@ -374,15 +381,15 @@ blue "------------------------------"
 
 
 
-installBBRplus(){
-apt install wget
+installKernel(){
+export DEBIAN_FRONTEND=noninteractive
+apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
-export DEBIAN_FRONTEND=noninteractive
 apt purge -y linux-image-amd64
 apt purge -y linux-image-*-amd64
 update-grub
@@ -393,8 +400,9 @@ PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 sysctl -p
 
 crontab -l > ~/now.cron
@@ -414,9 +422,9 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 
 reboot
-blue "-----------------------"
-blue  "Install bbrplus [done]"
-blue "-----------------------"
+blue "----------------------------"
+blue "Install latest kernel [done]"
+blue "----------------------------"
 }
 
 
@@ -728,7 +736,7 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. de_GWD clifwd install"
     green  "2. Change de_GWD password"
-    green  "3. Install bbrplus and reboot"
+    green  "3. Install latest kernel and reboot"
     red    "6. Change domain and issue new certificates"
     yellow "7. Install/Update WiregGard"
     yellow "8. update Nginx(docker)"
@@ -747,7 +755,7 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     3)
-    installBBRplus
+    installKernel
     start_menu
     ;;
     6)
