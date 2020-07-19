@@ -1097,6 +1097,9 @@ EOF
 systemctl daemon-reload >/dev/null 2>&1
 fi
 
+popupWindow="window.open('"http://$localaddr:7681"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
+sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
+
 rm -rf ~/ui-script
 rm -rf ~/ui-web
 }
