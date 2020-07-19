@@ -767,10 +767,9 @@ cat << EOF >/etc/php/7.4/fpm/pool.d/www.conf
 [www]
 user = www-data
 group = www-data
+listen.owner = www-data
+listen.group = www-data
 listen = /run/php/php-fpm.sock
-listen.allowed_clients = 127.0.0.1
-listen.backlog = 65536
-listen.mode = 0666
 
 pm = dynamic
 pm.max_children = 50
@@ -779,8 +778,6 @@ pm.min_spare_servers = 12
 pm.max_spare_servers = 24
 pm.max_requests = 1000
 
-catch_workers_output = yes
-clear_env = no
 env[HOSTNAME] = \$HOSTNAME
 env[PATH] = /usr/local/bin:/usr/bin:/bin
 env[TMP] = /tmp

@@ -781,6 +781,27 @@ error_log = /var/log/php-fpm.log
 include=/etc/php/7.3/fpm/pool.d/*.conf
 EOF
 
+cat << EOF >/etc/php/7.3/fpm/pool.d/www.conf
+[www]
+user = www-data
+group = www-data
+listen.owner = www-data
+listen.group = www-data
+listen = /run/php/php-fpm.sock
+
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+
+env[HOSTNAME] = \$HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+EOF
+
 cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
 [Unit]
 Description=The PHP 7.3 FastCGI Process Manager
