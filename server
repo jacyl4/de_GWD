@@ -125,7 +125,7 @@ net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_timestamps = 0
 net.ipv4.tcp_tw_reuse = 0
-net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_syncookies = 0
 net.ipv4.tcp_fin_timeout = 10
 net.ipv4.tcp_orphan_retries = 2
 net.ipv4.tcp_syn_retries = 2
@@ -150,10 +150,10 @@ sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
 if [[ "$(uname -r)" =~ "bbrplus" ]]; then
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 else
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
@@ -957,7 +957,7 @@ PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
 
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
 sysctl -p
 
