@@ -1,6 +1,7 @@
 #!/bin/bash
 systemctl stop wg-quick@wg0
 
+mkdir -p /etc/wireguard
 cd /etc/wireguard
 
 wg genkey | tee sprivatekey | wg pubkey > spublickey

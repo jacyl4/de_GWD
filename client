@@ -191,18 +191,10 @@ net.ipv4.tcp_slow_start_after_idle = 0
 net.ipv4.neigh.default.gc_thresh1 = 1024
 net.ipv4.neigh.default.gc_thresh2 = 2048
 net.ipv4.neigh.default.gc_thresh3 = 4096
+net.core.default_qdisc = fq_codel
+net.ipv4.tcp_congestion_control = bbr
 EOF
 
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-
-if [[ "$(uname -r)" =~ "bbrplus" ]]; then
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-else
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-fi
 sysctl -p
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -1088,37 +1080,6 @@ blue "------------------------------"
 
 
 
-installWGcore(){
-cd ~
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
-
-apt update
-
-if [[ $architecture = "arm64" ]]; then
-apt install wireguard-dkms wireguard-tools
-elif [[ $architecture = "amd64" ]]; then
-apt install linux-headers-$(uname -r) libmnl-dev libelf-dev gcc make wireguard-tools
-
-git clone https://git.zx2c4.com/wireguard-linux-compat
-cd ~/wireguard-linux-compat/src
-make && make install
-rm -rf ~/wireguard-linux-compat
-cd ~
-fi
-
-if [[ -z $(jq -r '.wireguard' /usr/local/bin/0conf) ]]; then
-  mkdir -p /etc/wireguard
-  /usr/local/bin/ui-WGchangeKey
-fi
-
-blue "------------------------"
-blue "Install WireGuard [done]"
-blue "------------------------"
-}
-
-
-
 updatePihole(){
 piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 
@@ -1304,7 +1265,6 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "3. Install/Update WiregGard"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
@@ -1317,10 +1277,6 @@ blue "-----------------------------------------------"
     ;;
     2)
     change_piholeAdmin
-    start_menu
-    ;;
-    3)
-    installWGcore
     start_menu
     ;;
     9)

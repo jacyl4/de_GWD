@@ -161,18 +161,10 @@ net.ipv4.tcp_slow_start_after_idle = 0
 net.ipv4.neigh.default.gc_thresh1 = 1024
 net.ipv4.neigh.default.gc_thresh2 = 2048
 net.ipv4.neigh.default.gc_thresh3 = 4096
+net.core.default_qdisc = fq_codel
+net.ipv4.tcp_congestion_control = bbr
 EOF
 
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-
-if [[ "$(uname -r)" =~ "bbrplus" ]]; then
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-else
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-fi
 sysctl -p
 
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -1293,28 +1285,50 @@ blue "------------------------------"
 
 
 
-installWGcore(){
-cd ~
-echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
+installKernel(){
+export DEBIAN_FRONTEND=noninteractive
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
 
-apt update
-apt install linux-headers-$(uname -r) libmnl-dev libelf-dev gcc make wireguard-tools
+apt purge -y linux-image-amd64
+apt purge -y linux-image-*-amd64
+update-grub
 
-git clone https://git.zx2c4.com/wireguard-linux-compat
-cd ~/wireguard-linux-compat/src
-make && make install
-rm -rf ~/wireguard-linux-compat
-cd ~
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
-if [[ -z $(jq -r '.wireguard' /usr/local/bin/0conf) ]]; then
-mkdir -p /etc/wireguard
-/usr/local/bin/ui-WGchangeKey
-fi
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
 
-blue "------------------------"
-blue "Install WireGuard [done]"
-blue "------------------------"
+echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+sysctl -p
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+reboot
+blue "----------------------------"
+blue "Install latest kernel [done]"
+blue "----------------------------"
 }
 
 
@@ -1528,7 +1542,7 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "3. Install/Update WiregGard"
+    yellow "3. Install latest kernel and reboot"
     yellow "8. update Nginx(docker)"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
@@ -1545,7 +1559,7 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     3)
-    installWGcore
+    installKernel
     start_menu
     ;;
     8)
