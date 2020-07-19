@@ -508,7 +508,7 @@ function FRPprotocolUDP(){$('#FRPprotocol').html("UDP"); };
 
 function installFRP(){
 $.get('installFRPc.php', function(result){});
-window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 };
 
 function onFRP(){
@@ -541,7 +541,7 @@ $('#frpCMD').val(data);
 
 function installWG(){
 $.get('installWG.php', function(result){});
-window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 };
 
 function WGchangeKey(){

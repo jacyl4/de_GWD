@@ -206,7 +206,7 @@ window.location.reload(true);
 function update(){
 updateCMD=$('#updateCMD').val();
 $.get('update.php', {updateCMD:updateCMD}, function(result){});
-window.open('http://10.0.0.2:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 }
 
 function Rescue(){
