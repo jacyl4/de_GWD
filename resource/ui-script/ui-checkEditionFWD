@@ -1,4 +1,4 @@
 #!/bin/bash
 if [[ $(jq -r '.clifwd | keys[]' /usr/local/bin/0conf) =~ "clifwd_uuidnum" ]]; then
-echo "Nat"
+echo "FWD"
 fi
