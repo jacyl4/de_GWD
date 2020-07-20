@@ -1,4 +1,4 @@
 #!/bin/bash
-if [[ $(jq -r '.clifwd' /usr/local/bin/0conf) != "null" ]]; then
+if [[ -d "/var/www/html/gwd" ]]; then
 echo "Nat"
 fi

@@ -1,4 +1,4 @@
 #!/bin/bash
-if [[ -d "/etc/nginx" ]]; then
-echo "Nginx"
+if [[ -f "/lib/systemd/system/docker.service" ]]; then
+echo "do"
 fi
