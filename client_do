@@ -1105,6 +1105,7 @@ rm -rf ~/ui-web
 
 postInstall(){
 /usr/local/bin/ui_am4
+/usr/local/bin/ui_2h
 
 /usr/local/bin/ui-saveDNSChina >/dev/null 2>&1
 systemctl restart smartdns
@@ -1123,7 +1124,6 @@ systemctl restart iptables-proxy
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis >/dev/null 2>&1
 fi
-/usr/local/bin/ui_2h
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
