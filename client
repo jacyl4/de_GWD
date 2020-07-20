@@ -104,7 +104,7 @@ EOF
 fi
 
 apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync lighttpd bc resolvconf lighttpd
+apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 bc resolvconf lighttpd
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now lighttpd >/dev/null 2>&1
@@ -763,6 +763,8 @@ deb http://$aptGlobal/debian-security/ $(cat /etc/os-release | grep VERSION= | c
 deb http://$aptGlobal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
+echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
+curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 fi
 
 apt update
