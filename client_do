@@ -1139,6 +1139,8 @@ rm -rf ~/now.cron
 rm -rf ~/smartdns.deb
 rm -rf ~/doh.zip
 rm -rf ~/vtrui.zip
+rm -rf ~/ui-script.zip
+rm -rf ~/ui-web.zip
 }
 
 
