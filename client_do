@@ -994,10 +994,12 @@ rm -rf /etc/nginx/conf.d/default.conf
 
 cat << EOF >/etc/nginx/conf.d/default.conf
 server {
-  listen       80;
-  server_name  localhost;
-  root         /var/www/html;
-  index        index.php index.html index.htm;
+  listen 443 ssl http2 fastopen=128 reuseport default_server;
+  root /var/www/html;
+  index index.php index.html index.htm;
+
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
 
 location ~ /\.(?!well-known).* {
   deny all;
@@ -1027,6 +1029,13 @@ EOF
 
 
 installNginxDo(){
+mkdir -p /var/www/ssl
+cd /var/www/ssl
+
+if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
+openssl req -x509 -nodes -days 365 -subj "/C=CA/ST=QC/O=Company, Inc./CN=de_GWD.com" -addext "subjectAltName=DNS:de_GWD.com" -newkey rsa:2048 -keyout de_GWD.key -out de_GWD.cer
+fi
+
 docker stop nginx >/dev/null 2>&1
 docker rm nginx >/dev/null 2>&1
 
@@ -1038,6 +1047,7 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
 -v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
 -v /var/www/html/:/var/www/html/ \
+-v /var/www/ssl/:/var/www/ssl/ \
 -v /run/php/:/run/php/ \
 jacyl4/nginx_tls1.3:latest
 }
