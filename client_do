@@ -1028,7 +1028,7 @@ mkdir -p /var/www/ssl
 
 if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
 cd /var/www/ssl
-openssl req -x509 -nodes -days 365 -subj "/C=CA/ST=QC/O=Company, Inc./CN=de_GWD.com" -addext "subjectAltName=DNS:de_GWD.com" -newkey rsa:2048 -keyout de_GWD.key -out de_GWD.cer
+openssl req -x509 -nodes -days 3650 -subj "/C=CA/ST=QC/O=Company, Inc./CN=de_GWD.com" -addext "subjectAltName=DNS:de_GWD.com" -newkey rsa:2048 -keyout de_GWD.key -out de_GWD.cer
 fi
 }
 
