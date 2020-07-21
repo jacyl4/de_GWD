@@ -1006,13 +1006,11 @@ location ~ ^/ttyd(.*)$ {
 EOF
 
 mkdir -p /var/www/ssl
-cd /var/www/ssl
 
 if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
+cd /var/www/ssl
 openssl req -x509 -nodes -days 365 -subj "/C=CA/ST=QC/O=Company, Inc./CN=de_GWD.com" -addext "subjectAltName=DNS:de_GWD.com" -newkey rsa:2048 -keyout de_GWD.key -out de_GWD.cer
 fi
-
-systemctl restart nginx
 }
 
 
@@ -1042,6 +1040,8 @@ mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
 chmod -R +x /var/www/html
 chmod +x /usr/local/bin/*
+
+systemctl restart nginx
 
 if [ $(ls -l ~/ttyd | awk '{print$5}') -gt 2000000 ]; then
 mv -f ~/ttyd /usr/local/bin/ttyd
