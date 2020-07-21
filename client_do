@@ -1079,7 +1079,7 @@ chown -R www-data:www-data /var/www/html
 chmod -R +x /var/www/html
 chmod +x /usr/local/bin/*
 
-docker restart nginx
+docker exec -it nginx nginx -s reload
 
 if [ $(ls -l ~/ttyd | awk '{print$5}') -gt 2000000 ]; then
 mv -f ~/ttyd /usr/local/bin/ttyd

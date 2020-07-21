@@ -572,7 +572,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/$topDomain.key  \
                --fullchain-file /var/www/ssl/$topDomain.cer \
-               --reloadcmd     "docker restart nginx >/dev/null 2>&1"
+               --reloadcmd     "docker exec -it nginx nginx -s reload"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
@@ -617,7 +617,7 @@ server {
 }
 EOF
 
-docker restart nginx
+docker exec -it nginx nginx -s reload
 
 rm -rf /var/www/ssl/*
 
@@ -627,7 +627,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --installcert -d $domain --ecc \
                --key-file       /var/www/ssl/$domain.key  \
                --fullchain-file /var/www/ssl/$domain.cer \
-               --reloadcmd     "docker restart nginx >/dev/null 2>&1"
+               --reloadcmd     "docker exec -it nginx nginx -s reload"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
@@ -764,7 +764,7 @@ cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/4_v2Proxy >> /etc/nginx/conf.d/default.conf
 
-docker restart nginx
+docker exec -it nginx nginx -s reload
 EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
@@ -1073,7 +1073,7 @@ changeV2rayVerify(){
 
 sed -i "$(sed -ne '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
-docker restart nginx
+docker exec -it nginx nginx -s reload
 
 jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /usr/local/bin/vtrui/config.json |\
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
@@ -1382,7 +1382,7 @@ fi
     green  "1. Install de_GWD"
     green  "2. Install bbrplus and reboot"
     red    "5. Change static IP"
-    red    "6. Change domain and issue new certificates"
+    red    "6. Change domain and generate new certificate"
     red    "7. Change v2ray UUID & path"
     green  "8. Set v2ray upsteram"
     yellow "9. Update Pi-hole"
