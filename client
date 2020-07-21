@@ -104,7 +104,7 @@ EOF
 fi
 
 apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git rsync jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now lighttpd >/dev/null 2>&1
@@ -1012,10 +1012,8 @@ installWebUI(){
 cd ~
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script.zip
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web.zip
-unzip ~/ui-script.zip -d ~/
-unzip ~/ui-web.zip -d ~/
 
-if [[ -f ~/ui-script/ui_am4 ]] && [[ -d ~/ui-web/vendor ]]; then
+if [[ $(ls -l ~/ui-script.zip | awk '{print$5}') -gt 45000 ]] && [[ $(ls -l ~/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
 rm -rf /usr/local/bin/ui-*
 rm -rf /usr/local/bin/ui_*
 rm -rf /var/www/html/*.php
@@ -1024,8 +1022,8 @@ rm -rf /var/www/html/act
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
 
-rsync -azrI ~/ui-script/* /usr/local/bin
-rsync -azrI ~/ui-web/* /var/www/html
+unzip ~/ui-script.zip -d /usr/local/bin
+unzip ~/ui-web.zip -d /var/www/html
 fi
 
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
