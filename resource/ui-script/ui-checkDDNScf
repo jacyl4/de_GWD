@@ -1,6 +1,0 @@
-#!/bin/bash
-if [[ "$(crontab -l)" =~ "ddnsUpdateIPCF" ]]; then
-	echo "success"
-else
-	echo "outline-secondary"
-fi

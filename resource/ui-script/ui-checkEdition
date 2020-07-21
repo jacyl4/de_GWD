@@ -1,4 +1,0 @@
-#!/bin/bash
-if [[ -f "/lib/systemd/system/docker.service" ]]; then
-echo "do"
-fi

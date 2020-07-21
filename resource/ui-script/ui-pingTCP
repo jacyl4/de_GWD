@@ -1,4 +1,0 @@
-#!/bin/bash
-nodeNUM=$1
-url=$(jq -r '.v2node[].domain' /usr/local/bin/0conf | awk NR==$nodeNUM)
-echo "$(curl -o /dev/null -sw '%{time_connect}\n' $url) * 1000" | bc | awk '{printf ("%.0f\n",$1)}' 

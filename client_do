@@ -77,7 +77,7 @@ deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f
 EOF
 
 apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq unzip ca-certificates haveged subversion rsync apt-transport-https gnupg2 bc resolvconf lighttpd
+apt install sudo locales net-tools dnsutils ipset wget curl git rsync jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now lighttpd >/dev/null 2>&1
@@ -1046,14 +1046,16 @@ jacyl4/nginx_tls1.3:latest
 
 installWebUI(){
 cd ~
-svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-script
-svn export --force https://github.com/jacyl4/de_GWD/branches/$branch/resource/ui-web
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script.zip
+wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web.zip
+unzip ~/ui-script.zip -d ~/
+unzip ~/ui-web.zip -d ~/
 
 if [[ -f ~/ui-script/ui_am4 ]] && [[ -d ~/ui-web/vendor ]]; then
 rm -rf /usr/local/bin/ui-*
 rm -rf /usr/local/bin/ui_*
-rm -rf /var/www/html/restore/*
 rm -rf /var/www/html/*.php
+rm -rf /var/www/html/act
 rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
@@ -1063,13 +1065,11 @@ rsync -azrI ~/ui-web/* /var/www/html
 fi
 
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
-mv -f ~/version.php /var/www/html/version.php
-
-docker restart nginx
+mv -f ~/version.php /var/www/html/act/version.php
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
-chmod +x /var/www/html/*
+chmod -R +x /var/www/html
 chmod +x /usr/local/bin/*
 
 if [ $(ls -l ~/ttyd | awk '{print$5}') -gt 2000000 ]; then
@@ -1095,7 +1095,7 @@ systemctl daemon-reload >/dev/null 2>&1
 fi
 
 popupWindow="window.open('"http://$localaddr:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
-sed -i "/popupWindow/c\\$popupWindow" /var/www/html/!update.php
+sed -i "/popupWindow/c\\$popupWindow" /var/www/html/update.php
 
 rm -rf ~/ui-script
 rm -rf ~/ui-web
