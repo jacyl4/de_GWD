@@ -25,15 +25,6 @@ bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client)
 ```
 
 
-#### Extension edition:
-
-Nat forward Client (amd64)
-```
-apt install -y wget
-bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do_fwd)
-```
-- - - -
-
 ## Contributors
 
 ### Code Contributors

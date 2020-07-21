@@ -1013,7 +1013,7 @@ cd ~
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script.zip
 wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web.zip
 
-if [[ $(ls -l ~/ui-script.zip | awk '{print$5}') -gt 45000 ]] && [[ $(ls -l ~/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
+if [[ $(ls -l ~/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l ~/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
 rm -rf /usr/local/bin/ui-*
 rm -rf /usr/local/bin/ui_*
 rm -rf /var/www/html/*.php
