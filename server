@@ -1455,7 +1455,7 @@ fi
     installBBRplus
     start_menu
     ;;
-    2)
+    3)
     installBBR
     start_menu
     ;;
