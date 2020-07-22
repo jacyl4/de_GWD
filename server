@@ -150,11 +150,14 @@ sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
 if [[ "$(uname -r)" =~ "bbrplus" ]]; then
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+  echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+elif [[ "$(uname -r)" =~ "5.7.7" ]]; then
+  echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 else
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+  echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
 
@@ -646,6 +649,8 @@ openssl ocsp -no_nonce \
     -VAfile  /var/www/ssl/bundle.pem \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
+    
+docker exec -it nginx nginx -s reload
 EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache
@@ -981,6 +986,54 @@ reboot
 blue "-----------------------"
 blue  "Install bbrplus [done]"
 blue "-----------------------"
+}
+
+
+
+installBBR(){
+export DEBIAN_FRONTEND=noninteractive
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+apt purge -y linux-image-amd64
+apt purge -y linux-image-*-amd64
+update-grub
+
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+sysctl -p
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+reboot
+blue "----------------------------"
+blue "Install latest kernel [done]"
+blue "----------------------------"
 }
 
 
@@ -1380,7 +1433,8 @@ if [[ -f "/usr/local/bin/version.php" ]]; then
 fi
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot"
+    green  "2. Install bbrplus+fq and reboot"
+    green  "3. Install bbr+cake and reboot"
     red    "5. Change static IP"
     red    "6. Change domain and generate new certificate"
     red    "7. Change v2ray path & UUID"
@@ -1399,6 +1453,10 @@ fi
     ;;
     2)
     installBBRplus
+    start_menu
+    ;;
+    2)
+    installBBR
     start_menu
     ;;
     5)

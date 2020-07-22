@@ -1028,7 +1028,12 @@ mkdir -p /var/www/ssl
 
 if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
 cd /var/www/ssl
-openssl req -x509 -nodes -days 3650 -subj "/C=CA/ST=QC/O=Company, Inc./CN=de_GWD.com" -addext "subjectAltName=DNS:de_GWD.com" -newkey rsa:2048 -keyout de_GWD.key -out de_GWD.cer
+openssl req -x509 -nodes -days 3650 \
+  -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
+  -addext "subjectAltName=DNS:localhost.com" \
+  -newkey rsa:2048 \
+  -keyout de_GWD.key \
+  -out de_GWD.cer
 fi
 }
 
@@ -1302,7 +1307,7 @@ blue "------------------------------"
 
 
 
-installKernel(){
+installBBR(){
 export DEBIAN_FRONTEND=noninteractive
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
@@ -1559,7 +1564,7 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "3. Install latest kernel and reboot"
+    green  "3. Install bbr+fq_codel and reboot"
     yellow "8. update Nginx(docker)"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
@@ -1576,7 +1581,7 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     3)
-    installKernel
+    installBBR
     start_menu
     ;;
     8)
