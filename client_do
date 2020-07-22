@@ -1026,8 +1026,9 @@ EOF
 
 mkdir -p /var/www/ssl
 
-if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
+if [[ ! -f "/var/www/ssl/ocsp.resp" ]]; then
 cd /var/www/ssl
+rm -rf /var/www/ssl/*
 openssl req -x509 -nodes -days 3650 \
   -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
   -addext "subjectAltName=DNS:localhost.com" \
