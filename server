@@ -600,7 +600,7 @@ chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
 crontab -l > ~/now.cron
-sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+sed -i '/update_ocsp_cache/d' ~/now.cron
 echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -657,7 +657,7 @@ chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
 crontab -l > ~/now.cron
-sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' ~/now.cron
+sed -i '/update_ocsp_cache/d' ~/now.cron
 echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
