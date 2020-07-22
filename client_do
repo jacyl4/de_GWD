@@ -1440,8 +1440,8 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
 jq 'del(.clifwd)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer
-mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key
+mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
+mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
