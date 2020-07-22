@@ -971,7 +971,7 @@ http {
 }
 EOF
 
-rm -rf /etc/nginx/conf.d/default.conf
+rm -rf /etc/nginx/conf.d/*
 
 cat << EOF >/etc/nginx/conf.d/default.conf
 server {
