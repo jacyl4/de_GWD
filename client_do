@@ -485,8 +485,8 @@ EOF
 
 jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/vtrui/config.json |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
-jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
@@ -994,7 +994,7 @@ rm -rf /etc/nginx/conf.d/default.conf
 
 cat << EOF >/etc/nginx/conf.d/default.conf
 server {
-  listen 443 ssl http2 fastopen=128 reuseport default_server;
+  listen 443 ssl http2 fastopen=128 reuseport;
   root /var/www/html;
   index index.php index.html index.htm;
 
@@ -1044,7 +1044,7 @@ docker pull jacyl4/nginx_tls1.3:latest
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
 -v /run/php/:/run/php/ \
@@ -1178,14 +1178,14 @@ installGWD(){
     read v2servn
 
     green "========================="
-    green " V2ray UUID"
-    green "========================="
-    read uuidnum
-
-    green "========================="
     green " Path"
     green "========================="
     read v2path
+    
+    green "========================="
+    green " V2ray UUID"
+    green "========================="
+    read uuidnum
 
 cd ~
 
@@ -1269,12 +1269,12 @@ jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
 jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
-jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' |\
+jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
 jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
-jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
 jq --arg v2path "$v2path" '.v2nodeForUpdate.path=$v2path' |\
+jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
 jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod 666 /usr/local/bin/0conf
 
@@ -1451,8 +1451,8 @@ doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
 
 domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
 port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
-uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)

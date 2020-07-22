@@ -543,7 +543,7 @@ chown -R www-data:www-data /run/php
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
 -v /run/php/:/run/php/ \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
@@ -552,7 +552,7 @@ else
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+-v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
 jacyl4/nginx_tls1.3:latest
@@ -863,8 +863,8 @@ fi
 
 cd ~
 
-v2uuids=$(cat /proc/sys/kernel/random/uuid)
 v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
+v2uuids=$(cat /proc/sys/kernel/random/uuid)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
@@ -930,8 +930,8 @@ blue  "Install de_GWD [done]"
 echo ""
 blue "DoH:    $(yellow "$vpsdomainP/dq")"
 blue "Domain: $(yellow "$vpsdomainP")"
-blue "UUID:   $(yellow "$v2uuids")"
 blue "PATH:   $(yellow "$v2path")"
+blue "UUID:   $(yellow "$v2uuids")"
 blue "---------------------------------------------"
 }
 
@@ -1075,8 +1075,8 @@ sed -i "$(sed -ne '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}
 
 docker exec -it nginx nginx -s reload
 
-jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' /usr/local/bin/vtrui/config.json |\
-jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
+jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' /usr/local/bin/vtrui/config.json |\
+jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 systemctl restart vtrui
 blue "------------------------------"
@@ -1101,14 +1101,14 @@ sed -i '/"outbounds":/,$d' /usr/local/bin/vtrui/config.json
     read upstreamDomainP
 
     green "=========================="
-    green "v2ray upstream UUID"
-    green "=========================="
-    read upstreamUUID
-
-    green "=========================="
     green "v2ray upstream path"
     green "=========================="
     read upstreamPath
+
+    green "=========================="
+    green "v2ray upstream UUID"
+    green "=========================="
+    read upstreamUUID
 
 domain=$(echo $upstreamDomainP | cut -d: -f1)
 port=$(echo $upstreamDomainP | cut -d: -f2)
@@ -1227,8 +1227,8 @@ port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/defa
 portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
-v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /usr/local/bin/vtrui/config.json)
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /usr/local/bin/vtrui/config.json)
+v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /usr/local/bin/vtrui/config.json)
 
 htmldir=$(awk '/root/ {print$2;exit}' /etc/nginx/conf.d/default.conf | cut -d';' -f1)
 
@@ -1276,8 +1276,8 @@ else
 vpsdomainP=$vpsdomain:$port
 fi
 
-v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /usr/local/bin/vtrui/config.json)
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /usr/local/bin/vtrui/config.json)
+v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /usr/local/bin/vtrui/config.json)
 
 blue "---------------------------------------------"
 green "V2ray node information"
@@ -1383,7 +1383,7 @@ fi
     green  "2. Install bbrplus and reboot"
     red    "5. Change static IP"
     red    "6. Change domain and generate new certificate"
-    red    "7. Change v2ray UUID & path"
+    red    "7. Change v2ray path & UUID"
     green  "8. Set v2ray upsteram"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
