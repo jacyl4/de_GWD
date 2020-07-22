@@ -377,7 +377,7 @@ cat << EOF >/usr/local/bin/vtrui/config.json
   "dns":{"servers":["localhost"]},
   "inbounds": [
     {
-    "port":11811,
+    "port":11810,
     "listen":"127.0.0.1",
     "protocol":"vmess",
     "settings":{
@@ -742,7 +742,7 @@ location /dq {
 }
 
 location $v2path {
-  proxy_pass                http://127.0.0.1:11811;
+  proxy_pass                http://127.0.0.1:11810;
   proxy_http_version        1.1;
   proxy_set_header          Host \$http_host;
   proxy_set_header          Upgrade "WebSocket";
