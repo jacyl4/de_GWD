@@ -188,7 +188,7 @@ net.ipv4.tcp_slow_start_after_idle = 0
 net.ipv4.neigh.default.gc_thresh1 = 1024
 net.ipv4.neigh.default.gc_thresh2 = 2048
 net.ipv4.neigh.default.gc_thresh3 = 4096
-net.core.default_qdisc = fq_codel
+net.core.default_qdisc = cake
 net.ipv4.tcp_congestion_control = bbr
 EOF
 

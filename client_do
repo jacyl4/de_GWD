@@ -161,7 +161,7 @@ net.ipv4.tcp_slow_start_after_idle = 0
 net.ipv4.neigh.default.gc_thresh1 = 1024
 net.ipv4.neigh.default.gc_thresh2 = 2048
 net.ipv4.neigh.default.gc_thresh3 = 4096
-net.core.default_qdisc = fq_codel
+net.core.default_qdisc = cake
 net.ipv4.tcp_congestion_control = bbr
 EOF
 
@@ -1329,7 +1329,7 @@ PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
 
-echo "net.core.default_qdisc = fq_codel" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 sysctl -p
 
@@ -1574,7 +1574,7 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    green  "3. Install bbr+fq_codel and reboot"
+    green  "3. Install bbr+cake and reboot"
     yellow "8. update Nginx(docker)"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
