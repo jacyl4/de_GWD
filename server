@@ -868,8 +868,8 @@ fi
 
 cd ~
 
-v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
 v2uuids=$(cat /proc/sys/kernel/random/uuid)
+v2path="/$(echo $v2uuids | awk '{print substr($0,length($1)-5)}')"
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)

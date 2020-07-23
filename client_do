@@ -1031,7 +1031,8 @@ cd /var/www/ssl
 rm -rf /var/www/ssl/*
 openssl req -x509 -nodes -days 3650 \
   -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
-  -addext "subjectAltName=DNS:localhost.com" \
+  -config <(cat /etc/ssl/openssl.cnf \
+    <(printf '[SAN]\nsubjectAltName=DNS:localhost')) \
   -newkey rsa:2048 \
   -keyout de_GWD.key \
   -out de_GWD.cer
