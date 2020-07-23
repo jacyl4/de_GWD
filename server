@@ -1115,14 +1115,14 @@ blue "-----------------------------------------------"
 
 changeV2rayVerify(){
     green "=========="
-    green " New UUID"
-    green "=========="
-    read nuuid
-
-    green "=========="
     green " New path"
     green "=========="
     read npath
+
+    green "=========="
+    green " New UUID"
+    green "=========="
+    read nuuid
 
 sed -i "$(sed -ne '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
