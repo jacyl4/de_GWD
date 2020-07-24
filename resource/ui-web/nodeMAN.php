@@ -117,80 +117,19 @@
           </div>
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-bordered table-striped" id="dataTable">
+              <table class="table table-bordered table-striped text-center">
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th><button type="button" class="form-control btn btn-outline-secondary btn-xs my-n2" style="border-Radius: 0px;" onclick="addLine()">增加</button></th>
                     <th class="text-nowrap text-center"><———— 域名 ————></th>
                     <th class="text-nowrap text-center"><———— 节点名 ————></th>
                     <th class="text-nowrap text-center"><—— PATH ——></th>
                     <th class="text-nowrap text-center"><———————— UUID ————————></th>
+                    <th class="text-nowrap text-center">上</th>
+                    <th class="text-nowrap text-center">下</th>
                   </tr>
                 </thead>
                 <tbody id="nodeTable">
-                  <tr>
-                    <td>1</td>
-                    <td><input type="text" class="form-control" id="domain1" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[0]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename1" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[0]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path1" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[0]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid1" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[0]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td><input type="text" class="form-control" id="domain2" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[1]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename2" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[1]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path2" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[1]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid2" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[1]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>3</td>
-                    <td><input type="text" class="form-control" id="domain3" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[2]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename3" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[2]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path3" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[2]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid3" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[2]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>4</td>
-                    <td><input type="text" class="form-control" id="domain4" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[3]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename4" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[3]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path4" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[3]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid4" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[3]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>5</td>
-                    <td><input type="text" class="form-control" id="domain5" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[4]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename5" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[4]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path5" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[4]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid5" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[4]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>6</td>
-                    <td><input type="text" class="form-control" id="domain6" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[5]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename6" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[5]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path6" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[5]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid6" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[5]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>7</td>
-                    <td><input type="text" class="form-control" id="domain7" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[6]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename7" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[6]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path7" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[6]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid7" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[6]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>8</td>
-                    <td><input type="text" class="form-control" id="domain8" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[7]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename8" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[7]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path8" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[7]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid8" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[7]->uuid ?>"></td>
-                  </tr>
-                  <tr>
-                    <td>9</td>
-                    <td><input type="text" class="form-control" id="domain9" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[8]->domain ?>"></td>
-                    <td><input type="text" class="form-control" id="nodename9" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[8]->name ?>"></td>
-                    <td><input type="text" class="form-control" id="path9" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[8]->path ?>"></td>
-                    <td><input type="text" class="form-control" id="uuid9" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[8]->uuid ?>"></td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -223,23 +162,56 @@ $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index
 function saveNode(){
 var nodeList = [];
 var domain, name, path, uuid;
-var len = $("#nodeTable td:nth-child(1)").length+1
-for( let i = 1; i<len; i++){
+var len = $("#nodeTable td:nth-child(1)").length;
+console.log(len);
+for( let i = 0; i<len; i++){
     domain = $('#domain'+i).val();
-    name = $('#nodename'+i).val();
+    name = $('#name'+i).val();
     path = $('#path'+i).val();
     uuid = $('#uuid'+i).val();
     if (domain !== '' || name !== '' || path !== '' || uuid !== '' ) {
     nodeList.push({domain, name, path, uuid});
-    }
+    };
 };
-$.get("./act/saveNode.php", {nodeList:nodeList}, function(result){window.location.reload();});
+$.get("./act/saveNode.php", {nodeList:nodeList}, function(result){ window.location.href="index.php" });
 };
 
+function addLine(){
+  var i = $("#nodeTable td:nth-child(1)").length;
+  $('#nodeTable').append(`<tr>
+                          <td class="align-middle">${i}</td>
+                          <td class="align-middle"><input type="text" class="form-control" id="domain${i}" value=""></td>
+                          <td class="align-middle"><input type="text" class="form-control" id="name${i}" value=""></td>
+                          <td class="align-middle"><input type="text" class="form-control" id="path${i}" value=""></td>
+                          <td class="align-middle"><input type="text" class="form-control" id="uuid${i}" value=""></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-up"></i></button></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-down"></i></button></td>
+                          </tr>`);
+};
 
 window.onload = function() {
+$.get('./act/v2node.php', function(data) {
+var nodeList = JSON.parse(data);
+var len = nodeList.length;
+for( let i = 0; i<len; i++){
+  let domain = nodeList[i].domain;
+  let name = nodeList[i].name;
+  let path = nodeList[i].path;
+  let uuid = nodeList[i].uuid;
+  $('#nodeTable').append(`<tr>
+                          <td class="align-middle">${i}</td>
+                          <td class="align-middle"><input type="text" class="form-control" id="domain${i}" value="${domain}"></td>
+                          <td class="align-middle"><input type="text" class="form-control" id="name${i}" value="${name}"></td>
+                          <td class="align-middle"><input type="text" class="form-control" id="path${i}" value="${path}"></td>
+                          <td class="align-middle"><input type="text" class="form-control" id="uuid${i}" value="${uuid}"></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-up"></i></button></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-down"></i></button></td>
+                          </tr>`);
+};
 
-}
+
+});
+};
 </script>
 
   <!-- Scroll to Top Button-->

@@ -364,11 +364,11 @@ $('#FWD1body').css('display', 'block');
 };
 });
 
-$.get('./act/v2nodeNAME.php', function(data) {
-var v2nodeNAME = data.split('\n');
-var len = v2nodeNAME.length-1;
+$.get('./act/v2node.php', function(data) {
+var nodeList = JSON.parse(data);
+var len = nodeList.length;
 for( let i = 0; i<len; i++){
-  let name = v2nodeNAME[i];
+  let name = nodeList[i].name;
   $('#v2nodeNAME').append("<a class='dropdown-item' href='#' id='nodeName"+i+"'>"+name+"</a>");
   $('#nodeName'+i).click(function(){ $('#v2nodeNAMEshow').html(name); $('#v2nodeNAMEshow').val(i);});
 };

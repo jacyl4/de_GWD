@@ -204,7 +204,7 @@
 
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-bordered table-hover text-center text-nowrap" id="dataTable">
+              <table class="table table-bordered table-hover text-center text-nowrap">
                 <thead>
 
 <span class="float-left">
@@ -575,19 +575,20 @@ window.onload = function() {
 nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
 nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
 
-$.get('./act/v2nodeNAME.php', function(data) {
-var nodeNAME = data.split('\n');
-var len = nodeNAME.length-1;
+$.get('./act/v2node.php', function(data) {
+var nodeList = JSON.parse(data);
+var len = nodeList.length;
 for( let i = 0; i<len; i++){
-  let nodeMAIN = nodeNAME[i];
-  let nodeNF = nodeNAME[i];
-  let nodeDT = nodeNAME[i];
+  let domain = nodeList[i].domain;
+  let name = nodeList[i].name;
+  let nodeNF = nodeList[i].name;
+  let nodeDT = nodeList[i].name;
   $('#nodeTable').append(`<tr> 
-                          <td>${i}</td>
-                          <td><span id="nodeDomain${i}"class="align-middle"></span></td>
-                          <td><span id="nodeshow${i}" class="align-middle">${nodeMAIN}</span></td>
-                          <td><span id="ping${i}" class='text-success'></span></td>
-                          <td><button id="switch${i}" type="button" class="btn btn-success btn-xs">切换</button></td>
+                          <td class="align-middle">${i}</td>
+                          <td class="align-middle"><span id="nodeDomain${i}">${domain}</span></td>
+                          <td class="align-middle"><span id="nodeshow${i}">${name}</span></td>
+                          <td class="align-middle"><span id="ping${i}" class='text-success'></span></td>
+                          <td class="align-middle"><button id="switch${i}" type="button" class="btn btn-success btn-xs">切换</button></td>
                           <td id="checkNode${i}">${nodestatusf}</td>
                           </tr>`);
   $('#checkNode<?php echo exec('/usr/local/bin/ui-checkNode');?>').html(nodestatust);
@@ -595,15 +596,6 @@ for( let i = 0; i<len; i++){
     $("#nodeTable td:nth-child(6)").html(nodestatusf);
     $('#checkNode'+i).html(nodestatust);
     $.get("./act/changeNode.php", {nodenum:i}, function(result){ })
-  });
-
-  $.get('./act/v2nodeDOMAIN.php', function(data) {
-  var nodeDOMAIN = data.split('\n');
-  var len = nodeDOMAIN.length-1;
-    for( let i = 0; i<len; i++){
-    let nodeDomain = nodeDOMAIN[i];
-    $('#nodeDomain'+i).html(nodeDomain);
-    };
   });
 
   $('#nodenf').append("<a class='dropdown-item' href='#' id='nodenf"+i+"'>"+nodeNF+"</a>");
