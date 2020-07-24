@@ -1,6 +1,7 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
+$portCheck1 = $_GET['portCheck1'];
 $FWD0port = $_GET['FWD0port'];
 $FWD0path = $_GET['FWD0path'];
 $FWD0uuid = $_GET['FWD0uuid'];
@@ -9,6 +10,7 @@ $FWD0uuid = explode("\n",$FWD0uuid);
 $FWD0uuid = array_filter($FWD0uuid);
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$data['FORWARD']['PortCheck1'] = $portCheck1;
 $data['FORWARD']['FWD0']['port'] = $FWD0port;
 $data['FORWARD']['FWD0']['path'] = $FWD0path;
 $data['FORWARD']['FWD0']['uuid'] = $FWD0uuid;
@@ -29,5 +31,7 @@ if (file_exists($nginx)) {
 elseif (file_exists($docker)) {
     shell_exec('sudo docker exec -it nginx nginx -s reload');
 }
+
+shell_exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

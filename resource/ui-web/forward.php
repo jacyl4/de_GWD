@@ -164,6 +164,14 @@
           <div class="card-body" id="FWD0body" style="display:none">
             <div class="form-row">
               <div class="col-md-3 mt-auto">
+
+<span class="float-left mb-3">
+<div class="form-group form-check ml-4 mt-1 mb-1">
+    <input type="checkbox" class="form-check-input" id="portCheck1" <?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->PortCheck1 ?>>
+    <label class="form-check-label" for="portCheck1">阻止外部访问本机53端口</label>
+</div>
+</span>
+
               <div class="input-group mb-1">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
@@ -311,10 +319,15 @@ $('#FWD0body').css('display', 'block');
 }
 
 function FWD0save(){
+if ($('#portCheck1').prop('checked') == true) {
+  var portCheck1 = "checked";
+} else {
+  var portCheck1 = "";
+};
 FWD0port=$('#FWD0port').val();
 FWD0path=$('#FWD0path').val();
 FWD0uuid=$('#FWD0uuid').val();
-$.get('./act/FWD0save.php', {FWD0port:FWD0port, FWD0path:FWD0path, FWD0uuid:FWD0uuid}, function(result){window.location.reload();});
+$.get('./act/FWD0save.php', {portCheck1:portCheck1, FWD0port:FWD0port, FWD0path:FWD0path, FWD0uuid:FWD0uuid}, function(result){window.location.reload();});
 }
 
 function FWD0stop(){

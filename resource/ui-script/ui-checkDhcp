@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) == "on" ]]; then
+if [[ $(ls /etc/dnsmasq.d) =~ "dhcp" ]]; then
 	echo "success"
 else
 	echo "outline-secondary"

@@ -196,8 +196,7 @@ listB=$("#listB").val();
 listW=$("#listW").val();
 listBlan=$("#listBlan").val();
 listWlan=$("#listWlan").val();
-$.get("./act/saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){window.location.reload();});
-alert("提交黑白名单。。。");
+$.get("./act/saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){ window.location.href="index.php" });
 }
 
 window.onload = function() {
