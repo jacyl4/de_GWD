@@ -203,9 +203,6 @@
           </div>
 
           <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-bordered table-hover text-center text-nowrap">
-                <thead>
 
 <span class="float-left">
 <div class="input-group ml-4 mb-4 mt-1">
@@ -232,6 +229,9 @@
 </div>
 </span>
 
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover text-center text-nowrap">
+                <thead>
                     <tr>
                     <th>#</th>
                     <th>域名</th>
@@ -244,6 +244,7 @@
                 <tbody id="nodeTable">
                 </tbody>
               </table>
+            </div>
 
 <div id="shnodedt" style="display:<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->divertLan->display; ?>">
 <span class="float-left">
@@ -271,8 +272,6 @@
 </span>
 </div>
 
-
-            </div>
           </div>
         </div>
 
