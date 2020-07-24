@@ -1062,8 +1062,8 @@ jacyl4/nginx_tls1.3:latest
 
 installWebUI(){
 cd ~
-wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script.zip
-wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web.zip
+wget --no-check-certificate -c -O ~/ui-script.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script/Archive.zip
+wget --no-check-certificate -c -O ~/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
 
 if [[ $(ls -l ~/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l ~/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
 rm -rf /usr/local/bin/ui-*

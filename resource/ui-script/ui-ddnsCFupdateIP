@@ -1,0 +1,18 @@
+#!/bin/bash
+wanIP=$(curl http://members.3322.org/dyndns/getip)
+
+CFdomain=$(jq -r '.ddns.ddnsCF.cfDomain' /usr/local/bin/0conf)
+CFzoneid=$(jq -r '.ddns.ddnsCF.cfZoneID' /usr/local/bin/0conf)
+CFapikey=$(jq -r '.ddns.ddnsCF.cfAPIkey' /usr/local/bin/0conf)
+CFemail=$(jq -r '.ddns.ddnsCF.cfEmail' /usr/local/bin/0conf)
+CFdomainid=$(jq -r '.ddns.ddnsCF.cfDomainID' /usr/local/bin/0conf)
+
+CFdomainip=$(dig @127.0.0.1 $CFdomain -p 5380 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+
+if [[ $wanIP != $CFdomainip ]]; then
+curl -X PUT "https://api.cloudflare.com/client/v4/zones/$CFzoneid/dns_records/$CFdomainid" \
+     -H "X-Auth-Email: $CFemail" \
+     -H "X-Auth-Key: $CFapikey" \
+     -H "Content-Type: application/json" \
+     --data '{"type":"A","name":"'$CFdomain'","content":"'$wanIP'","ttl":1,"proxied":false}'
+fi

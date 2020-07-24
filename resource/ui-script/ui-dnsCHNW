@@ -1,0 +1,104 @@
+#!/bin/bash
+cat << EOF >/tmp/v2dns_config
+{
+"dns":{
+  "hosts":{"localhost":"127.0.0.1"},
+  "servers":[
+  {"address":"127.0.0.1","port":5390},
+  {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
+  {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
+  {"address":"127.0.0.1","port":5310,"domains":["geosite:cn"]}
+  ]
+},
+"inbounds":[
+  {
+    "tag":"dnsin",
+    "port":53,
+    "protocol":"dokodemo-door",
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53}
+  }
+],
+"outbounds":[
+  {
+    "tag":"dnsout",
+    "protocol":"dns"
+  }
+],
+"routing":{
+  "domainStrategy":"AsIs",
+  "rules":[
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
+  ]
+}
+}
+EOF
+
+
+
+doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
+
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+
+doh1IP=$(dig @127.0.0.1 $doh1Domain -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+
+doh_upstream1='url = "https:\/\/'$doh1'"'
+doh_upstream2='url = "https:\/\/'$doh2'"'
+
+sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
+
+jq --arg key1 "$doh1Domain" --arg value1 "$doh1IP" '.dns.hosts += {($key1): ($value1)}' /tmp/v2dns_config |\
+jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($value2)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
+
+echo $doh1IP >/tmp/IPdoh
+echo $doh2IP >>/tmp/IPdoh
+sort /tmp/IPdoh | uniq | sed '/^\s*$/d' >/usr/local/bin/IPdoh
+
+cat /dev/null >/usr/local/bin/IPv2node
+jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp2
+sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
+cat /tmp/v2node_temp | while read line 
+do
+  key=$line
+  value=$(dig @127.0.0.1 $line -p 5370 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+echo $value >>/usr/local/bin/IPv2node
+jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
+done
+
+jq 'del(.dns.hosts[] | select(. == ""))' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
+
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+if [[ -n $(cat /tmp/hosts) ]]; then
+  cat /tmp/hosts | while read line 
+  do
+    key=$(echo $line | awk '{print$1}')
+    value=$(echo $line | awk '{print$2}')
+    jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
+  done
+fi
+
+jq '.dns.DNSsplit="chnw"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+
+if [[ -n $(cat /tmp/v2dns_config) ]]; then
+  mv -f /tmp/v2dns_config /usr/local/bin/v2dns/config.json
+fi
+
+
+if [[ $(jq -r '.dns.v2ad' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-V2ADon
+else
+/usr/local/bin/ui-V2ADoff
+fi
+
+rm -rf /tmp/v2dns*
+rm -rf /tmp/v2node*
+rm -rf /tmp/IPdoh*
+rm -rf /tmp/hosts
+rm -rf /tmp/listB
+rm -rf /tmp/listW
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /usr/local/bin/0conf

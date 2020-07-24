@@ -1,0 +1,55 @@
+#!/bin/bash
+FWD0port=$(jq -r '.FORWARD.FWD0.port' /usr/local/bin/0conf)
+FWD0path=$(jq -r '.FORWARD.FWD0.path' /usr/local/bin/0conf)
+
+cat << EOF >/etc/nginx/conf.d/forward0.conf
+server {
+  listen $FWD0port ssl http2 fastopen=128 reuseport;
+
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_session_timeout 10m;
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
+
+  add_header Referrer-Policy "no-referrer" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Download-Options "noopen" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header X-Permitted-Cross-Domain-Policies "none" always;
+  add_header X-Robots-Tag "none" always;
+  add_header X-XSS-Protection "1; mode=block" always;
+  add_header Strict-Transport-Security "max-age=63072000" always;
+
+location $FWD0path {
+  proxy_pass                http://127.0.0.1:11810;
+  proxy_http_version        1.1;
+  proxy_set_header          Host \$http_host;
+  proxy_set_header          Upgrade "WebSocket";
+  proxy_set_header          Connection "upgrade";
+  proxy_set_header          X-Real-IP \$remote_addr;
+  proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_connect_timeout     432000;
+  proxy_send_timeout        432000;
+  proxy_read_timeout        432000;
+  proxy_redirect            off;
+  proxy_buffering           off;
+  proxy_buffer_size         4k;
+}
+}
+EOF
+
+if [[ -f "/lib/systemd/system/nginx.service" ]];then
+    sed -i '/ssl_early_data/d' /etc/nginx/conf.d/forward0.conf
+fi

@@ -1,0 +1,6 @@
+#!/bin/bash
+cat << EOF >/usr/local/bin/ui-update
+#!/bin/bash
+/usr/local/bin/ttyd -p 3000 -o $(jq -r '.updateCMD' /usr/local/bin/0conf)
+EOF
+chmod +x /usr/local/bin/ui-update

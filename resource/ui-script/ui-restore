@@ -1,0 +1,25 @@
+#!/bin/bash
+piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
+sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
+
+/usr/local/bin/ui-saveDNSChina
+systemctl restart smartdns
+/usr/local/bin/ui_4h
+systemctl restart doh-client
+systemctl restart v2dns
+/usr/local/bin/ui-NodeDThide
+systemctl restart vtrui
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-UDPon
+else
+  /usr/local/bin/ui-UDPoff
+fi
+systemctl restart iptables-proxy
+
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-DHCPon
+fi
+
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
+  /usr/local/bin/ui-markThis
+fi

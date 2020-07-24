@@ -1,0 +1,112 @@
+#!/bin/bash
+clear
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+
+if [[ -f "/lib/systemd/system/docker.service" ]];then
+    reloadcmd="docker exec -it nginx nginx -s reload"
+elif [[ -f "/lib/systemd/system/nginx.service" ]];then
+    reloadcmd="systemctl reload nginx"
+fi
+
+
+installCER(){
+crontab -l > ~/now.cron
+sed -i '/acme.sh/d' ~/now.cron
+sed -i '/update_ocsp_cache/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+CFapikey=$(jq -r '.FORWARD.APIkey' /usr/local/bin/0conf)
+CFemail=$(jq -r '.FORWARD.Email' /usr/local/bin/0conf)
+domain=$(jq -r '.FORWARD.domain' /usr/local/bin/0conf)
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+apt install netcat socat
+rm -rf /var/www/ssl/*
+
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --force --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --force --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
+~/.acme.sh/acme.sh --force --installcert -d $topDomain --ecc \
+               --key-file       /var/www/ssl/de_GWD.key  \
+               --fullchain-file /var/www/ssl/de_GWD.cer \
+               --reloadcmd     "$reloadcmd"
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+cat << EOF >/var/www/ssl/update_ocsp_cache
+#!/bin/bash
+wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+mv ~/intermediate.pem /var/www/ssl
+mv ~/root.pem /var/www/ssl
+cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/de_GWD.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://ocsp.int-x3.letsencrypt.org \
+    -respout /var/www/ssl/ocsp.resp
+
+$reloadcmd   
+EOF
+
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+
+crontab -l > ~/now.cron
+echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+jq --arg key "$domain" --arg value "$localaddr" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq --arg key "$domain" --arg value "$localaddr" '.dns.hosts += {($key): ($value)}' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /usr/local/bin/0conf
+
+systemctl restart v2dns
+
+blue "--------------------------------"
+blue  "Generate TLS Certificate [done]"
+blue "--------------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "     Domain & Certificate"
+    green "==============================="
+    green  "1. Generate TLS Certificate"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installCER
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu

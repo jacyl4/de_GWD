@@ -1,0 +1,75 @@
+#!/bin/bash
+clear
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+case $(uname -m) in
+    x86_64)  architecture="amd64" ;;
+    aarch64)  architecture="arm64" ;;
+esac
+
+installFRP(){
+cd ~
+
+if [[ $architecture = "amd64" ]]; then
+wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/frp_linux_amd64.tar.gz
+elif [[ $architecture = "arm64" ]]; then
+wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/frp_linux_arm64.tar.gz
+fi
+tar zxvf ~/frp.tar.gz
+
+mkdir -p /usr/local/bin/frp
+mv -f ~/frp_*/frpc /usr/local/bin/frp/frpc
+chmod -R 755 /usr/local/bin/frp
+chown -R root:root /usr/local/bin/frp
+
+rm -rf ~/frp*
+blue "--------------------"
+blue  "install FRP [done]"
+blue "--------------------"
+}
+
+uninstallFRP(){
+systemctl stop frpc
+rm -rf /lib/systemd/system/frpc.service
+systemctl daemon-reload
+
+rm -rf /usr/local/bin/frp
+
+jq 'del(.FRP)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+chmod 666 /usr/local/bin/0conf
+
+blue "--------------------"
+blue  "uninstall FRP [done]"
+blue "--------------------"
+}
+
+start_menu(){
+    green "==============================="
+    green "         FRP"
+    green "==============================="
+    green  "1. Install FRP"
+    yellow  "2. Uninnstall FRP"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installFRP
+    start_menu
+    ;;
+    2)
+    uninstallFRP
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
