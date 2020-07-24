@@ -163,12 +163,13 @@ function saveNode(){
 var nodeList = [];
 var domain, name, path, uuid;
 var len = $("#nodeTable td:nth-child(1)").length;
-console.log(len);
+var trList = $("#nodeTable").children("tr")
 for( let i = 0; i<len; i++){
-    domain = $('#domain'+i).val();
-    name = $('#name'+i).val();
-    path = $('#path'+i).val();
-    uuid = $('#uuid'+i).val();
+    var tdArr = trList.eq(i).find("td");
+    var domain = tdArr.eq(1).find('input').val();
+    var name = tdArr.eq(2).find('input').val();
+    var path = tdArr.eq(3).find('input').val();
+    var uuid = tdArr.eq(4).find('input').val();
     if (domain !== '' || name !== '' || path !== '' || uuid !== '' ) {
     nodeList.push({domain, name, path, uuid});
     };
@@ -180,13 +181,30 @@ function addLine(){
   var i = $("#nodeTable td:nth-child(1)").length;
   $('#nodeTable').append(`<tr>
                           <td class="align-middle">${i}</td>
-                          <td class="align-middle"><input type="text" class="form-control" id="domain${i}" value=""></td>
-                          <td class="align-middle"><input type="text" class="form-control" id="name${i}" value=""></td>
-                          <td class="align-middle"><input type="text" class="form-control" id="path${i}" value=""></td>
-                          <td class="align-middle"><input type="text" class="form-control" id="uuid${i}" value=""></td>
-                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-up"></i></button></td>
-                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-down"></i></button></td>
+                          <td class="align-middle"><input type="text" class="form-control" value=""></td>
+                          <td class="align-middle"><input type="text" class="form-control" value=""></td>
+                          <td class="align-middle"><input type="text" class="form-control" value=""></td>
+                          <td class="align-middle"><input type="text" class="form-control" value=""></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="moveUp(this)"><i class="fas fa-caret-up"></i></button></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="moveDown(this)"><i class="fas fa-caret-down"></i></button></td>
                           </tr>`);
+};
+
+function moveUp(obj) { 
+var current = $(obj).parent().parent();
+console.log(current);
+var prev = current.prev();
+if (current.index() > 0) { 
+current.insertBefore(prev);
+};
+};
+
+function moveDown(obj) { 
+var current = $(obj).parent().parent();
+var next = current.next();
+if (next) { 
+current.insertAfter(next);
+};
 };
 
 window.onload = function() {
@@ -200,12 +218,12 @@ for( let i = 0; i<len; i++){
   let uuid = nodeList[i].uuid;
   $('#nodeTable').append(`<tr>
                           <td class="align-middle">${i}</td>
-                          <td class="align-middle"><input type="text" class="form-control" id="domain${i}" value="${domain}"></td>
-                          <td class="align-middle"><input type="text" class="form-control" id="name${i}" value="${name}"></td>
-                          <td class="align-middle"><input type="text" class="form-control" id="path${i}" value="${path}"></td>
-                          <td class="align-middle"><input type="text" class="form-control" id="uuid${i}" value="${uuid}"></td>
-                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-up"></i></button></td>
-                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;"><i class="fas fa-caret-down"></i></button></td>
+                          <td class="align-middle"><input type="text" class="form-control" value="${domain}"></td>
+                          <td class="align-middle"><input type="text" class="form-control" value="${name}"></td>
+                          <td class="align-middle"><input type="text" class="form-control" value="${path}"></td>
+                          <td class="align-middle"><input type="text" class="form-control" value="${uuid}"></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="moveUp(this)"><i class="fas fa-caret-up"></i></button></td>
+                          <td class="align-middle"><button type="button" class="form-control btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="moveDown(this)"><i class="fas fa-caret-down"></i></button></td>
                           </tr>`);
 };
 
