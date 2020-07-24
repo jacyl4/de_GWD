@@ -490,9 +490,9 @@ $.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){wi
 }
 
 function pingICMP(){
-$.get('./act/v2nodeNAME.php', function(data) {
-var res = data.split('\n');
-var len = res.length-1;
+$.get('./act/v2node.php', function(data) {
+var nodeList = JSON.parse(data);
+var len = nodeList.length;
 for( let i = 0; i<len; i++){
   $.get("./act/pingICMP.php", {pingICMP:i}, function(data){ $('#ping'+i).text(data) });
 };
@@ -502,9 +502,9 @@ $.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) });
 }
 
 function pingTCP(){
-$.get('./act/v2nodeNAME.php', function(data) {
-var res = data.split('\n');
-var len = res.length-1;
+$.get('./act/v2node.php', function(data) {
+var nodeList = JSON.parse(data);
+var len = nodeList.length;
 for( let i = 0; i<len; i++){
   $.get("./act/pingTCP.php", {pingTCP:i}, function(data){ $('#ping'+i).text(data) });
 };
