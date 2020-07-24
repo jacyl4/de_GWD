@@ -29,7 +29,7 @@ if (file_exists($nginx)) {
     shell_exec('sudo systemctl reload nginx');
 }
 elseif (file_exists($docker)) {
-    shell_exec('sudo docker exec -it nginx nginx -s reload');
+    shell_exec('sudo docker container exec nginx nginx -s reload');
 }
 
 shell_exec('sudo systemctl restart iptables-proxy');

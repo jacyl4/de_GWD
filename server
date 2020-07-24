@@ -575,7 +575,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/$topDomain.key  \
                --fullchain-file /var/www/ssl/$topDomain.cer \
-               --reloadcmd     "docker exec -it nginx nginx -s reload"
+               --reloadcmd     "docker container exec nginx nginx -s reload"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
@@ -620,7 +620,7 @@ server {
 }
 EOF
 
-docker exec -it nginx nginx -s reload
+docker container exec nginx nginx -s reload
 
 rm -rf /var/www/ssl/*
 
@@ -630,7 +630,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --installcert -d $domain --ecc \
                --key-file       /var/www/ssl/$domain.key  \
                --fullchain-file /var/www/ssl/$domain.cer \
-               --reloadcmd     "docker exec -it nginx nginx -s reload"
+               --reloadcmd     "docker container exec nginx nginx -s reload"
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
@@ -650,7 +650,7 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
     
-docker exec -it nginx nginx -s reload
+docker container exec nginx nginx -s reload
 EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache
@@ -769,7 +769,7 @@ cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/4_v2Proxy >> /etc/nginx/conf.d/default.conf
 
-docker exec -it nginx nginx -s reload
+docker container exec nginx nginx -s reload
 EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
@@ -1126,7 +1126,7 @@ changeV2rayVerify(){
 
 sed -i "$(sed -ne '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
-docker exec -it nginx nginx -s reload
+docker container exec nginx nginx -s reload
 
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' /usr/local/bin/vtrui/config.json |\
 jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json

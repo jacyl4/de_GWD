@@ -7,7 +7,7 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 if [[ -f "/lib/systemd/system/docker.service" ]];then
-    reloadcmd="docker exec -it nginx nginx -s reload"
+    reloadcmd="docker container exec nginx nginx -s reload"
 elif [[ -f "/lib/systemd/system/nginx.service" ]];then
     reloadcmd="systemctl reload nginx"
 fi
