@@ -29,6 +29,7 @@
 
   <!-- Custom scripts for all pages-->
   <script src="js/sb-admin.min.js"></script>
+  <script src="js/jquery.qrcode.min.js"></script>
 
 </head>
 
