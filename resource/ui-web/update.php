@@ -115,9 +115,9 @@
           <div class="card-body">
 
     <div class="form-row">
-<button type="button" class="btn btn-outline-secondary" onclick="backup()">备份下载</button>
+<button type="button" class="btn btn-outline-secondary my-2" onclick="backup()">备份下载</button>
 
-<div class="input-group col-md-4">
+<div class="input-group col-md-4 my-2">
   <div class="custom-file">
     <input type="file" class="custom-file-input" id="restorefile">
     <label class="custom-file-label" for="restorefile">...</label>
@@ -143,9 +143,9 @@
           <div class="card-body">
 
     <div class="form-row">
-      <div class="input-group">
+      <div class="input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center w-100">CMD</span>
+          <span class="input-group-text justify-content-center">CMD</span>
         </div>
           <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateCMD ?>">
         <div class="input-group-append">

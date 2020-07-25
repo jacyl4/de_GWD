@@ -124,21 +124,21 @@
     <div class="form-row">
       <div class="col-md-3 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center w-100">域名</span>
+          <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
         </div>
           <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->domain ?>">
       </div>
 
       <div class="col-md-5 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center w-100">CF API KEY</span>
+          <span class="input-group-text justify-content-center" style="min-width: 120px;">CF API KEY</span>
         </div>
           <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->APIkey ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center w-100">CF E-mail</span>
+          <span class="input-group-text justify-content-center" style="min-width: 120px;">CF E-mail</span>
         </div>
           <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->Email ?>">
       </div>
