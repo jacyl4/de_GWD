@@ -11,7 +11,7 @@
   <meta name="description" content="de_GWD">
   <meta name="author" content="JacyL4">
 
-  <title>de_GWD</title>
+<title>de_GWD</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -205,7 +205,7 @@
           <div class="card-body">
 
 <span class="float-left">
-<div class="input-group ml-4 mb-4 mt-1">
+<div class="input-group ml-4 mt-1 mb-4">
   <div class="input-group-prepend">
     <label class="input-group-text">Netflix 分流</label>
   </div>
@@ -218,7 +218,7 @@
 </span>
 
 <span class="float-right">
-<div class="input-group mt-1 mr-4 mb-4">
+<div class="input-group mr-4 mt-1 mb-4">
   <div class="input-group-prepend">
   <label class="input-group-text">UDP代理</label>
   </div>
@@ -248,7 +248,7 @@
 
 <div id="shnodedt" style="display:<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->divertLan->display; ?>">
 <span class="float-left">
-<div class="input-group ml-4 mt-1 mb-1">
+<div class="input-group ml-4 mt-1 mb-4">
   <div class="input-group-prepend">
     <label class="input-group-text">内网设备分流</label>
   </div>
@@ -261,7 +261,7 @@
 </span>
 
 <span class="float-right">
-<div class="input-group mt-1 mr-4">
+<div class="input-group mr-4 mt-1">
   <div class="input-group-prepend">
   <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['divertLan']['ip'] as $k => $v) {echo "$v ";} ?>">
   </div>
