@@ -114,13 +114,10 @@
           </div>
           <div class="card-body">
 
-  <div class="my-2 float-left">
+    <div class="form-row">
 <button type="button" class="btn btn-outline-secondary" onclick="backup()">备份下载</button>
-  </div>
 
-  <div class="my-2 col-md-4 float-left">
-<form>
-<div class="input-group">
+<div class="input-group col-md-4">
   <div class="custom-file">
     <input type="file" class="custom-file-input" id="restorefile">
     <label class="custom-file-label" for="restorefile">...</label>
@@ -129,8 +126,7 @@
     <button type="button" class="btn btn-outline-secondary" onclick="restore()">上传恢复</button>
   </div>
 </div>
-</form>
-  </div>
+    </div>
 
           </div>
         </div>
@@ -147,8 +143,8 @@
           <div class="card-body">
 
     <div class="form-row">
-      <div class="col-md-10 input-group my-2">
-        <div class="input-group-prepend w-15">
+      <div class="input-group">
+        <div class="input-group-prepend">
           <span class="input-group-text justify-content-center w-100">CMD</span>
         </div>
           <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateCMD ?>">
@@ -156,7 +152,6 @@
           <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
         </div>
       </div>
-      
     </div>
 
 
