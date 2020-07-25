@@ -20,6 +20,17 @@
   <link href="css/sb-admin.min.css" rel="stylesheet">
   <link href="css/bootstrap4-toggle.min.css" rel="stylesheet">
 
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin.min.js"></script>
+  <script src="js/bootstrap4-toggle.min.js"></script>
+
 </head>
 
 <body id="page-top" class="sidebar-toggled">
@@ -228,6 +239,7 @@
   </div>
 </div>
 </span>
+
 
             <div class="table-responsive">
               <table class="table table-bordered table-hover text-center text-nowrap">
@@ -635,21 +647,11 @@ checklink();
 }, 1800);
 };
 </script>
+
   <!-- Scroll to Top Button-->
   <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin.min.js"></script>
-
 
 </body>
 
