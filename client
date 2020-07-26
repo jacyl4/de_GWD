@@ -1297,7 +1297,7 @@ fi
 /usr/local/bin/ui-saveListBW >/dev/null 2>&1
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-DHCPon
+  /usr/local/bin/ui-onDHCP
 fi
 
 systemctl restart iptables-proxy
