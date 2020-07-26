@@ -249,7 +249,7 @@
 
 <div id="shnodedt" style="display:<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->divertLan->display; ?>">
 <span class="float-left">
-<div class="input-group ml-4 mt-1 mb-4">
+<div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
     <label class="input-group-text">内网设备分流</label>
   </div>
