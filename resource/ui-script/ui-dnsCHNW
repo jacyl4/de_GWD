@@ -7,7 +7,7 @@ cat << EOF >/tmp/v2dns_config
   {"address":"127.0.0.1","port":5390},
   {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
-  {"address":"127.0.0.1","port":5310,"domains":["geosite:cn"]}
+  {"address":"127.0.0.1","port":5310,"domains":["geosite:cn"],"expectIPs":["geoip:cn"]}
   ]
 },
 "inbounds":[
@@ -27,7 +27,7 @@ cat << EOF >/tmp/v2dns_config
 "routing":{
   "domainStrategy":"AsIs",
   "rules":[
-    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
+    {"outboundTag":"dnsout","type":"field","inboundTag":["dnsin"]}
   ]
 }
 }
