@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ~
 wget --no-check-certificate -c --tries=10 https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
-if [[ $(ls -l ~/dlc.dat | awk '{print$5}') -gt 240000 ]]; then
+if [[ $(ls -l ~/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
 mv -f ~/geosite.dat /usr/local/bin/v2dns/geosite.dat
 fi
 
