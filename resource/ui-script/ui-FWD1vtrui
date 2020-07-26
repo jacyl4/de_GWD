@@ -31,7 +31,7 @@ echo $v2path
 
 cat > /usr/local/bin/vtrui1/config.json << EOF
 {
-  "dns":{"servers":["localhost"]},
+  "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
   "inbounds":[
    {
       "port": 11811,

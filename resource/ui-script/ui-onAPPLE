@@ -1,5 +1,7 @@
 #!/bin/bash
-jq --arg APPLE "geosite:apple-cn" '.dns.servers[1].domains+=[$APPLE]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_config
+jq --arg APPLE "geosite:apple-cn" '.dns.servers[2].domains+=[$APPLE]' /usr/local/bin/v2dns/config.json |\
+jq --arg APPLE "domain:icloud.com" '.dns.servers[2].domains+=[$APPLE]' |\
+jq --arg APPLE "domain:icloud-content.com" '.dns.servers[2].domains+=[$APPLE]' >/tmp/v2dns_config
 
 jq '.dns.APPLEdir="on"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
