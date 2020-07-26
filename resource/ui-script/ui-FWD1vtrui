@@ -14,21 +14,6 @@ fi
 uuidnum=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /usr/local/bin/0conf)
 v2path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /usr/local/bin/0conf)
 
-
-echo $v2nodeID
-echo $FWD1path
-echo $FWD1uuid
-
-
-echo $v2servn
-echo $domain
-echo $port
-
-echo $uuidnum
-echo $v2path
-
-
-
 cat > /usr/local/bin/vtrui1/config.json << EOF
 {
   "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
