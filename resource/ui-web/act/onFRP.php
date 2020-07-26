@@ -20,7 +20,7 @@ $data['FRP']['protocol'] = $FRPprotocol;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-shell_exec('sudo /usr/local/bin/ui-FRPon');
+shell_exec('sudo /usr/local/bin/ui-onFRP');
 shell_exec('sudo systemctl restart frpc');
 ?>
 <?php }?>

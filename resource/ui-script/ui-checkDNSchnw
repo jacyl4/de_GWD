@@ -1,6 +1,0 @@
-#!/bin/bash
-if [[ $(cat /usr/local/bin/v2dns/config.json) =~ "geosite:cn" ]]; then
-    echo "success"
-else
-	echo "outline-secondary"
-fi

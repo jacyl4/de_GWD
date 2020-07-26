@@ -1093,9 +1093,9 @@ systemctl restart v2dns
 /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 systemctl restart vtrui
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-UDPon >/dev/null 2>&1
+  /usr/local/bin/ui-onUDP >/dev/null 2>&1
 else
-  /usr/local/bin/ui-UDPoff >/dev/null 2>&1
+  /usr/local/bin/ui-offUDP >/dev/null 2>&1
 fi
 systemctl restart iptables-proxy
 
