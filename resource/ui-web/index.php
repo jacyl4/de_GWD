@@ -294,26 +294,26 @@
               <div class="col-md-4 mt-auto">
 
                 <div class="form-row ml-4">
-                  <div class="col-md-6 my-auto">
+                  <div class="my-auto" style="min-width: 160px">
               <div class="input-group mb-4 mx-auto">
                 <div class="input-group-prepend">
                 <label class="input-group-text">去广告</label>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php $v2add = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$v2add",'category-ads') !== false) echo 'success'; else echo 'secondary'; ?>" type="button" onclick="onV2ad()">ON</button>
-                  <button class="btn btn-secondary" type="button" onclick="offV2ad()">OFF</button>
+                  <button class="btn btn-<?php $v2add = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$v2add",'category-ads') !== false) echo 'success'; else echo 'secondary'; ?> btn-sm" type="button" onclick="onV2ad()">ON</button>
+                  <button class="btn btn-secondary btn-sm" type="button" onclick="offV2ad()">OFF</button>
                 </div>
               </div>
                   </div>
 
-                  <div class="col-md-6 my-auto">
+                  <div class="my-auto" style="min-width: 200px">
               <div class="input-group mb-4 mx-auto">
                 <div class="input-group-prepend">
                 <label class="input-group-text">Apple直连</label>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple-cn') !== false) echo 'success'; else echo 'secondary'; ?>" type="button" onclick="onAPPLE()">ON</button>
-                  <button class="btn btn-secondary" type="button" onclick="offAPPLE()">OFF</button>
+                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple-cn') !== false) echo 'success'; else echo 'secondary'; ?> btn-sm" type="button" onclick="onAPPLE()">ON</button>
+                  <button class="btn btn-secondary btn-sm" type="button" onclick="offAPPLE()">OFF</button>
                 </div>
               </div>
                   </div>
