@@ -68,19 +68,6 @@ echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-
-
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-
-jq --arg key "$domain" --arg value "$localaddr" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-jq --arg key "$domain" --arg value "$localaddr" '.dns.hosts += {($key): ($value)}' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-
-chmod 666 /usr/local/bin/v2dns/config.json
-chmod 666 /usr/local/bin/0conf
-
-systemctl restart v2dns
-
 blue "--------------------------------"
 blue  "Generate TLS Certificate [done]"
 blue "--------------------------------"
