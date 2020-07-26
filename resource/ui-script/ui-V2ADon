@@ -1,15 +1,13 @@
 #!/bin/bash
 ads1="geosite:category-ads-all"
-ads2="ext:h2y.dat:ad"
 fakeIP="127.0.0.1"
 
 jq --arg key "$ads1" --arg value "$fakeIP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json >/tmp/v2dns_config
-jq --arg key "$ads2" --arg value "$fakeIP" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config >/tmp/v2dns_config2
 
 jq '.dns.v2ad="on"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
-if [[ -n $(cat /tmp/v2dns_config2) ]]; then
-  mv -f /tmp/v2dns_config2 /usr/local/bin/v2dns/config.json
+if [[ -n $(cat /tmp/v2dns_config) ]]; then
+  mv -f /tmp/v2dns_config /usr/local/bin/v2dns/config.json
 fi
 
 rm -rf /tmp/v2dns*

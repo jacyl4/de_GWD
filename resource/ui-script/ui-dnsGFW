@@ -7,7 +7,7 @@ cat << EOF >/tmp/v2dns_config
   {"address":"127.0.0.1","port":5310},
   {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
-  {"address":"127.0.0.1","port":5390,"domains":["ext:h2y.dat:gfw"]}
+  {"address":"127.0.0.1","port":5390,"domains":["geosite:geolocation-!cn"]}
   ]
 },
 "inbounds":[
