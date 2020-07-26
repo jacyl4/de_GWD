@@ -297,11 +297,11 @@
                   <div class="col-md-6 my-auto">
               <div class="input-group mb-4 mx-auto">
                 <div class="input-group-prepend">
-                <label class="input-group-text">V2去广告</label>
+                <label class="input-group-text">去广告</label>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php $v2add = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$v2add",'category-ads') !== false) echo 'success'; else echo 'secondary'; ?>" type="button" onclick="onV2ad()">开启</button>
-                  <button class="btn btn-secondary" type="button" onclick="offV2ad()">关闭</button>
+                  <button class="btn btn-<?php $v2add = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$v2add",'category-ads') !== false) echo 'success'; else echo 'secondary'; ?>" type="button" onclick="onV2ad()">ON</button>
+                  <button class="btn btn-secondary" type="button" onclick="offV2ad()">OFF</button>
                 </div>
               </div>
                   </div>
@@ -312,8 +312,8 @@
                 <label class="input-group-text">Apple直连</label>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple-cn') !== false) echo 'success'; else echo 'secondary'; ?>" type="button" onclick="onAPPLE()">开启</button>
-                  <button class="btn btn-secondary" type="button" onclick="offAPPLE()">关闭</button>
+                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple-cn') !== false) echo 'success'; else echo 'secondary'; ?>" type="button" onclick="onAPPLE()">ON</button>
+                  <button class="btn btn-secondary" type="button" onclick="offAPPLE()">OFF</button>
                 </div>
               </div>
                   </div>
