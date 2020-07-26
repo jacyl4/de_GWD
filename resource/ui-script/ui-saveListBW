@@ -75,6 +75,19 @@ if [[ -n $(awk '/listWlan/ {print;exit}' /usr/local/bin/0conf) ]]; then
 	fi
 fi
 
+
+if [[ $(jq -r '.dns.v2ad' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-onV2ad
+else
+/usr/local/bin/ui-offV2ad
+fi
+
+if [[ $(jq -r '.dns.APPLEdir' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-onAPPLE
+else
+/usr/local/bin/ui-offAPPLE
+fi
+
 rm -rf /tmp/listB*
 rm -rf /tmp/listW*
 rm -rf /tmp/v2dns*
