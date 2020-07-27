@@ -9,7 +9,7 @@ if [[ -n $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) ]]; then
 	sort /tmp/listBpre2 | uniq | sed '/^\s*$/d' >/tmp/listBpre
 
 	cat /dev/null >/usr/local/bin/IPlistB
-	jq '.dns.servers[1].domains=["keyword:play.googleapi.cn"]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
+	jq '.dns.servers[1].domains+=["keyword:play.googleapi.cn"]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 	if [[ -n $(cat /tmp/listBpre) ]]; then
 		jq '.listB={}' /usr/local/bin/0conf >/tmp/0conf_temp
 		cat /dev/null > /usr/local/bin/IPlistB
@@ -38,7 +38,7 @@ if [[ -n $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) ]]; then
 	sort /tmp/listWpre2 | uniq | sed '/^\s*$/d' >/tmp/listWpre
 
 	cat /dev/null >/usr/local/bin/IPlistW
-	jq '.dns.servers[2].domains=["keyword:live.com"]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
+	jq '.dns.servers[2].domains+=["keyword:live.com"]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
 	if [[ -n $(cat /tmp/listWpre) ]]; then
 		jq '.listW={}' /usr/local/bin/0conf >/tmp/0conf_temp
 		cat /dev/null > /usr/local/bin/IPlistW
