@@ -294,7 +294,7 @@
               <div class="col-md-4 mt-auto">
 
                 <div class="form-row ml-4">
-                  <div class="col-sm-6 my-auto" style="min-width: 160px">
+                  <div class="my-auto" style="min-width: 175px">
               <div class="input-group mb-4 mx-auto">
                 <div class="input-group-prepend">
                 <label class="input-group-text">去广告</label>
@@ -306,7 +306,7 @@
               </div>
                   </div>
 
-                  <div class="col-sm-6 my-auto" style="min-width: 200px">
+                  <div class="my-auto" style="min-width: 200px">
               <div class="input-group mb-4 mx-auto">
                 <div class="input-group-prepend">
                 <label class="input-group-text">Apple直连</label>
