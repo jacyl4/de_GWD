@@ -533,14 +533,14 @@ echo $domainIP > /usr/local/bin/IPv2node
 
 cat << EOF >/usr/local/bin/iptables-proxy-up
 #!/bin/bash
-ipset -X chnroute
-ipset -X lanip
-ipset -X doh
-ipset -X v2node
-ipset -X listB
-ipset -X listW
-ipset -X listBlan
-ipset -X listWlan
+ipset -X chnroute >/dev/null 2>&1
+ipset -X lanip >/dev/null 2>&1
+ipset -X doh >/dev/null 2>&1
+ipset -X v2node >/dev/null 2>&1
+ipset -X listB >/dev/null 2>&1
+ipset -X listW >/dev/null 2>&1
+ipset -X listBlan >/dev/null 2>&1
+ipset -X listWlan >/dev/null 2>&1
 
 lanip="0.0.0.0/8 \
 100.64.0.0/10 \
@@ -665,14 +665,14 @@ iptables -t nat -X
 iptables -F
 iptables -X
 
-ipset -F chnroute
-ipset -F lanip
-ipset -F doh
-ipset -F v2node
-ipset -F listB
-ipset -F listW
-ipset -F listBlan
-ipset -F listWlan
+ipset -F chnroute >/dev/null 2>&1
+ipset -F lanip >/dev/null 2>&1
+ipset -F doh >/dev/null 2>&1
+ipset -F v2node >/dev/null 2>&1
+ipset -F listB >/dev/null 2>&1
+ipset -F listW >/dev/null 2>&1
+ipset -F listBlan >/dev/null 2>&1
+ipset -F listWlan >/dev/null 2>&1
 
 ip route flush table 100
 ip rule del fwmark 0x9
