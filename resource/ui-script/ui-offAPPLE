@@ -1,5 +1,5 @@
 #!/bin/bash
-server2=$(jq '.dns.servers[2].domains - ["geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"] ' /usr/local/bin/v2dns/config.json)
+server2=$(jq '.dns.servers[2].domains - ["geosite:apple","domain:icloud.com","domain:icloud-content.com"] ' /usr/local/bin/v2dns/config.json)
 
 jq --argjson server1 "$server2" '.dns.servers[2].domains=$server1' /usr/local/bin/v2dns/config.json >/tmp/v2dns_config
 
