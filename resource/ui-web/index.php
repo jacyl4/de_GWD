@@ -312,7 +312,7 @@
                 <label class="input-group-text">Apple直连</label>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple-cn') !== false) echo 'success'; else echo 'secondary'; ?> btn-sm" type="button" onclick="onAPPLE()">ON</button>
+                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'secondary'; ?> btn-sm" type="button" onclick="onAPPLE()">ON</button>
                   <button class="btn btn-secondary btn-sm" type="button" onclick="offAPPLE()">OFF</button>
                 </div>
               </div>
