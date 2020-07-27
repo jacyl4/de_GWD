@@ -54,8 +54,10 @@ if [[ -f "/lib/systemd/system/nginx.service" ]];then
     sed -i '/ssl_early_data/d' /etc/nginx/conf.d/forward1.conf
 fi
 
+rm -rf /usr/local/bin/vtrui1
 mkdir -p /usr/local/bin/vtrui1
-cp -f /usr/local/bin/vtrui/* /usr/local/bin/vtrui1
+cp -f /usr/local/bin/vtrui/vtrui /usr/local/bin/vtrui1/vtrui1
+cp -f /usr/local/bin/vtrui/v2ctl /usr/local/bin/vtrui1/v2ctl
 chmod -R +x /usr/local/bin/vtrui1
 
 cat << "EOF" > /lib/systemd/system/vtrui1.service
@@ -70,7 +72,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/local/bin/vtrui1/vtrui -config /usr/local/bin/vtrui1/config.json
+ExecStart=/usr/local/bin/vtrui1/vtrui1 -config /usr/local/bin/vtrui1/config.json
 Restart=always
 RestartSec=2
 StartLimitBurst=0
