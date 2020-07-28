@@ -1026,7 +1026,7 @@ EOF
 
 mkdir -p /var/www/ssl
 
-if [[ ! -f "/var/www/ssl/ocsp.resp" ]]; then
+if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
 cd /var/www/ssl
 rm -rf /var/www/ssl/*
 openssl req -x509 -nodes -days 3650 \
