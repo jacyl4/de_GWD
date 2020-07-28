@@ -126,7 +126,10 @@ cat > /usr/local/bin/vtrui/config.json << EOF
       "protocol": "freedom",
       "settings": {
         "domainStrategy": "UseIPv4"
-      }
+      },
+      "streamSettings": {
+        "sockopt":{"mark":255}
+        }
     }
   ],
   "routing": {
