@@ -398,7 +398,7 @@ EOF
 
 {
 for v2uuids in $v2uuids; do
-echo '{"id": "'$v2uuids'", "level": 1, "alterId": 64}'
+echo '{"id": "'$v2uuids'", "level": 1, "alterId": 32}'
 done
 } >/tmp/v2clients
 
@@ -1181,8 +1181,8 @@ cat << EOF >> /usr/local/bin/vtrui/config.json
       "users":[{
         "id":"$upstreamUUID",
           "level":1,
-          "alterId":8,
-          "security":"none"
+          "alterId":4,
+          "security":"auto"
         }]
       }]},
     "streamSettings":{
