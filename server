@@ -594,6 +594,8 @@ openssl ocsp -no_nonce \
     -VAfile  /var/www/ssl/bundle.pem \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
+
+docker container exec nginx nginx -s reload
 EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache

@@ -10,8 +10,8 @@ for IPv2node in $(cat /usr/local/bin/IPv2node); do
 done
 
 
-
 /usr/local/bin/ui-saveListBW >/dev/null 2>&1
+
 
 if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
   for iplistB in $(cat /usr/local/bin/IPlistB); do
