@@ -1,6 +1,7 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
+$conf = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 $listB = $_GET['listB'];
 $listB = explode("\n",$listB);
 $listB = array_filter($listB);
@@ -19,14 +20,13 @@ $listWlan = $_GET['listWlan'];
 $listWlan = explode("\n",$listWlan);
 $listWlan = array_filter($listWlan);
 
-$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-$data['listB'] = array();
-$data['listW'] = array();
-$data['listB'] = $listB;
-$data['listW'] = $listW;
-$data['listBlan'] = $listBlan;
-$data['listWlan'] = $listWlan;
-$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+$conf['listB'] = array();
+$conf['listW'] = array();
+$conf['listB'] = $listB;
+$conf['listW'] = $listW;
+$conf['listBlan'] = $listBlan;
+$conf['listWlan'] = $listWlan;
+$newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 shell_exec('sudo /usr/local/bin/ui-saveListBW');

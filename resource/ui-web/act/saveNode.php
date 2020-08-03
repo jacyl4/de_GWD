@@ -1,19 +1,30 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
+$conf = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 $nodeList = $_GET['nodeList'];
 
-$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-$data['v2node'] = $nodeList;
-$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
-file_put_contents('/usr/local/bin/0conf', $newJsonString);
-
-$DNSsplit = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-if ( $DNSsplit['DNSsplit'] === "gfw" ){
+if ( $conf['dns']['DNSsplit'] === "gfw" ){
 	shell_exec('sudo /usr/local/bin/ui-dnsGFW');
 } else {
 	shell_exec('sudo /usr/local/bin/ui-dnsCHNW');
 }
+
+if ( $conf['dns']['v2ad'] === "on" ){
+	shell_exec('sudo /usr/local/bin/ui-onV2ad');
+} else {
+	shell_exec('sudo /usr/local/bin/ui-offV2ad');
+}
+
+if ( $conf['dns']['APPLEdir'] === "on" ){
+	shell_exec('sudo /usr/local/bin/ui-onAPPLE');
+} else {
+	shell_exec('sudo /usr/local/bin/ui-offAPPLE');
+}
+
+$conf['v2node'] = $nodeList;
+$newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
+file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
 shell_exec('sudo systemctl restart iptables-proxy');
 shell_exec('sudo systemctl restart v2dns');

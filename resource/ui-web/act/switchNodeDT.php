@@ -5,7 +5,7 @@ $switchNodeDT = $_GET['switchNodeDT'];
 $forward0 = '/etc/nginx/conf.d/forward0.conf';
 $forward1 = '/etc/nginx/conf.d/forward1.conf';
 
-if ( $switchNodeDT === "NodeDTshow"){
+if ( $switchNodeDT === "NodeDTshow" ){
     shell_exec('sudo /usr/local/bin/ui-NodeDTshow');
 }
 elseif ( $switchNodeDT === "NodeDThide"){
