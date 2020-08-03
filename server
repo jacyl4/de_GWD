@@ -569,6 +569,8 @@ rm -rf /var/www/ssl/*
 export CF_Key="$CFapikey"
 export CF_Email="$CFemail"
 
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --upgrade  --auto-upgrade
 ~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
@@ -576,7 +578,6 @@ curl https://get.acme.sh | sh
                --key-file       /var/www/ssl/$topDomain.key  \
                --fullchain-file /var/www/ssl/$topDomain.cer \
                --reloadcmd     "docker container exec nginx nginx -s reload"
-openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
@@ -626,6 +627,8 @@ docker container exec nginx nginx -s reload
 
 rm -rf /var/www/ssl/*
 
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --upgrade  --auto-upgrade
 ~/.acme.sh/acme.sh --issue -d $domain -w /var/www/html --keylength ec-256
@@ -633,7 +636,6 @@ curl https://get.acme.sh | sh
                --key-file       /var/www/ssl/$domain.key  \
                --fullchain-file /var/www/ssl/$domain.cer \
                --reloadcmd     "docker container exec nginx nginx -s reload"
-openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash

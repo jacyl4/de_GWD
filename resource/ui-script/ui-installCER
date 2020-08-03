@@ -31,6 +31,8 @@ rm -rf /var/www/ssl/*
 export CF_Key="$CFapikey"
 export CF_Email="$CFemail"
 
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --force --upgrade  --auto-upgrade
 ~/.acme.sh/acme.sh --force --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
@@ -38,7 +40,6 @@ curl https://get.acme.sh | sh
                --key-file       /var/www/ssl/de_GWD.key  \
                --fullchain-file /var/www/ssl/de_GWD.cer \
                --reloadcmd     "$reloadcmd"
-openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
