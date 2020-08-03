@@ -1275,6 +1275,8 @@ mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_serverUpstream
 mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
 rm -f /etc/nginx/conf.d/3_proxyPath
 fi
+sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
+echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
