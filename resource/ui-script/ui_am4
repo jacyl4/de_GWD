@@ -22,7 +22,7 @@ sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /us
 
 ipset -F chnroute >/dev/null 2>&1
 for IPchnroute in $(cat /usr/local/bin/IPchnroute); do
-  ipset add chnroute $IPchnroute >/dev/null 2>&1
+  ipset add chnroute $IPchnroute
 done
 fi
 

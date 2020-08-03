@@ -1,12 +1,12 @@
 #!/bin/bash
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  /usr/local/bin/ui-dnsGFW >/dev/null 2>&1
+  /usr/local/bin/ui-dnsGFW
 else
-  /usr/local/bin/ui-dnsCHNW >/dev/null 2>&1
+  /usr/local/bin/ui-dnsCHNW
 fi
 
 for IPv2node in $(cat /usr/local/bin/IPv2node); do
-  ipset add v2node $IPv2node >/dev/null 2>&1
+  ipset add v2node $IPv2node
 done
 
 
@@ -15,13 +15,13 @@ done
 
 if [[ -n $(cat /usr/local/bin/IPlistB) ]]; then
   for iplistB in $(cat /usr/local/bin/IPlistB); do
-    ipset add listB $iplistB >/dev/null 2>&1
+    ipset add listB $iplistB
   done
 fi
 
 if [[ -n $(cat /usr/local/bin/IPlistW) ]]; then
   for iplistW in $(cat /usr/local/bin/IPlistW); do
-    ipset add listW $iplistW >/dev/null 2>&1
+    ipset add listW $iplistW
   done
 fi
 
