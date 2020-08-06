@@ -9,8 +9,8 @@ rm -rf /etc/resolv.conf
 cat > /etc/resolv.conf << EOF
 nameserver 119.29.29.29
 nameserver 119.28.28.28
-nameserver 223.5.5.5
-nameserver 223.6.6.6
+nameserver 114.114.114.114
+nameserver 114.114.115.115
 EOF
 
 sed -i '/^\s*$/d' /usr/local/bin/0conf

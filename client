@@ -260,12 +260,10 @@ prefetch-domain   yes
 serve-expired     yes
 serve-expired-ttl 0
 
-server 114.114.114.114
-server 114.114.115.115
 server 119.29.29.29
 server 119.28.28.28
-server 223.5.5.5
-server 223.6.6.6
+server 114.114.114.114
+server 114.114.115.115
 EOF
 
 rm -rf /run/smartdns.pid
