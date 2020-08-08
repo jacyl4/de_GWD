@@ -2,9 +2,7 @@
 cd ~
 wget --no-check-certificate -c --tries=10 https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
 if [[ $(ls -l ~/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
-cp -f ~/geosite.dat /usr/local/bin/v2dns/geosite.dat
-cp -f ~/geosite.dat /usr/local/bin/vtrui/geosite.dat
-rm -rf ~/geosite.dat
+mv -f ~/geosite.dat /usr/local/bin/v2dns/geosite.dat
 fi
 
 wget --no-check-certificate -c --tries=10 https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat

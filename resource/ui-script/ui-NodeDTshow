@@ -138,20 +138,6 @@ cat > /usr/local/bin/vtrui/config.json << EOF
       {
         "outboundTag": "Direct",
         "type": "field",
-        "domain": [
-          "geosite:tld-cn"
-        ]
-      },
-      {
-        "outboundTag": "Direct",
-        "type": "field",
-        "domain": [
-          "geosite:cn"
-        ]
-      },
-      {
-        "outboundTag": "Direct",
-        "type": "field",
         "ip": [
           "geoip:cn",
           "geoip:private"
