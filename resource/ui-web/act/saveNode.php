@@ -26,7 +26,7 @@ $conf['v2node'] = $nodeList;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-shell_exec('sudo systemctl restart iptables-proxy');
 shell_exec('sudo systemctl restart v2dns');
+shell_exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

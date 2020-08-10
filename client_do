@@ -1387,9 +1387,10 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-systemctl restart iptables-proxy
+
 systemctl restart v2dns
 systemctl restart vtrui
+systemctl restart iptables-proxy
 
 installPihole
 
@@ -1409,9 +1410,9 @@ if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onDHCP
 fi
 
-systemctl restart iptables-proxy
 systemctl restart v2dns
 systemctl restart vtrui
+systemctl restart iptables-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
