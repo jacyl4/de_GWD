@@ -1399,9 +1399,9 @@ piholeSet
 /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  /usr/local/bin/ui-dnsGFW
+  /usr/local/bin/ui-dnsGFW >/dev/null 2>&1
 else
-  /usr/local/bin/ui-dnsCHNW
+  /usr/local/bin/ui-dnsCHNW >/dev/null 2>&1
 fi
 
 /usr/local/bin/ui-saveListBW >/dev/null 2>&1
