@@ -70,8 +70,8 @@ done
 
 jq 'del(.dns.hosts[] | select(. == ""))' /tmp/v2dns_config >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /tmp/v2dns_config
 
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
-if [[ -n $(cat /tmp/hosts) ]]; then
+if [[ -n $(jq -r '.dns.hosts' /usr/local/bin/0conf) ]] && [[ $(jq -r '.dns.hosts' /usr/local/bin/0conf) != "null" ]]; then
+  jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
   cat /tmp/hosts | while read line 
   do
     key=$(echo $line | awk '{print$1}')
