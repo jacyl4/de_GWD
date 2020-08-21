@@ -291,11 +291,11 @@
 
           <div class="card-body">
             <div class="form-row">
-              <div class="col-md-4 mt-auto">
+              <div class="col-md-5 mt-auto">
 
-                <div class="form-row ml-4">
-                  <div class="my-auto" style="min-width: 175px">
-              <div class="input-group mb-4 mx-auto">
+                <div class="form-row">
+                  <div class="mx-auto" style="min-width: 175px">
+              <div class="input-group mb-3">
                 <div class="input-group-prepend">
                 <label class="input-group-text">去广告</label>
                 </div>
@@ -306,8 +306,8 @@
               </div>
                   </div>
 
-                  <div class="my-auto" style="min-width: 200px">
-              <div class="input-group mb-4 mx-auto">
+                  <div class="mx-auto" style="min-width: 185px">
+              <div class="input-group mb-3">
                 <div class="input-group-prepend">
                 <label class="input-group-text">Apple直连</label>
                 </div>
@@ -341,9 +341,10 @@
                   <span class="input-group-text text-success" id="pingDOH2"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
+
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text">

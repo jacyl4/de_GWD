@@ -159,6 +159,13 @@
           </div>
         </div>
 
+<div class="row mt-4">
+    <div class="col"><hr></div>
+    <div class="col-auto"><a href="https://jacyl4.github.io/de_GWD/" target="_blank">捐赠</a></div>
+    <div class="col"><hr></div>
+</div>
+
+
         <!-- Page Content -->
       </div>
       <!-- /.container-fluid -->
