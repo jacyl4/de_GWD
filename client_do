@@ -42,7 +42,7 @@ nameserver 114.114.114.114
 nameserver 114.114.115.115
 EOF
 
-wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns.1.2020.05.04-0005.x86_64-debian-all.deb
+wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns.1.2020.08.22-1540.x86_64-debian-all.deb
 
 wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/dohamd64.zip
 
