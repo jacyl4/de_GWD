@@ -48,9 +48,9 @@ nameserver 114.114.115.115
 EOF
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns.1.2020.08.24-2355.aarch64-debian-all.deb
+  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns.1.2020.08.27-2335.aarch64-debian-all.deb
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns.1.2020.08.24-2355.x86_64-debian-all.deb
+  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns.1.2020.08.27-2335.x86_64-debian-all.deb
 fi
 
 
