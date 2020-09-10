@@ -18,11 +18,11 @@
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
 
   <!-- Custom styles for this template-->
-  <link href="css/sb-admin.min.css" rel="stylesheet">
+  <link href="css/sb-admin.css" rel="stylesheet">
 
 </head>
 
-<body id="page-top" class="sidebar-toggled">
+<body id="page-top" class="sidebar-toggled fixed-padding">
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
@@ -369,7 +369,22 @@
           </div>
         </div>
         <!-- Page Content -->
-        
+
+      </div>
+      <!-- /.container-fluid -->
+
+      <!-- Sticky Footer -->
+      <footer class="sticky-footer">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright © de_GWD by JacyL4 2020</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+    <!-- /.content-wrapper -->
+
 <!-- Modal -->
 <div class="modal fade" id="wgqrpop1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -474,22 +489,6 @@
     </div>
   </div>
 </div>
-
-      </div>
-      <!-- /.container-fluid -->
-
-      <!-- Sticky Footer -->
-      <footer class="sticky-footer">
-        <div class="container my-auto">
-          <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by JacyL4 2020</span>
-          </div>
-        </div>
-      </footer>
-
-    </div>
-    <!-- /.content-wrapper -->
-
   </div>
   <!-- /#wrapper -->
 <script>
