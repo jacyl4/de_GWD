@@ -369,8 +369,7 @@
           </div>
         </div>
         <!-- Page Content -->
-      </div>
-      
+        
 <!-- Modal -->
 <div class="modal fade" id="wgqrpop1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -475,6 +474,8 @@
     </div>
   </div>
 </div>
+
+      </div>
       <!-- /.container-fluid -->
 
       <!-- Sticky Footer -->
