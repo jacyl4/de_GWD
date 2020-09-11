@@ -9,7 +9,7 @@ jq --arg FWD0path "$FWD0path" '.inbounds[1].streamSettings.wsSettings.path=$FWD0
 
 {
 for v2uuids in $FWD0uuid; do
-echo '{"id": "'$v2uuids'", "level": 1, "alterId": 32}'
+echo '{"id": "'$v2uuids'", "level": 1, "alterId": 0}'
 done
 } >/tmp/v2uuids
 

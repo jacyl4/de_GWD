@@ -457,7 +457,7 @@ cat << EOF >/usr/local/bin/vtrui/config.json
           "users":[
             {
               "id":"00000000-0000-0000-0000-000000000000",
-              "alterId":4,
+              "alterId":0,
               "security":"auto"
             }
           ]

@@ -27,7 +27,7 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
           {
             "id": "00000000-0000-0000-0000-000000000000",
             "level": 1,
-            "alterId": 32
+            "alterId": 0
           }
         ]
       },
@@ -52,7 +52,7 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "alterId": 4,
+                "alterId": 0,
                 "security": "auto"
               }
             ]
@@ -88,7 +88,7 @@ jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$
 
 {
 for v2uuids in $FWD1uuid; do
-echo '{"id": "'$v2uuids'", "level": 1, "alterId": 32}'
+echo '{"id": "'$v2uuids'", "level": 1, "alterId": 0}'
 done
 } >/tmp/v2uuids
 
