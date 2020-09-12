@@ -379,8 +379,9 @@ cat << EOF >/usr/local/bin/vtrui/config.json
     {
     "port":11810,
     "listen":"127.0.0.1",
-    "protocol":"vmess",
+    "protocol":"vless",
     "settings":{
+      "decryption":"none",
       "clients":[]
       },
     "streamSettings": {
@@ -398,7 +399,7 @@ EOF
 
 {
 for v2uuids in $v2uuids; do
-echo '{"id": "'$v2uuids'", "level": 1, "alterId": 0}'
+echo '{"id": "'$v2uuids'", "level": 1}'
 done
 } >/tmp/v2clients
 
@@ -1178,15 +1179,13 @@ fi
 cat << EOF >> /usr/local/bin/vtrui/config.json
   "outbounds": [
     {
-    "protocol":"vmess",
+    "protocol":"vless",
     "settings":{"vnext":[{
       "address":"$domain",
       "port":$port,
       "users":[{
         "id":"$upstreamUUID",
-          "level":1,
-          "alterId":0,
-          "security":"auto"
+        "encryption": "none"
         }]
       }]},
     "streamSettings":{

@@ -21,7 +21,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     {
       "tag": "proxy",
       "mux": { "enabled": true },
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
         "vnext": [
           {
@@ -30,8 +30,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "alterId": 0,
-                "security": "auto"
+                "encryption": "none"
               }
             ]
           }
@@ -54,7 +53,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     },
     {
       "tag": "netflix",
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
         "vnext": [
           {
@@ -63,8 +62,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "alterId": 0,
-                "security": "auto"
+                "encryption": "none"
               }
             ]
           }
