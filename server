@@ -1185,7 +1185,8 @@ cat << EOF >> /usr/local/bin/vtrui/config.json
       "port":$port,
       "users":[{
         "id":"$upstreamUUID",
-        "encryption": "none"
+        "encryption": "none",
+        "level": 1
         }]
       }]},
     "streamSettings":{
