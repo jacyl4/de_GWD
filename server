@@ -956,8 +956,11 @@ wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/mast
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
-apt purge -y linux-image-amd64
-apt purge -y linux-image-*-amd64
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/bbrplus/d' | while read line
+do
+apt purge -y $line
+done
+
 update-grub
 
 cat << EOF >~/bbrkernel/clearkernel
@@ -1004,8 +1007,11 @@ wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/mast
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
-apt purge -y linux-image-amd64
-apt purge -y linux-image-*-amd64
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | while read line
+do
+apt purge -y $line
+done
+
 update-grub
 
 cat << EOF >~/bbrkernel/clearkernel
