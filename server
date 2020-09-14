@@ -392,7 +392,7 @@ cat << EOF >/usr/local/bin/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
+  {"protocol":"freedom","settings":{}}
   ]
 }
 EOF
@@ -1225,7 +1225,7 @@ sed -i '/"outbounds":/,$d' /usr/local/bin/vtrui/config.json
 
 cat >> /usr/local/bin/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
+  {"protocol":"freedom","settings":{}}
   ]
 }
 EOF
