@@ -19,6 +19,7 @@ tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | 
 aptLocal="mirrors.aliyun.com"
 aptGlobal="deb.debian.org"
 branch="master"
+de_gwd_nginx="1.19.1"
 
 
 
@@ -1066,8 +1067,10 @@ installNginxDo(){
 docker stop nginx >/dev/null 2>&1
 docker rm nginx >/dev/null 2>&1
 
-docker rmi jacyl4/nginx_tls1.3:latest >/dev/null 2>&1
-docker pull jacyl4/nginx_tls1.3:latest
+docker image ls | sed 1d | awk '/nginx/' | awk '{print$3}' | while read line
+do
+docker rmi $line
+done
 
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
@@ -1076,7 +1079,7 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
 -v /run/php/:/run/php/ \
-jacyl4/nginx_tls1.3:latest
+jacyl4/de_gwd_nginx:$de_gwd_nginx
 }
 
 

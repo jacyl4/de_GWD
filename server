@@ -8,6 +8,10 @@ statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 statusNONE=$(yellow "-")
 
+
+de_gwd_nginx="1.19.1"
+
+
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
 
@@ -538,8 +542,10 @@ cat /dev/null > /etc/nginx/conf.d/default.conf
 docker stop nginx >/dev/null 2>&1
 docker rm nginx >/dev/null 2>&1
 
-docker rmi jacyl4/nginx_tls1.3:latest >/dev/null 2>&1
-docker pull jacyl4/nginx_tls1.3:latest
+docker image ls | sed 1d | awk '/nginx/' | awk '{print$3}' | while read line
+do
+docker rmi $line
+done
 
 if [[ -d "/etc/php" ]]; then
 mkdir -p /run/php
@@ -552,7 +558,7 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /run/php/:/run/php/ \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
-jacyl4/nginx_tls1.3:latest
+jacyl4/de_gwd_nginx:$de_gwd_nginx
 else
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
@@ -560,7 +566,7 @@ docker run -d --name=nginx --net=host --restart=always \
 -v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
-jacyl4/nginx_tls1.3:latest
+jacyl4/de_gwd_nginx:$de_gwd_nginx
 fi
 }
 
