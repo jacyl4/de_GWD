@@ -300,8 +300,8 @@ echo "$statusInstalled smartdns"
 installDoH(){
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
-doh1IP=$(dig $doh1Domain +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
-doh2IP=$(dig $doh2Domain +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 
 systemctl stop doh-client >/dev/null 2>&1
 rm -rf /usr/local/bin/doh-client
