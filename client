@@ -113,7 +113,6 @@ systemctl mask --now lighttpd >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
-dpkg --configure -a
 
 cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
@@ -227,6 +226,7 @@ ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 installSmartDNS(){
 systemctl stop smartdns >/dev/null 2>&1
 dpkg --purge smartdns >/dev/null 2>&1
+dpkg --configure -a
 dpkg -i ~/smartdns.deb
 rm -rf /etc/smartdns/*.conf
 
