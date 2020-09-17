@@ -45,7 +45,9 @@ location $FWD1path {
   proxy_read_timeout        432000;
   proxy_redirect            off;
   proxy_buffering           off;
-  proxy_buffer_size         4k;
+  proxy_buffer_size         16k;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
 }
 }
 EOF
