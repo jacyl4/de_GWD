@@ -114,7 +114,48 @@
           <span class="form-control text-center" id="wanIP"></span>
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="showIP()">查询</button>
       </div>
-      
+
+
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-cloud"></i>
+            F3322 DDNS
+<span class="float-right mt-n1 mb-n2" id="ddns3322button" style="display:none">
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322save()">开启</button>
+<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322stop()">关闭</button>
+</span>
+<span class="float-right mt-n1 mb-n2" id="ddns3322switch">
+<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322switch()">展开</button>
+</span>
+          </div>
+
+          <div class="card-body" id="ddns3322body" style="display:none">
+    <div class="form-row">
+      <div class="col-md-4 input-group my-2">
+        <div class="input-group-prepend">
+          <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
+        </div>
+          <input type="text" id="domain3322" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->domain ?>">
+      </div>
+
+      <div class="col-md-4 input-group my-2">
+        <div class="input-group-prepend">
+          <span class="input-group-text justify-content-center" style="min-width: 120px;">用户名</span>
+        </div>
+          <input type="text" id="user3322" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->user ?>">
+      </div>
+
+      <div class="col-md-4 input-group my-2">
+        <div class="input-group-prepend">
+          <span class="input-group-text justify-content-center" style="min-width: 120px;">密码</span>
+        </div>
+          <input type="text" id="pwd3322" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->pwd ?>">
+      </div>
+    </div>
+          </div>
+        </div>
+
+
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-cloud"></i>
@@ -164,7 +205,7 @@
         </div>
 
 
-          <div class="card mb-3">
+        <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-bacon"></i>
             FRP
@@ -500,10 +541,28 @@ function showIP(){
 $.get('./act/checkDDNSip.php', function(data) { $('#wanIP').text(data) });
 }
 
+function ddns3322switch(){
+$("#ddns3322switch").css("display", "none"); 
+$("#ddns3322button").css("display", "block"); 
+$("#ddns3322body").css("display", "block"); 
+}
+
 function ddnsCFswitch(){
 $("#ddnsCFswitch").css("display", "none"); 
 $("#ddnsCFbutton").css("display", "block"); 
 $("#ddnsCFbody").css("display", "block"); 
+}
+
+function ddns3322save(){
+domain3322=$('#domain3322').val();
+user3322=$('#user3322').val();
+pwd3322=$('#pwd3322').val();
+$.get('./act/ddns3322save.php', {domain3322:domain3322, user3322:user3322, pwd3322:pwd3322}, function(result){ location.reload() });
+alert("开启DDNS。。。");
+}
+
+function ddns3322stop(){
+$.get('./act/ddns3322stop.php', function(result){window.location.reload();});
 }
 
 function ddnsCFsave(){
@@ -597,6 +656,14 @@ $.get('./act/WGmark.php', {WGmark1:WGmark1, WGmark2:WGmark2, WGmark3:WGmark3, WG
 }
 
 window.onload = function() {
+$.get("./act/checkDDNS3322.php", function(data) {
+if ($.trim(data) == "installed") {
+$("#ddns3322switch").css("display", "none"); 
+$("#ddns3322button").css("display", "block"); 
+$("#ddns3322body").css("display", "block"); 
+};
+});
+
 $.get("./act/checkDDNScf.php", function(data) {
 if ($.trim(data) == "installed") {
 $("#ddnsCFswitch").css("display", "none"); 
