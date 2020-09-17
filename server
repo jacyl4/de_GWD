@@ -941,7 +941,7 @@ blue "---------------------------------------------"
 
 
 
-installBBR(){
+installKernel(){
 export DEBIAN_FRONTEND=noninteractive
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
@@ -1385,7 +1385,7 @@ if [[ -f "/usr/local/bin/version.php" ]]; then
 fi
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbr+cake and reboot"
+    green  "2. Install latest kernel and reboot"
     red    "5. Change static IP"
     red    "6. Change domain and generate new certificate"
     red    "7. Change v2ray path & UUID"
@@ -1403,7 +1403,7 @@ fi
     start_menu
     ;;
     2)
-    installBBR
+    installKernel
     start_menu
     ;;
     5)

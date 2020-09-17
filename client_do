@@ -1335,7 +1335,7 @@ blue "------------------------------"
 
 
 
-installBBR(){
+installKernel(){
 export DEBIAN_FRONTEND=noninteractive
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
@@ -1605,7 +1605,7 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    green  "3. Install bbr+cake and reboot"
+    green  "3. Install latest kernel and reboot"
     yellow "8. update Nginx(docker)"
     yellow "9. Update Pi-hole"
     yellow "0. Update de_GWD"
@@ -1622,7 +1622,7 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     3)
-    installBBR
+    installKernel
     start_menu
     ;;
     8)
