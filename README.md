@@ -53,3 +53,10 @@ Support this project with your organization. Your logo will show up here with a 
 <a href="https://opencollective.com/de_GWD/organization/7/website"><img src="https://opencollective.com/de_GWD/organization/7/avatar.svg"></a>
 <a href="https://opencollective.com/de_GWD/organization/8/website"><img src="https://opencollective.com/de_GWD/organization/8/avatar.svg"></a>
 <a href="https://opencollective.com/de_GWD/organization/9/website"><img src="https://opencollective.com/de_GWD/organization/9/avatar.svg"></a>
+
+
+## Thanks to
+* ![v2ray/v2ray-core](https://github.com/v2ray/v2ray-core)
+* ![pymumu/smartdns](https://github.com/pymumu/smartdns)
+* ![m13253/dns-over-https](https://github.com/m13253/dns-over-https)
+* ![pi-hole/pi-hole](https://github.com/pi-hole/pi-hole)
