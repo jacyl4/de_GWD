@@ -1070,11 +1070,7 @@ cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/4_end >> /etc/nginx/conf.d/default.conf
 
-if [[ -f "/lib/systemd/system/nginx.service" ]]; then
-  systemctl reload nginx
-else
-  docker container exec nginx nginx -s reload
-fi
+docker container exec nginx nginx -s reload
 EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
