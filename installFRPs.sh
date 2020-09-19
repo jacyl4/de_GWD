@@ -28,7 +28,7 @@ fi
 
 installFRPs(){
 cd ~
-wget --no-check-certificate -O ~/frp.tar.gz $mirrorSite/frp_linux_amd64.tar.gz
+wget --no-check-certificate -O ~/frp.tar.gz $mirrorSite/amd64_frp.tar.gz
 tar zxvf ~/frp.tar.gz
 
 mkdir -p /usr/local/bin/frp

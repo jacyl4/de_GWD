@@ -45,13 +45,13 @@ nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
 
-wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns_amd64.deb
+wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
 
-wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/dohamd64.zip
+wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
 
-wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/vtamd64.zip
+wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
 
-wget --no-check-certificate -c -O ~/ttyd $mirrorSite/ttyd_linux.x86_64
+wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
 }
 
 

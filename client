@@ -50,30 +50,30 @@ nameserver 223.6.6.6
 EOF
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns_arm64.deb
+  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/arm64_smartdns.deb
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/smartdns_amd64.deb
+  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
 fi
 
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/doharm64.zip
+  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/arm64_doh.zip
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/dohamd64.zip
+  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
 fi
 
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/vtarm64.zip
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/vtamd64.zip
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
 fi
 
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/ttyd_linux.arm
+  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/arm64_ttyd
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/ttyd_linux.x86_64
+  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
 fi
 }
 
