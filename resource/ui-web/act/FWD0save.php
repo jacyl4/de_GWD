@@ -21,17 +21,6 @@ shell_exec('sudo /usr/local/bin/ui-FWD0save');
 shell_exec('sudo /usr/local/bin/ui-FWD0vtrui');
 
 shell_exec('sudo systemctl restart vtrui');
-
-$nginx = "/lib/systemd/system/nginx.service";
-$docker = "/lib/systemd/system/docker.service";
-
-if (file_exists($nginx)) {
-    shell_exec('sudo systemctl reload nginx');
-}
-elseif (file_exists($docker)) {
-    shell_exec('sudo docker container exec nginx nginx -s reload');
-}
-
 shell_exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

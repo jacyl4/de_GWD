@@ -21,15 +21,5 @@ shell_exec('sudo /usr/local/bin/ui-FWD1save');
 shell_exec('sudo /usr/local/bin/ui-FWD1vtrui');
 
 shell_exec('sudo systemctl restart vtrui1');
-
-$nginx = "/lib/systemd/system/nginx.service";
-$docker = "/lib/systemd/system/docker.service";
-
-if (file_exists($nginx)) {
-    shell_exec('sudo systemctl reload nginx');
-}
-elseif (file_exists($docker)) {
-    shell_exec('sudo docker container exec nginx nginx -s reload');
-}
 ?>
 <?php }?>
