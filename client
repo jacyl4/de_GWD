@@ -1485,7 +1485,7 @@ blue "Current tcp congestion control ：$(sysctl net.ipv4.tcp_congestion_control
 blue "-----------------------------------------------"
 
     green "===================================="
-    green "                CLIENT"
+    green "                CLIENT_s"
     green "Recommend: Debian 10 (amd64 & arm64)"
     green "Author:    JacyL4"
     green "===================================="

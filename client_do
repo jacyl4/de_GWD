@@ -1610,7 +1610,7 @@ blue "Current tcp congestion control ：$(sysctl net.ipv4.tcp_congestion_control
 blue "-----------------------------------------------"
 
     green "==============================="
-    green "           CLIENT (Nginx)"
+    green "           CLIENT"
     green "Recommend: Debian 10 (amd64)"
     green "Author:    JacyL4"
     green "==============================="
