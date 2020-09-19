@@ -957,8 +957,10 @@ installKernel(){
 export DEBIAN_FRONTEND=noninteractive
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+
+if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 45981000 ]]; then
 dpkg -i linux-headers-*.deb
 dpkg -i linux-image-*.deb
 
@@ -997,6 +999,12 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 
 reboot
+
+else
+    red "Kernel download failed"
+
+    exit
+fi
 blue "----------------------------"
 blue "Install latest kernel [done]"
 blue "----------------------------"

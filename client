@@ -1407,7 +1407,7 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 if [[ -z $domain ]] || [[ -z $uuidnum ]] || [[ -z $v2path ]]; then
-  red "Lost de_GWD config file"
+  red "de_GWD /usr/local/bin/0conf is missing"
   exit
 fi
 
