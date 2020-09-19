@@ -843,6 +843,7 @@ rsync -azrI ~/sample/* /var/www/html/
 rm -rf ~/sample*
 fi
 
+rm -rf /usr/local/bin/version.php
 wget --no-check-certificate -c -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 }
 
