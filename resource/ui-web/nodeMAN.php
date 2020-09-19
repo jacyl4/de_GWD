@@ -119,7 +119,7 @@
               <table class="table table-bordered table-striped text-center">
                 <thead>
                   <tr>
-                    <th><button type="button" class="form-control btn btn-outline-secondary btn-xs my-n2" style="border-Radius: 0px;" onclick="addLine()">增加</button></th>
+                    <th><button type="button" class="form-control btn btn-outline-secondary btn-sm my-n2" style="border-Radius: 0px;" onclick="addLine()">+</button></th>
                     <th class="text-nowrap text-center"><———— 域名 ————></th>
                     <th class="text-nowrap text-center"><———— 节点名 ————></th>
                     <th class="text-nowrap text-center"><—— PATH ——></th>
