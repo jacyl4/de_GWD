@@ -739,7 +739,7 @@ EOF
 
 touch /etc/nginx/conf.d/3_reverseProxy
 
-cat << EOF >/etc/nginx/conf.d/4_v2Proxy
+cat << EOF >/etc/nginx/conf.d/4_end
 location /dq {
   proxy_pass                http://127.0.0.1:8053/dq;
   proxy_set_header          Host \$host;
@@ -776,7 +776,7 @@ cat /etc/nginx/conf.d/0_top > /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/1_serverHead >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/4_v2Proxy >> /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/4_end >> /etc/nginx/conf.d/default.conf
 
 docker container exec nginx nginx -s reload
 EOF
