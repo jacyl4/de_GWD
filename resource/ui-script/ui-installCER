@@ -23,6 +23,7 @@ rm -rf ~/now.cron
 CFapikey=$(jq -r '.FORWARD.APIkey' /usr/local/bin/0conf)
 CFemail=$(jq -r '.FORWARD.Email' /usr/local/bin/0conf)
 domain=$(jq -r '.FORWARD.domain' /usr/local/bin/0conf)
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 apt install netcat socat
 rm -rf /var/www/ssl/*
@@ -34,8 +35,8 @@ openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --force --upgrade  --auto-upgrade
-~/.acme.sh/acme.sh --force --issue --dns dns_cf -d $domain --keylength ec-256
-~/.acme.sh/acme.sh --force --installcert -d $domain --ecc \
+~/.acme.sh/acme.sh --force --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
+~/.acme.sh/acme.sh --force --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/de_GWD.key  \
                --fullchain-file /var/www/ssl/de_GWD.cer \
                --reloadcmd     "$reloadcmd"
