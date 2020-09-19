@@ -119,7 +119,7 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-cloud"></i>
-            F3322 DDNS
+            <a href="http://www.pubyun.com" target="_blank">F3322 DDNS</a>
 <span class="float-right mt-n1 mb-n2" id="ddns3322button" style="display:none">
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322save()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322stop()">关闭</button>
@@ -159,7 +159,7 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-cloud"></i>
-            CloudFlare DDNS
+            <a href="https://dash.cloudflare.com/login" target="_blank">CloudFlare DDNS</a>
 <span class="float-right mt-n1 mb-n2" id="ddnsCFbutton" style="display:none">
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFsave()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFstop()">关闭</button>
