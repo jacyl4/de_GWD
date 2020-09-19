@@ -287,7 +287,7 @@ pihole logging off
 installDOHser(){
 rm -rf /usr/local/bin/doh-server
 
-wget -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
+wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/dohamd64.zip
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
@@ -358,7 +358,7 @@ rm -rf /usr/local/bin/vtrui
 rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/vtrui
 mkdir -p ~/vtrui
-wget -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
+wget --no-check-certificate -c -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/vtamd64.zip
 unzip ~/vtrui.zip -d ~/vtrui
 cp -f ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
 cp -f ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
@@ -581,8 +581,8 @@ curl https://get.acme.sh | sh
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
-wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
-wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+wget --no-check-certificate -c -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget --no-check-certificate -c -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
 mv ~/intermediate.pem /var/www/ssl
 mv ~/root.pem /var/www/ssl
 cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
@@ -639,8 +639,8 @@ curl https://get.acme.sh | sh
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
-wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
-wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+wget --no-check-certificate -c -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget --no-check-certificate -c -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
 mv ~/intermediate.pem /var/www/ssl
 mv ~/root.pem /var/www/ssl
 cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
@@ -790,7 +790,7 @@ postInstall(){
 
 cat << "EOF" > /usr/local/bin/autoUpdate
 #!/bin/bash
-wget -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
+wget --no-check-certificate -c -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
 sed -i '$d' ~/update
 echo "updateGWD" >>  ~/update
 chmod +x ~/update
@@ -837,13 +837,13 @@ rm -rf ~/now.cron
 
 indexpage=$(ls /var/www/html/index.* 2>/dev/null | wc -l)
 if [ "$indexpage" = "0" ]; then 
-wget https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/sample.zip
-unzip sample.zip
+wget --no-check-certificate -c -O ~/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/sample.zip
+unzip ~/sample.zip
 rsync -azrI ~/sample/* /var/www/html/
 rm -rf ~/sample*
 fi
 
-wget -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+wget --no-check-certificate -c -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 }
 
 
