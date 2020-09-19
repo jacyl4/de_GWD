@@ -2,13 +2,13 @@
 <?php if (isset($auth) && $auth) {?>
 <?php
 $conf = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
-$domain3322 = $_GET['domain3322'];
-$user3322 = $_GET['user3322'];
-$pwd3322 = $_GET['pwd3322'];
+$f3322domain = $_GET['f3322domain'];
+$f3322usr = $_GET['f3322usr'];
+$f3322pwd = $_GET['f3322pwd'];
 
-$conf['ddns']['ddns3322']['domain'] = $domain3322;
-$conf['ddns']['ddns3322']['user'] = $user3322;
-$conf['ddns']['ddns3322']['pwd'] = $pwd3322;
+$conf['ddns']['ddns3322']['domain'] = $f3322domain;
+$conf['ddns']['ddns3322']['user'] = $f3322usr;
+$conf['ddns']['ddns3322']['pwd'] = $f3322pwd;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 

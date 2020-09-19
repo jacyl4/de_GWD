@@ -135,21 +135,21 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
         </div>
-          <input type="text" id="domain3322" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->domain ?>">
+          <input type="text" id="f3322domain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->domain ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">用户名</span>
         </div>
-          <input type="text" id="user3322" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->user ?>">
+          <input type="text" id="f3322usr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->user ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">密码</span>
         </div>
-          <input type="text" id="pwd3322" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->pwd ?>">
+          <input type="text" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->pwd ?>">
       </div>
     </div>
           </div>
@@ -554,10 +554,10 @@ $("#ddnsCFbody").css("display", "block");
 }
 
 function ddns3322save(){
-domain3322=$('#domain3322').val();
-user3322=$('#user3322').val();
-pwd3322=$('#pwd3322').val();
-$.get('./act/ddns3322save.php', {domain3322:domain3322, user3322:user3322, pwd3322:pwd3322}, function(result){ location.reload() });
+f3322domain=$('#f3322domain').val();
+f3322usr=$('#f3322usr').val();
+f3322pwd=$('#f3322pwd').val();
+$.get('./act/ddns3322save.php', {f3322domain:f3322domain, f3322usr:f3322usr, f3322pwd:f3322pwd}, function(result){ location.reload() });
 alert("开启DDNS。。。");
 }
 
