@@ -670,8 +670,7 @@ rm -rf ~/now.cron
 
 
 nginxWebConf(){
-touch /etc/nginx/conf.d/0_serverUpstream
-touch /etc/nginx/conf.d/3_reverseProxy
+touch /etc/nginx/conf.d/0_top
 
 if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
@@ -738,6 +737,8 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
 
 EOF
 
+touch /etc/nginx/conf.d/3_reverseProxy
+
 cat << EOF >/etc/nginx/conf.d/4_v2Proxy
 location /dq {
   proxy_pass                http://127.0.0.1:8053/dq;
@@ -771,7 +772,7 @@ cat << EOF >/etc/nginx/conf.d/merge.sh
 #!/bin/bash
 rm -rf /etc/nginx/conf.d/default.conf
 
-cat /etc/nginx/conf.d/0_serverUpstream > /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/0_top > /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/1_serverHead >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
@@ -1234,7 +1235,7 @@ if [[ -f /etc/vtrui/config.json ]]; then
 fi
 rm -rf /etc/modules-load.d/nf_conntrack.conf
 if [[ -f "/etc/nginx/conf.d/supp_head" ]] && [[ -f "/etc/nginx/conf.d/supp_body" ]]; then
-mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_serverUpstream
+mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_top
 mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
 rm -f /etc/nginx/conf.d/3_proxyPath
 fi
