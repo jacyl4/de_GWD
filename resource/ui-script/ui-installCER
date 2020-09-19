@@ -43,8 +43,8 @@ curl https://get.acme.sh | sh
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
-wget -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
-wget -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+wget --no-check-certificate -c -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget --no-check-certificate -c -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
 mv ~/intermediate.pem /var/www/ssl
 mv ~/root.pem /var/www/ssl
 cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
