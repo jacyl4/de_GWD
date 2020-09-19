@@ -1002,6 +1002,8 @@ http {
 }
 EOF
 
+rm -rf /etc/nginx/conf.d/forward*.conf
+
 touch /etc/nginx/conf.d/0_top
 
 cat << EOF >/etc/nginx/conf.d/1_serverHead
