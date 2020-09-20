@@ -1183,7 +1183,11 @@ systemctl restart smartdns
 /usr/local/bin/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
-/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf) ]]; then
+  /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
+else
+  /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+fi
 systemctl restart vtrui
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onUDP >/dev/null 2>&1
