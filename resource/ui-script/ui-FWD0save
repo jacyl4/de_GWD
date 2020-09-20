@@ -59,11 +59,13 @@ location $FWD0path {
   proxy_set_header          Connection "upgrade";
   proxy_set_header          X-Real-IP \$remote_addr;
   proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
   proxy_connect_timeout     432000;
   proxy_send_timeout        432000;
   proxy_read_timeout        432000;
-  proxy_redirect            off;
   proxy_buffering           off;
+  proxy_buffer_size         8k;
 }
 }
 EOF

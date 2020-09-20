@@ -938,9 +938,6 @@ http {
   tcp_nodelay               on;
   tcp_nopush                on;
 
-  keepalive_requests        25600;
-  keepalive_timeout         300 300;
-
   client_header_timeout     60;
   client_body_timeout       60;
   reset_timedout_connection on;
