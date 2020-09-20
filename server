@@ -848,8 +848,8 @@ fi
 rm -rf /usr/local/bin/version.php
 wget --no-check-certificate -c -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
 
-if [[ $(ls -l /var/www/html/spt | awk '{print$5}') != "134217728" ]]; then
-  dd if=/dev/zero of=/var/www/html/spt bs=1k count=128k status=progress
+if [[ $(ls -l /var/www/html/spt | awk '{print$5}') != "104857600" ]]; then
+  dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
 }
 
