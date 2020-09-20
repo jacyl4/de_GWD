@@ -25,7 +25,6 @@ cat << EOF >/etc/nginx/conf.d/forward0.conf
 server {
   listen $FWD0port ssl http2 fastopen=128 reuseport;
   root /var/www/html;
-  index index.php index.html index.htm;
   
   ssl_certificate /var/www/ssl/de_GWD.cer;
   ssl_certificate_key /var/www/ssl/de_GWD.key;
@@ -52,6 +51,10 @@ server {
   add_header X-Robots-Tag "none" always;
   add_header X-XSS-Protection "1; mode=block" always;
   add_header Strict-Transport-Security "max-age=63072000" always;
+
+location ~ /\.(?!well-known).* {
+  deny all;
+}
 
 location $FWD0path {
   proxy_pass                http://127.0.0.1:11810;
