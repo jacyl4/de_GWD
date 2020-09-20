@@ -24,7 +24,9 @@ fi
 cat << EOF >/etc/nginx/conf.d/forward0.conf
 server {
   listen $FWD0port ssl http2 fastopen=128 reuseport;
-
+  root /var/www/html;
+  index index.php index.html index.htm;
+  
   ssl_certificate /var/www/ssl/de_GWD.cer;
   ssl_certificate_key /var/www/ssl/de_GWD.key;
   ssl_dhparam /var/www/ssl/dhparam.pem;
