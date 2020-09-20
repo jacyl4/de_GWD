@@ -1173,6 +1173,10 @@ rm -rf ~/doh.zip
 rm -rf ~/vtrui.zip
 rm -rf ~/ui-script.zip
 rm -rf ~/ui-web.zip
+
+if [[ $(ls -l /var/www/html/spt | awk '{print$5}') != "134217728" ]]; then
+  dd if=/dev/zero of=/var/www/html/spt bs=1k count=128k status=progress
+fi
 }
 
 

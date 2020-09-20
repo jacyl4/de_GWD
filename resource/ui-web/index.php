@@ -198,8 +198,9 @@
           </span>
           </div>
           <div style="display: flex;flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingICMP()">Ping (ICMP)</button>
-            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingTCP()">Ping (TCP)</button>
+            <button type="button" class="btn btn-outline-success btn-sm col-2" style="border-radius: 0px;" onclick="speedT()">测速</button>
+            <button type="button" class="btn btn-outline-success btn-sm col-5" style="border-radius: 0px;" onclick="pingTCP()">Ping (TCP)</button>
+            <button type="button" class="btn btn-outline-success btn-sm col-5" style="border-radius: 0px;" onclick="pingICMP()">Ping (ICMP)</button>
           </div>
 
           <div class="card-body">
@@ -220,11 +221,10 @@
 <span class="float-right">
 <div class="input-group mr-4 mt-1 mb-4">
   <div class="input-group-prepend">
-  <label class="input-group-text">UDP代理</label>
+    <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkUDP');?>" type="button" onclick="onUDP()">UDP代理</button>
   </div>
   <div class="input-group-append">
-    <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkUDP');?>" type="button" onclick="onUDP()">开启</button>
-    <button class="btn btn-secondary" type="button" onclick="offUDP()">关闭</button>
+    <button class="btn btn-secondary" type="button" onclick="offUDP()">OFF</button>
   </div>
 </div>
 </span>
@@ -237,9 +237,9 @@
                     <th>#</th>
                     <th>域名</th>
                     <th>节点名</th>
+                    <th>速度(MB/s)</th>
                     <th>延迟(ms)</th>
                     <th>操作</th>
-                    <th>状态</th>
                   </tr>
                 </thead>
                 <tbody id="nodeTable">
@@ -297,11 +297,10 @@
                   <div class="mx-auto" style="min-width: 175px">
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                <label class="input-group-text">去广告</label>
+                  <button class="btn btn-<?php $v2add = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$v2add",'category-ads') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onV2ad()">去广告</button>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php $v2add = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$v2add",'category-ads') !== false) echo 'success'; else echo 'secondary'; ?> btn-sm" type="button" onclick="onV2ad()">ON</button>
-                  <button class="btn btn-secondary btn-sm" type="button" onclick="offV2ad()">OFF</button>
+                  <button class="btn btn-secondary" type="button" onclick="offV2ad()">OFF</button>
                 </div>
               </div>
                   </div>
@@ -309,11 +308,10 @@
                   <div class="mx-auto" style="min-width: 185px">
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                <label class="input-group-text">Apple直连</label>
+                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onAPPLE()">Apple直连</button>
                 </div>
                 <div class="input-group-append">
-                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'secondary'; ?> btn-sm" type="button" onclick="onAPPLE()">ON</button>
-                  <button class="btn btn-secondary btn-sm" type="button" onclick="offAPPLE()">OFF</button>
+                  <button class="btn btn-secondary" type="button" onclick="offAPPLE()">OFF</button>
                 </div>
               </div>
                   </div>
@@ -518,6 +516,16 @@ $.get("./act/pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) });
 $.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) });
 }
 
+function speedT(){
+$.get('./act/v2node.php', function(data) {
+var nodeList = JSON.parse(data);
+var len = nodeList.length;
+for( let i = 0; i<len; i++){
+  $.get("./act/speedT.php", {speedT:i}, function(data){ $('#speed'+i).text(data) });
+};
+});
+}
+
 function pingTCP(){
 $.get('./act/v2node.php', function(data) {
 var nodeList = JSON.parse(data);
@@ -597,9 +605,6 @@ $.get('./act/offDHCP.php', function(result){window.location.reload();});
 }
 
 window.onload = function() {
-nodestatusf = "<h5 class='mb-0'><span class='badge badge-pill badge-secondary'>闲置</span></h5>";
-nodestatust = "<h5 class='mb-0'><span class='badge badge-pill badge-success'>选中</span></h5>";
-
 $.get('./act/v2node.php', function(data) {
 var nodeList = JSON.parse(data);
 var len = nodeList.length;
@@ -612,14 +617,14 @@ for( let i = 0; i<len; i++){
                           <td class="align-middle">${i}</td>
                           <td class="align-middle"><span id="nodeDomain${i}">${domain}</span></td>
                           <td class="align-middle"><span id="nodeshow${i}">${name}</span></td>
+                          <td class="align-middle"><span id="speed${i}" class='text-success'></span></td>
                           <td class="align-middle"><span id="ping${i}" class='text-success'></span></td>
-                          <td class="align-middle"><button id="switch${i}" type="button" class="btn btn-success btn-xs">切换</button></td>
-                          <td id="checkNode${i}">${nodestatusf}</td>
+                          <td class="align-middle"><button id="switch${i}" type="button" class="btn btn-outline-secondary btn-sm">切换</button></td>
                           </tr>`);
-  $('#checkNode<?php echo exec('/usr/local/bin/ui-checkNode');?>').html(nodestatust);
+  $('#switch<?php echo exec('/usr/local/bin/ui-checkNode');?>').attr("class", "btn btn-success btn-sm");
   $('#switch'+i).click(function(){
-    $("#nodeTable td:nth-child(6)").html(nodestatusf);
-    $('#checkNode'+i).html(nodestatust);
+    $("#nodeTable td:nth-child(6) button").attr("class", "btn btn-outline-secondary btn-sm");
+    $('#switch'+i).attr("class", "btn btn-success btn-sm");
     $.get("./act/changeNode.php", {nodenum:i}, function(result){ })
   });
 

@@ -2,5 +2,5 @@
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
 	echo "success"
 else
-	echo "secondary"
+	echo "outline-secondary"
 fi
