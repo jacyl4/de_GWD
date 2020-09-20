@@ -331,6 +331,7 @@ timeout = 30
 no_cookies = true
 no_ecs = true
 no_ipv6 = false
+no_user_agent = false
 verbose = false
 EOF
 
