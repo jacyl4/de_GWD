@@ -7,13 +7,9 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 statusNONE=$(yellow "-")
-
-
-de_gwd_nginx="1.19.1"
-
-
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
+de_gwd_nginx="1.19.1"
 
 
 
@@ -293,9 +289,7 @@ mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
 rm -rf ~/doh*
 
-mkdir -p /etc/dns-over-https
-
-cat << EOF >/etc/dns-over-https/doh-server.conf
+cat << EOF >/usr/local/bin/doh-server.conf
 listen = [ "127.0.0.1:8053" ]
 
 path = "/dq"
@@ -337,7 +331,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-ExecStart=/usr/local/bin/doh-server -conf /etc/dns-over-https/doh-server.conf
+ExecStart=/usr/local/bin/doh-server -conf /usr/local/bin/doh-server.conf
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -789,7 +783,6 @@ chmod +x /etc/nginx/conf.d/merge.sh
 
 
 postInstall(){
-
 cat << "EOF" > /usr/local/bin/autoUpdate
 #!/bin/bash
 wget --no-check-certificate -c -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/main/server
@@ -976,20 +969,16 @@ update-grub
 cat << EOF >~/bbrkernel/clearkernel
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-
 echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 sysctl -p
-
 crontab -l > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrkernel
-
 systemctl restart sshd
 EOF
 
@@ -1238,12 +1227,15 @@ if [[ -f /etc/vtrui/config.json ]]; then
   cp -f /etc/vtrui/config.json /usr/local/bin/vtrui/config.json
   rm -rf /etc/vtrui
 fi
-rm -rf /etc/modules-load.d/nf_conntrack.conf
+
 if [[ -f "/etc/nginx/conf.d/supp_head" ]] && [[ -f "/etc/nginx/conf.d/supp_body" ]]; then
 mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_top
 mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
 rm -f /etc/nginx/conf.d/3_proxyPath
 fi
+
+rm -rf /etc/dns-over-https
+
 sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
 echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
 

@@ -9,6 +9,15 @@ statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
+export DEBIAN_FRONTEND=noninteractive
+export PIHOLE_SKIP_OS_CHECK=true
+branch="main"
+
+case $(uname -m) in
+    x86_64)  architecture="amd64" ;;
+    aarch64)  architecture="arm64" ;;
+esac
+
 
 
 mirrorSite="http://gwd.seso.icu:10290"
@@ -21,15 +30,89 @@ aptGlobal="deb.debian.org"
 
 
 
-branch="main"
+preUpdate(){
+if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
+rm -rf /etc/php/7.3/
+apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
+fi
 
-case $(uname -m) in
-    x86_64)  architecture="amd64" ;;
-    aarch64)  architecture="arm64" ;;
-esac
+if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
+doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
+v2ad=$(jq -r '.v2ad' /usr/local/bin/0conf)
+DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
+piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
-export DEBIAN_FRONTEND=noninteractive
-export PIHOLE_SKIP_OS_CHECK=true
+jq 'del(.doh)' /usr/local/bin/0conf |\
+jq 'del(.hosts)' |\
+jq 'del(.v2ad)' |\
+jq 'del(.splitDNS)' |\
+jq 'del(.pihole)' |\
+jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' |\
+jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
+jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
+jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
+jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
+jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
+if [[ $(awk '/divertLan/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+jq '.divertLan={}' /usr/local/bin/0conf |\
+jq '.divertLan.display="none"' |\
+jq '.divertLan.ip=[]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+rm -rf /usr/local/bin/chnrouteset
+rm -rf /usr/local/bin/chnroute.txt
+rm -rf /usr/local/bin/Q4am
+rm -rf /usr/local/bin/Q4H
+rm -rf /usr/local/bin/Q2H
+rm -rf /etc/dns-over-https
+rm -rf /usr/bin/vtrui
+rm -rf /etc/vtrui
+rm -rf /usr/local/bin/v2dns
+rm -rf /usr/local/bin/vtrui
+rm -rf /lib/systemd/system/ttyd.service
+systemctl daemon-reload >/dev/null 2>&1
+
+rm -rf /var/www/html/gwd
+jq 'del(.clifwd)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
+mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
+
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+
+
+cd ~
+source /etc/profile
+
+piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
+
+doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
+doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
+
+domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
+port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
+v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+if [[ -z $domain ]] || [[ -z $v2path ]] || [[ -z $uuidnum ]]; then
+  red "de_GWD /usr/local/bin/0conf is missing"
+  exit
+fi
+}
 
 
 
@@ -81,7 +164,6 @@ fi
 
 
 preInstall(){
-
 cat << EOF >/etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
 APT::Install-Recommends "false";
@@ -123,8 +205,6 @@ cat << EOF >/etc/security/limits.conf
 EOF
 
 echo "ulimit -n 1000000" > ~/.bash_profile
-
-modprobe ip_conntrack
 
 cat << EOF >/etc/sysctl.conf
 vm.overcommit_memory = 1
@@ -225,18 +305,19 @@ ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 
 installSmartDNS(){
-systemctl stop smartdns >/dev/null 2>&1
-dpkg --purge smartdns >/dev/null 2>&1
+systemctl disable --now smartdns >/dev/null 2>&1
+dpkg --purge --force-all smartdns >/dev/null 2>&1
 dpkg --configure -a
 dpkg -i ~/smartdns.deb
 rm -rf /etc/smartdns/*.conf
 
 cat << EOF >/etc/smartdns/remote.conf
-bind 127.0.0.1:5370 -force-aaaa-soa
-bind-tcp 127.0.0.1:5370 -force-aaaa-soa
+bind 127.0.0.1:5370
+bind-tcp 127.0.0.1:5370 
 
 speed-check-mode  ping,tcp:80
 cache-size        0
+force-AAAA-SOA    yes
 prefetch-domain   no
 serve-expired     yes
 serve-expired-ttl 0
@@ -254,7 +335,7 @@ bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
 speed-check-mode  ping,tcp:80
-cache-size        10000
+cache-size        5000
 rr-ttl            600
 rr-ttl-min        60
 rr-ttl-max        43200
@@ -263,10 +344,12 @@ prefetch-domain   yes
 serve-expired     yes
 serve-expired-ttl 0
 
-server 119.29.29.29
-server 119.28.28.28
 server 114.114.114.114
 server 114.114.115.115
+server 119.29.29.29
+server 119.28.28.28
+server 223.5.5.5
+server 223.6.6.6
 EOF
 
 rm -rf /run/smartdns.pid
@@ -293,6 +376,7 @@ EOF
 systemctl daemon-reload
 systemctl enable smartdns
 systemctl restart smartdns
+
 echo "$statusInstalled smartdns"
 }
 
@@ -305,13 +389,11 @@ doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '
 doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 
 systemctl stop doh-client >/dev/null 2>&1
-rm -rf /usr/local/bin/doh-client
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-client /usr/local/bin/doh-client
 chmod +x /usr/local/bin/doh-client
-mkdir -p /etc/dns-over-https/
 
-cat << EOF >/etc/dns-over-https/doh-client.conf
+cat << EOF >/usr/local/bin/doh-client.conf
 listen = [ "127.0.0.1:5380" ]
 
 [upstream]
@@ -339,8 +421,8 @@ EOF
 doh_upstream1='url = "https:\/\/'$doh1'"'
 doh_upstream2='url = "https:\/\/'$doh2'"'
 
-sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /etc/dns-over-https/doh-client.conf
-sed -i "$(sed -ne '/url =/=' /etc/dns-over-https/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /etc/dns-over-https/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /usr/local/bin/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /usr/local/bin/doh-client.conf
 mkdir -p /etc/NetworkManager/dispatcher.d/
 
 cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
@@ -370,7 +452,7 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
-ExecStart=/usr/local/bin/doh-client -conf /etc/dns-over-https/doh-client.conf
+ExecStart=/usr/local/bin/doh-client -conf /usr/local/bin/doh-client.conf
 Restart=always
 RestartSec=2
 StartLimitBurst=0
@@ -382,7 +464,9 @@ EOF
 systemctl daemon-reload
 systemctl enable doh-client
 systemctl restart doh-client
+
 rm -rf ~/doh
+
 echo "$statusInstalled doh-client"
 }
 
@@ -391,10 +475,6 @@ echo "$statusInstalled doh-client"
 installV2ray(){
 systemctl disable --now v2dns >/dev/null 2>&1
 systemctl disable --now vtrui >/dev/null 2>&1
-rm -rf /usr/bin/vtrui
-rm -rf /etc/vtrui
-rm -rf /usr/local/bin/v2dns
-rm -rf /usr/local/bin/vtrui
 mkdir -p /usr/local/bin/v2dns
 mkdir -p /usr/local/bin/vtrui
 
@@ -425,7 +505,9 @@ cat << EOF >/usr/local/bin/v2dns/config.json
 "outbounds":[
   {
     "tag":"dnsout",
-    "protocol":"dns"
+    "protocol":"dns",
+    "settings":{},
+    "streamSettings":{"sockopt":{"mark":255}}
   }
 ],
 "routing":{
@@ -542,7 +624,9 @@ EOF
 systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
+
 rm -rf ~/vtrui
+
 echo "$statusInstalled v2dns && vtrui"
 }
 
@@ -880,7 +964,7 @@ listen-address=127.0.0.1
 port=5390
 EOF
 
-cat /dev/null > /etc/pihole/dns-servers.conf
+cat /dev/null >/etc/pihole/dns-servers.conf
 
 cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
@@ -906,6 +990,19 @@ pihole restartdns
 
 nginxSet(){
 apt install nginx
+
+mkdir -p "/var/www/ssl"
+
+if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
+cd /var/www/ssl
+openssl req -x509 -nodes -days 3650 \
+  -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
+  -config <(cat /etc/ssl/openssl.cnf \
+    <(printf '[SAN]\nsubjectAltName=DNS:localhost')) \
+  -newkey rsa:2048 \
+  -keyout de_GWD.key \
+  -out de_GWD.cer
+fi
 
 rm -rf /etc/nginx/nginx.conf
 
@@ -1058,19 +1155,6 @@ EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
 /etc/nginx/conf.d/merge.sh
-
-mkdir -p /var/www/ssl
-
-if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
-cd /var/www/ssl
-openssl req -x509 -nodes -days 3650 \
-  -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
-  -config <(cat /etc/ssl/openssl.cnf \
-    <(printf '[SAN]\nsubjectAltName=DNS:localhost')) \
-  -newkey rsa:2048 \
-  -keyout de_GWD.key \
-  -out de_GWD.cer
-fi
 }
 
 
@@ -1138,7 +1222,73 @@ fi
 
 
 
+installKernel(){
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+
+if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 45981000 ]]; then
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
+do
+apt purge -y $line
+done
+
+update-grub
+
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+sysctl -p
+
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+echo "Kernel updated, please reboot." >~/bbrkernel/reboot
+else
+    red "Kernel download failed"
+
+    exit
+fi
+}
+
+
+
 postInstall(){
+if [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
+  installKernel
+fi
+
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
+  /usr/local/bin/ui-markThis >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onDHCP
+fi
+
 /usr/local/bin/ui_am4
 /usr/local/bin/ui_2h
 
@@ -1160,10 +1310,6 @@ else
 fi
 systemctl restart iptables-proxy
 
-if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-  /usr/local/bin/ui-markThis >/dev/null 2>&1
-fi
-
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
@@ -1177,11 +1323,15 @@ EOF
 
 crontab ~/now.cron
 rm -rf ~/now.cron
+
 rm -rf ~/smartdns.deb
 rm -rf ~/doh.zip
 rm -rf ~/vtrui.zip
 rm -rf ~/ui-script.zip
 rm -rf ~/ui-web.zip
+
+echo ""
+red "$(cat ~/bbrkernel/reboot 2>/dev/null)"
 }
 
 
@@ -1203,7 +1353,7 @@ installGWD(){
     read doh1
 
     green "========================="
-    green " V2ray domain"
+    green " Domain"
     green "========================="
     read v2servn
 
@@ -1330,121 +1480,8 @@ blue "------------------------------"
 
 
 
-updatePihole(){
-piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
-
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-
-rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
-
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
-
-systemctl restart v2dns
-systemctl restart vtrui
-systemctl restart iptables-proxy
-
-installPihole
-
-piholeSet
-
-/usr/local/bin/ui-NodeDThide >/dev/null 2>&1
-
-if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
-  /usr/local/bin/ui-dnsGFW >/dev/null 2>&1
-else
-  /usr/local/bin/ui-dnsCHNW >/dev/null 2>&1
-fi
-
-/usr/local/bin/ui-saveListBW >/dev/null 2>&1
-
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onDHCP
-fi
-
-systemctl restart v2dns
-systemctl restart vtrui
-systemctl restart iptables-proxy
-blue "----------------------"
-blue "Install Pi-hole [done]"
-blue "----------------------"
-}
-
-
-
-updateGWD(){
-if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
-doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
-hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
-v2ad=$(jq -r '.v2ad' /usr/local/bin/0conf)
-DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
-piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
-
-jq 'del(.doh)' /usr/local/bin/0conf |\
-jq 'del(.hosts)' |\
-jq 'del(.v2ad)' |\
-jq 'del(.splitDNS)' |\
-jq 'del(.pihole)' |\
-jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' |\
-jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
-jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
-jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
-jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
-jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-fi
-
-if [[ $(awk '/divertLan/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
-jq '.divertLan={}' /usr/local/bin/0conf |\
-jq '.divertLan.display="none"' |\
-jq '.divertLan.ip=[]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-fi
-rm -rf /usr/local/bin/chnrouteset
-rm -rf /usr/local/bin/chnroute.txt
-rm -rf /usr/local/bin/Q4am
-rm -rf /usr/local/bin/Q4H
-rm -rf /usr/local/bin/Q2H
-rm -rf /etc/modules-load.d/nf_conntrack.conf
-rm -rf /lib/systemd/system/ttyd.service
-systemctl daemon-reload >/dev/null 2>&1
-
-rm -rf /var/www/html/gwd
-jq 'del(.clifwd)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
-mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
-
-crontab -l > ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-
-
-cd ~
-source /etc/profile
-
-piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
-
-doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
-
-domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
-port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
-v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
-uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
-
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-
-if [[ -z $domain ]] || [[ -z $uuidnum ]] || [[ -z $v2path ]]; then
-  red "de_GWD /usr/local/bin/0conf is missing"
-  exit
-fi
+updateGWDfull(){
+preUpdate
 
 preDownload
 
@@ -1460,6 +1497,8 @@ installIptablesProxy
 
 installDep
 
+installPihole
+
 piholeSet
 
 nginxSet
@@ -1471,6 +1510,34 @@ blue "--------------------"
 blue "Update de_GWD [done]"
 blue "--------------------"
 }
+
+
+
+updateGWDfast(){
+preUpdate
+
+preDownload
+
+installSmartDNS
+
+installDoH
+
+installV2ray
+
+installIptablesProxy
+
+piholeSet
+
+nginxSet
+
+installWebUI
+
+postInstall
+blue "--------------------"
+blue "Update de_GWD [done]"
+blue "--------------------"
+}
+
 
 
 start_menu(){
@@ -1527,8 +1594,8 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "9. Update Pi-hole"
-    yellow "0. Update de_GWD"
+    yellow "9. Update de_GWD (full)"
+    yellow "0. Update de_GWD (fast)"
     red    "CTRL+C EXIT"
     echo ""
     read -p "Select:" num
@@ -1542,11 +1609,11 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     9)
-    updatePihole
+    updateGWDfull
     start_menu
     ;;
     0)
-    updateGWD
+    updateGWDfast
     start_menu
     ;;
     *)
