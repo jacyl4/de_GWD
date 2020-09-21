@@ -781,6 +781,21 @@ chmod +x /etc/nginx/conf.d/merge.sh
 
 
 postInstall(){
+indexpage=$(ls /var/www/html/index.* 2>/dev/null | wc -l)
+if [ "$indexpage" = "0" ]; then 
+wget --no-check-certificate -c -O ~/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/sample.zip
+unzip ~/sample.zip
+rsync -azrI ~/sample/* /var/www/html/
+rm -rf ~/sample*
+fi
+
+rm -rf /usr/local/bin/version.php
+wget --no-check-certificate -c -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+
+if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
+  dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
+fi
+
 cat << "EOF" > /usr/local/bin/autoUpdate
 #!/bin/bash
 wget --no-check-certificate -c -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/main/server
@@ -828,21 +843,6 @@ sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
 echo '0 */2 * * * /usr/local/bin/Q2H' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-
-indexpage=$(ls /var/www/html/index.* 2>/dev/null | wc -l)
-if [ "$indexpage" = "0" ]; then 
-wget --no-check-certificate -c -O ~/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/sample.zip
-unzip ~/sample.zip
-rsync -azrI ~/sample/* /var/www/html/
-rm -rf ~/sample*
-fi
-
-rm -rf /usr/local/bin/version.php
-wget --no-check-certificate -c -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
-
-if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
-  dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
-fi
 }
 
 
