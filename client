@@ -31,11 +31,6 @@ aptGlobal="deb.debian.org"
 
 
 preUpdate(){
-if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
-rm -rf /etc/php/7.3/
-apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
-fi
-
 if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
 doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
