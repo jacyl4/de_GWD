@@ -13,15 +13,16 @@ statusBAD=$(red "✕")
 
 mirrorSite="http://gwd.seso.icu:10290"
 installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client_do)"
+de_gwd_nginx="1.19.1"
 
 tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"; }
 
 aptLocal="mirrors.aliyun.com"
 aptGlobal="deb.debian.org"
-branch="master"
-de_gwd_nginx="1.19.1"
 
 
+
+branch="main"
 
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
@@ -871,7 +872,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-curl -fsSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 }
 
 
@@ -1372,8 +1373,8 @@ installKernel(){
 export DEBIAN_FRONTEND=noninteractive
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 45981000 ]]; then
 dpkg -i linux-headers-*.deb

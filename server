@@ -287,7 +287,7 @@ pihole logging off
 installDOHser(){
 rm -rf /usr/local/bin/doh-server
 
-wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/amd64_doh.zip
+wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_doh.zip
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
@@ -358,7 +358,7 @@ rm -rf /usr/local/bin/vtrui
 rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/vtrui
 mkdir -p ~/vtrui
-wget --no-check-certificate -c -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/amd64_vtrui.zip
+wget --no-check-certificate -c -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
 unzip ~/vtrui.zip -d ~/vtrui
 cp -f ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
 cp -f ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
@@ -792,7 +792,7 @@ postInstall(){
 
 cat << "EOF" > /usr/local/bin/autoUpdate
 #!/bin/bash
-wget --no-check-certificate -c -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/master/server
+wget --no-check-certificate -c -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/main/server
 sed -i '$d' ~/update
 echo "updateGWD" >>  ~/update
 chmod +x ~/update
@@ -818,7 +818,7 @@ rm -rf /var/log/*2
 rm -rf /var/log/*gz
 
 localVer=$(awk 'NR==1' /usr/local/bin/version.php)
-remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
+remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
 
 if [[ $localVer != $remoteVer ]]; then
 crontab -l > ~/now.cron
@@ -839,14 +839,14 @@ rm -rf ~/now.cron
 
 indexpage=$(ls /var/www/html/index.* 2>/dev/null | wc -l)
 if [ "$indexpage" = "0" ]; then 
-wget --no-check-certificate -c -O ~/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/sample.zip
+wget --no-check-certificate -c -O ~/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/sample.zip
 unzip ~/sample.zip
 rsync -azrI ~/sample/* /var/www/html/
 rm -rf ~/sample*
 fi
 
 rm -rf /usr/local/bin/version.php
-wget --no-check-certificate -c -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php
+wget --no-check-certificate -c -O /usr/local/bin/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
 
 if [[ $(ls -l /var/www/html/spt | awk '{print$5}') != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
@@ -959,8 +959,8 @@ installKernel(){
 export DEBIAN_FRONTEND=noninteractive
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 45981000 ]]; then
 dpkg -i linux-headers-*.deb
@@ -1328,7 +1328,7 @@ sed -i '/localVer=/,$d' /usr/local/bin/Q2H
 
 cat << "EOF" >> /usr/local/bin/Q2H
 localVer=$(awk 'NR==1' /usr/local/bin/version.php)
-remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/master/version.php | awk 'NR==1')
+remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
 
 if [[ $localVer != $remoteVer ]]; then
 crontab -l > ~/now.cron

@@ -18,9 +18,10 @@ tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | 
 
 aptLocal="mirrors.aliyun.com"
 aptGlobal="deb.debian.org"
-branch="master"
 
 
+
+branch="main"
 
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
@@ -862,7 +863,7 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-curl -fsSL https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh | bash /dev/stdin --unattended
+curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 }
 
 

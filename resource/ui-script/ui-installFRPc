@@ -14,9 +14,9 @@ installFRP(){
 cd ~
 
 if [[ $architecture = "amd64" ]]; then
-wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/amd64_frp.tar.gz
+wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_frp.tar.gz
 elif [[ $architecture = "arm64" ]]; then
-wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/master/resource/arm64_frp.tar.gz
+wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/arm64_frp.tar.gz
 fi
 tar zxvf ~/frp.tar.gz
 
