@@ -31,6 +31,19 @@ aptGlobal="deb.debian.org"
 
 
 preUpdate(){
+if [[ -n $(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf 2>/dev/null) ]]; then
+domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
+port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
+v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
+
+jq 'del(.v2nodeForUpdate)' /usr/local/bin/0conf |\
+jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
+jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
+jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+  
 if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
 doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
@@ -95,10 +108,10 @@ piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
 
-domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
-port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
-v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
-uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
+domain=$(jq -r '.v2nodeForUpdate[0].address' /usr/local/bin/0conf)
+port=$(jq -r '.v2nodeForUpdate[0].port' /usr/local/bin/0conf)
+v2path=$(jq -r '.v2nodeForUpdate[0].path' /usr/local/bin/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate[0].uuid' /usr/local/bin/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
@@ -1446,10 +1459,10 @@ jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg path "$v2path" '.v2node[0].path=$path' |\
 jq --arg uuid "$uuidnum" '.v2node[0].uuid=$uuid' |\
-jq --arg domain "$domain" '.v2nodeForUpdate.address=$domain' |\
-jq --arg port "$port" '.v2nodeForUpdate.port=$port' |\
-jq --arg v2path "$v2path" '.v2nodeForUpdate.path=$v2path' |\
-jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate.uuid=$uuidnum' |\
+jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
+jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
+jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' |\
+jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
 jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 chmod 666 /usr/local/bin/0conf
 

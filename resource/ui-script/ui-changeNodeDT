@@ -19,6 +19,11 @@ jq --arg uuidnum "$uuidnum" '.outbounds[2].settings.vnext[0].users[0].id=$uuidnu
 jq --arg v2path "$v2path" '.outbounds[2].streamSettings.wsSettings.path=$v2path' |\
 jq --arg domain "$domain" '.outbounds[2].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
+jq --arg domain "$domain" '.v2nodeForUpdate[2].address=$domain' /usr/local/bin/0conf |\
+jq --arg port "$port" '.v2nodeForUpdate[2].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[2].uuid=$uuidnum' |\
+jq --arg v2path "$v2path" '.v2nodeForUpdate[2].path=$v2path' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+
 chmod 666 /usr/local/bin/vtrui/config.json
 
 rm -rf /var/www/html/act/nodedtpre.txt
