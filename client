@@ -355,7 +355,6 @@ ExecStartPost=/bin/sh -c "echo $MAINPID > /run/smartdns.pid"
 ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
 KillMode=mixed
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]
@@ -443,7 +442,6 @@ LimitNPROC=64000
 LimitNOFILE=1000000
 ExecStart=/usr/local/bin/doh-client -conf /usr/local/bin/doh-client.conf
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]
@@ -527,7 +525,6 @@ LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]
@@ -603,7 +600,6 @@ LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]
@@ -898,7 +894,6 @@ PIDFile=/run/php/php-fpm.pid
 ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]

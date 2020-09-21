@@ -331,7 +331,6 @@ LimitNPROC=64000
 LimitNOFILE=1000000
 ExecStart=/usr/local/bin/doh-server -conf /usr/local/bin/doh-server.conf
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]
@@ -412,7 +411,6 @@ LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]

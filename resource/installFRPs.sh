@@ -55,7 +55,6 @@ LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/local/bin/frp/frps -c /usr/local/bin/frp/frps.ini
 Restart=always
-RestartSec=2
 StartLimitBurst=0
 
 [Install]
