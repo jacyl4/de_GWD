@@ -11,6 +11,7 @@ $FWD1uuid = array_filter($FWD1uuid);
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
 $data['FORWARD']['FWD1']['upstream'] = $v2nodeID;
+$data['FORWARD']['FWD1']['status'] = "on";
 $data['FORWARD']['FWD1']['port'] = $FWD1port;
 $data['FORWARD']['FWD1']['path'] = $FWD1path;
 $data['FORWARD']['FWD1']['uuid'] = $FWD1uuid;
