@@ -1419,6 +1419,10 @@ deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
+preDownload
+
+preInstall
+
 apt update
 apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
 source /etc/profile
@@ -1427,10 +1431,6 @@ systemctl mask --now lighttpd >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
-
-preDownload
-
-preInstall
 
 installSmartDNS
 

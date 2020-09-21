@@ -1379,6 +1379,10 @@ EOF
 
 fi
 
+preDownload
+
+preInstall
+
 apt update
 apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
 source /etc/profile
@@ -1387,10 +1391,6 @@ systemctl mask --now lighttpd >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
-
-preDownload
-
-preInstall
 
 installSmartDNS
 
