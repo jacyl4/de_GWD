@@ -1168,7 +1168,7 @@ sed -i "/popupWindow/c\\$popupWindow" /var/www/html/update.php
 rm -rf ~/ui-script
 rm -rf ~/ui-web
 
-if [[ $(ls -l /var/www/html/spt | awk '{print$5}') != "104857600" ]]; then
+if [[ $(ls -l /var/www/html/spt | awk '{print$5}' 2>/dev/null) != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
 }
@@ -1184,7 +1184,7 @@ systemctl restart smartdns
 /usr/local/bin/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
-if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf) ]]; then
+if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf 2>/dev/null) ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
 else
   /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
