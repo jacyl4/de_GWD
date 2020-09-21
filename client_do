@@ -1115,6 +1115,7 @@ http {
 
   access_log off;
   error_log off;
+  log_not_found off;
 
   include /etc/nginx/conf.d/*.conf;
 }
@@ -1145,7 +1146,7 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   add_header Referrer-Policy "no-referrer" always;
   add_header X-Content-Type-Options "nosniff" always;
   add_header X-Download-Options "noopen" always;
-  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header X-Frame-Options "DENY" always;
   add_header X-Permitted-Cross-Domain-Policies "none" always;
   add_header X-Robots-Tag "none" always;
   add_header X-XSS-Protection "1; mode=block" always;

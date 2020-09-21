@@ -510,6 +510,7 @@ http {
 
   access_log off;
   error_log off;
+  log_not_found off;
 
   include /etc/nginx/conf.d/*.conf;
 }
