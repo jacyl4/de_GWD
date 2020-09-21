@@ -25,9 +25,6 @@ echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
 echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
 fi
 
-date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
-
 rm -rf /etc/resolv.conf
 
 cat << EOF >/etc/resolv.conf
@@ -36,6 +33,9 @@ nameserver 8.8.8.8
 nameserver 1.0.0.1
 nameserver 8.8.4.4
 EOF
+
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
 
 cat << EOF >/etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";

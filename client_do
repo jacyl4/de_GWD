@@ -114,7 +114,6 @@ fi
 
 
 preDownload() {
-tcpTime && hwclock -w
 systemctl stop iptables-proxy >/dev/null 2>&1
 systemctl stop v2dns >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
@@ -129,6 +128,8 @@ nameserver 119.28.28.28
 nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
+
+tcpTime && hwclock -w
 
 wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
 wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
@@ -152,6 +153,19 @@ Dpkg::Options {
 };
 EOF
 
+apt update
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
+source /etc/profile
+systemctl enable --now haveged >/dev/null 2>&1
+systemctl mask --now lighttpd >/dev/null 2>&1
+
+systemctl mask --now systemd-resolved >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
+}
+
+
+
+preConf(){
 cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
@@ -1423,14 +1437,7 @@ preDownload
 
 preInstall
 
-apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
-source /etc/profile
-systemctl enable --now haveged >/dev/null 2>&1
-systemctl mask --now lighttpd >/dev/null 2>&1
-
-systemctl mask --now systemd-resolved >/dev/null 2>&1
-systemctl daemon-reload >/dev/null 2>&1
+preConf
 
 installSmartDNS
 
@@ -1522,6 +1529,8 @@ preDownload
 
 preInstall
 
+preConf
+
 installSmartDNS
 
 installDOH
@@ -1555,7 +1564,7 @@ preUpdate
 
 preDownload
 
-preInstall
+preConf
 
 installSmartDNS
 
