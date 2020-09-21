@@ -152,23 +152,6 @@ Dpkg::Options {
 };
 EOF
 
-rm -rf /etc/apt/sources.list.d/*
-
-cat << EOF >/etc/apt/sources.list
-deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
-deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
-EOF
-
-apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
-source /etc/profile
-systemctl enable --now haveged >/dev/null 2>&1
-systemctl mask --now lighttpd >/dev/null 2>&1
-
-systemctl mask --now systemd-resolved >/dev/null 2>&1
-systemctl daemon-reload >/dev/null 2>&1
-
 cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
@@ -1428,6 +1411,23 @@ netmask 255.255.255.0
 gateway $gatewayaddr
 EOF
 
+rm -rf /etc/apt/sources.list.d/*
+
+cat << EOF >/etc/apt/sources.list
+deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
+EOF
+
+apt update
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
+source /etc/profile
+systemctl enable --now haveged >/dev/null 2>&1
+systemctl mask --now lighttpd >/dev/null 2>&1
+
+systemctl mask --now systemd-resolved >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
+
 preDownload
 
 preInstall
@@ -1554,6 +1554,8 @@ updateGWDfast(){
 preUpdate
 
 preDownload
+
+preInstall
 
 installSmartDNS
 

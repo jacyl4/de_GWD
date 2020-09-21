@@ -42,10 +42,7 @@
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">      
       <li class="nav-item no-arrow mx-1">
-        <a class="nav-link" href="/admin">
-          <i class="fas fa-tachometer-alt"></i>
-          <span>Pi-hole</span>
-        </a>
+
       </li>
     </ul>
 

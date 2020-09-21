@@ -172,26 +172,6 @@ Dpkg::Options {
 };
 EOF
 
-if [[ $architecture = "amd64" ]]; then
-rm -rf /etc/apt/sources.list.d/*
-
-cat << EOF >/etc/apt/sources.list
-deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
-deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
-EOF
-
-fi
-
-apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
-source /etc/profile
-systemctl enable --now haveged >/dev/null 2>&1
-systemctl mask --now lighttpd >/dev/null 2>&1
-
-systemctl mask --now systemd-resolved >/dev/null 2>&1
-systemctl daemon-reload >/dev/null 2>&1
-
 cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
@@ -984,8 +964,6 @@ pihole restartdns
 
 
 nginxSet(){
-apt install nginx
-
 mkdir -p "/var/www/ssl"
 
 if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
@@ -1390,6 +1368,26 @@ netmask 255.255.255.0
 gateway $gatewayaddr
 EOF
 
+if [[ $architecture = "amd64" ]]; then
+rm -rf /etc/apt/sources.list.d/*
+
+cat << EOF >/etc/apt/sources.list
+deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
+EOF
+
+fi
+
+apt update
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
+source /etc/profile
+systemctl enable --now haveged >/dev/null 2>&1
+systemctl mask --now lighttpd >/dev/null 2>&1
+
+systemctl mask --now systemd-resolved >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
+
 preDownload
 
 preInstall
@@ -1425,6 +1423,8 @@ sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
 echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
+
+apt install nginx
 
 nginxSet
 
@@ -1512,6 +1512,8 @@ updateGWDfast(){
 preUpdate
 
 preDownload
+
+preInstall
 
 installSmartDNS
 
