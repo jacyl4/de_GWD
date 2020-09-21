@@ -1307,8 +1307,6 @@ rm -rf ~/now.cron
 echo "Kernel updated, please reboot." >~/bbrkernel/reboot
 else
     red "Kernel download failed"
-
-    exit
 fi
 }
 
