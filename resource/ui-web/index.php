@@ -501,38 +501,35 @@ $("#shnodedt").css("display", "none");
 $.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){window.location.reload();});
 }
 
-function pingICMP(){
-$.get('./act/v2node.php', function(data) {
-var nodeList = JSON.parse(data);
-var len = nodeList.length;
-for( let i = 0; i<len; i++){
-  $.get("./act/pingICMP.php", {pingICMP:i}, function(data){ $('#ping'+i).text(data) });
-};
-});
-$.get("./act/pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) });
-$.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) });
-}
-
 function speedT(){
 $.get('./act/v2node.php', function(data) {
 var nodeList = JSON.parse(data);
-var len = nodeList.length;
-for( let i = 0; i<len; i++){
+$.each(nodeList, function(i){
   $.get("./act/speedT.php", {speedT:i}, function(data){ $('#speed'+i).text(data) });
-};
+});
 });
 }
 
 function pingTCP(){
 $.get('./act/v2node.php', function(data) {
 var nodeList = JSON.parse(data);
-var len = nodeList.length;
-for( let i = 0; i<len; i++){
+$.each(nodeList, function(i){
   $.get("./act/pingTCP.php", {pingTCP:i}, function(data){ $('#ping'+i).text(data) });
-};
+});
 });
 $.get("./act/pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) });
 $.get("./act/pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) });
+}
+
+function pingICMP(){
+$.get('./act/v2node.php', function(data) {
+var nodeList = JSON.parse(data);
+$.each(nodeList, function(i){
+  $.get("./act/pingICMP.php", {pingICMP:i}, function(data){ $('#ping'+i).text(data) });
+});
+});
+$.get("./act/pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) });
+$.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) });
 }
 
 function onUDP(){
