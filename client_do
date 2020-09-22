@@ -83,6 +83,8 @@ rm -rf /etc/vtrui
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/local/bin/vtrui
 rm -rf /lib/systemd/system/ttyd.service
+rm -rf /usr/local/bin/__MACOSX
+rm -rf /var/www/html/__MACOSX
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
