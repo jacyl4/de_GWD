@@ -1654,12 +1654,12 @@ else
     echo "[$statusBAD] php7.4-FPM     [start failed]"
 fi
 
-if [[ $(systemctl is-active docker) = "active" ]]; then
-    echo "[$statusGOOD] Docker         [working]"
-elif [[ ! -f "/usr/bin/docker" ]]; then
-    echo "[$statusBAD] Docker         [not installed]"
+if [[ -n $(docker container ls | awk '/nginx/') ]]; then
+    echo "[$statusGOOD] Docker nginx   [working]"
+elif [[ -z $(docker image ls | awk '/nginx/') ]]; then
+    echo "[$statusBAD] Docker nginx   [not installed]"
 else
-    echo "[$statusBAD] Docker         [start failed]"
+    echo "[$statusBAD] Docker nginx   [start failed]"
 fi
 
 blue "-----------------------------------------------"
