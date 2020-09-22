@@ -308,8 +308,8 @@ sysctl -p
 
 installSmartDNS(){
 systemctl disable --now smartdns >/dev/null 2>&1
-dpkg --purge --force-all smartdns >/dev/null 2>&1
 dpkg --configure -a
+dpkg --purge --force-all smartdns >/dev/null 2>&1
 dpkg -i ~/smartdns.deb
 rm -rf /etc/smartdns/*.conf
 
