@@ -5,17 +5,12 @@ yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
-case $(uname -m) in
-    x86_64)  architecture="amd64" ;;
-    aarch64)  architecture="arm64" ;;
-esac
-
 installFRP(){
 cd ~
 
-if [[ $architecture = "amd64" ]]; then
+if [[ $(uname -m) = "x86_64" ]]; then
 wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_frp.tar.gz
-elif [[ $architecture = "arm64" ]]; then
+elif [[ $(uname -m) = "aarch64" ]]; then
 wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/arm64_frp.tar.gz
 fi
 tar zxvf ~/frp.tar.gz
@@ -32,8 +27,7 @@ blue "--------------------"
 }
 
 uninstallFRP(){
-systemctl stop frpc
-rm -rf /lib/systemd/system/frpc.service
+systemctl disable --now frpc
 systemctl daemon-reload
 
 rm -rf /usr/local/bin/frp
