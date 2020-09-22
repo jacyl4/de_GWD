@@ -1460,7 +1460,6 @@ jq '.dns.hosts={}' |\
 jq '.v2node=[]' |\
 jq '.divertLan.display="none"' |\
 jq '.divertLan.ip=[]' |\
-jq '.v2nodeForUpdate={}' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
 jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
