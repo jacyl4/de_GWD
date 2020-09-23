@@ -358,7 +358,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable smartdns
-systemctl restart smartdns
+systemctl start smartdns
 
 echo "$statusInstalled smartdns"
 }
@@ -445,7 +445,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable doh-client
-systemctl restart doh-client
+systemctl start doh-client
 
 rm -rf ~/doh
 
@@ -528,7 +528,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable v2dns
-systemctl restart v2dns
+systemctl start v2dns
 
 cat << EOF >/usr/local/bin/vtrui/config.json
 {
@@ -603,7 +603,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable vtrui
-systemctl restart vtrui
+systemctl start vtrui
 
 rm -rf ~/vtrui
 
@@ -800,7 +800,7 @@ echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
-systemctl restart iptables-proxy
+systemctl start iptables-proxy
 echo "$statusInstalled iptables-proxy"
 
 $(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1

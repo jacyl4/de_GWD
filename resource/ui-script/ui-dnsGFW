@@ -1,4 +1,6 @@
 #!/bin/bash
+pihole flush
+
 cat << EOF >/tmp/v2dns_config
 {
 "dns":{
