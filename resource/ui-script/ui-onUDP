@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
 cat << EOF >/usr/local/bin/iptables-proxy-up

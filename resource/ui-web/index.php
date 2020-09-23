@@ -638,22 +638,22 @@ for( let i = 0; i<len; i++){
 };
 });
 
+$.get('./act/uptime.php', function(data) { $('#uptime').text(data) });
+
 $.get("./act/version.php", function(data) {
 var currentvernum = data.split("-")[0].substring(0);
 var remotevernum = data.split("-")[1].substring(0);
+var vera = $.trim(currentvernum);
+var verb = $.trim(remotevernum);
 $('#currentver').html(currentvernum+'本机');
 $('#remotever').html(remotevernum+' 发布');
 
-var vera = $.trim(currentvernum);
-var verb = $.trim(remotevernum);
 if (vera == verb) {
 $('#remotever').addClass('badge badge-pill badge-light');
 } else {
 $('#remotever').addClass('badge badge-pill badge-warning');
 };
 });
-
-$.get('./act/uptime.php', function(data) { $('#uptime').text(data) });
 
 setInterval(function() {
 checklink();
