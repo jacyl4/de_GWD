@@ -675,7 +675,6 @@ checklink();
 
   <!-- Custom scripts for all pages-->
   <script src="js/sb-admin.min.js"></script>
-  <script src="js/bootstrap4-toggle.min.js"></script>
 
 </body>
 
