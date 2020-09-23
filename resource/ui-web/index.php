@@ -183,6 +183,19 @@
   </div>
 </div>
 
+<div class="modal fade" id="reboot" tabindex="-1" role="dialog" aria-labelledby="reboot" aria-hidden="true">
+  <div class="modal-dialog modal-sm" style="top:50%" role="document">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">重启本机</h5>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-sm btn-dark" onclick="submitstaticip()">立即重启</button>
+      </div>
+    </div>
+  </div>
+</div>
 
         <!-- DataTables Example -->
         <div class="card mb-3">
@@ -377,7 +390,7 @@
             <i class="fas fa-exchange-alt"></i>
             IP地址
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="submitstaticip()">重启</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" data-toggle="modal" data-target="#reboot">重启</button>
           </span>
           </div>
           <div class="card-body">
