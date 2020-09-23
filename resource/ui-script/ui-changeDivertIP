@@ -1,0 +1,17 @@
+#!/bin/bash
+localip=$(jq -r '.divertLan.ip[]' /usr/local/bin/0conf | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+
+jq 'del(.routing.rules[1].source[])' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp
+
+if [[ -n "$localip" ]]; then
+	jq '.routing.rules[1].type="field"' /tmp/vtrui_temp |\
+	jq '.routing.rules[1].outboundTag="diverttraffic"' >/usr/local/bin/vtrui/config.json
+
+	for IP in $localip; do
+		jq --arg IP "$IP" '.routing.rules[1].source+=[$IP]' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
+	done
+
+	rm -rf /tmp/vtrui_temp*
+
+	chmod 666 /usr/local/bin/vtrui/config.json
+fi

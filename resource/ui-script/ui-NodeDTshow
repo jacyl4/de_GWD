@@ -165,6 +165,11 @@ cat > /usr/local/bin/vtrui/config.json << EOF
         ]
       },
       {
+        "outboundTag": "diverttraffic",
+        "type": "field",
+        "source": [ "0.0.0.0" ]
+      },
+      {
         "outboundTag": "netflix",
         "type": "field",
         "domain": [
@@ -189,11 +194,6 @@ cat > /usr/local/bin/vtrui/config.json << EOF
           "domain:netflixdnstest8.com",
           "domain:netflixdnstest9.com"
         ]
-      },
-      {
-        "outboundTag": "diverttraffic",
-        "type": "field",
-        "source": [ ]
       }
     ]
   }
@@ -217,7 +217,7 @@ jq --arg dtV2path "$dtV2path" '.outbounds[2].streamSettings.wsSettings.path=$dtV
 jq --arg dtDomain "$dtDomain" '.outbounds[2].streamSettings.tlsSettings.serverName=$dtDomain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
 
 
-/usr/local/bin/ui-changeLocalIP
+/usr/local/bin/ui-changeDivertIP
 
 jq '.divertLan.display="block"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 
