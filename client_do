@@ -1680,6 +1680,7 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
+    green  "3. Install latest kernel BBR and reboot"
     yellow "9. Update de_GWD (full)"
     yellow "0. Update de_GWD (fast)"
     red    "CTRL+C EXIT"
@@ -1694,7 +1695,7 @@ blue "-----------------------------------------------"
     change_piholeAdmin
     start_menu
     ;;
-    2)
+    3)
     installBBR
     start_menu
     ;;
