@@ -10,14 +10,6 @@ $data['FORWARD']['FWD0']['status'] = "off";
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-$nginx = "/lib/systemd/system/nginx.service";
-$docker = "/lib/systemd/system/docker.service";
-
-if (file_exists($nginx)) {
-    shell_exec('sudo systemctl reload nginx');
-}
-elseif (file_exists($docker)) {
-    shell_exec('sudo docker container exec nginx nginx -s reload');
-}
+shell_exec('sudo /etc/nginx/conf.d/merge.sh');
 ?>
 <?php }?>
