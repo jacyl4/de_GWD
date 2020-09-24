@@ -1225,63 +1225,7 @@ fi
 
 
 
-installKernel(){
-apt install -y wget
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-
-if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 45981000 ]]; then
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
-do
-apt purge -y $line
-done
-
-update-grub
-
-cat << EOF >~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-
-echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-sysctl -p
-
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-
-systemctl restart sshd
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-echo "Kernel updated, please reboot." >~/bbrkernel/reboot
-else
-    red "Kernel download failed"
-fi
-}
-
-
-
 postInstall(){
-if [[ $architecture = "amd64" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
-  installKernel
-fi
-
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis >/dev/null 2>&1
 fi

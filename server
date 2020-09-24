@@ -954,52 +954,6 @@ blue "---------------------------------------------"
 
 
 
-installBBRplus(){
-apt install -y wget
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-dpkg --list | grep linux-image | awk '{print $2}' | sed '/bbrplus/d' | while read line
-do
-apt purge -y $line
-done
-
-update-grub
-
-cat << EOF >~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
-sysctl -p
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-systemctl restart sshd
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-reboot
-blue "-----------------------"
-blue  "Install bbrplus [done]"
-blue "-----------------------"
-}
-
-
-
 installBBR(){
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
@@ -1047,9 +1001,63 @@ else
 
     exit
 fi
-blue "----------------------------"
-blue "Install latest kernel [done]"
-blue "----------------------------"
+blue "--------------------------------"
+blue "Install latest kernel BBR [done]"
+blue "--------------------------------"
+}
+
+
+
+installBBRplus(){
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+
+if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 11265000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 44341000 ]]; then
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/bbrplus/d' | while read line
+do
+apt purge -y $line
+done
+
+update-grub
+
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+reboot
+
+else
+    red "Kernel download failed"
+
+    exit
+fi
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
 }
 
 
@@ -1450,8 +1458,8 @@ if [[ -f "/usr/local/bin/version.php" ]]; then
 fi
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install latest kernel BBR and reboot"
-    green  "3. Install bbrplus+fq and reboot"
+    green  "2. Install bbrplus+fq and reboot"
+    green  "3. Install latest kernel BBR and reboot"
     red    "5. Change static IP"
     red    "6. Change domain and generate new certificate"
     red    "7. Change v2ray path & UUID"
@@ -1469,11 +1477,11 @@ fi
     start_menu
     ;;
     2)
-    installBBR
+    installBBRplus
     start_menu
     ;;
     3)
-    installBBRplus
+    installBBR
     start_menu
     ;;
     5)
