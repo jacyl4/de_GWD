@@ -1657,9 +1657,9 @@ else
     echo "[$statusBAD] php7.4-FPM     [start failed]"
 fi
 
-if [[ -n $(docker container ls | awk '/nginx/') ]]; then
+if [[ -n $(docker container ls 2>/dev/null | awk '/nginx/') ]]; then
     echo "[$statusGOOD] Docker nginx   [working]"
-elif [[ -z $(docker image ls | awk '/nginx/') ]]; then
+elif [[ -z $(docker image ls 2>/dev/null | awk '/nginx/') ]]; then
     echo "[$statusBAD] Docker nginx   [not installed]"
 else
     echo "[$statusBAD] Docker nginx   [start failed]"
