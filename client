@@ -1511,6 +1511,11 @@ blue "------------------------------"
 updatePihole(){
 de_GWDconnect
 
+jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+
+systemctl restart v2dns
+sleep 3
+
 installDep
 
 piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
