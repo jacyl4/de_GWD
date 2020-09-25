@@ -38,7 +38,7 @@ if ( $conf['dns']['DNSsplit'] === "gfw" ){
 }
 
 shell_exec('sudo /usr/local/bin/ui-saveListBW');
-shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
+shell_exec('sudo systemctl restart v2dns');
 ?>
 <?php }?>
