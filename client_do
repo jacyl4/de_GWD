@@ -292,6 +292,31 @@ sysctl -p
 }
 
 
+de_GWDconnect(){
+$(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
+echo ""
+if [[ $(curl -Is  http://www.google.com/ncr | head -n 1) =~ "HTTP" ]]; then
+    echo "$statuSuccess de_GWD server connect"
+    echo "$statuSuccess de_GWD server connect"
+    echo "$statuSuccess de_GWD server connect"
+else
+    echo "$statusFailed de_GWD server connect"
+    echo "$statusFailed de_GWD server connect"
+    echo "$statusFailed de_GWD server connect"
+
+cat << EOF >/etc/resolv.conf
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+nameserver 114.114.114.114
+nameserver 114.114.115.115
+EOF
+
+    exit
+fi
+echo ""
+}
+
+
 
 installSmartDNS(){
 systemctl disable --now smartdns >/dev/null 2>&1
@@ -807,28 +832,6 @@ resolvconf -u
 
 systemctl start iptables-proxy
 echo "$statusInstalled iptables-proxy"
-
-$(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
-echo ""
-if [[ $(curl -Is  http://www.google.com/ncr | head -n 1) =~ "HTTP" ]]; then
-    echo "$statuSuccess de_GWD server connect"
-    echo "$statuSuccess de_GWD server connect"
-    echo "$statuSuccess de_GWD server connect"
-else
-    echo "$statusFailed de_GWD server connect"
-    echo "$statusFailed de_GWD server connect"
-    echo "$statusFailed de_GWD server connect"
-
-cat << EOF >/etc/resolv.conf
-nameserver 119.29.29.29
-nameserver 119.28.28.28
-nameserver 114.114.114.114
-nameserver 114.114.115.115
-EOF
-
-    exit
-fi
-echo ""
 }
 
 
@@ -1480,6 +1483,8 @@ sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /us
 
 installIptablesProxy
 
+de_GWDconnect
+
 installDep
 
 installPihole
@@ -1544,44 +1549,63 @@ blue "------------------------------"
 
 
 
-updateGWDfull(){
-preUpdate
-
-preDownload
-
-preInstall
-
-preConf
-
-installSmartDNS
-
-installDOH
-
-installV2ray
-
-installIptablesProxy
+updatePihole(){
+de_GWDconnect
 
 installDep
+
+piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 installPihole
 
 piholeSet
 
-installNginxDo
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onDHCP
+fi
 
-nginxSet
+/usr/local/bin/ui_4h
 
-installWebUI
+if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf 2>/dev/null) ]]; then
+  /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
+else
+  /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+fi
 
-postInstall
-blue "--------------------"
-blue "Update de_GWD [done]"
-blue "--------------------"
+if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
+  /usr/local/bin/ui-FWD0save
+  /usr/local/bin/ui-FWD0vtrui
+fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
+  /usr/local/bin/ui-FWD1save
+  /usr/local/bin/ui-FWD1vtrui
+fi
+
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onUDP >/dev/null 2>&1
+else
+  /usr/local/bin/ui-offUDP >/dev/null 2>&1
+fi
+
+systemctl restart v2dns
+systemctl restart vtrui
+systemctl restart iptables-proxy
+blue "----------------------"
+blue "Install Pi-hole [done]"
+blue "----------------------"
 }
 
 
 
-updateGWDfast(){
+updateGWD(){
+de_GWDconnect
+
 preUpdate
 
 preDownload
@@ -1680,8 +1704,9 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "9. Update de_GWD (full)"
-    yellow "0. Update de_GWD (fast)"
+    yellow "8. update Nginx(docker)"
+    yellow "9. Update Pi-hole"
+    yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo ""
     read -p "Select:" num
@@ -1694,12 +1719,16 @@ blue "-----------------------------------------------"
     change_piholeAdmin
     start_menu
     ;;
+    8)
+    installNginxDo
+    start_menu
+    ;;
     9)
-    updateGWDfull
+    updatePihole
     start_menu
     ;;
     0)
-    updateGWDfast
+    updateGWD
     start_menu
     ;;
     *)
