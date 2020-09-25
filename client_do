@@ -1151,7 +1151,7 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_session_cache builtin:1000 shared:SSL:10m;
   ssl_buffer_size 4k;
 
-  add_header alt-svc 'h3-27=":443"; ma=86400';
+  add_header alt-svc 'quic=":443"; h3-27=":443"; h3-25=":443"; h3-T050=":443"; h3-Q050=":443"; h3-Q049=":443"; h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"; ma=86400';
   add_header Referrer-Policy "no-referrer" always;
   add_header X-Content-Type-Options "nosniff" always;
   add_header X-Download-Options "noopen" always;

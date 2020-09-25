@@ -672,7 +672,7 @@ if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
 cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
-  listen 443 quic reuseport;
+  listen $port quic reuseport;
   listen $port ssl http2 fastopen=128 reuseport;
   server_name $domain;
   root /var/www/html;
@@ -680,6 +680,8 @@ server {
 
   ssl_certificate /var/www/ssl/$topDomain.cer;
   ssl_certificate_key /var/www/ssl/$topDomain.key;
+
+  add_header alt-svc 'quic=":$port"; h3-27=":$port"; h3-25=":$port"; h3-T050=":$port"; h3-Q050=":$port"; h3-Q049=":$port"; h3-Q048=":$port"; h3-Q046=":$port"; h3-Q043=":$port"; ma=86400';
 EOF
 
 else
@@ -700,6 +702,8 @@ server {
 
   ssl_certificate /var/www/ssl/$domain.cer;
   ssl_certificate_key /var/www/ssl/$domain.key;
+
+  add_header alt-svc 'quic=":443"; h3-27=":443"; h3-25=":443"; h3-T050=":443"; h3-Q050=":443"; h3-Q049=":443"; h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"; ma=86400';
 EOF
 
 fi
@@ -720,7 +724,6 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
 
-  add_header alt-svc 'h3-27=":443"; ma=86400';
   add_header Referrer-Policy "no-referrer" always;
   add_header X-Content-Type-Options "nosniff" always;
   add_header X-Download-Options "noopen" always;
