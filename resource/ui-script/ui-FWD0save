@@ -79,6 +79,7 @@ EOF
 
 if [[ -f "/lib/systemd/system/nginx.service" ]];then
     sed -i '/ssl_early_data/d' /etc/nginx/conf.d/forward0.conf
+    sed -i '/quic/d' /etc/nginx/conf.d/forward0.conf
 fi
 
 /etc/nginx/conf.d/merge.sh
