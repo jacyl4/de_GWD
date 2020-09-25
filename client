@@ -1587,7 +1587,9 @@ blue "----------------------"
 
 
 updateGWD(){
-de_GWDconnect
+if [[ $(systemctl is-active v2dns) = "active" ]]; then
+  de_GWDconnect
+fi
 
 preUpdate
 
