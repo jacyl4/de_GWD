@@ -672,6 +672,7 @@ if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
 
 cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
+  listen 443 quic reuseport;
   listen $port ssl http2 fastopen=128 reuseport;
   server_name $domain;
   root /var/www/html;
@@ -691,6 +692,7 @@ server {
 }
 
 server {
+  listen 443 quic reuseport;
   listen 443 ssl http2 fastopen=128 reuseport;
   server_name $domain;
   root /var/www/html;
@@ -718,6 +720,7 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
 
+  add_header alt-svc 'h3-27=":443"; ma=86400';
   add_header Referrer-Policy "no-referrer" always;
   add_header X-Content-Type-Options "nosniff" always;
   add_header X-Download-Options "noopen" always;

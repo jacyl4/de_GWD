@@ -23,6 +23,7 @@ fi
 
 cat << EOF >/etc/nginx/conf.d/forward0.conf
 server {
+  listen 443 quic reuseport;
   listen $FWD0port ssl http2 fastopen=128 reuseport;
   root /var/www/html;
   
@@ -43,6 +44,7 @@ server {
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
 
+  add_header alt-svc 'h3-27=":443"; ma=86400';
   add_header Referrer-Policy "no-referrer" always;
   add_header X-Content-Type-Options "nosniff" always;
   add_header X-Download-Options "noopen" always;
