@@ -23,7 +23,7 @@ fi
 
 cat << EOF >/etc/nginx/conf.d/forward0.conf
 server {
-  listen 443 quic reuseport;
+  listen $FWD0port quic reuseport;
   listen $FWD0port ssl http2 fastopen=128 reuseport;
   root /var/www/html;
   

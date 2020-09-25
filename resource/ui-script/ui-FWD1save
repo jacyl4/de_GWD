@@ -4,7 +4,7 @@ FWD1path=$(jq -r '.FORWARD.FWD1.path' /usr/local/bin/0conf)
 
 cat << EOF >/etc/nginx/conf.d/forward1.conf
 server {
-  listen 443 quic reuseport;
+  listen $FWD1port quic reuseport;
   listen $FWD1port ssl http2 fastopen=128 reuseport;
   root /var/www/html;
   
