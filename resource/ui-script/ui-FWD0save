@@ -54,10 +54,6 @@ server {
   add_header X-XSS-Protection "1; mode=block" always;
   add_header Strict-Transport-Security "max-age=63072000" always;
 
-location ~ /\.(?!well-known).* {
-  deny all;
-}
-
 location $FWD0path {
   proxy_pass                http://127.0.0.1:11810;
   proxy_http_version        1.1;

@@ -1128,10 +1128,7 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   add_header X-Robots-Tag "none" always;
   add_header X-XSS-Protection "1; mode=block" always;
   add_header Strict-Transport-Security "max-age=63072000" always;
-  
-location ~ /\.(?!well-known).* {
-  deny all;
-}
+
 EOF
 
 touch /etc/nginx/conf.d/3_reverseProxy
