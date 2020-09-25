@@ -2,6 +2,13 @@
 piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
 
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onUDP
+else
+  /usr/local/bin/ui-offUDP
+fi
+systemctl restart iptables-proxy
+
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis
 fi
@@ -12,33 +19,25 @@ fi
 
 /usr/local/bin/ui-saveDNSChina
 systemctl restart smartdns
+
 /usr/local/bin/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
+
 if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf 2>/dev/null) ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
 else
   /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 fi
 
+if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
+  /usr/local/bin/ui-FWD1save
+  /usr/local/bin/ui-FWD1vtrui
+  systemctl restart vtrui1
+fi
+
 if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
   /usr/local/bin/ui-FWD0save
   /usr/local/bin/ui-FWD0vtrui
 fi
-
-if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
-  /usr/local/bin/ui-FWD1save
-  /usr/local/bin/ui-FWD1vtrui
-fi
-
 systemctl restart vtrui
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onUDP
-else
-  /usr/local/bin/ui-offUDP
-fi
-systemctl restart iptables-proxy
-
-
-
-
