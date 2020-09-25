@@ -13,7 +13,7 @@ export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
 branch="main"
 
-de_gwd_nginx="1.19.1"
+de_gwd_nginx="1.19.2"
 
 
 

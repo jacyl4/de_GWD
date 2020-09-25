@@ -9,7 +9,7 @@ statusBAD=$(red "✕")
 statusNONE=$(yellow "-")
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
-de_gwd_nginx="1.19.1"
+de_gwd_nginx="1.19.2"
 
 
 
