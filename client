@@ -1282,6 +1282,13 @@ if [[ $architecture = "amd64" ]] && [[ -z $(dpkg --list | grep linux-image | awk
   installKernel
 fi
 
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onUDP >/dev/null 2>&1
+else
+  /usr/local/bin/ui-offUDP >/dev/null 2>&1
+fi
+systemctl restart iptables-proxy
+
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis >/dev/null 2>&1
 fi
@@ -1295,32 +1302,28 @@ fi
 
 /usr/local/bin/ui-saveDNSChina >/dev/null 2>&1
 systemctl restart smartdns
+
 /usr/local/bin/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
+
 if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf 2>/dev/null) ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
 else
   /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 fi
 
+if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
+  /usr/local/bin/ui-FWD1save
+  /usr/local/bin/ui-FWD1vtrui
+  systemctl restart vtrui1
+fi
+
 if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
   /usr/local/bin/ui-FWD0save
   /usr/local/bin/ui-FWD0vtrui
 fi
-
-if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
-  /usr/local/bin/ui-FWD1save
-  /usr/local/bin/ui-FWD1vtrui
-fi
-
 systemctl restart vtrui
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onUDP >/dev/null 2>&1
-else
-  /usr/local/bin/ui-offUDP >/dev/null 2>&1
-fi
-systemctl restart iptables-proxy
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
@@ -1529,11 +1532,19 @@ installPihole
 
 piholeSet
 
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onUDP >/dev/null 2>&1
+else
+  /usr/local/bin/ui-offUDP >/dev/null 2>&1
+fi
+systemctl restart iptables-proxy
+
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onDHCP
 fi
 
 /usr/local/bin/ui_4h
+systemctl restart v2dns
 
 if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf 2>/dev/null) ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
@@ -1541,25 +1552,17 @@ else
   /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 fi
 
+if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
+  /usr/local/bin/ui-FWD1save
+  /usr/local/bin/ui-FWD1vtrui
+  systemctl restart vtrui1
+fi
+
 if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
   /usr/local/bin/ui-FWD0save
   /usr/local/bin/ui-FWD0vtrui
 fi
-
-if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
-  /usr/local/bin/ui-FWD1save
-  /usr/local/bin/ui-FWD1vtrui
-fi
-
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onUDP >/dev/null 2>&1
-else
-  /usr/local/bin/ui-offUDP >/dev/null 2>&1
-fi
-
-systemctl restart v2dns
 systemctl restart vtrui
-systemctl restart iptables-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
