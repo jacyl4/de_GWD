@@ -1168,14 +1168,14 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_buffer_size 4k;
 
   add_header alt-svc 'quic=":443"; h3-27=":443"; h3-25=":443"; h3-T050=":443"; h3-Q050=":443"; h3-Q049=":443"; h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"; ma=86400';
-  add_header Referrer-Policy "no-referrer" always;
-  add_header X-Content-Type-Options "nosniff" always;
-  add_header X-Download-Options "noopen" always;
-  add_header X-Frame-Options "DENY" always;
-  add_header X-Permitted-Cross-Domain-Policies "none" always;
-  add_header X-Robots-Tag "none" always;
-  add_header X-XSS-Protection "1; mode=block" always;
-  add_header Strict-Transport-Security "max-age=63072000" always;
+  add_header Referrer-Policy                    no-referrer;
+  add_header X-Content-Type-Options             nosniff;
+  add_header X-Download-Options                 noopen;
+  add_header X-Frame-Options                    DENY;
+  add_header X-Permitted-Cross-Domain-Policies  none;
+  add_header X-Robots-Tag                       none;
+  add_header X-XSS-Protection                   "1; mode=block";
+  add_header Strict-Transport-Security          "max-age=63072000" always;
 
 EOF
 
