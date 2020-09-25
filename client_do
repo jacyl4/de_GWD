@@ -1182,6 +1182,10 @@ EOF
 touch /etc/nginx/conf.d/3_reverseProxy
 
 cat << EOF >/etc/nginx/conf.d/4_end
+location ~ /\.(?!well-known).* {
+  deny all;
+}
+
 location ~ [^/]\.php(/|$) {
   fastcgi_pass unix:/run/php/php-fpm.sock;
   fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;

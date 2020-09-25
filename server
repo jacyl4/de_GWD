@@ -751,6 +751,10 @@ EOF
 touch /etc/nginx/conf.d/3_reverseProxy
 
 cat << EOF >/etc/nginx/conf.d/4_end
+location ~ /\.(?!well-known).* {
+  deny all;
+}
+
 location /dq {
   proxy_pass                http://127.0.0.1:8053/dq;
   proxy_set_header          Host \$host;
