@@ -1004,6 +1004,7 @@ pihole restartdns
 
 installNginxDo(){
 mkdir -p "/etc/nginx"
+mkdir -p "/etc/nginx/conf.d/"
 mkdir -p "/var/www/html"
 mkdir -p "/var/www/ssl"
 mkdir -p "/run/php/"
@@ -1030,7 +1031,8 @@ done
 
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
--v /etc/nginx/:/etc/nginx/ \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
 -v /run/php/:/run/php/ \
