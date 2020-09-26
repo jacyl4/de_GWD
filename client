@@ -1414,11 +1414,11 @@ EOF
 
 fi
 
-preDownload
-
 preInstall
 
 preConf
+
+preDownload
 
 installSmartDNS
 
@@ -1570,9 +1570,9 @@ fi
 
 preUpdate
 
-preDownload
-
 preConf
+
+preDownload
 
 installSmartDNS
 

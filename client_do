@@ -1004,9 +1004,10 @@ pihole restartdns
 
 installNginxDo(){
 mkdir -p "/etc/nginx"
-mkdir -p "/etc/nginx/conf.d"
-mkdir -p "/var/log/nginx"
+mkdir -p "/var/www/html"
 mkdir -p "/var/www/ssl"
+mkdir -p "/run/php/"
+mkdir -p "/var/log/nginx"
 
 if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
 cd /var/www/ssl
@@ -1029,8 +1030,7 @@ done
 
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
+-v /etc/nginx/:/etc/nginx/ \
 -v /var/www/html/:/var/www/html/ \
 -v /var/www/ssl/:/var/www/ssl/ \
 -v /run/php/:/run/php/ \
@@ -1455,11 +1455,11 @@ deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
-preDownload
-
 preInstall
 
 preConf
+
+preDownload
 
 installSmartDNS
 
@@ -1611,9 +1611,9 @@ fi
 
 preUpdate
 
-preDownload
-
 preConf
+
+preDownload
 
 installSmartDNS
 
