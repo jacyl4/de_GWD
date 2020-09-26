@@ -18,7 +18,7 @@ fi
 
 cat > /usr/local/bin/vtrui/config.json << EOF
 {
-  "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+  "dns":{"servers":[{"address":"127.0.0.1","port":5390}]},
   "inbounds":[
     {
     "port":9896,
