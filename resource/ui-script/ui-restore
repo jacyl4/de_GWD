@@ -24,9 +24,9 @@ systemctl restart smartdns
 systemctl restart doh-client
 systemctl restart v2dns
 
-if [[ -n $(jq -r '.divertLan.ip[]' /usr/local/bin/0conf 2>/dev/null) ]]; then
+if [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "block" ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
-else
+elif [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "none" ]]; then
   /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
 fi
 
