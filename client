@@ -346,26 +346,7 @@ dpkg --purge --force-all smartdns >/dev/null 2>&1
 dpkg -i ~/smartdns.deb
 rm -rf /etc/smartdns/*.conf
 
-cat << EOF >/etc/smartdns/remote.conf
-bind 127.0.0.1:5370
-bind-tcp 127.0.0.1:5370 
-
-speed-check-mode  ping,tcp:80
-cache-size        0
-force-AAAA-SOA    yes
-prefetch-domain   no
-serve-expired     yes
-serve-expired-ttl 0
-
-server 1.1.1.1
-server 1.0.0.1
-server 8.8.8.8
-server 8.8.4.4
-EOF
-
 cat << EOF >/etc/smartdns/smartdns.conf
-conf-file remote.conf
-
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
@@ -769,8 +750,6 @@ iptables -A INPUT -p tcp -tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
 iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5370 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5370 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5380 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5380 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
@@ -781,8 +760,6 @@ iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5370 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5370 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
