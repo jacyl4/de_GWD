@@ -1002,7 +1002,7 @@ pihole restartdns
 
 
 
-installNginxDo(){
+nginxSet(){
 mkdir -p "/etc/nginx"
 mkdir -p "/etc/nginx/conf.d/"
 mkdir -p "/var/www/html"
@@ -1010,38 +1010,6 @@ mkdir -p "/var/www/ssl"
 mkdir -p "/run/php/"
 mkdir -p "/var/log/nginx"
 
-if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
-cd /var/www/ssl
-openssl req -x509 -nodes -days 3650 \
-  -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
-  -config <(cat /etc/ssl/openssl.cnf \
-    <(printf '[SAN]\nsubjectAltName=DNS:localhost')) \
-  -newkey rsa:2048 \
-  -keyout de_GWD.key \
-  -out de_GWD.cer
-fi
-
-docker stop nginx >/dev/null 2>&1
-docker rm nginx >/dev/null 2>&1
-
-docker image ls | sed 1d | awk '/nginx/' | awk '{print$3}' | while read line
-do
-docker rmi $line
-done
-
-docker run -d --name=nginx --net=host --restart=always \
--v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
--v /var/www/html/:/var/www/html/ \
--v /var/www/ssl/:/var/www/ssl/ \
--v /run/php/:/run/php/ \
-jacyl4/de_gwd_nginx:$de_gwd_nginx
-}
-
-
-
-nginxSet(){
 rm -rf /etc/nginx/nginx.conf
 
 cat << EOF >/etc/nginx/nginx.conf
@@ -1201,6 +1169,38 @@ EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
 /etc/nginx/conf.d/merge.sh
+}
+
+
+
+installNginxDo(){
+if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
+cd /var/www/ssl
+openssl req -x509 -nodes -days 3650 \
+  -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
+  -config <(cat /etc/ssl/openssl.cnf \
+    <(printf '[SAN]\nsubjectAltName=DNS:localhost')) \
+  -newkey rsa:2048 \
+  -keyout de_GWD.key \
+  -out de_GWD.cer
+fi
+
+docker stop nginx >/dev/null 2>&1
+docker rm nginx >/dev/null 2>&1
+
+docker image ls | sed 1d | awk '/nginx/' | awk '{print$3}' | while read line
+do
+docker rmi $line
+done
+
+docker run -d --name=nginx --net=host --restart=always \
+-v /etc/localtime:/etc/localtime \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
+-v /var/www/html/:/var/www/html/ \
+-v /var/www/ssl/:/var/www/ssl/ \
+-v /run/php/:/run/php/ \
+jacyl4/de_gwd_nginx:$de_gwd_nginx
 }
 
 
@@ -1497,9 +1497,9 @@ echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
 echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
 echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
 
-installNginxDo
-
 nginxSet
+
+installNginxDo
 
 echo "{}" > /usr/local/bin/0conf
 jq '.address={}' /usr/local/bin/0conf |\
