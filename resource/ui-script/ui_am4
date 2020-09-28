@@ -8,6 +8,7 @@ fi
 wget --no-check-certificate -c --tries=10 https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat
 if [[ $(ls -l ~/geoip.dat | awk '{print$5}') -gt 240000 ]]; then
 cp -f ~/geoip.dat /usr/local/bin/v2dns/geoip.dat
+cp -f ~/geoip.dat /usr/local/bin/vtrui/geoip.dat
 rm -rf ~/geoip.dat
 fi
 

@@ -158,6 +158,13 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     "domainStrategy":"AsIs",
     "rules": [
       {
+        "outboundTag": "Direct",
+        "type": "field",
+        "ip": [
+          "geoip:cn"
+        ]
+      },
+      {
         "outboundTag": "diverttraffic",
         "type": "field",
         "source": [ "0.0.0.0" ]
