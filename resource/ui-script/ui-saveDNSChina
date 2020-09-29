@@ -1,7 +1,7 @@
 #!/bin/bash
 sed -i '/server /d' /etc/smartdns/smartdns.conf
 
-if [[ -z $(jq -r '.dns.china' /usr/local/bin/0conf 2>/dev/null) ]]; then
+if [[ -z $(jq -r '.dns.china' /usr/local/bin/0conf 2>/dev/null) ]] || [[ $(jq -r '.dns.china' /usr/local/bin/0conf) = "null" ]]; then
 	jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
