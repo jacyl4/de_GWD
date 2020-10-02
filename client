@@ -579,14 +579,14 @@ cat << EOF >/usr/local/bin/vtrui/config.json
 ],
 "outbounds":[
   {
-    "protocol":"vless",
+    "protocol":"vmess",
     "settings":{"vnext":[{
           "address":"xxxx.ooo",
           "port":443,
           "users":[
             {
               "id":"00000000-0000-0000-0000-000000000000",
-              "encryption":"none",
+              "security": "auto",
               "level": 1
             }
           ]

@@ -53,9 +53,8 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
    {
       "port": 11811,
       "listen": "127.0.0.1",
-      "protocol": "vless",
+      "protocol": "vmess",
       "settings": {
-        "decryption":"none",
         "clients": [
           {
             "id": "00000000-0000-0000-0000-000000000000",
@@ -74,7 +73,7 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
   "outbounds": [
     {
       "tag": "proxy",
-      "protocol": "vless",
+      "protocol": "vmess",
       "settings": {
         "vnext": [
           {
@@ -83,7 +82,7 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "encryption": "none",
+                "security": "auto",
                 "level": 1
               }
             ]
