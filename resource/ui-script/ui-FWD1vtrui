@@ -74,7 +74,6 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
   "outbounds": [
     {
       "tag": "proxy",
-      "mux": { "enabled": true },
       "protocol": "vless",
       "settings": {
         "vnext": [

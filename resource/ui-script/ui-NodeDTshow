@@ -46,7 +46,6 @@ cat > /usr/local/bin/vtrui/config.json << EOF
   "outbounds": [
     {
       "tag": "proxy",
-      "mux": { "enabled": true },
       "protocol": "vless",
       "settings": {
         "vnext": [
@@ -113,7 +112,6 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     },
     {
       "tag": "diverttraffic",
-      "mux": { "enabled": true },
       "protocol": "vless",
       "settings": {
         "vnext": [
