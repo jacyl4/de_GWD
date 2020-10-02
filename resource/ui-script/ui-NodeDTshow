@@ -47,7 +47,8 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     {
       "tag": "proxy",
       "mux": {
-        "enabled": true
+        "enabled": true,
+        "concurrency": 24
       },
       "protocol": "vmess",
       "settings": {
@@ -83,7 +84,8 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     {
       "tag": "netflix",
       "mux": {
-        "enabled": true
+        "enabled": true,
+        "concurrency": 24
       },
       "protocol": "vmess",
       "settings": {
@@ -119,7 +121,8 @@ cat > /usr/local/bin/vtrui/config.json << EOF
     {
       "tag": "diverttraffic",
       "mux": {
-        "enabled": true
+        "enabled": true,
+        "concurrency": 24
       },
       "protocol": "vmess",
       "settings": {
