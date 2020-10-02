@@ -34,7 +34,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
       "tag": "proxy",
       "mux": {
         "enabled": true,
-        "concurrency": 16
+        "concurrency": 12
       },
       "protocol": "vmess",
       "settings": {
@@ -71,7 +71,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
       "tag": "netflix",
       "mux": {
         "enabled": true,
-        "concurrency": 16
+        "concurrency": 12
       },
       "protocol": "vmess",
       "settings": {

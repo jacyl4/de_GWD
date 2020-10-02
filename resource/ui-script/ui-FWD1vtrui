@@ -75,7 +75,7 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
       "tag": "proxy",
       "mux": {
         "enabled": true,
-        "concurrency": 16
+        "concurrency": 12
       },
       "protocol": "vmess",
       "settings": {
