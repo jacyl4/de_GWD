@@ -310,7 +310,7 @@ elif [[ $architecture = "amd64" ]]; then
   wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
 fi
 
-wget --no-check-certificate -c https://bgp.space/china.html
+wget --no-check-certificate -c -O ~/china https://bgp.space/china.html
 }
 
 
@@ -660,10 +660,10 @@ echo $doh1IP > /usr/local/bin/IPdoh
 echo $doh2IP >> /usr/local/bin/IPdoh
 echo $domainIP > /usr/local/bin/IPv2node
 
-sed -i '1,/BEGIN/d' ~/china.html
-sed -i '/END/,$d' ~/china.html
-sed -i 's/<br>//g' ~/china.html
-mv -f ~/china.html /usr/local/bin/chnrouteSET
+mv -f ~/china /usr/local/bin/chnrouteSET
+sed -i '1,/BEGIN/d' /usr/local/bin/chnrouteSET
+sed -i '/END/,$d' /usr/local/bin/chnrouteSET
+sed -i 's/<br>//g' /usr/local/bin/chnrouteSET
 sed -i 's/^/add chnroute &/g' /usr/local/bin/chnrouteSET
 sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/chnrouteSET
 
