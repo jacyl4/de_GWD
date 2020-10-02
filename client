@@ -126,54 +126,6 @@ fi
 
 
 
-preDownload() {
-systemctl stop iptables-proxy >/dev/null 2>&1
-systemctl stop v2dns >/dev/null 2>&1
-systemctl stop vtrui >/dev/null 2>&1
-
-rm -rf /etc/resolv.conf
-
-cat << EOF >/etc/resolv.conf
-nameserver 114.114.114.114
-nameserver 114.114.115.115
-nameserver 119.29.29.29
-nameserver 119.28.28.28
-nameserver 223.5.5.5
-nameserver 223.6.6.6
-EOF
-
-tcpTime && hwclock -w
-
-if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/arm64_smartdns.deb
-elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
-fi
-
-
-if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/arm64_doh.zip
-elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
-fi
-
-
-if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
-elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
-fi
-
-
-if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/arm64_ttyd
-elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
-fi
-}
-
-
-
 preInstall(){
 cat << EOF >/etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
@@ -309,6 +261,56 @@ else
   echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
+}
+
+
+
+preDownload() {
+systemctl stop iptables-proxy >/dev/null 2>&1
+systemctl stop v2dns >/dev/null 2>&1
+systemctl stop vtrui >/dev/null 2>&1
+
+rm -rf /etc/resolv.conf
+
+cat << EOF >/etc/resolv.conf
+nameserver 114.114.114.114
+nameserver 114.114.115.115
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+nameserver 223.5.5.5
+nameserver 223.6.6.6
+EOF
+
+tcpTime && hwclock -w
+
+if [[ $architecture = "arm64" ]]; then
+  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/arm64_smartdns.deb
+elif [[ $architecture = "amd64" ]]; then
+  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
+fi
+
+
+if [[ $architecture = "arm64" ]]; then
+  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/arm64_doh.zip
+elif [[ $architecture = "amd64" ]]; then
+  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
+fi
+
+
+if [[ $architecture = "arm64" ]]; then
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
+elif [[ $architecture = "amd64" ]]; then
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
+fi
+
+
+if [[ $architecture = "arm64" ]]; then
+  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/arm64_ttyd
+elif [[ $architecture = "amd64" ]]; then
+  wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
+fi
+
+wget --no-check-certificate -c https://bgp.space/china.html
 }
 
 
@@ -657,6 +659,13 @@ touch /usr/local/bin/IPlistWlan
 echo $doh1IP > /usr/local/bin/IPdoh
 echo $doh2IP >> /usr/local/bin/IPdoh
 echo $domainIP > /usr/local/bin/IPv2node
+
+sed -i '1,/BEGIN/d' ~/china.html
+sed -i '/END/,$d' ~/china.html
+sed -i 's/<br>//g' ~/china.html
+mv -f ~/china.html /usr/local/bin/chnrouteSET
+sed -i 's/^/add chnroute &/g' /usr/local/bin/chnrouteSET
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/chnrouteSET
 
 cat << EOF >/usr/local/bin/iptables-proxy-up
 #!/bin/bash
@@ -1425,16 +1434,6 @@ installSmartDNS
 installDoH
 
 installV2ray
-
-cd ~
-wget --no-check-certificate -c https://bgp.space/china.html
-sed -i '1,/BEGIN/d' ~/china.html
-sed -i '/END/,$d' ~/china.html
-sed -i 's/<br>//g' ~/china.html
-mv -f ~/china.html /usr/local/bin/IPchnroute
-cp -f /usr/local/bin/IPchnroute /usr/local/bin/chnrouteSET
-sed -i 's/^/add chnroute &/g' /usr/local/bin/chnrouteSET
-sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/chnrouteSET
 
 installIptablesProxy
 
