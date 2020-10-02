@@ -32,7 +32,7 @@ localip=$(jq -r '.divertLan.ip | to_entries[] | .value' /usr/local/bin/0conf)
 
 cat > /usr/local/bin/vtrui/config.json << EOF
 {
-  "dns":{"servers":[{"localhost"}]},
+  "dns":{"servers":["localhost"]},
   "inbounds":[
     {
     "port":9896,

@@ -380,7 +380,7 @@ rm -rf ~/vtrui*
 
 cat << EOF >/usr/local/bin/vtrui/config.json
 {
-  "dns":{"servers":[{"localhost"}]},
+  "dns":{"servers":["localhost"]},
   "inbounds": [
     {
     "port":11810,
