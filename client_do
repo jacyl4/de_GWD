@@ -1330,6 +1330,10 @@ if [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --l
   installKernel
 fi
 
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onDHCP
+fi
+
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onUDP >/dev/null 2>&1
 else
@@ -1368,10 +1372,6 @@ if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]]
   /usr/local/bin/ui-FWD0vtrui
 fi
 systemctl restart vtrui
-
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onDHCP
-fi
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
@@ -1567,6 +1567,10 @@ installPihole
 
 piholeSet
 
+if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onDHCP
+fi
+
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onUDP >/dev/null 2>&1
 else
@@ -1594,10 +1598,6 @@ if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]]
   /usr/local/bin/ui-FWD0vtrui
 fi
 systemctl restart vtrui
-
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onDHCP
-fi
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
