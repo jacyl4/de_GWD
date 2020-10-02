@@ -2,7 +2,7 @@
 FWD0path=$(jq -r '.FORWARD.FWD0.path' /usr/local/bin/0conf)
 FWD0uuid=$(jq -r '.FORWARD.FWD0.uuid[]' /usr/local/bin/0conf)
 
-vtruiIn='{"port":11810,"listen":"127.0.0.1","protocol":"vless","settings":{"decryption":"none","clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"}}}'
+vtruiIn='{"port":11810,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"}}}'
 
 jq --argjson vtruiIn "$vtruiIn" '.inbounds[1] = $vtruiIn' /usr/local/bin/vtrui/config.json |\
 jq --arg FWD0path "$FWD0path" '.inbounds[1].streamSettings.wsSettings.path=$FWD0path' >/tmp/vtrui_temp

@@ -385,9 +385,8 @@ cat << EOF >/usr/local/bin/vtrui/config.json
     {
     "port":11810,
     "listen":"127.0.0.1",
-    "protocol":"vless",
+    "protocol":"vmess",
     "settings":{
-      "decryption":"none",
       "clients":[]
       },
     "streamSettings": {
@@ -1210,13 +1209,13 @@ fi
 cat << EOF >> /usr/local/bin/vtrui/config.json
   "outbounds": [
     {
-    "protocol":"vless",
+    "protocol":"vmess",
     "settings":{"vnext":[{
       "address":"$domain",
       "port":$port,
       "users":[{
         "id":"$upstreamUUID",
-        "encryption": "none",
+        "security": "auto",
         "level": 1
         }]
       }]},
