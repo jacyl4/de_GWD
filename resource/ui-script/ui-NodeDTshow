@@ -171,7 +171,8 @@ cat > /usr/local/bin/vtrui/config.json << EOF
         "outboundTag": "Direct",
         "type": "field",
         "ip": [
-          "geoip:cn"
+          "geoip:cn",
+          "geoip:private"
         ]
       },
       {

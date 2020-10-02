@@ -1232,8 +1232,7 @@ unzip ~/ui-script.zip -d /usr/local/bin
 unzip ~/ui-web.zip -d /var/www/html
 fi
 
-wget --no-check-certificate -c https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
-mv -f ~/version.php /var/www/html/act/version.php
+wget --no-check-certificate -c -O /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
