@@ -852,7 +852,7 @@ echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
-systemctl start iptables-proxy
+systemctl restart iptables-proxy
 echo "$statusInstalled iptables-proxy"
 }
 
