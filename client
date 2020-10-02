@@ -1280,6 +1280,9 @@ fi
 
 
 postInstall(){
+/usr/local/bin/ui_am4
+/usr/local/bin/ui_2h
+
 if [[ $architecture = "amd64" ]] && [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
   installKernel
 fi
@@ -1298,9 +1301,6 @@ systemctl restart iptables-proxy
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis >/dev/null 2>&1
 fi
-
-/usr/local/bin/ui_am4
-/usr/local/bin/ui_2h
 
 /usr/local/bin/ui-saveDNSChina >/dev/null 2>&1
 systemctl restart smartdns
