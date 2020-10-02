@@ -28,8 +28,8 @@ fi
 rm -rf /etc/resolv.conf
 
 cat << EOF >/etc/resolv.conf
-nameserver 1.1.1.1
 nameserver 8.8.8.8
+nameserver 1.1.1.1
 nameserver 1.0.0.1
 nameserver 8.8.4.4
 EOF
@@ -253,8 +253,8 @@ cat /dev/null > /etc/pihole/adlists.list
 cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=1.1.1.1
-PIHOLE_DNS_2=8.8.8.8
+PIHOLE_DNS_1=8.8.8.8
+PIHOLE_DNS_2=1.1.1.1
 PIHOLE_DNS_3=1.0.0.1
 PIHOLE_DNS_4=8.8.4.4
 QUERY_LOGGING=true
@@ -1269,8 +1269,8 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 rm -rf /etc/resolv.conf
 
 cat << EOF >/etc/resolv.conf
-nameserver 1.1.1.1
 nameserver 8.8.8.8
+nameserver 1.1.1.1
 nameserver 1.0.0.1
 nameserver 8.8.4.4
 EOF
