@@ -3,6 +3,7 @@ rm -rf /usr/local/bin/vtrui1
 mkdir -p /usr/local/bin/vtrui1
 cp -f /usr/local/bin/vtrui/vtrui /usr/local/bin/vtrui1/vtrui1
 cp -f /usr/local/bin/vtrui/v2ctl /usr/local/bin/vtrui1/v2ctl
+cp -f /usr/local/bin/vtrui/geoip.dat /usr/local/bin/vtrui1/geoip.dat
 chmod -R +x /usr/local/bin/vtrui1
 
 cat << "EOF" > /lib/systemd/system/vtrui1.service
@@ -107,8 +108,29 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
           "mark": 255
         }
       }
+    },
+    {
+      "tag": "Direct",
+      "protocol": "freedom",
+      "settings": {},
+      "streamSettings": {
+        "sockopt":{"mark":255}
+        }
     }
-  ]
+  ],
+  "routing": {
+    "domainStrategy":"AsIs",
+    "rules": [
+      {
+        "outboundTag": "Direct",
+        "type": "field",
+        "ip": [
+          "geoip:cn",
+          "geoip:private"
+        ]
+      }
+    ]
+  }
 }
 EOF
 

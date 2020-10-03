@@ -499,6 +499,7 @@ cp -f ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
 cp -f ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
 cp -f ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
 cp -f ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
+cp -f ~/vtrui/geoip.dat /usr/local/bin/vtrui/geoip.dat
 chmod +x /usr/local/bin/v2dns/v2dns
 chmod +x /usr/local/bin/v2dns/v2ctl
 chmod +x /usr/local/bin/vtrui/vtrui
@@ -605,8 +606,22 @@ cat << EOF >/usr/local/bin/vtrui/config.json
       },
       "sockopt":{"mark":255}
     }
+  },
+  {
+    "tag":"Direct",
+    "protocol":"freedom",
+    "settings":{},
+    "streamSettings":{
+      "sockopt":{"mark":255}
+      }
   }
-]
+],
+"routing":{
+  "domainStrategy":"AsIs",
+  "rules":[
+    {"outboundTag":"Direct","type":"field","ip":["geoip:cn","geoip:private"]}
+  ]
+}
 }
 EOF
 
