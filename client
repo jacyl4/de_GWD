@@ -1659,7 +1659,7 @@ blue "-----------------------------------------------"
 
     green "===================================="
     green "                CLIENT_s"
-    green "Recommend: Debian 10 (amd64 & arm64)"
+    green "Recommend: Debian 10 (arm64)"
     green "Author:    JacyL4"
     green "===================================="
     echo ""
