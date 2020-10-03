@@ -126,6 +126,80 @@ fi
 
 
 
+installKernel(){
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+
+if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 45981000 ]]; then
+dpkg -i linux-headers-*.deb
+dpkg -i linux-image-*.deb
+
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
+do
+apt purge -y $line
+done
+
+update-grub
+
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+sysctl -p
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+echo "Kernel updated, please reboot." >~/bbrkernel/reboot
+else
+    red "Kernel download failed"
+fi
+}
+
+
+
+de_GWDconnect(){
+$(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
+echo ""
+if [[ $(curl -Is  http://www.google.com/ncr | head -n 1) =~ "HTTP" ]]; then
+    echo "$statuSuccess de_GWD server connect"
+    echo "$statuSuccess de_GWD server connect"
+    echo "$statuSuccess de_GWD server connect"
+else
+    echo "$statusFailed de_GWD server connect"
+    echo "$statusFailed de_GWD server connect"
+    echo "$statusFailed de_GWD server connect"
+
+cat << EOF >/etc/resolv.conf
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+nameserver 114.114.114.114
+nameserver 114.114.115.115
+EOF
+
+    exit
+fi
+echo ""
+}
+
+
+
 preInstall(){
 cat << EOF >/etc/apt/apt.conf.d/01InstallLess
 APT::Get::Assume-Yes "true";
@@ -309,32 +383,6 @@ if [[ $architecture = "arm64" ]]; then
 elif [[ $architecture = "amd64" ]]; then
   wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
 fi
-}
-
-
-
-de_GWDconnect(){
-$(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
-echo ""
-if [[ $(curl -Is  http://www.google.com/ncr | head -n 1) =~ "HTTP" ]]; then
-    echo "$statuSuccess de_GWD server connect"
-    echo "$statuSuccess de_GWD server connect"
-    echo "$statuSuccess de_GWD server connect"
-else
-    echo "$statusFailed de_GWD server connect"
-    echo "$statusFailed de_GWD server connect"
-    echo "$statusFailed de_GWD server connect"
-
-cat << EOF >/etc/resolv.conf
-nameserver 119.29.29.29
-nameserver 119.28.28.28
-nameserver 114.114.114.114
-nameserver 114.114.115.115
-EOF
-
-    exit
-fi
-echo ""
 }
 
 
@@ -672,6 +720,8 @@ touch /usr/local/bin/IPlistWlan
 echo $doh1IP > /usr/local/bin/IPdoh
 echo $doh2IP >> /usr/local/bin/IPdoh
 echo $domainIP > /usr/local/bin/IPv2node
+
+echo "create chnroute hash:net family inet hashsize 2048 maxelem 65535" > /usr/local/bin/chnrouteSET
 
 cat << EOF >/usr/local/bin/iptables-proxy-up
 #!/bin/bash
@@ -1236,61 +1286,13 @@ fi
 
 
 
-installKernel(){
-apt install -y wget
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c --tries=10 https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-
-if [[ $(ls -l ~/bbrkernel/linux-headers-*.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image-*.deb | awk '{print$5}') -gt 45981000 ]]; then
-dpkg -i linux-headers-*.deb
-dpkg -i linux-image-*.deb
-
-dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
-do
-apt purge -y $line
-done
-
-update-grub
-
-cat << EOF >~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-sysctl -p
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-systemctl restart sshd
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-echo "Kernel updated, please reboot." >~/bbrkernel/reboot
-else
-    red "Kernel download failed"
-fi
-}
-
-
-
 postInstall(){
-/usr/local/bin/ui_am4
-/usr/local/bin/ui_2h
-
 if [[ $architecture = "amd64" ]] && [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
   installKernel
 fi
+
+/usr/local/bin/ui_am4
+/usr/local/bin/ui_2h
 
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onDHCP
@@ -1359,34 +1361,34 @@ red "$(cat ~/bbrkernel/reboot 2>/dev/null)"
 
 
 installGWD(){
-    green "========================="
+    green "==========================="
     green " de_GWD local IP address"
-    green "========================="
+    green "==========================="
     read localaddr
 
-    green "========================="
+    green "==========================="
     green " Upstream route IP address"
-    green "========================="
+    green "==========================="
     read gatewayaddr
 
-    green "========================="
+    green "==========================="
     green " DoH"
-    green "========================="
+    green "==========================="
     read doh1
 
-    green "========================="
+    green "==========================="
     green " Domain"
-    green "========================="
+    green "==========================="
     read v2servn
 
-    green "========================="
+    green "==========================="
     green " Path"
-    green "========================="
+    green "==========================="
     read v2path
 
-    green "========================="
+    green "==========================="
     green " V2ray UUID"
-    green "========================="
+    green "==========================="
     read uuidnum
 
 cd ~
