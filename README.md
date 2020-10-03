@@ -18,7 +18,7 @@ apt install -y wget
 bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client_do)
 ```
     
-Compatible Edition (amd64&arm64)
+Compatible Edition (arm64)
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client)
