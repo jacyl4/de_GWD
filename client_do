@@ -1353,7 +1353,6 @@ if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
 fi
 
 /usr/local/bin/ui_am4
-/usr/local/bin/ui_2h
 
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onUDP >/dev/null 2>&1
@@ -1390,6 +1389,8 @@ if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]]
   /usr/local/bin/ui-FWD0vtrui
 fi
 systemctl restart vtrui
+
+/usr/local/bin/ui_2h
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron

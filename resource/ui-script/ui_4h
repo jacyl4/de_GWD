@@ -3,7 +3,7 @@ blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
-statusUpdated=$(green "[ updated ]")
+statusUpdated=$(green "[  updated  ]")
 
 if [[ $(jq -r '.dns.DNSsplit' /usr/local/bin/0conf) = "gfw" ]]; then
   /usr/local/bin/ui-dnsGFW >/dev/null 2>&1

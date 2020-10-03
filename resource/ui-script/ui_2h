@@ -7,7 +7,7 @@ rm -rf /var/log/*1*
 rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
 rm -rf /var/www/html/log.log
-rm -rf /var/www/html/restore/de_GWD_bak
+rm -rf /var/www/html/restore/*
 
 if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
 cd /lib/modules/
