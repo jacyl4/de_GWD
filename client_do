@@ -1072,8 +1072,6 @@ sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.p
 sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 pihole restartdns
-
-echo "$statusInstalled Pi-hole"
 }
 
 
