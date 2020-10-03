@@ -1302,12 +1302,12 @@ if [[ $architecture = "amd64" ]] && [[ -z $(dpkg --list | grep linux-image | awk
   installKernel
 fi
 
-/usr/local/bin/ui_am4
-/usr/local/bin/ui_2h
-
 if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onDHCP
 fi
+
+/usr/local/bin/ui_am4
+/usr/local/bin/ui_2h
 
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onUDP >/dev/null 2>&1
