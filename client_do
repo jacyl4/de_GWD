@@ -1004,6 +1004,8 @@ EOF
 systemctl daemon-reload >/dev/null 2>&1
 systemctl enable php7.4-fpm
 systemctl restart php7.4-fpm
+
+echo "$statusInstalled dependencies"
 }
 
 
@@ -1070,6 +1072,8 @@ sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.p
 sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 pihole restartdns
+
+echo "$statusInstalled Pi-hole"
 }
 
 
@@ -1335,6 +1339,8 @@ rm -rf ~/ui-web
 if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
+
+echo "$statusInstalled WebUI"
 }
 
 

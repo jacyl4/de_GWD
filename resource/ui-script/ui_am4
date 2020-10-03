@@ -1,4 +1,10 @@
 #!/bin/bash
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+statusInstalled=$(green "[ installed ]")
+
 cd ~
 wget --no-check-certificate -c --tries=10 https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
 if [[ $(ls -l ~/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
@@ -24,4 +30,4 @@ for IPchnroute in $(cat /usr/local/bin/IPchnroute); do
 done
 fi
 
-echo "IP & Domain rules done"
+echo "$statusInstalled IP & Domain rules"
