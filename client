@@ -1580,6 +1580,8 @@ installV2ray
 
 installIptablesProxy
 
+de_GWDconnect
+
 piholeSet
 
 nginxSet
