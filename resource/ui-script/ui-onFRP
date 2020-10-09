@@ -1,0 +1,43 @@
+#!/bin/bash
+FRPdomain=$(jq -r '.FRP.domain' /usr/local/bin/0conf)
+FRPbindPort=$(jq -r '.FRP.bindPort' /usr/local/bin/0conf)
+FRPtoken=$(jq -r '.FRP.token' /usr/local/bin/0conf)
+FRPbindProtocol=$(jq -r '.FRP.bindProtocol' /usr/local/bin/0conf)
+
+FRPremotePort=$(jq -r '.FRP.remotePort' /usr/local/bin/0conf)
+FRPlocalPort=$(jq -r '.FRP.localPort' /usr/local/bin/0conf)
+FRPprotocol=$(jq -r '.FRP.protocol' /usr/local/bin/0conf)
+
+cat << EOF >/lib/systemd/system/frpc.service
+[Unit]
+Description=Frp Client Service
+After=network.target
+
+[Service]
+User=root
+Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+ExecStart=/usr/local/bin/frp/frpc -c /usr/local/bin/frp/frpc.ini
+Restart=always
+StartLimitBurst=0
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+
+cat << EOF >/usr/local/bin/frp/frpc.ini
+[common]
+server_addr = $FRPdomain
+server_port = $FRPbindPort
+protocol = $(echo $FRPbindProtocol | tr '[:upper:]' '[:lower:]')
+token = $FRPtoken
+
+[FRP]
+type = $(echo $FRPprotocol | tr '[:upper:]' '[:lower:]')
+local_ip = 127.0.0.1
+remote_port = $FRPremotePort
+local_port = $FRPlocalPort
+EOF

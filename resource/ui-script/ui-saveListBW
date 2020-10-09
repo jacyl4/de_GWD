@@ -1,0 +1,92 @@
+#!/bin/bash
+if [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	jq -r '.listB[]' /usr/local/bin/0conf >/tmp/listBpre2
+elif [[ $(awk '/listB/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	jq -r '.listB | keys[]' /usr/local/bin/0conf >/tmp/listBpre2
+fi
+
+sort /tmp/listBpre2 | uniq | sed '/^\s*$/d' >/tmp/listBpre
+
+cat /dev/null >/usr/local/bin/IPlistB
+jq '.dns.servers[1].domains=["keyword:play.googleapi.cn"]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
+if [[ -n $(cat /tmp/listBpre) ]]; then
+	jq '.listB={}' /usr/local/bin/0conf >/tmp/0conf_temp
+	cat /dev/null > /usr/local/bin/IPlistB
+	cat /tmp/listBpre | while read listB 
+	do
+		jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+		listBIP=$(dig @127.0.0.1 $listB -p 5380 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+		echo $listBIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistB
+		jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
+		jq --arg key "$listB" --slurpfile value /tmp/listBIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+	done
+	mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+
+
+
+if [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+	jq -r '.listW[]' /usr/local/bin/0conf >/tmp/listWpre2
+elif [[ $(awk '/listW/ {print;exit}' /usr/local/bin/0conf) =~ "{" ]]; then
+	jq -r '.listW | keys[]' /usr/local/bin/0conf >/tmp/listWpre2
+fi
+
+sort /tmp/listWpre2 | uniq | sed '/^\s*$/d' >/tmp/listWpre
+
+cat /dev/null >/usr/local/bin/IPlistW
+jq '.dns.servers[3].domains=["keyword:live.com"]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp
+if [[ -n $(cat /tmp/listWpre) ]]; then
+	jq '.listW={}' /usr/local/bin/0conf >/tmp/0conf_temp
+	cat /dev/null > /usr/local/bin/IPlistW
+	cat /tmp/listWpre | while read listW
+	do
+		jq --arg listW "keyword:$listW" '.dns.servers[3].domains+=[$listW]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+		listWIP=$(dig @127.0.0.1 $listW -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+		echo $listWIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistW
+		jq -n --arg listWIP "$listWIP" '$listWIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWIPs
+		jq --arg key "$listW" --slurpfile value /tmp/listWIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+	done
+	mv -f /tmp/0conf_temp /usr/local/bin/0conf		
+fi
+mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+
+
+
+if [[ -n $(awk '/listBlan/ {print;exit}' /usr/local/bin/0conf) ]]; then
+	cat /dev/null >/usr/local/bin/IPlistBlan
+	listBlan=$(jq -r '.listBlan[]' /usr/local/bin/0conf)
+	if [[ -n $listBlan ]]; then
+		echo $listBlan >/usr/local/bin/IPlistBlan
+	fi
+fi
+
+
+
+if [[ -n $(awk '/listWlan/ {print;exit}' /usr/local/bin/0conf) ]]; then
+	cat /dev/null >/usr/local/bin/IPlistWlan
+	listWlan=$(jq -r '.listWlan[]' /usr/local/bin/0conf)
+	if [[ -n $listWlan ]]; then
+		echo $listWlan >/usr/local/bin/IPlistWlan
+	fi
+fi
+
+
+if [[ $(jq -r '.dns.v2ad' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-onV2ad
+else
+/usr/local/bin/ui-offV2ad
+fi
+
+if [[ $(jq -r '.dns.APPLEdir' /usr/local/bin/0conf) == "on" ]]; then
+/usr/local/bin/ui-onAPPLE
+else
+/usr/local/bin/ui-offAPPLE
+fi
+
+rm -rf /tmp/listB*
+rm -rf /tmp/listW*
+rm -rf /tmp/v2dns*
+
+chmod 666 /usr/local/bin/v2dns/config.json
+chmod 666 /usr/local/bin/0conf

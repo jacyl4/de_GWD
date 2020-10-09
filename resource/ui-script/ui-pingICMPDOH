@@ -1,0 +1,4 @@
+#!/bin/bash
+dohNUM=$1
+url=$(awk '/url =/' /usr/local/bin/doh-client.conf | cut -d/ -f3 | cut -d: -f1 | awk NR==$dohNUM)
+ping -n -c1 -w1 $url | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1

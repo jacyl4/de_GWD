@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ $(uname -m) = "x86_64" ]] && [[ ! -f "/lib/systemd/system/docker.service" ]]; then
+echo "no docker"
+fi
