@@ -304,17 +304,6 @@
               <div class="col-md-5 mt-auto">
 
                 <div class="form-row">
-                  <div class="mx-auto" style="min-width: 175px">
-              <div class="input-group my-3">
-                <div class="input-group-prepend">
-                  <button class="btn btn-<?php $v2add = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$v2add",'category-ads') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onV2ad()">去广告</button>
-                </div>
-                <div class="input-group-append">
-                  <button class="btn btn-secondary" type="button" onclick="offV2ad()">OFF</button>
-                </div>
-              </div>
-                  </div>
-
                   <div class="mx-auto" style="min-width: 185px">
               <div class="input-group my-3">
                 <div class="input-group-prepend">
@@ -555,14 +544,6 @@ dnsChina=$("#dnsChina").val();
 hostsCustomize=$("#hostsCustomize").val();
 $.get("./act/saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
 alert("应用DNS设置。。。");
-}
-
-function onV2ad(){
-$.get('./act/onV2ad.php', function(result){window.location.reload();});
-}
-
-function offV2ad(){
-$.get('./act/offV2ad.php', function(result){window.location.reload();});
 }
 
 function onAPPLE(){

@@ -72,11 +72,6 @@ if [[ -n $(awk '/listWlan/ {print;exit}' /usr/local/bin/0conf) ]]; then
 fi
 
 
-if [[ $(jq -r '.dns.v2ad' /usr/local/bin/0conf) == "on" ]]; then
-/usr/local/bin/ui-onV2ad
-else
-/usr/local/bin/ui-offV2ad
-fi
 
 if [[ $(jq -r '.dns.APPLEdir' /usr/local/bin/0conf) == "on" ]]; then
 /usr/local/bin/ui-onAPPLE

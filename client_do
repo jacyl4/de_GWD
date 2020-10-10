@@ -11,7 +11,7 @@ statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
-branch="main"
+branch="dev"
 
 de_gwd_nginx="1.19.3"
 
