@@ -50,7 +50,6 @@ if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
 doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
 hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
-v2ad=$(jq -r '.v2ad' /usr/local/bin/0conf)
 DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
 piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
@@ -63,7 +62,6 @@ jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' |\
 jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
 jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
 jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
-jq --arg v2ad "$v2ad" '.dns.v2ad=$v2ad' |\
 jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
@@ -88,7 +86,8 @@ rm -rf /var/www/html/__MACOSX
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
-jq 'del(.clifwd)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq 'del(.clifwd)' /usr/local/bin/0conf |\
+jq 'del(.dns.v2ad)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
 mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
 
