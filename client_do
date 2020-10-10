@@ -396,29 +396,6 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-rm -rf /run/smartdns.pid
-
-cat << "EOF" > /lib/systemd/system/smartdns.service
-[Unit]
-Description=Smart DNS server
-After=network.target
-
-[Service]
-Type=forking
-LimitNPROC=64000
-LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-EnvironmentFile=/etc/default/smartdns
-ExecStartPost=/bin/sh -c "echo $MAINPID > /run/smartdns.pid"
-ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
-KillMode=mixed
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
 systemctl daemon-reload
 systemctl enable smartdns
 systemctl start smartdns
