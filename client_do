@@ -414,7 +414,7 @@ ExecStartPost=/bin/sh -c "echo $MAINPID > /run/smartdns.pid"
 ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
 KillMode=mixed
 Restart=always
-StartLimitBurst=0
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -502,7 +502,7 @@ LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/usr/local/bin/doh-client -conf /usr/local/bin/doh-client.conf
 Restart=always
-StartLimitBurst=0
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -586,7 +586,7 @@ LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
 Restart=always
-StartLimitBurst=0
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -675,7 +675,7 @@ LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
 Restart=always
-StartLimitBurst=0
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -997,7 +997,7 @@ PIDFile=/run/php/php-fpm.pid
 ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
-StartLimitBurst=0
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
