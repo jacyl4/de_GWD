@@ -291,6 +291,35 @@
 
 
         <!-- row2 -->
+<div class="form-row">
+<div class="col-md-2"> 
+        <!-- 静态地址 -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-exchange-alt"></i>
+            IP地址
+          <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" data-toggle="modal" data-target="#reboot">应用</button>
+          </span>
+          </div>
+          <div class="card-body">
+                <div class="input-group my-2">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->localIP ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">本机</span>
+                </div>
+                </div>
+                <div class="input-group my-2">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->upstreamIP ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">上级</span>
+                </div>
+                </div>
+          </div>
+          </div>
+</div>
+
+<div class="col-md-10"> 
         <div class="card mb-3">
           <div class="card-header">
             <i class="far fa-compass"></i>
@@ -304,21 +333,7 @@
 
           <div class="card-body">
             <div class="form-row">
-              <div class="col-md-5 mt-auto">
-
-                <div class="form-row">
-                  <div class="mx-auto" style="min-width: 185px">
-              <div class="input-group my-3">
-                <div class="input-group-prepend">
-                  <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onAPPLE()">Apple直连</button>
-                </div>
-                <div class="input-group-append">
-                  <button class="btn btn-secondary" type="button" onclick="offAPPLE()">OFF</button>
-                </div>
-              </div>
-                  </div>
-                </div>
-
+              <div class="col-md-5">
               <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
@@ -342,6 +357,18 @@
                 </div>
               </div>
 
+              <div class="row">
+                <div class="ml-auto mr-3">
+                  <div class="input-group my-2">
+                    <div class="input-group-prepend">
+                      <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onAPPLE()">Apple直连</button>
+                    </div>
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button" onclick="offAPPLE()">OFF</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
               </div>
 
               <div class="col-md-3">
@@ -349,7 +376,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   DNS<br>
-                  国内解析<br>
+                  国内<br>
                   </span>
                 </div>
                   <textarea id="dnsChina" class="form-control" aria-label="dnsChina" rows="6"><?php echo str_replace(' ', "\n", json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->china) ?></textarea>
@@ -361,7 +388,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   hosts<br>
-                  静态解析<br>
+                  静态<br>
                   </span>
                 </div>
                   <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6" placeholder="IP 空格 域名"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
@@ -369,41 +396,6 @@
               </div>
             </div>
 
-          </div>
-          </div>
-
-
-        <!-- row3 -->
-<div class="form-row">
-<div class="col-md-6">      
-        <!-- 静态地址 -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-exchange-alt"></i>
-            IP地址
-          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" data-toggle="modal" data-target="#reboot">应用</button>
-          </span>
-          </div>
-          <div class="card-body">
-            <div class="form-row">
-              <div class="col-md-6 my-2">
-                <div class="input-group">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->localIP ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">本机</span>
-                </div>
-                </div>
-              </div>
-              <div class="col-md-6 my-2">
-                <div class="input-group">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->upstreamIP ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">上级</span>
-                </div>
-                </div>
-              </div>
-            </div>
           </div>
           </div>
 </div>
