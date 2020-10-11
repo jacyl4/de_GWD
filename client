@@ -221,10 +221,9 @@ Dpkg::Options {
 EOF
 
 apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf lighttpd
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
-systemctl mask --now lighttpd >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
@@ -1195,11 +1194,11 @@ chmod +x /usr/local/bin/*
 nginx -s reload
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
+  wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
+  wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
 fi
-chmod +x /usr/local/bin/ttyd
+chmod +x /usr/bin/ttyd
 
 cat << EOF >/lib/systemd/system/updateGWD.service
 [Unit]
