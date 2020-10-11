@@ -349,6 +349,7 @@ preDownload() {
 systemctl stop iptables-proxy >/dev/null 2>&1
 systemctl stop v2dns >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
+/opt/AdGuardHome/AdGuardHome -s stop >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 
@@ -1424,7 +1425,7 @@ systemctl restart smartdns
 /usr/local/bin/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
-/opt/AdGuardHome/AdGuardHome -s restart
+/opt/AdGuardHome/AdGuardHome -s restart >/dev/null 2>&1
 
 if [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "block" ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
