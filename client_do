@@ -108,7 +108,13 @@ sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
+if [[ $(dpkg -l moreutils) =~ "no packages found" ]]; then
+  apt install moreutils
+fi
 
+if [[ $(dpkg -l apache2-utils) =~ "no packages found" ]]; then
+  apt install apache2-utils
+fi
 
 cd ~
 source /etc/profile
@@ -1297,8 +1303,6 @@ cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
 bind_host:
 bind_port:
 users:
-- name:
-  password:
 http_proxy: ""
 language: ""
 rlimit_nofile: 0
@@ -1307,7 +1311,7 @@ web_session_ttl: 720
 dns:
   bind_host: 0.0.0.0
   port: 53
-  statistics_interval: 1
+  statistics_interval: 7
   querylog_enabled: true
   querylog_file_enabled: true
   querylog_interval: 90
@@ -1327,7 +1331,7 @@ dns:
   - 127.0.0.1:5353
   bootstrap_dns:
   - 127.0.0.1:5353
-  all_servers: true
+  all_servers: false
   fastest_addr: false
   allowed_clients: []
   disallowed_clients: []
@@ -1351,39 +1355,56 @@ dns:
   rewrites: []
   blocked_services: []
 tls:
-  enabled: false
-  server_name: ""
-  force_https: false
-  port_https: 443
-  port_dns_over_tls: 853
-  allow_unencrypted_doh: false
-  strict_sni_check: false
-  certificate_chain: ""
-  private_key: ""
-  certificate_path: ""
-  private_key_path: ""
 filters:
 - enabled: true
   url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
   name: AdGuard DNS filter
   id: 1
-- enabled: false
-  url: https://github.com/AdAway/adaway.github.io/blob/master/hosts.txt
-  name: AdAway
-  id: 2
-- enabled: false
+- enabled: true
   url: https://www.malwaredomainlist.com/hostslist/hosts.txt
   name: MalwareDomainList.com Hosts List
+  id: 2
+- enabled: true
+  url: https://easylist.to/easylist/easylist.txt
+  name: EasyList
+  id: 3
+- enabled: true
+  url: https://easylist.to/easylist/easyprivacy.txt
+  name: EasyPrivacy
   id: 4
+- enabled: true
+  url: https://easylist-downloads.adblockplus.org/easylistchina.txt
+  name: EasyList China
+  id: 5
+- enabled: true
+  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjxlist.txt
+  name: CJX's EasyList Lite
+  id: 6
+- enabled: false
+  url: https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext
+  name: Peter Lowe’s Ad and tracking server list
+  id: 7
+- enabled: false
+  url: https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts
+  name: StevenBlack
+  id: 8
+- enabled: false
+  url: https://anti-ad.net/easylist.txt
+  name: 'CHN: anti-AD'
+  id: 9
+- enabled: false
+  url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
+  name: 大圣净化
+  id: 10
 whitelist_filters: []
-user_rules: []
+user_rules:
 dhcp:
-  enabled: true
-  interface_name: ens18
-  gateway_ip: 10.0.0.2
-  subnet_mask: 255.255.255.0
-  range_start: 10.0.0.100
-  range_end: 10.0.0.250
+  enabled: false
+  interface_name: ""
+  gateway_ip: ""
+  subnet_mask: ""
+  range_start: ""
+  range_end: ""
   lease_duration: 86400
   icmp_timeout_msec: 1000
 clients: []
@@ -1397,9 +1418,23 @@ verbose: false
 schema_version: 6
 EOF
 fi
+}
 
-yq w /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
+
+
+AdGset(){
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "0.0.0.0"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_port "53"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.ratelimit "0"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5353"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5353"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "true"
 }
 
 
@@ -1589,6 +1624,8 @@ installWebUI
 
 installAdG
 
+AdGset
+
 postInstall
 blue "---------------------"
 blue "Install de_GWD [done]"
@@ -1697,6 +1734,8 @@ de_GWDconnect
 nginxSet
 
 installWebUI
+
+AdGset
 
 postInstall
 blue "--------------------"
