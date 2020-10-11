@@ -14,11 +14,11 @@ if [[ -n $(cat /tmp/listBpre) ]]; then
 	cat /dev/null > /usr/local/bin/IPlistB
 	cat /tmp/listBpre | while read listB 
 	do
-		jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+		jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp | sponge /tmp/v2dns_temp
 		listBIP=$(dig @127.0.0.1 $listB -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 		echo $listBIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistB
 		jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
-		jq --arg key "$listB" --slurpfile value /tmp/listBIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+		jq --arg key "$listB" --slurpfile value /tmp/listBIPs '.listB += {($key):$value}' /tmp/0conf_temp | sponge /tmp/0conf_temp
 	done
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
@@ -41,11 +41,11 @@ if [[ -n $(cat /tmp/listWpre) ]]; then
 	cat /dev/null > /usr/local/bin/IPlistW
 	cat /tmp/listWpre | while read listW
 	do
-		jq --arg listW "keyword:$listW" '.dns.servers[3].domains+=[$listW]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
+		jq --arg listW "keyword:$listW" '.dns.servers[3].domains+=[$listW]' /tmp/v2dns_temp | sponge /tmp/v2dns_temp
 		listWIP=$(dig @127.0.0.1 $listW -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 		echo $listWIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistW
 		jq -n --arg listWIP "$listWIP" '$listWIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWIPs
-		jq --arg key "$listW" --slurpfile value /tmp/listWIPs '.listW += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp
+		jq --arg key "$listW" --slurpfile value /tmp/listWIPs '.listW += {($key):$value}' /tmp/0conf_temp | sponge /tmp/0conf_temp
 	done
 	mv -f /tmp/0conf_temp /usr/local/bin/0conf		
 fi
