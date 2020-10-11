@@ -1246,7 +1246,9 @@ echo "$statusInstalled WebUI"
 
 
 installAdG(){
-curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
+if [ ! -d "/opt/AdGuardHome" ]; then
+  curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
+fi
 
 if [[ ! -f /opt/AdGuardHome/AdGuardHome.yaml ]]; then
 cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
@@ -1686,6 +1688,8 @@ de_GWDconnect
 nginxSet
 
 installWebUI
+
+installAdG
 
 AdGset
 
