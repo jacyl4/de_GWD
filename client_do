@@ -366,7 +366,6 @@ tcpTime && hwclock -w
 wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
 wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
 wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
-wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
 wget --no-check-certificate -c -O ~/china https://bgp.space/china.html
 }
 
@@ -1606,8 +1605,8 @@ change_PWD(){
 pwdHash=$(echo -n $pwd | sha256sum | awk '{print$1}' | tr -d '\n' | sha256sum | awk '{print$1}')
 pwdHashAdG=$(htpasswd -B -n -b $user $pwd | cut -d: -f2 | awk NR==1)
 
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml users.name "$user"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml users.password "$pwdHashAdG"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].name "$user"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].password "$pwdHashAdG"
 
 jq --arg password "$pwdHash" '.address.PWD=$password' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
 
