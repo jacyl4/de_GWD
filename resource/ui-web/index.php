@@ -404,44 +404,8 @@
           </div>
           </div>
 </div>
-
-<div class="col-md-6"> 
-        <!-- DHCP -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-network-wired"></i>
-            DHCP 服务
-<span class="float-right mt-n1 mb-n2">
-<a href="/admin/settings.php?tab=piholedhcp" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">详情</a>
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="onDHCP()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="offDHCP()">关闭</button>
-</span>
-          </div>
-          <div class="card-body">
-            <div class="form-row">
-              <div class="col-md-6 my-2">
-                <div class="input-group">
-                  <input type="text" id="dhcpStart" class="form-control" placeholder="起始IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpStart ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">起始</span>
-                </div>
-                </div>
-              </div>
-              <div class="col-md-6 my-2">
-                <div class="input-group">
-                  <input type="text" id="dhcpEnd" class="form-control" placeholder="结束IP" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->dhcpEnd ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">结束</span>
-                </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
-
 </div>
 
-</div>
         </div>
       </div>
       <!-- /.container-fluid -->
@@ -559,17 +523,6 @@ staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
 $.get('./act/changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
 alert("本机已开始重新启动");
-}
-
-function onDHCP(){
-dhcpStarttxt=$('#dhcpStart').val();
-dhcpEndtxt=$('#dhcpEnd').val();
-$.get('./act/onDHCP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt}, function(result){window.location.reload();});
-alert('启动DHCP服务。。。');
-}
-
-function offDHCP(){
-$.get('./act/offDHCP.php', function(result){window.location.reload();});
 }
 
 function checklink(){

@@ -15,7 +15,7 @@ if [[ -n $(cat /tmp/listBpre) ]]; then
 	cat /tmp/listBpre | while read listB 
 	do
 		jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp >/tmp/v2dns_temp2 && mv -f /tmp/v2dns_temp2 /tmp/v2dns_temp
-		listBIP=$(dig @127.0.0.1 $listB -p 5380 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+		listBIP=$(dig @127.0.0.1 $listB -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 		echo $listBIP | sed 's/ /\n/g ' >> /usr/local/bin/IPlistB
 		jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
 		jq --arg key "$listB" --slurpfile value /tmp/listBIPs '.listB += {($key):$value}' /tmp/0conf_temp >/tmp/0conf_temp2 && mv -f /tmp/0conf_temp2 /tmp/0conf_temp

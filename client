@@ -10,8 +10,9 @@ statusFailed=$(red "[ failed ]")
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 export DEBIAN_FRONTEND=noninteractive
-export PIHOLE_SKIP_OS_CHECK=true
 branch="main"
+yq_version="3.4.0"
+ttyd_version="1.6.1"
 
 case $(uname -m) in
     x86_64)  architecture="amd64" ;;
@@ -49,14 +50,12 @@ doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
 hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
 DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
-piholePW=$(jq -r '.pihole' /usr/local/bin/0conf)
 
 jq 'del(.doh)' /usr/local/bin/0conf |\
 jq 'del(.hosts)' |\
 jq 'del(.v2ad)' |\
 jq 'del(.splitDNS)' |\
 jq 'del(.pihole)' |\
-jq --arg piholePW "$piholePW" '.address.piholePW=$piholePW' |\
 jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
 jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
 jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
@@ -68,6 +67,13 @@ jq '.divertLan={}' /usr/local/bin/0conf |\
 jq '.divertLan.display="none"' |\
 jq '.divertLan.ip=[]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
+
+if [[ -n $(jq -r '.address.pihole' /usr/local/bin/0conf 2>/dev/null) ]]; then
+pwd=$(jq -r '.address.pihole' /usr/local/bin/0conf)
+jq 'del(.address.pihole)' /usr/local/bin/0conf |\
+jq --arg pwd "$pwd" '.address.PWD=$pwd' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+fi
+
 rm -rf /usr/local/bin/chnrouteset
 rm -rf /usr/local/bin/chnroute.txt
 rm -rf /usr/local/bin/Q4am
@@ -85,6 +91,9 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
 jq 'del(.clifwd)' /usr/local/bin/0conf |\
+jq 'del(.address.dhcpStart)' /usr/local/bin/0conf |\
+jq 'del(.address.dhcpEnd)' /usr/local/bin/0conf |\
+jq 'del(.address.dhcp)' /usr/local/bin/0conf |\
 jq 'del(.dns.v2ad)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
 mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
@@ -103,8 +112,6 @@ rm -rf ~/now.cron
 
 cd ~
 source /etc/profile
-
-piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
 
 doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
@@ -358,28 +365,13 @@ tcpTime && hwclock -w
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/arm64_smartdns.deb
-elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
-fi
-
-
-if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/arm64_doh.zip
-elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
-fi
-
-
-if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
-elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
-fi
-
-
-if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -c -O ~/ttyd $mirrorSite/arm64_ttyd
 elif [[ $architecture = "amd64" ]]; then
+  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
+  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
   wget --no-check-certificate -c -O ~/ttyd $mirrorSite/amd64_ttyd
 fi
 
@@ -461,7 +453,7 @@ mv -f ~/doh/doh-client /usr/local/bin/doh-client
 chmod +x /usr/local/bin/doh-client
 
 cat << EOF >/usr/local/bin/doh-client.conf
-listen = [ "127.0.0.1:5380" ]
+listen = [ "127.0.0.1:5390" ]
 
 [upstream]
 upstream_selector = "weighted_round_robin"
@@ -560,7 +552,7 @@ cat << EOF >/usr/local/bin/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
-  "servers":[{"address":"127.0.0.1","port":5380}]
+  "servers":[{"address":"127.0.0.1","port":5390}]
 },
 "inbounds":[
   {
@@ -587,7 +579,7 @@ cat << EOF >/usr/local/bin/v2dns/config.json
 }
 EOF
 
-domainIP=$(dig @127.0.0.1 $domain -p 5380 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
+domainIP=$(dig @127.0.0.1 $domain -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
 
 jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
@@ -618,7 +610,7 @@ systemctl start v2dns
 
 cat << EOF >/usr/local/bin/vtrui/config.json
 {
-"dns":{"servers":[{"address":"127.0.0.1","port":5380}]},
+"dns":{"servers":["localhost"]},
 "inbounds":[
   {
     "port":9896,
@@ -821,20 +813,20 @@ iptables -A INPUT -p tcp -tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
+iptables -A INPUT -p tcp --dport 5353 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5353 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5380 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5380 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5353 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5353 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5380 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5380 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 
@@ -941,7 +933,7 @@ apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install php7.3-common php7.3-cgi php7.3-fpm php7.3-xml php7.3-opcache php7.3-json
+apt install php7.3-common php7.3-cgi php7.3-fpm php7.3-xml php7.3-opcache php7.3-json moreutils apache2-utils
 
 cat << EOF >/etc/php/7.3/fpm/php-fpm.conf
 [global]
@@ -993,72 +985,14 @@ systemctl daemon-reload >/dev/null 2>&1
 systemctl enable php7.3-fpm
 systemctl restart php7.3-fpm
 
+if [[ $architecture = "arm64" ]]; then
+  wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
+elif [[ $architecture = "amd64" ]]; then
+  wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
+fi
+chmod +x /usr/bin/yq
+
 echo "$statusInstalled dependencies"
-}
-
-
-
-installPihole(){
-systemctl unmask lighttpd >/dev/null 2>&1
-
-mkdir -p /etc/pihole
-
-cat /dev/null > /etc/pihole/adlists.list
-
-cat << EOF >/etc/pihole/setupVars.conf
-PIHOLE_INTERFACE=$ethernetnum
-IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=127.0.0.1#5380
-QUERY_LOGGING=true
-INSTALL_WEB_SERVER=true
-INSTALL_WEB_INTERFACE=true
-LIGHTTPD_ENABLED=false
-BLOCKING_ENABLED=true
-WEBPASSWORD=$piholePW
-DNSMASQ_LISTENING=single
-DNS_FQDN_REQUIRED=true
-DNS_BOGUS_PRIV=true
-DNSSEC=false
-CONDITIONAL_FORWARDING=false
-EOF
-
-curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
-}
-
-
-
-piholeSet(){
-rm -rf /var/www/html/index.lighttpd.orig
-systemctl mask --now lighttpd >/dev/null 2>&1
-systemctl mask --now dhcpcd >/dev/null 2>&1
-systemctl daemon-reload >/dev/null 2>&1
-
-cat << EOF >/etc/dnsmasq.conf
-conf-dir=/etc/dnsmasq.d
-listen-address=127.0.0.1
-port=5390
-EOF
-
-cat /dev/null >/etc/pihole/dns-servers.conf
-
-cat << EOF >/etc/pihole/pihole-FTL.conf
-PRIVACYLEVEL=0
-AAAA_QUERY_ANALYSIS=no
-EOF
-
-cat << "EOF" > /usr/local/bin/pihole_hotfix
-#!/bin/bash
-localIP=$(jq -r '.address.localIP' /usr/local/bin/0conf)
-sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
-pihole restartdns
-EOF
-
-chmod +x /usr/local/bin/pihole_hotfix
-
-sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /usr/local/bin/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-
-pihole restartdns
 }
 
 
@@ -1198,7 +1132,7 @@ location ~ [^/]\.php(/|$) {
   fastcgi_index index.php;
   include fastcgi_params;
 }
-        
+
 location ~ ^/ttyd(.*)$ {
   proxy_http_version 1.1;
   proxy_set_header Host \$host;
@@ -1261,8 +1195,11 @@ chmod +x /usr/local/bin/*
 
 nginx -s reload
 
-if [ $(ls -l ~/ttyd | awk '{print$5}') -gt 2000000 ]; then
-mv -f ~/ttyd /usr/local/bin/ttyd
+if [[ $architecture = "arm64" ]]; then
+  wget --no-check-certificate -c -O /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
+elif [[ $architecture = "amd64" ]]; then
+  wget --no-check-certificate -c -O /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
+fi
 chmod +x /usr/local/bin/ttyd
 
 cat << EOF >/lib/systemd/system/updateGWD.service
@@ -1281,7 +1218,6 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload >/dev/null 2>&1
-fi
 
 popupWindow="window.open('"http://$localaddr:3000"', 'popupWindow', 'width=800, height=600, scrollbars=yes');"
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/update.php
@@ -1298,15 +1234,126 @@ echo "$statusInstalled WebUI"
 
 
 
+installAdG(){
+curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
+
+if [[ ! -f /opt/AdGuardHome/AdGuardHome.yaml ]]; then
+cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
+bind_host:
+bind_port:
+users:
+- name:
+  password:
+http_proxy: ""
+language: ""
+rlimit_nofile: 0
+debug_pprof: false
+web_session_ttl: 720
+dns:
+  bind_host: 0.0.0.0
+  port: 53
+  statistics_interval: 1
+  querylog_enabled: true
+  querylog_file_enabled: true
+  querylog_interval: 90
+  querylog_size_memory: 1000
+  anonymize_client_ip: false
+  protection_enabled: true
+  blocking_mode: default
+  blocking_ipv4: ""
+  blocking_ipv6: ""
+  blocked_response_ttl: 10
+  parental_block_host: family-block.dns.adguard.com
+  safebrowsing_block_host: standard-block.dns.adguard.com
+  ratelimit: 0
+  ratelimit_whitelist: []
+  refuse_any: true
+  upstream_dns:
+  - 127.0.0.1:5353
+  bootstrap_dns:
+  - 127.0.0.1:5353
+  all_servers: true
+  fastest_addr: false
+  allowed_clients: []
+  disallowed_clients: []
+  blocked_hosts: []
+  cache_size: 4194304
+  cache_ttl_min: 0
+  cache_ttl_max: 0
+  bogus_nxdomain: []
+  aaaa_disabled: true
+  enable_dnssec: false
+  edns_client_subnet: true
+  filtering_enabled: true
+  filters_update_interval: 24
+  parental_enabled: false
+  safesearch_enabled: false
+  safebrowsing_enabled: false
+  safebrowsing_cache_size: 1048576
+  safesearch_cache_size: 1048576
+  parental_cache_size: 1048576
+  cache_time: 30
+  rewrites: []
+  blocked_services: []
+tls:
+  enabled: false
+  server_name: ""
+  force_https: false
+  port_https: 443
+  port_dns_over_tls: 853
+  allow_unencrypted_doh: false
+  strict_sni_check: false
+  certificate_chain: ""
+  private_key: ""
+  certificate_path: ""
+  private_key_path: ""
+filters:
+- enabled: true
+  url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
+  name: AdGuard DNS filter
+  id: 1
+- enabled: false
+  url: https://github.com/AdAway/adaway.github.io/blob/master/hosts.txt
+  name: AdAway
+  id: 2
+- enabled: false
+  url: https://www.malwaredomainlist.com/hostslist/hosts.txt
+  name: MalwareDomainList.com Hosts List
+  id: 4
+whitelist_filters: []
+user_rules: []
+dhcp:
+  enabled: true
+  interface_name: ens18
+  gateway_ip: 10.0.0.2
+  subnet_mask: 255.255.255.0
+  range_start: 10.0.0.100
+  range_end: 10.0.0.250
+  lease_duration: 86400
+  icmp_timeout_msec: 1000
+clients: []
+log_compress: false
+log_localtime: false
+log_max_backups: 0
+log_max_size: 100
+log_max_age: 3
+log_file: ""
+verbose: false
+schema_version: 6
+EOF
+fi
+
+yq w /opt/AdGuardHome/AdGuardHome.yaml bind_host "$localaddr"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
+}
+
+
+
 postInstall(){
 /usr/local/bin/ui_2h
 
 if [[ $architecture = "amd64" ]] && [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
   installKernel
-fi
-
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onDHCP
 fi
 
 /usr/local/bin/ui_am4
@@ -1328,6 +1375,7 @@ systemctl restart smartdns
 /usr/local/bin/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
+/opt/AdGuardHome/AdGuardHome -s restart
 
 if [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "block" ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
@@ -1417,8 +1465,6 @@ fi
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
-piholePW="0000000000000000000000000000000000000000000000000000000000000000"
-
 cat << EOF >/etc/network/interfaces
 source /etc/network/interfaces.d/*
 
@@ -1461,18 +1507,6 @@ de_GWDconnect
 
 installDep
 
-installPihole
-
-piholeSet
-
-sed -i "/static ip_address=/d" /etc/dhcpcd.conf
-sed -i "/static routers=/d" /etc/dhcpcd.conf
-sed -i "/static domain_name_servers=/d" /etc/dhcpcd.conf
-
-echo -e "static ip_address=$localaddr/32" >> /etc/dhcpcd.conf
-echo -e "static routers=$gatewayaddr" >> /etc/dhcpcd.conf
-echo -e "static domain_name_servers=127.0.0.1" >> /etc/dhcpcd.conf
-
 apt install nginx
 
 nginxSet
@@ -1501,6 +1535,8 @@ chmod 666 /usr/local/bin/0conf
 
 installWebUI
 
+installAdG
+
 postInstall
 blue "---------------------"
 blue "Install de_GWD [done]"
@@ -1509,44 +1545,46 @@ blue "---------------------"
 
 
 
-change_piholeAdmin(){
-sudo pihole -a -p
+change_PWD(){
+    green "==========="
+    green " USER"
+    green "==========="
+    read user
 
-piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d= -f2)
+    green "==========="
+    green " PASSWOED"
+    green "==========="
+    read pwd
+    
+pwdHash=$(echo -n $pwd | sha256sum | awk '{print$1}' | tr -d '\n' | sha256sum | awk '{print$1}')
+pwdHashAdG=$(htpasswd -B -n -b $user $pwd | cut -d: -f2 | awk NR==1)
 
-jq --arg piholePW "$piholePW" '.address.pihole = $piholePW' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml users.name "$user"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml users.password "$pwdHashAdG"
+
+jq --arg password "$pwdHash" '.address.PWD=$password' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
+
 chmod 666 /usr/local/bin/0conf
-blue "------------------------------"
-blue "Change Pi-hole password [done]"
-blue "------------------------------"
+blue "----------------------"
+blue "Change password [done]"
+blue "----------------------"
 }
 
 
 
-updatePihole(){
+updateAdG(){
 de_GWDconnect
 
-jq '.dns.servers=[{"address":"127.0.0.1","port":5380}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5390}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
 
 systemctl restart v2dns
 sleep 3
 
 installDep
 
-piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
-
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
-rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
-
-installPihole
-
-piholeSet
-
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onDHCP
-fi
 
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onUDP >/dev/null 2>&1
@@ -1603,8 +1641,6 @@ installIptablesProxy
 
 de_GWDconnect
 
-piholeSet
-
 nginxSet
 
 installWebUI
@@ -1634,12 +1670,12 @@ else
     echo "[$statusBAD] DoH client     [start failed]"
 fi
 
-if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
-    echo "[$statusGOOD] Pi-hole        [working]"
-elif [ ! -f "/usr/local/bin/pihole" ]; then
-    echo "[$statusBAD] Pi-hole        [not installed]"
+if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
+    echo "[$statusGOOD] AdGuardHome    [working]"
+elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
+    echo "[$statusBAD] AdGuardHome    [not installed]"
 else
-    echo "[$statusBAD] Pi-hole        [start failed]"
+    echo "[$statusBAD] AdGuardHome    [start failed]"
 fi
 
 if [[ $(systemctl is-active v2dns) = "active" ]]; then
@@ -1682,11 +1718,11 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     2)
-    change_piholeAdmin
+    change_PWD
     start_menu
     ;;
     9)
-    updatePihole
+    updateAdG
     start_menu
     ;;
     0)

@@ -1,11 +1,4 @@
 #!/bin/bash
-piholePW=$(jq -r '.address.pihole' /usr/local/bin/0conf)
-sed -i "/WEBPASSWORD=/c\WEBPASSWORD=$piholePW" /etc/pihole/setupVars.conf
-
-if [[ $(jq -r '.address.dhcp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onDHCP
-fi
-
 if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
   /usr/local/bin/ui-onUDP
 else
