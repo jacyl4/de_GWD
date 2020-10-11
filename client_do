@@ -84,6 +84,7 @@ rm -rf /usr/bin/vtrui
 rm -rf /etc/vtrui
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/local/bin/vtrui
+rm -rf /usr/local/bin/ttyd
 rm -rf /lib/systemd/system/ttyd.service
 rm -rf /usr/local/bin/__MACOSX
 rm -rf /var/www/html/__MACOSX
@@ -1617,7 +1618,7 @@ jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
 jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
-jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' | sponge /usr/local/bin/0conf
 chmod 666 /usr/local/bin/0conf
 
 installWebUI

@@ -2,7 +2,7 @@
 <?php if (isset($auth) && $auth) {?>
 <?php
 shell_exec('sudo rm -rf /etc/nginx/conf.d/forward0.conf');
-shell_exec('sudo jq "del(.inbounds[1])" /usr/local/bin/vtrui/config.json >/tmp/vtrui_tmp && sudo mv -f /tmp/vtrui_tmp /usr/local/bin/vtrui/config.json');
+shell_exec('sudo jq "del(.inbounds[1])" /usr/local/bin/vtrui/config.json | sponge /usr/local/bin/vtrui/config.json');
 shell_exec('sudo systemctl restart vtrui');
 
 $data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);

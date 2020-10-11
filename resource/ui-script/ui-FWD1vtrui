@@ -149,7 +149,7 @@ done
 
 cat /tmp/v2uuids | while read v2uuids
 do
-jq --argjson v2uuids "$v2uuids" '.inbounds[0].settings.clients+=[$v2uuids]' /tmp/vtrui1_temp >/tmp/vtrui1_temp2 && mv -f /tmp/vtrui1_temp2 /tmp/vtrui1_temp
+jq --argjson v2uuids "$v2uuids" '.inbounds[0].settings.clients+=[$v2uuids]' /tmp/vtrui1_temp | sponge /tmp/vtrui1_temp
 done
 
 mv -f /tmp/vtrui1_temp /usr/local/bin/vtrui1/config.json

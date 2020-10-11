@@ -8,7 +8,7 @@ if [[ -n "$localip" ]]; then
 	jq '.routing.rules[1].outboundTag="diverttraffic"' >/usr/local/bin/vtrui/config.json
 
 	for IP in $localip; do
-		jq --arg IP "$IP" '.routing.rules[1].source+=[$IP]' /usr/local/bin/vtrui/config.json >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
+		jq --arg IP "$IP" '.routing.rules[1].source+=[$IP]' /usr/local/bin/vtrui/config.json | sponge /usr/local/bin/vtrui/config.json
 	done
 
 	rm -rf /tmp/vtrui_temp*

@@ -225,12 +225,12 @@ jq --arg dtDomain "$dtDomain" '.outbounds[2].settings.vnext[0].address=$dtDomain
 jq --argjson dtPort "$dtPort" '.outbounds[2].settings.vnext[0].port=$dtPort' |\
 jq --arg dtUuidnum "$dtUuidnum" '.outbounds[2].settings.vnext[0].users[0].id=$dtUuidnum' |\
 jq --arg dtV2path "$dtV2path" '.outbounds[2].streamSettings.wsSettings.path=$dtV2path' |\
-jq --arg dtDomain "$dtDomain" '.outbounds[2].streamSettings.tlsSettings.serverName=$dtDomain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
+jq --arg dtDomain "$dtDomain" '.outbounds[2].streamSettings.tlsSettings.serverName=$dtDomain' | sponge /usr/local/bin/vtrui/config.json
 
 
 /usr/local/bin/ui-changeDivertIP
 
-jq '.divertLan.display="block"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq '.divertLan.display="block"' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
 
 chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

@@ -134,6 +134,6 @@ fi
 EOF
 chmod +x /usr/local/bin/iptables-proxy-up
 
-jq '.address.udp="off"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq '.address.udp="off"' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
 
 chmod 666 /usr/local/bin/0conf
