@@ -1,0 +1,36 @@
+#!/bin/bash
+if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+  /usr/local/bin/ui-onUDP
+else
+  /usr/local/bin/ui-offUDP
+fi
+systemctl restart iptables-proxy
+
+if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
+  /usr/local/bin/ui-markThis
+fi
+
+/usr/local/bin/ui-saveDNSChina
+systemctl restart smartdns
+
+/usr/local/bin/ui_4h
+systemctl restart doh-client
+systemctl restart v2dns
+
+if [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "block" ]]; then
+  /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
+elif [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "none" ]]; then
+  /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
+  /usr/local/bin/ui-FWD1save
+  /usr/local/bin/ui-FWD1vtrui
+  systemctl restart vtrui1
+fi
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
+  /usr/local/bin/ui-FWD0save
+  /usr/local/bin/ui-FWD0vtrui
+fi
+systemctl restart vtrui
