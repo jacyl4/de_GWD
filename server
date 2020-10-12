@@ -59,6 +59,7 @@ fi
 
 cd ~
 source /etc/profile
+service cron stop
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
@@ -997,6 +998,7 @@ sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
 echo '0 */2 * * * /usr/local/bin/Q2H' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
+service cron restart
 }
 
 

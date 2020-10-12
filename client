@@ -137,11 +137,12 @@ sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-service cron stop
+
 
 
 cd ~
 source /etc/profile
+service cron stop
 
 doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
