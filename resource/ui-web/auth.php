@@ -1,9 +1,9 @@
 <?php
     session_start();
-    $setupVars = parse_ini_file("/etc/pihole/setupVars.conf");
-    if(isset($setupVars['WEBPASSWORD']))
+    $PWDhash = json_decode(file_get_contents('/usr/local/bin/0conf'))->address->PWD;
+    if(isset($PWDhash))
     {
-        $GWDpwhash = $setupVars['WEBPASSWORD'];
+        $GWDpwhash = $PWDhash;
     }
     else
     {

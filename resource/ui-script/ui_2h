@@ -1,5 +1,5 @@
 #!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 biadu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
 rm -rf ~/client*

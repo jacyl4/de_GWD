@@ -40,9 +40,12 @@
     </form>
 
     <!-- Navbar -->
-    <ul class="navbar-nav ml-auto ml-md-0">      
+    <ul class="navbar-nav ml-auto ml-md-0">
       <li class="nav-item no-arrow mx-1">
-
+        <a class="nav-link" href="/adg">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>AdGuard Home</span>
+        </a>
       </li>
     </ul>
 

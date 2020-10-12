@@ -164,9 +164,9 @@ jq --arg nfDomain "$nfDomain" '.outbounds[1].settings.vnext[0].address=$nfDomain
 jq --argjson nfPort "$nfPort" '.outbounds[1].settings.vnext[0].port=$nfPort' |\
 jq --arg nfUuidnum "$nfUuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$nfUuidnum' |\
 jq --arg nfV2path "$nfV2path" '.outbounds[1].streamSettings.wsSettings.path=$nfV2path' |\
-jq --arg nfDomain "$nfDomain" '.outbounds[1].streamSettings.tlsSettings.serverName=$nfDomain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
+jq --arg nfDomain "$nfDomain" '.outbounds[1].streamSettings.tlsSettings.serverName=$nfDomain' | sponge /usr/local/bin/vtrui/config.json
 
-jq '.divertLan.display="none"' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq '.divertLan.display="none"' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
 
 chmod 666 /usr/local/bin/vtrui/config.json
 chmod 666 /usr/local/bin/0conf

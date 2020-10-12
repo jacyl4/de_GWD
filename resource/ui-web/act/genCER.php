@@ -12,6 +12,6 @@ $conf['FORWARD']['Email'] = $CFemail;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/usr/local/bin/0conf', $newJsonString);
 
-shell_exec('sudo nohup /usr/local/bin/ttyd -p 3000 -o /usr/local/bin/ui-installCER');
+shell_exec('sudo nohup /usr/bin/ttyd -p 3000 -o /usr/local/bin/ui-installCER');
 ?>
 <?php }?>

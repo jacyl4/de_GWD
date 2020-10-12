@@ -10,12 +10,6 @@ if ( $conf['dns']['DNSsplit'] === "gfw" ){
 	shell_exec('sudo /usr/local/bin/ui-dnsCHNW');
 }
 
-if ( $conf['dns']['v2ad'] === "on" ){
-	shell_exec('sudo /usr/local/bin/ui-onV2ad');
-} else {
-	shell_exec('sudo /usr/local/bin/ui-offV2ad');
-}
-
 if ( $conf['dns']['APPLEdir'] === "on" ){
 	shell_exec('sudo /usr/local/bin/ui-onAPPLE');
 } else {
