@@ -74,6 +74,35 @@ jq 'del(.address.pihole)' /usr/local/bin/0conf |\
 jq --arg pwd "$pwd" '.address.PWD=$pwd' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
+if [[ -f "/etc/dnsmasq.conf" ]]; then
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=5311
+EOF
+pihole restartdns >/dev/null 2>&1
+fi
+
+if [[ -d "/etc/pihole" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
+usermod -G www-data www-data
+pihole -a disabledhcp
+/opt/pihole/uninstall.sh << EOF
+y
+n
+EOF
+
+sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
+
+killall -u pihole >/dev/null 2>&1
+deluser --remove-home pihole >/dev/null 2>&1
+groupdel pihole >/dev/null 2>&1
+
+rm -rf /usr/local/bin/pihole*
+rm -rf /etc/dnsmasq*
+
+apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5 iputils-ping idn2 dns-root-data
+fi
+
 rm -rf /usr/local/bin/chnrouteset
 rm -rf /usr/local/bin/chnroute.txt
 rm -rf /usr/local/bin/Q4am
@@ -109,13 +138,7 @@ sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-if [[ $(dpkg -l moreutils) =~ "no packages found" ]]; then
-  apt install moreutils
-fi
 
-if [[ $(dpkg -l apache2-utils) =~ "no packages found" ]]; then
-  apt install apache2-utils
-fi
 
 cd ~
 source /etc/profile
@@ -913,6 +936,10 @@ echo "$statusInstalled iptables-proxy"
 
 
 installDep(){
+if [[ -d "/etc/pihole" ]]; then
+yes | pihole uninstall
+fi
+
 cat << EOF >/etc/apt/sources.list
 deb http://$aptGlobal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
 deb http://$aptGlobal/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
@@ -931,7 +958,7 @@ apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install docker-ce docker-ce-cli containerd.io php7.4-common php7.4-cgi php7.4-fpm php7.4-xml php7.4-opcache php7.4-json moreutils apache2-utils
+apt install docker-ce docker-ce-cli containerd.io php7.4-fpm php7.4-opcache php7.4-json moreutils apache2-utils
 
 sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
 sed -i "/LimitNPROC=/c\LimitNPROC=64000"  /lib/systemd/system/docker.service
@@ -1016,9 +1043,6 @@ EOF
 systemctl daemon-reload >/dev/null 2>&1
 systemctl enable php7.4-fpm
 systemctl restart php7.4-fpm
-
-wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
-chmod +x /usr/bin/yq
 
 echo "$statusInstalled dependencies"
 }
@@ -1197,7 +1221,7 @@ docker container exec nginx nginx -s reload
 EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
-/etc/nginx/conf.d/merge.sh
+/etc/nginx/conf.d/merge.sh >/dev/null 2>&1
 }
 
 
@@ -1426,6 +1450,9 @@ fi
 
 
 AdGset(){
+wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
+chmod +x /usr/bin/yq
+
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "0.0.0.0"
@@ -1443,6 +1470,14 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "true"
 
 
 postInstall(){
+if [[ $(dpkg -l moreutils 2>&1) =~ "no packages found" ]]; then
+  apt install moreutils
+fi
+
+if [[ $(dpkg -l apache2-utils 2>&1) =~ "no packages found" ]]; then
+  apt install apache2-utils
+fi
+
 /usr/local/bin/ui_2h
 
 if [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
