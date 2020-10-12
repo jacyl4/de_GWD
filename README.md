@@ -30,6 +30,7 @@ bash <(wget --no-check-certificate -qO- http://gwd.seso.icu:10290/client)
 ## Thanks to
 * [ m13253/dns-over-https ](https://github.com/m13253/dns-over-https)
 * [ pymumu/smartdns ](https://github.com/pymumu/smartdns)
+* [ AdguardTeam/AdGuardHome ](https://github.com/AdguardTeam/AdGuardHome)
 * [ pi-hole/pi-hole ](https://github.com/pi-hole/pi-hole)
 * [ v2fly/v2ray-core ](https://github.com/v2fly/v2ray-core)
 * [ Loyalsoldier/v2ray-rules-dat ](https://github.com/Loyalsoldier/v2ray-rules-dat)
