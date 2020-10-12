@@ -10,7 +10,75 @@ statusNONE=$(yellow "-")
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
 de_gwd_nginx="1.19.3"
+yq_version="3.4.0"
 
+
+
+preUpdate(){
+if [[ -f /etc/vtrui/config.json ]]; then
+  mkdir -p /usr/local/bin/vtrui
+  cp -f /etc/vtrui/config.json /usr/local/bin/vtrui/config.json
+  rm -rf /etc/vtrui
+fi
+
+if [[ -f "/etc/nginx/conf.d/supp_head" ]] && [[ -f "/etc/nginx/conf.d/supp_body" ]]; then
+mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_top
+mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
+rm -f /etc/nginx/conf.d/3_proxyPath
+fi
+
+rm -rf /etc/dns-over-https
+rm -rf /etc/nginx/conf.d/0_serverUpstream
+rm -rf /etc/nginx/conf.d/4_v2Proxy
+
+sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
+echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
+
+
+
+if [[ -d "/etc/pihole" ]]; then
+usermod -G www-data www-data
+/opt/pihole/uninstall.sh << EOF
+y
+n
+EOF
+
+killall -u pihole >/dev/null 2>&1
+deluser --remove-home pihole >/dev/null 2>&1
+groupdel pihole >/dev/null 2>&1
+
+rm -rf /usr/local/bin/pihole*
+rm -rf /etc/dnsmasq*
+
+sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
+
+apt purge sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
+fi
+
+
+
+cd ~
+source /etc/profile
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
+
+domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
+port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
+portCheck=$(echo $port | grep '^[0-9]\+$')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /usr/local/bin/vtrui/config.json)
+v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /usr/local/bin/vtrui/config.json)
+
+if [[ -f /var/www/ssl/fullchain.cer ]]; then
+  if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
+  mv -f /var/www/ssl/fullchain.cer /var/www/ssl/$topDomain.cer
+  else
+  mv -f /var/www/ssl/fullchain.cer /var/www/ssl/$domain.cer
+  fi
+fi
+}
 
 
 preInstall(){
@@ -245,40 +313,115 @@ systemctl restart iptablesrules
 
 
 
-installPihole(){
-mkdir -p /etc/pihole
+installAdG(){
+if [ ! -d "/opt/AdGuardHome" ]; then
+  curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
+fi
 
-cat /dev/null > /etc/pihole/adlists.list
-
-cat << EOF >/etc/pihole/setupVars.conf
-PIHOLE_INTERFACE=$ethernetnum
-IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=8.8.8.8
-PIHOLE_DNS_2=1.1.1.1
-PIHOLE_DNS_3=1.0.0.1
-PIHOLE_DNS_4=8.8.4.4
-QUERY_LOGGING=true
-INSTALL_WEB_SERVER=false
-INSTALL_WEB_INTERFACE=false
-LIGHTTPD_ENABLED=false
-BLOCKING_ENABLED=true
-WEBPASSWORD=0000000000000000000000000000000000000000000000000000000000000000
-DNSMASQ_LISTENING=single
-DNS_FQDN_REQUIRED=true
-DNS_BOGUS_PRIV=true
-DNSSEC=false
-CONDITIONAL_FORWARDING=false
+if [[ ! -f /opt/AdGuardHome/AdGuardHome.yaml ]]; then
+cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
+bind_host:
+bind_port:
+users:
+http_proxy: ""
+language: ""
+rlimit_nofile: 0
+debug_pprof: false
+web_session_ttl: 720
+dns:
+  bind_host: 0.0.0.0
+  port: 53
+  statistics_interval: 7
+  querylog_enabled: true
+  querylog_file_enabled: true
+  querylog_interval: 90
+  querylog_size_memory: 1000
+  anonymize_client_ip: false
+  protection_enabled: true
+  blocking_mode: default
+  blocking_ipv4: ""
+  blocking_ipv6: ""
+  blocked_response_ttl: 10
+  parental_block_host: family-block.dns.adguard.com
+  safebrowsing_block_host: standard-block.dns.adguard.com
+  ratelimit: 0
+  ratelimit_whitelist: []
+  refuse_any: true
+  upstream_dns:
+  bootstrap_dns:
+  all_servers: true
+  fastest_addr: false
+  allowed_clients: []
+  disallowed_clients: []
+  blocked_hosts: []
+  cache_size: 4194304
+  cache_ttl_min: 0
+  cache_ttl_max: 0
+  bogus_nxdomain: []
+  aaaa_disabled: true
+  enable_dnssec: false
+  edns_client_subnet: false
+  filtering_enabled: true
+  filters_update_interval: 24
+  parental_enabled: false
+  safesearch_enabled: false
+  safebrowsing_enabled: false
+  safebrowsing_cache_size: 1048576
+  safesearch_cache_size: 1048576
+  parental_cache_size: 1048576
+  cache_time: 30
+  rewrites: []
+  blocked_services: []
+tls:
+filters:
+whitelist_filters: []
+user_rules:
+dhcp:
+  enabled: false
+  interface_name: ""
+  gateway_ip: ""
+  subnet_mask: ""
+  range_start: ""
+  range_end: ""
+  lease_duration: 86400
+  icmp_timeout_msec: 1000
+clients: []
+log_compress: false
+log_localtime: false
+log_max_backups: 0
+log_max_size: 100
+log_max_age: 3
+log_file: ""
+verbose: false
+schema_version: 6
 EOF
-
-curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+fi
 }
 
 
 
-piholeSet(){
-systemctl mask --now lighttpd
-systemctl mask --now dhcpcd
-systemctl daemon-reload >/dev/null 2>&1
+AdGset(){
+wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
+chmod +x /usr/bin/yq
+
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "127.0.0.1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_port "53"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.ratelimit "0"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "8.8.8.8"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[1] "1.1.1.1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[2] "1.0.0.1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[3] "8.8.4.4"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "8.8.8.8"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[1] "1.1.1.1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[2] "1.0.0.1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[3] "8.8.4.4"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.all_servers "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
@@ -288,13 +431,6 @@ cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
-
-cat << EOF >/etc/pihole/pihole-FTL.conf
-PRIVACYLEVEL=0
-AAAA_QUERY_ANALYSIS=no
-EOF
-
-pihole logging on
 }
 
 
@@ -917,9 +1053,9 @@ preInstall
 
 installIptablesRules
 
-installPihole
+installAdG
 
-piholeSet
+AdGset
 
 sed -i "/static ip_address=/d" /etc/dhcpcd.conf
 sed -i "/static routers=/d" /etc/dhcpcd.conf
@@ -1261,60 +1397,15 @@ fi
 
 
 updateGWD(){
-if [[ -f /etc/vtrui/config.json ]]; then
-  mkdir -p /usr/local/bin/vtrui
-  cp -f /etc/vtrui/config.json /usr/local/bin/vtrui/config.json
-  rm -rf /etc/vtrui
-fi
-
-if [[ -f "/etc/nginx/conf.d/supp_head" ]] && [[ -f "/etc/nginx/conf.d/supp_body" ]]; then
-mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_top
-mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
-rm -f /etc/nginx/conf.d/3_proxyPath
-fi
-
-rm -rf /etc/dns-over-https
-rm -rf /etc/nginx/conf.d/0_serverUpstream
-rm -rf /etc/nginx/conf.d/4_v2Proxy
-
-sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
-echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
-
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-
-domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
-port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
-portCheck=$(echo $port | grep '^[0-9]\+$')
-topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
-
-v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /usr/local/bin/vtrui/config.json)
-v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /usr/local/bin/vtrui/config.json)
-
-if [[ -f /var/www/ssl/fullchain.cer ]]; then
-  if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
-  mv -f /var/www/ssl/fullchain.cer /var/www/ssl/$topDomain.cer
-  else
-  mv -f /var/www/ssl/fullchain.cer /var/www/ssl/$domain.cer
-  fi
-fi
-
-cd ~
-source /etc/profile
+preUpdate
 
 preInstall
 
 installIptablesRules
 
-if [[ -n $(pihole -v 2>/dev/null) ]] && [[ $(pihole -v | awk 'NR==1{print$4}') != $(pihole -v | awk 'NR==1{print$6}' | sed 's/.$//') ]]; then
-  rm -rf /etc/dnsmasq* /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
+installAdG
 
-  systemctl daemon-reload
-
-  installPihole
-fi
-
-piholeSet
+AdGset
 
 installDOHser
 
@@ -1401,36 +1492,36 @@ fi
 
 
 start_menu(){
-if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
-    echo "[$statusGOOD] Pi-hole      [working]"
-elif [[ ! -f "/usr/local/bin/pihole" ]]; then
-    echo "[$statusBAD] Pi-hole      [not installed]"
+if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
+    echo "[$statusGOOD] AdGuardHome    [working]"
+elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
+    echo "[$statusBAD] AdGuardHome    [not installed]"
 else
-    echo "[$statusBAD] Pi-hole      [start failed]"
+    echo "[$statusBAD] AdGuardHome    [start failed]"
 fi
 
 if [[ $(systemctl is-active doh-server) = "active" ]]; then
-    echo "[$statusGOOD] DoH server   [working]"
+    echo "[$statusGOOD] DoH server     [working]"
 elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
-    echo "[$statusBAD] DoH server   [not Installed]"
+    echo "[$statusBAD] DoH server     [not Installed]"
 else
-    echo "[$statusBAD] DoH server   [start failed]"
+    echo "[$statusBAD] DoH server     [start failed]"
 fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusGOOD] V2RAY        [working]"
+    echo "[$statusGOOD] V2RAY          [working]"
 elif [[ ! -d "/usr/local/bin/vtrui" ]]; then
-    echo "[$statusBAD] V2RAY        [not Installed]"
+    echo "[$statusBAD] V2RAY          [not Installed]"
 else
-    echo "[$statusBAD] V2RAY        [start failed]"
+    echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
-if [[ $(systemctl is-active docker) = "active" ]]; then
-    echo "[$statusGOOD] Docker       [working]"
-elif [[ ! -f "/usr/bin/docker" ]]; then
-    echo "[$statusBAD] Docker       [not installed]"
+if [[ -n $(docker container ls 2>/dev/null | awk '/nginx/') ]]; then
+    echo "[$statusGOOD] Docker nginx   [working]"
+elif [[ -z $(docker image ls 2>/dev/null | awk '/nginx/') ]]; then
+    echo "[$statusBAD] Docker nginx   [not installed]"
 else
-    echo "[$statusBAD] Docker       [start failed]"
+    echo "[$statusBAD] Docker nginx   [start failed]"
 fi
 
 blue "-----------------------------------------------"

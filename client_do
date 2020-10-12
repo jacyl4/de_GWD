@@ -91,8 +91,6 @@ y
 n
 EOF
 
-sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
-
 killall -u pihole >/dev/null 2>&1
 deluser --remove-home pihole >/dev/null 2>&1
 groupdel pihole >/dev/null 2>&1
@@ -101,6 +99,8 @@ rm -rf /usr/local/bin/pihole*
 rm -rf /etc/dnsmasq*
 
 fi
+
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
 
