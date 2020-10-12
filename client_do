@@ -1474,10 +1474,6 @@ if [[ $(dpkg -l moreutils 2>&1) =~ "no packages found" ]]; then
   apt install moreutils
 fi
 
-if [[ $(dpkg -l apache2-utils 2>&1) =~ "no packages found" ]]; then
-  apt install apache2-utils
-fi
-
 /usr/local/bin/ui_2h
 
 if [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
@@ -1686,12 +1682,17 @@ change_PWD(){
 pwdHash=$(echo -n $pwd | sha256sum | awk '{print$1}' | tr -d '\n' | sha256sum | awk '{print$1}')
 pwdHashAdG=$(htpasswd -B -n -b $user $pwd | cut -d: -f2 | awk NR==1)
 
+if [[ $(dpkg -l apache2-utils 2>&1) =~ "no packages found" ]]; then
+  apt install apache2-utils
+fi
+
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].name "$user"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].password "$pwdHashAdG"
 
 jq --arg password "$pwdHash" '.address.PWD=$password' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
 
 chmod 666 /usr/local/bin/0conf
+/opt/AdGuardHome/AdGuardHome -s restart >/dev/null 2>&1
 blue "----------------------"
 blue "Change password [done]"
 blue "----------------------"
