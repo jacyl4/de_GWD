@@ -1504,7 +1504,8 @@ systemctl restart smartdns
 /usr/local/bin/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
-systemctl restart AdGuardHome >/dev/null 2>&1
+systemctl restart AdGuardHome
+/etc/init.d/networking restart
 
 if [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "block" ]]; then
   /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
@@ -1698,7 +1699,8 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].password "$pwdHashAdG"
 jq --arg password "$pwdHash" '.address.PWD=$password' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
 
 chmod 666 /usr/local/bin/0conf
-systemctl restart AdGuardHome >/dev/null 2>&1
+systemctl restart AdGuardHome
+/etc/init.d/networking restart
 blue "----------------------"
 blue "Change password [done]"
 blue "----------------------"
