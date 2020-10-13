@@ -1151,7 +1151,12 @@ rm -rf /etc/nginx/conf.d/forward*.conf
 
 touch /etc/nginx/conf.d/0_top
 
-cat << EOF >/etc/nginx/conf.d/1_serverHead
+cat << 'EOF' >/etc/nginx/conf.d/1_serverHead
+server {
+        listen 80;
+        return 301 https://$host$request_uri;
+}
+
 server {
   listen 443 quic reuseport;
   listen 443 ssl http2 fastopen=128 reuseport;
