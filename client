@@ -415,8 +415,8 @@ systemctl disable --now smartdns >/dev/null 2>&1
 dpkg --configure -a
 dpkg --purge --force-all smartdns >/dev/null 2>&1
 dpkg -i ~/smartdns.deb
-rm -rf /etc/smartdns/*.conf
 
+rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
@@ -440,7 +440,7 @@ server 223.6.6.6
 EOF
 
 rm -rf /run/smartdns.pid
-
+touch /run/smartdns.pid
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=SmartDNS server
@@ -450,13 +450,13 @@ StartLimitIntervalSec=60
 
 [Service]
 Type=forking
+PIDFile=/run/smartdns.pid
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 EnvironmentFile=/etc/default/smartdns
-ExecStartPost=/bin/sh -c "echo $MAINPID > /run/smartdns.pid"
-ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
-KillMode=process
+ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
+ExecStop=/bin/kill -s QUIT $MAINPID
 Restart=always
 RestartSec=2
 
