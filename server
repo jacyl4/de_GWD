@@ -26,6 +26,13 @@ mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
 rm -f /etc/nginx/conf.d/3_proxyPath
 fi
 
+if [[ -z $(awk '/nginx/' /var/www/ssl/update_ocsp_cache) ]]; then
+sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
+echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+fi
+
 
 
 if [[ -d "/etc/pihole" ]]; then
@@ -54,14 +61,11 @@ rm -rf /etc/dns-over-https
 rm -rf /etc/nginx/conf.d/0_serverUpstream
 rm -rf /etc/nginx/conf.d/4_v2Proxy
 
-sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
-echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
-
 
 
 cd ~
 source /etc/profile
-service cron stop
+service cron stop >/dev/null 2>&1
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
@@ -73,14 +77,6 @@ topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /usr/local/bin/vtrui/config.json)
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /usr/local/bin/vtrui/config.json)
-
-if [[ -f /var/www/ssl/fullchain.cer ]]; then
-  if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
-  mv -f /var/www/ssl/fullchain.cer /var/www/ssl/$topDomain.cer
-  else
-  mv -f /var/www/ssl/fullchain.cer /var/www/ssl/$domain.cer
-  fi
-fi
 }
 
 
@@ -981,7 +977,7 @@ sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
 echo '0 */2 * * * /usr/local/bin/Q2H' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-service cron restart
+service cron restart >/dev/null 2>&1
 }
 
 

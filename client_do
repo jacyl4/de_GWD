@@ -144,7 +144,7 @@ rm -rf ~/now.cron
 
 cd ~
 source /etc/profile
-service cron stop
+service cron stop >/dev/null 2>&1
 
 doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
 doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
@@ -1541,7 +1541,7 @@ EOF
 
 crontab ~/now.cron
 rm -rf ~/now.cron
-service cron restart
+service cron restart >/dev/null 2>&1
 
 rm -rf ~/smartdns.deb
 rm -rf ~/doh.zip
