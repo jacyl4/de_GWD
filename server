@@ -30,14 +30,14 @@ fi
 
 if [[ -d "/etc/pihole" ]]; then
 usermod -G www-data www-data
+killall -u pihole >/dev/null 2>&1
+deluser --remove-home pihole >/dev/null 2>&1
+groupdel pihole >/dev/null 2>&1
+
 /opt/pihole/uninstall.sh << EOF
 y
 n
 EOF
-
-killall -u pihole >/dev/null 2>&1
-deluser --remove-home pihole >/dev/null 2>&1
-groupdel pihole >/dev/null 2>&1
 
 rm -rf /usr/local/bin/pihole*
 rm -rf /etc/dnsmasq*
