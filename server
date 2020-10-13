@@ -10,7 +10,6 @@ statusNONE=$(yellow "-")
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
 de_gwd_nginx="1.19.3"
-yq_version="3.4.0"
 
 
 
@@ -26,13 +25,6 @@ mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_top
 mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
 rm -f /etc/nginx/conf.d/3_proxyPath
 fi
-
-rm -rf /etc/dns-over-https
-rm -rf /etc/nginx/conf.d/0_serverUpstream
-rm -rf /etc/nginx/conf.d/4_v2Proxy
-
-sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
-echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
 
 
 
@@ -54,6 +46,16 @@ sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/
 
 apt purge sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
 fi
+
+
+
+rm -rf /usr/bin/yq
+rm -rf /etc/dns-over-https
+rm -rf /etc/nginx/conf.d/0_serverUpstream
+rm -rf /etc/nginx/conf.d/4_v2Proxy
+
+sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
+echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
 
 
 
@@ -318,15 +320,18 @@ installAdG(){
 if [ ! -d "/opt/AdGuardHome" ]; then
   curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
 fi
+}
 
-if [[ ! -f /opt/AdGuardHome/AdGuardHome.yaml ]]; then
+
+
+AdGset(){
 cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
-bind_host:
-bind_port:
-users:
+bind_host: 127.0.0.1
+bind_port: 8080
+users: []
 http_proxy: ""
 language: ""
-rlimit_nofile: 0
+rlimit_nofile: 100000
 debug_pprof: false
 web_session_ttl: 720
 dns:
@@ -338,7 +343,7 @@ dns:
   querylog_interval: 1
   querylog_size_memory: 1000
   anonymize_client_ip: false
-  protection_enabled: false
+  protection_enabled: true
   blocking_mode: default
   blocking_ipv4: ""
   blocking_ipv6: ""
@@ -349,7 +354,15 @@ dns:
   ratelimit_whitelist: []
   refuse_any: true
   upstream_dns:
+  - 8.8.8.8
+  - 1.1.1.1
+  - 1.0.0.1
+  - 8.8.4.4
   bootstrap_dns:
+  - 8.8.8.8
+  - 1.1.1.1
+  - 1.0.0.1
+  - 8.8.4.4
   all_servers: true
   fastest_addr: false
   allowed_clients: []
@@ -362,7 +375,7 @@ dns:
   aaaa_disabled: true
   enable_dnssec: false
   edns_client_subnet: false
-  filtering_enabled: false
+  filtering_enabled: true
   filters_update_interval: 24
   parental_enabled: false
   safesearch_enabled: false
@@ -396,44 +409,9 @@ log_file: ""
 verbose: false
 schema_version: 6
 EOF
-fi
-}
 
-
-
-AdGset(){
-wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
-chmod +x /usr/bin/yq
-
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml rlimit_nofile "100000"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "127.0.0.1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_port "53"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.statistics_interval "1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.querylog_enabled "false"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.querylog_file_enabled "false"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.querylog_interval "1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.anonymize_client_ip "false"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.protection_enabled "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.ratelimit "0"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "8.8.8.8"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[1] "1.1.1.1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[2] "1.0.0.1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[3] "8.8.4.4"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "8.8.8.8"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[1] "1.1.1.1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[2] "1.0.0.1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[3] "8.8.4.4"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.all_servers "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.filtering_enabled "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.filters_update_interval "24"
 systemctl restart AdGuardHome
+sleep 3
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
