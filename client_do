@@ -1459,6 +1459,7 @@ chmod +x /usr/bin/yq
 
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml rlimit_nofile "100000"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "0.0.0.0"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_port "53"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.ratelimit "0"
@@ -1467,6 +1468,7 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5353"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5353"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
 }
 

@@ -330,15 +330,15 @@ rlimit_nofile: 0
 debug_pprof: false
 web_session_ttl: 720
 dns:
-  bind_host: 0.0.0.0
+  bind_host: 127.0.0.1
   port: 53
-  statistics_interval: 7
-  querylog_enabled: true
-  querylog_file_enabled: true
-  querylog_interval: 90
+  statistics_interval: 1
+  querylog_enabled: false
+  querylog_file_enabled: false
+  querylog_interval: 1
   querylog_size_memory: 1000
   anonymize_client_ip: false
-  protection_enabled: true
+  protection_enabled: false
   blocking_mode: default
   blocking_ipv4: ""
   blocking_ipv6: ""
@@ -362,7 +362,7 @@ dns:
   aaaa_disabled: true
   enable_dnssec: false
   edns_client_subnet: false
-  filtering_enabled: true
+  filtering_enabled: false
   filters_update_interval: 24
   parental_enabled: false
   safesearch_enabled: false
@@ -407,8 +407,15 @@ chmod +x /usr/bin/yq
 
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml rlimit_nofile "100000"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "127.0.0.1"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_port "53"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.statistics_interval "1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.querylog_enabled "false"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.querylog_file_enabled "false"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.querylog_interval "1"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.anonymize_client_ip "false"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.protection_enabled "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.ratelimit "0"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "8.8.8.8"
@@ -422,7 +429,12 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[2] "1.0.0.1"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[3] "8.8.4.4"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.all_servers "true"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.filtering_enabled "false"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.filters_update_interval "24"
+
+/opt/AdGuardHome/AdGuardHome -s restart
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
