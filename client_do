@@ -116,9 +116,9 @@ rm -rf /etc/vtrui
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/local/bin/vtrui
 rm -rf /usr/local/bin/ttyd
-rm -rf /lib/systemd/system/ttyd.service
 rm -rf /usr/local/bin/__MACOSX
 rm -rf /var/www/html/__MACOSX
+rm -rf /lib/systemd/system/ttyd.service
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
@@ -437,8 +437,10 @@ rm -rf /run/smartdns.pid
 
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
-Description=Smart DNS server
+Description=SmartDNS server
 After=network.target
+StartLimitBurst=0
+StartLimitIntervalSec=60
 
 [Service]
 Type=forking
@@ -448,7 +450,7 @@ CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 EnvironmentFile=/etc/default/smartdns
 ExecStartPost=/bin/sh -c "echo $MAINPID > /run/smartdns.pid"
 ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
-KillMode=mixed
+KillMode=process
 Restart=always
 RestartSec=2
 
