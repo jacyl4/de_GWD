@@ -836,8 +836,8 @@ iptables -A INPUT -p tcp -tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
-iptables -A INPUT -p tcp --dport 5353 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5353 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
@@ -846,8 +846,8 @@ iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5353 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5353 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
@@ -1357,9 +1357,9 @@ dns:
   ratelimit_whitelist: []
   refuse_any: true
   upstream_dns:
-  - 127.0.0.1:5353
+  - 127.0.0.1:5350
   bootstrap_dns:
-  - 127.0.0.1:5353
+  - 127.0.0.1:5350
   all_servers: false
   fastest_addr: false
   allowed_clients: []
@@ -1464,9 +1464,9 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "0.0.0.0"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_port "53"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.ratelimit "0"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5353"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5350"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5353"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5350"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
