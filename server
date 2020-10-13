@@ -375,7 +375,7 @@ dns:
   aaaa_disabled: true
   enable_dnssec: false
   edns_client_subnet: false
-  filtering_enabled: true
+  filtering_enabled: false
   filters_update_interval: 24
   parental_enabled: false
   safesearch_enabled: false
