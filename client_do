@@ -433,8 +433,8 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-rm -rf /run/smartdns.pid
-touch /run/smartdns.pid
+rm -rf /var/run/smartdns.pid
+touch /var/run/smartdns.pid
 cat << "EOF" > /lib/systemd/system/smartdns.service
 [Unit]
 Description=SmartDNS server
@@ -444,7 +444,7 @@ StartLimitIntervalSec=60
 
 [Service]
 Type=forking
-PIDFile=/run/smartdns.pid
+PIDFile=/var/run/smartdns.pid
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
