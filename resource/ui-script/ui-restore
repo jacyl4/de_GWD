@@ -4,7 +4,6 @@ if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
 else
   /usr/local/bin/ui-offUDP
 fi
-systemctl restart iptables-proxy
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis
@@ -34,3 +33,4 @@ if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]]
   /usr/local/bin/ui-FWD0vtrui
 fi
 systemctl restart vtrui
+systemctl restart iptables-proxy

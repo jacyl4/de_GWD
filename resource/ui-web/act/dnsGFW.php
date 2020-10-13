@@ -3,7 +3,7 @@
 <?php 
 shell_exec('sudo /usr/local/bin/ui-dnsGFW');
 shell_exec('sudo /usr/local/bin/ui-saveListBW');
-shell_exec('sudo systemctl restart iptables-proxy');
 shell_exec('sudo systemctl restart v2dns');
+shell_exec('sudo systemctl restart iptables-proxy');
 ?>
 <?php }?>

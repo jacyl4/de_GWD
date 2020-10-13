@@ -1450,7 +1450,6 @@ if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
 else
   /usr/local/bin/ui-offUDP >/dev/null 2>&1
 fi
-systemctl restart iptables-proxy
 
 if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
   /usr/local/bin/ui-markThis >/dev/null 2>&1
@@ -1481,6 +1480,7 @@ if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]]
   /usr/local/bin/ui-FWD0vtrui
 fi
 systemctl restart vtrui
+systemctl restart iptables-proxy
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
@@ -1686,7 +1686,6 @@ if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
 else
   /usr/local/bin/ui-offUDP >/dev/null 2>&1
 fi
-systemctl restart iptables-proxy
 
 /usr/local/bin/ui_4h
 systemctl restart v2dns
@@ -1708,6 +1707,7 @@ if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]]
   /usr/local/bin/ui-FWD0vtrui
 fi
 systemctl restart vtrui
+systemctl restart iptables-proxy
 blue "----------------------"
 blue "Install Pi-hole [done]"
 blue "----------------------"
