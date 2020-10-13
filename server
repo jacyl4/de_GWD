@@ -421,6 +421,7 @@ installDOHser(){
 rm -rf /usr/local/bin/doh-server
 
 wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_doh.zip
+rm -rf ~/doh
 unzip ~/doh.zip -d ~/
 mv -f ~/doh/doh-server /usr/local/bin/doh-server
 chmod +x /usr/local/bin/doh-server
@@ -490,6 +491,7 @@ rm -rf /etc/vtrui
 mkdir -p /usr/local/bin/vtrui
 mkdir -p ~/vtrui
 wget --no-check-certificate -c -O ~/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
+rm -rf ~/vtrui
 unzip ~/vtrui.zip -d ~/vtrui
 cp -f ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
 cp -f ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
