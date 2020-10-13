@@ -1508,10 +1508,10 @@ fi
     green  "1. Install de_GWD"
     green  "2. Install bbrplus+fq and reboot"
     green  "3. Install latest kernel BBR and reboot"
-    red    "4. Change static IP"
-    red    "5. Change domain and generate new certificate"
-    red    "6. Change v2ray path & UUID"
-    green  "7. Set v2ray upsteram"
+    red    "4. Change domain and generate new certificate"
+    red    "5. Change v2ray path & UUID"
+    red    "6. Change static IP"
+    yellow "7. Set v2ray upsteram"
     yellow "0. Update de_GWD"
     green  "11.Print v2ray node information"
     red    "00.AutoUpdate turn on/off"
@@ -1532,15 +1532,15 @@ fi
     start_menu
     ;;
     4)
-    changeStaticIP
-    start_menu
-    ;;
-    5)
     changeDomain
     start_menu
     ;;
-    6)
+    5)
     changeV2rayVerify
+    start_menu
+    ;;
+    6)
+    changeStaticIP
     start_menu
     ;;
     7)
