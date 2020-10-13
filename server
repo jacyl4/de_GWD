@@ -402,7 +402,7 @@ verbose: false
 schema_version: 6
 EOF
 
-/opt/AdGuardHome/AdGuardHome -s restart
+systemctl restart AdGuardHome
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
