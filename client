@@ -98,11 +98,13 @@ EOF
 
 rm -rf /usr/local/bin/pihole*
 rm -rf /etc/dnsmasq*
-fi
 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
 apt purge php7.3-cgi php7.3-xml php7.3-intl php7.3-sqlite3 sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
+fi
+
+
 
 rm -rf /usr/local/bin/chnrouteset
 rm -rf /usr/local/bin/chnroute.txt
