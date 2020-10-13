@@ -127,7 +127,7 @@ jq 'del(.clifwd)' /usr/local/bin/0conf |\
 jq 'del(.address.dhcpStart)' |\
 jq 'del(.address.dhcpEnd)' |\
 jq 'del(.address.dhcp)' |\
-jq 'del(.dns.v2ad)' /usr/local/bin/0conf >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq 'del(.dns.v2ad)' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
 mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
 
