@@ -28,8 +28,8 @@ bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
 [de_GWD doc](https://jacyl4.gitbook.io/de-gwd-doc/)
 
 ## Thanks to
-* [ m13253/dns-over-https ](https://github.com/m13253/dns-over-https)
 * [ AdguardTeam/AdGuardHome ](https://github.com/AdguardTeam/AdGuardHome)
+* [ m13253/dns-over-https ](https://github.com/m13253/dns-over-https)
 * [ pymumu/smartdns ](https://github.com/pymumu/smartdns)
 * [ fatedier/frp ](https://github.com/fatedier/frp)
 * [ v2fly/v2ray-core ](https://github.com/v2fly/v2ray-core)
