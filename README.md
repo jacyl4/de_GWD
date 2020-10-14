@@ -1,6 +1,7 @@
 
 [![Telegram](https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg)](https://t.me/de_GWD)  
 
+# To be the fastest router ε=ε=ε=ε=ε=ε=ε=ヽ( ＠_＠)ノ
 
 ![de_GWD](https://i.loli.net/2020/10/12/Mmli1gsXLyUCFEB.png)
 
