@@ -1409,16 +1409,16 @@ filters:
   name: EasyList
   id: 3
 - enabled: true
-  url: https://easylist.to/easylist/easyprivacy.txt
-  name: EasyPrivacy
-  id: 4
-- enabled: true
   url: https://easylist-downloads.adblockplus.org/easylistchina.txt
   name: EasyList China
-  id: 5
+  id: 4
 - enabled: true
   url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjxlist.txt
   name: CJX's EasyList Lite
+  id: 5
+- enabled: false
+  url: https://easylist.to/easylist/easyprivacy.txt
+  name: EasyPrivacy
   id: 6
 - enabled: false
   url: https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext
