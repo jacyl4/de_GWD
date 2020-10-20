@@ -1,0 +1,143 @@
+#!/bin/bash
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+
+cat << EOF >/usr/local/bin/iptables-proxy-up
+#!/bin/bash
+ipset -X chnroute >/dev/null 2>&1
+ipset -X lanip >/dev/null 2>&1
+ipset -X doh >/dev/null 2>&1
+ipset -X v2node >/dev/null 2>&1
+ipset -X listB >/dev/null 2>&1
+ipset -X listW >/dev/null 2>&1
+ipset -X listBlan >/dev/null 2>&1
+ipset -X listWlan >/dev/null 2>&1
+
+lanip="0.0.0.0/8 \
+100.64.0.0/10 \
+127.0.0.0/8 \
+169.254.0.0/16 \
+10.0.0.0/8 \
+172.16.0.0/12 \
+192.168.0.0/16 \
+255.255.255.255/32 \
+114.114.114.114/32 \
+114.114.115.115/32 \
+119.29.29.29/32 \
+119.28.28.28/32 \
+223.5.5.5/32 \
+223.6.6.6/32"
+
+ipset -R < /usr/local/bin/chnrouteSET
+
+ipset -N lanip hash:net family inet hashsize 2048 maxelem 65535
+for iplanip in \$lanip; do
+  ipset add lanip \$iplanip
+done
+
+ipset -N doh hash:ip family inet
+for IPdoh in \$(cat /usr/local/bin/IPdoh); do
+  ipset add doh \$IPdoh
+done
+
+ipset -N v2node hash:ip family inet
+for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+  ipset add v2node \$IPv2node
+done
+
+ipset -N listB hash:ip family inet
+if [[ -n \$(cat /usr/local/bin/IPlistB) ]]; then
+  for iplistB in \$(cat /usr/local/bin/IPlistB); do
+    ipset add listB \$iplistB
+  done
+fi
+
+ipset -N listW hash:ip family inet
+if [[ -n \$(cat /usr/local/bin/IPlistW) ]]; then
+  for iplistW in \$(cat /usr/local/bin/IPlistW); do
+    ipset add listW \$iplistW
+  done
+fi
+
+ipset -N listBlan hash:net family inet
+if [[ -n \$(cat /usr/local/bin/IPlistBlan) ]]; then
+  for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
+    ipset add listBlan \$iplistBlan
+  done
+fi
+
+ipset -N listWlan hash:net family inet
+if [[ -n \$(cat /usr/local/bin/IPlistWlan) ]]; then
+  for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
+    ipset add listWlan \$iplistWlan
+  done
+fi
+
+ip rule add fwmark 0x9 table 100 pref 100
+ip route add local 0.0.0.0/0 dev lo table 100
+
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
+iptables -A INPUT -p tcp -tcp-flags FIN,SYN FIN,SYN -j DROP
+iptables -A INPUT -p tcp -tcp-flags SYN,RST SYN,RST -j DROP
+iptables -A INPUT -p tcp -tcp-flags FIN,RST FIN,RST -j DROP
+iptables -A INPUT -p tcp -tcp-flags FIN,ACK FIN -j DROP
+iptables -A INPUT -p tcp -tcp-flags ACK,URG URG -j DROP
+iptables -A INPUT -p tcp -tcp-flags ACK,FIN FIN -j DROP
+iptables -A INPUT -p tcp -tcp-flags ACK,PSH PSH -j DROP
+iptables -A INPUT -p tcp -tcp-flags ALL ALL -j DROP
+iptables -A INPUT -p tcp -tcp-flags ALL NONE -j DROP
+iptables -A INPUT -p tcp -tcp-flags ALL FIN,PSH,URG -j DROP
+iptables -A INPUT -p tcp -tcp-flags ALL SYN,FIN,PSH,URG -j DROP
+iptables -A INPUT -p tcp -tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+
+iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
+
+iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
+
+iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
+
+iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
+
+iptables -t mangle -A OUTPUT -p tcp -j V2PROXY
+iptables -t mangle -A OUTPUT -p udp -j V2PROXY
+
+iptables -t mangle -A PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
+
+iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+
+if [[ \$(ip --oneline link show up | grep -v lo | awk '{print\$2}') =~ "wg0" ]]; then
+iptables -I FORWARD -i wg0 -j ACCEPT
+iptables -I FORWARD -o wg0 -j ACCEPT
+iptables -t nat -I POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
+fi
+EOF
+chmod +x /usr/local/bin/iptables-proxy-up
+
+jq '.address.udp="on"' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
+
+chmod 666 /usr/local/bin/0conf

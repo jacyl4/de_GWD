@@ -1,0 +1,24 @@
+#!/bin/bash
+systemctl stop updateGWD
+
+systemctl stop iptables-proxy
+systemctl stop vtrui
+systemctl stop v2dns
+systemctl stop AdGuardHome
+
+rm -rf /etc/resolv.conf
+
+cat << EOF >/etc/resolv.conf
+nameserver 114.114.114.114
+nameserver 114.114.115.115
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+nameserver 223.5.5.5
+nameserver 223.6.6.6
+EOF
+
+sed -i '/^\s*$/d' /usr/local/bin/0conf
+if [[ -z $(cat /usr/local/bin/0conf) ]]; then
+	cp -f /usr/local/bin/0conf_bak /usr/local/bin/0conf
+	chmod 666 /usr/local/bin/0conf
+fi

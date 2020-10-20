@@ -1,0 +1,36 @@
+#!/bin/bash
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+statusInstalled=$(green "[ installed ]")
+
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+
+cd ~
+wget --no-check-certificate -c --tries=10 https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
+if [[ $(ls -l ~/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
+mv -f ~/geosite.dat /usr/local/bin/v2dns/geosite.dat
+fi
+
+wget --no-check-certificate -c --tries=10 https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat
+if [[ $(ls -l ~/geoip.dat | awk '{print$5}') -gt 240000 ]]; then
+cp -f ~/geoip.dat /usr/local/bin/v2dns/geoip.dat
+cp -f ~/geoip.dat /usr/local/bin/vtrui/geoip.dat
+rm -rf ~/geoip.dat
+fi
+
+curl -fkSL --retry 10 -m 1800 https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt > /usr/local/bin/IPchnroute
+if [[ $(ls -l /usr/local/bin/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
+cp -f /usr/local/bin/IPchnroute /usr/local/bin/chnrouteSET
+sed -i 's/^/add chnroute &/g' /usr/local/bin/chnrouteSET
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/chnrouteSET
+
+ipset -F chnroute >/dev/null 2>&1
+for IPchnroute in $(cat /usr/local/bin/IPchnroute); do
+  ipset add chnroute $IPchnroute
+done
+fi
+
+echo "$statusInstalled IP & Domain rules"
