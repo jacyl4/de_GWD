@@ -101,7 +101,7 @@ rm -rf /etc/dnsmasq*
 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
+apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5
 fi
 
 

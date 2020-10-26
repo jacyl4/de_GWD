@@ -51,7 +51,7 @@ rm -rf /etc/dnsmasq*
 
 sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-apt purge sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
+apt purge sqlite3 lighttpd dhcpcd5
 fi
 
 
@@ -339,7 +339,7 @@ dns:
   querylog_interval: 1
   querylog_size_memory: 1000
   anonymize_client_ip: false
-  protection_enabled: true
+  protection_enabled: false
   blocking_mode: default
   blocking_ipv4: ""
   blocking_ipv6: ""
@@ -348,7 +348,7 @@ dns:
   safebrowsing_block_host: standard-block.dns.adguard.com
   ratelimit: 0
   ratelimit_whitelist: []
-  refuse_any: true
+  refuse_any: false
   upstream_dns:
   - 8.8.8.8
   - 1.1.1.1
