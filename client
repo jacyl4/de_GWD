@@ -1341,7 +1341,7 @@ dns:
   blocked_services: []
 tls:
 filters:
-- enabled: true
+- enabled: false
   url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
   name: AdGuard DNS filter
   id: 1
