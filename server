@@ -61,6 +61,11 @@ rm -rf /etc/dns-over-https
 rm -rf /etc/nginx/conf.d/0_serverUpstream
 rm -rf /etc/nginx/conf.d/4_v2Proxy
 
+systemctl disable --now doh-server >/dev/null 2>&1
+rm -rf /lib/systemd/system/doh-server.service
+rm -rf /usr/local/bin/doh-server*
+rm -rf "/etc/NetworkManager/dispatcher.d"
+systemctl daemon-reload
 
 
 cd ~
@@ -383,6 +388,17 @@ dns:
   rewrites: []
   blocked_services: []
 tls:
+  enabled: true
+  server_name: $domain
+  force_https: false
+  port_https: 8443
+  port_dns_over_tls: 0
+  allow_unencrypted_doh: true
+  strict_sni_check: false
+  certificate_chain: ""
+  private_key: ""
+  certificate_path: /var/www/ssl/$domain.cer
+  private_key_path: /var/www/ssl/$domain.key
 filters:
 whitelist_filters: []
 user_rules:
@@ -408,75 +424,8 @@ cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
 echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
-/etc/init.d/networking restart
-}
 
-
-
-installDOHser(){
-rm -rf /usr/local/bin/doh-server
-
-wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_doh.zip
-rm -rf ~/doh
-unzip ~/doh.zip -d ~/
-mv -f ~/doh/doh-server /usr/local/bin/doh-server
-chmod +x /usr/local/bin/doh-server
-rm -rf ~/doh*
-
-cat << EOF >/usr/local/bin/doh-server.conf
-listen = [ "127.0.0.1:8053" ]
-
-path = "/dq"
-
-upstream = [ "udp:127.0.0.1:53" ]
-
-timeout = 10
-tries = 3
-verbose = false
-log_guessed_client_ip = false
-EOF
-
-mkdir -p /etc/NetworkManager/dispatcher.d
-
-cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
-#!/bin/bash
-case "$2" in
-    up)
-        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
-        ;;
-    down)
-        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
-        ;;
-    *)
-        exit 0
-        ;;
-esac
-EOF
-
-chmod +x /etc/NetworkManager/dispatcher.d/doh-server
-
-cat << "EOF" > /lib/systemd/system/doh-server.service
-[Unit]
-Description=DNS-over-HTTPS server
-After=network.target
-
-[Service]
-User=root
-Type=simple
-LimitNPROC=64000
-LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/local/bin/doh-server -conf /usr/local/bin/doh-server.conf
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload >/dev/null 2>&1
-systemctl enable doh-server
-systemctl restart doh-server
+sleep 3
 }
 
 
@@ -869,9 +818,11 @@ location ~ /\.(?!well-known).* {
 }
 
 location /dq {
-  proxy_pass                http://127.0.0.1:8053/dq;
+  proxy_pass                http://127.0.0.1:8080/dns-query;
   proxy_set_header          Host \$host;
   proxy_set_header          X-Real-IP \$remote_addr;
+  proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_redirect            off;
   keepalive_requests        25600;
   keepalive_timeout         300 300;
   proxy_buffering           off;
@@ -1037,8 +988,6 @@ installIptablesRules
 installAdG
 
 AdGset
-
-installDOHser
 
 installV2ray
 
@@ -1372,8 +1321,6 @@ installAdG
 
 AdGset
 
-installDOHser
-
 installV2ray
 
 installNginx
@@ -1463,14 +1410,6 @@ elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
     echo "[$statusBAD] AdGuardHome    [not installed]"
 else
     echo "[$statusBAD] AdGuardHome    [start failed]"
-fi
-
-if [[ $(systemctl is-active doh-server) = "active" ]]; then
-    echo "[$statusGOOD] DoH server     [working]"
-elif [[ ! -f "/usr/local/bin/doh-server" ]]; then
-    echo "[$statusBAD] DoH server     [not Installed]"
-else
-    echo "[$statusBAD] DoH server     [start failed]"
 fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
