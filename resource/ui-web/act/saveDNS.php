@@ -40,6 +40,5 @@ shell_exec('sudo systemctl restart doh-client');
 shell_exec('sudo /usr/local/bin/ui-saveListBW');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
-shell_exec('sudo /opt/AdGuardHome/AdGuardHome -s restart');
 ?>
 <?php }?>

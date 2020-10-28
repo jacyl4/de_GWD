@@ -53,10 +53,6 @@ doh_upstream2='url = "https:\/\/'$doh2'"'
 sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /usr/local/bin/doh-client.conf
 sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /usr/local/bin/doh-client.conf
 
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5350"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[1] "https://$doh1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[2] "https://$doh2"
-
 jq --arg key1 "$doh1Domain" --arg value1 "$doh1IP" '.dns.hosts += {($key1): ($value1)}' /tmp/v2dns_config |\
 jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($value2)}' | sponge /tmp/v2dns_config
 
