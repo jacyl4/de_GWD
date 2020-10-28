@@ -397,8 +397,8 @@ tls:
   strict_sni_check: false
   certificate_chain: ""
   private_key: ""
-  certificate_path: ""
-  private_key_path: ""
+  certificate_path: /var/www/ssl/$domain.cer
+  private_key_path: /var/www/ssl/$domain.key
 filters:
 whitelist_filters: []
 user_rules:
