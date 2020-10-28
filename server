@@ -56,16 +56,19 @@ fi
 
 
 
-rm -rf /usr/bin/yq
-rm -rf /etc/dns-over-https
-rm -rf /etc/nginx/conf.d/0_serverUpstream
-rm -rf /etc/nginx/conf.d/4_v2Proxy
-
 systemctl disable --now doh-server >/dev/null 2>&1
 rm -rf /lib/systemd/system/doh-server.service
 rm -rf /usr/local/bin/doh-server*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
+
+
+
+rm -rf /usr/bin/yq
+rm -rf /etc/dns-over-https
+rm -rf /etc/nginx/conf.d/0_serverUpstream
+rm -rf /etc/nginx/conf.d/4_v2Proxy
+
 
 
 cd ~
