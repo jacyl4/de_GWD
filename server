@@ -392,7 +392,7 @@ dns:
   blocked_services: []
 tls:
   enabled: true
-  server_name: $domain
+  server_name: ""
   force_https: false
   port_https: 8443
   port_dns_over_tls: 0
@@ -400,8 +400,8 @@ tls:
   strict_sni_check: false
   certificate_chain: ""
   private_key: ""
-  certificate_path: /var/www/ssl/$domain.cer
-  private_key_path: /var/www/ssl/$domain.key
+  certificate_path: ""
+  private_key_path: ""
 filters:
 whitelist_filters: []
 user_rules:
