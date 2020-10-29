@@ -973,7 +973,7 @@ apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install php7.3-fpm php7.3-opcache php7.3-json moreutils apache2-utils iputils-ping idn2 dns-root-data
+apt install php7.3-fpm php7.3-opcache php7.3-json moreutils apache2-utils iputils-ping
 
 cat << EOF >/etc/php/7.3/fpm/php-fpm.conf
 [global]

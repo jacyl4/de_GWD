@@ -966,7 +966,7 @@ apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install docker-ce docker-ce-cli containerd.io php7.4-fpm php7.4-opcache php7.4-json moreutils apache2-utils iputils-ping idn2 dns-root-data
+apt install docker-ce docker-ce-cli containerd.io php7.4-fpm php7.4-opcache php7.4-json moreutils apache2-utils iputils-ping
 
 sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
 sed -i "/LimitNPROC=/c\LimitNPROC=64000"  /lib/systemd/system/docker.service
