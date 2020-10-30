@@ -1804,14 +1804,6 @@ else
     echo "[$statusBAD] DoH client     [start failed]"
 fi
 
-if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
-    echo "[$statusGOOD] AdGuardHome    [working]"
-elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
-    echo "[$statusBAD] AdGuardHome    [not installed]"
-else
-    echo "[$statusBAD] AdGuardHome    [start failed]"
-fi
-
 if [[ $(systemctl is-active v2dns) = "active" ]]; then
     echo "[$statusGOOD] V2DNS          [working]"
 elif [[ ! -d "/opt/de_GWD/v2dns" ]]; then
@@ -1826,6 +1818,14 @@ elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
     echo "[$statusBAD] V2RAY          [not Installed]"
 else
     echo "[$statusBAD] V2RAY          [start failed]"
+fi
+
+if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
+    echo "[$statusGOOD] AdGuardHome    [working]"
+elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
+    echo "[$statusBAD] AdGuardHome    [not installed]"
+else
+    echo "[$statusBAD] AdGuardHome    [start failed]"
 fi
 
 blue "-----------------------------------------------"
