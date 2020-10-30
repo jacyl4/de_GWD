@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
 	echo "success"
 else
 	echo "outline-secondary"

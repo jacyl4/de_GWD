@@ -31,9 +31,9 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
-<span class="float-right badge text-info"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionARM');?></span>
-<span class="float-right badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionFWD');?></span>
+<span class="float-right badge text-primary"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEdition');?></span>
+<span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
+<span class="float-right badge text-success"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -148,7 +148,7 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">CMD</span>
         </div>
-          <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->updateCMD ?>">
+          <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->updateCMD ?>">
         <div class="input-group-append">
           <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
         </div>

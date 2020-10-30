@@ -25,8 +25,8 @@ elif [[ $architecture = "arm64" ]]; then
     apt install wireguard-dkms wireguard-tools
 fi
 
-if [[ $(jq -r '.wireguard.sprivatekey' /usr/local/bin/0conf) = "null" ]]; then
-    /usr/local/bin/ui-WGchangeKey
+if [[ $(jq -r '.wireguard.sprivatekey' /opt/de_GWD/0conf) = "null" ]]; then
+    /opt/de_GWD/ui-WGchangeKey
 fi
 
 blue "------------------------"

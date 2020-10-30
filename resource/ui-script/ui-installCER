@@ -20,9 +20,9 @@ sed -i '/update_ocsp_cache/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-CFapikey=$(jq -r '.FORWARD.APIkey' /usr/local/bin/0conf)
-CFemail=$(jq -r '.FORWARD.Email' /usr/local/bin/0conf)
-domain=$(jq -r '.FORWARD.domain' /usr/local/bin/0conf)
+CFapikey=$(jq -r '.FORWARD.APIkey' /opt/de_GWD/0conf)
+CFemail=$(jq -r '.FORWARD.Email' /opt/de_GWD/0conf)
+domain=$(jq -r '.FORWARD.domain' /opt/de_GWD/0conf)
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 apt install netcat socat

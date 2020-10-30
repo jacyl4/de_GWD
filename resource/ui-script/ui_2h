@@ -6,7 +6,7 @@ rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
 rm -rf /var/www/html/log.log
 rm -rf /var/www/html/restore/*
-rm -rf /usr/local/bin/__MACOSX
+rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
 
 if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
@@ -14,10 +14,10 @@ cd /lib/modules/
 rm -rf $(ls | grep -v $(uname -r | awk NR==1))
 fi
 
-sed -i '/^\s*$/d' /usr/local/bin/0conf
-if [[ -n $(cat /usr/local/bin/0conf) ]]; then
-	cp -f /usr/local/bin/0conf /usr/local/bin/0conf_bak
-elif [[ -z $(cat /usr/local/bin/0conf) ]]; then
-	cp -f /usr/local/bin/0conf_bak /usr/local/bin/0conf
-	chmod 666 /usr/local/bin/0conf
+sed -i '/^\s*$/d' /opt/de_GWD/0conf
+if [[ -n $(cat /opt/de_GWD/0conf) ]]; then
+	cp -f /opt/de_GWD/0conf /opt/de_GWD/0conf_bak
+elif [[ -z $(cat /opt/de_GWD/0conf) ]]; then
+	cp -f /opt/de_GWD/0conf_bak /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
 fi

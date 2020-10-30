@@ -1,7 +1,7 @@
 #!/bin/bash
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
-cat << EOF >/usr/local/bin/iptables-proxy-up
+cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute >/dev/null 2>&1
 ipset -X lanip >/dev/null 2>&1
@@ -27,7 +27,7 @@ lanip="0.0.0.0/8 \
 223.5.5.5/32 \
 223.6.6.6/32"
 
-ipset -R < /usr/local/bin/chnrouteSET
+ipset -R < /opt/de_GWD/chnrouteSET
 
 ipset -N lanip hash:net family inet hashsize 2048 maxelem 65535
 for iplanip in \$lanip; do
@@ -35,39 +35,39 @@ for iplanip in \$lanip; do
 done
 
 ipset -N doh hash:ip family inet
-for IPdoh in \$(cat /usr/local/bin/IPdoh); do
+for IPdoh in \$(cat /opt/de_GWD/IPdoh); do
   ipset add doh \$IPdoh
 done
 
 ipset -N v2node hash:ip family inet
-for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+for IPv2node in \$(cat /opt/de_GWD/IPv2node); do
   ipset add v2node \$IPv2node
 done
 
 ipset -N listB hash:ip family inet
-if [[ -n \$(cat /usr/local/bin/IPlistB) ]]; then
-  for iplistB in \$(cat /usr/local/bin/IPlistB); do
+if [[ -n \$(cat /opt/de_GWD/IPlistB) ]]; then
+  for iplistB in \$(cat /opt/de_GWD/IPlistB); do
     ipset add listB \$iplistB
   done
 fi
 
 ipset -N listW hash:ip family inet
-if [[ -n \$(cat /usr/local/bin/IPlistW) ]]; then
-  for iplistW in \$(cat /usr/local/bin/IPlistW); do
+if [[ -n \$(cat /opt/de_GWD/IPlistW) ]]; then
+  for iplistW in \$(cat /opt/de_GWD/IPlistW); do
     ipset add listW \$iplistW
   done
 fi
 
 ipset -N listBlan hash:net family inet
-if [[ -n \$(cat /usr/local/bin/IPlistBlan) ]]; then
-  for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
+if [[ -n \$(cat /opt/de_GWD/IPlistBlan) ]]; then
+  for iplistBlan in \$(cat /opt/de_GWD/IPlistBlan); do
     ipset add listBlan \$iplistBlan
   done
 fi
 
 ipset -N listWlan hash:net family inet
-if [[ -n \$(cat /usr/local/bin/IPlistWlan) ]]; then
-  for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
+if [[ -n \$(cat /opt/de_GWD/IPlistWlan) ]]; then
+  for iplistWlan in \$(cat /opt/de_GWD/IPlistWlan); do
     ipset add listWlan \$iplistWlan
   done
 fi
@@ -136,8 +136,8 @@ iptables -I FORWARD -o wg0 -j ACCEPT
 iptables -t nat -I POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
 fi
 EOF
-chmod +x /usr/local/bin/iptables-proxy-up
+chmod +x /opt/de_GWD/iptables-proxy-up
 
-jq '.address.udp="on"' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
+jq '.address.udp="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
-chmod 666 /usr/local/bin/0conf
+chmod 666 /opt/de_GWD/0conf

@@ -31,9 +31,9 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
-<span class="float-right badge text-info"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionARM');?></span>
-<span class="float-right badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionFWD');?></span>
+<span class="float-right badge text-primary"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEdition');?></span>
+<span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
+<span class="float-right badge text-success"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -121,7 +121,7 @@
             <i class="fas fa-cloud"></i>
             <a href="http://www.pubyun.com" target="_blank">F3322 DDNS</a>
 <span class="float-right mt-n1 mb-n2" id="ddns3322button" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322save()">开启</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322save()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322stop()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="ddns3322switch">
@@ -135,21 +135,21 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
         </div>
-          <input type="text" id="f3322domain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->domain ?>">
+          <input type="text" id="f3322domain" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->domain ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">用户名</span>
         </div>
-          <input type="text" id="f3322usr" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->user ?>">
+          <input type="text" id="f3322usr" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->user ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">密码</span>
         </div>
-          <input type="text" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddns3322->pwd ?>">
+          <input type="text" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->pwd ?>">
       </div>
     </div>
           </div>
@@ -161,7 +161,7 @@
             <i class="fas fa-cloud"></i>
             <a href="https://dash.cloudflare.com/login" target="_blank">CloudFlare DDNS</a>
 <span class="float-right mt-n1 mb-n2" id="ddnsCFbutton" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFsave()">开启</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFsave()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFstop()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="ddnsCFswitch">
@@ -175,14 +175,14 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
         </div>
-          <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfDomain ?>">
+          <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfDomain ?>">
       </div>
 
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">Zone ID</span>
         </div>
-          <input type="text" id="CFzoneid" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfZoneID ?>">
+          <input type="text" id="CFzoneid" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfZoneID ?>">
       </div>
     </div>
 
@@ -191,14 +191,14 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">CF API KEY</span>
         </div>
-          <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfAPIkey ?>">
+          <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfAPIkey ?>">
       </div>
 
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">CF E-mail</span>
         </div>
-          <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->ddns->ddnsCF->cfEmail ?>">
+          <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfEmail ?>">
       </div>
     </div>
           </div>
@@ -210,7 +210,7 @@
             <i class="fas fa-bacon"></i>
             FRP
 <span class="float-right mt-n1 mb-n2 ml-4" id="FRPbutton" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkFRP'); ?> btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFRP'); ?> btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
@@ -228,19 +228,19 @@
         <div class="input-group-prepend col-xs-5">
           <span class="input-group-text align-self-center">服务器域名</span>
         </div>
-        <input type="text" id="FRPdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->domain ?>">
+        <input type="text" id="FRPdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->domain ?>">
 
         <div class="input-group-append">
           <span class="input-group-text align-self-center">Bind-Port</span>
         </div>
-          <input type="text" id="FRPbindPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->bindPort ?>">
+          <input type="text" id="FRPbindPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindPort ?>">
 
         <div class="input-group-append">
           <span class="input-group-text align-self-center">Token</span>
         </div>
-          <input type="text" id="FRPtoken" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->token ?>">
+          <input type="text" id="FRPtoken" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->token ?>">
         <div class="input-group-prepend">
-          <button id="FRPbindProtocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->bindProtocol ?></button>
+          <button id="FRPbindProtocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindProtocol ?></button>
             <div class="dropdown-menu">
             <a class="dropdown-item" onclick="FRPbindTCP()" href="#">TCP</a>
             <a class="dropdown-item" onclick="FRPbindKCP()" href="#">KCP</a>
@@ -257,15 +257,15 @@
         <div class="input-group-prepend">
           <span class="input-group-text align-self-center">服务器端口</span>
         </div>
-          <input type="text" id="FRPremotePort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->remotePort ?>">
+          <input type="text" id="FRPremotePort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->remotePort ?>">
 
         <div class="input-group-append">
           <span class="input-group-text align-self-center">本地端口</span>
         </div>
-          <input type="text" id="FRPlocalPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->localPort ?>">  
+          <input type="text" id="FRPlocalPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->localPort ?>">  
 
         <div class="input-group-prepend">
-          <button id="FRPprotocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FRP->protocol ?></button>
+          <button id="FRPprotocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->protocol ?></button>
             <div class="dropdown-menu">
             <a class="dropdown-item" onclick="FRPprotocolTCP()" href="#">TCP</a>
             <a class="dropdown-item" onclick="FRPprotocolUDP()" href="#">UDP</a>
@@ -292,7 +292,7 @@
             <i class="fas fa-archway"></i>
             WireGuard Server
 <span class="float-right mt-n1 mb-n2 ml-4" id="WGbutton" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkWG');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkWG');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="WGoff()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2 ml-4" id="WGswitch">
@@ -310,13 +310,13 @@
           <span class="input-group-text justify-content-center">Endpoint</span>
           <span class="input-group-text justify-content-center">域名/公网IP</span>
         </div>
-          <input type="text" id="WGaddress" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGdomain ?>">
+          <input type="text" id="WGaddress" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGdomain ?>">
       </div>
       <div class="col-md-4 input-group mb-1 mr-auto">
          <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">UDP端口</span>
          </div>
-          <input type="text" id="WGaddressport" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGport ?>">
+          <input type="text" id="WGaddressport" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGport ?>">
          <div class="input-group-append">
           <button type="button" class="btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
          </div>
@@ -330,7 +330,7 @@
           <span class="input-group-text justify-content-center">节点1</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark1" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[0] ?>">
+          <input type="text" id="WGmark1" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[0] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop1" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -339,7 +339,7 @@
           <span class="input-group-text justify-content-center">节点2</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark2" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[1] ?>">
+          <input type="text" id="WGmark2" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[1] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop2" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>
@@ -350,7 +350,7 @@
           <span class="input-group-text justify-content-center">节点3</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark3" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[2] ?>">
+          <input type="text" id="WGmark3" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[2] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop3" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -359,7 +359,7 @@
           <span class="input-group-text justify-content-center">节点4</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark4" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[3] ?>">
+          <input type="text" id="WGmark4" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[3] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop4" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>
@@ -370,7 +370,7 @@
           <span class="input-group-text justify-content-center">节点5</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark5" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[4] ?>">
+          <input type="text" id="WGmark5" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[4] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop5" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -379,7 +379,7 @@
           <span class="input-group-text justify-content-center">节点6</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark6" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[5] ?>">
+          <input type="text" id="WGmark6" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[5] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop6" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>
@@ -390,7 +390,7 @@
           <span class="input-group-text justify-content-center">节点7</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark7" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[6] ?>">
+          <input type="text" id="WGmark7" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[6] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop7" onclick="submitWGmark()">显示二维码</button>
       </div>
 
@@ -399,7 +399,7 @@
           <span class="input-group-text justify-content-center">节点8</span>
           <span class="input-group-text justify-content-center">备注：</span>
         </div>
-          <input type="text" id="WGmark8" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->wireguard->WGmark[7] ?>">
+          <input type="text" id="WGmark8" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[7] ?>">
           <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop8" onclick="submitWGmark()">显示二维码</button>
       </div>
 </div>

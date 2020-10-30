@@ -1,6 +1,6 @@
 #!/bin/bash
 crontab -l > ~/now.cron
 sed -i '/ui-ddns3322/d' ~/now.cron
-echo '*/2 * * * * /usr/local/bin/ui-ddns3322updateIP >/dev/null 2>&1' >> ~/now.cron
+echo '*/2 * * * * /opt/de_GWD/ui-ddns3322updateIP >/dev/null 2>&1' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron

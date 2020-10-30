@@ -31,9 +31,9 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
-<span class="float-right badge text-info"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionARM');?></span>
-<span class="float-right badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionFWD');?></span>
+<span class="float-right badge text-primary"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEdition');?></span>
+<span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
+<span class="float-right badge text-success"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -162,7 +162,7 @@
               </div>
               <a class="card-footer text-white clearfix small z-1">
                 <span id="uptime" class="float-left"></span>
-                <span class="float-right"><?php echo shell_exec('sudo /usr/local/bin/ui-checkStatus');?></span>
+                <span class="float-right"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkStatus');?></span>
               </a>
             </div>
           </div>
@@ -177,7 +177,7 @@
         <h5 class="modal-title" id="markThisLabel">备注本机</h5>
       </div>
       <div class="modal-body">
-        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->alias ?>">
+        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
@@ -224,7 +224,7 @@
     <label class="input-group-text">Netflix 分流</label>
   </div>
   <div class="input-group-append">
-    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodenfnum = exec("/usr/local/bin/ui-checkNodeNF"); echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[$nodenfnum]->name; ?></button>
+    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodenfnum = exec("/opt/de_GWD/ui-checkNodeNF"); echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$nodenfnum]->name; ?></button>
     <div id="nodenf" class="dropdown-menu">
     </div>
   </div>
@@ -234,7 +234,7 @@
 <span class="float-right">
 <div class="input-group mr-4 mt-1 mb-4">
   <div class="input-group-prepend">
-    <button class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkUDP');?>" type="button" onclick="onUDP()">UDP代理</button>
+    <button class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkUDP');?>" type="button" onclick="onUDP()">UDP代理</button>
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="offUDP()">OFF</button>
@@ -260,14 +260,14 @@
               </table>
             </div>
 
-<div id="shnodedt" style="display:<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->divertLan->display; ?>">
+<div id="shnodedt" style="display:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->divertLan->display; ?>">
 <span class="float-left">
 <div class="input-group ml-4 mt-1 mb-1">
   <div class="input-group-prepend">
     <label class="input-group-text">内网设备分流</label>
   </div>
   <div class="input-group-append">
-    <button id="nodedtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodedtnum = exec("/usr/local/bin/ui-checkNodeDT"); echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[$nodedtnum]->name; ?></button>
+    <button id="nodedtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodedtnum = exec("/opt/de_GWD/ui-checkNodeDT"); echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$nodedtnum]->name; ?></button>
     <div id="nodedt" class="dropdown-menu">
     </div>
   </div>
@@ -277,7 +277,7 @@
 <span class="float-right">
 <div class="input-group mr-4 mt-1">
   <div class="input-group-prepend">
-  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['divertLan']['ip'] as $k => $v) {echo "$v ";} ?>">
+  <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['divertLan']['ip'] as $k => $v) {echo "$v ";} ?>">
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
@@ -304,13 +304,13 @@
           </div>
           <div class="card-body">
                 <div class="input-group my-2">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->localIP ?>">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->localIP ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">本机</span>
                 </div>
                 </div>
                 <div class="input-group my-2">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->address->upstreamIP ?>">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->upstreamIP ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">上级</span>
                 </div>
@@ -325,8 +325,8 @@
             <i class="far fa-compass"></i>
             DNS
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$DNSchnw",'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsCHNW()">大陆白名单</button>
-                <button type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$DNSgfw",'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsGFW()">GFWlist</button>
+                <button type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSchnw",'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsCHNW()">大陆白名单</button>
+                <button type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSgfw",'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsGFW()">GFWlist</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="submitDNS()">应用</button>
           </span>
           </div>
@@ -340,7 +340,7 @@
                   DoH 1<br>
                   </span>
                 </div>
-                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->doh1 ?>">
+                <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->dns->doh1 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH1"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
@@ -351,7 +351,7 @@
                   DoH 2<br>
                   </span>
                 </div>
-                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->doh2 ?>">
+                <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->dns->doh2 ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-success" id="pingDOH2"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
@@ -361,7 +361,7 @@
                 <div class="ml-auto mr-3">
                   <div class="input-group my-2">
                     <div class="input-group-prepend">
-                      <button class="btn btn-<?php $apple = file_get_contents('/usr/local/bin/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onAPPLE()">Apple直连</button>
+                      <button class="btn btn-<?php $apple = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onAPPLE()">Apple直连</button>
                     </div>
                     <div class="input-group-append">
                       <button class="btn btn-secondary" type="button" onclick="offAPPLE()">OFF</button>
@@ -379,7 +379,7 @@
                   国内<br>
                   </span>
                 </div>
-                  <textarea id="dnsChina" class="form-control" aria-label="dnsChina" rows="6"><?php echo str_replace(' ', "\n", json_decode(file_get_contents('/usr/local/bin/0conf'))->dns->china) ?></textarea>
+                  <textarea id="dnsChina" class="form-control" aria-label="dnsChina" rows="6"><?php echo str_replace(' ', "\n", json_decode(file_get_contents('/opt/de_GWD/0conf'))->dns->china) ?></textarea>
                 </div>
               </div>
 
@@ -391,7 +391,7 @@
                   静态<br>
                   </span>
                 </div>
-                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6" placeholder="IP 空格 域名"><?php echo shell_exec("sudo /usr/local/bin/ui-hostsCustomize"); ?></textarea>
+                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6" placeholder="IP 空格 域名"><?php echo shell_exec("sudo /opt/de_GWD/ui-hostsCustomize"); ?></textarea>
                 </div>
               </div>
             </div>
@@ -572,7 +572,7 @@ for( let i = 0; i<len; i++){
                           <td class="align-middle"><span id="ping${i}" class='text-success'></span></td>
                           <td class="align-middle"><button id="switch${i}" type="button" class="btn btn-outline-secondary btn-sm">切换</button></td>
                           </tr>`);
-  $('#switch<?php echo exec('/usr/local/bin/ui-checkNode');?>').attr("class", "btn btn-success btn-sm");
+  $('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr("class", "btn btn-success btn-sm");
   $('#switch'+i).click(function(){
     $("#nodeTable td:nth-child(6) button").attr("class", "btn btn-outline-secondary btn-sm");
     $('#switch'+i).attr("class", "btn btn-success btn-sm");

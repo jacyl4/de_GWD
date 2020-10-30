@@ -33,7 +33,7 @@ cpublickey6=$(cat /etc/wireguard/cpublickey6)
 cpublickey7=$(cat /etc/wireguard/cpublickey7)
 cpublickey8=$(cat /etc/wireguard/cpublickey8)
 
-jq --arg sprivatekey "$sprivatekey" '.wireguard.sprivatekey=$sprivatekey' /usr/local/bin/0conf |\
+jq --arg sprivatekey "$sprivatekey" '.wireguard.sprivatekey=$sprivatekey' /opt/de_GWD/0conf |\
 jq --arg spublickey "$spublickey" '.wireguard.spublickey=$spublickey' |\
 jq --arg cprivatekey1 "$cprivatekey1" '.wireguard.cprivatekey1=$cprivatekey1' |\
 jq --arg cprivatekey2 "$cprivatekey2" '.wireguard.cprivatekey2=$cprivatekey2' |\
@@ -50,8 +50,8 @@ jq --arg cpublickey4 "$cpublickey4" '.wireguard.cpublickey4=$cpublickey4' |\
 jq --arg cpublickey5 "$cpublickey5" '.wireguard.cpublickey5=$cpublickey5' |\
 jq --arg cpublickey6 "$cpublickey6" '.wireguard.cpublickey6=$cpublickey6' |\
 jq --arg cpublickey7 "$cpublickey7" '.wireguard.cpublickey7=$cpublickey7' |\
-jq --arg cpublickey8 "$cpublickey8" '.wireguard.cpublickey8=$cpublickey8' | sponge /usr/local/bin/0conf
-chmod 666 /usr/local/bin/0conf
+jq --arg cpublickey8 "$cpublickey8" '.wireguard.cpublickey8=$cpublickey8' | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
 
 rm -rf /etc/wireguard/*key*
 cd ~

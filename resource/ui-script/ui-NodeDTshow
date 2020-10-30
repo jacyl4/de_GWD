@@ -1,14 +1,14 @@
 #!/bin/bash
-domain=$(jq -r '.v2nodeForUpdate[0].address' /usr/local/bin/0conf)
-port=$(jq -r '.v2nodeForUpdate[0].port' /usr/local/bin/0conf)
-uuidnum=$(jq -r '.v2nodeForUpdate[0].uuid' /usr/local/bin/0conf)
-v2path=$(jq -r '.v2nodeForUpdate[0].path' /usr/local/bin/0conf)
+domain=$(jq -r '.v2nodeForUpdate[0].address' /opt/de_GWD/0conf)
+port=$(jq -r '.v2nodeForUpdate[0].port' /opt/de_GWD/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate[0].uuid' /opt/de_GWD/0conf)
+v2path=$(jq -r '.v2nodeForUpdate[0].path' /opt/de_GWD/0conf)
 
-if [[ $(jq -r '.v2nodeForUpdate[1]' /usr/local/bin/0conf 2>/dev/null) != "null" ]]; then
-nfDomain=$(jq -r '.v2nodeForUpdate[1].address' /usr/local/bin/0conf)
-nfPort=$(jq -r '.v2nodeForUpdate[1].port' /usr/local/bin/0conf)
-nfUuidnum=$(jq -r '.v2nodeForUpdate[1].uuid' /usr/local/bin/0conf)
-nfV2path=$(jq -r '.v2nodeForUpdate[1].path' /usr/local/bin/0conf)
+if [[ $(jq -r '.v2nodeForUpdate[1]' /opt/de_GWD/0conf 2>/dev/null) != "null" ]]; then
+nfDomain=$(jq -r '.v2nodeForUpdate[1].address' /opt/de_GWD/0conf)
+nfPort=$(jq -r '.v2nodeForUpdate[1].port' /opt/de_GWD/0conf)
+nfUuidnum=$(jq -r '.v2nodeForUpdate[1].uuid' /opt/de_GWD/0conf)
+nfV2path=$(jq -r '.v2nodeForUpdate[1].path' /opt/de_GWD/0conf)
 else
 nfDomain=$domain
 nfPort=$port
@@ -16,11 +16,11 @@ nfUuidnum=$uuidnum
 nfV2path=$v2path
 fi
 
-if [[ $(jq -r '.v2nodeForUpdate[2]' /usr/local/bin/0conf 2>/dev/null) != "null" ]]; then
-dtDomain=$(jq -r '.v2nodeForUpdate[2].address' /usr/local/bin/0conf)
-dtPort=$(jq -r '.v2nodeForUpdate[2].port' /usr/local/bin/0conf)
-dtUuidnum=$(jq -r '.v2nodeForUpdate[2].uuid' /usr/local/bin/0conf)
-dtV2path=$(jq -r '.v2nodeForUpdate[2].path' /usr/local/bin/0conf)
+if [[ $(jq -r '.v2nodeForUpdate[2]' /opt/de_GWD/0conf 2>/dev/null) != "null" ]]; then
+dtDomain=$(jq -r '.v2nodeForUpdate[2].address' /opt/de_GWD/0conf)
+dtPort=$(jq -r '.v2nodeForUpdate[2].port' /opt/de_GWD/0conf)
+dtUuidnum=$(jq -r '.v2nodeForUpdate[2].uuid' /opt/de_GWD/0conf)
+dtV2path=$(jq -r '.v2nodeForUpdate[2].path' /opt/de_GWD/0conf)
 else
 dtDomain=$domain
 dtPort=$port
@@ -28,9 +28,9 @@ dtUuidnum=$uuidnum
 dtV2path=$v2path
 fi
 
-localip=$(jq -r '.divertLan.ip | to_entries[] | .value' /usr/local/bin/0conf)
+localip=$(jq -r '.divertLan.ip | to_entries[] | .value' /opt/de_GWD/0conf)
 
-cat > /usr/local/bin/vtrui/config.json << EOF
+cat > /opt/de_GWD/vtrui/config.json << EOF
 {
   "dns":{"servers":["localhost"]},
   "inbounds":[
@@ -211,7 +211,7 @@ cat > /usr/local/bin/vtrui/config.json << EOF
 }
 EOF
 
-jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/vtrui/config.json |\
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /opt/de_GWD/vtrui/config.json |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
@@ -225,12 +225,12 @@ jq --arg dtDomain "$dtDomain" '.outbounds[2].settings.vnext[0].address=$dtDomain
 jq --argjson dtPort "$dtPort" '.outbounds[2].settings.vnext[0].port=$dtPort' |\
 jq --arg dtUuidnum "$dtUuidnum" '.outbounds[2].settings.vnext[0].users[0].id=$dtUuidnum' |\
 jq --arg dtV2path "$dtV2path" '.outbounds[2].streamSettings.wsSettings.path=$dtV2path' |\
-jq --arg dtDomain "$dtDomain" '.outbounds[2].streamSettings.tlsSettings.serverName=$dtDomain' | sponge /usr/local/bin/vtrui/config.json
+jq --arg dtDomain "$dtDomain" '.outbounds[2].streamSettings.tlsSettings.serverName=$dtDomain' | sponge /opt/de_GWD/vtrui/config.json
 
 
-/usr/local/bin/ui-changeDivertIP
+/opt/de_GWD/ui-changeDivertIP
 
-jq '.divertLan.display="block"' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
+jq '.divertLan.display="block"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
-chmod 666 /usr/local/bin/vtrui/config.json
-chmod 666 /usr/local/bin/0conf
+chmod 666 /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/0conf
