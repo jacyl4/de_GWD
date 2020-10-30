@@ -79,7 +79,7 @@ if [[ -d /usr/local/bin/frp ]]; then
 mv -f /usr/local/bin/frp /opt/de_GWD/frp
 fi
 
-if [[ -f /usr/local/bin/0conf ]]; then
+if [[ -f /usr/local/bin/0conf ]] && [[ -n $(cat /usr/local/bin/0conf 2>/dev/null) ]]; then
 mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
 mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
 fi
