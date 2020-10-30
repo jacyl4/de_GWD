@@ -1765,7 +1765,7 @@ blue "----------------------"
 
 
 updateGWD(){
-if [[ $(systemctl is-active v2dns) = "active" ]]; then
+if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]]; then
   de_GWDconnect
 fi
 
