@@ -67,6 +67,10 @@ rm -rf /usr/local/bin/doh-server*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
 
+crontab -l > ~/now.cron
+sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
 
 
 cd ~
@@ -932,7 +936,8 @@ chmod +x /opt/de_GWD/Q2H
 /opt/de_GWD/Q2H
 
 crontab -l > ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
+sed -i '/\/opt\/de_GWD\/Q2H/d' ~/now.cron
+
 echo '0 */2 * * * /opt/de_GWD/Q2H' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
