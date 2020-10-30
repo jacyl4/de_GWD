@@ -1345,29 +1345,29 @@ filters:
   url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
   name: AdGuard DNS filter
   id: 1
-- enabled: true
-  url: https://easylist.to/easylist/easylist.txt
-  name: EasyList
-  id: 2
-- enabled: true
-  url: https://easylist-downloads.adblockplus.org/easylistchina.txt
-  name: EasyList China
-  id: 3
-- enabled: true
-  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjxlist.txt
-  name: CJX's EasyList Lite
-  id: 4
-- enabled: true
-  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjx-annoyance.txt
-  name: CJX’s Annoyance List
-  id: 5
-- enabled: true
-  url: https://www.malwaredomainlist.com/hostslist/hosts.txt
-  name: MalwareDomainList.com Hosts List
-  id: 6
 - enabled: false
   url: https://easylist.to/easylist/easyprivacy.txt
   name: EasyPrivacy
+  id: 2
+- enabled: true
+  url: https://easylist.to/easylist/easylist.txt
+  name: EasyList
+  id: 3
+- enabled: true
+  url: https://easylist-downloads.adblockplus.org/easylistchina.txt
+  name: EasyList China
+  id: 4
+- enabled: true
+  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjxlist.txt
+  name: CJX's EasyList Lite
+  id: 5
+- enabled: true
+  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjx-annoyance.txt
+  name: CJX’s Annoyance List
+  id: 6
+- enabled: true
+  url: https://www.malwaredomainlist.com/hostslist/hosts.txt
+  name: MalwareDomainList.com Hosts List
   id: 7
 - enabled: false
   url: https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext
