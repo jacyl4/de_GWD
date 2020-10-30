@@ -32,46 +32,48 @@ aptGlobal="deb.debian.org"
 
 
 preUpdate(){
-if [[ -n $(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf 2>/dev/null) ]]; then
-domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
-port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
-v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
-uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
+if [[ -f "/usr/local/bin/0conf" ]]; then
+  if [[ -n $(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf 2>/dev/null) ]]; then
+  domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
+  port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
+  v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
+  uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
 
-jq 'del(.v2nodeForUpdate)' /usr/local/bin/0conf |\
-jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
-jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
-jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
-jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-fi
-  
-if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
-doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
-hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
-DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
+  jq 'del(.v2nodeForUpdate)' /usr/local/bin/0conf |\
+  jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
+  jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
+  jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
+  jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  fi
+    
+  if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
+  doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
+  doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
+  hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
+  DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
 
-jq 'del(.doh)' /usr/local/bin/0conf |\
-jq 'del(.hosts)' |\
-jq 'del(.v2ad)' |\
-jq 'del(.splitDNS)' |\
-jq 'del(.pihole)' |\
-jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
-jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
-jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
-jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-fi
+  jq 'del(.doh)' /usr/local/bin/0conf |\
+  jq 'del(.hosts)' |\
+  jq 'del(.v2ad)' |\
+  jq 'del(.splitDNS)' |\
+  jq 'del(.pihole)' |\
+  jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
+  jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
+  jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
+  jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  fi
 
-if [[ $(awk '/divertLan/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
-jq '.divertLan={}' /usr/local/bin/0conf |\
-jq '.divertLan.display="none"' |\
-jq '.divertLan.ip=[]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
-fi
+  if [[ $(awk '/divertLan/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
+  jq '.divertLan={}' /usr/local/bin/0conf |\
+  jq '.divertLan.display="none"' |\
+  jq '.divertLan.ip=[]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  fi
 
-if [[ $(jq -r '.address.pihole' /usr/local/bin/0conf 2>/dev/null) != "null" ]]; then
-pwd=$(jq -r '.address.pihole' /usr/local/bin/0conf)
-jq 'del(.address.pihole)' /usr/local/bin/0conf |\
-jq --arg pwd "$pwd" '.address.PWD=$pwd' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  if [[ $(jq -r '.address.pihole' /usr/local/bin/0conf 2>/dev/null) != "null" ]]; then
+  pwd=$(jq -r '.address.pihole' /usr/local/bin/0conf)
+  jq 'del(.address.pihole)' /usr/local/bin/0conf |\
+  jq --arg pwd "$pwd" '.address.PWD=$pwd' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  fi
 fi
 
 mkdir -p /opt/de_GWD
@@ -79,7 +81,7 @@ if [[ -d /usr/local/bin/frp ]]; then
 mv -f /usr/local/bin/frp /opt/de_GWD/frp
 fi
 
-if [[ -f /usr/local/bin/0conf ]] && [[ -n $(cat /usr/local/bin/0conf 2>/dev/null) ]]; then
+if [[ -n $(cat /usr/local/bin/0conf 2>/dev/null) ]]; then
 mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
 mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
 fi
