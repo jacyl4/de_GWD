@@ -1,7 +1,7 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-$conf = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$conf = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
 $DoH1 = $_GET['DoH1'];
 $DoH2 = $_GET['DoH2'];
 
@@ -25,19 +25,19 @@ $conf['dns']['china'] = $dnsChina;
 $conf['dns']['hosts'] = array();
 $conf['dns']['hosts'] = $hosts;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
-file_put_contents('/usr/local/bin/0conf', $newJsonString);
+file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-shell_exec('sudo /usr/local/bin/ui-saveDNSChina');
+shell_exec('sudo /opt/de_GWD/ui-saveDNSChina');
 shell_exec('sudo systemctl restart smartdns');
 
 if ( $conf['dns']['DNSsplit'] === "gfw" ){
-	shell_exec('sudo /usr/local/bin/ui-dnsGFW');
+	shell_exec('sudo /opt/de_GWD/ui-dnsGFW');
 } else {
-	shell_exec('sudo /usr/local/bin/ui-dnsCHNW');
+	shell_exec('sudo /opt/de_GWD/ui-dnsCHNW');
 }
 
 shell_exec('sudo systemctl restart doh-client');
-shell_exec('sudo /usr/local/bin/ui-saveListBW');
+shell_exec('sudo /opt/de_GWD/ui-saveListBW');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
 ?>

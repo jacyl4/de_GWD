@@ -1,7 +1,7 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-$conf = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$conf = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
 $listB = $_GET['listB'];
 $listB = explode("\n",$listB);
 $listB = array_filter($listB);
@@ -27,9 +27,9 @@ $conf['listW'] = $listW;
 $conf['listBlan'] = $listBlan;
 $conf['listWlan'] = $listWlan;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
-file_put_contents('/usr/local/bin/0conf', $newJsonString);
+file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-shell_exec('sudo /usr/local/bin/ui-saveListBW');
+shell_exec('sudo /opt/de_GWD/ui-saveListBW');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
 ?>

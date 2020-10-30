@@ -10,7 +10,7 @@ statusFailed=$(red "[ failed ]")
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 export DEBIAN_FRONTEND=noninteractive
-branch="main"
+branch="dev"
 yq_version="3.4.1"
 ttyd_version="1.6.1"
 de_gwd_nginx="1.19.3"
@@ -74,6 +74,15 @@ jq 'del(.address.pihole)' /usr/local/bin/0conf |\
 jq --arg pwd "$pwd" '.address.PWD=$pwd' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
+if [[ -d /usr/local/bin/frp ]]; then
+mv -f /usr/local/bin/frp /opt/de_GWD/frp
+fi
+
+if [[ -f /usr/local/bin/0conf ]]; then
+mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
+mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
+fi
+
 if [[ -f "/etc/dnsmasq.conf" ]]; then
 cat << EOF >/etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
@@ -106,28 +115,28 @@ fi
 
 
 
-rm -rf /usr/local/bin/chnrouteset
-rm -rf /usr/local/bin/chnroute.txt
-rm -rf /usr/local/bin/Q4am
-rm -rf /usr/local/bin/Q4H
-rm -rf /usr/local/bin/Q2H
+rm -rf /opt/de_GWD/chnrouteset
+rm -rf /opt/de_GWD/chnroute.txt
+rm -rf /opt/de_GWD/Q4am
+rm -rf /opt/de_GWD/Q4H
+rm -rf /opt/de_GWD/Q2H
 rm -rf /etc/dns-over-https
 rm -rf /usr/bin/vtrui
 rm -rf /etc/vtrui
-rm -rf /usr/local/bin/v2dns
-rm -rf /usr/local/bin/vtrui
-rm -rf /usr/local/bin/ttyd
-rm -rf /usr/local/bin/__MACOSX
+rm -rf /opt/de_GWD/v2dns
+rm -rf /opt/de_GWD/vtrui
+rm -rf /opt/de_GWD/ttyd
+rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
 rm -rf /lib/systemd/system/ttyd.service
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
-jq 'del(.clifwd)' /usr/local/bin/0conf |\
+jq 'del(.clifwd)' /opt/de_GWD/0conf |\
 jq 'del(.address.dhcpStart)' |\
 jq 'del(.address.dhcpEnd)' |\
 jq 'del(.address.dhcp)' |\
-jq 'del(.dns.v2ad)' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+jq 'del(.dns.v2ad)' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /opt/de_GWD/0conf
 mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
 mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
 
@@ -147,19 +156,19 @@ cd ~
 source /etc/profile
 service cron stop >/dev/null 2>&1
 
-doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
+doh1=$(jq -r '.dns.doh1' /opt/de_GWD/0conf)
+doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
 
-domain=$(jq -r '.v2nodeForUpdate[0].address' /usr/local/bin/0conf)
-port=$(jq -r '.v2nodeForUpdate[0].port' /usr/local/bin/0conf)
-v2path=$(jq -r '.v2nodeForUpdate[0].path' /usr/local/bin/0conf)
-uuidnum=$(jq -r '.v2nodeForUpdate[0].uuid' /usr/local/bin/0conf)
+domain=$(jq -r '.v2nodeForUpdate[0].address' /opt/de_GWD/0conf)
+port=$(jq -r '.v2nodeForUpdate[0].port' /opt/de_GWD/0conf)
+v2path=$(jq -r '.v2nodeForUpdate[0].path' /opt/de_GWD/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate[0].uuid' /opt/de_GWD/0conf)
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 if [[ -z $domain ]] || [[ -z $v2path ]] || [[ -z $uuidnum ]]; then
-  red "de_GWD /usr/local/bin/0conf is missing"
+  red "de_GWD /opt/de_GWD/0conf is missing"
   exit
 fi
 }
@@ -477,10 +486,10 @@ doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '
 systemctl disable --now doh-client >/dev/null 2>&1
 rm -rf ~/doh
 unzip ~/doh.zip -d ~/
-mv -f ~/doh/doh-client /usr/local/bin/doh-client
-chmod +x /usr/local/bin/doh-client
+mv -f ~/doh/doh-client /opt/de_GWD/doh-client
+chmod +x /opt/de_GWD/doh-client
 
-cat << EOF >/usr/local/bin/doh-client.conf
+cat << EOF >/opt/de_GWD/doh-client.conf
 listen = [ "127.0.0.1:5390" ]
 
 [upstream]
@@ -508,8 +517,8 @@ EOF
 doh_upstream1='url = "https:\/\/'$doh1'"'
 doh_upstream2='url = "https:\/\/'$doh2'"'
 
-sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /usr/local/bin/doh-client.conf
-sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /usr/local/bin/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /opt/de_GWD/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /opt/de_GWD/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /opt/de_GWD/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /opt/de_GWD/doh-client.conf
 mkdir -p /etc/NetworkManager/dispatcher.d/
 
 cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
@@ -540,7 +549,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/local/bin/doh-client -conf /usr/local/bin/doh-client.conf
+ExecStart=/opt/de_GWD/doh-client -conf /opt/de_GWD/doh-client.conf
 Restart=always
 RestartSec=2
 
@@ -562,22 +571,22 @@ echo "$statusInstalled doh-client"
 installV2ray(){
 systemctl disable --now v2dns >/dev/null 2>&1
 systemctl disable --now vtrui >/dev/null 2>&1
-mkdir -p /usr/local/bin/v2dns
-mkdir -p /usr/local/bin/vtrui
+mkdir -p /opt/de_GWD/v2dns
+mkdir -p /opt/de_GWD/vtrui
 
 rm -rf ~/vtrui
 unzip ~/vtrui.zip -d ~/vtrui
-cp -f ~/vtrui/v2ray /usr/local/bin/v2dns/v2dns
-cp -f ~/vtrui/v2ctl /usr/local/bin/v2dns/v2ctl
-cp -f ~/vtrui/v2ray /usr/local/bin/vtrui/vtrui
-cp -f ~/vtrui/v2ctl /usr/local/bin/vtrui/v2ctl
-cp -f ~/vtrui/geoip.dat /usr/local/bin/vtrui/geoip.dat
-chmod +x /usr/local/bin/v2dns/v2dns
-chmod +x /usr/local/bin/v2dns/v2ctl
-chmod +x /usr/local/bin/vtrui/vtrui
-chmod +x /usr/local/bin/vtrui/v2ctl
+cp -f ~/vtrui/v2ray /opt/de_GWD/v2dns/v2dns
+cp -f ~/vtrui/v2ctl /opt/de_GWD/v2dns/v2ctl
+cp -f ~/vtrui/v2ray /opt/de_GWD/vtrui/vtrui
+cp -f ~/vtrui/v2ctl /opt/de_GWD/vtrui/v2ctl
+cp -f ~/vtrui/geoip.dat /opt/de_GWD/vtrui/geoip.dat
+chmod +x /opt/de_GWD/v2dns/v2dns
+chmod +x /opt/de_GWD/v2dns/v2ctl
+chmod +x /opt/de_GWD/vtrui/vtrui
+chmod +x /opt/de_GWD/vtrui/v2ctl
 
-cat << EOF >/usr/local/bin/v2dns/config.json
+cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
@@ -610,9 +619,9 @@ EOF
 
 domainIP=$(dig @127.0.0.1 $domain -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
 
-jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /usr/local/bin/v2dns/config.json |\
+jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json |\
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
-jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
 
 cat << "EOF" > /lib/systemd/system/v2dns.service
 [Unit]
@@ -625,7 +634,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-ExecStart=/usr/local/bin/v2dns/v2dns -config /usr/local/bin/v2dns/config.json
+ExecStart=/opt/de_GWD/v2dns/v2dns -config /opt/de_GWD/v2dns/config.json
 Restart=always
 RestartSec=2
 
@@ -637,7 +646,7 @@ systemctl daemon-reload
 systemctl enable v2dns
 systemctl start v2dns
 
-cat << EOF >/usr/local/bin/vtrui/config.json
+cat << EOF >/opt/de_GWD/vtrui/config.json
 {
 "dns":{"servers":["localhost"]},
 "inbounds":[
@@ -696,11 +705,11 @@ cat << EOF >/usr/local/bin/vtrui/config.json
 }
 EOF
 
-jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /usr/local/bin/vtrui/config.json |\
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /opt/de_GWD/vtrui/config.json |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
-jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /usr/local/bin/vtrui/config.json
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /opt/de_GWD/vtrui/config.json
 
 cat << "EOF" > /lib/systemd/system/vtrui.service
 [Unit]
@@ -714,7 +723,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-ExecStart=/usr/local/bin/vtrui/vtrui -config /usr/local/bin/vtrui/config.json
+ExecStart=/opt/de_GWD/vtrui/vtrui -config /opt/de_GWD/vtrui/config.json
 Restart=always
 RestartSec=2
 
@@ -734,25 +743,25 @@ echo "$statusInstalled v2dns && vtrui"
 
 
 installIptablesProxy(){
-touch /usr/local/bin/IPdoh
-touch /usr/local/bin/IPv2node
-touch /usr/local/bin/IPlistB
-touch /usr/local/bin/IPlistW
-touch /usr/local/bin/IPlistBlan
-touch /usr/local/bin/IPlistWlan
+touch /opt/de_GWD/IPdoh
+touch /opt/de_GWD/IPv2node
+touch /opt/de_GWD/IPlistB
+touch /opt/de_GWD/IPlistW
+touch /opt/de_GWD/IPlistBlan
+touch /opt/de_GWD/IPlistWlan
 
-echo $doh1IP > /usr/local/bin/IPdoh
-echo $doh2IP >> /usr/local/bin/IPdoh
-echo $domainIP > /usr/local/bin/IPv2node
+echo $doh1IP > /opt/de_GWD/IPdoh
+echo $doh2IP >> /opt/de_GWD/IPdoh
+echo $domainIP > /opt/de_GWD/IPv2node
 
-mv -f ~/china /usr/local/bin/chnrouteSET
-sed -i '1,/BEGIN/d' /usr/local/bin/chnrouteSET
-sed -i '/END/,$d' /usr/local/bin/chnrouteSET
-sed -i 's/<br>//g' /usr/local/bin/chnrouteSET
-sed -i 's/^/add chnroute &/g' /usr/local/bin/chnrouteSET
-sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /usr/local/bin/chnrouteSET
+mv -f ~/china /opt/de_GWD/chnrouteSET
+sed -i '1,/BEGIN/d' /opt/de_GWD/chnrouteSET
+sed -i '/END/,$d' /opt/de_GWD/chnrouteSET
+sed -i 's/<br>//g' /opt/de_GWD/chnrouteSET
+sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /opt/de_GWD/chnrouteSET
 
-cat << EOF >/usr/local/bin/iptables-proxy-up
+cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute >/dev/null 2>&1
 ipset -X lanip >/dev/null 2>&1
@@ -778,7 +787,7 @@ lanip="0.0.0.0/8 \
 223.5.5.5/32 \
 223.6.6.6/32"
 
-ipset -R < /usr/local/bin/chnrouteSET
+ipset -R < /opt/de_GWD/chnrouteSET
 
 ipset -N lanip hash:net family inet hashsize 2048 maxelem 65535
 for iplanip in \$lanip; do
@@ -786,39 +795,39 @@ for iplanip in \$lanip; do
 done
 
 ipset -N doh hash:ip family inet
-for IPdoh in \$(cat /usr/local/bin/IPdoh); do
+for IPdoh in \$(cat /opt/de_GWD/IPdoh); do
   ipset add doh \$IPdoh
 done
 
 ipset -N v2node hash:ip family inet
-for IPv2node in \$(cat /usr/local/bin/IPv2node); do
+for IPv2node in \$(cat /opt/de_GWD/IPv2node); do
   ipset add v2node \$IPv2node
 done
 
 ipset -N listB hash:ip family inet
-if [[ -n \$(cat /usr/local/bin/IPlistB) ]]; then
-  for iplistB in \$(cat /usr/local/bin/IPlistB); do
+if [[ -n \$(cat /opt/de_GWD/IPlistB) ]]; then
+  for iplistB in \$(cat /opt/de_GWD/IPlistB); do
     ipset add listB \$iplistB
   done
 fi
 
 ipset -N listW hash:ip family inet
-if [[ -n \$(cat /usr/local/bin/IPlistW) ]]; then
-  for iplistW in \$(cat /usr/local/bin/IPlistW); do
+if [[ -n \$(cat /opt/de_GWD/IPlistW) ]]; then
+  for iplistW in \$(cat /opt/de_GWD/IPlistW); do
     ipset add listW \$iplistW
   done
 fi
 
 ipset -N listBlan hash:net family inet
-if [[ -n \$(cat /usr/local/bin/IPlistBlan) ]]; then
-  for iplistBlan in \$(cat /usr/local/bin/IPlistBlan); do
+if [[ -n \$(cat /opt/de_GWD/IPlistBlan) ]]; then
+  for iplistBlan in \$(cat /opt/de_GWD/IPlistBlan); do
     ipset add listBlan \$iplistBlan
   done
 fi
 
 ipset -N listWlan hash:net family inet
-if [[ -n \$(cat /usr/local/bin/IPlistWlan) ]]; then
-  for iplistWlan in \$(cat /usr/local/bin/IPlistWlan); do
+if [[ -n \$(cat /opt/de_GWD/IPlistWlan) ]]; then
+  for iplistWlan in \$(cat /opt/de_GWD/IPlistWlan); do
     ipset add listWlan \$iplistWlan
   done
 fi
@@ -884,9 +893,9 @@ iptables -t nat -I POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
 fi
 EOF
 
-chmod +x /usr/local/bin/iptables-proxy-up
+chmod +x /opt/de_GWD/iptables-proxy-up
 
-cat << EOF >/usr/local/bin/iptables-proxy-down
+cat << EOF >/opt/de_GWD/iptables-proxy-down
 #!/bin/bash
 iptables -t mangle -F
 iptables -t mangle -X
@@ -908,7 +917,7 @@ ip route flush table 100
 ip rule del fwmark 0x9
 EOF
 
-chmod +x /usr/local/bin/iptables-proxy-down
+chmod +x /opt/de_GWD/iptables-proxy-down
 
 cat << EOF >/lib/systemd/system/iptables-proxy.service
 [Unit]
@@ -918,8 +927,8 @@ Description=iptables-proxy
 User=root
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/bash /usr/local/bin/iptables-proxy-up
-ExecStop=/bin/bash /usr/local/bin/iptables-proxy-down
+ExecStart=/bin/bash /opt/de_GWD/iptables-proxy-up
+ExecStop=/bin/bash /opt/de_GWD/iptables-proxy-down
 
 [Install]
 WantedBy=multi-user.target
@@ -998,7 +1007,7 @@ pm.max_spare_servers = 24
 pm.max_requests = 1000
 
 env[HOSTNAME] = \$HOSTNAME
-env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[PATH] = /opt/de_GWD:/usr/bin:/bin
 env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
@@ -1277,15 +1286,15 @@ wget --no-check-certificate -c -O ~/ui-script.zip https://raw.githubusercontent.
 wget --no-check-certificate -c -O ~/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
 
 if [[ $(ls -l ~/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l ~/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
-rm -rf /usr/local/bin/ui-*
-rm -rf /usr/local/bin/ui_*
+rm -rf /opt/de_GWD/ui-*
+rm -rf /opt/de_GWD/ui_*
 rm -rf /var/www/html/*.php
 rm -rf /var/www/html/act
 rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
 
-unzip ~/ui-script.zip -d /usr/local/bin
+unzip ~/ui-script.zip -d /opt/de_GWD
 unzip ~/ui-web.zip -d /var/www/html
 fi
 
@@ -1294,7 +1303,7 @@ wget --no-check-certificate -c -O /var/www/html/act/version.php https://raw.gith
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
 chmod -R +x /var/www/html
-chmod +x /usr/local/bin/*
+chmod +x /opt/de_GWD/*
 
 docker container exec nginx nginx -s reload
 
@@ -1309,7 +1318,7 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
-ExecStart=/bin/bash /usr/local/bin/ui-update
+ExecStart=/bin/bash /opt/de_GWD/ui-update
 KillMode=process
 
 [Install]
@@ -1495,47 +1504,47 @@ if [[ -z $(dpkg -l moreutils 2>/dev/null) ]]; then
   apt install moreutils
 fi
 
-/usr/local/bin/ui_2h
+/opt/de_GWD/ui_2h
 
 if [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
   installKernel
 fi
 
-/usr/local/bin/ui_am4
+/opt/de_GWD/ui_am4
 
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onUDP >/dev/null 2>&1
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-onUDP >/dev/null 2>&1
 else
-  /usr/local/bin/ui-offUDP >/dev/null 2>&1
+  /opt/de_GWD/ui-offUDP >/dev/null 2>&1
 fi
 
-if [[ $(jq -r '.address.alias' /usr/local/bin/0conf) != "null" ]]; then
-  /usr/local/bin/ui-markThis >/dev/null 2>&1
+if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
+  /opt/de_GWD/ui-markThis >/dev/null 2>&1
 fi
 
-/usr/local/bin/ui-saveDNSChina >/dev/null 2>&1
+/opt/de_GWD/ui-saveDNSChina >/dev/null 2>&1
 systemctl restart smartdns
 
-/usr/local/bin/ui_4h
+/opt/de_GWD/ui_4h
 systemctl restart doh-client
 systemctl restart v2dns
 systemctl restart AdGuardHome
 
-if [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "block" ]]; then
-  /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
-elif [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "none" ]]; then
-  /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
+  /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
+elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "none" ]]; then
+  /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
 fi
 
-if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
-  /usr/local/bin/ui-FWD1save
-  /usr/local/bin/ui-FWD1vtrui
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD1save
+  /opt/de_GWD/ui-FWD1vtrui
   systemctl restart vtrui1
 fi
 
-if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
-  /usr/local/bin/ui-FWD0save
-  /usr/local/bin/ui-FWD0vtrui
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD0save
+  /opt/de_GWD/ui-FWD0vtrui
 fi
 systemctl restart vtrui
 systemctl restart iptables-proxy
@@ -1546,9 +1555,9 @@ sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
 
 cat << EOF >> ~/now.cron
-0 4 * * * /usr/local/bin/ui_am4
-0 */4 * * * /usr/local/bin/ui_4h
-0 */2 * * * /usr/local/bin/ui_2h
+0 4 * * * /opt/de_GWD/ui_am4
+0 */4 * * * /opt/de_GWD/ui_4h
+0 */2 * * * /opt/de_GWD/ui_2h
 EOF
 
 crontab ~/now.cron
@@ -1654,8 +1663,8 @@ nginxSet
 
 installNginxDo
 
-echo "{}" > /usr/local/bin/0conf
-jq '.address={}' /usr/local/bin/0conf |\
+echo "{}" > /opt/de_GWD/0conf
+jq '.address={}' /opt/de_GWD/0conf |\
 jq '.dns={}' |\
 jq '.dns.hosts={}' |\
 jq '.v2node=[]' |\
@@ -1673,8 +1682,8 @@ jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
 jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
 jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' |\
 jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
-jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' | sponge /usr/local/bin/0conf
-chmod 666 /usr/local/bin/0conf
+jq --arg updateCMD "$installCMD" '.updateCMD=$updateCMD' | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
 
 installWebUI
 
@@ -1711,9 +1720,9 @@ pwdHashAdG=$(htpasswd -B -n -b $user $pwd | cut -d: -f2 | awk NR==1)
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].name "$user"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].password "$pwdHashAdG"
 
-jq --arg password "$pwdHash" '.address.PWD=$password' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
+jq --arg password "$pwdHash" '.address.PWD=$password' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
-chmod 666 /usr/local/bin/0conf
+chmod 666 /opt/de_GWD/0conf
 systemctl restart AdGuardHome
 blue "----------------------"
 blue "Change password [done]"
@@ -1725,7 +1734,7 @@ blue "----------------------"
 updateAdG(){
 de_GWDconnect
 
-jq '.dns.servers=[{"address":"127.0.0.1","port":5390}]' /usr/local/bin/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /usr/local/bin/v2dns/config.json
+jq '.dns.servers=[{"address":"127.0.0.1","port":5390}]' /opt/de_GWD/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
 
 systemctl restart v2dns
 sleep 3
@@ -1737,30 +1746,30 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 
-if [[ $(jq -r '.address.udp' /usr/local/bin/0conf) = "on" ]]; then
-  /usr/local/bin/ui-onUDP >/dev/null 2>&1
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-onUDP >/dev/null 2>&1
 else
-  /usr/local/bin/ui-offUDP >/dev/null 2>&1
+  /opt/de_GWD/ui-offUDP >/dev/null 2>&1
 fi
 
-/usr/local/bin/ui_4h
+/opt/de_GWD/ui_4h
 systemctl restart v2dns
 
-if [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "block" ]]; then
-  /usr/local/bin/ui-NodeDTshow >/dev/null 2>&1
-elif [[ $(jq -r '.divertLan.display' /usr/local/bin/0conf 2>/dev/null) = "none" ]]; then
-  /usr/local/bin/ui-NodeDThide >/dev/null 2>&1
+if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
+  /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
+elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "none" ]]; then
+  /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
 fi
 
-if [[ $(jq -r '.FORWARD.FWD1.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
-  /usr/local/bin/ui-FWD1save
-  /usr/local/bin/ui-FWD1vtrui
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD1save
+  /opt/de_GWD/ui-FWD1vtrui
   systemctl restart vtrui1
 fi
 
-if [[ $(jq -r '.FORWARD.FWD0.status' /usr/local/bin/0conf 2>/dev/null) = "on" ]];then
-  /usr/local/bin/ui-FWD0save
-  /usr/local/bin/ui-FWD0vtrui
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD0save
+  /opt/de_GWD/ui-FWD0vtrui
 fi
 systemctl restart vtrui
 systemctl restart iptables-proxy
@@ -1821,7 +1830,7 @@ fi
 
 if [[ $(systemctl is-active doh-client) = "active" ]]; then
     echo "[$statusGOOD] DoH client     [working]"
-elif [[ ! -f "/usr/local/bin/doh-client" ]]; then
+elif [[ ! -f "/opt/de_GWD/doh-client" ]]; then
     echo "[$statusBAD] DoH client     [not Installed]"
 else
     echo "[$statusBAD] DoH client     [start failed]"
@@ -1837,7 +1846,7 @@ fi
 
 if [[ $(systemctl is-active v2dns) = "active" ]]; then
     echo "[$statusGOOD] V2DNS          [working]"
-elif [[ ! -d "/usr/local/bin/v2dns" ]]; then
+elif [[ ! -d "/opt/de_GWD/v2dns" ]]; then
     echo "[$statusBAD] V2DNS          [not Installed]"
 else
     echo "[$statusBAD] V2DNS          [start failed]"
@@ -1845,7 +1854,7 @@ fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY          [working]"
-elif [[ ! -d "/usr/local/bin/vtrui" ]]; then
+elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
     echo "[$statusBAD] V2RAY          [not Installed]"
 else
     echo "[$statusBAD] V2RAY          [start failed]"

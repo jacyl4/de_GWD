@@ -1,12 +1,12 @@
 #!/bin/bash
-FRPdomain=$(jq -r '.FRP.domain' /usr/local/bin/0conf)
-FRPbindPort=$(jq -r '.FRP.bindPort' /usr/local/bin/0conf)
-FRPtoken=$(jq -r '.FRP.token' /usr/local/bin/0conf)
-FRPbindProtocol=$(jq -r '.FRP.bindProtocol' /usr/local/bin/0conf)
+FRPdomain=$(jq -r '.FRP.domain' /opt/de_GWD/0conf)
+FRPbindPort=$(jq -r '.FRP.bindPort' /opt/de_GWD/0conf)
+FRPtoken=$(jq -r '.FRP.token' /opt/de_GWD/0conf)
+FRPbindProtocol=$(jq -r '.FRP.bindProtocol' /opt/de_GWD/0conf)
 
-FRPremotePort=$(jq -r '.FRP.remotePort' /usr/local/bin/0conf)
-FRPlocalPort=$(jq -r '.FRP.localPort' /usr/local/bin/0conf)
-FRPprotocol=$(jq -r '.FRP.protocol' /usr/local/bin/0conf)
+FRPremotePort=$(jq -r '.FRP.remotePort' /opt/de_GWD/0conf)
+FRPlocalPort=$(jq -r '.FRP.localPort' /opt/de_GWD/0conf)
+FRPprotocol=$(jq -r '.FRP.protocol' /opt/de_GWD/0conf)
 
 cat << EOF >/lib/systemd/system/frpc.service
 [Unit]
@@ -19,7 +19,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/local/bin/frp/frpc -c /usr/local/bin/frp/frpc.ini
+ExecStart=/opt/de_GWD/frp/frpc -c /opt/de_GWD/frp/frpc.ini
 Restart=always
 RestartSec=2
 
@@ -28,7 +28,7 @@ WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
 
-cat << EOF >/usr/local/bin/frp/frpc.ini
+cat << EOF >/opt/de_GWD/frp/frpc.ini
 [common]
 server_addr = $FRPdomain
 server_port = $FRPbindPort

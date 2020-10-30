@@ -17,8 +17,8 @@ nameserver 223.5.5.5
 nameserver 223.6.6.6
 EOF
 
-sed -i '/^\s*$/d' /usr/local/bin/0conf
-if [[ -z $(cat /usr/local/bin/0conf) ]]; then
-	cp -f /usr/local/bin/0conf_bak /usr/local/bin/0conf
-	chmod 666 /usr/local/bin/0conf
+sed -i '/^\s*$/d' /opt/de_GWD/0conf
+if [[ -z $(cat /opt/de_GWD/0conf) ]]; then
+	cp -f /opt/de_GWD/0conf_bak /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
 fi

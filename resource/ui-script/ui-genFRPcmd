@@ -1,8 +1,8 @@
 #!/bin/bash
-FRPbindPort=$(jq -r '.FRP.bindPort' /usr/local/bin/0conf)
-FRPtoken=$(jq -r '.FRP.token' /usr/local/bin/0conf)
-FRPbindProtocol=$(jq -r '.FRP.bindProtocol' /usr/local/bin/0conf)
+FRPbindPort=$(jq -r '.FRP.bindPort' /opt/de_GWD/0conf)
+FRPtoken=$(jq -r '.FRP.token' /opt/de_GWD/0conf)
+FRPbindProtocol=$(jq -r '.FRP.bindProtocol' /opt/de_GWD/0conf)
 
-frpCMD=$(jq -r '.updateCMD' /usr/local/bin/0conf | sed 's/client.*/installFRPs.sh)/')
+frpCMD=$(jq -r '.updateCMD' /opt/de_GWD/0conf | sed 's/client.*/installFRPs.sh)/')
 
 echo "$frpCMD $FRPbindPort $FRPtoken $FRPbindProtocol"

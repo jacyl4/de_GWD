@@ -1,6 +1,6 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-shell_exec('sudo /usr/local/bin/ui-ddns3322updateOff');
+shell_exec('sudo /opt/de_GWD/ui-ddns3322updateOff');
 ?>
 <?php }?>

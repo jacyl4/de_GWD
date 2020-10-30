@@ -1,4 +1,4 @@
 #!/bin/bash
 nodeNUM=$1
-url=$(jq -r '.v2node[].domain' /usr/local/bin/0conf | awk NR==$nodeNUM)
+url=$(jq -r '.v2node[].domain' /opt/de_GWD/0conf | awk NR==$nodeNUM)
 wget -O /dev/null https://$url/spt 2>&1 | sed '$d' | awk 'END{print$3}' | sed 's/(//'

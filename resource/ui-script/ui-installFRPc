@@ -15,10 +15,10 @@ wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/ja
 fi
 tar zxvf ~/frp.tar.gz
 
-mkdir -p /usr/local/bin/frp
-mv -f ~/frp_*/frpc /usr/local/bin/frp/frpc
-chmod -R 755 /usr/local/bin/frp
-chown -R root:root /usr/local/bin/frp
+mkdir -p /opt/de_GWD/frp
+mv -f ~/frp_*/frpc /opt/de_GWD/frp/frpc
+chmod -R 755 /opt/de_GWD/frp
+chown -R root:root /opt/de_GWD/frp
 
 rm -rf ~/frp*
 blue "--------------------"
@@ -30,10 +30,10 @@ uninstallFRP(){
 systemctl disable --now frpc
 systemctl daemon-reload
 
-rm -rf /usr/local/bin/frp
+rm -rf /opt/de_GWD/frp
 
-jq 'del(.FRP)' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
-chmod 666 /usr/local/bin/0conf
+jq 'del(.FRP)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
 
 blue "--------------------"
 blue  "uninstall FRP [done]"

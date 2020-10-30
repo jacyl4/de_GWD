@@ -38,8 +38,8 @@ EOF
 
 
 
-doh1=$(jq -r '.dns.doh1' /usr/local/bin/0conf)
-doh2=$(jq -r '.dns.doh2' /usr/local/bin/0conf)
+doh1=$(jq -r '.dns.doh1' /opt/de_GWD/0conf)
+doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
 
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
@@ -50,31 +50,31 @@ doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]
 doh_upstream1='url = "https:\/\/'$doh1'"'
 doh_upstream2='url = "https:\/\/'$doh2'"'
 
-sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /usr/local/bin/doh-client.conf
-sed -i "$(sed -ne '/url =/=' /usr/local/bin/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /usr/local/bin/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /opt/de_GWD/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /opt/de_GWD/doh-client.conf
+sed -i "$(sed -ne '/url =/=' /opt/de_GWD/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /opt/de_GWD/doh-client.conf
 
 jq --arg key1 "$doh1Domain" --arg value1 "$doh1IP" '.dns.hosts += {($key1): ($value1)}' /tmp/v2dns_config |\
 jq --arg key2 "$doh2Domain" --arg value2 "$doh2IP" '.dns.hosts += {($key2): ($value2)}' | sponge /tmp/v2dns_config
 
 echo $doh1IP >/tmp/IPdoh
 echo $doh2IP >>/tmp/IPdoh
-sort /tmp/IPdoh | uniq | sed '/^\s*$/d' >/usr/local/bin/IPdoh
+sort /tmp/IPdoh | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
 
-cat /dev/null >/usr/local/bin/IPv2node
-jq -r '.v2node[].domain' /usr/local/bin/0conf | cut -d: -f1 >/tmp/v2node_temp2
+cat /dev/null >/opt/de_GWD/IPv2node
+jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1 >/tmp/v2node_temp2
 sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
 cat /tmp/v2node_temp | while read line 
 do
 key=$line
 value=$(dig @127.0.0.1 $line -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
-echo $value >>/usr/local/bin/IPv2node
+echo $value >>/opt/de_GWD/IPv2node
 jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config | sponge /tmp/v2dns_config
 done
 
 jq 'del(.dns.hosts[] | select(. == ""))' /tmp/v2dns_config | sponge /tmp/v2dns_config
 
-if [[ -n $(jq -r '.dns.hosts' /usr/local/bin/0conf) ]] && [[ $(jq -r '.dns.hosts' /usr/local/bin/0conf) != "null" ]]; then
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /usr/local/bin/0conf >/tmp/hosts
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf) ]] && [[ $(jq -r '.dns.hosts' /opt/de_GWD/0conf) != "null" ]]; then
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /opt/de_GWD/0conf >/tmp/hosts
 cat /tmp/hosts | while read line 
 do
 key=$(echo $line | awk '{print$1}')
@@ -83,10 +83,10 @@ jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp
 done
 fi
 
-jq '.dns.DNSsplit="gfw"' /usr/local/bin/0conf | sponge /usr/local/bin/0conf
+jq '.dns.DNSsplit="gfw"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
 if [[ -n $(cat /tmp/v2dns_config) ]]; then
-  mv -f /tmp/v2dns_config /usr/local/bin/v2dns/config.json
+  mv -f /tmp/v2dns_config /opt/de_GWD/v2dns/config.json
 fi
 
 rm -rf /tmp/v2dns*
@@ -96,5 +96,5 @@ rm -rf /tmp/hosts
 rm -rf /tmp/listB
 rm -rf /tmp/listW
 
-chmod 666 /usr/local/bin/v2dns/config.json
-chmod 666 /usr/local/bin/0conf
+chmod 666 /opt/de_GWD/v2dns/config.json
+chmod 666 /opt/de_GWD/0conf

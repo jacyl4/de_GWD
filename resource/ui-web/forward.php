@@ -31,9 +31,9 @@
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge text-primary"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEdition');?></span>
-<span class="float-right badge text-info"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionARM');?></span>
-<span class="float-right badge text-success"><?php echo shell_exec('sudo /usr/local/bin/ui-checkEditionFWD');?></span>
+<span class="float-right badge text-primary"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEdition');?></span>
+<span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
+<span class="float-right badge text-success"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -125,21 +125,21 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
         </div>
-          <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->domain ?>">
+          <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->domain ?>">
       </div>
 
       <div class="col-md-5 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">CF API KEY</span>
         </div>
-          <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->APIkey ?>">
+          <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->APIkey ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">CF E-mail</span>
         </div>
-          <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->Email ?>">
+          <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->Email ?>">
       </div>
     </div>
           </div>
@@ -152,7 +152,7 @@
             <i class="fas fa-reply"></i>
             默认中转线
 <span class="float-right mt-n1 mb-n2" id="FWD0button" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkFWD0');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD0save()">开启</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD0');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD0save()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD0stop()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="FWD0switch">
@@ -166,7 +166,7 @@
 
 <span class="float-left mb-3">
 <div class="form-group form-check ml-4 mt-1 mb-1">
-    <input type="checkbox" class="form-check-input" id="portCheck1" <?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->PortCheck1 ?>>
+    <input type="checkbox" class="form-check-input" id="portCheck1" <?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->PortCheck1 ?>>
     <label class="form-check-label" for="portCheck1">阻止外部访问本机53端口</label>
 </div>
 </span>
@@ -177,7 +177,7 @@
                   端口
                   </span>
                 </div>
-                <input type="text" id="FWD0port" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->FWD0->port ?>">
+                <input type="text" id="FWD0port" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD0->port ?>">
               </div>
               </div>
 
@@ -188,7 +188,7 @@
                   Path
                   </span>
                 </div>
-                <input type="text" id="FWD0path" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->FWD0->path ?>">
+                <input type="text" id="FWD0path" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD0->path ?>">
               </div>
               </div>
 
@@ -199,7 +199,7 @@
                   UUID
                   </span>
                 </div>
-                  <textarea id="FWD0uuid" class="form-control" rows="4"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['FORWARD']['FWD0']['uuid'] as $k => $v) {echo "$v\n";} ?></textarea>
+                  <textarea id="FWD0uuid" class="form-control" rows="4"><?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['FORWARD']['FWD0']['uuid'] as $k => $v) {echo "$v\n";} ?></textarea>
                 </div>
               </div>
             </div>
@@ -213,7 +213,7 @@
             <i class="fas fa-reply-all"></i>
             并行中转线
 <span class="float-right mt-n1 mb-n2" id="FWD1button" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /usr/local/bin/ui-checkFWD1');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD1save()">开启</button>
+<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD1');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD1save()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD1stop()">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="FWD1switch">
@@ -231,7 +231,7 @@
     <label class="input-group-text">上级v2节点</label>
   </div>
   <div class="input-group-append">
-    <button id="v2nodeNAMEshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->FWD1->upstream ?>"><?php $v2nodeID = json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->FWD1->upstream; echo json_decode(file_get_contents('/usr/local/bin/0conf'))->v2node[$v2nodeID]->name ?></button>
+    <button id="v2nodeNAMEshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->upstream ?>"><?php $v2nodeID = json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->upstream; echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$v2nodeID]->name ?></button>
     <div id="v2nodeNAME" class="dropdown-menu">
     </div>
   </div>
@@ -244,7 +244,7 @@
                   端口
                   </span>
                 </div>
-                <input type="text" id="FWD1port" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->FWD1->port ?>">
+                <input type="text" id="FWD1port" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->port ?>">
               </div>
               </div>
 
@@ -255,7 +255,7 @@
                   Path
                   </span>
                 </div>
-                <input type="text" id="FWD1path" class="form-control" value="<?php echo json_decode(file_get_contents('/usr/local/bin/0conf'))->FORWARD->FWD1->path ?>">
+                <input type="text" id="FWD1path" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->path ?>">
               </div>
               </div>
 
@@ -266,7 +266,7 @@
                   UUID
                   </span>
                 </div>
-                  <textarea id="FWD1uuid" class="form-control" rows="4"><?php foreach (json_decode(file_get_contents('/usr/local/bin/0conf'), true)['FORWARD']['FWD1']['uuid'] as $k => $v) {echo "$v\n";} ?></textarea>
+                  <textarea id="FWD1uuid" class="form-control" rows="4"><?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['FORWARD']['FWD1']['uuid'] as $k => $v) {echo "$v\n";} ?></textarea>
                 </div>
               </div>
             </div>

@@ -1,10 +1,10 @@
 #!/bin/bash
-rm -rf /usr/local/bin/vtrui1
-mkdir -p /usr/local/bin/vtrui1
-cp -f /usr/local/bin/vtrui/vtrui /usr/local/bin/vtrui1/vtrui1
-cp -f /usr/local/bin/vtrui/v2ctl /usr/local/bin/vtrui1/v2ctl
-cp -f /usr/local/bin/vtrui/geoip.dat /usr/local/bin/vtrui1/geoip.dat
-chmod -R +x /usr/local/bin/vtrui1
+rm -rf /opt/de_GWD/vtrui1
+mkdir -p /opt/de_GWD/vtrui1
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
+cp -f /opt/de_GWD/vtrui/v2ctl /opt/de_GWD/vtrui1/v2ctl
+cp -f /opt/de_GWD/vtrui/geoip.dat /opt/de_GWD/vtrui1/geoip.dat
+chmod -R +x /opt/de_GWD/vtrui1
 
 cat << "EOF" > /lib/systemd/system/vtrui1.service
 [Unit]
@@ -18,7 +18,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-ExecStart=/usr/local/bin/vtrui1/vtrui1 -config /usr/local/bin/vtrui1/config.json
+ExecStart=/opt/de_GWD/vtrui1/vtrui1 -config /opt/de_GWD/vtrui1/config.json
 Restart=always
 RestartSec=2
 
@@ -31,11 +31,11 @@ systemctl enable vtrui1
 systemctl restart vtrui1
 
 
-v2nodeID=$(jq -r '.FORWARD.FWD1.upstream' /usr/local/bin/0conf)
-FWD1path=$(jq -r '.FORWARD.FWD1.path' /usr/local/bin/0conf)
-FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[]' /usr/local/bin/0conf)
+v2nodeID=$(jq -r '.FORWARD.FWD1.upstream' /opt/de_GWD/0conf)
+FWD1path=$(jq -r '.FORWARD.FWD1.path' /opt/de_GWD/0conf)
+FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[]' /opt/de_GWD/0conf)
 
-v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /usr/local/bin/0conf)
+v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf)
 domain=$(echo $v2servn | cut -d: -f1)
 port=$(echo $v2servn | cut -d: -f2)
 portCheck=$(echo $port | grep '^[0-9]\+$')
@@ -43,10 +43,10 @@ if [[ -z $portCheck ]]; then
 port="443"
 fi
 
-uuidnum=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /usr/local/bin/0conf)
-v2path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /usr/local/bin/0conf)
+uuidnum=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf)
+v2path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0conf)
 
-cat > /usr/local/bin/vtrui1/config.json << EOF
+cat > /opt/de_GWD/vtrui1/config.json << EOF
 {
   "dns":{"servers":["localhost"]},
   "inbounds":[
@@ -133,7 +133,7 @@ cat > /usr/local/bin/vtrui1/config.json << EOF
 }
 EOF
 
-jq '.inbounds[0].settings.clients=[]' /usr/local/bin/vtrui1/config.json |\
+jq '.inbounds[0].settings.clients=[]' /opt/de_GWD/vtrui1/config.json |\
 jq --arg FWD1path "$FWD1path" '.inbounds[0].streamSettings.wsSettings.path=$FWD1path' |\
 jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
@@ -152,8 +152,8 @@ do
 jq --argjson v2uuids "$v2uuids" '.inbounds[0].settings.clients+=[$v2uuids]' /tmp/vtrui1_temp | sponge /tmp/vtrui1_temp
 done
 
-mv -f /tmp/vtrui1_temp /usr/local/bin/vtrui1/config.json
+mv -f /tmp/vtrui1_temp /opt/de_GWD/vtrui1/config.json
 
 rm -rf /tmp/v2uuids
 
-chmod 666 /usr/local/bin/vtrui1/config.json
+chmod 666 /opt/de_GWD/vtrui1/config.json

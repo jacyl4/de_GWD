@@ -1,6 +1,6 @@
 <?php
     session_start();
-    $PWDhash = json_decode(file_get_contents('/usr/local/bin/0conf'))->address->PWD;
+    $PWDhash = json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->PWD;
     if(isset($PWDhash))
     {
         $GWDpwhash = $PWDhash;

@@ -31,11 +31,11 @@ cd ~
 wget --no-check-certificate -O ~/frp.tar.gz $mirrorSite/amd64_frp.tar.gz
 tar zxvf ~/frp.tar.gz
 
-mkdir -p /usr/local/bin/frp
-mv -f ~/frp_*/frps /usr/local/bin/frp/frps
+mkdir -p /opt/de_GWD/frp
+mv -f ~/frp_*/frps /opt/de_GWD/frp/frps
 
 
-cat << EOF >/usr/local/bin/frp/frps.ini
+cat << EOF >/opt/de_GWD/frp/frps.ini
 [common]
 bind_addr = 0.0.0.0
 $bind_port
@@ -53,7 +53,7 @@ Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/usr/local/bin/frp/frps -c /usr/local/bin/frp/frps.ini
+ExecStart=/opt/de_GWD/frp/frps -c /opt/de_GWD/frp/frps.ini
 Restart=always
 RestartSec=2
 
@@ -65,8 +65,8 @@ systemctl enable frps
 systemctl restart frps
 
 
-chmod -R 755 /usr/local/bin/frp
-chown -R root:root /usr/local/bin/frp
+chmod -R 755 /opt/de_GWD/frp
+chown -R root:root /opt/de_GWD/frp
 
 rm -rf ~/frp*
 blue "--------------------"
@@ -79,7 +79,7 @@ systemctl stop frps
 rm -rf /lib/systemd/system/frps.service
 systemctl daemon-reload
 
-rm -rf /usr/local/bin/frp
+rm -rf /opt/de_GWD/frp
 blue "--------------------"
 blue  "uninstall FRP [done]"
 blue "--------------------"
@@ -91,7 +91,7 @@ statusBAD=$(red "✕")
 
 if [[ $(systemctl is-active frps) = "active" ]]; then
     echo " [$statusGOOD] FRP         [working]"
-elif [[ ! -f "/usr/local/bin/frp/frps" ]]; then
+elif [[ ! -f "/opt/de_GWD/frp/frps" ]]; then
     echo " [$statusBAD] FRP         [not Installed]"
 else
     echo " [$statusBAD] FRP         [start failed]"

@@ -1,5 +1,5 @@
 <?php
 putenv("dohNUM=2");
-system('sudo /usr/local/bin/ui-pingICMPDOH $dohNUM');
+system('sudo /opt/de_GWD/ui-pingICMPDOH $dohNUM');
 die();
 ?>

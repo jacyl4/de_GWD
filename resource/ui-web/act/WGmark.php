@@ -10,7 +10,7 @@ $WGmark6 = $_GET['WGmark6'];
 $WGmark7 = $_GET['WGmark7'];
 $WGmark8 = $_GET['WGmark8'];
 
-$data = json_decode(file_get_contents('/usr/local/bin/0conf'), true);
+$data = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
 $data['wireguard']['WGmark'][0] = $WGmark1;
 $data['wireguard']['WGmark'][1] = $WGmark2;
 $data['wireguard']['WGmark'][2] = $WGmark3;
@@ -20,7 +20,7 @@ $data['wireguard']['WGmark'][5] = $WGmark6;
 $data['wireguard']['WGmark'][6] = $WGmark7;
 $data['wireguard']['WGmark'][7] = $WGmark8;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
-file_put_contents('/usr/local/bin/0conf', $newJsonString);
+file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
 ?>
 <?php }?>

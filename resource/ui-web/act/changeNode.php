@@ -7,7 +7,7 @@ $nodepre = fopen("nodepre.txt", "w");
 fwrite($nodepre, $nodenum);
 fclose($nodepre);
 
-shell_exec('sudo /usr/local/bin/ui-changeNode');
+shell_exec('sudo /opt/de_GWD/ui-changeNode');
 shell_exec('sudo systemctl restart vtrui');
 ?>
 <?php }?>
