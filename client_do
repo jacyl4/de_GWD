@@ -1540,6 +1540,9 @@ crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
 sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
+sed -i '/\/opt\/de_GWD\/ui_am4/d' ~/now.cron
+sed -i '/\/opt\/de_GWD\/ui_4h/d' ~/now.cron
+sed -i '/\/opt\/de_GWD\/ui_2h/d' ~/now.cron
 
 cat << EOF >> ~/now.cron
 0 4 * * * /opt/de_GWD/ui_am4
