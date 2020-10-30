@@ -240,7 +240,7 @@
         </div>
           <input type="text" id="FRPtoken" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->token ?>">
         <div class="input-group-prepend">
-          <button id="FRPbindProtocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindProtocol ?></button>
+          <button id="FRPbindProtocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindProtocol ?>"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindProtocol ?></button>
             <div class="dropdown-menu">
             <a class="dropdown-item" onclick="FRPbindTCP()" href="#">TCP</a>
             <a class="dropdown-item" onclick="FRPbindKCP()" href="#">KCP</a>
@@ -265,7 +265,7 @@
           <input type="text" id="FRPlocalPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->localPort ?>">  
 
         <div class="input-group-prepend">
-          <button id="FRPprotocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->protocol ?></button>
+          <button id="FRPprotocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->protocol ?>"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->protocol ?></button>
             <div class="dropdown-menu">
             <a class="dropdown-item" onclick="FRPprotocolTCP()" href="#">TCP</a>
             <a class="dropdown-item" onclick="FRPprotocolUDP()" href="#">UDP</a>
