@@ -64,7 +64,7 @@ rm -rf /etc/dnsmasq*
 
 sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-apt purge sqlite3 lighttpd dhcpcd5
+apt purge sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
 fi
 
 
