@@ -27,7 +27,6 @@ installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client)"
 tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"; }
 
 aptLocal="mirrors.aliyun.com"
-aptGlobal="deb.debian.org"
 
 
 
@@ -276,7 +275,7 @@ Dpkg::Options {
 EOF
 
 apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf smartdns
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
@@ -421,11 +420,9 @@ EOF
 tcpTime && hwclock -w
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/arm64_smartdns.deb
   wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/arm64_doh.zip
   wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
   wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
   wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
 fi
@@ -435,12 +432,7 @@ wget --no-check-certificate -c -O ~/china https://bgp.space/china.html
 
 
 
-installSmartDNS(){
-systemctl disable --now smartdns >/dev/null 2>&1
-dpkg --configure -a
-dpkg --purge --force-all smartdns >/dev/null 2>&1
-dpkg -i ~/smartdns.deb
-
+SmartDNSset(){
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310
@@ -464,34 +456,7 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-rm -rf /var/run/smartdns.pid
-touch /var/run/smartdns.pid
-cat << "EOF" > /lib/systemd/system/smartdns.service
-[Unit]
-Description=SmartDNS server
-After=network.target
-StartLimitBurst=0
-StartLimitIntervalSec=60
-
-[Service]
-Type=forking
-PIDFile=/var/run/smartdns.pid
-LimitNPROC=64000
-LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-EnvironmentFile=/etc/default/smartdns
-ExecStart=/usr/sbin/smartdns $SMART_DNS_OPTS
-ExecStop=/bin/kill -s QUIT $MAINPID
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable smartdns
-systemctl start smartdns
+systemctl restart smartdns
 
 echo "$statusInstalled smartdns"
 }
@@ -981,9 +946,10 @@ fi
 if [[ $architecture = "amd64" ]]; then
 
 cat << EOF >/etc/apt/sources.list
-deb http://$aptGlobal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://$aptGlobal/debian-security/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
-deb http://$aptGlobal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
+deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-backports main contrib non-free
+deb http://deb.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 EOF
 
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
@@ -1600,12 +1566,12 @@ gateway $gatewayaddr
 EOF
 
 if [[ $architecture = "amd64" ]]; then
-rm -rf /etc/apt/sources.list.d/*
 
 cat << EOF >/etc/apt/sources.list
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
+deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-backports main contrib non-free
+deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 EOF
 
 fi
@@ -1616,7 +1582,7 @@ preConf
 
 preDownload
 
-installSmartDNS
+SmartDNSset
 
 installDoH
 
@@ -1759,7 +1725,7 @@ preConf
 
 preDownload
 
-installSmartDNS
+SmartDNSset
 
 installDoH
 
