@@ -116,6 +116,8 @@ rm -rf /usr/local/bin/0conf
 rm -rf /usr/local/bin/chnrouteSET
 rm -rf /usr/local/bin/doh*
 rm -rf /usr/local/bin/IP*
+rm -rf /usr/local/bin/listW*
+rm -rf /usr/local/bin/listB*
 rm -rf /usr/local/bin/iptables*
 rm -rf /usr/local/bin/ui*
 rm -rf /usr/local/bin/v2dns
