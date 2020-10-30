@@ -1274,24 +1274,26 @@ openssl req -x509 -nodes -days 3650 \
   -out de_GWD.cer
 fi
 
-docker stop nginx >/dev/null 2>&1
-docker rm nginx >/dev/null 2>&1
+if [[ $(docker image ls 2>/dev/null | awk '/nginx/{print$2}') != $de_gwd_nginx ]]; then
+  docker stop nginx >/dev/null 2>&1
+  docker rm nginx >/dev/null 2>&1
 
-docker image ls | sed 1d | awk '/nginx/' | awk '{print$3}' | while read line
-do
-docker rmi $line
-done
+  docker image ls | awk '/nginx/{print$3}' | while read line
+  do
+  docker rmi $line
+  done
 
-docker pull jacyl4/de_gwd_nginx:$de_gwd_nginx
+  docker pull jacyl4/de_gwd_nginx:$de_gwd_nginx
 
-docker run -d --name=nginx --net=host --restart=always \
--v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
--v /var/www/html/:/var/www/html/ \
--v /var/www/ssl/:/var/www/ssl/ \
--v /run/php/:/run/php/ \
-jacyl4/de_gwd_nginx:$de_gwd_nginx
+  docker run -d --name=nginx --net=host --restart=always \
+  -v /etc/localtime:/etc/localtime \
+  -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  -v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
+  -v /var/www/html/:/var/www/html/ \
+  -v /var/www/ssl/:/var/www/ssl/ \
+  -v /run/php/:/run/php/ \
+  jacyl4/de_gwd_nginx:$de_gwd_nginx
+fi
 }
 
 
@@ -1359,7 +1361,10 @@ echo "$statusInstalled WebUI"
 
 
 installAdG(){
-if [ ! -d "/opt/AdGuardHome" ]; then
+if [[ $(/opt/AdGuardHome/AdGuardHome --version 2>/dev/null | awk '{print$4}' | sed 's/.$//') != $(curl --silent "https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest" | jq -r .tag_name | sed 's/^.//') ]]; then
+  rm -rf /opt/AdGuardHome
+  rm -rf /etc/systemd/system/AdGuardHome.service
+
   curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
 fi
 
@@ -1905,7 +1910,6 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "8. update Nginx(docker)"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo ""
@@ -1917,14 +1921,6 @@ blue "-----------------------------------------------"
     ;;
     2)
     change_PWD
-    start_menu
-    ;;
-    8)
-    installNginxDo
-    start_menu
-    ;;
-    9)
-    updateAdG
     start_menu
     ;;
     0)

@@ -1302,7 +1302,10 @@ echo "$statusInstalled WebUI"
 
 
 installAdG(){
-if [ ! -d "/opt/AdGuardHome" ]; then
+if [[ $(/opt/AdGuardHome/AdGuardHome --version 2>/dev/null | awk '{print$4}' | sed 's/.$//') != $(curl --silent "https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest" | jq -r .tag_name | sed 's/^.//') ]]; then
+  rm -rf /opt/AdGuardHome
+  rm -rf /etc/systemd/system/AdGuardHome.service
+
   curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
 fi
 
@@ -1849,10 +1852,6 @@ blue "-----------------------------------------------"
     ;;
     2)
     change_PWD
-    start_menu
-    ;;
-    9)
-    updateAdG
     start_menu
     ;;
     0)
