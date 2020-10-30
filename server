@@ -14,23 +14,10 @@ de_gwd_nginx="1.19.3"
 
 
 preUpdate(){
-if [[ -f /etc/vtrui/config.json ]]; then
-  mkdir -p /usr/local/bin/vtrui
-  cp -f /etc/vtrui/config.json /usr/local/bin/vtrui/config.json
-  rm -rf /etc/vtrui
-fi
-
 if [[ -f "/etc/nginx/conf.d/supp_head" ]] && [[ -f "/etc/nginx/conf.d/supp_body" ]]; then
 mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_top
 mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
 rm -f /etc/nginx/conf.d/3_proxyPath
-fi
-
-if [[ -z $(awk '/nginx/' /var/www/ssl/update_ocsp_cache) ]]; then
-sed -i '/nginx/d' /var/www/ssl/update_ocsp_cache
-echo "docker container exec nginx nginx -s reload" >>/var/www/ssl/update_ocsp_cache
-chmod +x /var/www/ssl/update_ocsp_cache
-/var/www/ssl/update_ocsp_cache
 fi
 
 mkdir -p /opt/de_GWD
@@ -48,6 +35,13 @@ rm -rf /usr/local/bin/Q2H
 rm -rf /usr/local/bin/version.php
 rm -rf /usr/local/bin/vtrui
 
+rm -rf /usr/bin/yq
+rm -rf /etc/dns-over-https
+rm -rf /etc/nginx/conf.d/0_serverUpstream
+rm -rf /etc/nginx/conf.d/4_v2Proxy
+
+
+
 if [[ -d "/etc/pihole" ]]; then
 usermod -G www-data www-data
 killall -u pihole >/dev/null 2>&1
@@ -64,23 +58,14 @@ rm -rf /etc/dnsmasq*
 
 sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-apt purge sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
+apt purge sqlite3 lighttpd dhcpcd5
 fi
-
-
 
 systemctl disable --now doh-server >/dev/null 2>&1
 rm -rf /lib/systemd/system/doh-server.service
 rm -rf /usr/local/bin/doh-server*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
-
-
-
-rm -rf /usr/bin/yq
-rm -rf /etc/dns-over-https
-rm -rf /etc/nginx/conf.d/0_serverUpstream
-rm -rf /etc/nginx/conf.d/4_v2Proxy
 
 
 
@@ -114,7 +99,6 @@ echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
 fi
 
 rm -rf /etc/resolv.conf
-
 cat << EOF >/etc/resolv.conf
 nameserver 8.8.8.8
 nameserver 1.1.1.1
@@ -336,7 +320,10 @@ systemctl restart iptablesrules
 
 
 installAdG(){
-if [ ! -d "/opt/AdGuardHome" ]; then
+if [[ $(/opt/AdGuardHome/AdGuardHome --version 2>/dev/null | awk '{print$4}' | sed 's/.$//') != $(curl --silent "https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest" | jq -r .tag_name | sed 's/^.//') ]]; then
+  rm -rf /opt/AdGuardHome
+  rm -rf /etc/systemd/system/AdGuardHome.service
+
   curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
 fi
 }
@@ -620,34 +607,38 @@ http {
 }
 EOF
 
-docker stop nginx >/dev/null 2>&1
-docker rm nginx >/dev/null 2>&1
+if [[ $(docker image ls 2>/dev/null | awk '/nginx/{print$2}') != $de_gwd_nginx ]]; then
+  docker stop nginx >/dev/null 2>&1
+  docker rm nginx >/dev/null 2>&1
 
-docker image ls | sed 1d | awk '/nginx/' | awk '{print$3}' | while read line
-do
-docker rmi $line
-done
+  docker image ls | awk '/nginx/{print$3}' | while read line
+  do
+  docker rmi $line
+  done
 
-if [[ -d "/etc/php" ]]; then
-mkdir -p /run/php
-chown -R www-data:www-data /run/php
+  docker pull jacyl4/de_gwd_nginx:$de_gwd_nginx
 
-docker run -d --name=nginx --net=host --restart=always \
--v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
--v /run/php/:/run/php/ \
--v /var/www/html/:/var/www/html/ \
--v /var/www/ssl/:/var/www/ssl/ \
-jacyl4/de_gwd_nginx:$de_gwd_nginx
-else
-docker run -d --name=nginx --net=host --restart=always \
--v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
--v /var/www/html/:/var/www/html/ \
--v /var/www/ssl/:/var/www/ssl/ \
-jacyl4/de_gwd_nginx:$de_gwd_nginx
+  if [[ -d "/etc/php" ]]; then
+  mkdir -p /run/php
+  chown -R www-data:www-data /run/php
+
+  docker run -d --name=nginx --net=host --restart=always \
+  -v /etc/localtime:/etc/localtime \
+  -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  -v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
+  -v /run/php/:/run/php/ \
+  -v /var/www/html/:/var/www/html/ \
+  -v /var/www/ssl/:/var/www/ssl/ \
+  jacyl4/de_gwd_nginx:$de_gwd_nginx
+  else
+  docker run -d --name=nginx --net=host --restart=always \
+  -v /etc/localtime:/etc/localtime \
+  -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  -v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
+  -v /var/www/html/:/var/www/html/ \
+  -v /var/www/ssl/:/var/www/ssl/ \
+  jacyl4/de_gwd_nginx:$de_gwd_nginx
+  fi
 fi
 }
 

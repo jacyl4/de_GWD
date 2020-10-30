@@ -26,33 +26,6 @@ aptGlobal="deb.debian.org"
 
 
 
-preDownload() {
-systemctl stop iptables-proxy >/dev/null 2>&1
-systemctl stop vtrui >/dev/null 2>&1
-systemctl stop v2dns >/dev/null 2>&1
-systemctl stop AdGuardHome >/dev/null 2>&1
-
-rm -rf /etc/resolv.conf
-
-cat << EOF >/etc/resolv.conf
-nameserver 114.114.114.114
-nameserver 114.114.115.115
-nameserver 119.29.29.29
-nameserver 119.28.28.28
-nameserver 223.5.5.5
-nameserver 223.6.6.6
-EOF
-
-tcpTime && hwclock -w
-
-wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
-wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
-wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
-wget --no-check-certificate -c -O ~/china https://bgp.space/china.html
-}
-
-
-
 preUpdate(){
 if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
 rm -rf /etc/php/7.3/
@@ -115,9 +88,9 @@ fi
 
 rm -rf /usr/local/bin/0conf
 rm -rf /usr/local/bin/chnrouteSET
-rm -rf /usr/local/bin/iptables*
 rm -rf /usr/local/bin/doh*
 rm -rf /usr/local/bin/IP*
+rm -rf /usr/local/bin/iptables*
 rm -rf /usr/local/bin/ui*
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/local/bin/vtrui*
@@ -149,7 +122,7 @@ rm -rf /etc/dnsmasq*
 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5 idn2 dns-root-data
+apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5
 fi
 
 
@@ -424,6 +397,33 @@ fi
 sysctl -p
 
 mkdir -p /opt/de_GWD
+}
+
+
+
+preDownload() {
+systemctl stop iptables-proxy >/dev/null 2>&1
+systemctl stop vtrui >/dev/null 2>&1
+systemctl stop v2dns >/dev/null 2>&1
+systemctl stop AdGuardHome >/dev/null 2>&1
+
+rm -rf /etc/resolv.conf
+
+cat << EOF >/etc/resolv.conf
+nameserver 114.114.114.114
+nameserver 114.114.115.115
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+nameserver 223.5.5.5
+nameserver 223.6.6.6
+EOF
+
+tcpTime && hwclock -w
+
+wget --no-check-certificate -c -O ~/smartdns.deb $mirrorSite/amd64_smartdns.deb
+wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
+wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
+wget --no-check-certificate -c -O ~/china https://bgp.space/china.html
 }
 
 
@@ -1274,22 +1274,26 @@ openssl req -x509 -nodes -days 3650 \
   -out de_GWD.cer
 fi
 
-docker stop nginx >/dev/null 2>&1
-docker rm nginx >/dev/null 2>&1
+if [[ $(docker image ls 2>/dev/null | awk '/nginx/{print$2}') != $de_gwd_nginx ]]; then
+  docker stop nginx >/dev/null 2>&1
+  docker rm nginx >/dev/null 2>&1
 
-docker image ls | sed 1d | awk '/nginx/' | awk '{print$3}' | while read line
-do
-docker rmi $line
-done
+  docker image ls | awk '/nginx/{print$3}' | while read line
+  do
+  docker rmi $line
+  done
 
-docker run -d --name=nginx --net=host --restart=always \
--v /etc/localtime:/etc/localtime \
--v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
--v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
--v /var/www/html/:/var/www/html/ \
--v /var/www/ssl/:/var/www/ssl/ \
--v /run/php/:/run/php/ \
-jacyl4/de_gwd_nginx:$de_gwd_nginx
+  docker pull jacyl4/de_gwd_nginx:$de_gwd_nginx
+
+  docker run -d --name=nginx --net=host --restart=always \
+  -v /etc/localtime:/etc/localtime \
+  -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  -v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
+  -v /var/www/html/:/var/www/html/ \
+  -v /var/www/ssl/:/var/www/ssl/ \
+  -v /run/php/:/run/php/ \
+  jacyl4/de_gwd_nginx:$de_gwd_nginx
+fi
 }
 
 
@@ -1357,7 +1361,10 @@ echo "$statusInstalled WebUI"
 
 
 installAdG(){
-if [ ! -d "/opt/AdGuardHome" ]; then
+if [[ $(/opt/AdGuardHome/AdGuardHome --version 2>/dev/null | awk '{print$4}' | sed 's/.$//') != $(curl --silent "https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest" | jq -r .tag_name | sed 's/^.//') ]]; then
+  rm -rf /opt/AdGuardHome
+  rm -rf /etc/systemd/system/AdGuardHome.service
+
   curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
 fi
 
@@ -1456,9 +1463,13 @@ filters:
   name: 'CHN: anti-AD'
   id: 9
 - enabled: false
+  url: https://cdn.jsdelivr.net/gh/neoFelhz/neohosts@gh-pages/basic/hosts.txt
+  name: neoHosts
+  id: 10
+- enabled: false
   url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
   name: 大圣净化
-  id: 10
+  id: 11
 whitelist_filters: []
 user_rules:
 dhcp:
@@ -1651,11 +1662,11 @@ deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 EOF
 
-preDownload
-
 preInstall
 
 preConf
+
+preDownload
 
 installSmartDNS
 
@@ -1795,11 +1806,11 @@ if [[ $(systemctl is-active v2dns) = "active" ]]; then
   de_GWDconnect
 fi
 
-preDownload
-
 preUpdate
 
 preConf
+
+preDownload
 
 installSmartDNS
 
@@ -1899,7 +1910,6 @@ blue "-----------------------------------------------"
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"
-    yellow "8. update Nginx(docker)"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo ""
@@ -1911,14 +1921,6 @@ blue "-----------------------------------------------"
     ;;
     2)
     change_PWD
-    start_menu
-    ;;
-    8)
-    installNginxDo
-    start_menu
-    ;;
-    9)
-    updateAdG
     start_menu
     ;;
     0)
