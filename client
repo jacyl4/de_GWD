@@ -1365,21 +1365,21 @@ filters:
   url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjx-annoyance.txt
   name: CJX’s Annoyance List
   id: 6
-- enabled: true
-  url: https://www.malwaredomainlist.com/hostslist/hosts.txt
-  name: MalwareDomainList.com Hosts List
-  id: 7
 - enabled: false
   url: https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext
   name: Peter Lowe’s Ad and tracking server list
-  id: 8
+  id: 7
 - enabled: false
-  url: https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts
+  url: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
   name: StevenBlack
-  id: 9
+  id: 8
 - enabled: false
   url: https://anti-ad.net/easylist.txt
   name: 'CHN: anti-AD'
+  id: 9
+- enabled: false
+  url: https://cdn.jsdelivr.net/gh/neoFelhz/neohosts@gh-pages/basic/hosts.txt
+  name: neoHosts
   id: 10
 - enabled: false
   url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
