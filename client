@@ -1346,41 +1346,45 @@ filters:
   name: AdGuard DNS filter
   id: 1
 - enabled: true
-  url: https://www.malwaredomainlist.com/hostslist/hosts.txt
-  name: MalwareDomainList.com Hosts List
-  id: 2
-- enabled: true
   url: https://easylist.to/easylist/easylist.txt
   name: EasyList
-  id: 3
+  id: 2
 - enabled: true
   url: https://easylist-downloads.adblockplus.org/easylistchina.txt
   name: EasyList China
-  id: 4
+  id: 3
 - enabled: true
   url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjxlist.txt
   name: CJX's EasyList Lite
+  id: 4
+- enabled: true
+  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjx-annoyance.txt
+  name: CJX’s Annoyance List
   id: 5
+- enabled: true
+  url: https://www.malwaredomainlist.com/hostslist/hosts.txt
+  name: MalwareDomainList.com Hosts List
+  id: 6
 - enabled: false
   url: https://easylist.to/easylist/easyprivacy.txt
   name: EasyPrivacy
-  id: 6
+  id: 7
 - enabled: false
   url: https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext
   name: Peter Lowe’s Ad and tracking server list
-  id: 7
+  id: 8
 - enabled: false
   url: https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts
   name: StevenBlack
-  id: 8
+  id: 9
 - enabled: false
   url: https://anti-ad.net/easylist.txt
   name: 'CHN: anti-AD'
-  id: 9
+  id: 10
 - enabled: false
   url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
   name: 大圣净化
-  id: 10
+  id: 11
 whitelist_filters: []
 user_rules:
 dhcp:
