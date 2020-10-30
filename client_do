@@ -1431,13 +1431,9 @@ filters:
   name: 'CHN: anti-AD'
   id: 9
 - enabled: false
-  url: https://cdn.jsdelivr.net/gh/neoFelhz/neohosts@gh-pages/basic/hosts.txt
-  name: neoHosts
-  id: 10
-- enabled: false
   url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
   name: 大圣净化
-  id: 11
+  id: 10
 whitelist_filters: []
 user_rules:
 dhcp:
