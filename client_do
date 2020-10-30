@@ -10,7 +10,7 @@ statusFailed=$(red "[ failed ]")
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 export DEBIAN_FRONTEND=noninteractive
-branch="dev"
+branch="main"
 yq_version="3.4.1"
 ttyd_version="1.6.1"
 de_gwd_nginx="1.19.3"
@@ -74,6 +74,7 @@ jq 'del(.address.pihole)' /usr/local/bin/0conf |\
 jq --arg pwd "$pwd" '.address.PWD=$pwd' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
 fi
 
+mkdir -p /opt/de_GWD
 if [[ -d /usr/local/bin/frp ]]; then
 mv -f /usr/local/bin/frp /opt/de_GWD/frp
 fi
@@ -82,6 +83,14 @@ if [[ -f /usr/local/bin/0conf ]]; then
 mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
 mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
 fi
+
+rm -rf /usr/local/bin/chnrouteSET
+rm -rf /usr/local/bin/doh*
+rm -rf /usr/local/bin/IP*
+rm -rf /usr/local/bin/iptables*
+rm -rf /usr/local/bin/ui*
+rm -rf /usr/local/bin/v2dns
+rm -rf /usr/local/bin/vtrui
 
 if [[ -f "/etc/dnsmasq.conf" ]]; then
 cat << EOF >/etc/dnsmasq.conf
@@ -383,6 +392,8 @@ else
   echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
+
+mkdir -p /opt/de_GWD
 }
 
 
