@@ -117,7 +117,7 @@ mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
 mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
 fi
 
-rm -rf /usr/local/bin/0conf
+rm -rf /usr/local/bin/0conf*
 rm -rf /usr/local/bin/chnrouteSET
 rm -rf /usr/local/bin/doh*
 rm -rf /usr/local/bin/IP*
