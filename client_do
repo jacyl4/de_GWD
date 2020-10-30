@@ -13,7 +13,7 @@ export DEBIAN_FRONTEND=noninteractive
 branch="main"
 yq_version="3.4.1"
 ttyd_version="1.6.1"
-de_gwd_nginx="1.19.3"
+de_gwd_nginx="1.19.4"
 
 
 
@@ -1785,6 +1785,8 @@ de_GWDconnect
 installDep
 
 nginxSet
+
+installNginxDo
 
 installWebUI
 
