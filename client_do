@@ -181,12 +181,7 @@ mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
 mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
 
 crontab -l > ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4am/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q4H/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/Q2H/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/ui_am4/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/ui_4h/d' ~/now.cron
-sed -i '/\/usr\/local\/bin\/ui_2h/d' ~/now.cron
+sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
@@ -1537,8 +1532,9 @@ systemctl restart vtrui
 systemctl restart iptables-proxy
 
 crontab -l > ~/now.cron
-sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
-sed -i '/\/opt\/de_GWD\/.*/d' ~/now.cron
+sed -i '/\/opt\/de_GWD\/ui_am4/d' ~/now.cron
+sed -i '/\/opt\/de_GWD\/ui_4h/d' ~/now.cron
+sed -i '/\/opt\/de_GWD\/ui_2h/d' ~/now.cron
 
 cat << EOF >> ~/now.cron
 0 4 * * * /opt/de_GWD/ui_am4
