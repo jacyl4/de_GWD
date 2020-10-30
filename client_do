@@ -1282,6 +1282,8 @@ do
 docker rmi $line
 done
 
+docker pull jacyl4/de_gwd_nginx:$de_gwd_nginx
+
 docker run -d --name=nginx --net=host --restart=always \
 -v /etc/localtime:/etc/localtime \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
