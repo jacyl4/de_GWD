@@ -165,13 +165,24 @@
               <div class="col-md-3 mt-auto">
 
 <span class="float-left mb-3">
-<div class="form-group form-check ml-4 mt-1 mb-1">
+<div class="form-group form-check ml-4 mt-1 my-2">
     <input type="checkbox" class="form-check-input" id="portCheck1" <?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->PortCheck1 ?>>
     <label class="form-check-label" for="portCheck1">阻止外部访问本机53端口</label>
 </div>
 </span>
 
-              <div class="input-group mb-1">
+              <div class="input-group my-2">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                  域名
+                  </span>
+                </div>
+                <span class="input-group-text form-control"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->domain ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD0->port ?></span>
+              </div>
+              </div>
+
+              <div class="col-md-3 mt-auto">
+              <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   端口
@@ -179,10 +190,8 @@
                 </div>
                 <input type="text" id="FWD0port" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD0->port ?>">
               </div>
-              </div>
 
-              <div class="col-md-3 mt-auto">
-              <div class="input-group mb-1">
+              <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   Path
@@ -193,7 +202,7 @@
               </div>
 
               <div class="col-md-6">
-                <div class="input-group mb-1">
+                <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   UUID
@@ -226,7 +235,7 @@
               <div class="col-md-3 mt-auto">
 
 <span class="float-left mb-3">
-<div class="input-group ml-4 mt-1 mb-1">
+<div class="input-group ml-4 mt-1 my-2">
   <div class="input-group-prepend">
     <label class="input-group-text">上级v2节点</label>
   </div>
@@ -238,7 +247,18 @@
 </div>
 </span>
 
-              <div class="input-group mb-1">
+              <div class="input-group my-2">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                  域名
+                  </span>
+                </div>
+                <span class="input-group-text form-control"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->domain ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->port ?></span>
+              </div>
+              </div>
+
+              <div class="col-md-3 mt-auto">
+              <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   端口
@@ -246,10 +266,8 @@
                 </div>
                 <input type="text" id="FWD1port" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->port ?>">
               </div>
-              </div>
 
-              <div class="col-md-3 mt-auto">
-              <div class="input-group mb-1">
+              <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   Path
@@ -260,7 +278,7 @@
               </div>
 
               <div class="col-md-6">
-                <div class="input-group mb-1">
+                <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   UUID
