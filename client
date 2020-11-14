@@ -435,15 +435,16 @@ cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
-speed-check-mode  ping,tcp:80
-cache-size        5000
-rr-ttl            600
-rr-ttl-min        60
-rr-ttl-max        43200
-force-AAAA-SOA    yes
-prefetch-domain   yes
-serve-expired     yes
-serve-expired-ttl 0
+speed-check-mode        tcp:443,ping
+cache-size              5000
+rr-ttl                  600
+rr-ttl-min              60
+rr-ttl-max              43200
+force-AAAA-SOA          yes
+prefetch-domain         yes
+serve-expired           yes
+serve-expired-ttl       0
+serve-expired-reply-ttl 30
 
 server 114.114.114.114
 server 114.114.115.115
