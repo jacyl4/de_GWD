@@ -22,7 +22,7 @@
 
 </head>
 
-<body id="page-top" class="sidebar-toggled">
+<body id="page-top" class="sidebar-toggled fixed-padding">
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
