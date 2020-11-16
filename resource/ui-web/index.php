@@ -18,7 +18,6 @@
 
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.css" rel="stylesheet">
-  <link href="css/bootstrap4-toggle.min.css" rel="stylesheet">
 
 </head>
 
