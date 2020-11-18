@@ -36,7 +36,6 @@ if ( $conf['dns']['DNSsplit'] === "gfw" ){
 	shell_exec('sudo /opt/de_GWD/ui-dnsCHNW');
 }
 
-shell_exec('sudo systemctl restart doh-client');
 shell_exec('sudo /opt/de_GWD/ui-saveListBW');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
