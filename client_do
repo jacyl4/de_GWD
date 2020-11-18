@@ -431,8 +431,6 @@ mkdir -p /opt/de_GWD
 SmartDNSset(){
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
-conf-file doh.conf
-
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
@@ -450,6 +448,8 @@ server 119.29.29.29
 server 119.28.28.28
 server 223.5.5.5
 server 223.6.6.6
+
+conf-file doh.conf
 EOF
 
 cat << EOF >/etc/smartdns/doh.conf
