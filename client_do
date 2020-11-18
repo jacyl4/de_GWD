@@ -555,7 +555,7 @@ systemctl restart v2dns
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-"dns":{"servers":["localhost"]},
+"dns":{"servers":[{"address":"127.0.0.1","port":53}]},
 "inbounds":[
   {
     "port":9896,
