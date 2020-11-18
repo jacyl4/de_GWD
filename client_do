@@ -456,13 +456,9 @@ cat << EOF >/etc/smartdns/doh.conf
 bind 127.0.0.1:5390
 bind-tcp 127.0.0.1:5390
 
-speed-check-mode        none
+speed-check-mode        tcp:443,ping
 cache-size              0
 force-AAAA-SOA          yes
-prefetch-domain         yes
-serve-expired           yes
-serve-expired-ttl       0
-serve-expired-reply-ttl 30
 
 server-https https://$doh1
 server-https https://$doh2
@@ -560,7 +556,7 @@ systemctl start v2dns
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-"dns":{"servers":[{"address":"127.0.0.1","port":5390}]},
+"dns":{"servers":[{"address":"127.0.0.1","port":53}]},
 "inbounds":[
   {
     "port":9896,

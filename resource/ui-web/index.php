@@ -529,7 +529,7 @@ $('#testBaidu').text("✗ 国内线路不通");
 }
 });
 
-$.get('./act/testYoutue.php',function(data) {
+$.get('./act/testGoogle.php',function(data) {
 var checklink2 = data;
 if ( $.trim(checklink2) == "ONLINE" ) {
 $('#testYoutue').text("✓ 国外线路畅通");
