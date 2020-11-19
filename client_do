@@ -462,8 +462,8 @@ server 223.6.6.6
 EOF
 
 cat << EOF >/etc/smartdns/doh.conf
-bind 127.0.0.1:5390 -no-speed-check -no-cache
-bind-tcp 127.0.0.1:5390 -no-speed-check -no-cache
+bind 127.0.0.1:5390 -no-cache
+bind-tcp 127.0.0.1:5390 -no-cache
 
 server-https https://$doh1
 server-https https://$doh2
@@ -558,7 +558,7 @@ systemctl restart v2dns
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-"dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+"dns":{"servers":["localhost"]},
 "inbounds":[
   {
     "port":9896,

@@ -18,7 +18,7 @@ fi
 
 cat > /opt/de_GWD/vtrui/config.json << EOF
 {
-  "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+  "dns":{"servers":["localhost"]},
   "inbounds":[
     {
     "port":9896,
