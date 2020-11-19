@@ -442,6 +442,9 @@ bind-tcp 127.0.0.1:5310
 
 speed-check-mode        tcp:443,ping
 cache-size              0
+rr-ttl                  600
+rr-ttl-min              60
+rr-ttl-max              43200
 force-AAAA-SOA          yes
 prefetch-domain         yes
 serve-expired           yes
@@ -462,12 +465,12 @@ cat << EOF >/etc/smartdns/doh.conf
 bind 127.0.0.1:5390 -no-speed-check -no-cache
 bind-tcp 127.0.0.1:5390 -no-speed-check -no-cache
 
-server-https https://$doh1 -host-name $doh1Domain
-server-https https://$doh2 -host-name $doh2Domain
-EOF
+server-https https://$doh1
+server-https https://$doh2
 
-sed -i "s/$doh1Domain/$doh1IP/" /etc/smartdns/doh.conf
-sed -i "s/$doh2Domain/$doh2IP/" /etc/smartdns/doh.conf
+address /$doh1Domain/$doh1IP
+address /$doh2Domain/$doh2IP
+EOF
 
 systemctl restart smartdns
 echo "$statusInstalled smartdns"
@@ -504,7 +507,8 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
     "tag":"dnsin",
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53}
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53,"followRedirect":true},
+    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
 ],
 "outbounds":[
@@ -526,11 +530,9 @@ EOF
 
 domainIP=$(dig @127.0.0.1 $domain -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
 
-jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json |\
-jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
-jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
+jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
 
-cat << "EOF" > /lib/systemd/system/v2dns.service
+cat << EOF > /lib/systemd/system/v2dns.service
 [Unit]
 Description=v2dns Service
 After=network.target
@@ -618,7 +620,7 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /opt/de_GWD/vtrui/config.json
 
-cat << "EOF" > /lib/systemd/system/vtrui.service
+cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -640,7 +642,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable vtrui
-systemctl start vtrui
+systemctl restart vtrui
 
 rm -rf ~/vtrui
 
