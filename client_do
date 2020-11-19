@@ -159,6 +159,7 @@ rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
 
 
+
 rm -rf /opt/de_GWD/chnrouteset
 rm -rf /opt/de_GWD/chnroute.txt
 rm -rf /opt/de_GWD/Q4am

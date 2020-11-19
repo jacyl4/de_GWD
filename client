@@ -50,10 +50,8 @@ EOF
 tcpTime && hwclock -w
 
 if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/arm64_doh.zip
   wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
 elif [[ $architecture = "amd64" ]]; then
-  wget --no-check-certificate -c -O ~/doh.zip $mirrorSite/amd64_doh.zip
   wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
 fi
 
@@ -157,6 +155,12 @@ rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/p
 
 apt purge php7.3-cgi php7.3-xml php7.3-intl php7.3-sqlite3 sqlite3 lighttpd dhcpcd5
 fi
+
+systemctl disable --now doh-client >/dev/null 2>&1
+rm -rf /lib/systemd/system/doh-client.service
+rm -rf /usr/local/bin/doh-client*
+rm -rf "/etc/NetworkManager/dispatcher.d"
+systemctl daemon-reload
 
 
 
@@ -430,13 +434,19 @@ mkdir -p /opt/de_GWD
 
 
 SmartDNSset(){
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+
+doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
 speed-check-mode        tcp:443,ping
-cache-size              5000
+cache-size              0
 rr-ttl                  600
 rr-ttl-min              60
 rr-ttl-max              43200
@@ -455,99 +465,7 @@ server 223.6.6.6
 EOF
 
 systemctl restart smartdns
-
 echo "$statusInstalled smartdns"
-}
-
-
-
-installDoH(){
-doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
-doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
-doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
-doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
-
-systemctl disable --now doh-client >/dev/null 2>&1
-rm -rf ~/doh
-unzip ~/doh.zip -d ~/
-mv -f ~/doh/doh-client /opt/de_GWD/doh-client
-chmod +x /opt/de_GWD/doh-client
-
-cat << EOF >/opt/de_GWD/doh-client.conf
-listen = [ "127.0.0.1:5390" ]
-
-[upstream]
-upstream_selector = "weighted_round_robin"
-
-# DoH1
-[[upstream.upstream_ietf]]
-    url = "https://xxx.ooo/dq"
-    weight = 50
-
-# DoH2
-[[upstream.upstream_ietf]]
-    url = "https://xxx.ooo/dq"
-    weight = 50
-    
-[others]
-timeout = 30
-no_cookies = true
-no_ecs = true
-no_ipv6 = true
-no_user_agent = false
-verbose = false
-EOF
-
-doh_upstream1='url = "https:\/\/'$doh1'"'
-doh_upstream2='url = "https:\/\/'$doh2'"'
-
-sed -i "$(sed -ne '/url =/=' /opt/de_GWD/doh-client.conf | awk NR==1)s?.*?$doh_upstream1?" /opt/de_GWD/doh-client.conf
-sed -i "$(sed -ne '/url =/=' /opt/de_GWD/doh-client.conf | awk NR==2)s?.*?$doh_upstream2?" /opt/de_GWD/doh-client.conf
-mkdir -p /etc/NetworkManager/dispatcher.d/
-
-cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-client
-#!/bin/bash
-case "$2" in
-    up)
-        /usr/bin/systemctl is-active doh-client.service >/dev/null && /usr/bin/systemctl restart doh-client.service
-        ;;
-    down)
-        /usr/bin/systemctl is-active doh-client.service >/dev/null && /usr/bin/systemctl restart doh-client.service
-        ;;
-    *)
-        exit 0
-        ;;
-esac
-EOF
-
-chmod +x /etc/NetworkManager/dispatcher.d/doh-client
-
-cat << "EOF" > /lib/systemd/system/doh-client.service
-[Unit]
-Description=DNS-over-HTTPS Client
-After=network.target
-
-[Service]
-User=root
-Type=simple
-LimitNPROC=64000
-LimitNOFILE=1000000
-CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
-ExecStart=/opt/de_GWD/doh-client -conf /opt/de_GWD/doh-client.conf
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable doh-client
-systemctl start doh-client
-
-rm -rf ~/doh
-
-echo "$statusInstalled doh-client"
 }
 
 
@@ -574,7 +492,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
-  "servers":[{"address":"127.0.0.1","port":5390}]
+  "servers":["https+local://$doh1","https+local://$doh2"]
 },
 "inbounds":[
   {
@@ -601,13 +519,13 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 }
 EOF
 
-domainIP=$(dig @127.0.0.1 $domain -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
+domainIP=$(dig @127.0.0.1 $domain -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
 
 jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json |\
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
 jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
 
-cat << "EOF" > /lib/systemd/system/v2dns.service
+cat << EOF > /lib/systemd/system/v2dns.service
 [Unit]
 Description=v2dns Service
 After=network.target
@@ -628,11 +546,11 @@ EOF
 
 systemctl daemon-reload
 systemctl enable v2dns
-systemctl start v2dns
+systemctl restart v2dns
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-"dns":{"servers":["localhost"]},
+"dns":{"servers":[{"address": "127.0.0.1","port":53}]},
 "inbounds":[
   {
     "port":9896,
@@ -674,7 +592,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
   {
     "tag":"Direct",
     "protocol":"freedom",
-    "settings":{},
+    "settings":{"domainStrategy":"UseIPv4"},
     "streamSettings":{
       "sockopt":{"mark":255}
       }
@@ -695,7 +613,7 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /opt/de_GWD/vtrui/config.json
 
-cat << "EOF" > /lib/systemd/system/vtrui.service
+cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -717,7 +635,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable vtrui
-systemctl start vtrui
+systemctl restart vtrui
 
 rm -rf ~/vtrui
 
@@ -839,8 +757,6 @@ iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
@@ -849,8 +765,6 @@ iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
@@ -1578,8 +1492,6 @@ preConf
 
 SmartDNSset
 
-installDoH
-
 installV2ray
 
 installIptablesProxy
@@ -1660,54 +1572,6 @@ blue "----------------------"
 
 
 
-updateAdG(){
-de_GWDconnect
-
-jq '.dns.servers=[{"address":"127.0.0.1","port":5390}]' /opt/de_GWD/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
-
-systemctl restart v2dns
-sleep 3
-
-installDep
-
-ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
-localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
-
-
-if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
-  /opt/de_GWD/ui-onUDP >/dev/null 2>&1
-else
-  /opt/de_GWD/ui-offUDP >/dev/null 2>&1
-fi
-
-/opt/de_GWD/ui_4h
-systemctl restart v2dns
-
-if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
-  /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
-elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "none" ]]; then
-  /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
-fi
-
-if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
-  /opt/de_GWD/ui-FWD1save
-  /opt/de_GWD/ui-FWD1vtrui
-  systemctl restart vtrui1
-fi
-
-if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
-  /opt/de_GWD/ui-FWD0save
-  /opt/de_GWD/ui-FWD0vtrui
-fi
-systemctl restart vtrui
-systemctl restart iptables-proxy
-blue "----------------------"
-blue "Install Pi-hole [done]"
-blue "----------------------"
-}
-
-
-
 updateGWD(){
 if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]]; then
   de_GWDconnect
@@ -1720,8 +1584,6 @@ preUpdate
 preConf
 
 SmartDNSset
-
-installDoH
 
 installV2ray
 
@@ -1754,14 +1616,6 @@ elif [[ ! -f "/usr/sbin/smartdns" ]]; then
     echo "[$statusBAD] SmartDNS       [not Installed]"
 else
     echo "[$statusBAD] SmartDNS       [start failed]"
-fi
-
-if [[ $(systemctl is-active doh-client) = "active" ]]; then
-    echo "[$statusGOOD] DoH client     [working]"
-elif [[ ! -f "/opt/de_GWD/doh-client" ]]; then
-    echo "[$statusBAD] DoH client     [not Installed]"
-else
-    echo "[$statusBAD] DoH client     [start failed]"
 fi
 
 if [[ $(systemctl is-active v2dns) = "active" ]]; then
