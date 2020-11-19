@@ -1182,6 +1182,7 @@ if [[ $(ls -l ~/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l ~/ui
 rm -rf /opt/de_GWD/ui-*
 rm -rf /opt/de_GWD/ui_*
 rm -rf /var/www/html/*.php
+rm -rf /var/www/html/*.ico
 rm -rf /var/www/html/act
 rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
