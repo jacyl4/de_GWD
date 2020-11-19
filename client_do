@@ -462,8 +462,14 @@ server 223.6.6.6
 EOF
 
 cat << EOF >/etc/smartdns/doh.conf
-bind 127.0.0.1:5390 -no-speed-check -no-cache
-bind-tcp 127.0.0.1:5390 -no-speed-check -no-cache
+bind 127.0.0.1:5390
+bind-tcp 127.0.0.1:5390
+
+speed-check-mode        none
+cache-size              0
+rr-ttl                  600
+rr-ttl-min              60
+rr-ttl-max              43200
 
 server-https https://$doh1
 server-https https://$doh2
@@ -507,7 +513,8 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
     "tag":"dnsin",
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53}
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53,"followRedirect":true},
+    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
 ],
 "outbounds":[
