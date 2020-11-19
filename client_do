@@ -437,8 +437,6 @@ doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '
 
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
-conf-file doh.conf
-
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
@@ -460,23 +458,6 @@ server 119.28.28.28
 server 223.5.5.5
 server 223.6.6.6
 EOF
-
-cat << EOF >/etc/smartdns/doh.conf
-bind 127.0.0.1:5390
-bind-tcp 127.0.0.1:5390
-
-speed-check-mode        none
-cache-size              0
-rr-ttl                  600
-rr-ttl-min              60
-rr-ttl-max              43200
-
-server-https https://$doh1 -host-name $doh1Domain
-server-https https://$doh2 -host-name $doh2Domain
-EOF
-
-sed -i "s/$doh1Domain/$doh1IP/" /etc/smartdns/doh.conf
-sed -i "s/$doh2Domain/$doh2IP/" /etc/smartdns/doh.conf
 
 systemctl restart smartdns
 echo "$statusInstalled smartdns"
