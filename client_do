@@ -437,6 +437,8 @@ doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -E '
 
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
+conf-file doh.conf
+
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
@@ -457,13 +459,22 @@ server 119.29.29.29
 server 119.28.28.28
 server 223.5.5.5
 server 223.6.6.6
-
-conf-file doh.conf
 EOF
 
 cat << EOF >/etc/smartdns/doh.conf
-bind 127.0.0.1:5390 -no-speed-check -no-cache
-bind-tcp 127.0.0.1:5390 -no-speed-check -no-cache
+bind 127.0.0.1:5390
+bind-tcp 127.0.0.1:5390
+
+speed-check-mode        ping,tcp:443
+cache-size              0
+rr-ttl                  600
+rr-ttl-min              60
+rr-ttl-max              43200
+force-AAAA-SOA          yes
+prefetch-domain         yes
+serve-expired           yes
+serve-expired-ttl       0
+serve-expired-reply-ttl 30
 
 server-https https://$doh1
 server-https https://$doh2
@@ -500,15 +511,14 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
-  "servers":[{"address":"127.0.0.1","port":5390}]
+  "servers":["https+local://$doh1","https+local://$doh2"]
 },
 "inbounds":[
   {
     "tag":"dnsin",
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53,"followRedirect":true},
-    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53}
   }
 ],
 "outbounds":[
@@ -530,7 +540,9 @@ EOF
 
 domainIP=$(dig @127.0.0.1 $domain -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | awk NR==1)
 
-jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
+jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json |\
+jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
+jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
 
 cat << EOF > /lib/systemd/system/v2dns.service
 [Unit]
