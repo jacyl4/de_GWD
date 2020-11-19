@@ -37,7 +37,6 @@ systemctl stop v2dns >/dev/null 2>&1
 systemctl stop AdGuardHome >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-
 cat << EOF >/etc/resolv.conf
 nameserver 114.114.114.114
 nameserver 114.114.115.115

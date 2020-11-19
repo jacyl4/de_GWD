@@ -33,7 +33,6 @@ systemctl stop v2dns >/dev/null 2>&1
 systemctl stop AdGuardHome >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
-
 cat << EOF >/etc/resolv.conf
 nameserver 114.114.114.114
 nameserver 114.114.115.115
@@ -1350,23 +1349,7 @@ filters:
 whitelist_filters: []
 user_rules:
 dhcp:
-  enabled: false
-  interface_name: ""
-  gateway_ip: ""
-  subnet_mask: ""
-  range_start: ""
-  range_end: ""
-  lease_duration: 86400
-  icmp_timeout_msec: 1000
 clients: []
-log_compress: false
-log_localtime: false
-log_max_backups: 0
-log_max_size: 100
-log_max_age: 3
-log_file: ""
-verbose: false
-schema_version: 6
 EOF
 fi
 
