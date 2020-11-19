@@ -7,7 +7,7 @@ CFapikey=$(jq -r '.ddns.ddnsCF.cfAPIkey' /opt/de_GWD/0conf)
 CFemail=$(jq -r '.ddns.ddnsCF.cfEmail' /opt/de_GWD/0conf)
 CFdomainid=$(jq -r '.ddns.ddnsCF.cfDomainID' /opt/de_GWD/0conf)
 
-CFdomainip=$(dig @127.0.0.1 $CFdomain -p 5390 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+CFdomainip=$(dig $CFdomain +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 
 if [[ $wanIP != $CFdomainip ]]; then
 curl -X PUT "https://api.cloudflare.com/client/v4/zones/$CFzoneid/dns_records/$CFdomainid" \

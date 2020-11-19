@@ -4,11 +4,3 @@ if [[ $(systemctl is-active smartdns) = "active" ]]; then
 else
 	echo "SmartDNS:failed"
 fi
-
-echo "|"
-
-if [[ $(systemctl is-active doh-client) = "active" ]]; then
-	echo "DoH: OK"
-else
-	echo "DoH:failed"
-fi
