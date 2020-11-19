@@ -56,15 +56,15 @@ if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
 
 elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
 	cat /dev/null >/opt/de_GWD/IPlistB
-	jq '.dns.servers[1].domains=["keyword:play.googleapi.cn"]' /opt/de_GWD/v2dns/config.json |\
-	jq '.dns.servers[2].domains=["keyword:play.googleapi.cn"]' >/tmp/v2dns_temp
+	jq '.dns.servers[2].domains=["keyword:play.googleapi.cn"]' /opt/de_GWD/v2dns/config.json |\
+	jq '.dns.servers[3].domains=["keyword:play.googleapi.cn"]' >/tmp/v2dns_temp
 
 	if [[ -n $(cat /tmp/listBpre) ]]; then
 		jq '.listB={}' /opt/de_GWD/0conf >/tmp/0conf_temp
 		cat /tmp/listBpre | while read listB 
 		do
-			jq --arg listB "keyword:$listB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_temp |\
-			jq --arg listB "keyword:$listB" '.dns.servers[2].domains+=[$listB]' | sponge /tmp/v2dns_temp
+			jq --arg listB "keyword:$listB" '.dns.servers[2].domains+=[$listB]' /tmp/v2dns_temp |\
+			jq --arg listB "keyword:$listB" '.dns.servers[3].domains+=[$listB]' | sponge /tmp/v2dns_temp
 			listBIP=$(dig @127.0.0.1 $listB -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 			echo $listBIP | sed 's/ /\n/g ' >> /opt/de_GWD/IPlistB
 			jq -n --arg listBIP "$listBIP" '$listBIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listBIPs
@@ -75,15 +75,13 @@ elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
 	mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
 
 	cat /dev/null >/opt/de_GWD/IPlistW
-	jq '.dns.servers[3].domains=["keyword:live.com"]' /opt/de_GWD/v2dns/config.json |\
-	jq '.dns.servers[4].domains=["keyword:live.com"]' >/tmp/v2dns_temp
+	jq '.dns.servers[1].domains=["keyword:live.com"]' /opt/de_GWD/v2dns/config.json >/tmp/v2dns_temp
 	if [[ -n $(cat /tmp/listWpre) ]]; then
 		jq '.listW={}' /opt/de_GWD/0conf >/tmp/0conf_temp
 		cat /dev/null > /opt/de_GWD/IPlistW
 		cat /tmp/listWpre | while read listW
 		do
-			jq --arg listW "keyword:$listW" '.dns.servers[3].domains+=[$listW]' /tmp/v2dns_temp |\
-			jq --arg listW "keyword:$listW" '.dns.servers[4].domains+=[$listW]' | sponge /tmp/v2dns_temp
+			jq --arg listW "keyword:$listW" '.dns.servers[1].domains+=[$listW]' /tmp/v2dns_temp | sponge /tmp/v2dns_temp
 			listWIP=$(dig @127.0.0.1 $listW -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 			echo $listWIP | sed 's/ /\n/g ' >> /opt/de_GWD/IPlistW
 			jq -n --arg listWIP "$listWIP" '$listWIP | split("\n") | to_entries[] | [.value] | @tsv' >/tmp/listWIPs

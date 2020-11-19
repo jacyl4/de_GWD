@@ -13,11 +13,11 @@ cat << EOF >/tmp/v2dns_config
   "hosts":{"localhost":"127.0.0.1"},
   "servers":[
   {"address":"127.0.0.1","port":5310},
+  {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
   {"address":"https+local://$doh1","domains":["domain:google.com"]},
   {"address":"https+local://$doh2","domains":["domain:google.com"]},
   {"address":"https+local://$doh1","domains":["geosite:geolocation-!cn"]},
-  {"address":"https+local://$doh2","domains":["geosite:geolocation-!cn"]},
-  {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]}
+  {"address":"https+local://$doh2","domains":["geosite:geolocation-!cn"]}
   ]
 },
 "inbounds":[
