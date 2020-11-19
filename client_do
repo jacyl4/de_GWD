@@ -151,7 +151,7 @@ fi
 
 systemctl disable --now doh-client >/dev/null 2>&1
 rm -rf /lib/systemd/system/doh-client.service
-rm -rf /usr/local/bin/doh-client*
+rm -rf /opt/de_GWD/doh-client*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
 

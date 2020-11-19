@@ -1,4 +1,4 @@
 #!/bin/bash
 dohNUM=$1
-url=$(awk '/url =/' /opt/de_GWD/doh-client.conf | cut -d/ -f3 | awk NR==$dohNUM)
+url=$(jq -r --arg doh "doh$dohNUM" '.dns."\($doh)"' /opt/de_GWD/0conf | cut -d/ -f1)
 echo "$(curl -o /dev/null -sw '%{time_connect}\n' $url) * 1000" | bc | awk '{printf ("%.0f\n",$1)}' 

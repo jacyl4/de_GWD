@@ -1,4 +1,4 @@
 #!/bin/bash
 dohNUM=$1
-url=$(awk '/url =/' /opt/de_GWD/doh-client.conf | cut -d/ -f3 | cut -d: -f1 | awk NR==$dohNUM)
+url=$(jq -r --arg doh "doh$dohNUM" '.dns."\($doh)"' /opt/de_GWD/0conf | cut -d/ -f1 | cut -d: -f1)
 ping -n -c1 -w1 $url | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1
