@@ -454,7 +454,7 @@ rm -rf ~/vtrui*
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-  "dns":{"servers":["localhost"]},
+  "dns":{"servers":[{"address": "127.0.0.1","port":53}]},
   "inbounds": [
     {
     "port":11810,
@@ -470,7 +470,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom","settings":{}}
+  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
   ]
 }
 EOF
@@ -1309,7 +1309,7 @@ sed -i '/"outbounds":/,$d' /opt/de_GWD/vtrui/config.json
 
 cat >> /opt/de_GWD/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom","settings":{}}
+  {"protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}}
   ]
 }
 EOF
