@@ -39,7 +39,7 @@ cat > /opt/de_GWD/vtrui/config.json << EOF
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
     "sniffing":{"enabled":true,"destOverride":["http","tls"]},
-    "settings":{"auth": "noauth","network":"tcp,udp","followRedirect":true},
+    "settings":{"network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
     }
   ],
