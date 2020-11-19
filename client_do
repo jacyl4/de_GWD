@@ -471,12 +471,12 @@ rr-ttl                  600
 rr-ttl-min              60
 rr-ttl-max              43200
 
-server-https https://$doh1
-server-https https://$doh2
-
-address /$doh1Domain/$doh1IP
-address /$doh2Domain/$doh2IP
+server-https https://$doh1 -host-name $doh1Domain
+server-https https://$doh2 -host-name $doh2Domain
 EOF
+
+sed -i "s/$doh1Domain/$doh1IP/" /etc/smartdns/doh.conf
+sed -i "s/$doh2Domain/$doh2IP/" /etc/smartdns/doh.conf
 
 systemctl restart smartdns
 echo "$statusInstalled smartdns"
