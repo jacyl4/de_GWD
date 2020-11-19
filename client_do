@@ -462,8 +462,8 @@ server 223.6.6.6
 EOF
 
 cat << EOF >/etc/smartdns/doh.conf
-bind 127.0.0.1:5390 -no-cache
-bind-tcp 127.0.0.1:5390 -no-cache
+bind 127.0.0.1:5390 -no-speed-check -no-cache
+bind-tcp 127.0.0.1:5390 -no-speed-check -no-cache
 
 server-https https://$doh1
 server-https https://$doh2
@@ -600,7 +600,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
   {
     "tag":"Direct",
     "protocol":"freedom",
-    "settings":{},
+    "settings":{"domainStrategy":"UseIPv4"},
     "streamSettings":{
       "sockopt":{"mark":255}
       }
