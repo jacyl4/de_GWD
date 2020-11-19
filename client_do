@@ -462,19 +462,8 @@ server 223.6.6.6
 EOF
 
 cat << EOF >/etc/smartdns/doh.conf
-bind 127.0.0.1:5390
-bind-tcp 127.0.0.1:5390
-
-speed-check-mode        ping,tcp:443
-cache-size              0
-rr-ttl                  600
-rr-ttl-min              60
-rr-ttl-max              43200
-force-AAAA-SOA          yes
-prefetch-domain         yes
-serve-expired           yes
-serve-expired-ttl       0
-serve-expired-reply-ttl 30
+bind 127.0.0.1:5390 -no-speed-check -no-cache
+bind-tcp 127.0.0.1:5390 -no-speed-check -no-cache
 
 server-https https://$doh1
 server-https https://$doh2
