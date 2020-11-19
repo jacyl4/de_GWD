@@ -1,4 +1,6 @@
 #!/bin/bash
+service cron stop >/dev/null 2>&1
+
 doh1=$(jq -r '.dns.doh1' /opt/de_GWD/0conf)
 doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
 
@@ -93,3 +95,5 @@ rm -rf /tmp/listW
 
 chmod 666 /opt/de_GWD/v2dns/config.json
 chmod 666 /opt/de_GWD/0conf
+
+service cron restart >/dev/null 2>&1

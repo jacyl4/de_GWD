@@ -1,4 +1,6 @@
 #!/bin/bash
+service cron stop >/dev/null 2>&1
+
 if [[ $(awk '/listB/ {print;exit}' /opt/de_GWD/0conf) =~ "[" ]]; then
 	jq -r '.listB[]' /opt/de_GWD/0conf >/tmp/listBpre2
 elif [[ $(awk '/listB/ {print;exit}' /opt/de_GWD/0conf) =~ "{" ]]; then
@@ -127,3 +129,5 @@ rm -rf /tmp/v2dns*
 
 chmod 666 /opt/de_GWD/v2dns/config.json
 chmod 666 /opt/de_GWD/0conf
+
+service cron restart >/dev/null 2>&1
