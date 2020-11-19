@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
   /opt/de_GWD/ui-onUDP
 else
   /opt/de_GWD/ui-offUDP
@@ -14,6 +14,12 @@ fi
 /opt/de_GWD/ui_4h
 systemctl restart smartdns
 systemctl restart v2dns
+
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+/opt/de_GWD/ui-onDHCP >/dev/null 2>&1
+else
+systemctl restart AdGuardHome
+fi
 
 if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
   /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1

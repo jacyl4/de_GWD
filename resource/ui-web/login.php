@@ -17,6 +17,7 @@
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.css" rel="stylesheet">
 
+  <link href="favicon.ico" rel="icon" type="image/x-icon" />
 </head>
 
 <body class="bg-dark">

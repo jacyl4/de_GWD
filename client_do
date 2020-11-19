@@ -175,9 +175,6 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
 jq 'del(.clifwd)' /opt/de_GWD/0conf |\
-jq 'del(.address.dhcpStart)' |\
-jq 'del(.address.dhcpEnd)' |\
-jq 'del(.address.dhcp)' |\
 jq 'del(.dns.v2ad)' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /opt/de_GWD/0conf
 mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
 mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
@@ -1104,9 +1101,9 @@ location ~ [^/]\.php(/|$) {
 }
 
 location /adg/ {
-  proxy_cookie_path / /adg/;
-  proxy_redirect / /adg/;
   proxy_pass http://127.0.0.1:8080/;
+  proxy_redirect / /adg/;
+  proxy_cookie_path / /adg/;
 }
 
 location ~ ^/ttyd(.*)$ {
@@ -1391,7 +1388,7 @@ fi
 
 /opt/de_GWD/ui_am4
 
-if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
   /opt/de_GWD/ui-onUDP >/dev/null 2>&1
 else
   /opt/de_GWD/ui-offUDP >/dev/null 2>&1
@@ -1406,7 +1403,12 @@ fi
 /opt/de_GWD/ui_4h
 systemctl restart smartdns
 systemctl restart v2dns
+
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+/opt/de_GWD/ui-onDHCP >/dev/null 2>&1
+else
 systemctl restart AdGuardHome
+fi
 
 if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
   /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1

@@ -19,6 +19,7 @@
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.css" rel="stylesheet">
 
+  <link href="favicon.ico" rel="icon" type="image/x-icon" />
 </head>
 
 <body id="page-top" class="sidebar-toggled">
@@ -290,35 +291,6 @@
 
 
         <!-- row2 -->
-<div class="form-row">
-<div class="col-md-2"> 
-        <!-- 静态地址 -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-exchange-alt"></i>
-            IP地址
-          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" data-toggle="modal" data-target="#reboot">应用</button>
-          </span>
-          </div>
-          <div class="card-body">
-                <div class="input-group my-2">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->localIP ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">本机</span>
-                </div>
-                </div>
-                <div class="input-group my-2">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->upstreamIP ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">上级</span>
-                </div>
-                </div>
-          </div>
-          </div>
-</div>
-
-<div class="col-md-10"> 
         <div class="card mb-3">
           <div class="card-header">
             <i class="far fa-compass"></i>
@@ -396,13 +368,84 @@
             </div>
 
           </div>
+        </div>
+
+        <!-- row3 -->
+        <div class="form-row">
+        <!-- 静态地址 -->
+          <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-exchange-alt"></i>
+            IP地址
+          <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" data-toggle="modal" data-target="#reboot">应用</button>
+          </span>
           </div>
-</div>
-</div>
+          <div class="card-body">
+                <div class="form-row">
+                <div class="col-md-6">
+                <div class="input-group my-2">
+                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->localIP ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">本机</span>
+                </div>
+                </div>
+                </div>
+                <div class="col-md-6">
+                <div class="input-group my-2">
+                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->upstreamIP ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">上级</span>
+                </div>
+                </div>
+                </div>
+                </div>
+          </div>
+          </div>
+          </div>
+
+        <!-- DHCP -->
+          <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-header">
+            <i class="fas fa-network-wired"></i>
+            DHCP
+          <span class="float-right mt-n1 mb-n2">
+                <button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="onDHCP()">开启</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="offDHCP()">关闭</button>
+          </span>
+          </div>
+          <div class="card-body">
+                <div class="form-row">
+                <div class="col-md-6">
+                <div class="input-group my-2">
+                  <input type="text" id="dhcpStart" class="form-control" placeholder="起始IP" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->dhcpStart ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">起始</span>
+                </div>
+                </div>
+                </div>
+                <div class="col-md-6">
+                <div class="input-group my-2">
+                  <input type="text" id="dhcpEnd" class="form-control" placeholder="结束IP" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->dhcpEnd ?>">
+                <div class="input-group-append">
+                  <span class="input-group-text text-secondary">结束</span>
+                </div>
+                </div>
+                </div>
+                </div>
+          </div>
+          </div>
+          </div>
+        </div>
+
+
 
         </div>
+        <!-- /.container-fluid -->
       </div>
-      <!-- /.container-fluid -->
+      <!-- /.content-wrapper -->
 
       <!-- Sticky Footer -->
       <footer class="sticky-footer">
@@ -517,6 +560,18 @@ staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
 $.get('./act/changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
 alert("本机已开始重新启动");
+}
+
+function onDHCP(){
+dhcpStarttxt=$('#dhcpStart').val();
+dhcpEndtxt=$('#dhcpEnd').val();
+$.get('./act/onDHCP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt, dhcp:"on"}, function(result){window.location.reload();});
+alert('启动DHCP服务。。。');
+}
+
+function offDHCP(){
+$.get('./act/offDHCP.php', function(result){window.location.reload();});
+alert('关闭DHCP服务。。。');
 }
 
 function checklink(){

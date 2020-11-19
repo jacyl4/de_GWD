@@ -20,6 +20,7 @@
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.css" rel="stylesheet">
 
+  <link href="favicon.ico" rel="icon" type="image/x-icon" />
 </head>
 
 <body id="page-top" class="sidebar-toggled fixed-padding">
