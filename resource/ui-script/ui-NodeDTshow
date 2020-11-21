@@ -32,6 +32,7 @@ localip=$(jq -r '.divertLan.ip | to_entries[] | .value' /opt/de_GWD/0conf)
 
 cat > /opt/de_GWD/vtrui/config.json << EOF
 {
+  "dns":{"servers":["localhost"]},
   "inbounds":[
     {
     "port":9896,

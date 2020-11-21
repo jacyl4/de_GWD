@@ -48,6 +48,7 @@ v2path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/
 
 cat > /opt/de_GWD/vtrui1/config.json << EOF
 {
+  "dns":{"servers":["localhost"]},
   "inbounds":[
    {
       "port": 11811,
