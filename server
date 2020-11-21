@@ -446,7 +446,6 @@ rm -rf ~/vtrui*
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-  "dns":{"servers":["localhost"]},
   "inbounds": [
     {
     "port":11810,
