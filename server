@@ -519,7 +519,7 @@ rm -rf /usr/bin/vtrui
 
 
 installNginx(){
-if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]]; then
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
   wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
   unzip ~/nginx.zip
   mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
