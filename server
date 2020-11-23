@@ -528,8 +528,8 @@ wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-n
 unzip ~/nginx.zip -d ~/
 mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
 chmod +x /usr/sbin/nginx
-mv -f ~/nginx/conf/* /etc/nginx/
 mkdir -p "/etc/nginx/conf.d/"
+mv -f ~/nginx/conf/* /etc/nginx/
 rm -rf ~/nginx*
 
 mkdir -p /var/www/html
