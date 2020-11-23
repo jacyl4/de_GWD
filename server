@@ -522,14 +522,17 @@ rm -rf /usr/bin/vtrui
 
 installNginx(){
 if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
-  wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
-  unzip ~/nginx.zip
-  mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
-  mv -f ~/nginx/conf/* /etc/nginx/
-  chmod +x /usr/sbin/nginx
-  rm -rf ~/nginx*
 
+rm -rf ~/nginx*
+rm -rf /etc/nginx/*
+wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+unzip ~/nginx.zip
+mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
+mv -f ~/nginx/conf/* /etc/nginx/
 mkdir -p "/etc/nginx/conf.d/"
+chmod +x /usr/sbin/nginx
+rm -rf ~/nginx*
+
 mkdir -p /var/www/html
 mkdir -p /var/www/ssl
 mkdir -p /var/log/nginx
