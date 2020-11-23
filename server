@@ -61,11 +61,27 @@ sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/
 apt purge sqlite3 lighttpd dhcpcd5
 fi
 
+
 systemctl disable --now doh-server >/dev/null 2>&1
 rm -rf /lib/systemd/system/doh-server.service
 rm -rf /usr/local/bin/doh-server*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
+
+
+docker stop nginx >/dev/null 2>&1
+docker rm nginx >/dev/null 2>&1
+
+docker image ls | awk '/nginx/{print$3}' | while read line
+do
+docker rmi $line
+done
+
+if [[ -z $(docker image ls | awk '/nginx/{print$3}') ]]; then
+  systemctl disable --now docker
+  apt purge docker-ce docker-ce-cli containerd.io
+fi
+
 
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
@@ -137,21 +153,11 @@ apt update && apt install sudo locales net-tools netcat dnsutils resolvconf wget
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
-echo "deb [arch=amd64] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" > /etc/apt/sources.list.d/docker.list
-curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
 curl -fsSL  https://packages.sury.org/php/apt.gpg | apt-key add -
 
 apt update
-apt install docker-ce docker-ce-cli containerd.io
 apt upgrade && apt autoremove && apt autoclean
-
-sed -i "/LimitNOFILE=/c\LimitNOFILE=1000000"  /lib/systemd/system/docker.service
-sed -i "/LimitNPROC=/c\LimitNPROC=64000"  /lib/systemd/system/docker.service
-systemctl daemon-reload >/dev/null 2>&1
-systemctl enable docker
-systemctl restart docker
 
 systemctl mask --now systemd-resolved  >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
@@ -513,11 +519,48 @@ rm -rf /usr/bin/vtrui
 
 
 installNginx(){
-mkdir -p "/etc/nginx"
-mkdir -p "/etc/nginx/conf.d"
-mkdir -p "/var/log/nginx"
-mkdir -p "/var/www/html"
-mkdir -p "/var/www/ssl"
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]]; then
+  wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+  unzip ~/nginx.zip
+  mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
+  mv -f ~/nginx/conf/* /etc/nginx/
+  chmod +x /usr/sbin/nginx
+  rm -rf ~/nginx*
+
+mkdir -p "/etc/nginx/conf.d/"
+mkdir -p /var/www/html
+mkdir -p /var/www/ssl
+mkdir -p /var/log/nginx
+mkdir -p /var/cache/nginx/client_temp
+mkdir -p /var/cache/nginx/proxy_temp
+mkdir -p /var/cache/nginx/fastcgi_temp
+mkdir -p /var/cache/nginx/scgi_temp
+mkdir -p /var/cache/nginx/uwsgi_temp
+
+cat > /lib/systemd/system/nginx.service << "EOF"
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+Wants=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart nginx
+fi
 
 rm -rf /etc/nginx/nginx.conf
 
@@ -601,40 +644,6 @@ http {
   include /etc/nginx/conf.d/*.conf;
 }
 EOF
-
-if [[ $(docker image ls 2>/dev/null | awk '/nginx/{print$2}') != $de_gwd_nginx ]]; then
-  docker stop nginx >/dev/null 2>&1
-  docker rm nginx >/dev/null 2>&1
-
-  docker image ls | awk '/nginx/{print$3}' | while read line
-  do
-  docker rmi $line
-  done
-
-  docker pull jacyl4/de_gwd_nginx:$de_gwd_nginx
-
-  if [[ -d "/etc/php" ]]; then
-  mkdir -p /run/php
-  chown -R www-data:www-data /run/php
-
-  docker run -d --name=nginx --net=host --restart=always \
-  -v /etc/localtime:/etc/localtime \
-  -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
-  -v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
-  -v /run/php/:/run/php/ \
-  -v /var/www/html/:/var/www/html/ \
-  -v /var/www/ssl/:/var/www/ssl/ \
-  jacyl4/de_gwd_nginx:$de_gwd_nginx
-  else
-  docker run -d --name=nginx --net=host --restart=always \
-  -v /etc/localtime:/etc/localtime \
-  -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf \
-  -v /etc/nginx/conf.d/:/etc/nginx/conf.d/ \
-  -v /var/www/html/:/var/www/html/ \
-  -v /var/www/ssl/:/var/www/ssl/ \
-  jacyl4/de_gwd_nginx:$de_gwd_nginx
-  fi
-fi
 }
 
 
@@ -652,7 +661,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/$topDomain.key  \
                --fullchain-file /var/www/ssl/$topDomain.cer \
-               --reloadcmd     "docker container exec nginx nginx -s reload"
+               --reloadcmd     "systemctl reload nginx"
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
@@ -671,7 +680,7 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
 
-docker container exec nginx nginx -s reload
+systemctl reload nginx
 EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache
@@ -698,7 +707,7 @@ server {
 }
 EOF
 
-docker container exec nginx nginx -s reload
+systemctl reload nginx
 
 rm -rf /var/www/ssl/*
 
@@ -710,7 +719,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --installcert -d $domain --ecc \
                --key-file       /var/www/ssl/$domain.key  \
                --fullchain-file /var/www/ssl/$domain.cer \
-               --reloadcmd     "docker container exec nginx nginx -s reload"
+               --reloadcmd     "systemctl reload nginx"
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
@@ -729,7 +738,7 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
     
-docker container exec nginx nginx -s reload
+systemctl reload nginx
 EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache
@@ -860,7 +869,7 @@ cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/4_end >> /etc/nginx/conf.d/default.conf
 
-docker container exec nginx nginx -s reload
+systemctl reload nginx
 EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
@@ -1214,7 +1223,7 @@ changeV2rayVerify(){
 
 sed -i "$(sed -ne '/location/=' /etc/nginx/conf.d/default.conf | awk 'END{print}')s/.*/location "'\'$npath''" {/" /etc/nginx/conf.d/default.conf
 
-docker container exec nginx nginx -s reload
+systemctl reload nginx
 
 jq --arg npath "$npath" '.inbounds[0].streamSettings.wsSettings.path=$npath' /opt/de_GWD/vtrui/config.json |\
 jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /opt/de_GWD/vtrui/config.json
@@ -1425,12 +1434,12 @@ else
     echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
-if [[ -n $(docker container ls 2>/dev/null | awk '/nginx/') ]]; then
-    echo "[$statusGOOD] Docker nginx   [working]"
-elif [[ -z $(docker image ls 2>/dev/null | awk '/nginx/') ]]; then
-    echo "[$statusBAD] Docker nginx   [not installed]"
+if [[ $(systemctl is-active nginx) = "active" ]]; then
+    echo "[$statusGOOD] Nginx          [working]"
+elif [[ ! -f "/usr/sbin/nginx" ]]; then
+    echo "[$statusBAD] Nginx          [not installed]"
 else
-    echo "[$statusBAD] Docker nginx   [start failed]"
+    echo "[$statusBAD] Nginx          [start failed]"
 fi
 
 blue "-----------------------------------------------"

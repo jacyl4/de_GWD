@@ -6,12 +6,6 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-if [[ -f "/lib/systemd/system/docker.service" ]];then
-    reloadcmd="docker container exec nginx nginx -s reload"
-elif [[ -f "/lib/systemd/system/nginx.service" ]];then
-    reloadcmd="systemctl reload nginx"
-fi
-
 
 installCER(){
 crontab -l > ~/now.cron
@@ -40,7 +34,7 @@ curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --force --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/de_GWD.key  \
                --fullchain-file /var/www/ssl/de_GWD.cer \
-               --reloadcmd     "$reloadcmd"
+               --reloadcmd     "systemctl reload nginx"
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
@@ -59,7 +53,7 @@ openssl ocsp -no_nonce \
     -url     http://ocsp.int-x3.letsencrypt.org \
     -respout /var/www/ssl/ocsp.resp
 
-$reloadcmd   
+systemctl reload nginx   
 EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache

@@ -1094,11 +1094,7 @@ cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/4_end >> /etc/nginx/conf.d/default.conf
 
-if [[ -f "/lib/systemd/system/nginx.service" ]]; then
-  systemctl reload nginx
-else
-  docker container exec nginx nginx -s reload
-fi
+systemctl reload nginx
 EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
@@ -1133,7 +1129,7 @@ chown -R www-data:www-data /var/www/html
 chmod -R +x /var/www/html
 chmod +x /opt/de_GWD/*
 
-nginx -s reload
+systemctl reload nginx
 
 if [[ $architecture = "arm64" ]]; then
   wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
