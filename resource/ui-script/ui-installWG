@@ -6,22 +6,16 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
-case $(uname -m) in
-    x86_64)  architecture="amd64" ;;
-    aarch64)  architecture="arm64" ;;
-esac
-
-
 installWGcore(){
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 apt update
 
-if [[ $architecture = "amd64" ]] && [[ $(uname -r) < "5.6" ]]; then
+if [[ $(uname -m) == "x86_64" ]] && [[ $(uname -r) < "5.6" ]]; then
     red "Update kernel first!"
-elif [[ $architecture = "amd64" ]] && [[ $(uname -r) > "5.6" ]]; then
+elif [[ $(uname -m) == "x86_64" ]] && [[ $(uname -r) > "5.6" ]]; then
     apt install wireguard-tools
-elif [[ $architecture = "arm64" ]]; then
+elif [[ $(uname -m) == "aarch64" ]]; then
     apt install wireguard-dkms wireguard-tools
 fi
 

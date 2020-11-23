@@ -13,16 +13,12 @@ export DEBIAN_FRONTEND=noninteractive
 branch="main"
 yq_version="3.4.1"
 ttyd_version="1.6.1"
-
-case $(uname -m) in
-    x86_64)  architecture="amd64" ;;
-    aarch64)  architecture="arm64" ;;
-esac
+de_gwd_nginx="1.19.4"
 
 
 
 mirrorSite="https://gwd.seso.icu:10284"
-installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client)"
+installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client_do)"
 
 tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"; }
 
@@ -46,10 +42,10 @@ EOF
 
 tcpTime && hwclock -w
 
-if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
-elif [[ $architecture = "amd64" ]]; then
+if [[ $(uname -m) == "x86_64" ]];then
   wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
+elif [[ $(uname -m) == "aarch64" ]];then
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
 fi
 
 wget --no-check-certificate -c -O ~/china https://bgp.space/china.html
@@ -71,7 +67,7 @@ if [[ -f "/usr/local/bin/0conf" ]]; then
   jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
   jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
   fi
-    
+
   if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
   doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
   doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
@@ -150,14 +146,29 @@ rm -rf /etc/dnsmasq*
 
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-apt purge php7.3-cgi php7.3-xml php7.3-intl php7.3-sqlite3 sqlite3 lighttpd dhcpcd5
+apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5
 fi
+
 
 systemctl disable --now doh-client >/dev/null 2>&1
 rm -rf /lib/systemd/system/doh-client.service
 rm -rf /opt/de_GWD/doh-client*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
+
+
+docker stop nginx >/dev/null 2>&1
+docker rm nginx >/dev/null 2>&1
+
+docker image ls 2>/dev/null | awk '/nginx/{print$3}' | while read line
+do
+docker rmi $line 2>/dev/null 
+done
+
+if [[ -z $(docker image ls 2>/dev/null | awk '/nginx/{print$3}') ]]; then
+  systemctl disable --now docker >/dev/null 2>&1
+  apt purge docker-ce docker-ce-cli containerd.io >/dev/null 2>&1
+fi
 
 
 
@@ -845,11 +856,16 @@ echo "$statusInstalled iptables-proxy"
 
 
 installDep(){
+if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
+rm -rf /etc/php/7.3/
+apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
+fi
+
 if [[ -d "/etc/pihole" ]]; then
 yes | pihole uninstall
 fi
 
-if [[ $architecture = "amd64" ]]; then
+if [[ $(uname -m) == "x86_64" ]];then
 
 cat << EOF >/etc/apt/sources.list
 deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
@@ -858,9 +874,10 @@ deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'
 deb http://deb.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 EOF
 
+fi
+
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
 curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
-fi
 
 apt update
 apt upgrade && apt autoremove && apt autoclean
@@ -868,17 +885,17 @@ apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install php7.3-fpm php7.3-opcache php7.3-json moreutils apache2-utils iputils-ping
+apt install php7.4-fpm php7.4-opcache php7.4-json moreutils apache2-utils iputils-ping
 
-cat << EOF >/etc/php/7.3/fpm/php-fpm.conf
+cat << EOF >/etc/php/7.4/fpm/php-fpm.conf
 [global]
 pid = /run/php/php-fpm.pid
 error_log = /var/log/php-fpm.log
 
-include=/etc/php/7.3/fpm/pool.d/*.conf
+include=/etc/php/7.4/fpm/pool.d/*.conf
 EOF
 
-cat << EOF >/etc/php/7.3/fpm/pool.d/www.conf
+cat << EOF >/etc/php/7.4/fpm/pool.d/www.conf
 [www]
 user = www-data
 group = www-data
@@ -887,27 +904,55 @@ listen.group = www-data
 listen = /run/php/php-fpm.sock
 
 pm = dynamic
-pm.max_children = 5
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
+pm.max_children = 50
+pm.start_servers = 12
+pm.min_spare_servers = 12
+pm.max_spare_servers = 24
+pm.max_requests = 1000
 
 env[HOSTNAME] = \$HOSTNAME
 env[PATH] = /opt/de_GWD:/usr/bin:/bin
 env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
+php_value[upload_max_filesize] = 1G
+php_value[post_max_size] = 1G
+php_admin_value[memory_limit] = 512M
 EOF
 
-cat << "EOF" > /lib/systemd/system/php7.3-fpm.service
+sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
+sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
+sed -i "/^upload_max_filesize/c\upload_max_filesize = 1G" /etc/php/7.4/fpm/php.ini
+sed -i "/^post_max_size/c\post_max_size = 1G" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_input_time/c\max_input_time = 3600" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_execution_time/c\max_execution_time = 3600" /etc/php/7.4/fpm/php.ini
+sed -i "/^memory_limit/c\memory_limit = 512m" /etc/php/7.4/fpm/php.ini
+sed -i "s/^zend_extension/;&/" /etc/php/7.4/fpm/php.ini
+sed -i "s/^opcache/;&/" /etc/php/7.4/fpm/php.ini
+
+cat << EOF >/etc/php/7.4/mods-available/opcache.ini
+; configuration for php opcache module
+; priority=10
+zend_extension=opcache.so
+opcache.enable=1
+opcache.enable_cli=1
+opcache.memory_consumption=128
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=10000
+opcache.revalidate_freq=1
+opcache.fast_shutdown=1
+opcache.save_comments=1
+EOF
+
+cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
 [Unit]
-Description=The PHP 7.3 FastCGI Process Manager
+Description=The PHP 7.4 FastCGI Process Manager
 After=network.target
 
 [Service]
 Type=notify
 PIDFile=/run/php/php-fpm.pid
-ExecStart=/usr/sbin/php-fpm7.3 --nodaemonize --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 RestartSec=2
@@ -917,17 +962,65 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload >/dev/null 2>&1
-systemctl enable php7.3-fpm
-systemctl restart php7.3-fpm
+systemctl enable php7.4-fpm
+systemctl restart php7.4-fpm
 
 echo "$statusInstalled dependencies"
 }
 
 
 
-nginxSet(){
-mkdir -p "/var/www/ssl"
+installNginx(){
+mkdir -p "/etc/nginx/conf.d/"
+mkdir -p /var/www/html
+mkdir -p /var/www/ssl
+mkdir -p /var/log/nginx
+mkdir -p /var/cache/nginx/client_temp
+mkdir -p /var/cache/nginx/proxy_temp
+mkdir -p /var/cache/nginx/fastcgi_temp
+mkdir -p /var/cache/nginx/scgi_temp
+mkdir -p /var/cache/nginx/uwsgi_temp
 
+if [[ $(uname -m) == "x86_64" ]];then
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
+
+  wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+  unzip ~/nginx.zip
+  mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
+  mv -f ~/nginx/conf/* /etc/nginx/
+  chmod +x /usr/sbin/nginx
+  rm -rf ~/nginx*
+
+cat > /lib/systemd/system/nginx.service << "EOF"
+[Unit]
+Description=The NGINX http and reverse proxy server
+After=network.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
+ExecStart=/usr/sbin/nginx -g 'daemon on; master_process on;'
+ExecReload=/usr/sbin/nginx -g 'daemon on; master_process on;' -s reload
+ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/nginx.pid
+TimeoutStopSec=5
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl restart nginx
+fi
+elif [[ $(uname -m) == "aarch64" ]];then
+  apt install nginx
+fi
+}
+
+
+
+nginxSet(){
 if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
 cd /var/www/ssl
 openssl req -x509 -nodes -days 3650 \
@@ -1006,6 +1099,14 @@ http {
                 image/svg+xml
                 image/x-icon;
 
+  brotli                    on;
+  brotli_static             on;
+  brotli_comp_level         6;
+  brotli_buffers            16 8k;
+  brotli_min_length         20;
+  brotli_window             16m;
+  brotli_types              *;
+
   access_log off;
   error_log off;
   log_not_found off;
@@ -1025,6 +1126,7 @@ server {
 }
 
 server {
+  listen 443 quic reuseport;
   listen 443 ssl http2 fastopen=128 reuseport;
   root /var/www/html;
   index index.php index.html index.htm;
@@ -1041,6 +1143,10 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_session_cache builtin:1000 shared:SSL:10m;
   ssl_buffer_size 4k;
 
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  add_header alt-svc 'quic=":443"; h3-27=":443"; h3-25=":443"; h3-T050=":443"; h3-Q050=":443"; h3-Q049=":443"; h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"; ma=86400';
   add_header Referrer-Policy                    no-referrer;
   add_header X-Content-Type-Options             nosniff;
   add_header X-Download-Options                 noopen;
@@ -1098,7 +1204,12 @@ systemctl reload nginx
 EOF
 
 chmod +x /etc/nginx/conf.d/merge.sh
-/etc/nginx/conf.d/merge.sh
+/etc/nginx/conf.d/merge.sh >/dev/null 2>&1
+
+if [[ $(uname -m) == "aarch64" ]];then
+    sed -i '/ssl_early_data/d' /etc/nginx/conf.d/default.conf
+    sed -i '/quic/d' /etc/nginx/conf.d/default.conf
+fi
 }
 
 
@@ -1113,8 +1224,8 @@ rm -rf /opt/de_GWD/ui-*
 rm -rf /opt/de_GWD/ui_*
 rm -rf /var/www/html/*.php
 rm -rf /var/www/html/*.ico
-rm -rf /var/www/html/vendor
 rm -rf /var/www/html/act
+rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
 
@@ -1131,10 +1242,10 @@ chmod +x /opt/de_GWD/*
 
 systemctl reload nginx
 
-if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
-elif [[ $architecture = "amd64" ]]; then
+if [[ $(uname -m) == "x86_64" ]];then
   wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
+elif [[ $(uname -m) == "aarch64" ]];then
+  wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
 fi
 chmod +x /usr/bin/ttyd
 
@@ -1289,10 +1400,10 @@ echo "$statusInstalled AdGuardHome"
 
 
 AdGset(){
-if [[ $architecture = "arm64" ]]; then
-  wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
-elif [[ $architecture = "amd64" ]]; then
+if [[ $(uname -m) == "x86_64" ]];then
   wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
+elif [[ $(uname -m) == "aarch64" ]];then
+  wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
 fi
 chmod +x /usr/bin/yq
 
@@ -1321,7 +1432,7 @@ fi
 
 /opt/de_GWD/ui_2h
 
-if [[ $architecture = "amd64" ]] && [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
+if [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
   installKernel
 fi
 
@@ -1338,9 +1449,9 @@ if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
 fi
 
 /opt/de_GWD/ui-saveDNSChina >/dev/null 2>&1
-systemctl restart smartdns
 
 /opt/de_GWD/ui_4h
+systemctl restart smartdns
 systemctl restart v2dns
 
 if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
@@ -1420,9 +1531,9 @@ installGWD(){
     green " Path"
     green "==========================="
     read v2path
-
+    
     green "==========================="
-    green " V2ray UUID"
+    green " UUID"
     green "==========================="
     read uuidnum
 
@@ -1452,15 +1563,13 @@ netmask 255.255.255.0
 gateway $gatewayaddr
 EOF
 
-if [[ $architecture = "amd64" ]]; then
-
+if [[ $(uname -m) == "x86_64" ]];then
 cat << EOF >/etc/apt/sources.list
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
 deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-backports main contrib non-free
 deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
 EOF
-
 fi
 
 preDownload
@@ -1479,7 +1588,7 @@ de_GWDconnect
 
 installDep
 
-apt install nginx
+installNginx
 
 nginxSet
 
@@ -1572,6 +1681,8 @@ de_GWDconnect
 
 installDep
 
+installNginx
+
 nginxSet
 
 installWebUI
@@ -1589,6 +1700,14 @@ blue "--------------------"
 
 
 start_menu(){
+if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
+    echo "[$statusGOOD] AdGuardHome    [working]"
+elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
+    echo "[$statusBAD] AdGuardHome    [not installed]"
+else
+    echo "[$statusBAD] AdGuardHome    [start failed]"
+fi
+
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
     echo "[$statusGOOD] SmartDNS       [working]"
 elif [[ ! -f "/usr/sbin/smartdns" ]]; then
@@ -1613,12 +1732,20 @@ else
     echo "[$statusBAD] V2RAY          [start failed]"
 fi
 
-if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
-    echo "[$statusGOOD] AdGuardHome    [working]"
-elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
-    echo "[$statusBAD] AdGuardHome    [not installed]"
+if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
+    echo "[$statusGOOD] php7.4-FPM     [working]"
+elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] php7.4-FPM     [not installed]"
 else
-    echo "[$statusBAD] AdGuardHome    [start failed]"
+    echo "[$statusBAD] php7.4-FPM     [start failed]"
+fi
+
+if [[ $(systemctl is-active nginx) = "active" ]]; then
+    echo "[$statusGOOD] Nginx          [working]"
+elif [[ ! -f "/usr/sbin/nginx" ]]; then
+    echo "[$statusBAD] Nginx          [not installed]"
+else
+    echo "[$statusBAD] Nginx          [start failed]"
 fi
 
 blue "-----------------------------------------------"
@@ -1626,11 +1753,11 @@ blue "Kernel ：$(uname -r)"
 blue "Current tcp congestion control ：$(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
 blue "-----------------------------------------------"
 
-    green "==============================="
+    green "====================================="
     green "           CLIENT"
-    green "Recommend: Debian 10 (arm64)"
+    green "Recommend: Debian 10 (amd64 && arm64)"
     green "Author:    JacyL4"
-    green "==============================="
+    green "====================================="
     echo ""
     green  "1. Install de_GWD"
     green  "2. Change de_GWD password"

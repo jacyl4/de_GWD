@@ -75,7 +75,7 @@ location $FWD0path {
 }
 EOF
 
-if [[ -f "/lib/systemd/system/nginx.service" ]];then
+if [[ $(uname -m) == "aarch64" ]];then
     sed -i '/ssl_early_data/d' /etc/nginx/conf.d/forward0.conf
     sed -i '/quic/d' /etc/nginx/conf.d/forward0.conf
 fi
