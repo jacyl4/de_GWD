@@ -184,6 +184,7 @@ cat > /opt/de_GWD/vtrui/config.json << EOF
         "outboundTag": "netflix",
         "type": "field",
         "domain": [
+          "domain:fast.com",
           "domain:netflix.ca",
           "domain:netflix.com",
           "domain:netflix.net",
