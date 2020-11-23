@@ -1014,6 +1014,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
+systemctl enable nginx
 systemctl restart nginx
 fi
 elif [[ $(uname -m) == "aarch64" ]];then
