@@ -1396,8 +1396,6 @@ dhcp:
 clients: []
 EOF
 fi
-
-echo "$statusInstalled AdGuardHome"
 }
 
 
@@ -1424,6 +1422,8 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.all_servers "true"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
+
+echo "$statusInstalled AdGuardHome"
 }
 
 
