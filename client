@@ -984,12 +984,12 @@ mkdir -p /var/cache/nginx/uwsgi_temp
 if [[ $(uname -m) == "x86_64" ]];then
 if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
 
-  wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
-  unzip ~/nginx.zip
-  mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
-  mv -f ~/nginx/conf/* /etc/nginx/
-  chmod +x /usr/sbin/nginx
-  rm -rf ~/nginx*
+wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+unzip ~/nginx.zip
+mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
+mv -f ~/nginx/conf/* /etc/nginx/
+chmod +x /usr/sbin/nginx
+rm -rf ~/nginx*
 
 cat > /lib/systemd/system/nginx.service << "EOF"
 [Unit]
@@ -1033,7 +1033,6 @@ openssl req -x509 -nodes -days 3650 \
 fi
 
 rm -rf /etc/nginx/nginx.conf
-
 cat << EOF >/etc/nginx/nginx.conf
 user  www-data www-data;
 pid   /run/nginx.pid;
