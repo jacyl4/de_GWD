@@ -869,15 +869,15 @@ fi
 if [[ $(uname -m) == "x86_64" ]];then
 
 cat << EOF >/etc/apt/sources.list
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-backports main contrib non-free
-deb http://deb.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://deb.debian.org/debian buster main contrib non-free
+deb http://deb.debian.org/debian buster-updates main contrib non-free
+deb http://deb.debian.org/debian buster-backports main contrib non-free
+deb http://deb.debian.org/debian-security buster/updates main contrib non-free
 EOF
 
 fi
 
-echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
+echo "deb https://packages.sury.org/php/ buster main" > /etc/apt/sources.list.d/php.list
 curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 
 apt update
@@ -1572,10 +1572,10 @@ EOF
 
 if [[ $(uname -m) == "x86_64" ]];then
 cat << EOF >/etc/apt/sources.list
-deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
-deb http://$aptLocal/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-backports main contrib non-free
-deb http://$aptLocal/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://$aptLocal/debian buster main contrib non-free
+deb http://$aptLocal/debian buster-updates main contrib non-free
+deb http://$aptLocal/debian buster-backports main contrib non-free
+deb http://$aptLocal/debian-security buster/updates main contrib non-free
 EOF
 fi
 

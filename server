@@ -145,17 +145,17 @@ Dpkg::Options {
 EOF
 
 cat << EOF >/etc/apt/sources.list
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main contrib non-free
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-updates main contrib non-free
-deb http://deb.debian.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)-backports main contrib non-free
-deb http://deb.debian.org/debian-security $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)/updates main contrib non-free
+deb http://deb.debian.org/debian buster main contrib non-free
+deb http://deb.debian.org/debian buster-updates main contrib non-free
+deb http://deb.debian.org/debian buster-backports main contrib non-free
+deb http://deb.debian.org/debian-security buster/updates main contrib non-free
 EOF
 
 apt update && apt install sudo locales net-tools netcat dnsutils resolvconf wget curl rsync git jq unzip ca-certificates apt-transport-https gnupg2 haveged socat
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
-echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/php.list
+echo "deb https://packages.sury.org/php/ buster main" > /etc/apt/sources.list.d/php.list
 curl -fsSL  https://packages.sury.org/php/apt.gpg | apt-key add -
 
 apt update
