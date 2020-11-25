@@ -563,8 +563,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable nginx
-systemctl restart nginx
+systemctl enable --now nginx
 
 rm -rf /etc/nginx/nginx.conf
 cat << EOF >/etc/nginx/nginx.conf
