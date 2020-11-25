@@ -166,10 +166,6 @@ do
 docker rmi $line 2>/dev/null 
 done
 
-if [[ -z $(docker image ls 2>/dev/null | awk '/nginx/{print$3}') ]]; then
-  systemctl disable --now docker >/dev/null 2>&1
-  apt purge docker-ce docker-ce-cli containerd.io >/dev/null 2>&1
-fi
 fi
 
 
