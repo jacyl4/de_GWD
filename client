@@ -465,6 +465,28 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
+cat << "EOF" >/lib/systemd/system/smartdns.service
+[Unit]
+Description=SmartDNS server
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/smartdns.pid
+EnvironmentFile=/etc/default/smartdns
+ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
+ExecStop=/bin/kill -s QUIT $MAINPID
+ExecStopPost=/bin/rm -f /run/smartdns.pid
+KillMode=mixed
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable smartdns
 systemctl restart smartdns
 echo "$statusInstalled smartdns"
 }
@@ -1006,8 +1028,8 @@ ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
 ExecReload=/usr/sbin/nginx -s reload
 ExecStop=/bin/kill -s QUIT $MAINPID
 ExecStopPost=/bin/rm -f /run/nginx.pid
-PrivateTmp=true
 KillMode=mixed
+PrivateTmp=true
 Restart=always
 RestartSec=2s
 

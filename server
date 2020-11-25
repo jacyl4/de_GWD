@@ -553,8 +553,8 @@ ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
 ExecReload=/usr/sbin/nginx -s reload
 ExecStop=/bin/kill -s QUIT $MAINPID
 ExecStopPost=/bin/rm -f /run/nginx.pid
-PrivateTmp=true
 KillMode=mixed
+PrivateTmp=true
 Restart=always
 RestartSec=2s
 
