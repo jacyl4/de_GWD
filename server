@@ -7,8 +7,10 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 statusGOOD=$(green "✓")
 statusBAD=$(red "✕")
 statusNONE=$(yellow "-")
+statusInstalled=$(green "[ installed ]")
+statuSuccess=$(green "[ OK ]")
+statusFailed=$(red "[ failed ]")
 export DEBIAN_FRONTEND=noninteractive
-export PIHOLE_SKIP_OS_CHECK=true
 de_gwd_nginx="1.19.4"
 
 
