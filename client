@@ -993,6 +993,10 @@ chmod +x /usr/sbin/nginx
 mkdir -p "/etc/nginx/conf.d/"
 mv -f ~/nginx/conf/* /etc/nginx/
 rm -rf ~/nginx*
+fi
+elif [[ $(uname -m) == "aarch64" ]];then
+  apt install nginx
+fi
 
 cat << "EOF" > /lib/systemd/system/nginx.service
 [Unit]
@@ -1019,10 +1023,6 @@ EOF
 systemctl daemon-reload
 systemctl enable nginx
 systemctl restart nginx
-fi
-elif [[ $(uname -m) == "aarch64" ]];then
-  apt install nginx
-fi
 }
 
 

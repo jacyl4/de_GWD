@@ -540,6 +540,7 @@ mkdir -p /var/cache/nginx/proxy_temp
 mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
+fi
 
 cat << "EOF" > /lib/systemd/system/nginx.service
 [Unit]
@@ -566,10 +567,8 @@ EOF
 systemctl daemon-reload
 systemctl enable nginx
 systemctl restart nginx
-fi
 
 rm -rf /etc/nginx/nginx.conf
-
 cat << EOF >/etc/nginx/nginx.conf
 user  www-data www-data;
 pid   /run/nginx.pid;
