@@ -1,4 +1,4 @@
-1.11.10
+1.11.11
 -
 <?php
 $str= file_get_contents('https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php');
