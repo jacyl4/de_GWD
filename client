@@ -151,7 +151,6 @@ fi
 
 
 rm -rf /opt/de_GWD/chnroute.txt
-rm -rf /opt/de_GWD/IPchnroute
 rm -rf /opt/de_GWD/Q4am
 rm -rf /opt/de_GWD/Q4H
 rm -rf /opt/de_GWD/Q2H
