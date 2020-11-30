@@ -196,12 +196,6 @@ rm -rf /opt/de_GWD/ttyd
 rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
 
-rm -rf /var/www/html/gwd
-jq 'del(.clifwd)' /opt/de_GWD/0conf |\
-jq 'del(.dns.v2ad)' | sponge /opt/de_GWD/0conf >/dev/null 2>&1
-mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
-mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
-
 crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
 crontab ~/now.cron
@@ -645,6 +639,8 @@ echo $doh1IP > /opt/de_GWD/IPdoh
 echo $doh2IP >> /opt/de_GWD/IPdoh
 echo $domainIP > /opt/de_GWD/IPv2node
 
+echo 'create chnroute hash:net family inet hashsize 2048 maxelem 65535' >/opt/de_GWD/chnrouteSET
+
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
 ipset -X chnroute >/dev/null 2>&1
@@ -814,6 +810,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable iptables-proxy
+systemctl restart iptables-proxy
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
@@ -824,7 +821,6 @@ echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
-systemctl restart iptables-proxy
 echo "$statusInstalled iptables-proxy"
 }
 
