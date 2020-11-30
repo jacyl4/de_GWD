@@ -150,7 +150,6 @@ done
 fi
 
 
-rm -rf /opt/de_GWD/chnrouteset
 rm -rf /opt/de_GWD/chnroute.txt
 rm -rf /opt/de_GWD/Q4am
 rm -rf /opt/de_GWD/Q4H
