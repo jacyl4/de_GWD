@@ -26,6 +26,33 @@ tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | 
 
 
 
+preDownload() {
+mkdir -p /opt/de_GWD
+
+systemctl stop iptables-proxy >/dev/null 2>&1
+systemctl stop vtrui >/dev/null 2>&1
+systemctl stop v2dns >/dev/null 2>&1
+systemctl stop AdGuardHome >/dev/null 2>&1
+
+rm -rf /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+nameserver 114.114.114.114
+nameserver 114.114.115.115
+EOF
+
+tcpTime && hwclock -w
+
+if [[ $(uname -m) == "x86_64" ]];then
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
+elif [[ $(uname -m) == "aarch64" ]];then
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
+fi
+}
+
+
+
 cleanDep() {
 if [[ -f "/usr/local/bin/0conf" ]]; then
   if [[ -n $(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf 2>/dev/null) ]]; then
@@ -55,19 +82,19 @@ if [[ -f "/usr/local/bin/0conf" ]]; then
   jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
   jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
   jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
-  jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' | sponge /usr/local/bin/0conf
   fi
 
   if [[ $(awk '/divertLan/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
   jq '.divertLan={}' /usr/local/bin/0conf |\
   jq '.divertLan.display="none"' |\
-  jq '.divertLan.ip=[]' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  jq '.divertLan.ip=[]' | sponge /usr/local/bin/0conf
   fi
 
   if [[ $(jq -r '.address.pihole' /usr/local/bin/0conf 2>/dev/null) != "null" ]]; then
   pwd=$(jq -r '.address.pihole' /usr/local/bin/0conf)
   jq 'del(.address.pihole)' /usr/local/bin/0conf |\
-  jq --arg pwd "$pwd" '.address.PWD=$pwd' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  jq --arg pwd "$pwd" '.address.PWD=$pwd' | sponge /usr/local/bin/0conf
   fi
 fi
 
@@ -82,11 +109,6 @@ if [[ -n $(cat /usr/local/bin/0conf 2>/dev/null) ]]; then
 	mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
 fi
 
-if [[ -f "/lib/systemd/system/ttyd.service" ]]; then
-	rm -rf /lib/systemd/system/ttyd.service
-	systemctl daemon-reload >/dev/null 2>&1
-fi
-
 rm -rf /usr/local/bin/0conf*
 rm -rf /usr/local/bin/chnrouteSET
 rm -rf /usr/local/bin/doh*
@@ -97,6 +119,11 @@ rm -rf /usr/local/bin/iptables*
 rm -rf /usr/local/bin/ui*
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/local/bin/vtrui*
+
+if [[ -f "/lib/systemd/system/ttyd.service" ]]; then
+	rm -rf /lib/systemd/system/ttyd.service
+	systemctl daemon-reload >/dev/null 2>&1
+fi
 
 
 if [[ -f "/etc/dnsmasq.conf" ]]; then
@@ -150,6 +177,12 @@ done
 fi
 
 
+if [[ -n $(dpkg -l | grep php) ]] && [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
+rm -rf /etc/php/7.3/
+apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
+fi
+
+
 rm -rf /opt/de_GWD/chnroute.txt
 rm -rf /opt/de_GWD/Q4am
 rm -rf /opt/de_GWD/Q4H
@@ -165,7 +198,7 @@ rm -rf /var/www/html/__MACOSX
 
 rm -rf /var/www/html/gwd
 jq 'del(.clifwd)' /opt/de_GWD/0conf |\
-jq 'del(.dns.v2ad)' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /opt/de_GWD/0conf
+jq 'del(.dns.v2ad)' | sponge /opt/de_GWD/0conf >/dev/null 2>&1
 mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer >/dev/null 2>&1
 mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key >/dev/null 2>&1
 
@@ -173,41 +206,6 @@ crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-}
-
-
-
-preDownload() {
-mkdir -p /opt/de_GWD
-
-systemctl stop iptables-proxy >/dev/null 2>&1
-systemctl stop vtrui >/dev/null 2>&1
-systemctl stop v2dns >/dev/null 2>&1
-systemctl stop AdGuardHome >/dev/null 2>&1
-
-rm -rf /etc/resolv.conf
-cat << EOF >/etc/resolv.conf
-nameserver 119.29.29.29
-nameserver 119.28.28.28
-nameserver 114.114.114.114
-nameserver 114.114.115.115
-EOF
-
-tcpTime && hwclock -w
-
-if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
-elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
-fi
-
-wget --no-check-certificate -O /opt/de_GWD/chnrouteSET https://bgp.space/china.html
-
-sed -i '1,/BEGIN/d' /opt/de_GWD/chnrouteSET
-sed -i '/END/,$d' /opt/de_GWD/chnrouteSET
-sed -i 's/<br>//g' /opt/de_GWD/chnrouteSET
-sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
-sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /opt/de_GWD/chnrouteSET
 }
 
 
@@ -277,7 +275,7 @@ Dpkg::Options {
 EOF
 
 apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf smartdns
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf moreutils apache2-utils iputils-ping smartdns
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
@@ -396,6 +394,8 @@ else
   echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
+
+echo "$statuSuccess system config"
 }
 
 
@@ -512,7 +512,7 @@ domainIP=$(dig @127.0.0.1 $domain -p 5310 +short | grep -E '^[0-9]{1,3}\.[0-9]{1
 
 jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json |\
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
-jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' >/tmp/v2dns_temp && mv -f /tmp/v2dns_temp /opt/de_GWD/v2dns/config.json
+jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' | sponge /opt/de_GWD/v2dns/config.json
 
 cat << EOF > /lib/systemd/system/v2dns.service
 [Unit]
@@ -600,7 +600,7 @@ jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /opt
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
-jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui_temp && mv -f /tmp/vtrui_temp /opt/de_GWD/vtrui/config.json
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui/config.json
 
 cat << EOF > /lib/systemd/system/vtrui.service
 [Unit]
@@ -831,12 +831,6 @@ echo "$statusInstalled iptables-proxy"
 
 
 installDep(){
-if [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
-rm -rf /etc/php/7.3/
-apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
-fi
-
-
 if [[ $(uname -m) == "x86_64" ]];then
 
 cat << EOF >/etc/apt/sources.list
@@ -857,7 +851,7 @@ apt upgrade && apt autoremove && apt autoclean
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
-apt install php7.4-fpm php7.4-opcache php7.4-json moreutils apache2-utils iputils-ping
+apt install php7.4-fpm php7.4-opcache php7.4-json
 
 cat << EOF >/etc/php/7.4/fpm/php-fpm.conf
 [global]
