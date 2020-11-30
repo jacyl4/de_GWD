@@ -49,6 +49,18 @@ if [[ $(uname -m) == "x86_64" ]];then
 elif [[ $(uname -m) == "aarch64" ]];then
   wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
 fi
+
+wget --no-check-certificate -O /opt/de_GWD/chnrouteSET https://bgp.space/china.html
+
+sed -i '1,/BEGIN/d' /opt/de_GWD/chnrouteSET
+
+sed -i '/END/,$d' /opt/de_GWD/chnrouteSET
+
+sed -i 's/<br>//g' /opt/de_GWD/chnrouteSET
+
+sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
+
+sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /opt/de_GWD/chnrouteSET
 }
 
 
@@ -638,8 +650,6 @@ touch /opt/de_GWD/IPlistWlan
 echo $doh1IP > /opt/de_GWD/IPdoh
 echo $doh2IP >> /opt/de_GWD/IPdoh
 echo $domainIP > /opt/de_GWD/IPv2node
-
-echo 'create chnroute hash:net family inet hashsize 2048 maxelem 65535' >/opt/de_GWD/chnrouteSET
 
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
