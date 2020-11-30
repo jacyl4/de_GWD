@@ -59,8 +59,6 @@ sed -i '/END/,$d' /opt/de_GWD/chnrouteSET
 sed -i 's/<br>//g' /opt/de_GWD/chnrouteSET
 
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
-
-sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /opt/de_GWD/chnrouteSET
 }
 
 
@@ -677,6 +675,7 @@ lanip="0.0.0.0/8 \
 223.5.5.5/32 \
 223.6.6.6/32"
 
+ipset -N chnroute hash:net family inet hashsize 2048 maxelem 65535
 ipset -R < /opt/de_GWD/chnrouteSET
 
 ipset -N lanip hash:net family inet hashsize 2048 maxelem 65535

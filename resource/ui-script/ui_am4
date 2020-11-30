@@ -25,7 +25,6 @@ curl -fkSL --retry 10 -m 1800 https://raw.githubusercontent.com/17mon/china_ip_l
 if [[ $(ls -l /opt/de_GWD/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
 cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
-sed -i '1i\create chnroute hash:net family inet hashsize 2048 maxelem 65535' /opt/de_GWD/chnrouteSET
 
 ipset -F chnroute >/dev/null 2>&1
 for IPchnroute in $(cat /opt/de_GWD/IPchnroute); do
