@@ -988,7 +988,7 @@ systemctl enable --now nginx
 
 
 nginxSet(){
-if [[ $(ls -A "/var/www/ssl" | wc -w) == "0" ]]; then
+if [[ ! -f "/var/www/ssl/de_GWD.cer" ]] || [[ ! -f "/var/www/ssl/de_GWD.key" ]]; then
 cd /var/www/ssl
 openssl req -x509 -nodes -days 3650 \
   -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
