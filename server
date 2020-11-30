@@ -1039,61 +1039,17 @@ blue "---------------------------------------------"
 
 
 
-installBBR(){
-apt install -y wget
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-
-if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
-dpkg -i linux-headers.deb
-dpkg -i linux-image.deb
-
-dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
-do
-apt purge -y $line
-done
-
-update-grub
-
-cat << EOF >~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-sysctl -p
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-systemctl restart sshd
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-reboot
-
-else
-    red "Kernel download failed"
-
-    exit
-fi
-blue "--------------------------------"
-blue "Install latest kernel BBR [done]"
-blue "--------------------------------"
-}
-
-
-
 installBBRplus(){
+    green "==================="
+    green "Y. Install bbrplus"
+    green "==================="
+    read BBRplusConfirm
+
+if [[ "$BBRplusConfirm" = "Y" ]] || [[ "$BBRplusConfirm" = "y" ]]; then
+
+if [[ $(uname -m) == "aarch64" ]]; then
+  red "only work on x86_64"
+elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
 wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
@@ -1140,9 +1096,77 @@ else
 
     exit
 fi
+fi
+fi
 blue "-----------------------"
 blue  "Install bbrplus [done]"
 blue "-----------------------"
+}
+
+
+
+installBBR(){
+    green "============================="
+    green "Y. Install latest kernel BBR"
+    green "============================="
+    read BBRconfirm
+
+if [[ "$BBRconfirm" = "Y" ]] || [[ "$BBRconfirm" = "y" ]]; then
+
+if [[ $(uname -m) == "aarch64" ]]; then
+  red "only work on x86_64"
+elif [[ $(uname -m) == "x86_64" ]]; then
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+
+if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
+dpkg -i linux-headers.deb
+dpkg -i linux-image.deb
+
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
+do
+apt purge -y $line
+done
+
+update-grub
+
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+sysctl -p
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+reboot
+
+else
+    red "Kernel download failed"
+
+    exit
+fi
+fi
+fi
+blue "--------------------------------"
+blue "Install latest kernel BBR [done]"
+blue "--------------------------------"
 }
 
 

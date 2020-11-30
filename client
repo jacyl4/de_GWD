@@ -17,42 +17,16 @@ yq_version="3.4.1"
 branch="main"
 
 mirrorSite="https://gwd.seso.icu:10284"
-installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client_do)"
 
-tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"; }
+installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client_do)"
 
 aptLocal="mirrors.aliyun.com"
 
-
-
-preDownload() {
-systemctl stop iptables-proxy >/dev/null 2>&1
-systemctl stop vtrui >/dev/null 2>&1
-systemctl stop v2dns >/dev/null 2>&1
-systemctl stop AdGuardHome >/dev/null 2>&1
-
-rm -rf /etc/resolv.conf
-cat << EOF >/etc/resolv.conf
-nameserver 119.29.29.29
-nameserver 119.28.28.28
-nameserver 114.114.114.114
-nameserver 114.114.115.115
-EOF
-
-tcpTime && hwclock -w
-
-if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
-elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
-fi
-
-wget --no-check-certificate -c -O ~/china https://bgp.space/china.html
-}
+tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"; }
 
 
 
-preUpdate(){
+cleanDep() {
 if [[ -f "/usr/local/bin/0conf" ]]; then
   if [[ -n $(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf 2>/dev/null) ]]; then
   domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
@@ -97,14 +71,20 @@ if [[ -f "/usr/local/bin/0conf" ]]; then
   fi
 fi
 
-mkdir -p /opt/de_GWD
+
 if [[ -d /usr/local/bin/frp ]]; then
-mv -f /usr/local/bin/frp /opt/de_GWD/frp
+	mv -f /usr/local/bin/frp /opt/de_GWD/frp
 fi
 
+
 if [[ -n $(cat /usr/local/bin/0conf 2>/dev/null) ]]; then
-mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
-mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
+	mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
+	mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
+fi
+
+if [[ -f "/lib/systemd/system/ttyd.service" ]]; then
+	rm -rf /lib/systemd/system/ttyd.service
+	systemctl daemon-reload >/dev/null 2>&1
 fi
 
 rm -rf /usr/local/bin/0conf*
@@ -118,34 +98,36 @@ rm -rf /usr/local/bin/ui*
 rm -rf /usr/local/bin/v2dns
 rm -rf /usr/local/bin/vtrui*
 
+
 if [[ -f "/etc/dnsmasq.conf" ]]; then
 cat << EOF >/etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
 listen-address=127.0.0.1
 port=5311
 EOF
-pihole restartdns >/dev/null 2>&1
+	pihole restartdns >/dev/null 2>&1
 fi
 
-if [[ -d "/etc/pihole" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
-pihole -a disabledhcp
 
-usermod -G www-data www-data
-killall -u pihole >/dev/null 2>&1
-deluser --remove-home pihole >/dev/null 2>&1
-groupdel pihole >/dev/null 2>&1
+if [[ -d "/etc/pihole" ]]; then
+	pihole -a disabledhcp
+
+	usermod -G www-data www-data
+	killall -u pihole >/dev/null 2>&1
+	deluser --remove-home pihole >/dev/null 2>&1
+	groupdel pihole >/dev/null 2>&1
 
 /opt/pihole/uninstall.sh << EOF
 y
 n
 EOF
 
-rm -rf /usr/local/bin/pihole*
-rm -rf /etc/dnsmasq*
+	rm -rf /usr/local/bin/pihole*
+	rm -rf /etc/dnsmasq*
 
-rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
+	rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 
-apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5
+	apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5
 fi
 
 
@@ -157,8 +139,8 @@ systemctl daemon-reload
 
 
 if [[ -f "/usr/bin/dockerd" ]]; then
-docker stop nginx >/dev/null 2>&1
-docker rm nginx >/dev/null 2>&1
+	docker stop nginx >/dev/null 2>&1
+	docker rm nginx >/dev/null 2>&1
 
 docker image ls 2>/dev/null | awk '/nginx/{print$3}' | while read line
 do
@@ -181,8 +163,6 @@ rm -rf /opt/de_GWD/vtrui
 rm -rf /opt/de_GWD/ttyd
 rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
-rm -rf /lib/systemd/system/ttyd.service
-systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /var/www/html/gwd
 jq 'del(.clifwd)' /opt/de_GWD/0conf |\
@@ -194,9 +174,40 @@ crontab -l > ~/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
+}
 
 
 
+preDownload() {
+mkdir -p /opt/de_GWD
+
+systemctl stop iptables-proxy >/dev/null 2>&1
+systemctl stop vtrui >/dev/null 2>&1
+systemctl stop v2dns >/dev/null 2>&1
+systemctl stop AdGuardHome >/dev/null 2>&1
+
+rm -rf /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
+nameserver 119.29.29.29
+nameserver 119.28.28.28
+nameserver 114.114.114.114
+nameserver 114.114.115.115
+EOF
+
+tcpTime && hwclock -w
+
+if [[ $(uname -m) == "x86_64" ]];then
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
+elif [[ $(uname -m) == "aarch64" ]];then
+  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
+fi
+
+wget --no-check-certificate -c -O /opt/de_GWD/chnrouteSET https://bgp.space/china.html
+}
+
+
+
+preUpdate(){
 cd ~
 source /etc/profile
 service cron stop >/dev/null 2>&1
@@ -215,54 +226,6 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 if [[ -z $domain ]] || [[ -z $v2path ]] || [[ -z $uuidnum ]]; then
   red "de_GWD /opt/de_GWD/0conf is missing"
   exit
-fi
-}
-
-
-
-installKernel(){
-apt install -y wget
-mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-
-if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
-dpkg -i linux-headers.deb
-dpkg -i linux-image.deb
-
-dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
-do
-apt purge -y $line
-done
-
-update-grub
-
-cat << EOF >~/bbrkernel/clearkernel
-#!/bin/bash
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-sysctl -p
-crontab -l > ~/now.cron
-sed -i '/clearkernel/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-rm -rf ~/bbrkernel
-systemctl restart sshd
-EOF
-
-chmod +x ~/bbrkernel/clearkernel
-
-crontab -l > ~/now.cron
-echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
-
-echo "Kernel updated, please reboot." >~/bbrkernel/reboot
-else
-    red "Kernel download failed"
 fi
 }
 
@@ -428,8 +391,6 @@ else
   echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 fi
 sysctl -p
-
-mkdir -p /opt/de_GWD
 }
 
 
@@ -679,7 +640,6 @@ echo $doh1IP > /opt/de_GWD/IPdoh
 echo $doh2IP >> /opt/de_GWD/IPdoh
 echo $domainIP > /opt/de_GWD/IPv2node
 
-mv -f ~/china /opt/de_GWD/chnrouteSET
 sed -i '1,/BEGIN/d' /opt/de_GWD/chnrouteSET
 sed -i '/END/,$d' /opt/de_GWD/chnrouteSET
 sed -i 's/<br>//g' /opt/de_GWD/chnrouteSET
@@ -1451,10 +1411,6 @@ echo "$statusInstalled AdGuardHome"
 postInstall(){
 /opt/de_GWD/ui_2h
 
-if [[ $(uname -m) == "x86_64" ]] && [[ -z $(dpkg --list | grep linux-image | awk '/bbrplus/') ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.7.7" ]] && [[ $(dpkg --list | grep linux-image | awk '{print $2}') != "linux-image-5.6.15" ]]; then
-  installKernel
-fi
-
 /opt/de_GWD/ui_am4
 
 if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
@@ -1518,9 +1474,6 @@ rm -rf ~/doh.zip
 rm -rf ~/vtrui.zip
 rm -rf ~/ui-script.zip
 rm -rf ~/ui-web.zip
-
-echo ""
-red "$(cat ~/bbrkernel/reboot 2>/dev/null)"
 }
 
 
@@ -1597,6 +1550,8 @@ preInstall
 
 preConf
 
+cleanDep
+
 SmartDNSset
 
 installV2ray
@@ -1647,6 +1602,138 @@ blue "---------------------"
 
 
 
+installBBRplus(){
+    green "==================="
+    green "Y. Install bbrplus"
+    green "==================="
+    read BBRplusConfirm
+
+if [[ "$BBRplusConfirm" = "Y" ]] || [[ "$BBRplusConfirm" = "y" ]]; then
+
+if [[ $(uname -m) == "aarch64" ]]; then
+  red "only work on x86_64"
+elif [[ $(uname -m) == "x86_64" ]]; then
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+
+if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 11265000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 44341000 ]]; then
+dpkg -i linux-headers.deb
+dpkg -i linux-image.deb
+
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/bbrplus/d' | while read line
+do
+apt purge -y $line
+done
+
+update-grub
+
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+sysctl -p
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+reboot
+
+else
+    red "Kernel download failed"
+
+    exit
+fi
+fi
+fi
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
+}
+
+
+
+installBBR(){
+    green "============================="
+    green "Y. Install latest kernel BBR"
+    green "============================="
+    read BBRconfirm
+
+if [[ "$BBRconfirm" = "Y" ]] || [[ "$BBRconfirm" = "y" ]]; then
+
+if [[ $(uname -m) == "aarch64" ]]; then
+  red "only work on x86_64"
+elif [[ $(uname -m) == "x86_64" ]]; then
+apt install -y wget
+mkdir -p ~/bbrkernel && cd ~/bbrkernel
+wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+
+if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
+dpkg -i linux-headers.deb
+dpkg -i linux-image.deb
+
+dpkg --list | grep linux-image | awk '{print $2}' | sed '/5.7.7/d' | sed '/5.6.15/d' | while read line
+do
+apt purge -y $line
+done
+
+update-grub
+
+cat << EOF >~/bbrkernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+sysctl -p
+crontab -l > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/bbrkernel
+systemctl restart sshd
+EOF
+
+chmod +x ~/bbrkernel/clearkernel
+
+crontab -l > ~/now.cron
+echo '@reboot ~/bbrkernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+reboot
+
+else
+    red "Kernel download failed"
+
+    exit
+fi
+fi
+fi
+blue "--------------------------------"
+blue "Install latest kernel BBR [done]"
+blue "--------------------------------"
+}
+
+
+
 change_PWD(){
 if [[ -z $(dpkg -l apache2-utils 2>/dev/null) ]]; then
   apt install apache2-utils
@@ -1689,6 +1776,8 @@ preDownload
 preUpdate
 
 preConf
+
+cleanDep
 
 SmartDNSset
 
@@ -1779,7 +1868,9 @@ blue "-----------------------------------------------"
     green "====================================="
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Change de_GWD password"
+    green  "2. Install bbrplus+fq and reboot"
+    green  "3. Install latest kernel BBR and reboot"
+    yellow "9. Change de_GWD password"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
     echo ""
@@ -1790,6 +1881,14 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     2)
+    installBBRplus
+    start_menu
+    ;;
+    3)
+    installBBR
+    start_menu
+    ;;
+    9)
     change_PWD
     start_menu
     ;;
