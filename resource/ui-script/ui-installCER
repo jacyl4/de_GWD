@@ -21,12 +21,12 @@ topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 apt install netcat socat
 rm -rf /var/www/ssl/*
+touch /var/www/ssl/ocsp.resp
 
 export CF_Key="$CFapikey"
 export CF_Email="$CFemail"
 
 openssl dhparam -out /var/www/ssl/dhparam.pem 2048
-touch /var/www/ssl/ocsp.resp
 
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --force --upgrade  --auto-upgrade
