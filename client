@@ -838,9 +838,6 @@ rm -rf /etc/php/7.3/
 apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
 fi
 
-if [[ -d "/etc/pihole" ]]; then
-yes | pihole uninstall
-fi
 
 if [[ $(uname -m) == "x86_64" ]];then
 
