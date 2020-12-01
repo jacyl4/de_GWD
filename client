@@ -953,17 +953,16 @@ mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
 if [[ $(uname -m) == "x86_64" ]];then
-if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
-
-rm -rf ~/nginx*
-wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
-unzip ~/nginx.zip -d ~/
-mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
-chmod +x /usr/sbin/nginx
-mkdir -p "/etc/nginx/conf.d/"
-mv -f ~/nginx/conf/* /etc/nginx/
-rm -rf ~/nginx*
-fi
+  if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
+    rm -rf ~/nginx*
+    wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+    unzip ~/nginx.zip -d ~/
+    mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
+    chmod +x /usr/sbin/nginx
+    mkdir -p "/etc/nginx/conf.d/"
+    mv -f ~/nginx/conf/* /etc/nginx/
+    rm -rf ~/nginx*
+  fi
 elif [[ $(uname -m) == "aarch64" ]];then
   apt install nginx
 fi
