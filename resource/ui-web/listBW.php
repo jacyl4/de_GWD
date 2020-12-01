@@ -42,7 +42,7 @@
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
       <li class="nav-item no-arrow mx-1">
-        <a class="nav-link" href="adg/">
+        <a class="nav-link" href="adg/" target="_blank">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>AdGuard Home</span>
         </a>

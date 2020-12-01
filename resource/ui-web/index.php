@@ -41,7 +41,7 @@
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
       <li class="nav-item no-arrow mx-1">
-        <a class="nav-link" href="adg/">
+        <a class="nav-link" href="adg/" target="_blank">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>AdGuard Home</span>
         </a>
@@ -411,6 +411,7 @@
             <i class="fas fa-network-wired"></i>
             DHCP
           <span class="float-right mt-n1 mb-n2">
+                <a type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" href="adg/#dhcp" target="_blank">详情</a>
                 <button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="onDHCP()">开启</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="offDHCP()">关闭</button>
           </span>
