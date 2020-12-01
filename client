@@ -110,7 +110,7 @@ fi
 
 
 if [[ -d /usr/local/bin/frp ]]; then
-	mv -f /usr/local/bin/frp /opt/de_GWD/frp
+	mv -f /usr/local/bin/frp /opt/de_GWD
 fi
 
 
