@@ -1232,7 +1232,7 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
-ExecStart=/bin/bash /opt/de_GWD/ui-update
+ExecStart=/usr/bin/ttyd -p 3000 -o /opt/de_GWD/update
 KillMode=process
 
 [Install]
