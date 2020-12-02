@@ -226,7 +226,7 @@ window.location.href="index.php";
 function update(){
 updateCMD=$('#updateCMD').val();
 $.get('./act/updateGEN.php', {updateCMD:updateCMD}, function(result){});
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+setTimeout(function(){window.open('', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
 }
 
 function Rescue(){
