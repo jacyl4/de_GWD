@@ -12,7 +12,7 @@ $updateURL = strpos($updateCMD,"https");
 $updateURL = substr($updateCMD, $updateURL);
 $updateURL = substr($updateURL, 0, strlen($updateURL)-1);
 
-shell_exec("sudo wget --no-check-certificate -qO /opt/de_GWD/update $updateURL");
+shell_exec("sudo wget --no-check-certificate -c -O /opt/de_GWD/update $updateURL");
 shell_exec('sudo chmod +x /opt/de_GWD/update');
 shell_exec('sudo systemctl start updateGWD');
 ?>
