@@ -176,18 +176,34 @@
           </div>
           <div class="card-body">
 
+                <div class="form-row">
+                <div class="col-md-5">
+      <div class="input-group my-2">
+        <div class="input-group-prepend">
+          <span class="input-group-text justify-content-center">de_GWD Addr</span>
+        </div>
+          <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>">
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text justify-content-center">Port</span>
+        </div>
+          <input type="text" id="updatePort" class="form-control col-md-2" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>">
+      </div>
+                </div>
+
+                <div class="col-md-7">
     <div class="form-row">
       <div class="input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">CMD</span>
         </div>
-          <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->updateCMD ?>">
+          <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateCMD ?>">
         <div class="input-group-append">
           <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
         </div>
       </div>
     </div>
-
+                </div>
+                </div>
 
           </div>
         </div>
@@ -250,8 +266,10 @@ window.location.href="index.php";
 
 function update(){
 updateCMD=$('#updateCMD').val();
-$.get('./act/updateGEN.php', {updateCMD:updateCMD}, function(result){});
-setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->localIP ?>:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
+updateAddr=$('#updateAddr').val();
+updatePort=$('#updatePort').val();
+$.get('./act/updateGEN.php', {updateCMD:updateCMD,updateAddr:updateAddr,updatePort:updatePort}, function(result){});
+setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
 }
 
 function Rescue(){
