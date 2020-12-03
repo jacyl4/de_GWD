@@ -25,12 +25,11 @@ EOF
 fi
 
 installFRPs(){
-cd ~
-wget --no-check-certificate -O ~/frp.tar.gz $mirrorSite/amd64_frp.tar.gz
-tar zxvf ~/frp.tar.gz
+wget --no-check-certificate -O /tmp/frp.tar.gz $mirrorSite/amd64_frp.tar.gz
+tar zxvf /tmp/frp.tar.gz -C /tmp/
 
 mkdir -p /opt/de_GWD/frp
-mv -f ~/frp_*/frps /opt/de_GWD/frp/frps
+mv -f /tmp/frp_*/frps /opt/de_GWD/frp/frps
 
 
 cat << EOF >/opt/de_GWD/frp/frps.ini
@@ -66,7 +65,7 @@ systemctl restart frps
 chmod -R 755 /opt/de_GWD/frp
 chown -R root:root /opt/de_GWD/frp
 
-rm -rf ~/frp*
+rm -rf /tmp/frp*
 blue "--------------------"
 blue  "install FRP [done]"
 blue "--------------------"

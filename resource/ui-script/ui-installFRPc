@@ -6,21 +6,20 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 installFRP(){
-cd ~
+mkdir -p /opt/de_GWD/frp
 
 if [[ $(uname -m) = "x86_64" ]]; then
-wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_frp.tar.gz
+wget --no-check-certificate -O /tmp/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_frp.tar.gz
 elif [[ $(uname -m) = "aarch64" ]]; then
-wget --no-check-certificate -O ~/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/arm64_frp.tar.gz
+wget --no-check-certificate -O /tmp/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/arm64_frp.tar.gz
 fi
-tar zxvf ~/frp.tar.gz
+tar zxvf /tmp/frp.tar.gz -C /tmp/
 
-mkdir -p /opt/de_GWD/frp
-mv -f ~/frp_*/frpc /opt/de_GWD/frp/frpc
+mv -f /tmp/frp_*/frpc /opt/de_GWD/frp/frpc
 chmod -R 755 /opt/de_GWD/frp
 chown -R root:root /opt/de_GWD/frp
 
-rm -rf ~/frp*
+rm -rf /tmp/frp*
 blue "--------------------"
 blue  "install FRP [done]"
 blue "--------------------"

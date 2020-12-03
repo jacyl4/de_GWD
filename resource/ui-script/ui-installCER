@@ -8,11 +8,11 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 installCER(){
-crontab -l > ~/now.cron
-sed -i '/acme.sh/d' ~/now.cron
-sed -i '/update_ocsp_cache/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
+crontab -l >/tmp/now.cron
+sed -i '/acme.sh/d' /tmp/now.cron
+sed -i '/update_ocsp_cache/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
 
 CFapikey=$(jq -r '.FORWARD.APIkey' /opt/de_GWD/0conf)
 CFemail=$(jq -r '.FORWARD.Email' /opt/de_GWD/0conf)
@@ -38,10 +38,10 @@ curl https://get.acme.sh | sh
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
-wget --no-check-certificate -c -O ~/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
-wget --no-check-certificate -c -O ~/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
-mv ~/intermediate.pem /var/www/ssl
-mv ~/root.pem /var/www/ssl
+wget --no-check-certificate -c -O /tmp/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+wget --no-check-certificate -c -O /tmp/root.pem https://ssl-tools.net/certificates/dac9024f54d8f6df94935fb1732638ca6ad77c13.pem
+mv -f /tmp/intermediate.pem /var/www/ssl
+mv -f /tmp/root.pem /var/www/ssl
 cat /var/www/ssl/intermediate.pem > /var/www/ssl/bundle.pem
 cat /var/www/ssl/root.pem >> /var/www/ssl/bundle.pem
 
@@ -59,10 +59,10 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-crontab -l > ~/now.cron
-echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >> ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
+crontab -l >/tmp/now.cron
+echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
 
 blue "--------------------------------"
 blue  "Generate TLS Certificate [done]"

@@ -8,22 +8,21 @@ statusInstalled=$(green "[ installed ]")
 date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 
-cd ~
-wget --no-check-certificate -c -O ~/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
-if [[ $(ls -l ~/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
-mv -f ~/geosite.dat /opt/de_GWD/v2dns/geosite.dat
+wget --no-check-certificate -c -O /tmp/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
+if [[ $(ls -l /tmp/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
+mv -f /tmp/geosite.dat /opt/de_GWD/v2dns/geosite.dat
 fi
 
-wget --no-check-certificate -c -O ~/geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat
-if [[ $(ls -l ~/geoip.dat | awk '{print$5}') -gt 240000 ]]; then
-cp -f ~/geoip.dat /opt/de_GWD/v2dns/geoip.dat
-cp -f ~/geoip.dat /opt/de_GWD/vtrui/geoip.dat
-rm -rf ~/geoip.dat
+wget --no-check-certificate -c -O /tmp/geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat
+if [[ $(ls -l /tmp/geoip.dat | awk '{print$5}') -gt 240000 ]]; then
+cp -f /tmp/geoip.dat /opt/de_GWD/v2dns/geoip.dat
+cp -f /tmp/geoip.dat /opt/de_GWD/vtrui/geoip.dat
+rm -rf /tmp/geoip.dat
 fi
 
-wget --no-check-certificate -c -O ~/IPchnroute https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt
-if [[ $(ls -l ~/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
-mv -f ~/IPchnroute /opt/de_GWD/IPchnroute
+wget --no-check-certificate -c -O /tmp/IPchnroute https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt
+if [[ $(ls -l /tmp/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
+mv -f /tmp/IPchnroute /opt/de_GWD/IPchnroute
 cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
 

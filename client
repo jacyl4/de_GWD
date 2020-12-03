@@ -45,9 +45,9 @@ EOF
 tcpTime && hwclock -w
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/amd64_vtrui.zip
+  wget --no-check-certificate -c -O /tmp/vtrui.zip $mirrorSite/amd64_vtrui.zip
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O ~/vtrui.zip $mirrorSite/arm64_vtrui.zip
+  wget --no-check-certificate -c -O /tmp/vtrui.zip $mirrorSite/arm64_vtrui.zip
 fi
 
 wget --no-check-certificate -O /opt/de_GWD/chnrouteSET https://bgp.space/china.html
@@ -206,10 +206,10 @@ rm -rf /opt/de_GWD/ttyd
 rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
 
-crontab -l > ~/now.cron
-sed -i '/\/usr\/local\/bin\/.*/d' ~/now.cron
-crontab ~/now.cron
-rm -rf ~/now.cron
+crontab -l > /tmp/now.cron
+sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
 }
 
 
@@ -469,13 +469,13 @@ systemctl disable --now vtrui >/dev/null 2>&1
 mkdir -p /opt/de_GWD/v2dns
 mkdir -p /opt/de_GWD/vtrui
 
-rm -rf ~/vtrui
-unzip ~/vtrui.zip -d ~/vtrui
-cp -f ~/vtrui/v2ray /opt/de_GWD/v2dns/v2dns
-cp -f ~/vtrui/v2ctl /opt/de_GWD/v2dns/v2ctl
-cp -f ~/vtrui/v2ray /opt/de_GWD/vtrui/vtrui
-cp -f ~/vtrui/v2ctl /opt/de_GWD/vtrui/v2ctl
-cp -f ~/vtrui/geoip.dat /opt/de_GWD/vtrui/geoip.dat
+rm -rf /tmp/vtrui
+unzip /tmp/vtrui.zip -d /tmp/vtrui
+cp -f /tmp/vtrui/v2ray /opt/de_GWD/v2dns/v2dns
+cp -f /tmp/vtrui/v2ctl /opt/de_GWD/v2dns/v2ctl
+cp -f /tmp/vtrui/v2ray /opt/de_GWD/vtrui/vtrui
+cp -f /tmp/vtrui/v2ctl /opt/de_GWD/vtrui/v2ctl
+cp -f /tmp/vtrui/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 chmod +x /opt/de_GWD/v2dns/v2dns
 chmod +x /opt/de_GWD/v2dns/v2ctl
 chmod +x /opt/de_GWD/vtrui/vtrui
@@ -630,7 +630,7 @@ systemctl daemon-reload
 systemctl enable vtrui
 systemctl restart vtrui
 
-rm -rf ~/vtrui
+rm -rf /tmp/vtrui*
 
 echo "$statusInstalled v2dns && vtrui"
 }
@@ -954,14 +954,14 @@ mkdir -p /var/cache/nginx/uwsgi_temp
 
 if [[ $(uname -m) == "x86_64" ]];then
   if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
-    rm -rf ~/nginx*
-    wget --no-check-certificate -c -O ~/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
-    unzip ~/nginx.zip -d ~/
-    mv -f ~/nginx/nginx_amd64 /usr/sbin/nginx
+    rm -rf /tmp/nginx*
+    wget --no-check-certificate -c -O /tmp/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+    unzip /tmp/nginx.zip -d /tmp/
+    mv -f /tmp/nginx/nginx_amd64 /usr/sbin/nginx
     chmod +x /usr/sbin/nginx
     mkdir -p "/etc/nginx/conf.d/"
-    mv -f ~/nginx/conf/* /etc/nginx/
-    rm -rf ~/nginx*
+    mv -f /tmp/nginx/conf/* /etc/nginx/
+    rm -rf /tmp/nginx*
   fi
 elif [[ $(uname -m) == "aarch64" ]];then
   apt install nginx
@@ -1191,10 +1191,10 @@ chmod +x /etc/nginx/conf.d/merge.sh
 
 installWebUI(){
 cd ~
-wget --no-check-certificate -c -O ~/ui-script.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script/Archive.zip
-wget --no-check-certificate -c -O ~/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
+wget --no-check-certificate -c -O /tmp/ui-script.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script/Archive.zip
+wget --no-check-certificate -c -O /tmp/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
 
-if [[ $(ls -l ~/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l ~/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
+if [[ $(ls -l /tmp/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l /tmp/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
 rm -rf /opt/de_GWD/ui-*
 rm -rf /opt/de_GWD/ui_*
 rm -rf /var/www/html/*.php
@@ -1204,8 +1204,8 @@ rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
 
-unzip ~/ui-script.zip -d /opt/de_GWD
-unzip ~/ui-web.zip -d /var/www/html
+unzip /tmp/ui-script.zip -d /opt/de_GWD
+unzip /tmp/ui-web.zip -d /var/www/html
 fi
 
 wget --no-check-certificate -c -O /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
@@ -1218,11 +1218,11 @@ chmod +x /opt/de_GWD/*
 systemctl reload nginx
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O ~/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
+  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O ~/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
+  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
 fi
-mv -f ~/ttyd /usr/bin/ttyd
+mv -f /tmp/ttyd /usr/bin/ttyd
 chmod +x /usr/bin/ttyd
 
 cat << EOF >/lib/systemd/system/updateGWD.service
@@ -1245,8 +1245,8 @@ systemctl daemon-reload >/dev/null 2>&1
 popupWindow="setTimeout(function(){window.open('http://"$localaddr":3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);"
 sed -i "/popupWindow/c\\$popupWindow" /var/www/html/update.php
 
-rm -rf ~/ui-script
-rm -rf ~/ui-web
+rm -rf /tmp/ui-script*
+rm -rf /tmp/ui-web*
 
 if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
@@ -1375,11 +1375,11 @@ fi
 
 AdGset(){
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O ~/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
+  wget --no-check-certificate -c -O /tmp/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O ~/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
+  wget --no-check-certificate -c -O /tmp/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
 fi
-mv -f ~/yq /usr/bin/yq
+mv -f /tmp/yq /usr/bin/yq
 chmod +x /usr/bin/yq
 
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
@@ -1448,26 +1448,19 @@ fi
 systemctl restart vtrui
 systemctl restart iptables-proxy
 
-crontab -l > ~/now.cron
-sed -i '/\/opt\/de_GWD\/ui_am4/d' ~/now.cron
-sed -i '/\/opt\/de_GWD\/ui_4h/d' ~/now.cron
-sed -i '/\/opt\/de_GWD\/ui_2h/d' ~/now.cron
+crontab -l > /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/ui_am4/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/ui_4h/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/ui_2h/d' /tmp/now.cron
 
-cat << EOF >> ~/now.cron
+cat << EOF >> /tmp/now.cron
 0 4 * * * /opt/de_GWD/ui_am4
 0 */4 * * * /opt/de_GWD/ui_4h
 0 */2 * * * /opt/de_GWD/ui_2h
 EOF
-
-crontab ~/now.cron
-rm -rf ~/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
 service cron restart >/dev/null 2>&1
-
-rm -rf ~/smartdns.deb
-rm -rf ~/doh.zip
-rm -rf ~/vtrui.zip
-rm -rf ~/ui-script.zip
-rm -rf ~/ui-web.zip
 }
 
 
