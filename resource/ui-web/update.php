@@ -251,7 +251,7 @@ window.location.href="index.php";
 function update(){
 updateCMD=$('#updateCMD').val();
 $.get('./act/updateGEN.php', {updateCMD:updateCMD}, function(result){});
-setTimeout(function(){window.open('', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
+setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->localIP ?>:3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
 }
 
 function Rescue(){

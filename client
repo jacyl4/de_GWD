@@ -1242,9 +1242,6 @@ EOF
 
 systemctl daemon-reload >/dev/null 2>&1
 
-popupWindow="setTimeout(function(){window.open('http://"$localaddr":3000', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);"
-sed -i "/popupWindow/c\\$popupWindow" /var/www/html/update.php
-
 rm -rf /tmp/ui-script*
 rm -rf /tmp/ui-web*
 
