@@ -180,7 +180,7 @@
                 <div class="col-md-5">
       <div class="input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">de_GWD Addr</span>
+          <span class="input-group-text justify-content-center">Update Addr</span>
         </div>
           <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>">
         <div class="input-group-prepend input-group-append">
