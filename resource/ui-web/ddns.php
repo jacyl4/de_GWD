@@ -234,8 +234,10 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">Wan IP</span>
         </div>
-          <span class="form-control text-center" id="wanIP"></span>
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="showIP()">查询</button>
+          <input type="text" class="form-control text-center" id="wanIP" value="">
+        <div class="input-group-append">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="showIP()">查询</button>
+        </div>
       </div>
 
 
@@ -563,7 +565,7 @@ $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.loca
 }
 
 function showIP(){
-$.get('./act/checkDDNSip.php', function(data) { $('#wanIP').text(data) });
+$.get('./act/checkDDNSip.php', function(data) { $('#wanIP').attr("value",data); });
 }
 
 function ddns3322switch(){
