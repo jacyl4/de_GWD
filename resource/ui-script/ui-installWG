@@ -11,12 +11,10 @@ echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 apt update
 
-if [[ $(uname -m) == "x86_64" ]] && [[ $(uname -r) < "5.6" ]]; then
+if [[ $(uname -r 2>&1 | grep -o '[0-9.]*' | awk NR==1) < "5.6" ]]; then
     red "Update kernel first!"
-elif [[ $(uname -m) == "x86_64" ]] && [[ $(uname -r) > "5.6" ]]; then
+else
     apt install wireguard-tools
-elif [[ $(uname -m) == "aarch64" ]]; then
-    apt install wireguard-dkms wireguard-tools
 fi
 
 if [[ $(jq -r '.wireguard.sprivatekey' /opt/de_GWD/0conf) = "null" ]]; then
