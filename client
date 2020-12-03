@@ -110,10 +110,10 @@ fi
 
 
 if [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) != "null" ]]; then
-  $updateCMD=$(jq -r '.updateCMD' /opt/de_GWD/0conf)
-  $updateAddr=$(jq -r '.address.localIP' /opt/de_GWD/0conf)
+  updateCMD=$(jq -r '.updateCMD' /opt/de_GWD/0conf)
+  updateAddr=$(jq -r '.address.localIP' /opt/de_GWD/0conf)
 
-  jp 'del(.updateCMD)' /opt/de_GWD/0conf |\
+  jq 'del(.updateCMD)' /opt/de_GWD/0conf |\
   jq --arg updateAddr "$updateAddr" '.update.updateAddr=$updateAddr' |\
   jq --arg updatePort "3000" '.update.updatePort=$updatePort' |\
   jq --arg updateCMD "$installCMD" '.update.updateCMD=$updateCMD' | sponge /opt/de_GWD/0conf
