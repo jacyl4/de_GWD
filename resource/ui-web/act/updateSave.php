@@ -18,6 +18,5 @@ $updateURL = substr($updateURL, 0, strlen($updateURL)-1);
 
 shell_exec("sudo wget --no-check-certificate -O /opt/de_GWD/update $updateURL");
 shell_exec('sudo chmod +x /opt/de_GWD/update');
-shell_exec('sudo systemctl start updateGWD');
 ?>
 <?php }?>

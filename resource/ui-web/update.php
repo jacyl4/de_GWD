@@ -197,8 +197,11 @@
           <span class="input-group-text justify-content-center">CMD</span>
         </div>
           <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateCMD ?>">
+        <div class="input-group-prepend input-group-append">
+          <button type="button" class="btn btn-secondary text-right px-3" onclick="updateSave()">保存</button>
+        </div>
         <div class="input-group-append">
-          <button type="button" class="btn btn-outline-danger text-right px-3" onclick="update()">运行</button>
+          <button type="button" class="btn btn-danger text-right px-3" onclick="updateRun()">运行</button>
         </div>
       </div>
     </div>
@@ -264,12 +267,16 @@ alert('恢复设置。。。');
 window.location.href="index.php";
 }
 
-function update(){
+function updateSave(){
 updateCMD=$('#updateCMD').val();
 updateAddr=$('#updateAddr').val();
 updatePort=$('#updatePort').val();
-$.get('./act/updateGEN.php', {updateCMD:updateCMD,updateAddr:updateAddr,updatePort:updatePort}, function(result){});
-setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
+$.get('./act/updateSave.php', {updateCMD:updateCMD,updateAddr:updateAddr,updatePort:updatePort}, function(result){window.location.reload();});
+}
+
+function updateRun(){
+$.get('./act/updateRun.php', function(result){});
+setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 300);
 }
 
 function Rescue(){
