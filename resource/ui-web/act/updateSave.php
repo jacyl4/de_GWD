@@ -11,12 +11,5 @@ $conf['update']['updateAddr'] = $updateAddr;
 $conf['update']['updatePort'] = $updatePort;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
-
-$updateURL = strpos($updateCMD,"https");
-$updateURL = substr($updateCMD, $updateURL);
-$updateURL = substr($updateURL, 0, strlen($updateURL)-1);
-
-shell_exec("sudo wget --no-check-certificate -O /opt/de_GWD/update $updateURL");
-shell_exec('sudo chmod +x /opt/de_GWD/update');
 ?>
 <?php }?>
