@@ -18,7 +18,7 @@ branch="main"
 
 mirrorSite="https://gwd.seso.icu:10284"
 
-installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client_do)"
+installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client)"
 
 aptLocal="mirrors.aliyun.com"
 

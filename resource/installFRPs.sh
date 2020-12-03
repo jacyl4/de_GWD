@@ -10,9 +10,7 @@ FRPbindPort=$1
 FRPtoken=$2
 FRPbindProtocol=$3
 
-installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client_do)"
-
-mirrorSite=$(echo $installCMD | awk '{print$5}' | sed 's?/client_do)??')
+mirrorSite="https://gwd.seso.icu:10284"
 
 
 
