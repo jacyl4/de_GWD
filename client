@@ -1244,7 +1244,7 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
-ExecStart=/usr/bin/ttyd -p 3000 -o /opt/de_GWD/update
+ExecStart=/usr/bin/ttyd -p 3000 -m 1 -o /opt/de_GWD/update
 KillMode=process
 
 [Install]
