@@ -75,7 +75,7 @@ if [[ -f "/usr/local/bin/0conf" ]]; then
   jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
   jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
   jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
-  jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' >/tmp/0conf_temp && mv -f /tmp/0conf_temp /usr/local/bin/0conf
+  jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' | sponge /usr/local/bin/0conf
   fi
 
   if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
@@ -1218,10 +1218,11 @@ chmod +x /opt/de_GWD/*
 systemctl reload nginx
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
+  wget --no-check-certificate -c -O ~/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
+  wget --no-check-certificate -c -O ~/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
 fi
+mv -f ~/ttyd /usr/bin/ttyd
 chmod +x /usr/bin/ttyd
 
 cat << EOF >/lib/systemd/system/updateGWD.service
@@ -1374,10 +1375,11 @@ fi
 
 AdGset(){
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
+  wget --no-check-certificate -c -O ~/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
+  wget --no-check-certificate -c -O ~/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
 fi
+mv -f ~/yq /usr/bin/yq
 chmod +x /usr/bin/yq
 
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
