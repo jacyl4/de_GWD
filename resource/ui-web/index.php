@@ -26,7 +26,8 @@
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
-    <a class="navbar-brand mr-1" href="index.php">de_GWD</a>
+    <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
+    <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
@@ -142,11 +143,11 @@
                 <div class="card-body-icon">
                   <i class="fas fa-toggle-on"></i>
                 </div>
-                <div class="">快捷选项</div>
+                <div class="">代理开关</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" onclick="restartProxy()">重启进程</button></h6>
-                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" data-toggle="modal" data-target="#markThis">备注本机</button></h6>
+                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" onclick="proxyRestart()">重启代理</button></h6>
+                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" onclick="proxyStop()">关闭代理</button></h6>
               </a>
             </div>
           </div>
@@ -466,8 +467,12 @@ function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
 }
 
-function restartProxy(){
-$.get('./act/restartProxy.php', function(result){window.location.reload();});
+function proxyRestart(){
+$.get('./act/proxyRestart.php', function(result){window.location.reload();});
+}
+
+function proxyStop(){
+$.get('./act/proxyStop.php', function(result){window.location.reload();});
 }
 
 function markThis(){

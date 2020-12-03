@@ -5,6 +5,8 @@ shell_exec('sudo systemctl restart smartdns');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart vtrui');
 shell_exec('sudo systemctl restart iptables-proxy');
+shell_exec('sudo yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5350"');
+shell_exec('sudo yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5350"');
 shell_exec('sudo systemctl restart AdGuardHome');
 
 shell_exec('sudo rm -rf /etc/resolv.conf');

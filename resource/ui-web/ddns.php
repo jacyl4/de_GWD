@@ -27,7 +27,8 @@
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
-    <a class="navbar-brand mr-1" href="index.php">de_GWD</a>
+    <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
+    <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
@@ -93,7 +94,6 @@
       </li>
     </ul>
 
-
     <div id="content-wrapper" class="mx-auto" style="max-width: 1600px;">
 
       <div class="container-fluid">
@@ -105,6 +105,129 @@
           </li>
           <li class="breadcrumb-item active">DDNS & LINK</li>
         </ol>
+
+
+<!-- Modal -->
+<div class="modal fade" id="markThis" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="markThisLabel">备注本机</h5>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端1 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode1"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop2" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端2 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop3" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端3 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop4" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端4 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop5" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端5 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode5"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop6" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端6 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode6"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop7" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端7 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode7"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wgqrpop8" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端8 二维码</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="qrcode8"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
         <!-- Page Content -->
       <div class="col-md-6 input-group mx-auto mb-3">
@@ -427,116 +550,16 @@
 
     </div>
     <!-- /.content-wrapper -->
-
-<!-- Modal -->
-<div class="modal fade" id="wgqrpop1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端1 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode1"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop2" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端2 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode2"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop3" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端3 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode3"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop4" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端4 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode4"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop5" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端5 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode5"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop6" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端6 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode6"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop7" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端7 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode7"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop8" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端8 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode8"></div>
-      </div>
-    </div>
-  </div>
-</div>
   </div>
   <!-- /#wrapper -->
 <script>
 function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
+}
+
+function markThis(){
+markNametxt=$('#markName').val();
+$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
 }
 
 function showIP(){
