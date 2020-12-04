@@ -276,7 +276,7 @@ $.get('./act/updateSave.php', {updateCMD:updateCMD,updateAddr:updateAddr,updateP
 
 function updateRun(){
 $.get('./act/updateRun.php', function(result){});
-setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 300);
+setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
 }
 
 function Rescue(){
