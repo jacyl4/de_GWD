@@ -177,8 +177,7 @@
           <div class="card-body">
 
                 <div class="form-row">
-                <div class="col-md-5">
-      <div class="input-group my-2">
+      <div class="input-group my-2 col-md-4">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">Update Addr</span>
         </div>
@@ -188,24 +187,17 @@
         </div>
           <input type="text" id="updatePort" class="form-control col-md-2" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>">
       </div>
-                </div>
 
-                <div class="col-md-7">
-    <div class="form-row">
-      <div class="input-group my-2">
+      <div class="input-group my-2 col-md-8">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">CMD</span>
         </div>
           <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateCMD ?>">
-        <div class="input-group-prepend input-group-append">
-          <button type="button" class="btn btn-secondary text-right px-3" onclick="updateSave()">保存</button>
-        </div>
-        <div class="input-group-append">
-          <button type="button" class="btn btn-danger text-right px-3" onclick="updateRun()">运行</button>
-        </div>
+          <button type="button" class="btn btn-outline-secondary text-right px-3 ml-2" onclick="updateSave()">保存</button>
+          <button type="button" class="btn btn-outline-danger text-right px-3 ml-2" onclick="updateRun()">运行</button>
       </div>
-    </div>
-                </div>
+
+
                 </div>
 
           </div>
