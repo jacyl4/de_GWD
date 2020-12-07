@@ -5,7 +5,7 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 statusInstalled=$(green "[ installed ]")
 
-/opt/de_GWD/ui-tcpTime
+/opt/de_GWD/tcpTime
 
 wget --no-check-certificate -c -O /tmp/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
 if [[ $(ls -l /tmp/geosite.dat | awk '{print$5}') -gt 240000 ]]; then

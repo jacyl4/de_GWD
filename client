@@ -39,13 +39,13 @@ nameserver 114.114.115.115
 EOF
 
 mkdir -p /opt/de_GWD
-cat << EOF >/opt/de_GWD/ui-tcpTime
+cat << EOF >/opt/de_GWD/tcpTime
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 EOF
-chmod +x /opt/de_GWD/ui-tcpTime
-/opt/de_GWD/ui-tcpTime
+chmod +x /opt/de_GWD/tcpTime
+/opt/de_GWD/tcpTime
 
 if [[ $(uname -m) == "x86_64" ]];then
   wget --no-check-certificate -c -O /tmp/vtrui.zip $mirrorSite/amd64_vtrui.zip
