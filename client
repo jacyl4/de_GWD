@@ -22,13 +22,9 @@ installCMD="bash <(wget --no-check-certificate -qO- $mirrorSite/client)"
 
 aptLocal="mirrors.aliyun.com"
 
-tcpTime(){ date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"; }
-
 
 
 preDownload() {
-mkdir -p /opt/de_GWD
-
 systemctl stop iptables-proxy >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
 systemctl stop v2dns >/dev/null 2>&1
@@ -42,7 +38,14 @@ nameserver 114.114.114.114
 nameserver 114.114.115.115
 EOF
 
-tcpTime && hwclock -w
+mkdir -p /opt/de_GWD
+cat << EOF >/opt/de_GWD/ui-tcpTime
+#!/bin/bash
+date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+EOF
+chmod +x /opt/de_GWD/ui-tcpTime
+/opt/de_GWD/ui-tcpTime
 
 if [[ $(uname -m) == "x86_64" ]];then
   wget --no-check-certificate -c -O /tmp/vtrui.zip $mirrorSite/amd64_vtrui.zip

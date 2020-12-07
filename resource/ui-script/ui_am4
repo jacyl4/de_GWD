@@ -5,8 +5,7 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 statusInstalled=$(green "[ installed ]")
 
-date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-hwclock -w
+/opt/de_GWD/ui-tcpTime
 
 wget --no-check-certificate -c -O /tmp/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
 if [[ $(ls -l /tmp/geosite.dat | awk '{print$5}') -gt 240000 ]]; then

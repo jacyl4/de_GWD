@@ -18,6 +18,6 @@ shell_exec('sudo resolvconf -u');
 
 shell_exec('sudo systemctl restart vtrui');
 shell_exec('sudo systemctl restart iptables-proxy');
-shell_exec('sudo /opt/de_GWD/ui_4h');
+shell_exec('sudo /opt/de_GWD/ui-tcpTime');
 ?>
 <?php }?>
