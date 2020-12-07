@@ -16,8 +16,8 @@ shell_exec('sudo echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/bas
 shell_exec('sudo ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf');
 shell_exec('sudo resolvconf -u');
 
-shell_exec('sudo /opt/de_GWD/ui_4h');
 shell_exec('sudo systemctl restart vtrui');
 shell_exec('sudo systemctl restart iptables-proxy');
+shell_exec('sudo /opt/de_GWD/ui_4h');
 ?>
 <?php }?>
