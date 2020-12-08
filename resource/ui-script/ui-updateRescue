@@ -1,10 +1,7 @@
 #!/bin/bash
-systemctl stop updateGWD
-
-systemctl stop iptables-proxy
-systemctl stop vtrui
 systemctl stop v2dns
-systemctl stop AdGuardHome
+systemctl stop vtrui
+systemctl stop iptables-proxy
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
