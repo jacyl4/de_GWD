@@ -1,0 +1,21 @@
+#!/bin/bash
+systemctl restart smartdns
+systemctl restart v2dns
+
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat /dev/null >/etc/resolvconf/resolv.conf.d/head
+cat /dev/null >/etc/resolvconf/resolv.conf.d/original
+cat /dev/null >/etc/resolvconf/resolv.conf.d/tail
+echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
+
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5350"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5350"
+systemctl restart AdGuardHome
+
+systemctl restart vtrui
+systemctl restart iptables-proxy
+
+/opt/de_GWD/tcpTime
