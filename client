@@ -112,7 +112,7 @@ if [[ -f "/usr/local/bin/0conf" ]]; then
 fi
 
 
-if [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) != "null" ]]; then
+if [[ -f "/opt/de_GWD/0conf" ]] && [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) != "null" ]]; then
   updateCMD=$(jq -r '.updateCMD' /opt/de_GWD/0conf)
   updateAddr=$(jq -r '.address.localIP' /opt/de_GWD/0conf)
 
