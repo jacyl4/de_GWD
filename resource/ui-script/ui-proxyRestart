@@ -1,4 +1,6 @@
 #!/bin/bash
+/opt/de_GWD/ui_4h
+
 systemctl restart smartdns
 systemctl restart v2dns
 
@@ -17,5 +19,3 @@ systemctl restart AdGuardHome
 
 systemctl restart vtrui
 systemctl restart iptables-proxy
-
-/opt/de_GWD/tcpTime
