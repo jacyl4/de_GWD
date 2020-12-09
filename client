@@ -14,7 +14,7 @@ export DEBIAN_FRONTEND=noninteractive
 de_gwd_nginx="1.19.5"
 ttyd_version="1.6.1"
 yq_version="3.4.1"
-branch="https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main"
+branch="main"
 
 aptLocal="mirrors.aliyun.com"
 
@@ -44,14 +44,12 @@ chmod +x /opt/de_GWD/tcpTime
 /opt/de_GWD/tcpTime
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /tmp/vtrui.zip $branch/resource/amd64_vtrui.zip
+  wget --no-check-certificate -c -O /tmp/vtrui.zip https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/amd64_vtrui.zip
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /tmp/vtrui.zip $branch/resource/arm64_vtrui.zip
+  wget --no-check-certificate -c -O /tmp/vtrui.zip https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/arm64_vtrui.zip
 fi
 
-wget --no-check-certificate -O /tmp/IPchnroute https://cdn.jsdelivr.net/gh/17mon/china_ip_list@master/china_ip_list.txt
-
-mv -f /tmp/IPchnroute /opt/de_GWD/IPchnroute
+wget --no-check-certificate -O /opt/de_GWD/IPchnroute https://cdn.jsdelivr.net/gh/17mon/china_ip_list@master/china_ip_list.txt
 cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
 }
@@ -1197,8 +1195,8 @@ chmod +x /etc/nginx/conf.d/merge.sh
 
 installWebUI(){
 cd ~
-wget --no-check-certificate -c -O /tmp/ui-script.zip $branch/resource/ui-script/Archive.zip
-wget --no-check-certificate -c -O /tmp/ui-web.zip $branch/resource/ui-web/Archive.zip
+wget --no-check-certificate -c -O /tmp/ui-script.zip https://github.com/jacyl4/de_GWD/raw/$branch/resource/ui-script/Archive.zip
+wget --no-check-certificate -c -O /tmp/ui-web.zip https://github.com/jacyl4/de_GWD/raw/$branch/resource/ui-web/Archive.zip
 
 if [[ $(ls -l /tmp/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l /tmp/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
 rm -rf /opt/de_GWD/ui-*
@@ -1214,7 +1212,7 @@ unzip /tmp/ui-script.zip -d /opt/de_GWD
 unzip /tmp/ui-web.zip -d /var/www/html
 fi
 
-wget --no-check-certificate -c -O /var/www/html/act/version.php $branch/version.php
+wget --no-check-certificate -c -O /var/www/html/act/version.php https://github.com/jacyl4/de_GWD/raw/main/version.php
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html

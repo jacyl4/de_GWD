@@ -14,6 +14,3 @@ jobs:
         curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/client
         curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/amd64_vtrui.zip
         curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/arm64_vtrui.zip
-        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/ui-script/Archive.zip
-        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/ui-web/Archive.zip
-        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/version.php
