@@ -878,12 +878,9 @@ listen.owner = www-data
 listen.group = www-data
 listen = /run/php/php-fpm.sock
 
-pm = dynamic
-pm.max_children = 20
-pm.start_servers = 8
-pm.min_spare_servers = 4
-pm.max_spare_servers = 8
-pm.max_requests = 200
+pm = static
+pm.max_children = 8
+pm.max_requests = 500
 
 env[HOSTNAME] = \$HOSTNAME
 env[PATH] = /opt/de_GWD:/usr/bin:/bin
