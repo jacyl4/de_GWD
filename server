@@ -440,7 +440,7 @@ installV2ray(){
 rm -rf /opt/de_GWD/vtrui
 rm -rf /etc/vtrui
 mkdir -p /opt/de_GWD/vtrui
-wget --no-check-certificate -c -O /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
+wget --no-check-certificate -c -O /tmp/vtrui.zip https://github.com/jacyl4/de_GWD/raw/main/resource/amd64_vtrui.zip
 rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui
 cp -f /tmp/vtrui/v2ray /opt/de_GWD/vtrui/vtrui
@@ -881,14 +881,14 @@ chmod +x /etc/nginx/conf.d/merge.sh
 postInstall(){
 indexpage=$(ls /var/www/html/index.* 2>/dev/null | wc -l)
 if [ "$indexpage" = "0" ]; then 
-wget --no-check-certificate -c -O /tmp/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/sample.zip
+wget --no-check-certificate -c -O /tmp/sample.zip https://github.com/jacyl4/de_GWD/raw/main/resource/sample.zip
 unzip /tmp/sample.zip -d /tmp/
 cp -f /tmp/sample/* /var/www/html/
 rm -rf /tmp/sample*
 fi
 
 rm -rf /opt/de_GWD/version.php
-wget --no-check-certificate -c -O /opt/de_GWD/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+wget --no-check-certificate -c -O /opt/de_GWD/version.php https://github.com/jacyl4/de_GWD/raw/main/version.php
 
 if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
@@ -896,7 +896,7 @@ fi
 
 cat << "EOF" > /opt/de_GWD/autoUpdate
 #!/bin/bash
-wget --no-check-certificate -c -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/main/server
+wget --no-check-certificate -c -O ~/update https://github.com/jacyl4/de_GWD/raw/main/server
 sed -i '$d' ~/update
 echo "updateGWD" >>  ~/update
 chmod +x ~/update
@@ -922,7 +922,7 @@ rm -rf /var/log/*2
 rm -rf /var/log/*gz
 
 localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
-remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
+remoteVer=$(curl -s https://github.com/jacyl4/de_GWD/raw/main/version.php | awk 'NR==1')
 
 if [[ $localVer != $remoteVer ]]; then
 crontab -l > ~/now.cron
@@ -1049,8 +1049,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 11265000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 44341000 ]]; then
 dpkg -i linux-headers.deb
@@ -1115,8 +1115,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
 dpkg -i linux-headers.deb
@@ -1409,7 +1409,7 @@ sed -i '/localVer=/,$d' /opt/de_GWD/Q2H
 
 cat << "EOF" >> /opt/de_GWD/Q2H
 localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
-remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
+remoteVer=$(curl -s https://github.com/jacyl4/de_GWD/raw/main/version.php | awk 'NR==1')
 
 if [[ $localVer != $remoteVer ]]; then
 crontab -l > ~/now.cron

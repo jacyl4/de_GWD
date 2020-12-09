@@ -6,11 +6,10 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
+
 FRPbindPort=$1
 FRPtoken=$2
 FRPbindProtocol=$3
-
-mirrorSite="https://gwd.seso.icu:10284"
 
 
 
@@ -25,7 +24,7 @@ EOF
 fi
 
 installFRPs(){
-wget --no-check-certificate -O /tmp/frp.tar.gz $mirrorSite/amd64_frp.tar.gz
+wget --no-check-certificate -O /tmp/frp.tar.gz https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/amd64_frp.tar.gz
 tar zxvf /tmp/frp.tar.gz -C /tmp/
 
 mkdir -p /opt/de_GWD/frp

@@ -6,7 +6,7 @@
 ## Server:
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/main/server)
+bash <(wget --no-check-certificate -qO- https://github.com/jacyl4/de_GWD/raw/main/server)
 ```
 
 
