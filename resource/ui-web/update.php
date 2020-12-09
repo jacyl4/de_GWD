@@ -272,7 +272,7 @@ setTimeout(function(){window.open('http://<?php echo json_decode(file_get_conten
 }
 
 function Rescue(){
-$.get('./act/updateRescue.php', function(result){});
+$.get('./act/updateRescue.php', function(result){window.location.reload();});
 alert('救机代码已运行');
 }
 
