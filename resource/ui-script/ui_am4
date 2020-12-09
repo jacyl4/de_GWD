@@ -19,7 +19,7 @@ cp -f /tmp/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 rm -rf /tmp/geoip.dat
 fi
 
-wget --no-check-certificate -c -O /tmp/IPchnroute https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt
+wget --no-check-certificate -c -O /tmp/IPchnroute https://cdn.jsdelivr.net/gh/17mon/china_ip_list@master/china_ip_list.txt
 if [[ $(ls -l /tmp/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
 mv -f /tmp/IPchnroute /opt/de_GWD/IPchnroute
 cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET

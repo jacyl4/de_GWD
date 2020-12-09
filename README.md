@@ -13,7 +13,7 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 ## Client:
 ```
 apt install -y wget
-bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
+bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/client)
 ```
 
 ## Manual:
