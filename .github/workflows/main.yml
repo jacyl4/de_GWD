@@ -3,6 +3,7 @@ name: purge jsdelivr cache
 on:
   release:
     types: [created]
+  push:
   workflow_dispatch:
 
 jobs:
