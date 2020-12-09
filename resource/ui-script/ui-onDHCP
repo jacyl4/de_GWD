@@ -14,5 +14,5 @@ if [[ -n $dhcpStart ]] && [[ -n $dhcpEnd ]]; then
 	yq w -i /opt/AdGuardHome/AdGuardHome.yaml dhcp.dhcpv4.range_end "$dhcpEnd"
 	yq w -i /opt/AdGuardHome/AdGuardHome.yaml dhcp.dhcpv4.lease_duration "86400"
 
-	systemctl restart AdGuardHome
+	/opt/AdGuardHome/AdGuardHome -s restart
 fi

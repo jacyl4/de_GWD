@@ -421,7 +421,7 @@ dhcp:
 clients: []
 EOF
 
-systemctl restart AdGuardHome
+/opt/AdGuardHome/AdGuardHome -s restart
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface

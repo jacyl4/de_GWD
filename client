@@ -1426,7 +1426,7 @@ systemctl restart v2dns
 if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
 /opt/de_GWD/ui-onDHCP >/dev/null 2>&1
 else
-systemctl restart AdGuardHome
+/opt/AdGuardHome/AdGuardHome -s restart
 fi
 
 if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
@@ -1747,7 +1747,7 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].password "$pwdHashAdG"
 jq --arg password "$pwdHash" '.address.PWD=$password' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
 chmod 666 /opt/de_GWD/0conf
-systemctl restart AdGuardHome
+/opt/AdGuardHome/AdGuardHome -s restart
 blue "----------------------"
 blue "Change password [done]"
 blue "----------------------"

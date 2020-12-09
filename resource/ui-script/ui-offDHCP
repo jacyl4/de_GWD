@@ -1,6 +1,6 @@
 #!/bin/bash
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dhcp.enabled "false"
 
-systemctl restart AdGuardHome
+/opt/AdGuardHome/AdGuardHome -s restart
 
 jq 'del(.address.dhcp)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf

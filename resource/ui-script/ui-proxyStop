@@ -14,4 +14,4 @@ resolvconf -u
 
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5310"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5310"
-systemctl restart AdGuardHome
+/opt/AdGuardHome/AdGuardHome -s restart

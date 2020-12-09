@@ -5,6 +5,6 @@ shell_exec('sudo /opt/de_GWD/ui-dnsCHNW');
 shell_exec('sudo /opt/de_GWD/ui-saveListBW');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
-shell_exec('sudo systemctl restart AdGuardHome');
+shell_exec('sudo /opt/AdGuardHome/AdGuardHome -s restart');
 ?>
 <?php }?>
