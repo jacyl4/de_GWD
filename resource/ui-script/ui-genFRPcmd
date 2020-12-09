@@ -3,6 +3,4 @@ FRPbindPort=$(jq -r '.FRP.bindPort' /opt/de_GWD/0conf)
 FRPtoken=$(jq -r '.FRP.token' /opt/de_GWD/0conf)
 FRPbindProtocol=$(jq -r '.FRP.bindProtocol' /opt/de_GWD/0conf)
 
-frpCMD=$(jq -r '.updateCMD' /opt/de_GWD/0conf | sed 's/client.*/installFRPs.sh)/')
-
-echo "$frpCMD $FRPbindPort $FRPtoken $FRPbindProtocol"
+echo "bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/installFRPs.sh) $FRPbindPort $FRPtoken $FRPbindProtocol"
