@@ -1267,10 +1267,9 @@ if [[ ! -f /opt/AdGuardHome/AdGuardHome.yaml ]]; then
 cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
 bind_host: 127.0.0.1
 bind_port: 8080
-users:
 http_proxy: ""
 language: ""
-rlimit_nofile: 0
+rlimit_nofile: 100000
 debug_pprof: false
 web_session_ttl: 720
 dns:
@@ -1294,9 +1293,10 @@ dns:
   refuse_any: true
   upstream_dns:
   - 127.0.0.1:5350
+  upstream_dns_file: ""
   bootstrap_dns:
   - 127.0.0.1:5350
-  all_servers: false
+  all_servers: true
   fastest_addr: false
   allowed_clients: []
   disallowed_clients: []
@@ -1308,6 +1308,8 @@ dns:
   aaaa_disabled: true
   enable_dnssec: false
   edns_client_subnet: false
+  max_goroutines: 300
+  ipset: []
   filtering_enabled: true
   filters_update_interval: 24
   parental_enabled: false
@@ -1361,10 +1363,10 @@ filters:
   url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
   name: 大圣净化
   id: 10
-whitelist_filters: []
+whitelist_filters:
 user_rules:
 dhcp:
-clients: []
+clients:
 EOF
 fi
 }
@@ -1396,6 +1398,8 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.enabled "true"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.port_https "8443"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.allow_unencrypted_doh "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.strict_sni_check "false"
 
 echo "$statusInstalled AdGuardHome"
 }

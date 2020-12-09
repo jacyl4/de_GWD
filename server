@@ -358,7 +358,7 @@ dns:
   querylog_interval: 1
   querylog_size_memory: 1000
   anonymize_client_ip: false
-  protection_enabled: false
+  protection_enabled: true
   blocking_mode: default
   blocking_ipv4: ""
   blocking_ipv6: ""
@@ -370,19 +370,23 @@ dns:
   refuse_any: false
   upstream_dns:
   - 8.8.8.8
+  - 8.8.4.4
   - 1.1.1.1
   - 1.0.0.1
-  - 8.8.4.4
+  upstream_dns_file: ""
   bootstrap_dns:
   - 8.8.8.8
+  - 8.8.4.4
   - 1.1.1.1
   - 1.0.0.1
-  - 8.8.4.4
   all_servers: true
   fastest_addr: false
   allowed_clients: []
   disallowed_clients: []
-  blocked_hosts: []
+  blocked_hosts:
+  - version.bind
+  - id.server
+  - hostname.bind
   cache_size: 4194304
   cache_ttl_min: 0
   cache_ttl_max: 0
@@ -390,6 +394,8 @@ dns:
   aaaa_disabled: true
   enable_dnssec: false
   edns_client_subnet: false
+  max_goroutines: 300
+  ipset: []
   filtering_enabled: false
   filters_update_interval: 24
   parental_enabled: false
@@ -406,8 +412,8 @@ tls:
   server_name: ""
   force_https: false
   port_https: 8443
-  port_dns_over_tls: 0
-  port_dns_over_quic: 0
+  port_dns_over_tls: 853
+  port_dns_over_quic: 784
   allow_unencrypted_doh: true
   strict_sni_check: false
   certificate_chain: ""
@@ -415,10 +421,11 @@ tls:
   certificate_path: ""
   private_key_path: ""
 filters:
-whitelist_filters: []
+whitelist_filters:
 user_rules:
 dhcp:
-clients: []
+clients:
+schema_version: 7
 EOF
 
 /opt/AdGuardHome/AdGuardHome -s restart
