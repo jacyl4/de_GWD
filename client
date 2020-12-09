@@ -1268,8 +1268,8 @@ fi
 
 if [[ ! -f /opt/AdGuardHome/AdGuardHome.yaml ]]; then
 cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
-bind_host:
-bind_port:
+bind_host: 127.0.0.1
+bind_port: 8080
 users:
 http_proxy: ""
 language: ""
@@ -1397,6 +1397,8 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.all_servers "true"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.enabled "true"
+yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.port_https "8443"
 
 echo "$statusInstalled AdGuardHome"
 }
