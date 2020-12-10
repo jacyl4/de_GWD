@@ -33,6 +33,6 @@ shell_exec('sudo systemctl restart smartdns');
 shell_exec('sudo /opt/de_GWD/ui_4h');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
-shell_exec('sudo /opt/AdGuardHome/AdGuardHome -s restart');
+shell_exec('sudo /opt/AdGuardHome/AdGuardHome -s reload');
 ?>
 <?php }?>
