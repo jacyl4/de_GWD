@@ -30,13 +30,7 @@ file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 shell_exec('sudo /opt/de_GWD/ui-saveDNSChina');
 shell_exec('sudo systemctl restart smartdns');
 
-if ( $conf['dns']['DNSsplit'] === "gfw" ){
-	shell_exec('sudo /opt/de_GWD/ui-dnsGFW');
-} else {
-	shell_exec('sudo /opt/de_GWD/ui-dnsCHNW');
-}
-
-shell_exec('sudo /opt/de_GWD/ui-saveListBW');
+shell_exec('sudo /opt/de_GWD/ui_4h');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
 shell_exec('sudo /opt/AdGuardHome/AdGuardHome -s restart');
