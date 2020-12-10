@@ -57,7 +57,7 @@ echo $doh1IP >/tmp/IPdoh
 echo $doh2IP >>/tmp/IPdoh
 sort /tmp/IPdoh | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
 
-cat /dev/null >/opt/de_GWD/IPv2node
+>/opt/de_GWD/IPv2node
 jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1 >/tmp/v2node_temp2
 sort /tmp/v2node_temp2 | uniq | sed '/^\s*$/d' >/tmp/v2node_temp
 cat /tmp/v2node_temp | while read line 

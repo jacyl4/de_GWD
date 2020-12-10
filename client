@@ -22,9 +22,6 @@ aptLocal="mirrors.aliyun.com"
 
 preDownload() {
 systemctl stop iptables-proxy >/dev/null 2>&1
-systemctl stop vtrui >/dev/null 2>&1
-systemctl stop v2dns >/dev/null 2>&1
-systemctl stop AdGuardHome >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
@@ -827,9 +824,9 @@ systemctl restart iptables-proxy
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
-cat /dev/null >/etc/resolvconf/resolv.conf.d/head
-cat /dev/null >/etc/resolvconf/resolv.conf.d/original
-cat /dev/null >/etc/resolvconf/resolv.conf.d/tail
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
 echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
