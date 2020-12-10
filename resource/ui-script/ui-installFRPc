@@ -9,9 +9,9 @@ installFRP(){
 mkdir -p /opt/de_GWD/frp
 
 if [[ $(uname -m) = "x86_64" ]]; then
-wget --no-check-certificate -O /tmp/frp.tar.gz https://github.com/jacyl4/de_GWD/raw/main/resource/amd64_frp.tar.gz
+wget --no-check-certificate -O /tmp/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_frp.tar.gz
 elif [[ $(uname -m) = "aarch64" ]]; then
-wget --no-check-certificate -O /tmp/frp.tar.gz https://github.com/jacyl4/de_GWD/raw/main/resource/arm64_frp.tar.gz
+wget --no-check-certificate -O /tmp/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/arm64_frp.tar.gz
 fi
 tar zxvf /tmp/frp.tar.gz -C /tmp/
 

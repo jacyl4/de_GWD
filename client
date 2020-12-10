@@ -1193,8 +1193,8 @@ chmod +x /etc/nginx/conf.d/merge.sh
 
 installWebUI(){
 cd ~
-wget --no-check-certificate -c -O /tmp/ui-script.zip https://github.com/jacyl4/de_GWD/raw/$branch/resource/ui-script/Archive.zip
-wget --no-check-certificate -c -O /tmp/ui-web.zip https://github.com/jacyl4/de_GWD/raw/$branch/resource/ui-web/Archive.zip
+wget --no-check-certificate -c -O /tmp/ui-script.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script/Archive.zip
+wget --no-check-certificate -c -O /tmp/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
 
 if [[ $(ls -l /tmp/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l /tmp/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
 rm -rf /opt/de_GWD/ui-*
@@ -1210,7 +1210,7 @@ unzip /tmp/ui-script.zip -d /opt/de_GWD
 unzip /tmp/ui-web.zip -d /var/www/html
 fi
 
-wget --no-check-certificate -c -O /var/www/html/act/version.php https://github.com/jacyl4/de_GWD/raw/main/version.php
+wget --no-check-certificate -c -O /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
@@ -1609,8 +1609,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 11265000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 44341000 ]]; then
 dpkg -i linux-headers.deb
@@ -1675,8 +1675,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://github.com/jacyl4/de_GWD/raw/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
+wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-$(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
 dpkg -i linux-headers.deb
