@@ -21,6 +21,7 @@ aptLocal="mirrors.aliyun.com"
 
 
 preDownload() {
+/opt/AdGuardHome/AdGuardHome -s stop >/dev/null 2>&1
 systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
