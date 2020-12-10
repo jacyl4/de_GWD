@@ -210,7 +210,7 @@ rm -rf /opt/de_GWD/ttyd
 rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
 
-crontab -l > /tmp/now.cron
+crontab -l >/tmp/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
@@ -290,7 +290,7 @@ systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
 
 cat << EOF >/etc/default/locale
 LANG=en_US.UTF-8
@@ -312,7 +312,7 @@ EOF
 
 locale-gen en_US.UTF-8
 
-echo "Asia/Shanghai" > /etc/timezone
+echo "Asia/Shanghai" >/etc/timezone
 ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 }
 
@@ -395,11 +395,11 @@ sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
 if [[ $(uname -r) =~ "bbrplus" ]]; then
-  echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-  echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+  echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 else
-  echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-  echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+  echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
 fi
 sysctl -p
 
@@ -522,7 +522,7 @@ jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
 jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' | sponge /opt/de_GWD/v2dns/config.json
 
-cat << EOF > /lib/systemd/system/v2dns.service
+cat << EOF >/lib/systemd/system/v2dns.service
 [Unit]
 Description=v2dns Service
 After=network.target
@@ -610,7 +610,7 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui/config.json
 
-cat << EOF > /lib/systemd/system/vtrui.service
+cat << EOF >/lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -649,9 +649,9 @@ touch /opt/de_GWD/IPlistW
 touch /opt/de_GWD/IPlistBlan
 touch /opt/de_GWD/IPlistWlan
 
-echo $doh1IP > /opt/de_GWD/IPdoh
-echo $doh2IP >> /opt/de_GWD/IPdoh
-echo $domainIP > /opt/de_GWD/IPv2node
+echo $doh1IP >/opt/de_GWD/IPdoh
+echo $doh2IP >>/opt/de_GWD/IPdoh
+echo $domainIP >/opt/de_GWD/IPv2node
 
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
@@ -851,7 +851,7 @@ EOF
 
 fi
 
-echo "deb https://packages.sury.org/php/ buster main" > /etc/apt/sources.list.d/php.list
+echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
 curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 
 apt update
@@ -878,9 +878,12 @@ listen.owner = www-data
 listen.group = www-data
 listen = /run/php/php-fpm.sock
 
-pm = static
-pm.max_children = 8
-pm.max_requests = 500
+pm = dynamic
+pm.max_children = 50
+pm.start_servers = 8
+pm.min_spare_servers = 8
+pm.max_spare_servers = 24
+pm.max_requests = 1000
 
 env[HOSTNAME] = \$HOSTNAME
 env[PATH] = /opt/de_GWD:/usr/bin:/bin
@@ -916,7 +919,7 @@ opcache.fast_shutdown=1
 opcache.save_comments=1
 EOF
 
-cat << "EOF" > /lib/systemd/system/php7.4-fpm.service
+cat << "EOF" >/lib/systemd/system/php7.4-fpm.service
 [Unit]
 Description=The PHP 7.4 FastCGI Process Manager
 After=network.target
@@ -968,7 +971,7 @@ elif [[ $(uname -m) == "aarch64" ]];then
   apt install nginx
 fi
 
-cat << "EOF" > /lib/systemd/system/nginx.service
+cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
 After=network.target nss-lookup.target
@@ -1169,11 +1172,11 @@ cat << "EOF" >/etc/nginx/conf.d/merge.sh
 #!/bin/bash
 rm -rf /etc/nginx/conf.d/default.conf
 
-cat /etc/nginx/conf.d/0_top > /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/1_serverHead >> /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/4_end >> /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/0_top >/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/1_serverHead >>/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/2_tlsParameter >>/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/3_reverseProxy >>/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/4_end >>/etc/nginx/conf.d/default.conf
 
 if [[ $(uname -m) == "aarch64" ]];then
     sed -i '/ssl_early_data/d' /etc/nginx/conf.d/default.conf
@@ -1452,12 +1455,12 @@ fi
 systemctl restart vtrui
 systemctl restart iptables-proxy
 
-crontab -l > /tmp/now.cron
+crontab -l >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_am4/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_4h/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_2h/d' /tmp/now.cron
 
-cat << EOF >> /tmp/now.cron
+cat << EOF >>/tmp/now.cron
 0 4 * * * /opt/de_GWD/ui_am4
 0 */4 * * * /opt/de_GWD/ui_4h
 0 */2 * * * /opt/de_GWD/ui_2h
@@ -1557,7 +1560,7 @@ installNginx
 
 nginxSet
 
-echo "{}" > /opt/de_GWD/0conf
+echo "{}" >/opt/de_GWD/0conf
 jq '.address={}' /opt/de_GWD/0conf |\
 jq '.dns={}' |\
 jq '.dns.hosts={}' |\
@@ -1627,8 +1630,8 @@ cat << EOF >~/bbrkernel/clearkernel
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 sysctl -p
 crontab -l > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
@@ -1693,8 +1696,8 @@ cat << EOF >~/bbrkernel/clearkernel
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
 sysctl -p
 crontab -l > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron

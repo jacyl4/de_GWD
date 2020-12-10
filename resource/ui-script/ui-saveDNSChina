@@ -7,6 +7,6 @@ fi
 
 for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf); do
 	if [[ -n $dnsChina ]]; then
-		echo "server $dnsChina" >> /etc/smartdns/smartdns.conf
+		echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
 	fi
 done

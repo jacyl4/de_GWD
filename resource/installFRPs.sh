@@ -38,7 +38,7 @@ $bind_port
 token = $FRPtoken
 EOF
 
-cat << EOF > /lib/systemd/system/frps.service
+cat << EOF >/lib/systemd/system/frps.service
 [Unit]
 Description=Frp Server Service
 After=network.target

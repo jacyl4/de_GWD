@@ -92,7 +92,7 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-crontab -l > /tmp/now.cron
+crontab -l >/tmp/now.cron
 sed -i '/update_ocsp_cache/d' /tmp/now.cron
 echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >>/tmp/now.cron
 crontab /tmp/now.cron

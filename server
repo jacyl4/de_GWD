@@ -83,7 +83,7 @@ done
 fi
 
 
-crontab -l > /tmp/now.cron
+crontab -l >/tmp/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
@@ -114,8 +114,8 @@ chmod 600 /swapfile
 mkswap /swapfile
 swapon /swapfile
 sed -i "/swapfile/d" /etc/fstab
-echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
-echo "RESUME=" > /etc/initramfs-tools/conf.d/resume
+echo "/swapfile swap swap defaults 0 0" >>/etc/fstab
+echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
 fi
 
 rm -rf /etc/resolv.conf
@@ -153,7 +153,7 @@ apt update && apt install sudo locales net-tools netcat dnsutils resolvconf wget
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 
-echo "deb https://packages.sury.org/php/ buster main" > /etc/apt/sources.list.d/php.list
+echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
 curl -fsSL  https://packages.sury.org/php/apt.gpg | apt-key add -
 
 apt update
@@ -163,7 +163,7 @@ systemctl mask --now systemd-resolved  >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 dpkg --configure -a
 
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
 
 cat << EOF >/etc/default/locale
 LANG=en_US.UTF-8
@@ -185,7 +185,7 @@ EOF
 
 locale-gen en_US.UTF-8
 
-echo "Asia/Shanghai" > /etc/timezone
+echo "Asia/Shanghai" >/etc/timezone
 ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 cat << EOF >/etc/security/limits.conf
@@ -255,11 +255,11 @@ sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
 if [[ $(uname -r) =~ "bbrplus" ]]; then
-  echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-  echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+  echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 else
-  echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-  echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+  echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
 fi
 sysctl -p
 
@@ -432,10 +432,10 @@ EOF
 
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
-cat /dev/null > /etc/resolvconf/resolv.conf.d/head
-cat /dev/null > /etc/resolvconf/resolv.conf.d/original
-cat /dev/null > /etc/resolvconf/resolv.conf.d/tail
-echo "nameserver 127.0.0.1" > /etc/resolvconf/resolv.conf.d/base
+cat /dev/null >/etc/resolvconf/resolv.conf.d/head
+cat /dev/null >/etc/resolvconf/resolv.conf.d/original
+cat /dev/null >/etc/resolvconf/resolv.conf.d/tail
+echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
@@ -495,7 +495,7 @@ rm -rf /tmp/v2clients
 
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 
-cat << "EOF" > /lib/systemd/system/vtrui.service
+cat << "EOF" >/lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -546,7 +546,7 @@ mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 fi
 
-cat << "EOF" > /lib/systemd/system/nginx.service
+cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
 After=network.target nss-lookup.target
@@ -733,7 +733,7 @@ EOF
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
-crontab -l > /tmp/now.cron
+crontab -l >/tmp/now.cron
 sed -i '/update_ocsp_cache/d' /tmp/now.cron
 echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >>/tmp/now.cron
 crontab /tmp/now.cron
@@ -852,11 +852,11 @@ cat << EOF >/etc/nginx/conf.d/merge.sh
 #!/bin/bash
 rm -rf /etc/nginx/conf.d/default.conf
 
-cat /etc/nginx/conf.d/0_top > /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/1_serverHead >> /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/2_tlsParameter >> /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/3_reverseProxy >> /etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/4_end >> /etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/0_top >/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/1_serverHead >>/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/2_tlsParameter >>/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/3_reverseProxy >>/etc/nginx/conf.d/default.conf
+cat /etc/nginx/conf.d/4_end >>/etc/nginx/conf.d/default.conf
 
 systemctl reload nginx
 EOF
@@ -883,7 +883,7 @@ if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
 
-cat << "EOF" > /opt/de_GWD/autoUpdate
+cat << "EOF" >/opt/de_GWD/autoUpdate
 #!/bin/bash
 wget --no-check-certificate -c -O ~/update https://github.com/jacyl4/de_GWD/raw/main/server
 sed -i '$d' ~/update
@@ -900,7 +900,7 @@ EOF
 
 chmod +x /opt/de_GWD/autoUpdate
 
-cat << "EOF" > /opt/de_GWD/Q2H
+cat << "EOF" >/opt/de_GWD/Q2H
 #!/bin/bash
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
@@ -925,7 +925,7 @@ EOF
 chmod +x /opt/de_GWD/Q2H
 /opt/de_GWD/Q2H
 
-crontab -l > /tmp/now.cron
+crontab -l >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Q2H/d' /tmp/now.cron
 echo '0 */2 * * * /opt/de_GWD/Q2H' >>/tmp/now.cron
 crontab /tmp/now.cron
@@ -1061,8 +1061,8 @@ cat << EOF >~/bbrkernel/clearkernel
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbrplus" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 sysctl -p
 crontab -l > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
@@ -1127,8 +1127,8 @@ cat << EOF >~/bbrkernel/clearkernel
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = cake" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
 sysctl -p
 crontab -l > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
@@ -1288,7 +1288,7 @@ if [[ $portCheck = "" ]] || [[ $portCheck = "443" ]]; then
 port="443"
 fi
 
-cat << EOF >> /opt/de_GWD/vtrui/config.json
+cat << EOF >>/opt/de_GWD/vtrui/config.json
   "outbounds": [
     {
     "protocol":"vmess",
@@ -1328,7 +1328,7 @@ blue "-----------------------------"
 elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
 sed -i '/"outbounds":/,$d' /opt/de_GWD/vtrui/config.json
 
-cat >> /opt/de_GWD/vtrui/config.json << EOF
+cat >>/opt/de_GWD/vtrui/config.json << EOF
   "outbounds": [
   {"protocol":"freedom","settings":{}}
   ]
@@ -1404,7 +1404,7 @@ autoUpdateGWD(){
 if [[ "$autoUpdateswitch" = "Y" ]] || [[ "$autoUpdateswitch" = "y" ]]; then 
 sed -i '/localVer=/,$d' /opt/de_GWD/Q2H
 
-cat << "EOF" >> /opt/de_GWD/Q2H
+cat << "EOF" >>/opt/de_GWD/Q2H
 localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
 remoteVer=$(curl -s https://github.com/jacyl4/de_GWD/raw/main/version.php | awk 'NR==1')
 
