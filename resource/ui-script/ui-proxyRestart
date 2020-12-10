@@ -17,7 +17,7 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5350"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5350"
-/opt/AdGuardHome/AdGuardHome -s restart
+/opt/AdGuardHome/AdGuardHome -s reload
 
 systemctl restart vtrui
 systemctl restart iptables-proxy

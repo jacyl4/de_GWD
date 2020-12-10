@@ -14,4 +14,4 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5310"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5310"
-/opt/AdGuardHome/AdGuardHome -s restart
+/opt/AdGuardHome/AdGuardHome -s reload
