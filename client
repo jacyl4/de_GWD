@@ -823,11 +823,11 @@ systemctl daemon-reload
 systemctl enable iptables-proxy
 systemctl restart iptables-proxy
 
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
 >/etc/resolvconf/resolv.conf.d/head
 >/etc/resolvconf/resolv.conf.d/original
 >/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
 echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
@@ -1423,9 +1423,9 @@ if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
 fi
 
 /opt/de_GWD/ui-saveDNSChina >/dev/null 2>&1
+systemctl restart smartdns
 
 /opt/de_GWD/ui_4h
-systemctl restart smartdns
 systemctl restart v2dns
 
 if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then

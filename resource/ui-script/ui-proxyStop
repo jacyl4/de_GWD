@@ -1,11 +1,9 @@
 #!/bin/bash
-systemctl stop iptables-proxy
-
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
 >/etc/resolvconf/resolv.conf.d/head
 >/etc/resolvconf/resolv.conf.d/original
 >/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
 echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
@@ -15,3 +13,4 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5310"
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
 yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5310"
 /opt/AdGuardHome/AdGuardHome -s reload
+systemctl stop iptables-proxy

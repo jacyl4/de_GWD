@@ -10,9 +10,9 @@ if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
 fi
 
 /opt/de_GWD/ui-saveDNSChina
+systemctl restart smartdns
 
 /opt/de_GWD/ui_4h
-systemctl restart smartdns
 systemctl restart v2dns
 
 if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then

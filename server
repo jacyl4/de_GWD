@@ -430,11 +430,11 @@ EOF
 
 /opt/AdGuardHome/AdGuardHome -s restart
 
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
 >/etc/resolvconf/resolv.conf.d/head
 >/etc/resolvconf/resolv.conf.d/original
 >/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
 echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u

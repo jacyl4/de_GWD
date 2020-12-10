@@ -1,6 +1,4 @@
 #!/bin/bash
-service cron stop >/dev/null 2>&1
-
 doh1=$(jq -r '.dns.doh1' /opt/de_GWD/0conf)
 doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
 
@@ -82,6 +80,4 @@ fi
 
 jq '.dns.DNSsplit="gfw"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
-if [[ -n $(cat /tmp/v2dns_config) ]]; then
-  mv -f /tmp/v2dns_config /opt/de_GWD/v2dns/config.json
-fi
+/opt/de_GWD/ui-saveListBW
