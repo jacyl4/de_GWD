@@ -8,6 +8,12 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 installCER(){
+crontab -l >/tmp/now.cron
+sed -i '/acme.sh/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf ~/.acme.sh
+
 apt install netcat socat
 rm -rf /var/www/ssl/*
 cat << EOF >/var/www/ssl/ocsp.resp
@@ -44,12 +50,6 @@ cat << EOF >/var/www/ssl/ocsp.resp
 0000 0000 0000 0000 0000 0000 0000 0000
 0000 0000 0000 00
 EOF
-
-crontab -l >/tmp/now.cron
-sed -i '/acme.sh/d' /tmp/now.cron
-sed -i '/update_ocsp_cache/d' /tmp/now.cron
-crontab /tmp/now.cron
-rm -rf /tmp/now.cron
 
 CFapikey=$(jq -r '.FORWARD.APIkey' /opt/de_GWD/0conf)
 CFemail=$(jq -r '.FORWARD.Email' /opt/de_GWD/0conf)
