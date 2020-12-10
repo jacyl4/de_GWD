@@ -1763,7 +1763,7 @@ blue "----------------------"
 
 
 updateGWD(){
-if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]]; then
+if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(yq r /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] 2>/dev/null) == "127.0.0.1:5350" ]]; then
   de_GWDconnect
 fi
 
