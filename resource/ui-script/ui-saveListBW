@@ -90,7 +90,6 @@ fi
 
 
 
-
 if [[ -n $(jq -r '.listBlan[]' /opt/de_GWD/0conf) ]] && [[ $(jq -r '.listBlan[]' /opt/de_GWD/0conf) == "null" ]]; then
 	>/opt/de_GWD/IPlistBlan
 	jq -r '.listBlan[]' /opt/de_GWD/0conf >/opt/de_GWD/IPlistBlan
@@ -105,15 +104,18 @@ fi
 
 
 
+
+if [[ -n $(cat /tmp/v2dns_config) ]]; then
+  mv -f /tmp/v2dns_config /opt/de_GWD/v2dns/config.json
+fi
+
+
 if [[ $(jq -r '.dns.APPLEdir' /opt/de_GWD/0conf) == "on" ]]; then
 /opt/de_GWD/ui-onAPPLE
 else
 /opt/de_GWD/ui-offAPPLE
 fi
 
-if [[ -n $(cat /tmp/v2dns_config) ]]; then
-  mv -f /tmp/v2dns_config /opt/de_GWD/v2dns/config.json
-fi
 
 chmod 666 /opt/de_GWD/v2dns/config.json
 chmod 666 /opt/de_GWD/0conf
