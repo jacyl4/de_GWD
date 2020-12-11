@@ -5,21 +5,11 @@ FWD0uuid=$(jq -r '.FORWARD.FWD0.uuid[]' /opt/de_GWD/0conf)
 vtruiIn='{"port":11810,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/0000"}}}'
 
 jq --argjson vtruiIn "$vtruiIn" '.inbounds[1] = $vtruiIn' /opt/de_GWD/vtrui/config.json |\
-jq --arg FWD0path "$FWD0path" '.inbounds[1].streamSettings.wsSettings.path=$FWD0path' >/tmp/vtrui_temp
+jq --arg FWD0path "$FWD0path" '.inbounds[1].streamSettings.wsSettings.path=$FWD0path' | sponge /opt/de_GWD/vtrui/config.json
 
-{
-for v2uuids in $FWD0uuid; do
-echo '{"id": "'$v2uuids'", "level": 1}'
+for uuid in $FWD0uuid; do
+uuidStr='{"id": "'$uuid'", "level": 1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[1].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 done
-} >/tmp/v2uuids
-
-cat /tmp/v2uuids | while read v2uuids
-do
-jq --argjson v2uuids "$v2uuids" '.inbounds[1].settings.clients+=[$v2uuids]' /tmp/vtrui_temp | sponge /tmp/vtrui_temp
-done
-
-mv -f /tmp/vtrui_temp /opt/de_GWD/vtrui/config.json
-
-rm -rf /tmp/v2uuids
 
 chmod 666 /opt/de_GWD/vtrui/config.json

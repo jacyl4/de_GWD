@@ -139,21 +139,11 @@ jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' |\
 jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
-jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' >/tmp/vtrui1_temp
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui1/config.json
 
-{
-for v2uuids in $FWD1uuid; do
-echo '{"id": "'$v2uuids'", "level": 1}'
+for uuid in $FWD1uuid; do
+uuidStr='{"id": "'$uuid'", "level": 1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
 done
-} >/tmp/v2uuids
-
-cat /tmp/v2uuids | while read v2uuids
-do
-jq --argjson v2uuids "$v2uuids" '.inbounds[0].settings.clients+=[$v2uuids]' /tmp/vtrui1_temp | sponge /tmp/vtrui1_temp
-done
-
-mv -f /tmp/vtrui1_temp /opt/de_GWD/vtrui1/config.json
-
-rm -rf /tmp/v2uuids
 
 chmod 666 /opt/de_GWD/vtrui1/config.json
