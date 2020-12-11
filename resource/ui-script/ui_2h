@@ -1,6 +1,7 @@
 #!/bin/bash
 rm -rf ~/client*
-rm -rf ~/wget-log
+rm -rf ~/wget-log*
+rm -rf /wget-log*
 rm -rf /var/log/*1*
 rm -rf /var/log/*2*
 rm -rf /var/log/*.gz
