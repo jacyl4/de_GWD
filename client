@@ -35,7 +35,7 @@ EOF
 mkdir -p /opt/de_GWD
 cat << EOF >/opt/de_GWD/tcpTime
 #!/bin/bash
-date -s "$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+date -s "\$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 EOF
 chmod +x /opt/de_GWD/tcpTime
@@ -55,51 +55,6 @@ sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
 
 
 cleanDep() {
-if [[ -f "/usr/local/bin/0conf" ]]; then
-  if [[ -n $(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf 2>/dev/null) ]]; then
-  domain=$(jq -r '.v2nodeForUpdate.address' /usr/local/bin/0conf)
-  port=$(jq -r '.v2nodeForUpdate.port' /usr/local/bin/0conf)
-  v2path=$(jq -r '.v2nodeForUpdate.path' /usr/local/bin/0conf)
-  uuidnum=$(jq -r '.v2nodeForUpdate.uuid' /usr/local/bin/0conf)
-
-  jq 'del(.v2nodeForUpdate)' /usr/local/bin/0conf |\
-  jq --arg domain "$domain" '.v2nodeForUpdate[0].address=$domain' |\
-  jq --arg port "$port" '.v2nodeForUpdate[0].port=$port' |\
-  jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[0].uuid=$uuidnum' |\
-  jq --arg v2path "$v2path" '.v2nodeForUpdate[0].path=$v2path' | sponge /usr/local/bin/0conf
-  fi
-
-  if [[ $(jq -r '.dns.doh1' /usr/local/bin/0conf) = "null" ]]; then
-  doh1=$(jq -r '.doh.doh1' /usr/local/bin/0conf)
-  doh2=$(jq -r '.doh.doh2' /usr/local/bin/0conf)
-  hosts=$(jq -r '.hosts' /usr/local/bin/0conf)
-  DNSsplit=$(jq -r '.splitDNS' /usr/local/bin/0conf)
-
-  jq 'del(.doh)' /usr/local/bin/0conf |\
-  jq 'del(.hosts)' |\
-  jq 'del(.v2ad)' |\
-  jq 'del(.splitDNS)' |\
-  jq 'del(.pihole)' |\
-  jq --arg doh1 "$doh1" '.dns.doh1=$doh1' |\
-  jq --arg doh2 "$doh2" '.dns.doh2=$doh2' |\
-  jq --argjson hosts "$hosts" '.dns.hosts=$hosts' |\
-  jq --arg DNSsplit "$DNSsplit" '.dns.DNSsplit=$DNSsplit' | sponge /usr/local/bin/0conf
-  fi
-
-  if [[ $(awk '/divertLan/ {print;exit}' /usr/local/bin/0conf) =~ "[" ]]; then
-  jq '.divertLan={}' /usr/local/bin/0conf |\
-  jq '.divertLan.display="none"' |\
-  jq '.divertLan.ip=[]' | sponge /usr/local/bin/0conf
-  fi
-
-  if [[ $(jq -r '.address.pihole' /usr/local/bin/0conf) != "null" ]]; then
-  pwd=$(jq -r '.address.pihole' /usr/local/bin/0conf)
-  jq 'del(.address.pihole)' /usr/local/bin/0conf |\
-  jq --arg pwd "$pwd" '.address.PWD=$pwd' | sponge /usr/local/bin/0conf
-  fi
-fi
-
-
 if [[ -f "/opt/de_GWD/0conf" ]] && [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) != "null" ]]; then
   updateCMD=$(jq -r '.updateCMD' /opt/de_GWD/0conf)
   updateAddr=$(jq -r '.address.localIP' /opt/de_GWD/0conf)
@@ -108,65 +63,6 @@ if [[ -f "/opt/de_GWD/0conf" ]] && [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) !=
   jq --arg updateAddr "$updateAddr" '.update.updateAddr=$updateAddr' |\
   jq --arg updatePort "3000" '.update.updatePort=$updatePort' |\
   jq --arg updateCMD "bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/client)" '.update.updateCMD=$updateCMD' | sponge /opt/de_GWD/0conf
-fi
-
-
-if [[ -d /usr/local/bin/frp ]]; then
-	mv -f /usr/local/bin/frp /opt/de_GWD
-fi
-
-
-if [[ -n $(cat /usr/local/bin/0conf 2>/dev/null) ]]; then
-	mv -f /usr/local/bin/0conf /opt/de_GWD/0conf
-	mv -f /usr/local/bin/0conf_bak /opt/de_GWD/0conf_bak
-fi
-
-rm -rf /usr/local/bin/0conf*
-rm -rf /usr/local/bin/chnrouteSET
-rm -rf /usr/local/bin/doh*
-rm -rf /usr/local/bin/IP*
-rm -rf /usr/local/bin/listW*
-rm -rf /usr/local/bin/listB*
-rm -rf /usr/local/bin/iptables*
-rm -rf /usr/local/bin/ui*
-rm -rf /usr/local/bin/v2dns
-rm -rf /usr/local/bin/vtrui*
-
-if [[ -f "/lib/systemd/system/ttyd.service" ]]; then
-	rm -rf /lib/systemd/system/ttyd.service
-	systemctl daemon-reload >/dev/null 2>&1
-fi
-
-
-if [[ -f "/etc/dnsmasq.conf" ]]; then
-cat << EOF >/etc/dnsmasq.conf
-conf-dir=/etc/dnsmasq.d
-listen-address=127.0.0.1
-port=5311
-EOF
-	pihole restartdns >/dev/null 2>&1
-fi
-
-
-if [[ -d "/etc/pihole" ]]; then
-	pihole -a disabledhcp
-
-	usermod -G www-data www-data
-	killall -u pihole >/dev/null 2>&1
-	deluser --remove-home pihole >/dev/null 2>&1
-	groupdel pihole >/dev/null 2>&1
-
-/opt/pihole/uninstall.sh << EOF
-y
-n
-EOF
-
-	rm -rf /usr/local/bin/pihole*
-	rm -rf /etc/dnsmasq*
-
-	rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
-
-	apt purge php7.4-cgi php7.4-xml php7.4-intl php7.4-sqlite3 sqlite3 lighttpd dhcpcd5
 fi
 
 
@@ -551,6 +447,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
+    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
     "settings":{"auth":"noauth","network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
@@ -1550,14 +1447,6 @@ installV2ray
 
 installIptablesProxy
 
-de_GWDconnect
-
-installDep
-
-installNginx
-
-nginxSet
-
 echo "{}" >/opt/de_GWD/0conf
 jq '.address={}' /opt/de_GWD/0conf |\
 jq '.dns={}' |\
@@ -1581,6 +1470,14 @@ jq --arg updateAddr "$localaddr" '.update.updateAddr=$updateAddr' |\
 jq --arg updatePort "3000" '.update.updatePort=$updatePort' |\
 jq --arg updateCMD "bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/client)" '.update.updateCMD=$updateCMD' | sponge /opt/de_GWD/0conf
 chmod 666 /opt/de_GWD/0conf
+
+de_GWDconnect
+
+installDep
+
+installNginx
+
+nginxSet
 
 installWebUI
 
