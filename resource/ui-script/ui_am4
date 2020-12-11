@@ -7,12 +7,12 @@ statusInstalled=$(green "[ installed ]")
 
 /opt/de_GWD/tcpTime
 
-wget --no-check-certificate -c -O /tmp/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat
+wget --no-check-certificate -c -O /tmp/geosite.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat
 if [[ $(ls -l /tmp/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
 mv -f /tmp/geosite.dat /opt/de_GWD/v2dns/geosite.dat
 fi
 
-wget --no-check-certificate -c -O /tmp/geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat
+wget --no-check-certificate -c -O /tmp/geoip.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat
 if [[ $(ls -l /tmp/geoip.dat | awk '{print$5}') -gt 240000 ]]; then
 cp -f /tmp/geoip.dat /opt/de_GWD/v2dns/geoip.dat
 cp -f /tmp/geoip.dat /opt/de_GWD/vtrui/geoip.dat
