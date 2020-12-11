@@ -13,9 +13,13 @@ else
   /opt/de_GWD/ui-dnsCHNW >/dev/null 2>&1
 fi
 
-
-for IPv2node in $(cat /opt/de_GWD/IPv2node); do
-  ipset add v2node $IPv2node >/dev/null 2>&1
+cat /opt/de_GWD/IPv2node | xargs -n 8 | while read line
+do
+  for IPv2node in $line
+  do
+    ipset add v2node $IPv2node >/dev/null 2>&1 &
+  done
+  wait
 done
 
 if [[ -n $(cat /opt/de_GWD/IPlistB) ]]; then

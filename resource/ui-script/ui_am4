@@ -26,8 +26,13 @@ cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
 
 ipset -F chnroute >/dev/null 2>&1
-for IPchnroute in $(cat /opt/de_GWD/IPchnroute); do
-  ipset add chnroute $IPchnroute
+cat /opt/de_GWD/IPchnroute | xargs -n 20 | while read line
+do
+	for IPchnroute in $line
+	do
+	  ipset add chnroute $IPchnroute &
+	done
+	wait
 done
 fi
 
