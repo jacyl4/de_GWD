@@ -41,7 +41,6 @@ cat << EOF >/tmp/v2dns_config
   },
   {
     "protocol":"freedom",
-    "settings":{},
     "streamSettings":{"sockopt":{"mark":255}},
     "tag":"direct"
   }

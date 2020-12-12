@@ -111,7 +111,7 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
     },
     {
       "protocol": "freedom",
-      "settings": {},
+      "settings": {"domainStrategy": "UseIP"},
       "streamSettings": {
         "sockopt":{"mark":255}
         },
@@ -121,6 +121,12 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
   "routing": {
     "domainStrategy":"AsIs",
     "rules": [
+      {
+        "type": "field",
+        "port": "53",
+        "network": "tcp,udp",
+        "outboundTag": "direct"
+      },
       {
         "type": "field",
         "ip": [

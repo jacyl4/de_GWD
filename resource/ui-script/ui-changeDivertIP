@@ -2,13 +2,13 @@
 localip=$(jq -r '.divertLan.ip[]' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 
 if [[ -n "$localip" ]]; then
-	jq 'del(.routing.rules[0].source[])' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+	jq 'del(.routing.rules[1].source[])' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 
 	for IP in $localip; do
-		jq --arg IP "$IP" '.routing.rules[0].source+=[$IP]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+		jq --arg IP "$IP" '.routing.rules[1].source+=[$IP]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 	done
 
-	jq '.routing.rules[0].outboundTag="diverttraffic"' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+	jq '.routing.rules[1].outboundTag="diverttraffic"' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 
 	chmod 666 /opt/de_GWD/vtrui/config.json
 fi

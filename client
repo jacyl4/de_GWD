@@ -398,7 +398,6 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 "outbounds":[
   {
     "protocol":"dns",
-    "settings":{},
     "streamSettings":{"sockopt":{"mark":255}},
     "tag":"dnsout"
   },
@@ -495,7 +494,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
   },
   {
     "protocol":"freedom",
-    "settings":{},
+    "settings":{"domainStrategy":"UseIP"},
     "streamSettings":{
       "sockopt":{"mark":255}
       },
@@ -504,7 +503,10 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
 ],
 "routing":{
   "domainStrategy":"AsIs",
-  "rules":[{"type":"field","ip":["geoip:cn","geoip:private"],"network":"tcp,udp","outboundTag":"direct"}]
+  "rules":[
+    {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"},
+    {"type":"field","ip":["geoip:cn","geoip:private"],"network":"tcp,udp","outboundTag":"direct"}
+    ]
 }
 }
 EOF
