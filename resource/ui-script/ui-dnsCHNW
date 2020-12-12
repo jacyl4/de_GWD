@@ -20,7 +20,8 @@ cat << EOF >/tmp/v2dns_config
   {"address":"https+local://$doh2","domains":["domain:google.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["geosite:private","geosite:cn","geosite:tld-cn"],"expectIPs":["geoip:cn"]}
-  ]
+  ],
+  "tag": "dnsflow"
 },
 "inbounds":[
   {
@@ -37,12 +38,20 @@ cat << EOF >/tmp/v2dns_config
     "settings":{},
     "streamSettings":{"sockopt":{"mark":255}},
     "tag":"dnsout"
+  },
+  {
+    "protocol":"freedom",
+    "settings":{},
+    "streamSettings":{"sockopt":{"mark":255}},
+    "tag":"direct"
   }
 ],
 "routing":{
   "domainStrategy":"AsIs",
   "rules":[
-    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
+    {"type":"field","inboundTag":["dnsflow"],"network":"tcp,udp","outboundTag":"direct"},
+    {"type":"field","inboundTag":["dnsin"],"network":"tcp,udp","outboundTag":"dnsout"},
+    {"type":"field","port":"53",,"network":"tcp,udp","outboundTag":"dnsout"}
   ]
 }
 }

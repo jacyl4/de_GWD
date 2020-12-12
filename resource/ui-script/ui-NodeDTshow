@@ -157,7 +157,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     },
     {
       "protocol": "freedom",
-      "settings": { "domainStrategy": "UseIPv4" },
+      "settings": {},
       "streamSettings": {
         "sockopt":{"mark":255}
         },
@@ -170,6 +170,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       {
         "type": "field",
         "source": [ "0.0.0.0" ],
+        "network": "tcp,udp",
         "outboundTag": "diverttraffic"
       },
       {
@@ -197,6 +198,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
           "domain:netflixdnstest8.com",
           "domain:netflixdnstest9.com"
         ],
+        "network": "tcp,udp",
         "outboundTag": "netflix"
       },
       {
@@ -205,6 +207,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
           "geoip:cn",
           "geoip:private"
         ],
+        "network": "tcp,udp",
         "outboundTag": "direct"
       }
     ]

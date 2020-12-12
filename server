@@ -463,7 +463,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
   "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
   "routing":{
     "domainStrategy":"AsIs",
-    "rules":[{"type":"field","ip":["geoip:private"],"outboundTag":"block"}]
+    "rules":[{"type":"field","ip":["geoip:private"],"network":"tcp,udp","outboundTag":"block"}]
   },
   "inbounds": [
     {

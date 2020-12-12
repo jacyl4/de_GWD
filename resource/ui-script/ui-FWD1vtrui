@@ -109,7 +109,7 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
     },
     {
       "protocol": "freedom",
-      "settings": { "domainStrategy": "UseIPv4" },
+      "settings": {},
       "streamSettings": {
         "sockopt":{"mark":255}
         },
@@ -125,6 +125,7 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
           "geoip:cn",
           "geoip:private"
         ],
+        "network": "tcp,udp",
         "outboundTag": "direct"
       }
     ]
