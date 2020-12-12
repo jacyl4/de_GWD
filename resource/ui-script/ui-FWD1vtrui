@@ -123,16 +123,16 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
     "rules": [
       {
         "type": "field",
-        "port": "53",
+        "ip": [
+          "geoip:cn",
+          "geoip:private"
+        ],
         "network": "tcp,udp",
         "outboundTag": "direct"
       },
       {
         "type": "field",
-        "ip": [
-          "geoip:cn",
-          "geoip:private"
-        ],
+        "port": "53",
         "network": "tcp,udp",
         "outboundTag": "direct"
       }

@@ -118,6 +118,15 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     "rules": [
       {
         "type": "field",
+        "ip": [
+          "geoip:cn",
+          "geoip:private"
+        ],
+        "network": "tcp,udp",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
         "port": "53",
         "network": "tcp,udp",
         "outboundTag": "direct"
@@ -149,15 +158,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
         ],
         "network": "tcp,udp",
         "outboundTag": "netflix"
-      },
-      {
-        "type": "field",
-        "ip": [
-          "geoip:cn",
-          "geoip:private"
-        ],
-        "network": "tcp,udp",
-        "outboundTag": "direct"
       }
     ]
   }
