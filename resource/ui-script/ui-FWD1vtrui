@@ -111,7 +111,7 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
     {
       "tag": "Direct",
       "protocol": "freedom",
-      "settings": {"domainStrategy": "UseIP"},
+      "settings": {},
       "streamSettings": {
         "sockopt":{"mark":255}
         }
