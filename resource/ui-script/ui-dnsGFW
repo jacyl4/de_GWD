@@ -18,31 +18,31 @@ cat << EOF >/tmp/v2dns_config
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
   {"address":"https+local://$doh1","domains":["domain:google.com"]},
   {"address":"https+local://$doh2","domains":["domain:google.com"]},
-  {"address":"https+local://$doh1","domains":["geosite:geolocation-!cn"]},
-  {"address":"https+local://$doh2","domains":["geosite:geolocation-!cn"]}
+  {"address":"https+local://$doh1","domains":["geosite:geolocation-!cn","geosite:tld-!cn","geosite:gfw","geosite:greatfire"]},
+  {"address":"https+local://$doh2","domains":["geosite:geolocation-!cn","geosite:tld-!cn","geosite:gfw","geosite:greatfire"]}
   ]
 },
 "inbounds":[
   {
-    "tag":"dnsin",
     "port":5350,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53}
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53},
+    "tag":"dnsin"
   }
 ],
 "outbounds":[
   {
-    "tag":"dnsout",
     "protocol":"dns",
     "settings":{},
-    "streamSettings":{"sockopt":{"mark":255}}
+    "streamSettings":{"sockopt":{"mark":255}},
+    "tag":"dnsout"
   }
 ],
 "routing":{
   "domainStrategy":"AsIs",
   "rules":[
-    {"outboundTag":"dnsout","type":"field","inboundTag":["dnsin"]}
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
   ]
 }
 }

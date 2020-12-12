@@ -71,7 +71,6 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
   ],
   "outbounds": [
     {
-      "tag": "proxy",
       "mux": {
         "enabled": true,
         "concurrency": 12
@@ -105,14 +104,16 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
         "sockopt": {
           "mark": 255
         }
-      }
+      },
+      "tag": "proxy"
     },
     {
-      "tag": "direct",
       "protocol": "freedom",
+      "settings": { "domainStrategy": "UseIPv4" },
       "streamSettings": {
         "sockopt":{"mark":255}
-        }
+        },
+      "tag": "direct"
     }
   ],
   "routing": {

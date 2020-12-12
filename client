@@ -388,24 +388,24 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 },
 "inbounds":[
   {
-    "tag":"dnsin",
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53}
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53},
+    "tag":"dnsin"
   }
 ],
 "outbounds":[
   {
-    "tag":"dnsout",
     "protocol":"dns",
     "settings":{},
     "streamSettings":{"sockopt":{"mark":255}}
+    "tag":"dnsout"
   }
 ],
 "routing":{
   "domainStrategy":"AsIs",
   "rules":[
-    {"outboundTag":"dnsout","type":"field","inboundTag":["dnsin"]}
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
   ]
 }
 }
@@ -483,11 +483,12 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     }
   },
   {
-    "tag":"direct",
     "protocol":"freedom",
+    "settings":{"domainStrategy":"UseIPv4"},
     "streamSettings":{
       "sockopt":{"mark":255}
-      }
+      },
+    "tag":"direct"
   }
 ],
 "routing":{
