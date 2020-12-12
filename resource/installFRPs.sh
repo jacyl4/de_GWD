@@ -46,8 +46,6 @@ After=network.target
 [Service]
 User=root
 Type=simple
-LimitNPROC=64000
-LimitNOFILE=1000000
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/opt/de_GWD/frp/frps -c /opt/de_GWD/frp/frps.ini
 Restart=always

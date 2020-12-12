@@ -10,13 +10,12 @@ cat << "EOF" >/lib/systemd/system/vtrui1.service
 [Unit]
 Description=vtrui1 Service
 After=network.target nss-lookup.target
-Wants=network-online.target
 
 [Service]
 User=root
 Type=simple
-LimitNPROC=64000
-LimitNOFILE=1000000
+NoNewPrivileges=true
+AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/vtrui1/vtrui1 -config /opt/de_GWD/vtrui1/config.json
 Restart=always
