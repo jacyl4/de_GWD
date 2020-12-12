@@ -475,7 +475,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom","settings":{}}
+  {"protocol":"freedom"}
   ]
 }
 EOF
@@ -1330,7 +1330,7 @@ sed -i '/"outbounds":/,$d' /opt/de_GWD/vtrui/config.json
 
 cat >>/opt/de_GWD/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom","settings":{}}
+  {"protocol":"freedom"}
   ]
 }
 EOF

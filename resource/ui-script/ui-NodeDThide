@@ -107,7 +107,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     {
       "tag": "Direct",
       "protocol": "freedom",
-      "settings": {},
       "streamSettings": {
         "sockopt":{"mark":255}
         }
