@@ -18,6 +18,7 @@
 
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.css" rel="stylesheet">
+  <link href="css/animation.css" rel="stylesheet">
 
   <link href="favicon.ico" rel="icon" type="image/x-icon" />
 </head>
@@ -211,9 +212,8 @@
           </span>
           </div>
           <div style="display: flex;flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline-success btn-sm col-2" style="border-radius: 0px;" onclick="speedT()">测速</button>
-            <button type="button" class="btn btn-outline-success btn-sm col-5" style="border-radius: 0px;" onclick="pingTCP()">Ping (TCP)</button>
-            <button type="button" class="btn btn-outline-success btn-sm col-5" style="border-radius: 0px;" onclick="pingICMP()">Ping (ICMP)</button>
+            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingTCP()">Ping (TCP)</button>
+            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingICMP()">Ping (ICMP)</button>
           </div>
 
           <div class="card-body">
@@ -489,15 +489,6 @@ $("#shnodedt").css("display", "none");
 $.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){window.location.reload();});
 }
 
-function speedT(){
-$.get('./act/v2node.php', function(data) {
-var nodeList = JSON.parse(data);
-$.each(nodeList, function(i){
-  $.get("./act/speedT.php", {speedT:i}, function(data){ $('#speed'+i).text(data) });
-});
-});
-}
-
 function pingTCP(){
 $.get('./act/v2node.php', function(data) {
 var nodeList = JSON.parse(data);
@@ -627,29 +618,36 @@ for( let i = 0; i<len; i++){
                           <td class="align-middle">${i}</td>
                           <td class="align-middle"><span id="nodeDomain${i}">${domain}</span></td>
                           <td class="align-middle"><span id="nodeshow${i}">${name}</span></td>
-                          <td class="align-middle"><span id="speed${i}" class='text-success'></span></td>
+                          <td class="align-middle"><span id="speed${i}" class='text-success'><i type="button" class="far fa-play-circle fa-lg"></i></span></td>
                           <td class="align-middle"><span id="ping${i}" class='text-success'></span></td>
                           <td class="align-middle"><button id="switch${i}" type="button" class="btn btn-outline-secondary btn-sm">切换</button></td>
                           </tr>`);
-  $('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr("class", "btn btn-success btn-sm");
+
+  $('#speed'+i).click(function(){
+    $('#speed'+i).empty();
+    $('#speed'+i).attr('class', 'cloud');
+    $.get("./act/speedT.php", {speedT:i}, function(data){$('#speed'+i).removeClass('cloud').addClass('text-success'); $('#speed'+i).text(data)});
+  });
+
+  $('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr('class', 'btn btn-success btn-sm');
   $('#switch'+i).click(function(){
-    $("#nodeTable td:nth-child(6) button").attr("class", "btn btn-outline-secondary btn-sm");
-    $('#switch'+i).attr("class", "btn btn-success btn-sm");
-    $.get("./act/changeNode.php", {nodenum:i}, function(result){ })
+    $("#nodeTable td:nth-child(6) button").attr('class', "btn btn-outline-secondary btn-sm");
+    $('#switch'+i).attr('class', 'btn btn-success btn-sm');
+    $.get("./act/changeNode.php", {nodenum:i}, function(result){});
   });
 
   $('#nodenf').append("<a class='dropdown-item' href='#' id='nodenf"+i+"'>"+nodeNF+"</a>");
   $('#nodenf'+i).click(function(){
     $('#nodenfshow').html(nodeNF);
     $('#nodenfshow').val(i);
-    $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(result){ })
+    $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(result){});
   });
 
   $('#nodedt').append("<a class='dropdown-item' href='#' id='nodedt"+i+"'>"+nodeDT+"</a>");
   $('#nodedt'+i).click(function(){
     $('#nodedtshow').html(nodeDT);
     $('#nodedtshow').val(i);
-    $.get("./act/changeNodeDT.php", {nodedtnum:i}, function(result){ })
+    $.get("./act/changeNodeDT.php", {nodedtnum:i}, function(result){});
   });
 };
 });
