@@ -574,7 +574,7 @@ lanip="0.0.0.0/8 \
 223.5.5.5/32 \
 223.6.6.6/32"
 
-ipset -N chnroute hash:net family inet hashsize 16384 maxelem 100000 timeout 0
+ipset -N chnroute hash:net family inet hashsize 16384 maxelem 100000
 ipset -R </opt/de_GWD/chnrouteSET
 
 ipset -N lanip hash:net family inet
