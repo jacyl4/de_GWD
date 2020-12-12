@@ -108,7 +108,7 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
       }
     },
     {
-      "tag": "Direct",
+      "tag": "direct",
       "protocol": "freedom",
       "streamSettings": {
         "sockopt":{"mark":255}
@@ -119,12 +119,12 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
     "domainStrategy":"AsIs",
     "rules": [
       {
-        "outboundTag": "Direct",
         "type": "field",
         "ip": [
           "geoip:cn",
           "geoip:private"
-        ]
+        ],
+        "outboundTag": "direct"
       }
     ]
   }

@@ -25,7 +25,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
     "sniffing":{"enabled":true,"destOverride":["http","tls"]},
-    "settings":{"auth":"noauth","network":"tcp,udp","followRedirect":true},
+    "settings":{"network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
     }
   ],
@@ -105,7 +105,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       }
     },
     {
-      "tag": "Direct",
+      "tag": "direct",
       "protocol": "freedom",
       "streamSettings": {
         "sockopt":{"mark":255}
@@ -116,12 +116,12 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     "domainStrategy":"AsIs",
     "rules": [
       {
-        "outboundTag": "Direct",
         "type": "field",
         "ip": [
           "geoip:cn",
           "geoip:private"
-        ]
+        ],
+        "outboundTag": "direct"
       },
       {
         "outboundTag": "netflix",

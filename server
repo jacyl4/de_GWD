@@ -454,12 +454,17 @@ rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui
 cp -f /tmp/vtrui/v2ray /opt/de_GWD/vtrui/vtrui
 cp -f /tmp/vtrui/v2ctl /opt/de_GWD/vtrui/v2ctl
+cp -f /tmp/vtrui/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 chmod +x /opt/de_GWD/vtrui/vtrui
 chmod +x /opt/de_GWD/vtrui/v2ctl
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
   "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+  "routing":{
+    "domainStrategy":"AsIs",
+    "rules":[{"type":"field","ip":["geoip:private"],"outboundTag":"block"}]
+  },
   "inbounds": [
     {
     "port":11810,
@@ -475,7 +480,8 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     }
   ],
   "outbounds": [
-  {"protocol":"freedom"}
+    {"protocol":"freedom","tag":"direct"},
+    {"protocol":"blackhole","tag":"block"}
   ]
 }
 EOF
@@ -1315,7 +1321,9 @@ cat << EOF >>/opt/de_GWD/vtrui/config.json
         "allowInsecure":false
         }
       }
-    }
+    },
+    {"protocol":"freedom","tag":"direct"},
+    {"protocol":"blackhole","tag":"block"}
   ]
 }
 EOF
@@ -1330,7 +1338,8 @@ sed -i '/"outbounds":/,$d' /opt/de_GWD/vtrui/config.json
 
 cat >>/opt/de_GWD/vtrui/config.json << EOF
   "outbounds": [
-  {"protocol":"freedom"}
+    {"protocol":"freedom","tag":"direct"},
+    {"protocol":"blackhole","tag":"block"}
   ]
 }
 EOF
