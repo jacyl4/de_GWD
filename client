@@ -398,7 +398,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
   {
     "protocol":"dns",
     "settings":{},
-    "streamSettings":{"sockopt":{"mark":255}}
+    "streamSettings":{"sockopt":{"mark":255}},
     "tag":"dnsout"
   }
 ],
