@@ -385,7 +385,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
   "servers":["https+local://$doh1","https+local://$doh2"],
-  "tag": "dnsflow"
+  "tag":"dnsflow"
 },
 "inbounds":[
   {
@@ -414,7 +414,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
   "rules":[
     {"type":"field","inboundTag":["dnsflow"],"network":"tcp,udp","outboundTag":"direct"},
     {"type":"field","inboundTag":["dnsin"],"network":"tcp,udp","outboundTag":"dnsout"},
-    {"type":"field","port":"53",,"network":"tcp,udp","outboundTag":"dnsout"}
+    {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"}
   ]
 }
 }

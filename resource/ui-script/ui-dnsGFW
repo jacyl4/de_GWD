@@ -21,7 +21,7 @@ cat << EOF >/tmp/v2dns_config
   {"address":"https+local://$doh1","domains":["geosite:geolocation-!cn","geosite:tld-!cn","geosite:gfw","geosite:greatfire"]},
   {"address":"https+local://$doh2","domains":["geosite:geolocation-!cn","geosite:tld-!cn","geosite:gfw","geosite:greatfire"]}
   ],
-  "tag": "dnsflow"
+  "tag":"dnsflow"
 },
 "inbounds":[
   {
@@ -51,7 +51,7 @@ cat << EOF >/tmp/v2dns_config
   "rules":[
     {"type":"field","inboundTag":["dnsflow"],"network":"tcp,udp","outboundTag":"direct"},
     {"type":"field","inboundTag":["dnsin"],"network":"tcp,udp","outboundTag":"dnsout"},
-    {"type":"field","port":"53",,"network":"tcp,udp","outboundTag":"dnsout"}
+    {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"}
   ]
 }
 }

@@ -21,7 +21,7 @@ cat << EOF >/tmp/v2dns_config
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["geosite:private","geosite:cn","geosite:tld-cn"],"expectIPs":["geoip:cn"]}
   ],
-  "tag": "dnsflow"
+  "tag":"dnsflow"
 },
 "inbounds":[
   {
@@ -51,7 +51,7 @@ cat << EOF >/tmp/v2dns_config
   "rules":[
     {"type":"field","inboundTag":["dnsflow"],"network":"tcp,udp","outboundTag":"direct"},
     {"type":"field","inboundTag":["dnsin"],"network":"tcp,udp","outboundTag":"dnsout"},
-    {"type":"field","port":"53",,"network":"tcp,udp","outboundTag":"dnsout"}
+    {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"}
   ]
 }
 }
