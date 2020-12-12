@@ -21,19 +21,11 @@ fi
 
 wget --no-check-certificate -c -O /tmp/IPchnroute https://cdn.jsdelivr.net/gh/17mon/china_ip_list@master/china_ip_list.txt
 if [[ $(ls -l /tmp/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
-mv -f /tmp/IPchnroute /opt/de_GWD/IPchnroute
-cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
-sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
+sed -i 's/^/add chnroute &/g' /tmp/IPchnroute
+sed -i '/^\s*$/d' /tmp/IPchnroute
+mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET
 
-ipset -F chnroute >/dev/null 2>&1
-cat /opt/de_GWD/IPchnroute | xargs -n 20 | while read line
-do
-	for IPchnroute in $line
-	do
-	  ipset add chnroute $IPchnroute &
-	done
-	wait
-done
+ipset -! -R </opt/de_GWD/chnrouteSET
 fi
 
 echo "$statusInstalled IP & Domain rules"

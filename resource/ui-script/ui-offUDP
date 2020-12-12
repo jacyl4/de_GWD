@@ -27,10 +27,10 @@ lanip="0.0.0.0/8 \
 223.5.5.5/32 \
 223.6.6.6/32"
 
-ipset -N chnroute hash:net family inet hashsize 2048 maxelem 65535
-ipset -R < /opt/de_GWD/chnrouteSET
+ipset -N chnroute hash:net family inet hashsize 16384 maxelem 100000 timeout 0
+ipset -R </opt/de_GWD/chnrouteSET
 
-ipset -N lanip hash:net family inet hashsize 2048 maxelem 65535
+ipset -N lanip hash:net family inet
 for iplanip in \$lanip; do
   ipset add lanip \$iplanip
 done
@@ -100,10 +100,10 @@ iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
