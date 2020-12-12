@@ -250,8 +250,8 @@
                     <th>#</th>
                     <th>域名</th>
                     <th>节点名</th>
-                    <th>速度(MB/s)</th>
                     <th>延迟(ms)</th>
+                    <th>速度(MB/s)</th>
                     <th>操作</th>
                   </tr>
                 </thead>
@@ -618,8 +618,8 @@ for( let i = 0; i<len; i++){
                           <td class="align-middle">${i}</td>
                           <td class="align-middle"><span id="nodeDomain${i}">${domain}</span></td>
                           <td class="align-middle"><span id="nodeshow${i}">${name}</span></td>
-                          <td class="align-middle"><span id="speed${i}" class='text-success'><i type="button" class="far fa-play-circle fa-lg"></i></span></td>
                           <td class="align-middle"><span id="ping${i}" class='text-success'></span></td>
+                          <td class="align-middle"><span id="speed${i}" class='text-success'><i type="button" class="far fa-play-circle fa-lg"></i></span></td>
                           <td class="align-middle"><button id="switch${i}" type="button" class="btn btn-outline-secondary btn-sm">切换</button></td>
                           </tr>`);
 
