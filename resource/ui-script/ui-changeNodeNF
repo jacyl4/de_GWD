@@ -9,7 +9,7 @@ domain=$(echo -e $v2servn | cut -d: -f1)
 port=$(echo -e $v2servn | cut -d: -f2)
 
 portCheck=$(echo $port | grep '^[0-9]\+$')
-if [[ $portCheck = "" ]]; then
+if [[ -z $portCheck ]]; then
 port="443"
 fi
 

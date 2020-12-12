@@ -1266,26 +1266,26 @@ changev2rayupstream(){
 if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
 sed -i '/"outbounds":/,$d' /opt/de_GWD/vtrui/config.json
 
-    green "=========================="
-    green "v2ray upstream domain:port"
-    green "=========================="
+    green "======================"
+    green "v2ray upstream domain"
+    green "======================"
     read upstreamDomainP
 
-    green "=========================="
+    green "======================"
     green "v2ray upstream path"
-    green "=========================="
+    green "======================"
     read upstreamPath
 
-    green "=========================="
+    green "======================"
     green "v2ray upstream UUID"
-    green "=========================="
+    green "======================"
     read upstreamUUID
 
 domain=$(echo $upstreamDomainP | cut -d: -f1)
 port=$(echo $upstreamDomainP | cut -d: -f2)
 
 portCheck=$(echo $port | grep '^[0-9]\+$')
-if [[ $portCheck = "" ]] || [[ $portCheck = "443" ]]; then
+if [[ -z $portCheck ]] || [[ $portCheck = "443" ]]; then
 port="443"
 fi
 
