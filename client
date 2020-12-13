@@ -12,7 +12,7 @@ statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 export DEBIAN_FRONTEND=noninteractive
 de_gwd_nginx="1.19.5"
-ttyd_version="1.6.2"
+ttyd_version="1.6.1"
 yq_version="3.4.1"
 branch="main"
 
