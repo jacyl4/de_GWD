@@ -127,7 +127,6 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
           "geoip:cn",
           "geoip:private"
         ],
-        "network": "tcp,udp",
         "outboundTag": "direct"
       },
       {

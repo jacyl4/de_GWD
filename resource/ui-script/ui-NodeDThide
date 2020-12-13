@@ -122,7 +122,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
           "geoip:cn",
           "geoip:private"
         ],
-        "network": "tcp,udp",
         "outboundTag": "direct"
       },
       {
@@ -136,7 +135,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
         "domain": [
           "geosite:netflix"
         ],
-        "network": "tcp,udp",
         "outboundTag": "netflix"
       }
     ]

@@ -411,8 +411,8 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 "routing":{
   "domainStrategy":"AsIs",
   "rules":[
-    {"type":"field","inboundTag":["dnsflow"],"network":"tcp,udp","outboundTag":"direct"},
-    {"type":"field","inboundTag":["dnsin"],"network":"tcp,udp","outboundTag":"dnsout"},
+    {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"},
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
     {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"}
   ]
 }
@@ -502,7 +502,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
 "routing":{
   "domainStrategy":"AsIs",
   "rules":[
-    {"type":"field","ip":["geoip:cn","geoip:private"],"network":"tcp,udp","outboundTag":"direct"},
+    {"type":"field","ip":["geoip:cn","geoip:private"],"outboundTag":"direct"},
     {"type":"field","port":"53","network":"tcp,udp","outboundTag":"direct"}
     ]
 }
