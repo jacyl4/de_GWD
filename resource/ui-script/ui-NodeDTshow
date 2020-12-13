@@ -157,7 +157,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     },
     {
       "protocol": "freedom",
-      "settings": {"domainStrategy": "UseIP"},
+      "settings": {"domainStrategy": "UseIPv4"},
       "streamSettings": {
         "sockopt":{"mark":255}
         },
@@ -191,27 +191,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       {
         "type": "field",
         "domain": [
-          "domain:fast.com",
-          "domain:netflix.ca",
-          "domain:netflix.com",
-          "domain:netflix.net",
-          "domain:nflxext.com",
-          "domain:nflximg.com",
-          "domain:nflximg.net",
-          "domain:nflxso.net",
-          "domain:nflxvideo.net",
-          "domain:nflxsearch.net",
-          "domain:netflixinvestor.com",
-          "domain:netflixdnstest0.com",
-          "domain:netflixdnstest1.com",
-          "domain:netflixdnstest2.com",
-          "domain:netflixdnstest3.com",
-          "domain:netflixdnstest4.com",
-          "domain:netflixdnstest5.com",
-          "domain:netflixdnstest6.com",
-          "domain:netflixdnstest7.com",
-          "domain:netflixdnstest8.com",
-          "domain:netflixdnstest9.com"
+          "geosite:netflix"
         ],
         "network": "tcp,udp",
         "outboundTag": "netflix"

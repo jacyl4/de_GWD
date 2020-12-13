@@ -35,12 +35,12 @@ cat << EOF >/tmp/v2dns_config
 "outbounds":[
   {
     "protocol":"dns",
-    "settings":{},
     "streamSettings":{"sockopt":{"mark":255}},
     "tag":"dnsout"
   },
   {
     "protocol":"freedom",
+    "settings":{"domainStrategy":"UseIPv4"},
     "streamSettings":{"sockopt":{"mark":255}},
     "tag":"direct"
   }
