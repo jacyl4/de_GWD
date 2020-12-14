@@ -230,11 +230,11 @@
 
 
         <!-- Page Content -->
-      <div class="col-md-6 input-group mx-auto mb-3">
+      <div class="col-md-5 input-group mx-auto mb-3">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">Wan IP</span>
         </div>
-          <input type="text" class="form-control text-center" id="wanIP" value="">
+          <input type="text" class="form-control text-center" id="wanIP" value="" READONLY/>
         <div class="input-group-append">
           <button type="button" class="btn btn-secondary btn-sm" onclick="showIP()">查询</button>
         </div>
@@ -267,14 +267,14 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">用户名</span>
         </div>
-          <input type="text" id="f3322usr" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->user ?>">
+          <input type="text" name="username" id="f3322usr" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->user ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">密码</span>
         </div>
-          <input type="password" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->pwd ?>">
+          <input type="password" name="pwd" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->pwd ?>">
       </div>
     </div>
           </div>
