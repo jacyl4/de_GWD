@@ -560,22 +560,22 @@
 <script>
 function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
+};
 
 function markThis(){
 markNametxt=$('#markName').val();
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-}
+};
 
 function showIP(){
 $.get('./act/checkDDNSip.php', function(data) { $('#wanIP').attr("value",data); });
-}
+};
 
 function ddns3322switch(){
 $("#ddns3322switch").css("display", "none"); 
 $("#ddns3322button").css("display", "block"); 
 $("#ddns3322body").css("display", "block"); 
-}
+};
 
 function ddns3322save(){
 f3322domain=$('#f3322domain').val();
@@ -583,17 +583,17 @@ f3322usr=$('#f3322usr').val();
 f3322pwd=$('#f3322pwd').val();
 $.get('./act/ddns3322save.php', {f3322domain:f3322domain, f3322usr:f3322usr, f3322pwd:f3322pwd}, function(result){ location.reload() });
 alert("开启DDNS。。。");
-}
+};
 
 function ddns3322stop(){
 $.get('./act/ddns3322stop.php', function(result){window.location.reload();});
-}
+};
 
 function ddnsCFswitch(){
 $("#ddnsCFswitch").css("display", "none"); 
 $("#ddnsCFbutton").css("display", "block"); 
 $("#ddnsCFbody").css("display", "block"); 
-}
+};
 
 function ddnsCFsave(){
 cfdomain=$('#CFdomain').val();
@@ -602,17 +602,17 @@ cfapikey=$('#CFapikey').val();
 cfemail=$('#CFemail').val();
 $.get('./act/ddnsCFsave.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
 alert("开启DDNS。。。");
-}
+};
 
 function ddnsCFstop(){
 $.get('./act/ddnsCFstop.php', function(result){window.location.reload();});
-}
+};
 
 function FRPswitch(){
 $("#FRPswitch").css("display", "none"); 
 $("#FRPbutton").css("display", "block"); 
 $("#FRPbody").css("display", "block"); 
-}
+};
 
 function FRPbindTCP(){$('#FRPbindProtocol').html("TCP"); };
 function FRPbindKCP(){$('#FRPbindProtocol').html("KCP"); };
@@ -666,18 +666,18 @@ window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 
 function WGchangeKey(){
 $.get('./act/WGchangeKey.php', function(result){window.location.reload();});
-}
+};
 
 function WGon(){
 WGaddress=$('#WGaddress').val();
 WGaddressport=$('#WGaddressport').val();
 $.get('./act/WGon.php', {WGaddress:WGaddress, WGaddressport:WGaddressport}, function(result){ location.reload() });
 alert("开启WireGuard。。。");
-}
+};
 
 function WGoff(){
 $.get('./act/WGoff.php', function(result){window.location.reload();});
-}
+};
 
 function submitWGmark(){
 WGmark1=$('#WGmark1').val();
@@ -748,7 +748,7 @@ jQuery('#qrcode7').qrcode({width: 240,height: 240,correctLevel:0,text: data});
 $.get('./act/WGqrTXT8.php', function(data){
 jQuery('#qrcode8').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
 });
-}
+};
 </script>
 
   <!-- Scroll to Top Button-->

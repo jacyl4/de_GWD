@@ -40,19 +40,17 @@
   </div>
 
 <script>
-function submitpw () {
+function submitpw(){
 gwdpasswdtext=$('#gwdpasswd').val();
 $.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href="index.php"; });
-}
-</script>
+};
 
-<script>
-function keysubmitpw () {
+function keysubmitpw(){
     if(event.keyCode == 13) {
 event.preventDefault();
 gwdpasswdtext=$('#gwdpasswd').val();
 $.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href="index.php"; });
-}
+};
 };
 </script>
 

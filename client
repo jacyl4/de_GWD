@@ -503,7 +503,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
   "domainStrategy":"AsIs",
   "rules":[
     {"type":"field","ip":["geoip:cn","geoip:private"],"outboundTag":"direct"},
-    {"type":"field","port":"53","network":"tcp,udp","outboundTag":"direct"}
+    {"type":"field","port":"53,5310,5390","network":"tcp,udp","outboundTag":"direct"}
     ]
 }
 }

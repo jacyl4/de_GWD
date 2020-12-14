@@ -176,12 +176,12 @@
 <script>
 function logout () {
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
+};
 
 function markThis(){
 markNametxt=$('#markName').val();
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-}
+};
 
 function saveNode(){
 var nodeList = [];

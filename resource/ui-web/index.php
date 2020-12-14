@@ -465,29 +465,30 @@
 <script>
 function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
+};
 
 function proxyRestart(){
 $.get('./act/proxyRestart.php', function(result){window.location.reload();});
-}
+};
 
 function proxyStop(){
 $.get('./act/proxyStop.php', function(result){window.location.reload();});
-}
+};
 
 function markThis(){
 markNametxt=$('#markName').val();
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-}
+};
 
 function NodeDTshow(){
 $("#shnodedt").css("display", "block");
 $.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){window.location.reload();});
-}
+};
+
 function NodeDThide(){
 $("#shnodedt").css("display", "none");
 $.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){window.location.reload();});
-}
+};
 
 function pingTCP(){
 $.get('./act/v2node.php', function(data) {
@@ -498,7 +499,7 @@ $.each(nodeList, function(i){
 });
 $.get("./act/pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) });
 $.get("./act/pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) });
-}
+};
 
 function pingICMP(){
 $.get('./act/v2node.php', function(data) {
@@ -509,30 +510,30 @@ $.each(nodeList, function(i){
 });
 $.get("./act/pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) });
 $.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) });
-}
+};
 
 function onUDP(){
 $.get('./act/onUDP.php', function(result){window.location.reload();});
-}
+};
 
 function offUDP(){
 $.get('./act/offUDP.php', function(result){window.location.reload();});
-}
+};
 
 function submitlocalip(){
 localiptxt=$('#nodedttext').val();
 $.get('./act/changeLocalIP.php', {localip:localiptxt}, function(result){window.location.reload();});
-}
+};
 
 function dnsCHNW(){
 $.get('./act/dnsCHNW.php', function(result){window.location.reload();});
 alert("切换至大陆白名单。。。");
-}
+};
 
 function dnsGFW(){
 $.get('./act/dnsGFW.php', function(result){window.location.reload();});
 alert("切换至GFWlist。。。");
-}
+};
 
 function submitDNS(){
 dohtxt1=$('#DoH1').val();
@@ -545,30 +546,30 @@ alert("应用DNS设置。。。");
 
 function onAPPLE(){
 $.get('./act/onAPPLE.php', function(result){window.location.reload();});
-}
+};
 
 function offAPPLE(){
 $.get('./act/offAPPLE.php', function(result){window.location.reload();});
-}
+};
 
 function submitstaticip(){
 staticip1=$('#localip').val();
 staticip2=$('#upstreamip').val();
 $.get('./act/changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
 alert("本机已开始重新启动");
-}
+};
 
 function onDHCP(){
 dhcpStarttxt=$('#dhcpStart').val();
 dhcpEndtxt=$('#dhcpEnd').val();
 $.get('./act/onDHCP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt, dhcp:"on"}, function(result){window.location.reload();});
 alert('启动DHCP服务。。。');
-}
+};
 
 function offDHCP(){
 $.get('./act/offDHCP.php', function(result){window.location.reload();});
 alert('关闭DHCP服务。。。');
-}
+};
 
 function checklink(){
 $.get('./act/testBaidu.php',function(data) {
@@ -577,7 +578,7 @@ if ( $.trim(checklink1) == "ONLINE" ) {
 $('#testBaidu').text("✓ 国内线路畅通");
 } else {
 $('#testBaidu').text("✗ 国内线路不通");
-}
+};
 });
 
 $.get('./act/testGoogle.php',function(data) {
@@ -603,7 +604,7 @@ $('#remotever').addClass('badge badge-pill badge-light');
 $('#remotever').addClass('badge badge-pill badge-warning');
 };
 });
-}
+};
 
 window.onload = function() {
 $.get('./act/v2node.php', function(data) {

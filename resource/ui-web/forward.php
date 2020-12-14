@@ -333,18 +333,18 @@
 <script>
 function logout(){
 $.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
+};
 
 function markThis(){
 markNametxt=$('#markName').val();
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-}
+};
 
 function CERswitch(){
 $('#CERswitch').css('display', 'none'); 
 $('#CERbutton').css('display', 'block'); 
 $('#CERbody').css('display', 'block'); 
-}
+};
 
 function genCER(){
 cfdomain=$('#CFdomain').val();
@@ -352,13 +352,13 @@ cfapikey=$('#CFapikey').val();
 cfemail=$('#CFemail').val();
 $.get('./act/genCER.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(result){});
 window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
-}
+};
 
 function FWD0switch(){
 $('#FWD0switch').css('display', 'none'); 
 $('#FWD0button').css('display', 'block'); 
 $('#FWD0body').css('display', 'block'); 
-}
+};
 
 function FWD0save(){
 if ($('#portCheck1').prop('checked') == true) {
@@ -370,11 +370,11 @@ FWD0port=$('#FWD0port').val();
 FWD0path=$('#FWD0path').val();
 FWD0uuid=$('#FWD0uuid').val();
 $.get('./act/FWD0save.php', {portCheck1:portCheck1, FWD0port:FWD0port, FWD0path:FWD0path, FWD0uuid:FWD0uuid}, function(result){window.location.reload();});
-}
+};
 
 function FWD0stop(){
 $.get('./act/FWD0stop.php', function(result){window.location.reload();});
-}
+};
 
 function FWD1save(){
 v2nodeID=$('#v2nodeNAMEshow').val();
@@ -382,17 +382,17 @@ FWD1port=$('#FWD1port').val();
 FWD1path=$('#FWD1path').val();
 FWD1uuid=$('#FWD1uuid').val();
 $.get('./act/FWD1save.php', {v2nodeID:v2nodeID, FWD1port:FWD1port, FWD1path:FWD1path, FWD1uuid:FWD1uuid}, function(result){window.location.reload();});
-}
+};
 
 function FWD1stop(){
 $.get('./act/FWD1stop.php', function(result){window.location.reload();});
-}
+};
 
 function FWD1switch(){
 $('#FWD1switch').css('display', 'none'); 
 $('#FWD1button').css('display', 'block'); 
 $('#FWD1body').css('display', 'block'); 
-}
+};
 
 window.onload = function() {
 $.get('./act/checkCER.php', function(data) {
@@ -423,7 +423,7 @@ for( let i = 0; i<len; i++){
   $('#nodeName'+i).click(function(){ $('#v2nodeNAMEshow').html(name); $('#v2nodeNAMEshow').val(i);});
 };
 });
-}
+};
 </script>
 
   <!-- Scroll to Top Button-->
