@@ -47,7 +47,7 @@ elif [[ $(uname -m) == "aarch64" ]];then
   wget --no-check-certificate -c -O /tmp/vtrui.zip https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/arm64_vtrui.zip
 fi
 
-wget --no-check-certificate -O /opt/de_GWD/IPchnroute https://ispip.clang.cn/all_cn_cidr.txt
+wget --no-check-certificate -O /opt/de_GWD/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute-iplist@master/IPchnroute
 cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
 }
