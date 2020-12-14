@@ -1,10 +1,8 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-$forward1 = '/etc/nginx/conf.d/forward1.conf';
+$filePath = exec("sudo [ -f /etc/nginx/conf.d/forward1.conf ] && echo installed");
 
-if (file_exists($forward1)){
-    echo "installed";
-}
+if ($filePath == installed) echo 'installed';
 ?>
 <?php }?>

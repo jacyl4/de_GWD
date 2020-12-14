@@ -3,8 +3,6 @@
 <?php
 $ddnsCF = exec('sudo /opt/de_GWD/ui-checkDDNScf');
 
-if ( $ddnsCF == success ){
-    echo "installed";
-}
+if ($ddnsCF == success) echo "installed";
 ?>
 <?php }?>

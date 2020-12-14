@@ -626,7 +626,7 @@ for( let i = 0; i<len; i++){
   $('#speed'+i).click(function(){
     $('#speed'+i).empty();
     $('#speed'+i).attr('class', 'cloud');
-    $.get("./act/speedT.php", {speedT:i}, function(data){$('#speed'+i).removeClass('cloud').addClass('text-success'); $('#speed'+i).text(data)});
+    $.get("./act/speedT.php", {speedT:i}, function(data){$('#speed'+i).attr('class', 'text-success'); $('#speed'+i).text(data)});
   });
 
   $('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr('class', 'btn btn-success btn-sm');

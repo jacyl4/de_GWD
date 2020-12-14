@@ -1,10 +1,8 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-$cer = '/var/www/ssl/ocsp.resp';
+$filePath = exec("sudo [ -f /var/www/ssl/ocsp.resp ] && echo installed");
 
-if (file_exists($cer)){
-    echo "installed";
-}
+if ($filePath == installed) echo 'installed';
 ?>
 <?php }?>

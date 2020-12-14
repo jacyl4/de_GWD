@@ -338,8 +338,11 @@
 <button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFRP'); ?> btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
 </span>
+<span class="float-right mt-n1 mb-n2 ml-4" id="FRPswitch">
+<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FRPswitch()">展开</button>
+</span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="installFRP()">install</button>
+<button type="button" id="FRPinstall" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="installFRP()">install</button>
 </span>
           </div>
 
@@ -424,7 +427,7 @@
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="WGswitch()">展开</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="installWG()">install</button>
+<button type="button" id="WGinstall" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="installWG()">install</button>
 </span>
           </div>
           <div class="card-body" id="WGbody" style="display:none">
@@ -574,12 +577,6 @@ $("#ddns3322button").css("display", "block");
 $("#ddns3322body").css("display", "block"); 
 }
 
-function ddnsCFswitch(){
-$("#ddnsCFswitch").css("display", "none"); 
-$("#ddnsCFbutton").css("display", "block"); 
-$("#ddnsCFbody").css("display", "block"); 
-}
-
 function ddns3322save(){
 f3322domain=$('#f3322domain').val();
 f3322usr=$('#f3322usr').val();
@@ -590,6 +587,12 @@ alert("开启DDNS。。。");
 
 function ddns3322stop(){
 $.get('./act/ddns3322stop.php', function(result){window.location.reload();});
+}
+
+function ddnsCFswitch(){
+$("#ddnsCFswitch").css("display", "none"); 
+$("#ddnsCFbutton").css("display", "block"); 
+$("#ddnsCFbody").css("display", "block"); 
 }
 
 function ddnsCFsave(){
@@ -603,6 +606,12 @@ alert("开启DDNS。。。");
 
 function ddnsCFstop(){
 $.get('./act/ddnsCFstop.php', function(result){window.location.reload();});
+}
+
+function FRPswitch(){
+$("#FRPswitch").css("display", "none"); 
+$("#FRPbutton").css("display", "block"); 
+$("#FRPbody").css("display", "block"); 
 }
 
 function FRPbindTCP(){$('#FRPbindProtocol').html("TCP"); };
@@ -685,32 +694,33 @@ $.get('./act/WGmark.php', {WGmark1:WGmark1, WGmark2:WGmark2, WGmark3:WGmark3, WG
 window.onload = function() {
 $.get("./act/checkDDNS3322.php", function(data) {
 if ($.trim(data) == "installed") {
-$("#ddns3322switch").css("display", "none"); 
-$("#ddns3322button").css("display", "block"); 
-$("#ddns3322body").css("display", "block"); 
+ddns3322switch(); 
 };
 });
 
 $.get("./act/checkDDNScf.php", function(data) {
 if ($.trim(data) == "installed") {
-$("#ddnsCFswitch").css("display", "none"); 
-$("#ddnsCFbutton").css("display", "block"); 
-$("#ddnsCFbody").css("display", "block"); 
+ddnsCFswitch(); 
 };
 });
 
 $.get("./act/checkFRP.php", function(data) {
-if ($.trim(data) == "installed") {
-$("#FRPbutton").css("display", "block"); 
-$("#FRPbody").css("display", "block"); 
+var checkFRP = data.split(" ");
+if (checkFRP[0] == "installed") {
+$('#FRPinstall').attr('class', 'btn btn-outline-success btn-sm mt-1');
+};
+if (checkFRP[1] == "on") {
+FRPswitch(); 
 };
 });
 
 $.get("./act/checkWG.php", function(data) {
-if ($.trim(data) == "installed") {
-$("#WGswitch").css("display", "none"); 
-$("#WGbutton").css("display", "block");
-$("#WGbody").css("display", "block");
+var checkWG = data.split(" ");
+if (checkWG[0] == "installed") {
+$('#WGinstall').attr('class', 'btn btn-outline-success btn-sm mt-1');
+};
+if (checkWG[1] == "on") {
+WGswitch();
 };
 });
 
