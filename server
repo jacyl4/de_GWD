@@ -487,18 +487,10 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
 EOF
 
 
-{
-for v2uuids in $v2uuids; do
-echo '{"id": "'$v2uuids'", "level": 1}'
+for uuid in $v2uuids; do
+  uuidStr='{"id": "'$uuid'", "level": 1}'
+  jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 done
-} >/tmp/v2clients
-
-
-cat /tmp/v2clients | while read v2clients
-do
-jq --argjson v2clients "$v2clients" '.inbounds[0].settings.clients+=[$v2clients]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
-done
-rm -rf /tmp/v2clients
 
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 
