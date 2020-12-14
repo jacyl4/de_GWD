@@ -119,7 +119,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       {
         "type": "field",
         "ip": [
-          "geoip:cn",
           "geoip:private"
         ],
         "outboundTag": "direct"
