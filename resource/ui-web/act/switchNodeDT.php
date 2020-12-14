@@ -2,22 +2,16 @@
 <?php if (isset($auth) && $auth) {?>
 <?php
 $switchNodeDT = $_GET['switchNodeDT'];
-$forward0 = '/etc/nginx/conf.d/forward0.conf';
-$forward1 = '/etc/nginx/conf.d/forward1.conf';
+$forward0 = exec('sudo [ -f /etc/nginx/conf.d/forward0.conf ] && echo installed');
 
-if ( $switchNodeDT === "NodeDTshow" ){
+if ($switchNodeDT === NodeDTshow){
     shell_exec('sudo /opt/de_GWD/ui-NodeDTshow');
-}
+};
 elseif ( $switchNodeDT === "NodeDThide"){
     shell_exec('sudo /opt/de_GWD/ui-NodeDThide');
-}
+};
 
-if (file_exists($forward0)){
-    shell_exec('sudo /opt/de_GWD/ui-FWD0vtrui');
-}
-elseif (file_exists($forward1)){
-    shell_exec('sudo /opt/de_GWD/ui-FWD1vtrui');
-}
+if ($forward0 == installed) shell_exec('sudo /opt/de_GWD/ui-FWD0vtrui');
 
 shell_exec('sudo systemctl restart vtrui');
 ?>
