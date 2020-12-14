@@ -1128,9 +1128,9 @@ chmod +x /opt/de_GWD/*
 systemctl reload nginx
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.x86_64
+  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.x86_64
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd_linux.aarch64
+  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.aarch64
 fi
 mv -f /tmp/ttyd /usr/bin/ttyd
 chmod +x /usr/bin/ttyd
