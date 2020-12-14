@@ -132,7 +132,7 @@
             <i class="fas fa-shield-alt"></i>
             域名与证书
 <span class="float-right mt-n1 mb-n2" id="CERbutton" style="display:none">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="genCER()">生成证书</button>
+<button type="button" id="CERinstall" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="genCER()">install</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="CERswitch">
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="CERswitch()">展开</button>
@@ -397,25 +397,20 @@ $('#FWD1body').css('display', 'block');
 window.onload = function() {
 $.get('./act/checkCER.php', function(data) {
 if ($.trim(data) == "installed") {
-$('#CERswitch').css('display', 'none'); 
-$('#CERbutton').css('display', 'block'); 
-$('#CERbody').css('display', 'block'); 
+$('#CERinstall').attr('class', 'btn btn-outline-success btn-sm mt-1');
+CERswitch();
 };
 });
 
 $.get('./act/checkFWD0.php', function(data) {
 if ($.trim(data) == 'installed') {
-$('#FWD0switch').css('display', 'none'); 
-$('#FWD0button').css('display', 'block'); 
-$('#FWD0body').css('display', 'block'); 
+FWD0switch();
 };
 });
 
 $.get('./act/checkFWD1.php', function(data) {
 if ($.trim(data) == 'installed') {
-$('#FWD1switch').css('display', 'none'); 
-$('#FWD1button').css('display', 'block'); 
-$('#FWD1body').css('display', 'block'); 
+FWD1switch();
 };
 });
 
