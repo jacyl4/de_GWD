@@ -274,7 +274,7 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center" style="min-width: 120px;">密码</span>
         </div>
-          <input type="text" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->pwd ?>">
+          <input type="password" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->pwd ?>">
       </div>
     </div>
           </div>
