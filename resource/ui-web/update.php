@@ -170,9 +170,6 @@
           <div class="card-header">
             <i class="fas fa-archive"></i>
             更新
-        <span class="float-right mt-n1 mb-n2">
-        <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="Rescue()">救援</button>
-        </span>
           </div>
           <div class="card-body">
 
@@ -269,11 +266,6 @@ $.get('./act/updateSave.php', {updateCMD:updateCMD,updateAddr:updateAddr,updateP
 function updateRun(){
 $.get('./act/updateRun.php', function(result){});
 setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
-}
-
-function Rescue(){
-$.get('./act/updateRescue.php', function(result){window.location.reload();});
-alert('救机代码已运行');
 }
 
 window.onload = function() {
