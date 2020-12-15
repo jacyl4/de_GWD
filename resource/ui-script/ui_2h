@@ -10,11 +10,6 @@ rm -rf /var/www/html/restore/*
 rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
 
-if [[ -f "/lib/modules/$(uname -r | awk NR==1)/extra/wireguard.ko" ]]; then
-cd /lib/modules/
-rm -rf $(ls | grep -v $(uname -r | awk NR==1))
-fi
-
 sed -i '/^\s*$/d' /opt/de_GWD/0conf
 if [[ -n $(cat /opt/de_GWD/0conf) ]]; then
 	cp -f /opt/de_GWD/0conf /opt/de_GWD/0conf_bak

@@ -1,4 +1,6 @@
 #!/bin/bash
+/opt/de_GWD/ui_2h
+
 >/etc/resolvconf/resolv.conf.d/head
 >/etc/resolvconf/resolv.conf.d/original
 >/etc/resolvconf/resolv.conf.d/tail

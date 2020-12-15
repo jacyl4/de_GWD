@@ -1,4 +1,6 @@
 #!/bin/bash
+/opt/de_GWD/ui_2h
+
 >/etc/resolvconf/resolv.conf.d/head
 >/etc/resolvconf/resolv.conf.d/original
 >/etc/resolvconf/resolv.conf.d/tail
@@ -16,6 +18,7 @@ yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5350"
 systemctl restart iptables-proxy
 
 /opt/de_GWD/tcpTime
+
 systemctl restart v2dns
 systemctl restart vtrui
 
