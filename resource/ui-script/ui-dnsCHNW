@@ -4,20 +4,39 @@ doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
 
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+
 doh1IP=$(dig @127.0.0.1 $doh1Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 
+doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep -Po '\d+')
+doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep -Po '\d+')
+
+doh1PortStr=$([ -n "$doh1Port" ] && echo $doh1Port | sed 's/^/:/')
+doh2PortStr=$([ -n "$doh2Port" ] && echo $doh2Port | sed 's/^/:/')
+
 echo $doh1IP $doh2IP | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
+
+if [[ -z $(jq -r '.dns.china' /opt/de_GWD/0conf) ]] || [[ $(jq -r '.dns.china' /opt/de_GWD/0conf) = "null" ]]; then
+  jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
+sed -i '/server /d' /etc/smartdns/smartdns.conf
+sed -i '/server-https /d' /etc/smartdns/smartdns.conf
+for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf); do
+  if [[ -n $dnsChina ]]; then
+    echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
+  fi
+done
+echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -group doh -exclude-default-group" >>/etc/smartdns/smartdns.conf
+echo "server-https https://$doh1IP$doh2PortStr/dq -host-name $doh2Domain -group doh -exclude-default-group" >>/etc/smartdns/smartdns.conf
 
 cat << EOF >/tmp/v2dns_config
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
   "servers":[
-  {"address":"https+local://$doh1"},
-  {"address":"https+local://$doh2"},
-  {"address":"https+local://$doh1","domains":["domain:google.com"]},
-  {"address":"https+local://$doh2","domains":["domain:google.com"]},
+  {"address":"127.0.0.1","port":5390},
+  {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["geosite:private","geosite:cn","geosite:tld-cn"],"expectIPs":["geoip:cn"]}
   ],
@@ -72,8 +91,6 @@ do
   wait
 done
 
-jq 'del(.dns.hosts[] | select(. == ""))' /tmp/v2dns_config | sponge /tmp/v2dns_config
-
 if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf) ]] && [[ $(jq -r '.dns.hosts' /opt/de_GWD/0conf) != "null" ]]; then
 jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /opt/de_GWD/0conf | while read line
 do
@@ -83,6 +100,7 @@ do
 done
 fi
 
+jq 'del(.dns.hosts[] | select(. == ""))' /tmp/v2dns_config | sponge /tmp/v2dns_config
 jq '.dns.DNSsplit="chnw"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
 /opt/de_GWD/ui-saveListBW

@@ -27,10 +27,8 @@ $conf['dns']['hosts'] = $hosts;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-shell_exec('sudo /opt/de_GWD/ui-saveDNSChina');
-shell_exec('sudo systemctl restart smartdns');
-
 shell_exec('sudo /opt/de_GWD/ui_4h');
+shell_exec('sudo systemctl restart smartdns');
 shell_exec('sudo systemctl restart v2dns');
 shell_exec('sudo systemctl restart iptables-proxy');
 shell_exec('sudo /opt/AdGuardHome/AdGuardHome -s reload');
