@@ -97,12 +97,16 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
-port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
-portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf | grep -Po '\d+')
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/config.json)
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json)
+
+upDomain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
+upPort=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
+upPath=$(jq -r '.outbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/config.json)
+upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/config.json)
 }
 
 
@@ -479,13 +483,9 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
       }
     }
   ],
-  "outbounds": [
-    {"protocol":"freedom","tag":"direct"},
-    {"protocol":"blackhole","tag":"block"}
-  ]
+  "outbounds":[]
 }
 EOF
-
 
 for uuid in $v2uuids; do
   uuidStr='{"id": "'$uuid'", "level": 1}'
@@ -517,9 +517,67 @@ EOF
 
 systemctl daemon-reload
 systemctl enable vtrui
+}
+
+
+
+v2otUpstream(){
+cat << EOF >/tmp/vtruiOB0
+    {
+      "mux": {
+        "enabled": true,
+        "concurrency": 12
+      },
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$upDomain",
+            "port": $upPort,
+            "users": [
+              {
+                "id": "$upUUID",
+                "security": "auto",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$upPath"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$upDomain",
+          "allowInsecure": false
+        }
+      }
+    }
+EOF
+
+jq --slurpfile vtruiOB0 /tmp/vtruiOB0 '.outbounds=$vtruiOB0' /opt/de_GWD/vtrui/config.json |\
+jq '.outbounds[1].protocol="blackhole"' |\
+jq '.outbounds[1].tag="block"' | sponge /opt/de_GWD/vtrui/config.json
+
+rm -rf /tmp/vtruiOB0
+rm -rf /tmp/vtrui*
 systemctl restart vtrui
+}
+
+
+
+v2otDirect(){
+jq '.outbounds=[]' /opt/de_GWD/vtrui/config.json |\
+jq '.outbounds[0].protocol="freedom"' |\
+jq '.outbounds[0].tag="direct"' |\
+jq '.outbounds[1].protocol="blackhole"' |\
+jq '.outbounds[1].tag="block"' | sponge /opt/de_GWD/vtrui/config.json
 
 rm -rf /tmp/vtrui*
+systemctl restart vtrui
 }
 
 
@@ -745,7 +803,7 @@ rm -rf /tmp/now.cron
 nginxWebConf(){
 touch /etc/nginx/conf.d/0_top
 
-if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
+if [[ -n $port ]] && [[ $port != "443" ]]; then
 
 cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
@@ -943,11 +1001,11 @@ installGWD(){
     read vpsdomainP
 
 domain=$(echo $vpsdomainP | cut -d: -f1)
-port=$(echo $vpsdomainP | cut -d: -f2)
-portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+port=$(echo $vpsdomainP | cut -d: -f2| grep -Po '\d+')
+[ -z $port ] && port="443"
 
-if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
+if [[ -n $port ]] && [[ $port != "443" ]]; then
 
     green "==============================="
     green " Cloudflare API KEY"
@@ -993,7 +1051,9 @@ AdGset
 
 installV2ray
 
-if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
+v2otDirect
+
+if [[ -n $port ]] && [[ $port != "443" ]]; then
 
 installNginx
 
@@ -1191,11 +1251,11 @@ changeDomain(){
     read vpsdomainP
 
 domain=$(echo $vpsdomainP | cut -d: -f1)
-port=$(echo $vpsdomainP | cut -d: -f2)
-portCheck=$(echo $port | grep '^[0-9]\+$')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+port=$(echo $vpsdomainP | cut -d: -f2| grep -Po '\d+')
+[ -z $port ] && port="443"
 
-if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
+if [[ -n $port ]] && [[ $port != "443" ]]; then
 
     green "==============================="
     green " Cloudflare API KEY"
@@ -1211,7 +1271,7 @@ fi
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/config.json)
 
-if [[ -n $portCheck ]] && [[ $portCheck != "443" ]]; then
+if [[ -n $port ]] && [[ $port != "443" ]]; then
 makeSSL_D
 
 ocspStapling
@@ -1260,85 +1320,39 @@ changev2rayupstream(){
     green "==================================================="
     green "Y. Change v2ray upstream / N. Delete v2ray upstream"
     green "==================================================="
-    read v2rayupstreamyn
+    read v2UpStreamYN
 
-if [[ "$v2rayupstreamyn" = "Y" ]] || [[ "$v2rayupstreamyn" = "y" ]]; then
-sed -i '/"outbounds":/,$d' /opt/de_GWD/vtrui/config.json
+if [[ "$v2UpStreamYN" = "Y" ]] || [[ "$v2UpStreamYN" = "y" ]]; then
 
     green "======================"
     green "v2ray upstream domain"
     green "======================"
-    read upstreamDomainP
+    read upDomainP
 
     green "======================"
     green "v2ray upstream path"
     green "======================"
-    read upstreamPath
+    read upPath
 
     green "======================"
     green "v2ray upstream UUID"
     green "======================"
-    read upstreamUUID
+    read upUUID
 
-domain=$(echo $upstreamDomainP | cut -d: -f1)
-port=$(echo $upstreamDomainP | cut -d: -f2)
+upDomain=$(echo $upDomainP | cut -d: -f1)
+upPort=$(echo $upDomainP | cut -d: -f2 | grep -Po '\d+')
+[ -z $upPort ] && upPort="443"
 
-portCheck=$(echo $port | grep '^[0-9]\+$')
-if [[ -z $portCheck ]] || [[ $portCheck = "443" ]]; then
-port="443"
-fi
+v2otUpstream
 
-cat << EOF >>/opt/de_GWD/vtrui/config.json
-  "outbounds": [
-    {
-    "protocol":"vmess",
-    "settings":{"vnext":[{
-      "address":"$domain",
-      "port":$port,
-      "users":[{
-        "id":"$upstreamUUID",
-        "security": "auto",
-        "level": 1
-        }]
-      }]},
-    "streamSettings":{
-      "network":"ws",
-      "wsSettings":{
-        "path":"$upstreamPath",
-        "headers":{
-          "Host":"$domain"
-          }
-        },
-      "security":"tls",
-      "tlsSettings":{
-        "serverName":"$domain",
-        "allowInsecure":false
-        }
-      }
-    },
-    {"protocol":"freedom","tag":"direct"},
-    {"protocol":"blackhole","tag":"block"}
-  ]
-}
-EOF
-
-systemctl restart vtrui
 blue "-----------------------------"
 blue  "Change v2ray upstream [done]"
 blue "-----------------------------"
 
-elif [[ "$v2rayupstreamyn" = "N" ]] || [[ "$v2rayupstreamyn" = "n" ]]; then
-sed -i '/"outbounds":/,$d' /opt/de_GWD/vtrui/config.json
+elif [[ "$v2UpStreamYN" = "N" ]] || [[ "$v2UpStreamYN" = "n" ]]; then
 
-cat >>/opt/de_GWD/vtrui/config.json << EOF
-  "outbounds": [
-    {"protocol":"freedom","tag":"direct"},
-    {"protocol":"blackhole","tag":"block"}
-  ]
-}
-EOF
+v2otDirect
 
-systemctl restart vtrui
 blue "-----------------------------"
 blue  "Delete v2ray upstream [done]"
 blue "-----------------------------"
@@ -1359,6 +1373,12 @@ installAdG
 AdGset
 
 installV2ray
+
+if [[ $upDomain != null ]]; then
+  v2otUpstream
+else
+  v2otDirect
+fi
 
 installNginx
 
