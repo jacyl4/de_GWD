@@ -94,8 +94,7 @@ do
 done
 
 if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf) ]] && [[ $(jq -r '.dns.hosts' /opt/de_GWD/0conf) != "null" ]]; then
-jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /opt/de_GWD/0conf >/tmp/hosts
-cat /tmp/hosts | while read line 
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /opt/de_GWD/0conf | while read line
 do
   key=$(echo $line | awk '{print$1}')
   value=$(echo $line | awk '{print$2}')
