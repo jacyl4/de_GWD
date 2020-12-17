@@ -35,7 +35,7 @@ EOF
 mkdir -p /opt/de_GWD
 cat << EOF >/opt/de_GWD/tcpTime
 #!/bin/bash
-date -s "\$(wget -qSO- --max-redirect=0 baidu.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+date -s "\$(wget -qSO- --max-redirect=0 aliyun.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 EOF
 chmod +x /opt/de_GWD/tcpTime
