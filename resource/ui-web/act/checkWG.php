@@ -3,7 +3,7 @@
 <?php
 $checkWG = exec('sudo /opt/de_GWD/ui-checkWG');
 
-echo exec('sudo [ -d /sys/module/wireguard ] && echo installed');
+echo exec('sudo [ $(apt list --installed | grep wireguard-tool) =~ "installed" ] && echo installed');
 
 echo ' ';
 
