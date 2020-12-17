@@ -21,6 +21,23 @@
   <link href="css/sb-admin.css" rel="stylesheet">
 
   <link href="favicon.ico" rel="icon" type="image/x-icon" />
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin.min.js"></script>
+  <script src="js/jquery.qrcode.min.js"></script>
+
 </head>
 
 <body id="page-top" class="sidebar-toggled fixed-padding">
@@ -30,7 +47,7 @@
     <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
-    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+    <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="javascript:void(0)">
       <i class="fas fa-bars"></i>
     </button>
 <span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
@@ -88,7 +105,7 @@
           <span>更新</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" onclick="logout()">
+        <a id="buttonLogout" class="nav-link" href="javascript:void(0)">
           <i class="fas fa-sign-out-alt"></i>
           <span>注销</span></a>
       </li>
@@ -108,121 +125,17 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="markThis" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
+<div id="markThis" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="markThisLabel">备注本机</h5>
+        <h5 id="markThisLabel" class="modal-title">备注本机</h5>
       </div>
       <div class="modal-body">
-        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
+        <input id="markName" type="text" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端1 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode1"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop2" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端2 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode2"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop3" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端3 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode3"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop4" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端4 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode4"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop5" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端5 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode5"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop6" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端6 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode6"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop7" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端7 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode7"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="wgqrpop8" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title ml-auto mr-auto" >WireGuard客户端8 二维码</h5>
-      </div>
-      <div class="modal-body">
-        <div class="text-center" id="qrcode8"></div>
+        <button id="buttonMarkThis" type="button" class="btn-sm btn-dark">应用</button>
       </div>
     </div>
   </div>
@@ -232,11 +145,11 @@
         <!-- Page Content -->
       <div class="col-md-5 input-group mx-auto mb-3">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">Wan IP</span>
+          <span class="input-group-text">Wan IP</span>
         </div>
-          <input type="text" class="form-control text-center" id="wanIP" value="" READONLY>
+          <input id="wanIP" type="text" class="form-control text-center" value="" READONLY>
         <div class="input-group-append">
-          <button type="button" class="btn btn-secondary btn-sm" onclick="showIP()">查询</button>
+          <button id="buttonShowIP" type="button" class="btn btn-secondary btn-sm">查询</button>
         </div>
       </div>
 
@@ -245,36 +158,36 @@
           <div class="card-header">
             <i class="fas fa-cloud"></i>
             <a href="http://www.pubyun.com" target="_blank">F3322 DDNS</a>
-<span class="float-right mt-n1 mb-n2" id="ddns3322button" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322save()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322stop()">关闭</button>
+<span id="ddns3322button" class="float-right mt-n1 mb-n2" style="display:none">
+<button id="buttonDDNS3322save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonDDNS3322stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
-<span class="float-right mt-n1 mb-n2" id="ddns3322switch">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddns3322switch()">展开</button>
+<span id="ddns3322switch" class="float-right mt-n1 mb-n2">
+<button id="buttonDDNS3322switch" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">展开</button>
 </span>
           </div>
 
-          <div class="card-body" id="ddns3322body" style="display:none">
+          <div id="ddns3322body" class="card-body" style="display:none">
     <div class="form-row">
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
+          <span class="input-group-text" style="min-width: 120px;">域名</span>
         </div>
-          <input type="text" id="f3322domain" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->domain ?>">
+          <input id="f3322domain" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->domain ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center" style="min-width: 120px;">用户名</span>
+          <span class="input-group-text" style="min-width: 120px;">用户名</span>
         </div>
-          <input type="text" id="f3322usr" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->user ?>">
+          <input id="f3322usr" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->user ?>">
       </div>
 
       <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center" style="min-width: 120px;">密码</span>
+          <span class="input-group-text" style="min-width: 120px;">密码</span>
         </div>
-          <input type="text" id="f3322pwd" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->pwd ?>">
+          <input id="f3322pwd" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddns3322->pwd ?>">
       </div>
     </div>
           </div>
@@ -285,45 +198,45 @@
           <div class="card-header">
             <i class="fas fa-cloud"></i>
             <a href="https://dash.cloudflare.com/login" target="_blank">CloudFlare DDNS</a>
-<span class="float-right mt-n1 mb-n2" id="ddnsCFbutton" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFsave()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFstop()">关闭</button>
+<span id="ddnsCFbutton" class="float-right mt-n1 mb-n2" style="display:none">
+<button id="buttonDDNSCFsave" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonDDNSCFstop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
-<span class="float-right mt-n1 mb-n2" id="ddnsCFswitch">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="ddnsCFswitch()">展开</button>
+<span id="ddnsCFswitch" class="float-right mt-n1 mb-n2">
+<button id="buttonDDNSCFswitch" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">展开</button>
 </span>
           </div>
 
-          <div class="card-body" id="ddnsCFbody" style="display:none">
+          <div id="ddnsCFbody" class="card-body" style="display:none">
     <div class="form-row">
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center" style="min-width: 120px;">域名</span>
+          <span class="input-group-text" style="min-width: 120px;">域名</span>
         </div>
-          <input type="text" id="CFdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfDomain ?>">
+          <input id="CFdomain" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfDomain ?>">
       </div>
 
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center" style="min-width: 120px;">Zone ID</span>
+          <span class="input-group-text" style="min-width: 120px;">Zone ID</span>
         </div>
-          <input type="text" id="CFzoneid" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfZoneID ?>">
+          <input id="CFzoneid" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfZoneID ?>">
       </div>
     </div>
 
     <div class="form-row">
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center" style="min-width: 120px;">CF API KEY</span>
+          <span class="input-group-text" style="min-width: 120px;">CF API KEY</span>
         </div>
-          <input type="text" id="CFapikey" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfAPIkey ?>">
+          <input id="CFapikey" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfAPIkey ?>">
       </div>
 
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center" style="min-width: 120px;">CF E-mail</span>
+          <span class="input-group-text" style="min-width: 120px;">CF E-mail</span>
         </div>
-          <input type="text" id="CFemail" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfEmail ?>">
+          <input id="CFemail" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->ddns->ddnsCF->cfEmail ?>">
       </div>
     </div>
           </div>
@@ -334,82 +247,61 @@
           <div class="card-header">
             <i class="fas fa-bacon"></i>
             FRP
-<span class="float-right mt-n1 mb-n2 ml-4" id="FRPbutton" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFRP'); ?> btn-sm mt-1" style="border-Radius: 0px;" onclick="onFRP()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="offFRP()">关闭</button>
+<span id="FRPbutton" class="float-right mt-n1 mb-n2 ml-4" style="display:none">
+<button id="buttonOnFRP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonOffFRP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
-<span class="float-right mt-n1 mb-n2 ml-4" id="FRPswitch">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FRPswitch()">展开</button>
+<span id="FRPswitch" class="float-right mt-n1 mb-n2 ml-4">
+<button id="buttonFRPswitch" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">展开</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" id="FRPinstall" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="installFRP()">install</button>
+<button id="buttonFRPinstall" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">install</button>
 </span>
           </div>
 
-          <div class="card-body" id="FRPbody" style="display:none">
-  <div class="form-row">
-      <div class="col-md-8">
-        <H6 class="my-auto mr-3">
-        <i class="fas fa-globe-asia my-1 ml-4 mr-2"></i>服务端：
+          <div id="FRPbody" class="card-body" style="display:none">
+
+        <H6 class="mt-1 ml-4">
+        <i class="fas fa-globe-asia"></i>&nbsp&nbsp服务端：
         </H6>
-      <div class="input-group my-2">
-        <div class="input-group-prepend col-xs-5">
-          <span class="input-group-text align-self-center">服务器域名</span>
-        </div>
-        <input type="text" id="FRPdomain" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->domain ?>">
-
+    <div class="form-row">
+      <div class="col-md-12 input-group my-2">
+        <input id="frpCMD" type="text" class="form-control" placeholder="服务端安装指令" value="" readonly>
         <div class="input-group-append">
-          <span class="input-group-text align-self-center">Bind-Port</span>
-        </div>
-          <input type="text" id="FRPbindPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindPort ?>">
-
-        <div class="input-group-append">
-          <span class="input-group-text align-self-center">Token</span>
-        </div>
-          <input type="text" id="FRPtoken" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->token ?>">
-        <div class="input-group-prepend">
-          <button id="FRPbindProtocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindProtocol ?>"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->bindProtocol ?></button>
-            <div class="dropdown-menu">
-            <a class="dropdown-item" onclick="FRPbindTCP()" href="#">TCP</a>
-            <a class="dropdown-item" onclick="FRPbindKCP()" href="#">KCP</a>
-            </div>
-        </div>
-      </div>
-      </div>
-
-      <div class="col-md-4">
-        <H6 class="my-auto mr-3">
-        <i class="fas fa-ethernet my-1 ml-4 mr-2"></i>本地端：
-        </H6>
-      <div class="input-group my-2">
-        <div class="input-group-prepend">
-          <span class="input-group-text align-self-center">服务器端口</span>
-        </div>
-          <input type="text" id="FRPremotePort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->remotePort ?>">
-
-        <div class="input-group-append">
-          <span class="input-group-text align-self-center">本地端口</span>
-        </div>
-          <input type="text" id="FRPlocalPort" class="form-control" style="max-width: 120px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->localPort ?>">  
-
-        <div class="input-group-prepend">
-          <button id="FRPprotocol" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->protocol ?>"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->protocol ?></button>
-            <div class="dropdown-menu">
-            <a class="dropdown-item" onclick="FRPprotocolTCP()" href="#">TCP</a>
-            <a class="dropdown-item" onclick="FRPprotocolUDP()" href="#">UDP</a>
-            </div>
-        </div>
-      </div>
-      </div>
-  </div>
-
-    <div class="form-row mt-3">
-      <div class="col-md-12 input-group">
-        <input type="text" class="form-control" id="frpCMD" placeholder="服务端安装指令" value="" readonly>
-        <div class="input-group-append">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" onclick="genFRPcmd()">生成安装指令</button>
+          <button id="buttonGenFRPcmd" type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;">生成安装指令</button>
         </div> 
       </div>
+    </div>
+    <div class="form-row">
+      <div class="input-group my-2 col-md-12">
+        <div class="input-group-prepend">
+          <span class="input-group-text">服务器域名</span>
+        </div>
+          <input id="FRPdomain" type="text" class="form-control" style="max-width: 280px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->server->domain ?>">
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">Token</span>
+        </div>
+          <input id="FRPtoken" type="text" class="form-control" style="max-width: 150px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->server->token ?>">
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">Bind-Port</span>
+        </div>
+          <input id="FRPbindPort" type="text" class="form-control" style="max-width: 125px;" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->server->bindPort ?>">
+        <div class="input-group-prepend">
+          <button id="FRPbindProtocol" class="btn btn-outline-secondary dropdown-toggle" style="min-width: 80px;" type="button" data-toggle="dropdown"><?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FRP->server->bindProtocol ?></button>
+            <div class="dropdown-menu">
+            <a id="buttonFRPbindTCP" class="dropdown-item" href="javascript:void(0)">TCP</a>
+            <a id="buttonFRPbindKCP" class="dropdown-item" href="javascript:void(0)">KCP</a>
+            </div>
+        </div>
+          <button id="buttonFRPclientAdd" class="btn btn-sm btn-outline-secondary ml-auto" style="border-Radius: 0px;" type="button">添加客户端配置</button>
+      </div>
+    </div>
+
+        <H6 class="mt-3 ml-4">
+        <i class="fas fa-ethernet mb-2"></i>&nbsp&nbsp客户端：
+        </H6>
+    <div id="FRPclients" class="form-row">
+
     </div>
           </div>
         </div>
@@ -419,122 +311,44 @@
           <div class="card-header">
             <i class="fas fa-archway"></i>
             WireGuard Server
-<span class="float-right mt-n1 mb-n2 ml-4" id="WGbutton" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkWG');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="WGon()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="WGoff()">关闭</button>
+<span id="WGbutton" class="float-right mt-n1 mb-n2 ml-4" style="display:none">
+<button id="buttonOnWG" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonOffWG" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
-<span class="float-right mt-n1 mb-n2 ml-4" id="WGswitch">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="WGswitch()">展开</button>
+<span id="WGswitch" class="float-right mt-n1 mb-n2 ml-4">
+<button id="buttonWGswitch" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">展开</button>
 </span>
 <span class="float-right mt-n1 mb-n2">
-<button type="button" id="WGinstall" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="installWG()">install</button>
+<button id="buttonWGinstall" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">install</button>
 </span>
           </div>
-          <div class="card-body" id="WGbody" style="display:none">
+          <div id="WGbody" class="card-body" style="display:none">
 
 <div class="form-row mb-3">
-      <div class="col-md-4 input-group mb-1 ml-auto">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">Endpoint</span>
-          <span class="input-group-text justify-content-center">域名/公网IP</span>
+      <div class="input-group col-md-12 my-2">
+        <div class="input-group-prepend ">
+          <span class="input-group-text" style="min-width: 90px;">Endpoint</span>
+          <button id="WGgenSkey" style="min-width: 150px; border-Radius: 0px;" type="button" onclick="WGgenSkey()"></button>
+          <input id="sprivatekey" type="hidden" value="">
+          <input id="spublickey" type="hidden" value="">
         </div>
-          <input type="text" id="WGaddress" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGdomain ?>">
-      </div>
-      <div class="col-md-4 input-group mb-1 mr-auto">
-         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">UDP端口</span>
+          <input id="WGaddress" type="text" class="form-control" placeholder="域名/公网IP" style="max-width: 280px;" value="">
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">UDP端口</span>
          </div>
-          <input type="text" id="WGaddressport" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGport ?>">
-         <div class="input-group-append">
-          <button type="button" class="btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="WGchangeKey()">重新生成密钥</button>
-         </div>
+          <input id="WGport" type="text" class="form-control" placeholder="端口号" style="max-width: 125px;" value="">
+          <button id="buttonWGclientAdd" class="btn btn-sm btn-outline-secondary ml-auto" style="border-Radius: 0px;" type="button">添加客户端配置</button>
       </div>
 </div>
 
 
-<div class="form-row mb-3">
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点1</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark1" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[0] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop1" onclick="submitWGmark()">显示二维码</button>
-      </div>
+<div id="WGclients" class="form-row mb-1">
 
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点2</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark2" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[1] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop2" onclick="submitWGmark()">显示二维码</button>
-      </div>
-</div>
-
-<div class="form-row mb-3">
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点3</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark3" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[2] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop3" onclick="submitWGmark()">显示二维码</button>
-      </div>
-
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点4</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark4" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[3] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop4" onclick="submitWGmark()">显示二维码</button>
-      </div>
-</div>
-
-<div class="form-row mb-3">
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点5</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark5" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[4] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop5" onclick="submitWGmark()">显示二维码</button>
-      </div>
-
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点6</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark6" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[5] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop6" onclick="submitWGmark()">显示二维码</button>
-      </div>
-</div>
-
-<div class="form-row mb-3">
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点7</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark7" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[6] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop7" onclick="submitWGmark()">显示二维码</button>
-      </div>
-
-      <div class="col-md-6 input-group mb-1">
-        <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">节点8</span>
-          <span class="input-group-text justify-content-center">备注：</span>
-        </div>
-          <input type="text" id="WGmark8" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->wireguard->WGmark[7] ?>">
-          <button type="button" class="btn btn-secondary btn-sm" style="border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop8" onclick="submitWGmark()">显示二维码</button>
-      </div>
 </div>
 
 <span class="float-left text-secondary">
   <small>
-注：需要主路由映射所需UDP端口到de_GWD的地址。显示二维码的同时，即保存备注。
+注：需要主路由映射所需UDP端口到de_GWD的地址。最后一个“清空”按钮，可以删除最后一个wireguard节点。
   </small>
 </span>
           </div>
@@ -558,214 +372,425 @@
   </div>
   <!-- /#wrapper -->
 <script>
-function logout(){
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-};
+function DDNS3322switch(){
+$("#ddns3322switch").css("display", "none")
+$("#ddns3322button").css("display", "block")
+$("#ddns3322body").css("display", "block")
+}
 
-function markThis(){
-markNametxt=$('#markName').val();
-$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-};
-
-function showIP(){
-$.get('./act/checkDDNSip.php', function(data) { $('#wanIP').attr("value",data); });
-};
-
-function ddns3322switch(){
-$("#ddns3322switch").css("display", "none"); 
-$("#ddns3322button").css("display", "block"); 
-$("#ddns3322body").css("display", "block"); 
-};
-
-function ddns3322save(){
-f3322domain=$('#f3322domain').val();
-f3322usr=$('#f3322usr').val();
-f3322pwd=$('#f3322pwd').val();
-$.get('./act/ddns3322save.php', {f3322domain:f3322domain, f3322usr:f3322usr, f3322pwd:f3322pwd}, function(result){ location.reload() });
-alert("开启DDNS。。。");
-};
-
-function ddns3322stop(){
-$.get('./act/ddns3322stop.php', function(result){window.location.reload();});
-};
-
-function ddnsCFswitch(){
-$("#ddnsCFswitch").css("display", "none"); 
-$("#ddnsCFbutton").css("display", "block"); 
-$("#ddnsCFbody").css("display", "block"); 
-};
-
-function ddnsCFsave(){
-cfdomain=$('#CFdomain').val();
-cfzoneid=$('#CFzoneid').val();
-cfapikey=$('#CFapikey').val();
-cfemail=$('#CFemail').val();
-$.get('./act/ddnsCFsave.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){ location.reload() });
-alert("开启DDNS。。。");
-};
-
-function ddnsCFstop(){
-$.get('./act/ddnsCFstop.php', function(result){window.location.reload();});
-};
+function DDNSCFswitch(){
+$("#ddnsCFswitch").css("display", "none")
+$("#ddnsCFbutton").css("display", "block")
+$("#ddnsCFbody").css("display", "block")
+}
 
 function FRPswitch(){
-$("#FRPswitch").css("display", "none"); 
-$("#FRPbutton").css("display", "block"); 
-$("#FRPbody").css("display", "block"); 
-};
-
-function FRPbindTCP(){$('#FRPbindProtocol').html("TCP"); };
-function FRPbindKCP(){$('#FRPbindProtocol').html("KCP"); };
-
-function FRPprotocolTCP(){$('#FRPprotocol').html("TCP"); };
-function FRPprotocolUDP(){$('#FRPprotocol').html("UDP"); };
-
-function installFRP(){
-$.get('./act/installFRPc.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
-};
-
-function onFRP(){
-FRPdomain=$('#FRPdomain').val();
-FRPbindPort=$('#FRPbindPort').val();
-FRPtoken=$('#FRPtoken').val();
-FRPbindProtocol=$('#FRPbindProtocol').html();
-FRPremotePort=$('#FRPremotePort').val();
-FRPlocalPort=$('#FRPlocalPort').val();
-FRPprotocol=$('#FRPprotocol').html();
-$.get('./act/onFRP.php', {FRPdomain:FRPdomain, FRPbindPort:FRPbindPort, FRPtoken:FRPtoken, FRPbindProtocol:FRPbindProtocol, FRPremotePort:FRPremotePort, FRPlocalPort:FRPlocalPort, FRPprotocol:FRPprotocol}, function(result){ location.reload() });
-};
-
-function offFRP(){
-$.get('./act/offFRP.php', function(result){window.location.reload();});
-};
-
-function genFRPcmd(){
-FRPdomain=$('#FRPdomain').val();
-FRPbindPort=$('#FRPbindPort').val();
-FRPtoken=$('#FRPtoken').val();
-FRPbindProtocol=$('#FRPbindProtocol').html();
-FRPremotePort=$('#FRPremotePort').val();
-FRPlocalPort=$('#FRPlocalPort').val();
-FRPprotocol=$('#FRPprotocol').html();
-$.get('./act/genFRPcmd.php', {FRPdomain:FRPdomain, FRPbindPort:FRPbindPort, FRPtoken:FRPtoken, FRPbindProtocol:FRPbindProtocol, FRPremotePort:FRPremotePort, FRPlocalPort:FRPlocalPort, FRPprotocol:FRPprotocol}, function(data){
-$('#frpCMD').val(data);
-});
-};
+$("#FRPswitch").css("display", "none")
+$("#FRPbutton").css("display", "block")
+$("#FRPbody").css("display", "block")
+}
 
 function WGswitch(){
-$("#WGswitch").css("display", "none"); 
-$("#WGbutton").css("display", "block"); 
-$("#WGbody").css("display", "block"); 
+$("#WGswitch").css("display", "none")
+$("#WGbutton").css("display", "block")
+$("#WGbody").css("display", "block")
 }
 
-function installWG(){
+function FRPremoteProtocolTCP(FRPremoteProtocolTCP){
+$(FRPremoteProtocolTCP).parent().parent().find('.dropdown-toggle').html("TCP")
+}
+
+function FRPremoteProtocolUDP(FRPremoteProtocolUDP){
+$(FRPremoteProtocolUDP).parent().parent().find('.dropdown-toggle').html("UDP")
+}
+
+function FRPclear(FRPclear){
+var FRPnum = $(FRPclear).parent().parent().find('input').attr('id')
+var FRPnum = FRPnum.replace(/[^0-9]/ig,"")
+$('#FRPlocalIP'+FRPnum).val('')
+$('#FRPlocalPort'+FRPnum).val('')
+$('#FRPremotePort'+FRPnum).val('')
+$('#FRPlocalMark'+FRPnum).val('')
+}
+
+function WGgenSkey(){
+$.get('./act/WGgenSkey.php', function(result){window.location.reload()})
+}
+
+function WGgenCkey(WGgenCkey){
+var WGnum = $(WGgenCkey).parent().find('.input-group-text').html()
+var WGnum = WGnum.replace(/[^0-9]/ig,"")-1
+$.get('./act/WGgenCkey.php', {WGnum:WGnum}, function(result){window.location.reload()})
+}
+
+function WGqr(WGqr){
+var WGnum = $(WGqr).parent().parent().find('.input-group-text').html()
+var WGnum = WGnum.replace(/[^0-9]/ig,"")
+var QRnum = WGnum-1
+$.get('./act/WGqr.php', {WGnum:WGnum}, function(data){
+$('#qrcode'+QRnum).empty()
+$('#qrcode'+QRnum).qrcode({width: 240,height: 240,correctLevel:0,text: data})
+})
+$.get('./act/WGqr.php', {WGnum:WGnum}, function(data){
+$('#qrstr'+QRnum).val(data)
+})
+}
+
+function WGclear(WGclear){
+var WGtotal = $(WGclear).parent().parent().parent().find('.input-group').length-1
+var WGnum = $(WGclear).parent().parent().find('.input-group-text').html()
+var WGnum = WGnum.replace(/[^0-9]/ig,"")-1
+if (WGnum == WGtotal){
+$(WGclear).parent().parent('.input-group').remove()
+}
+else{
+$(':hidden#cprivatekey'+WGnum).val('0000000000000000000000000000000000000000000=')
+$(':hidden#cpublickey'+WGnum).val('0000000000000000000000000000000000000000000=')
+$('#WGmark'+WGnum).val('')
+$('#buttonWGgenCKey'+WGnum).attr('class', 'btn btn-sm btn-secondary')
+$('#buttonWGgenCKey'+WGnum).html('生成节点密钥对')
+}
+}
+
+function WGremove(WGremove){
+$(WGremove).parent().parent('.input-group').remove()
+}
+
+
+
+$(function(){
+$('#buttonLogout').click(function(){
+$.get('auth.php', {logout:'true'}, function(result){window.location.href="index.php"})
+})
+
+$('#buttonMarkThis').click(function(){
+markNametxt=$('#markName').val()
+$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
+
+$('#buttonShowIP').click(function(){
+$.get('./act/checkDDNSip.php', function(data){$('#wanIP').attr("value",data)})
+})
+
+
+$.get("./act/checkDDNS3322.php", function(data){
+if ($.trim(data) == "installed"){
+DDNS3322switch()
+}
+})
+
+$('#buttonDDNS3322switch').click(function(){
+DDNS3322switch()
+})
+
+$('#buttonDDNS3322save').click(function(){
+f3322domain=$('#f3322domain').val()
+f3322usr=$('#f3322usr').val()
+f3322pwd=$('#f3322pwd').val()
+$.get('./act/ddns3322save.php', {f3322domain:f3322domain, f3322usr:f3322usr, f3322pwd:f3322pwd}, function(result){window.location.reload()})
+alert("保存/开启DDNS。。。")
+})
+
+$('#buttonDDNS3322stop').click(function(){
+$.get('./act/ddns3322stop.php', function(result){window.location.reload()})
+})
+
+
+$.get("./act/checkDDNScf.php", function(data){
+if ($.trim(data) == "installed"){
+DDNSCFswitch()
+}
+})
+
+$('#buttonDDNSCFswitch').click(function(){
+DDNSCFswitch()
+})
+
+$('#buttonDDNSCFsave').click(function(){
+cfdomain=$('#CFdomain').val()
+cfzoneid=$('#CFzoneid').val()
+cfapikey=$('#CFapikey').val()
+cfemail=$('#CFemail').val()
+$.get('./act/ddnsCFsave.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){window.location.reload()})
+alert("保存/开启DDNS。。。")
+})
+
+$('#buttonDDNSCFstop').click(function(){
+$.get('./act/ddnsCFstop.php', function(result){window.location.reload()})
+})
+
+
+$.get('./act/arrFRP.php', function(data) {
+var arrFRPlist = JSON.parse(data);
+var len = arrFRPlist.length;
+for( let i = 0; i<len; i++){
+  let localIP = arrFRPlist[i].localIP;
+  let localPort = arrFRPlist[i].localPort;
+  let remotePort = arrFRPlist[i].remotePort;
+  let remoteProtocol = arrFRPlist[i].remoteProtocol;
+  let localMark = arrFRPlist[i].localMark;
+  $('#FRPclients').append(`
+      <div class="input-group mb-2 col-md-12">
+        <div class="input-group-prepend">
+          <span class="input-group-text">本地IP</span>
+        </div>
+          <input id="FRPlocalIP${i}" type="text" class="form-control" style="max-width: 180px;" value="${localIP}">  
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">本地端口</span>
+        </div>
+          <input id="FRPlocalPort${i}" type="text" class="form-control" style="max-width: 125px;" value="${localPort}">  
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">对应服务器端口</span>
+        </div>
+          <input id="FRPremotePort${i}" type="text" class="form-control" style="max-width: 125px;" value="${remotePort}">
+        <div class="input-group-append">
+          <button id="FRPremoteProtocol${i}" type="button" data-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle" style="min-width: 80px;">${remoteProtocol}</button>
+            <div class="dropdown-menu">
+            <a class="dropdown-item" onclick="FRPremoteProtocolTCP(this)" href="javascript:void(0)">TCP</a>
+            <a class="dropdown-item" onclick="FRPremoteProtocolUDP(this)" href="javascript:void(0)">UDP</a>
+            </div>
+        </div>
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">备注</span>
+        </div>
+          <input id="FRPlocalMark${i}" type="text" class="form-control" style="max-width: 150px;" value="${localMark}">
+        <div class="input-group-append">
+          <button type="button" class="btn btn-sm btn-outline-secondary" style="border-Radius: 0px;" onclick="FRPclear(this)">清空</button>
+        </div>
+      </div>
+                          `)
+}
+})
+
+$('#buttonFRPclientAdd').click(function(){
+  var i = $("#FRPclients .input-group").length
+  $('#FRPclients').append(`
+      <div class="input-group mb-2 col-md-12">
+        <div class="input-group-prepend">
+          <span class="input-group-text">本地IP</span>
+        </div>
+          <input id="FRPlocalIP${i}" type="text" class="form-control" style="max-width: 180px;" value="">  
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">本地端口</span>
+        </div>
+          <input id="FRPlocalPort${i}" type="text" class="form-control" style="max-width: 125px;" value="">  
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">对应服务器端口</span>
+        </div>
+          <input id="FRPremotePort${i}" type="text" class="form-control" style="max-width: 125px;" value="">
+        <div class="input-group-append">
+          <button id="FRPremoteProtocol${i}" type="button" data-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle" style="min-width: 80px;">TCP</button>
+            <div class="dropdown-menu">
+            <a class="dropdown-item" onclick="FRPremoteProtocolTCP(this)" href="javascript:void(0)">TCP</a>
+            <a class="dropdown-item" onclick="FRPremoteProtocolUDP(this)" href="javascript:void(0)">UDP</a>
+            </div>
+        </div>
+        <div class="input-group-prepend input-group-append">
+          <span class="input-group-text">备注</span>
+        </div>
+          <input id="FRPlocalMark${i}" type="text" class="form-control" style="max-width: 150px;" value="">
+        <div class="input-group-append">
+          <button type="button" class="btn btn-sm btn-outline-secondary" style="border-Radius: 0px;" onclick="FRPclear(this)">清空</button>
+        </div>
+      </div>
+                          `)
+})
+
+$.get("./act/checkFRP.php", function(data){
+var checkFRP = data.split(" ")
+if (checkFRP[0] == "installed"){
+$('#buttonFRPinstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
+}
+if (checkFRP[1] == "on"){
+FRPswitch()
+$('#buttonOnFRP').attr('class', 'btn btn-success btn-sm mt-1')
+}
+})
+
+$('#buttonFRPswitch').click(function(){
+FRPswitch()
+})
+
+$('#buttonFRPbindTCP').click(function(){
+$('#FRPbindProtocol').html("TCP")
+})
+
+$('#buttonFRPbindKCP').click(function(){
+$('#FRPbindProtocol').html("KCP")
+})
+
+$('#buttonFRPinstall').click(function(){
+$.get('./act/installFRPc.php', function(result){})
+window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
+})
+
+$('#buttonOnFRP').click(function(){
+FRPdomain=$('#FRPdomain').val()
+FRPtoken=$('#FRPtoken').val()
+FRPbindPort=$('#FRPbindPort').val()
+FRPbindProtocol=$('#FRPbindProtocol').html()
+var FRPclientsList = []
+var len = $("#FRPclients .input-group").length
+var localIP, localPort, remotePort, remoteProtocol, localMark
+for( let i = 0; i<len; i++){
+    var localIP = $('#FRPlocalIP'+i).val()
+    var localPort = $('#FRPlocalPort'+i).val()
+    var remotePort = $('#FRPremotePort'+i).val()
+    var remoteProtocol = $('#FRPremoteProtocol'+i).html()
+    var localMark = $('#FRPlocalMark'+i).val()
+    if (localIP !== '' && localPort !== '' && remotePort !== '' && remoteProtocol !== '') {
+    FRPclientsList.push({localIP, localPort, remotePort, remoteProtocol, localMark})
+    }
+}
+$.get('./act/onFRP.php', {FRPdomain:FRPdomain, FRPtoken:FRPtoken, FRPbindPort:FRPbindPort, FRPbindProtocol:FRPbindProtocol, FRPclientsList:FRPclientsList}, function(result){window.location.reload()})
+})
+
+$('#buttonOffFRP').click(function(){
+$.get('./act/offFRP.php', function(result){window.location.reload()})
+})
+
+$('#buttonGenFRPcmd').click(function(){
+$.get('./act/genFRPcmd.php', function(data){$('#frpCMD').val(data)})
+})
+
+
+$.get('./act/arrWG.php', function(data) {
+var arrWGlist = JSON.parse(data)
+
+if (arrWGlist.server.sprivatekey == null || arrWGlist.server.sprivatekey == undefined || arrWGlist.server.sprivatekey == 'undefined' || arrWGlist.server.sprivatekey == ''){
+$('#WGgenSkey').attr('class', 'btn btn-sm btn-secondary')
+$('#WGgenSkey').html('生成密钥对')
+}
+else{
+$('#WGgenSkey').attr('class', 'btn btn-sm btn-warning')
+$('#WGgenSkey').html('重新生成密钥对')
+$(':hidden#sprivatekey').val(arrWGlist.server.sprivatekey)
+$(':hidden#spublickey').val(arrWGlist.server.spublickey)
+}
+
+$('#WGaddress').val(arrWGlist.server.WGaddress)
+$('#WGport').val(arrWGlist.server.WGport)
+
+var arrWGlistC = arrWGlist.clients
+var len = arrWGlistC.length
+for( let i = 0; i<len; i++){
+  var cprivatekey = arrWGlistC[i].cprivatekey
+  var cpublickey = arrWGlistC[i].cpublickey
+  var mark = arrWGlistC[i].mark
+  if  ( mark == null || mark == undefined || mark == 'undefined' || mark == '' ){ mark = ''}
+  $('#WGclients').append(`
+      <div class="input-group mb-2 col-md-6">
+        <div class="input-group-prepend">
+          <span class="input-group-text" style="min-width: 90px;">节点${i+1}</span>
+          <button id="buttonWGgenCKey${i}" type="button" class="btn btn-secondary btn-sm" style="min-width: 150px; border-Radius: 0px;" onclick="WGgenCkey(this)"></button>
+          <input id="cprivatekey${i}" type="hidden" value="${cprivatekey}">
+          <input id="cpublickey${i}" type="hidden" value="${cpublickey}">
+          <span class="input-group-text">备注</span>
+        </div>
+          <input id="WGmark${i}" type="text" class="form-control" value="${mark}">
+        <div class="input-group-prepend input-group-append">
+          <button type="button" class="btn btn-secondary btn-sm" style="min-width: 120px; border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop${i}" onclick="WGqr(this)">显示二维码</button>
+        </div>
+        <div class="input-group-append">
+          <button type="button" class="btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="WGclear(this)">清空</button>
+        </div>
+      </div>
+
+<div id="wgqrpop${i}" class="modal fade" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title mx-auto" >WireGuard客户端${i+1}</h5>
+      </div>
+      <div class="modal-body">
+        <div id="qrcode${i}" class="text-center"></div>
+        <textarea id="qrstr${i}" class="mx-auto mt-3 col-12 small" rows="8" readonly></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+                          `)
+
+  if ( cprivatekey == null || cprivatekey == undefined || cprivatekey == 'undefined' || cprivatekey == '0000000000000000000000000000000000000000000=' || cprivatekey == '' ){
+  $('#buttonWGgenCKey'+i).attr('class', 'btn btn-sm btn-secondary')
+  $('#buttonWGgenCKey'+i).html('生成节点密钥对')
+  }
+  else{
+  $('#buttonWGgenCKey'+i).attr('class', 'btn btn-sm btn-warning')
+  $('#buttonWGgenCKey'+i).html('重新生成节点密钥对')
+  }
+
+}
+})
+
+$('#buttonWGclientAdd').click(function(){
+  var i = $("#WGclients .input-group").length
+  $('#WGclients').append(`
+      <div class="input-group mb-2 col-md-6">
+        <div class="input-group-prepend">
+          <span class="input-group-text" style="min-width: 90px;">节点${i+1}</span>
+          <button id="buttonWGgenCKey${i}" type="button" class="btn btn-secondary btn-sm" style="min-width: 150px; border-Radius: 0px;" onclick="WGgenCkey(this)"></button>
+          <input id="cprivatekey${i}" type="hidden" value="">
+          <input id="cpublickey${i}" type="hidden" value="">
+          <span class="input-group-text">备注</span>
+        </div>
+          <input id="WGmark${i}" type="text" class="form-control" value="">
+        <div class="input-group-prepend input-group-append">
+          <button type="button" class="btn btn-secondary btn-sm" style="min-width: 120px; border-Radius: 0px;" data-toggle="modal" data-target="#wgqrpop" onclick="WGqr(this)">显示二维码</button>
+        </div>
+        <div class="input-group-append">
+          <button type="button" class="btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" onclick="WGclear(this)">清空</button>
+        </div>
+      </div>
+                          `)
+})
+
+$.get("./act/checkWG.php", function(data){
+var checkWG = data.split(" ");
+if (checkWG[0] == "installed"){
+$('#buttonWGinstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
+};
+if (checkWG[1] == "on"){
+WGswitch()
+$('#buttonOnWG').attr('class', 'btn btn-success btn-sm mt-1')
+}
+})
+
+$('#buttonWGswitch').click(function(){
+WGswitch()
+})
+
+$('#buttonWGinstall').click(function(){
 $.get('./act/installWG.php', function(result){});
 window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
-};
+})
 
-function WGchangeKey(){
-$.get('./act/WGchangeKey.php', function(result){window.location.reload();});
-};
-
-function WGon(){
-WGaddress=$('#WGaddress').val();
-WGaddressport=$('#WGaddressport').val();
-$.get('./act/WGon.php', {WGaddress:WGaddress, WGaddressport:WGaddressport}, function(result){ location.reload() });
-alert("开启WireGuard。。。");
-};
-
-function WGoff(){
-$.get('./act/WGoff.php', function(result){window.location.reload();});
-};
-
-function submitWGmark(){
-WGmark1=$('#WGmark1').val();
-WGmark2=$('#WGmark2').val();
-WGmark3=$('#WGmark3').val();
-WGmark4=$('#WGmark4').val();
-WGmark5=$('#WGmark5').val();
-WGmark6=$('#WGmark6').val();
-WGmark7=$('#WGmark7').val();
-WGmark8=$('#WGmark8').val();
-$.get('./act/WGmark.php', {WGmark1:WGmark1, WGmark2:WGmark2, WGmark3:WGmark3, WGmark4:WGmark4, WGmark5:WGmark5, WGmark6:WGmark6, WGmark7:WGmark7, WGmark8:WGmark8}, function(result){ });
+$('#buttonOnWG').click(function(){
+WGaddress=$('#WGaddress').val()
+WGport=$('#WGport').val()
+sprivatekey=$(':hidden#sprivatekey').val()
+spublickey=$(':hidden#spublickey').val()
+var WGclientsList = []
+var len = $("#WGclients .input-group").length
+var cprivatekey, cpublickey, mark
+for( let i = 0; i<len; i++){
+    var cprivatekey = $(':hidden#cprivatekey'+i).val()
+    var cpublickey = $(':hidden#cpublickey'+i).val()
+    var mark = $('#WGmark'+i).val()
+    if ( cprivatekey !== '' || cpublickey !== '' || mark !== '') {
+    WGclientsList.push({cprivatekey, cpublickey, mark})
+    }
 }
+$.get('./act/onWG.php', {WGaddress:WGaddress, WGport:WGport, sprivatekey:sprivatekey, spublickey:spublickey, WGclientsList:WGclientsList}, function(result){window.location.reload()})
+alert("保存/开启WireGuard。。。")
+})
 
-window.onload = function() {
-$.get("./act/checkDDNS3322.php", function(data) {
-if ($.trim(data) == "installed") {
-ddns3322switch(); 
-};
-});
+$('#buttonOffWG').click(function(){
+$.get('./act/offWG.php', function(result){window.location.reload()})
+})
 
-$.get("./act/checkDDNScf.php", function(data) {
-if ($.trim(data) == "installed") {
-ddnsCFswitch(); 
-};
-});
-
-$.get("./act/checkFRP.php", function(data) {
-var checkFRP = data.split(" ");
-if (checkFRP[0] == "installed") {
-$('#FRPinstall').attr('class', 'btn btn-outline-success btn-sm mt-1');
-};
-if (checkFRP[1] == "on") {
-FRPswitch(); 
-};
-});
-
-$.get("./act/checkWG.php", function(data) {
-var checkWG = data.split(" ");
-if (checkWG[0] == "installed") {
-$('#WGinstall').attr('class', 'btn btn-outline-success btn-sm mt-1');
-};
-if (checkWG[1] == "on") {
-WGswitch();
-};
-});
-
-$.get('./act/WGqrTXT1.php', function(data){
-jQuery('#qrcode1').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-$.get('./act/WGqrTXT2.php', function(data){
-jQuery('#qrcode2').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-$.get('./act/WGqrTXT3.php', function(data){
-jQuery('#qrcode3').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-$.get('./act/WGqrTXT4.php', function(data){
-jQuery('#qrcode4').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-$.get('./act/WGqrTXT5.php', function(data){
-jQuery('#qrcode5').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-$.get('./act/WGqrTXT6.php', function(data){
-jQuery('#qrcode6').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-$.get('./act/WGqrTXT7.php', function(data){
-jQuery('#qrcode7').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-$.get('./act/WGqrTXT8.php', function(data){
-jQuery('#qrcode8').qrcode({width: 240,height: 240,correctLevel:0,text: data}); 
-});
-};
+})
 </script>
-
-  <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin.min.js"></script>
-  <script src="js/jquery.qrcode.min.js"></script>
 
 </body>
 

@@ -21,6 +21,22 @@
   <link href="css/animation.css" rel="stylesheet">
 
   <link href="favicon.ico" rel="icon" type="image/x-icon" />
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin.min.js"></script>
+
 </head>
 
 <body id="page-top" class="sidebar-toggled fixed-padding">
@@ -30,7 +46,7 @@
     <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
-    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+    <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="javascript:void(0)">
       <i class="fas fa-bars"></i>
     </button>
 <span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
@@ -88,7 +104,7 @@
           <span>更新</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" onclick="logout()">
+        <a id="buttonLogout" class="nav-link" href="javascript:void(0)">
           <i class="fas fa-sign-out-alt"></i>
           <span>注销</span></a>
       </li>
@@ -147,8 +163,8 @@
                 <div class="">代理开关</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <h6 class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" onclick="proxyRestart()">重启代理</button></h6>
-                <h6 class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;" onclick="proxyStop()">关闭代理</button></h6>
+                <h6 id="buttonProxyRestart" class="float-left" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;">重启代理</button></h6>
+                <h6 id="buttonProxyStop" class="float-right" style="margin-bottom: 0"><button class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;">关闭代理</button></h6>
               </a>
             </div>
           </div>
@@ -171,23 +187,23 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="markThis" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
+<div id="markThis" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="markThisLabel">备注本机</h5>
+        <h5 id="markThisLabel" class="modal-title">备注本机</h5>
       </div>
       <div class="modal-body">
-        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
+        <input id="markName" type="text" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
+        <button id="buttonMarkThis" type="button" class="btn-sm btn-dark">应用</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="reboot" tabindex="-1" role="dialog" aria-labelledby="reboot" aria-hidden="true">
+<div id="reboot" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="reboot" aria-hidden="true">
   <div class="modal-dialog modal-sm" style="top:50%" role="document">
     <div class="modal-content">
       <div class="modal-header border-0">
@@ -195,7 +211,7 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-sm btn-dark" onclick="submitstaticip()">立即重启</button>
+        <button id="buttonSubmitStaticIP" type="button" class="btn-sm btn-dark">立即重启</button>
       </div>
     </div>
   </div>
@@ -207,13 +223,13 @@
             <i class="fas fa-stream"></i>
             节点列表
          <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="NodeDTshow()">启用内网设备分流</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="NodeDThide()">禁用内网设备分流</button>
+                <button id="buttonNodeDTshow" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">启用内网设备分流</button>
+                <button id="buttonNodeDThide" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">禁用内网设备分流</button>
           </span>
           </div>
           <div style="display: flex;flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingTCP()">Ping (TCP)</button>
-            <button type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;" onclick="pingICMP()">Ping (ICMP)</button>
+            <button id="buttonPingTCP" type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;">Ping (TCP)</button>
+            <button id="buttonPingICMP" type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;">Ping (ICMP)</button>
           </div>
 
           <div class="card-body">
@@ -234,7 +250,7 @@
 <span class="float-right">
 <div class="input-group mr-4 mt-1 mb-4">
   <div class="input-group-prepend">
-    <button class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkUDP');?>" type="button" onclick="onUDP()">UDP代理</button>
+    <button id="buttonOnUDP" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkUDP');?>" type="button">UDP代理</button>
   </div>
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="offUDP()">OFF</button>
@@ -280,7 +296,7 @@
   <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['divertLan']['ip'] as $k => $v) {echo "$v ";} ?>">
   </div>
   <div class="input-group-append">
-    <button class="btn btn-secondary" type="button" onclick="submitlocalip()">IP写入</button>
+    <button id="buttonSubmitlocalip" class="btn btn-secondary" type="button">IP写入</button>
   </div>
 </div>
 </span>
@@ -296,9 +312,9 @@
             <i class="far fa-compass"></i>
             DNS
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSchnw",'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsCHNW()">大陆白名单</button>
-                <button type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSgfw",'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;" onclick="dnsGFW()">GFWlist</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="submitDNS()">应用</button>
+                <button id="buttonDnsCHNW" type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSchnw",'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">大陆白名单</button>
+                <button id="buttonDnsGFW" type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSgfw",'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">GFWlist</button>
+                <button id="buttonSubmitDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">应用</button>
           </span>
           </div>
 
@@ -313,7 +329,7 @@
                 </div>
                 <input type="text" id="DoH1" class="form-control" placeholder="DoH1" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->dns->doh1 ?>">
                 <div class="input-group-append">
-                  <span class="input-group-text text-success" id="pingDOH1"></span><span class="input-group-text text-secondary">ms</span>
+                  <span id="pingDOH1" class="input-group-text text-success"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
               <div class="input-group my-2">
@@ -324,7 +340,7 @@
                 </div>
                 <input type="text" id="DoH2" class="form-control" placeholder="DoH2" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->dns->doh2 ?>">
                 <div class="input-group-append">
-                  <span class="input-group-text text-success" id="pingDOH2"></span><span class="input-group-text text-secondary">ms</span>
+                  <span id="pingDOH2" class="input-group-text text-success"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
               </div>
 
@@ -332,10 +348,10 @@
                 <div class="ml-auto mr-3">
                   <div class="input-group my-2">
                     <div class="input-group-prepend">
-                      <button class="btn btn-<?php $apple = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button" onclick="onAPPLE()">Apple直连</button>
+                      <button id="buttonOnAPPLE" class="btn btn-<?php $apple = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$apple",'geosite:apple') !== false) echo 'success'; else echo 'outline-secondary'; ?>" type="button">Apple直连</button>
                     </div>
                     <div class="input-group-append">
-                      <button class="btn btn-secondary" type="button" onclick="offAPPLE()">OFF</button>
+                      <button id="buttonOffAPPLE" class="btn btn-secondary" type="button">OFF</button>
                     </div>
                   </div>
                 </div>
@@ -379,14 +395,14 @@
             <i class="fas fa-exchange-alt"></i>
             IP地址
           <span class="float-right mt-n1 mb-n2">
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" data-toggle="modal" data-target="#reboot">应用</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" data-toggle="modal" data-target="#reboot">应用/重启</button>
           </span>
           </div>
           <div class="card-body">
                 <div class="form-row">
                 <div class="col-md-6">
                 <div class="input-group my-2">
-                  <input type="text" id="localip" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->localIP ?>">
+                  <input id="localip" type="text" class="form-control" placeholder="本机地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->localIP ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">本机</span>
                 </div>
@@ -394,7 +410,7 @@
                 </div>
                 <div class="col-md-6">
                 <div class="input-group my-2">
-                  <input type="text" id="upstreamip" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->upstreamIP ?>">
+                  <input id="upstreamip" type="text" class="form-control" placeholder="上级地址" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->upstreamIP ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">上级</span>
                 </div>
@@ -413,15 +429,15 @@
             DHCP
           <span class="float-right mt-n1 mb-n2">
                 <a class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" href="adg/#dhcp" target="_blank">详情</a>
-                <button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;" onclick="onDHCP()">开启</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" onclick="offDHCP()">关闭</button>
+                <button id="buttonOnDHCP" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;">保存/开启</button>
+                <button id="buttonOffDHCP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">关闭</button>
           </span>
           </div>
           <div class="card-body">
                 <div class="form-row">
                 <div class="col-md-6">
                 <div class="input-group my-2">
-                  <input type="text" id="dhcpStart" class="form-control" placeholder="起始IP" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->dhcpStart ?>">
+                  <input id="dhcpStart" type="text" class="form-control" placeholder="起始IP" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->dhcpStart ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">起始</span>
                 </div>
@@ -429,7 +445,7 @@
                 </div>
                 <div class="col-md-6">
                 <div class="input-group my-2">
-                  <input type="text" id="dhcpEnd" class="form-control" placeholder="结束IP" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->dhcpEnd ?>">
+                  <input id="dhcpEnd" type="text" class="form-control" placeholder="结束IP" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->dhcpEnd ?>">
                 <div class="input-group-append">
                   <span class="input-group-text text-secondary">结束</span>
                 </div>
@@ -463,151 +479,64 @@
   </div>
   <!-- /#wrapper -->
 <script>
-function logout(){
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-};
-
-function proxyRestart(){
-$.get('./act/proxyRestart.php', function(result){window.location.reload();});
-};
-
-function proxyStop(){
-$.get('./act/proxyStop.php', function(result){window.location.reload();});
-};
-
-function markThis(){
-markNametxt=$('#markName').val();
-$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-};
-
-function NodeDTshow(){
-$("#shnodedt").css("display", "block");
-$.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){window.location.reload();});
-};
-
-function NodeDThide(){
-$("#shnodedt").css("display", "none");
-$.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){window.location.reload();});
-};
-
-function pingTCP(){
-$.get('./act/v2node.php', function(data) {
-var nodeList = JSON.parse(data);
-$.each(nodeList, function(i){
-  $.get("./act/pingTCP.php", {pingTCP:i}, function(data){ $('#ping'+i).text(data) });
-});
-});
-$.get("./act/pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) });
-$.get("./act/pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) });
-};
-
-function pingICMP(){
-$.get('./act/v2node.php', function(data) {
-var nodeList = JSON.parse(data);
-$.each(nodeList, function(i){
-  $.get("./act/pingICMP.php", {pingICMP:i}, function(data){ $('#ping'+i).text(data) });
-});
-});
-$.get("./act/pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) });
-$.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) });
-};
-
-function onUDP(){
-$.get('./act/onUDP.php', function(result){window.location.reload();});
-};
-
-function offUDP(){
-$.get('./act/offUDP.php', function(result){window.location.reload();});
-};
-
-function submitlocalip(){
-localiptxt=$('#nodedttext').val();
-$.get('./act/changeLocalIP.php', {localip:localiptxt}, function(result){window.location.reload();});
-};
-
-function dnsCHNW(){
-$.get('./act/dnsCHNW.php', function(result){window.location.reload();});
-alert("切换至大陆白名单。。。");
-};
-
-function dnsGFW(){
-$.get('./act/dnsGFW.php', function(result){window.location.reload();});
-alert("切换至GFWlist。。。");
-};
-
-function submitDNS(){
-dohtxt1=$('#DoH1').val();
-dohtxt2=$('#DoH2').val();
-dnsChina=$("#dnsChina").val();
-hostsCustomize=$("#hostsCustomize").val();
-$.get("./act/saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload();});
-alert("应用DNS设置。。。");
-}
-
-function onAPPLE(){
-$.get('./act/onAPPLE.php', function(result){window.location.reload();});
-};
-
-function offAPPLE(){
-$.get('./act/offAPPLE.php', function(result){window.location.reload();});
-};
-
-function submitstaticip(){
-staticip1=$('#localip').val();
-staticip2=$('#upstreamip').val();
-$.get('./act/changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(result){});
-alert("本机已开始重新启动");
-};
-
-function onDHCP(){
-dhcpStarttxt=$('#dhcpStart').val();
-dhcpEndtxt=$('#dhcpEnd').val();
-$.get('./act/onDHCP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt, dhcp:"on"}, function(result){window.location.reload();});
-alert('启动DHCP服务。。。');
-};
-
-function offDHCP(){
-$.get('./act/offDHCP.php', function(result){window.location.reload();});
-alert('关闭DHCP服务。。。');
-};
-
 function checklink(){
-$.get('./act/testBaidu.php',function(data) {
-var checklink1 = data;
+$.get('./act/testBaidu.php',function(data){
+var checklink1 = data
 if ( $.trim(checklink1) == "ONLINE" ) {
-$('#testBaidu').text("✓ 国内线路畅通");
+$('#testBaidu').text("✓ 国内线路畅通")
 } else {
-$('#testBaidu').text("✗ 国内线路不通");
-};
-});
-
-$.get('./act/testGoogle.php',function(data) {
-var checklink2 = data;
-if ( $.trim(checklink2) == "ONLINE" ) {
-$('#testYoutue').text("✓ 国外线路畅通");
-} else {
-$('#testYoutue').text("✗ 国外线路不通");
+$('#testBaidu').text("✗ 国内线路不通")
 }
-});
+})
 
-$.get("./act/version.php", function(data) {
-var currentvernum = data.split("-")[0].substring(0);
-var remotevernum = data.split("-")[1].substring(0);
-var vera = $.trim(currentvernum);
-var verb = $.trim(remotevernum);
-$('#currentver').html(currentvernum+'本机');
-$('#remotever').html(remotevernum+' 发布');
+$.get('./act/testGoogle.php',function(data){
+var checklink2 = data
+if ( $.trim(checklink2) == "ONLINE" ) {
+$('#testYoutue').text("✓ 国外线路畅通")
+} else {
+$('#testYoutue').text("✗ 国外线路不通")
+}
+})
+
+$.get("./act/version.php", function(data){
+var currentvernum = data.split("-")[0].substring(0)
+var remotevernum = data.split("-")[1].substring(0)
+var vera = $.trim(currentvernum)
+var verb = $.trim(remotevernum)
+$('#currentver').html(currentvernum+'本机')
+$('#remotever').html(remotevernum+' 发布')
 
 if (vera == verb) {
-$('#remotever').addClass('badge badge-pill badge-light');
+$('#remotever').addClass('badge badge-pill badge-light')
 } else {
-$('#remotever').addClass('badge badge-pill badge-warning');
-};
-});
-};
+$('#remotever').addClass('badge badge-pill badge-warning')
+}
+})
+}
 
-window.onload = function() {
-$.get('./act/v2node.php', function(data) {
+
+
+$(function(){
+$('#buttonLogout').click(function(){
+$.get('auth.php', {logout:'true'}, function(result){window.location.href="index.php"})
+})
+
+$('#buttonMarkThis').click(function(){
+markNametxt=$('#markName').val()
+$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
+
+$('#buttonProxyRestart').click(function(){
+$.get('./act/proxyRestart.php', function(result){window.location.reload()})
+})
+
+$('#buttonProxyStop').click(function(){
+$.get('./act/proxyStop.php', function(result){window.location.reload()})
+})
+
+$.get('./act/uptime.php', function(data){$('#uptime').text(data)})
+
+$.get('./act/arrV2node.php', function(data) {
 var nodeList = JSON.parse(data);
 var len = nodeList.length;
 for( let i = 0; i<len; i++){
@@ -615,66 +544,139 @@ for( let i = 0; i<len; i++){
   let name = nodeList[i].name;
   let nodeNF = nodeList[i].name;
   let nodeDT = nodeList[i].name;
-  $('#nodeTable').append(`<tr> 
+  $('#nodeTable').append(`
+                          <tr> 
                           <td class="align-middle">${i}</td>
                           <td class="align-middle"><span id="nodeDomain${i}">${domain}</span></td>
                           <td class="align-middle"><span id="nodeshow${i}">${name}</span></td>
                           <td class="align-middle"><span id="ping${i}" class='text-success'></span></td>
                           <td class="align-middle"><span id="speed${i}" class='text-success'><a href="javascript:void(0)" class="text-success"><i class="far fa-play-circle fa-lg"></i></a></span></td>
                           <td class="align-middle"><button id="switch${i}" type="button" class="btn btn-outline-secondary btn-sm">切换</button></td>
-                          </tr>`);
+                          </tr>
+                          `)
 
   $('#speed'+i).click(function(){
-    $('#speed'+i).empty();
-    $('#speed'+i).attr('class', 'cloud');
-    $.get("./act/speedT.php", {speedT:i}, function(data){$('#speed'+i).attr('class', 'text-success'); $('#speed'+i).text(data)});
-  });
+    $('#speed'+i).empty()
+    $('#speed'+i).attr('class', 'cloud')
+    $.get("./act/speedT.php", {speedT:i}, function(data){$('#speed'+i).attr('class', 'text-success'); $('#speed'+i).text(data)})
+  })
 
-  $('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr('class', 'btn btn-success btn-sm');
+  $('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr('class', 'btn btn-success btn-sm')
   $('#switch'+i).click(function(){
-    $("#nodeTable td:nth-child(6) button").attr('class', "btn btn-outline-secondary btn-sm");
+    $("#nodeTable td:nth-child(6) button").attr('class', "btn btn-outline-secondary btn-sm")
     $('#switch'+i).attr('class', 'btn btn-success btn-sm');
-    $.get("./act/changeNode.php", {nodenum:i}, function(result){});
-  });
+    $.get("./act/changeNode.php", {nodenum:i}, function(result){})
+  })
 
-  $('#nodenf').append("<a class='dropdown-item' href='#' id='nodenf"+i+"'>"+nodeNF+"</a>");
+  $('#nodenf').append("<a class='dropdown-item' href="javascript:void(0)" id='nodenf"+i+"'>"+nodeNF+"</a>")
   $('#nodenf'+i).click(function(){
-    $('#nodenfshow').html(nodeNF);
-    $('#nodenfshow').val(i);
-    $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(result){});
-  });
+    $('#nodenfshow').html(nodeNF)
+    $('#nodenfshow').val(i)
+    $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(result){})
+  })
 
-  $('#nodedt').append("<a class='dropdown-item' href='#' id='nodedt"+i+"'>"+nodeDT+"</a>");
+  $('#nodedt').append("<a class='dropdown-item' href="javascript:void(0)" id='nodedt"+i+"'>"+nodeDT+"</a>");
   $('#nodedt'+i).click(function(){
-    $('#nodedtshow').html(nodeDT);
-    $('#nodedtshow').val(i);
-    $.get("./act/changeNodeDT.php", {nodedtnum:i}, function(result){});
-  });
-};
-});
+    $('#nodedtshow').html(nodeDT)
+    $('#nodedtshow').val(i)
+    $.get("./act/changeNodeDT.php", {nodedtnum:i}, function(result){})
+  })
+}
+})
 
-$.get('./act/uptime.php', function(data) { $('#uptime').text(data) });
+$('#buttonNodeDTshow').click(function(){
+$("#shnodedt").css("display", "block")
+$.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){window.location.reload()})
+})
+
+$('#buttonNodeDThide').click(function(){
+$("#shnodedt").css("display", "none")
+$.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){window.location.reload()})
+})
+
+$('#buttonPingTCP').click(function(){
+$.get('./act/arrV2node.php', function(data) {
+var nodeList = JSON.parse(data)
+$.each(nodeList, function(i){
+  $.get("./act/pingTCP.php", {pingTCP:i}, function(data){ $('#ping'+i).text(data) })
+})
+})
+$.get("./act/pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) })
+$.get("./act/pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) })
+})
+
+$('#buttonPingICMP').click(function(){
+$.get('./act/arrV2node.php', function(data) {
+var nodeList = JSON.parse(data)
+$.each(nodeList, function(i){
+  $.get("./act/pingICMP.php", {pingICMP:i}, function(data){ $('#ping'+i).text(data) })
+})
+})
+$.get("./act/pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) })
+$.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) })
+})
+
+$('#buttonOnUDP').click(function(){
+$.get('./act/onUDP.php', function(result){window.location.reload()})
+})
+
+$('#buttonSubmitlocalip').click(function(){
+localiptxt=$('#nodedttext').val()
+$.get('./act/changeLocalIP.php', {localip:localiptxt}, function(result){window.location.reload()})
+})
+
+$('#buttonDnsCHNW').click(function(){
+$.get('./act/dnsCHNW.php', function(result){window.location.reload()})
+alert("切换至大陆白名单。。。")
+})
+
+$('#buttonDnsGFW').click(function(){
+$.get('./act/dnsGFW.php', function(result){window.location.reload()})
+alert("切换至GFWlist。。。")
+})
+
+$('#buttonSubmitDNS').click(function(){
+dohtxt1=$('#DoH1').val()
+dohtxt2=$('#DoH2').val()
+dnsChina=$("#dnsChina").val()
+hostsCustomize=$("#hostsCustomize").val()
+$.get("./act/saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload()})
+alert("应用DNS设置。。。")
+})
+
+$('#buttonOnAPPLE').click(function(){
+$.get('./act/onAPPLE.php', function(result){window.location.reload()})
+})
+
+$('#buttonOffAPPLE').click(function(){
+$.get('./act/offAPPLE.php', function(result){window.location.reload()})
+})
+
+$('#buttonSubmitStaticIP').click(function(){
+staticip1=$('#localip').val()
+staticip2=$('#upstreamip').val()
+$.get('./act/changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(result){})
+alert("本机已开始重新启动")
+})
+
+$('#buttonOnDHCP').click(function(){
+dhcpStarttxt=$('#dhcpStart').val()
+dhcpEndtxt=$('#dhcpEnd').val()
+$.get('./act/onDHCP.php', {dhcpStart:dhcpStarttxt, dhcpEnd:dhcpEndtxt, dhcp:"on"}, function(result){window.location.reload()})
+alert('启动DHCP服务。。。')
+})
+
+$('#buttonOffDHCP').click(function(){
+$.get('./act/offDHCP.php', function(result){window.location.reload()})
+alert('关闭DHCP服务。。。')
+})
 
 setInterval(function() {
-checklink();
-}, 1800);
-};
+checklink()
+}, 1800)
+
+})
 </script>
-
-  <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin.min.js"></script>
 
 </body>
 

@@ -3,24 +3,20 @@
 <?php
 $conf = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
 $FRPdomain = $_GET['FRPdomain'];
-$FRPbindPort = $_GET['FRPbindPort'];
 $FRPtoken = $_GET['FRPtoken'];
+$FRPbindPort = $_GET['FRPbindPort'];
 $FRPbindProtocol = $_GET['FRPbindProtocol'];
-$FRPremotePort = $_GET['FRPremotePort'];
-$FRPlocalPort = $_GET['FRPlocalPort'];
-$FRPprotocol = $_GET['FRPprotocol'];
+$FRPclientsList = $_GET['FRPclientsList'];
 
-$conf['FRP']['domain'] = $FRPdomain;
-$conf['FRP']['bindPort'] = $FRPbindPort;
-$conf['FRP']['token'] = $FRPtoken;
-$conf['FRP']['bindProtocol'] = $FRPbindProtocol;
-$conf['FRP']['remotePort'] = $FRPremotePort;
-$conf['FRP']['localPort'] = $FRPlocalPort;
-$conf['FRP']['protocol'] = $FRPprotocol;
+unset($conf['FRP']);
+$conf['FRP']['server']['domain'] = $FRPdomain;
+$conf['FRP']['server']['token'] = $FRPtoken;
+$conf['FRP']['server']['bindPort'] = $FRPbindPort;
+$conf['FRP']['server']['bindProtocol'] = $FRPbindProtocol;
+$conf['FRP']['clients'] = $FRPclientsList;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
 shell_exec('sudo /opt/de_GWD/ui-onFRP');
-shell_exec('sudo systemctl restart frpc');
 ?>
 <?php }?>

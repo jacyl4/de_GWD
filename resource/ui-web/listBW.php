@@ -12,7 +12,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-<title>黑白名单</title>
+<title>  黑白名单</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -21,6 +21,22 @@
   <link href="css/sb-admin.css" rel="stylesheet">
 
   <link href="favicon.ico" rel="icon" type="image/x-icon" />
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin.min.js"></script>
+  
 </head>
 
 <body id="page-top" class="sidebar-toggled fixed-padding">
@@ -30,7 +46,7 @@
     <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
-    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+    <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="javascript:void(0)">
       <i class="fas fa-bars"></i>
     </button>
 <span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
@@ -88,7 +104,7 @@
           <span>更新</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" onclick="logout()">
+        <a id="buttonLogout" class="nav-link" href="javascript:void(0)">
           <i class="fas fa-sign-out-alt"></i>
           <span>注销</span></a>
       </li>
@@ -108,17 +124,17 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="markThis" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
+<div id="markThis" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="markThisLabel">备注本机</h5>
+        <h5 id="markThisLabel" class="modal-title">备注本机</h5>
       </div>
       <div class="modal-body">
-        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
+        <input id="markName" type="text" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
+        <button id="buttonMarkThis" type="button" class="btn-sm btn-dark">应用</button>
       </div>
     </div>
   </div>
@@ -131,7 +147,7 @@
             <i class="fas fa-th-list"></i>
             名单编辑
 <span class="float-right mt-n1 mb-n2">
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="submitlistBW()">保存</button>
+<button id="buttonSubmitlistBW" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">保存</button>
 </span>
           </div>
           <div class="card-body">
@@ -207,43 +223,26 @@
   </div>
   <!-- /#wrapper -->
 <script> 
-function logout(){
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
+$(function(){
+$('#buttonLogout').click(function(){
+$.get('auth.php', {logout:'true'}, function(result){window.location.href="index.php"})
+})
 
-function markThis(){
-markNametxt=$('#markName').val();
-$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-}
+$('#buttonMarkThis').click(function(){
+markNametxt=$('#markName').val()
+$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
 
-function submitlistBW () {
-listB=$("#listB").val();
-listW=$("#listW").val();
-listBlan=$("#listBlan").val();
-listWlan=$("#listWlan").val();
-$.get("./act/saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){ window.location.href="index.php" });
-alert("保存黑白名单。。。");
-}
-
-window.onload = function() {
-
-}
+$('#buttonSubmitlistBW').click(function(){
+listB=$("#listB").val()
+listW=$("#listW").val()
+listBlan=$("#listBlan").val()
+listWlan=$("#listWlan").val()
+$.get("./act/saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){ window.location.href="index.php" })
+alert("保存黑白名单。。。")
+})
+})
 </script>
-
-  <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin.min.js"></script>
 
 </body>
 

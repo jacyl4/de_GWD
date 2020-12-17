@@ -1,6 +1,6 @@
 #!/bin/bash
-FRPbindPort=$(jq -r '.FRP.bindPort' /opt/de_GWD/0conf)
-FRPtoken=$(jq -r '.FRP.token' /opt/de_GWD/0conf)
-FRPbindProtocol=$(jq -r '.FRP.bindProtocol' /opt/de_GWD/0conf)
+FRPtoken=$(jq -r '.FRP.server.token' /opt/de_GWD/0conf)
+FRPbindPort=$(jq -r '.FRP.server.bindPort' /opt/de_GWD/0conf)
+FRPbindProtocol=$(jq -r '.FRP.server.bindProtocol' /opt/de_GWD/0conf)
 
-echo "bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/installFRPs.sh) $FRPbindPort $FRPtoken $FRPbindProtocol"
+echo "bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/installFRPs.sh) $FRPtoken $FRPbindPort $FRPbindProtocol"

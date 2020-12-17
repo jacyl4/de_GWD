@@ -1,6 +1,4 @@
 #!/bin/bash
 if [[ $(systemctl is-active frpc) = "active" ]]; then
 	echo "success"
-else
-	echo "outline-secondary"
 fi

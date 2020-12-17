@@ -21,6 +21,22 @@
   <link href="css/sb-admin.css" rel="stylesheet">
 
   <link href="favicon.ico" rel="icon" type="image/x-icon" />
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin.min.js"></script>
+
 </head>
 
 <body id="page-top" class="sidebar-toggled fixed-padding">
@@ -30,7 +46,7 @@
     <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
-    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+    <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="javascript:void(0)">
       <i class="fas fa-bars"></i>
     </button>
 <span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
@@ -88,12 +104,11 @@
           <span>更新</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" onclick="logout()">
+        <a id="buttonLogout" class="nav-link" href="javascript:void(0)">
           <i class="fas fa-sign-out-alt"></i>
           <span>注销</span></a>
       </li>
     </ul>
-
 
     <div id="content-wrapper" class="mx-auto" style="max-width: 1600px;">
 
@@ -109,23 +124,23 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="markThis" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
+<div id="markThis" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="markThisLabel">备注本机</h5>
+        <h5 id="markThisLabel"class="modal-title">备注本机</h5>
       </div>
       <div class="modal-body">
-        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
+        <input id="markName" type="text" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
+        <button id="buttonMarkThis" type="button" class="btn-sm btn-dark">应用</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="donate" tabindex="-1" role="dialog" aria-labelledby="donate" aria-hidden="true">
+<div id="donate" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="donate" aria-hidden="true">
   <div class="modal-dialog modal-sm" style="top:50%" role="document">
     <div class="modal-content">
       <div class="modal-header border-0">
@@ -149,15 +164,15 @@
           <div class="card-body">
 
     <div class="form-row">
-<button type="button" class="btn btn-outline-secondary my-2" onclick="backup()">备份下载</button>
+<button id="buttonBackup" type="button" class="btn btn-outline-secondary my-2">备份下载</button>
 
 <div class="input-group col-md-4 my-2">
   <div class="custom-file">
-    <input type="file" class="custom-file-input" id="restorefile">
+    <input id="restorefile" type="file" class="custom-file-input">
     <label class="custom-file-label" for="restorefile">...</label>
   </div>
   <div class="input-group-append">
-    <button type="button" class="btn btn-outline-secondary" onclick="restore()">上传恢复</button>
+    <button id="buttonRestore" type="button" class="btn btn-outline-secondary">上传恢复</button>
   </div>
 </div>
     </div>
@@ -178,20 +193,20 @@
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">Update Addr</span>
         </div>
-          <input type="text" id="updateAddr" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>">
+          <input id="updateAddr" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>">
         <div class="input-group-prepend input-group-append">
           <span class="input-group-text justify-content-center">Port</span>
         </div>
-          <input type="text" id="updatePort" class="form-control col-md-2" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>">
+          <input id="updatePort" type="text" class="form-control col-md-2" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>">
       </div>
 
       <div class="input-group my-2 col-md-8">
         <div class="input-group-prepend">
           <span class="input-group-text justify-content-center">CMD</span>
         </div>
-          <input type="text" id="updateCMD" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateCMD ?>">
-          <button type="button" class="btn btn-outline-secondary text-right px-3 ml-2" onclick="updateSave()">保存</button>
-          <button type="button" class="btn btn-outline-danger text-right px-3 ml-2" onclick="updateRun()">运行</button>
+          <input id="updateCMD" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateCMD ?>">
+          <button id="buttonUpdateSave" type="button" class="btn btn-outline-secondary text-right px-3 ml-2">保存</button>
+          <button id="buttonUpdateRun" type="button" class="btn btn-outline-danger text-right px-3 ml-2">运行</button>
       </div>
 
 
@@ -202,7 +217,7 @@
 
 <div class="row mt-4">
     <div class="col"><hr></div>
-    <div class="col-auto"><a href="#" data-toggle="modal" data-target="#donate">捐赠</a></div>
+    <div class="col-auto"><a href="javascript:void(0)" data-toggle="modal" data-target="#donate">捐赠</a></div>
     <div class="col"><hr></div>
 </div>
 
@@ -225,23 +240,24 @@
   </div>
   <!-- /#wrapper -->
 <script>
-function logout(){
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-}
+$(function(){
+$('#buttonLogout').click(function(){
+$.get('auth.php', {logout:'true'}, function(result){window.location.href="index.php"})
+})
 
-function markThis(){
-markNametxt=$('#markName').val();
-$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-}
+$('#buttonMarkThis').click(function(){
+markNametxt=$('#markName').val()
+$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
 
-function backup(){
-$.get('./act/backup.php', function(result){window.location.href = "/restore/de_GWD_bak"});
-}
+$('#buttonBackup').click(function(){
+$.get('./act/backup.php', function(result){window.location.href = "/restore/de_GWD_bak"})
+})
 
-function restore(){
-var file_data = $('#restorefile').prop('files')[0];
-var form_data = new FormData();
-form_data.append('file', file_data);
+$('#buttonRestore').click(function(){
+var file_data = $('#restorefile').prop('files')[0]
+var form_data = new FormData()
+form_data.append('file', file_data)
 $.ajax({
         url: './act/restore.php',
         cache: false,
@@ -251,49 +267,34 @@ $.ajax({
         type: 'post',
         success: function(data){
         }
-      });
+      })
 alert('恢复设置。。。');
-window.location.href="index.php";
-}
+window.location.href="index.php"
+})
 
-function updateSave(){
+$('#buttonUpdateSave').click(function(){
 updateCMD=$('#updateCMD').val();
 updateAddr=$('#updateAddr').val();
 updatePort=$('#updatePort').val();
-$.get('./act/updateSave.php', {updateCMD:updateCMD,updateAddr:updateAddr,updatePort:updatePort}, function(result){window.location.reload();});
-}
+$.get('./act/updateSave.php', {updateCMD:updateCMD,updateAddr:updateAddr,updatePort:updatePort}, function(result){window.location.reload()})
+})
 
-function updateRun(){
-$.get('./act/updateRun.php', function(result){});
-setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500);
-}
+$('#buttonUpdateRun').click(function(){
+$.get('./act/updateRun.php', function(result){})
+setTimeout(function(){window.open('http://<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>:<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>', 'popupWindow', 'width=800, height=600, scrollbars=yes');}, 500)
+})
 
-window.onload = function() {
+
 $(".custom-file-input").on("change", function() {
-  var fileName = $(this).val().split("\\").pop();
+  var fileName = $(this).val().split("\\").pop()
   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 
   if( fileName != "de_GWD_bak" ){
-  alert("文件选择错误，备份文件名为 de_GWD_bak ");
+  alert("文件选择错误，备份文件名为 de_GWD_bak ")
   }
-});
-}
+})
+})
 </script>
-
-  <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin.min.js"></script>
   
 </body>
 

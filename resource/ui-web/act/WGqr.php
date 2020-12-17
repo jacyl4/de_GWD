@@ -1,6 +1,7 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-shell_exec('sudo /opt/de_GWD/ui-WGoff');
+$WGnum = $_GET['WGnum'];
+passthru("sudo cat /etc/wireguard/client$WGnum.conf");
 ?>
 <?php }?>

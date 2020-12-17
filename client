@@ -48,8 +48,9 @@ elif [[ $(uname -m) == "aarch64" ]];then
 fi
 
 wget --no-check-certificate -O /opt/de_GWD/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@master/IPchnroute
-cp -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
-sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
+sed -i '/^\s*$/d' /opt/de_GWD/IPchnroute
+sed -i 's/^/add chnroute &/g' /opt/de_GWD/IPchnroute
+mv -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
 }
 
 

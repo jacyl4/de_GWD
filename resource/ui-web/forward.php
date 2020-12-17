@@ -21,6 +21,22 @@
   <link href="css/sb-admin.css" rel="stylesheet">
 
   <link href="favicon.ico" rel="icon" type="image/x-icon" />
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin.min.js"></script>
+  
 </head>
 
 <body id="page-top" class="sidebar-toggled fixed-padding">
@@ -30,7 +46,7 @@
     <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
     
-    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="javascript:void(0)">
       <i class="fas fa-bars"></i>
     </button>
 <span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
@@ -88,7 +104,7 @@
           <span>更新</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" onclick="logout()">
+        <a id="buttonLogout" class="nav-link" href="javascript:void(0)">
           <i class="fas fa-sign-out-alt"></i>
           <span>注销</span></a>
       </li>
@@ -109,17 +125,17 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="markThis" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
+<div id="markThis" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="markThisLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="markThisLabel">备注本机</h5>
+        <h5 id="markThisLabel" class="modal-title">备注本机</h5>
       </div>
       <div class="modal-body">
-        <input type="text" id="markName" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
+        <input id="markName" type="text" class="form-control" placeholder="备注名" required="required" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->address->alias ?>">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-sm btn-dark" onclick="markThis()">应用</button>
+        <button id="buttonMarkThis" type="button" class="btn-sm btn-dark">应用</button>
       </div>
     </div>
   </div>
@@ -132,7 +148,7 @@
             <i class="fas fa-shield-alt"></i>
             域名与证书
 <span class="float-right mt-n1 mb-n2" id="CERbutton" style="display:none">
-<button type="button" id="CERinstall" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="genCER()">install</button>
+<button type="button" id="buttonGenCER" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">install</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="CERswitch">
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="CERswitch()">展开</button>
@@ -172,8 +188,8 @@
             <i class="fas fa-reply"></i>
             默认中转线
 <span class="float-right mt-n1 mb-n2" id="FWD0button" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD0');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD0save()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD0stop()">关闭</button>
+<button id="buttonFWD0save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD0');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonFWD0stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="FWD0switch">
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD0switch()">展开</button>
@@ -242,8 +258,8 @@
             <i class="fas fa-reply-all"></i>
             并行中转线
 <span class="float-right mt-n1 mb-n2" id="FWD1button" style="display:none">
-<button type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD1');?> btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD1save()">开启</button>
-<button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD1stop()">关闭</button>
+<button id="buttonFWD1save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD1');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonFWD1stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="FWD1switch">
 <button type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;" onclick="FWD1switch()">展开</button>
@@ -331,27 +347,10 @@
   </div>
   <!-- /#wrapper -->
 <script>
-function logout(){
-$.get('auth.php', {logout:'true'}, function(result){ window.location.href="index.php" });
-};
-
-function markThis(){
-markNametxt=$('#markName').val();
-$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload();});
-};
-
 function CERswitch(){
 $('#CERswitch').css('display', 'none'); 
 $('#CERbutton').css('display', 'block'); 
 $('#CERbody').css('display', 'block'); 
-};
-
-function genCER(){
-cfdomain=$('#CFdomain').val();
-cfapikey=$('#CFapikey').val();
-cfemail=$('#CFemail').val();
-$.get('./act/genCER.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(result){});
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
 };
 
 function FWD0switch(){
@@ -360,86 +359,91 @@ $('#FWD0button').css('display', 'block');
 $('#FWD0body').css('display', 'block'); 
 };
 
-function FWD0save(){
-if ($('#portCheck1').prop('checked') == true) {
-  var portCheck1 = "checked";
-} else {
-  var portCheck1 = "";
-};
-FWD0port=$('#FWD0port').val();
-FWD0path=$('#FWD0path').val();
-FWD0uuid=$('#FWD0uuid').val();
-$.get('./act/FWD0save.php', {portCheck1:portCheck1, FWD0port:FWD0port, FWD0path:FWD0path, FWD0uuid:FWD0uuid}, function(result){window.location.reload();});
-};
-
-function FWD0stop(){
-$.get('./act/FWD0stop.php', function(result){window.location.reload();});
-};
-
-function FWD1save(){
-v2nodeID=$('#v2nodeNAMEshow').val();
-FWD1port=$('#FWD1port').val();
-FWD1path=$('#FWD1path').val();
-FWD1uuid=$('#FWD1uuid').val();
-$.get('./act/FWD1save.php', {v2nodeID:v2nodeID, FWD1port:FWD1port, FWD1path:FWD1path, FWD1uuid:FWD1uuid}, function(result){window.location.reload();});
-};
-
-function FWD1stop(){
-$.get('./act/FWD1stop.php', function(result){window.location.reload();});
-};
-
 function FWD1switch(){
 $('#FWD1switch').css('display', 'none'); 
 $('#FWD1button').css('display', 'block'); 
 $('#FWD1body').css('display', 'block'); 
 };
 
-window.onload = function() {
-$.get('./act/checkCER.php', function(data) {
+
+
+$(function(){
+$('#buttonLogout').click(function(){
+$.get('auth.php', {logout:'true'}, function(result){window.location.href="index.php"})
+})
+
+$('#buttonMarkThis').click(function(){
+markNametxt=$('#markName').val()
+$.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
+
+$('#buttonGenCER').click(function(){
+cfdomain=$('#CFdomain').val()
+cfapikey=$('#CFapikey').val()
+cfemail=$('#CFemail').val()
+$.get('./act/genCER.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(result){})
+window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
+})
+
+$.get('./act/checkCER.php', function(data){
 if ($.trim(data) == "installed") {
-$('#CERinstall').attr('class', 'btn btn-outline-success btn-sm mt-1');
-CERswitch();
-};
-});
+$('#buttonGenCER').attr('class', 'btn btn-outline-success btn-sm mt-1')
+CERswitch()
+}
+})
 
-$.get('./act/checkFWD0.php', function(data) {
-if ($.trim(data) == 'installed') {
-FWD0switch();
-};
-});
+$.get('./act/checkFWD0.php', function(data){
+if ($.trim(data) == 'installed'){
+FWD0switch()
+}
+})
 
-$.get('./act/checkFWD1.php', function(data) {
-if ($.trim(data) == 'installed') {
-FWD1switch();
-};
-});
+$.get('./act/checkFWD1.php', function(data){
+if ($.trim(data) == 'installed'){
+FWD1switch()
+}
+})
 
-$.get('./act/v2node.php', function(data) {
-var nodeList = JSON.parse(data);
-var len = nodeList.length;
+$.get('./act/arrV2node.php', function(data){
+var nodeList = JSON.parse(data)
+var len = nodeList.length
 for( let i = 0; i<len; i++){
-  let name = nodeList[i].name;
-  $('#v2nodeNAME').append("<a class='dropdown-item' href='#' id='nodeName"+i+"'>"+name+"</a>");
-  $('#nodeName'+i).click(function(){ $('#v2nodeNAMEshow').html(name); $('#v2nodeNAMEshow').val(i);});
-};
-});
-};
+  let name = nodeList[i].name
+  $('#v2nodeNAME').append("<a class='dropdown-item' href="javascript:void(0)" id='nodeName"+i+"'>"+name+"</a>");
+  $('#nodeName'+i).click(function(){ $('#v2nodeNAMEshow').html(name); $('#v2nodeNAMEshow').val(i)})
+}
+})
+
+$('#buttonFWD0save').click(function(){
+if ($('#portCheck1').prop('checked') == true) {
+  var portCheck1 = "checked"
+} else {
+  var portCheck1 = ""
+}
+FWD0port=$('#FWD0port').val()
+FWD0path=$('#FWD0path').val()
+FWD0uuid=$('#FWD0uuid').val()
+$.get('./act/FWD0save.php', {portCheck1:portCheck1, FWD0port:FWD0port, FWD0path:FWD0path, FWD0uuid:FWD0uuid}, function(result){window.location.reload()})
+})
+
+$('#buttonFWD0stop').click(function(){
+$.get('./act/FWD0stop.php', function(result){window.location.reload()})
+})
+
+$('#buttonFWD1save').click(function(){
+v2nodeID=$('#v2nodeNAMEshow').val()
+FWD1port=$('#FWD1port').val()
+FWD1path=$('#FWD1path').val()
+FWD1uuid=$('#FWD1uuid').val()
+$.get('./act/FWD1save.php', {v2nodeID:v2nodeID, FWD1port:FWD1port, FWD1path:FWD1path, FWD1uuid:FWD1uuid}, function(result){window.location.reload()})
+})
+
+$('#buttonFWD1stop').click(function(){
+$.get('./act/FWD1stop.php', function(result){window.location.reload()})
+})
+
+})
 </script>
-
-  <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin.min.js"></script>
   
 </body>
 

@@ -18,6 +18,14 @@
   <link href="css/sb-admin.css" rel="stylesheet">
 
   <link href="favicon.ico" rel="icon" type="image/x-icon" />
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+  
 </head>
 
 <body class="bg-dark">
@@ -34,17 +42,12 @@
                 </div>
           </div>
 </form>
-<button type="button" class="btn btn-primary btn-block" onclick="submitpw()">登入</button>
+<button id="buttonSubmitpw" type="button" class="btn btn-primary btn-block">登入</button>
       </div>
     </div>
   </div>
 
 <script>
-function submitpw(){
-gwdpasswdtext=$('#gwdpasswd').val();
-$.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href="index.php"; });
-};
-
 function keysubmitpw(){
     if(event.keyCode == 13) {
 event.preventDefault();
@@ -52,14 +55,16 @@ gwdpasswdtext=$('#gwdpasswd').val();
 $.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href="index.php"; });
 };
 };
+
+
+
+$(function(){
+$('#buttonSubmitpw').click(function(){
+gwdpasswdtext=$('#gwdpasswd').val()
+$.get('auth.php', {gwdpw:gwdpasswdtext}, function(result){ window.location.href="index.php"; })
+})
+})
 </script>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
 </body>
 

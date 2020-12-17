@@ -17,10 +17,6 @@ else
     apt install wireguard-tools
 fi
 
-if [[ $(jq -r '.wireguard.sprivatekey' /opt/de_GWD/0conf) = "null" ]]; then
-    /opt/de_GWD/ui-WGchangeKey
-fi
-
 blue "------------------------"
 blue "Install WireGuard [done]"
 blue "------------------------"
