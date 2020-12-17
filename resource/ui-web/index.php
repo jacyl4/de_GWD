@@ -253,7 +253,7 @@
     <button id="buttonOnUDP" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkUDP');?>" type="button">UDP代理</button>
   </div>
   <div class="input-group-append">
-    <button class="btn btn-secondary" type="button" onclick="offUDP()">OFF</button>
+    <button id="buttonOffUDP" class="btn btn-secondary" type="button">OFF</button>
   </div>
 </div>
 </span>
@@ -618,6 +618,10 @@ $.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) })
 
 $('#buttonOnUDP').click(function(){
 $.get('./act/onUDP.php', function(result){window.location.reload()})
+})
+
+$('#buttonOffUDP').click(function(){
+$.get('./act/offUDP.php', function(result){window.location.reload()})
 })
 
 $('#buttonSubmitlocalip').click(function(){
