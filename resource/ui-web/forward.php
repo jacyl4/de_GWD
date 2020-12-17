@@ -46,7 +46,7 @@
     <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
     
-    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="javascript:void(0)">
+    <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
     </button>
 <span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
@@ -409,7 +409,7 @@ var nodeList = JSON.parse(data)
 var len = nodeList.length
 for( let i = 0; i<len; i++){
   let name = nodeList[i].name
-  $('#v2nodeNAME').append("<a class='dropdown-item' href="javascript:void(0)" id='nodeName"+i+"'>"+name+"</a>");
+  $('#v2nodeNAME').append("<a class='dropdown-item' href='#' id='nodeName"+i+"'>"+name+"</a>");
   $('#nodeName'+i).click(function(){ $('#v2nodeNAMEshow').html(name); $('#v2nodeNAMEshow').val(i)})
 }
 })
