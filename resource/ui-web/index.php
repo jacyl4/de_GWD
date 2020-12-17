@@ -46,7 +46,7 @@
     <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">de_GWD</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
-    <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="javascript:void(0)">
+    <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="#">
       <i class="fas fa-bars"></i>
     </button>
 <span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
@@ -568,14 +568,14 @@ for( let i = 0; i<len; i++){
     $.get("./act/changeNode.php", {nodenum:i}, function(result){})
   })
 
-  $('#nodenf').append("<a class='dropdown-item' href="javascript:void(0)" id='nodenf"+i+"'>"+nodeNF+"</a>")
+  $('#nodenf').append("<a class='dropdown-item' href='#' id='nodenf"+i+"'>"+nodeNF+"</a>")
   $('#nodenf'+i).click(function(){
     $('#nodenfshow').html(nodeNF)
     $('#nodenfshow').val(i)
     $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(result){})
   })
 
-  $('#nodedt').append("<a class='dropdown-item' href="javascript:void(0)" id='nodedt"+i+"'>"+nodeDT+"</a>");
+  $('#nodedt').append("<a class='dropdown-item' href='#' id='nodedt"+i+"'>"+nodeDT+"</a>");
   $('#nodedt'+i).click(function(){
     $('#nodedtshow').html(nodeDT)
     $('#nodedtshow').val(i)
