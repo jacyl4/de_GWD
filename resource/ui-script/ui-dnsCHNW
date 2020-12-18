@@ -35,8 +35,8 @@ cat << EOF >/tmp/v2dns_config
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
   "servers":[
-  {"address":"127.0.0.1","port":5390},
-  {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
+  {"address":"127.0.0.1","port":5320},
+  {"address":"127.0.0.1","port":5320,"domains":["domain:google.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
   {"address":"127.0.0.1","port":5310,"domains":["geosite:private","geosite:cn","geosite:tld-cn"],"expectIPs":["geoip:cn"]}
   ],

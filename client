@@ -324,8 +324,8 @@ cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310
 bind-tcp 127.0.0.1:5310
 
-bind 127.0.0.1:5390 -no-speed-check -group doh
-bind-tcp 127.0.0.1:5390 -no-speed-check -group doh
+bind 127.0.0.1:5320 -no-speed-check -group doh
+bind-tcp 127.0.0.1:5320 -no-speed-check -group doh
 
 speed-check-mode        ping,tcp:80
 cache-size              10000
@@ -399,7 +399,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
-  "servers":[{"address":"127.0.0.1","port":5390}],
+  "servers":[{"address":"127.0.0.1","port":5320}],
   "tag":"dnsflow"
 },
 "inbounds":[
@@ -518,7 +518,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
   "domainStrategy":"AsIs",
   "rules":[
     {"type":"field","ip":["geoip:cn","geoip:private"],"outboundTag":"direct"},
-    {"type":"field","port":"53,5310,5390","network":"tcp,udp","outboundTag":"direct"}
+    {"type":"field","port":"53","network":"tcp,udp","outboundTag":"direct"}
     ]
 }
 }
@@ -665,22 +665,18 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
-iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5390 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5390 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5390 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5390 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT

@@ -37,8 +37,8 @@ cat << EOF >/tmp/v2dns_config
   "servers":[
   {"address":"127.0.0.1","port":5310},
   {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
-  {"address":"127.0.0.1","port":5390,"domains":["domain:google.com"]},
-  {"address":"127.0.0.1","port":5390,"domains":["geosite:geolocation-!cn","geosite:tld-!cn","geosite:gfw","geosite:greatfire"]}
+  {"address":"127.0.0.1","port":5320,"domains":["domain:google.com"]},
+  {"address":"127.0.0.1","port":5320,"domains":["geosite:geolocation-!cn","geosite:tld-!cn","geosite:gfw","geosite:greatfire"]}
   ],
   "tag":"dnsflow"
 },
