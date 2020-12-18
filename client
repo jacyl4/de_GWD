@@ -130,7 +130,9 @@ ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | 
 localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 if [[ -z $domain ]] || [[ -z $v2path ]] || [[ -z $uuidnum ]]; then
-  red "de_GWD /opt/de_GWD/0conf is missing"
+  cp -f /opt/de_GWD/0conf_bak /opt/de_GWD/0conf
+  red "de_GWD /opt/de_GWD/0conf recovered"
+  blue "Please update again"
   exit
 fi
 }
@@ -138,9 +140,9 @@ fi
 
 
 de_GWDconnect(){
-$(curl -Is  http://www.google.com/ncr | head -n 1) >/dev/null 2>&1
+$(curl -Is  cdn.jsdelivr.net | head -n 1) >/dev/null 2>&1
 echo ""
-if [[ $(curl -Is  http://www.google.com/ncr | head -n 1) =~ "HTTP" ]]; then
+if [[ $(curl -Is  cdn.jsdelivr.net | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
