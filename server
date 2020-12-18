@@ -98,7 +98,7 @@ localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | 
 
 domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
-port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf | grep -Po '\d+')
+port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf | grep '^[[:digit:]]*$')
 
 v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/config.json)
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json)
@@ -1002,7 +1002,7 @@ installGWD(){
 
 domain=$(echo $vpsdomainP | cut -d: -f1)
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
-port=$(echo $vpsdomainP | cut -d: -f2| grep -Po '\d+')
+port=$(echo $vpsdomainP | cut -d: -f2| grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
 
 if [[ -n $port ]] && [[ $port != "443" ]]; then
@@ -1252,7 +1252,7 @@ changeDomain(){
 
 domain=$(echo $vpsdomainP | cut -d: -f1)
 topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
-port=$(echo $vpsdomainP | cut -d: -f2| grep -Po '\d+')
+port=$(echo $vpsdomainP | cut -d: -f2| grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
 
 if [[ -n $port ]] && [[ $port != "443" ]]; then
@@ -1340,7 +1340,7 @@ if [[ "$v2UpStreamYN" = "Y" ]] || [[ "$v2UpStreamYN" = "y" ]]; then
     read upUUID
 
 upDomain=$(echo $upDomainP | cut -d: -f1)
-upPort=$(echo $upDomainP | cut -d: -f2 | grep -Po '\d+')
+upPort=$(echo $upDomainP | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -z $upPort ] && upPort="443"
 
 v2otUpstream

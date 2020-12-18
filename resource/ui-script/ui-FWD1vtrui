@@ -38,7 +38,7 @@ FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[]' /opt/de_GWD/0conf)
 
 v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf)
 domain=$(echo $v2servn | cut -d: -f1)
-port=$(echo $v2servn | cut -d: -f2 | grep -Po '\d+')
+port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
 
 uuidnum=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf)

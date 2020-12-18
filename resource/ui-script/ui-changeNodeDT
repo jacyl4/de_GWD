@@ -6,7 +6,7 @@ uuidnum=$(jq --argjson nodedtnum "$nodedtnum" -r '.v2node[$nodedtnum].uuid' /opt
 v2path=$(jq --argjson nodedtnum "$nodedtnum" -r '.v2node[$nodedtnum].path' /opt/de_GWD/0conf)
 
 domain=$(echo -e $v2servn | cut -d: -f1)
-port=$(echo -e $v2servn | cut -d: -f2 | grep -Po '\d+')
+port=$(echo -e $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
 
 jq --arg domain "$domain" '.outbounds[2].settings.vnext[0].address=$domain' /opt/de_GWD/vtrui/config.json |\
