@@ -307,18 +307,6 @@ echo "$statuSuccess system config"
 
 
 SmartDNSset(){
-doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
-doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
-
-doh1IP=$(nslookup $doh1Domain | awk '/Address/ {print$2}' | sed '1d' | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-doh2IP=$(nslookup $doh2Domain | awk '/Address/ {print$2}' | sed '1d' | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-
-doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep -Po '\d+')
-doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep -Po '\d+')
-
-doh1PortStr=$([ -n "$doh1Port" ] && echo $doh1Port | sed 's/^/:/')
-doh2PortStr=$([ -n "$doh2Port" ] && echo $doh2Port | sed 's/^/:/')
-
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310
@@ -344,9 +332,6 @@ server 119.29.29.29
 server 119.28.28.28
 server 223.5.5.5
 server 223.6.6.6
-
-server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -no-check-certificate -group doh -exclude-default-group
-server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -no-check-certificate -group doh -exclude-default-group
 EOF
 
 cat << "EOF" >/lib/systemd/system/smartdns.service
@@ -375,6 +360,26 @@ EOF
 systemctl daemon-reload
 systemctl enable smartdns
 systemctl restart smartdns
+
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+
+doh1IP=$(dig @127.0.0.1 $doh1Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+
+doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep -Po '\d+')
+doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep -Po '\d+')
+
+doh1PortStr=$([ -n "$doh1Port" ] && echo $doh1Port | sed 's/^/:/')
+doh2PortStr=$([ -n "$doh2Port" ] && echo $doh2Port | sed 's/^/:/')
+
+cat << EOF >>/etc/smartdns/smartdns.conf
+
+server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -no-check-certificate -group doh -exclude-default-group
+server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -no-check-certificate -group doh -exclude-default-group
+EOF
+systemctl restart smartdns
+
 echo "$statusInstalled smartdns"
 }
 
