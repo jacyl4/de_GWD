@@ -345,8 +345,8 @@ server 119.28.28.28
 server 223.5.5.5
 server 223.6.6.6
 
-server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -group doh -exclude-default-group
-server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -group doh -exclude-default-group
+server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -no-check-certificate -group doh -exclude-default-group
+server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -no-check-certificate -group doh -exclude-default-group
 EOF
 
 cat << "EOF" >/lib/systemd/system/smartdns.service

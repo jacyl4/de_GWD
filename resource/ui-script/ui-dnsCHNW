@@ -27,6 +27,7 @@ for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf); do
     echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
   fi
 done
+echo "" >>/etc/smartdns/smartdns.conf
 echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -group doh -exclude-default-group" >>/etc/smartdns/smartdns.conf
 echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -group doh -exclude-default-group" >>/etc/smartdns/smartdns.conf
 
