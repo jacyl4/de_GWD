@@ -140,9 +140,9 @@ fi
 
 
 de_GWDconnect(){
-$(curl -Is  cdn.jsdelivr.net | head -n 1) >/dev/null 2>&1
+$(curl -Is  youtube.com | head -n 1) >/dev/null 2>&1
 echo ""
-if [[ $(curl -Is  cdn.jsdelivr.net | head -n 1) =~ "HTTP" ]]; then
+if [[ $(curl -Is  youtube.com | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
@@ -399,8 +399,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
-  "servers":[{"address":"127.0.0.1","port":5320}],
-  "tag":"dnsflow"
+  "servers":[{"address":"127.0.0.1","port":5320}]
 },
 "inbounds":[
   {
@@ -418,7 +417,6 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
   },
   {
     "protocol":"freedom",
-    "settings":{"domainStrategy":"UseIPv4"},
     "streamSettings":{"sockopt":{"mark":255}},
     "tag":"direct"
   }
@@ -426,7 +424,6 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 "routing":{
   "domainStrategy":"AsIs",
   "rules":[
-    {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"},
     {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
     {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"}
   ]
@@ -473,7 +470,6 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     "port":9896,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
     "settings":{"network":"tcp,udp","followRedirect":true},
     "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
   }
