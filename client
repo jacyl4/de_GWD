@@ -357,8 +357,11 @@ After=network.target
 [Service]
 Type=forking
 PIDFile=/run/smartdns.pid
-EnvironmentFile=/etc/default/smartdns
-ExecStart=/usr/sbin/smartdns -p /run/smartdns.pid $SMART_DNS_OPTS
+LimitNPROC=64000
+LimitNOFILE=1000000
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+ExecStart=/usr/sbin/smartdns -c /etc/smartdns/smartdns.conf
 ExecStop=/bin/kill -s QUIT $MAINPID
 ExecStopPost=/bin/rm -f /run/smartdns.pid
 KillMode=mixed
