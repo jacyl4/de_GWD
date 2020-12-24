@@ -1,0 +1,39 @@
+#!/bin/bash
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+  /opt/de_GWD/ui-onUDP
+else
+  /opt/de_GWD/ui-offUDP
+fi
+
+if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
+  /opt/de_GWD/ui-markThis
+fi
+
+/opt/de_GWD/ui_4h
+systemctl restart smartdns
+systemctl restart v2dns
+
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+/opt/de_GWD/ui-onDHCP >/dev/null 2>&1
+else
+systemctl reload AdGuardHome >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
+  /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
+elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "none" ]]; then
+  /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD1save
+  /opt/de_GWD/ui-FWD1vtrui
+  systemctl restart vtrui1
+fi
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD0save
+  /opt/de_GWD/ui-FWD0vtrui
+fi
+systemctl restart vtrui
+systemctl restart iptables-proxy

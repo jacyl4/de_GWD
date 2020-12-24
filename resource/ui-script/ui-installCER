@@ -1,0 +1,131 @@
+#!/bin/bash
+clear
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+
+
+installCER(){
+crontab -l >/tmp/now.cron
+sed -i '/acme.sh/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf ~/.acme.sh
+
+apt install netcat socat
+rm -rf /var/www/ssl/*
+cat << EOF >/var/www/ssl/ocsp.resp
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 00
+EOF
+
+CFapikey=$(jq -r '.FORWARD.APIkey' /opt/de_GWD/0conf)
+CFemail=$(jq -r '.FORWARD.Email' /opt/de_GWD/0conf)
+domain=$(jq -r '.FORWARD.domain' /opt/de_GWD/0conf)
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --force --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --force --issue --dns dns_cf -d $topDomain -d *.$topDomain --keylength ec-256
+~/.acme.sh/acme.sh --force --installcert -d $topDomain --ecc \
+               --key-file       /var/www/ssl/de_GWD.key  \
+               --fullchain-file /var/www/ssl/de_GWD.cer \
+               --reloadcmd     "systemctl reload nginx"
+
+
+
+cat << EOF >/var/www/ssl/update_ocsp_cache
+#!/bin/bash
+wget --no-check-certificate -O /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+wget --no-check-certificate -O /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/*.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://r3.o.lencr.org \
+    -respout /var/www/ssl/ocsp.resp
+
+systemctl reload nginx
+EOF
+
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+
+crontab -l >/tmp/now.cron
+sed -i '/update_ocsp_cache/d' /tmp/now.cron
+echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+
+
+
+blue "--------------------------------"
+blue  "Generate TLS Certificate [done]"
+blue "--------------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "     Domain & Certificate"
+    green "==============================="
+    green  "1. Generate TLS Certificate"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installCER
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu

@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf) == "on" ]] && [[ $(yq r /opt/AdGuardHome/AdGuardHome.yaml dhcp.enabled) == "true" ]]; then
+	echo "success"
+else
+	echo "outline-secondary"
+fi

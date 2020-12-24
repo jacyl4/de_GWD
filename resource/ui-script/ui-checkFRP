@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ $(systemctl is-active frpc) = "active" ]]; then
+	echo "success"
+fi
