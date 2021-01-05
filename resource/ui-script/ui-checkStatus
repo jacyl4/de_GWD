@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ $(systemctl is-active smartdns) = "active" ]]; then
+	echo "SmartDNS: OK"
+else
+	echo "SmartDNS:failed"
+fi

@@ -1,0 +1,35 @@
+#!/bin/bash
+FWD0path=$(jq -r '.FORWARD.FWD0.path' /opt/de_GWD/0conf)
+FWD0uuid=$(jq -r '.FORWARD.FWD0.uuid[]' /opt/de_GWD/0conf)
+
+vtruiIn=`cat << EOF
+   {
+      "port": 11810,
+      "listen": "127.0.0.1",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "level": 1
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        }
+      }
+    }
+EOF
+`
+jq --argjson vtruiIn "$vtruiIn" '.inbounds[1] = $vtruiIn' /opt/de_GWD/vtrui/config.json |\
+jq --arg FWD0path "$FWD0path" '.inbounds[1].streamSettings.wsSettings.path=$FWD0path' | sponge /opt/de_GWD/vtrui/config.json
+
+for uuid in $FWD0uuid; do
+uuidStr='{"id": "'$uuid'", "level": 1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[1].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+done
+
+chmod 666 /opt/de_GWD/vtrui/config.json
