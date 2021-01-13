@@ -883,7 +883,6 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
   
-  add_header Referrer-Policy                    no-referrer;
   add_header X-Content-Type-Options             nosniff;
   add_header X-Download-Options                 noopen;
   add_header X-Frame-Options                    SAMEORIGIN;

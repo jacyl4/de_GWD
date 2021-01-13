@@ -1075,7 +1075,6 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   proxy_set_header Early-Data \$ssl_early_data;
 
   add_header alt-svc 'quic=":443"; h3-27=":443"; h3-25=":443"; h3-T050=":443"; h3-Q050=":443"; h3-Q049=":443"; h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"; ma=86400';
-  add_header Referrer-Policy                    no-referrer;
   add_header X-Content-Type-Options             nosniff;
   add_header X-Download-Options                 noopen;
   add_header X-Frame-Options                    SAMEORIGIN;
@@ -1203,15 +1202,18 @@ echo "$statusInstalled WebUI"
 
 
 installPihole(){
+piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r .tag_name)
+
+if [[ $(awk '{print$1}' /etc/pihole/localversions | cut -d- -f1) != $piholeRelease ]]; then
+
 if [[ -z $piholePW ]] || [[ $piholePW == "null" ]]; then
   piholePW="0000000000000000000000000000000000000000000000000000000000000000"
 fi
 
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 systemctl unmask lighttpd >/dev/null 2>&1
-
 mkdir -p /etc/pihole
-
-cat /dev/null > /etc/pihole/adlists.list
+>/etc/pihole/adlists.list
 
 cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
@@ -1234,6 +1236,7 @@ rm -rf /etc/.pihole
 git clone https://github.com/pi-hole/pi-hole /etc/.pihole
 
 curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+fi
 }
 
 
@@ -1253,14 +1256,13 @@ listen-address=127.0.0.1
 port=53
 EOF
 
-cat /dev/null >/etc/pihole/dns-servers.conf
-
+>/etc/pihole/dns-servers.conf
 cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
 AAAA_QUERY_ANALYSIS=no
 EOF
 
-cat << "EOF" > /opt/de_GWD/pihole_hotfix
+cat << "EOF" >/opt/de_GWD/pihole_hotfix
 #!/bin/bash
 localIP=$(jq -r '.address.localIP' /opt/de_GWD/0conf)
 sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
