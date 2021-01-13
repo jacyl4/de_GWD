@@ -10,11 +10,9 @@ echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5350"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5350"
-systemctl reload AdGuardHome >/dev/null 2>&1
+sed -i '/PIHOLE_DNS_1/c\PIHOLE_DNS_1=127.0.0.1#5350' /etc/pihole/setupVars.conf
+pihole restartdns
+
 systemctl restart iptables-proxy
 
 /opt/de_GWD/tcpTime

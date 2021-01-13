@@ -11,10 +11,10 @@ statusInstalled=$(green "[ installed ]")
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 export DEBIAN_FRONTEND=noninteractive
+export PIHOLE_SKIP_OS_CHECK=true
 de_gwd_nginx="1.19.6"
 ttyd_version="1.6.2"
-yq_version="3.4.1"
-branch="main"
+branch="dev"
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
@@ -24,7 +24,6 @@ aptLocal="mirrors.aliyun.com"
 
 
 preDownload() {
-systemctl stop AdGuardHome >/dev/null 2>&1
 systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
@@ -89,11 +88,25 @@ done
 fi
 
 
+if [[ -d "/opt/AdGuardHome" ]]; then
+  systemctl stop AdGuardHome >/dev/null 2>&1
+  rm -rf /etc/systemd/system/AdGuardHome.service
+  rm -rf /lib/systemd/system/AdGuardHome.service
+  rm -rf /opt/AdGuardHome
+  rm -rf /usr/bin/yq
+fi
+
+
 if [[ -n $(dpkg -l | grep php) ]] && [[ `dpkg -l | grep php | awk '{print $2}' | grep fpm` != "php7.4-fpm" ]]; then
 rm -rf /etc/php/7.3/
 apt purge `dpkg -l | grep php7.3 | awk '{print $2}' | tr "\n" " "`
 fi
 
+
+crontab -l >/tmp/now.cron
+sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
 
 rm -rf /opt/de_GWD/chnroute.txt
 rm -rf /opt/de_GWD/Q4am
@@ -107,11 +120,6 @@ rm -rf /opt/de_GWD/vtrui
 rm -rf /opt/de_GWD/ttyd
 rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
-
-crontab -l >/tmp/now.cron
-sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
-crontab /tmp/now.cron
-rm -rf /tmp/now.cron
 }
 
 
@@ -120,6 +128,8 @@ preUpdate(){
 cd ~
 source /etc/profile
 service cron stop >/dev/null 2>&1
+
+piholePW=$(jq -r '.address.PWD' /opt/de_GWD/0conf)
 
 doh1=$(jq -r '.dns.doh1' /opt/de_GWD/0conf)
 doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
@@ -183,9 +193,10 @@ Dpkg::Options {
 EOF
 
 apt update
-apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf moreutils apache2-utils iputils-ping smartdns
+apt install sudo locales net-tools dnsutils ipset wget curl git jq bc haveged unzip ca-certificates apt-transport-https gnupg2 resolvconf moreutils iputils-ping smartdns lighttpd
 source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
+systemctl mask --now lighttpd >/dev/null 2>&1
 
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
@@ -327,9 +338,6 @@ bind-tcp 127.0.0.1:5320 -group doh -no-speed-check
 
 speed-check-mode        tcp:443,ping
 cache-size              10000
-rr-ttl                  600
-rr-ttl-min              60
-rr-ttl-max              43200
 force-AAAA-SOA          yes
 prefetch-domain         yes
 serve-expired           yes
@@ -1086,12 +1094,6 @@ location ~ [^/]\.php(/|$) {
   include fastcgi_params;
 }
 
-location /adg/ {
-  proxy_pass http://127.0.0.1:8080/;
-  proxy_redirect / /adg/;
-  proxy_cookie_path / /adg/;
-}
-
 location ~ ^/ttyd(.*)$ {
   proxy_http_version 1.1;
   proxy_set_header Host \$host;
@@ -1194,175 +1196,78 @@ echo "$statusInstalled WebUI"
 
 
 
-installAdG(){
-if [[ $(/opt/AdGuardHome/AdGuardHome --version 2>/dev/null | awk '{print$4}' | sed 's/.$//') != $(curl --silent "https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest" | jq -r .tag_name | sed 's/^.//') ]]; then
-  rm -rf /opt/AdGuardHome
-  rm -rf /etc/systemd/system/AdGuardHome.service
-
-  curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
+installPihole(){
+if [[ -z $piholePW ]] || [[ $piholePW == "null" ]]; then
+  piholePW="0000000000000000000000000000000000000000000000000000000000000000"
 fi
 
-if [[ ! -f /opt/AdGuardHome/AdGuardHome.yaml ]]; then
-cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
-bind_host: 127.0.0.1
-bind_port: 8080
-http_proxy: ""
-language: ""
-rlimit_nofile: 100000
-debug_pprof: false
-web_session_ttl: 720
-dns:
-  bind_host: 0.0.0.0
-  port: 53
-  statistics_interval: 7
-  querylog_enabled: true
-  querylog_file_enabled: true
-  querylog_interval: 90
-  querylog_size_memory: 1000
-  anonymize_client_ip: false
-  protection_enabled: true
-  blocking_mode: default
-  blocking_ipv4: ""
-  blocking_ipv6: ""
-  blocked_response_ttl: 10
-  parental_block_host: family-block.dns.adguard.com
-  safebrowsing_block_host: standard-block.dns.adguard.com
-  ratelimit: 0
-  ratelimit_whitelist: []
-  refuse_any: true
-  upstream_dns:
-  - 127.0.0.1:5350
-  upstream_dns_file: ""
-  bootstrap_dns:
-  - 127.0.0.1:5350
-  all_servers: true
-  fastest_addr: false
-  allowed_clients: []
-  disallowed_clients: []
-  blocked_hosts: []
-  cache_size: 4194304
-  cache_ttl_min: 0
-  cache_ttl_max: 0
-  bogus_nxdomain: []
-  aaaa_disabled: true
-  enable_dnssec: false
-  edns_client_subnet: false
-  max_goroutines: 300
-  ipset: []
-  filtering_enabled: true
-  filters_update_interval: 24
-  parental_enabled: false
-  safesearch_enabled: false
-  safebrowsing_enabled: false
-  safebrowsing_cache_size: 1048576
-  safesearch_cache_size: 1048576
-  parental_cache_size: 1048576
-  cache_time: 30
-  rewrites: []
-  blocked_services: []
-tls:
-filters:
-- enabled: false
-  url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
-  name: AdGuard DNS filter
-  id: 1
-- enabled: false
-  url: https://easylist.to/easylist/easyprivacy.txt
-  name: EasyPrivacy
-  id: 2
-- enabled: false
-  url: https://easylist.to/easylist/easylist.txt
-  name: EasyList
-  id: 3
-- enabled: false
-  url: https://easylist-downloads.adblockplus.org/easylistchina.txt
-  name: EasyList China
-  id: 4
-- enabled: false
-  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjxlist.txt
-  name: CJX's EasyList Lite
-  id: 5
-- enabled: false
-  url: https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjx-annoyance.txt
-  name: CJX’s Annoyance List
-  id: 6
-- enabled: false
-  url: https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext
-  name: Peter Lowe’s Ad and tracking server list
-  id: 7
-- enabled: false
-  url: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-  name: StevenBlack
-  id: 8
-- enabled: false
-  url: https://anti-ad.net/easylist.txt
-  name: 'CHN: anti-AD'
-  id: 9
-- enabled: false
-  url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
-  name: 大圣净化
-  id: 10
-whitelist_filters:
-user_rules:
-dhcp:
-clients:
+systemctl unmask lighttpd >/dev/null 2>&1
+
+mkdir -p /etc/pihole
+
+cat /dev/null > /etc/pihole/adlists.list
+
+cat << EOF >/etc/pihole/setupVars.conf
+PIHOLE_INTERFACE=$ethernetnum
+IPV4_ADDRESS=$localaddr/24
+PIHOLE_DNS_1=127.0.0.1#5350
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=true
+INSTALL_WEB_INTERFACE=true
+LIGHTTPD_ENABLED=false
+BLOCKING_ENABLED=true
+WEBPASSWORD=$piholePW
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=false
 EOF
-fi
+
+rm -rf /etc/.pihole
+git clone https://github.com/pi-hole/pi-hole /etc/.pihole
+
+curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 }
 
 
 
-AdGset(){
-if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /tmp/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_amd64
-elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /tmp/yq https://github.com/mikefarah/yq/releases/download/$yq_version/yq_linux_arm64
-fi
-mv -f /tmp/yq /usr/bin/yq
-chmod +x /usr/bin/yq
+piholeSet(){
+jq '.inbounds[0].port=5350' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
+systemctl restart v2dns
 
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_host "127.0.0.1"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml bind_port "8080"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml rlimit_nofile "100000"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_host "0.0.0.0"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bind_port "53"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.ratelimit "0"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] "127.0.0.1:5350"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns ""
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.bootstrap_dns[0] "127.0.0.1:5350"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.all_servers "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.aaaa_disabled "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.enable_dnssec "false"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml dns.edns_client_subnet "false"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.enabled "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.port_https "8443"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.allow_unencrypted_doh "true"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml tls.strict_sni_check "false"
+rm -rf /var/www/html/index.lighttpd.orig
+systemctl mask --now lighttpd >/dev/null 2>&1
+systemctl mask --now dhcpcd >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
 
-rm -rf /etc/systemd/system/AdGuardHome.service
-cat << "EOF" >/lib/systemd/system/AdGuardHome.service
-[Unit]
-Description=AdGuardHome
-After=network.target
-
-[Service]
-LimitNPROC=64000
-LimitNOFILE=1000000
-ExecStart=/opt/AdGuardHome/AdGuardHome "-s" "run"
-ExecReload=/opt/AdGuardHome/AdGuardHome "-s" "reload"
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=53
 EOF
 
-systemctl daemon-reload
-systemctl enable --now AdGuardHome
-systemctl reload AdGuardHome >/dev/null 2>&1
+cat /dev/null >/etc/pihole/dns-servers.conf
 
-echo "$statusInstalled AdGuardHome"
+cat << EOF >/etc/pihole/pihole-FTL.conf
+PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
+EOF
+
+cat << "EOF" > /opt/de_GWD/pihole_hotfix
+#!/bin/bash
+localIP=$(jq -r '.address.localIP' /opt/de_GWD/0conf)
+sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
+pihole restartdns
+EOF
+chmod +x /opt/de_GWD/pihole_hotfix
+
+sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+
+pihole restartdns
+
+echo "$statusInstalled Pi-hole"
 }
 
 
@@ -1388,8 +1293,6 @@ systemctl restart v2dns
 
 if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
 /opt/de_GWD/ui-onDHCP
-else
-systemctl restart AdGuardHome >/dev/null 2>&1
 fi
 
 if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
@@ -1539,9 +1442,9 @@ nginxSet
 
 installWebUI
 
-installAdG
+installPihole
 
-AdGset
+piholeSet
 
 postInstall
 blue "---------------------"
@@ -1683,31 +1586,13 @@ blue "--------------------------------"
 
 
 
-change_PWD(){
-if [[ -z $(dpkg -l apache2-utils 2>/dev/null) ]]; then
-  apt install apache2-utils
-fi
+changePWD(){
+sudo pihole -a -p
 
-    green "==========="
-    green " USER"
-    green "==========="
-    read user
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d= -f2)
 
-    green "==========="
-    green " PASSWOED"
-    green "==========="
-    read pwd
-    
-pwdHash=$(echo -n $pwd | sha256sum | awk '{print$1}' | tr -d '\n' | sha256sum | awk '{print$1}')
-pwdHashAdG=$(htpasswd -B -n -b $user $pwd | cut -d: -f2 | awk NR==1)
-
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].name "$user"
-yq w -i /opt/AdGuardHome/AdGuardHome.yaml users[0].password "$pwdHashAdG"
-
-jq --arg password "$pwdHash" '.address.PWD=$password' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
-
+jq --arg piholePW "$piholePW" '.address.PWD = $piholePW' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 chmod 666 /opt/de_GWD/0conf
-systemctl reload AdGuardHome >/dev/null 2>&1
 blue "----------------------"
 blue "Change password [done]"
 blue "----------------------"
@@ -1718,7 +1603,7 @@ blue "----------------------"
 updateGWD(){
 [ -f /opt/de_GWD/version.php ] && red "this is not client" && exit
 
-if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(yq r /opt/AdGuardHome/AdGuardHome.yaml dns.upstream_dns[0] 2>/dev/null) == "127.0.0.1:5350" ]]; then
+if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(awk '/PIHOLE_DNS_1/' /etc/pihole/setupVars.conf | cut -d= -f2) == "127.0.0.1#5350" ]]; then
   de_GWDconnect
 fi
 
@@ -1746,9 +1631,9 @@ nginxSet
 
 installWebUI
 
-installAdG
+installPihole
 
-AdGset
+piholeSet
 
 postInstall
 blue "--------------------"
@@ -1840,7 +1725,7 @@ blue "-----------------------------------------------"
     start_menu
     ;;
     9)
-    change_PWD
+    changePWD
     start_menu
     ;;
     0)
