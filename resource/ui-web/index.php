@@ -420,7 +420,7 @@
             <i class="fas fa-network-wired"></i>
             DHCP
           <span class="float-right mt-n1 mb-n2">
-                <a class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" href="adg/#dhcp" target="_blank">详情</a>
+                <a class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" href="admin/settings.php?tab=piholedhcp" target="_blank">详情</a>
                 <button id="buttonOnDHCP" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;">保存/开启</button>
                 <button id="buttonOffDHCP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">关闭</button>
           </span>

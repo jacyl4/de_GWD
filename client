@@ -24,6 +24,12 @@ aptLocal="mirrors.aliyun.com"
 
 
 preDownload() {
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=5353
+EOF
+pihole restartdns  >/dev/null 2>&1
 systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
@@ -1603,7 +1609,7 @@ blue "----------------------"
 updateGWD(){
 [ -f /opt/de_GWD/version.php ] && red "this is not client" && exit
 
-if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(awk '/PIHOLE_DNS_1/' /etc/pihole/setupVars.conf | cut -d= -f2) == "127.0.0.1#5350" ]]; then
+if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(awk '/PIHOLE_DNS_1/' /etc/pihole/setupVars.conf | cut -d= -f2) == "127.0.0.1#5350" ]] && [[ $(awk '/port/' /etc/dnsmasq.conf | cut -d= -f2) == "53" ]]; then
   de_GWDconnect
 fi
 
@@ -1644,12 +1650,12 @@ blue "--------------------"
 
 
 start_menu(){
-if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
-    echo "[$statusGOOD] AdGuardHome    [working]"
-elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
-    echo "[$statusBAD] AdGuardHome    [not installed]"
+if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+    echo "[$statusGOOD] Pi-hole        [working]"
+elif [ ! -f "/usr/local/bin/pihole" ]; then
+    echo "[$statusBAD] Pi-hole        [not installed]"
 else
-    echo "[$statusBAD] AdGuardHome    [start failed]"
+    echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
 if [[ $(systemctl is-active smartdns) = "active" ]]; then
