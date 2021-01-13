@@ -1233,7 +1233,7 @@ curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 
 
 piholeSet(){
-jq '.inbounds[0].port=5350' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
+jq '.inbounds[0].port="5350"' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
 systemctl restart v2dns
 
 rm -rf /var/www/html/index.lighttpd.orig

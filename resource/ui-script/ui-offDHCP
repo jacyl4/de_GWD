@@ -2,3 +2,4 @@
 pihole -a disabledhcp
 
 jq 'del(.address.dhcp)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
