@@ -25,7 +25,7 @@ bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
 ## Thanks to
 * [ v2fly/v2ray-core ](https://github.com/v2fly/v2ray-core)
 * [ Loyalsoldier/v2ray-rules-dat ](https://github.com/Loyalsoldier/v2ray-rules-dat)
-* [ AdguardTeam/AdGuardHome ](https://github.com/AdguardTeam/AdGuardHome)
+* [ pi-hole/pi-hole ](https://github.com/pi-hole/pi-hole)
 * [ pymumu/smartdns ](https://github.com/pymumu/smartdns)
 * [ fatedier/frp ](https://github.com/fatedier/frp)
 * [ tsl0922/ttyd ](https://github.com/tsl0922/ttyd)
