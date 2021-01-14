@@ -342,8 +342,11 @@ bind-tcp 127.0.0.1:5311 -no-speed-check -no-cache
 bind 127.0.0.1:5320 -group doh -no-speed-check 
 bind-tcp 127.0.0.1:5320 -group doh -no-speed-check 
 
-speed-check-mode        tcp:443,ping
+speed-check-mode        ping,tcp:80
 cache-size              10000
+rr-ttl                  600
+rr-ttl-min              60
+rr-ttl-max              3600
 force-AAAA-SOA          yes
 prefetch-domain         yes
 serve-expired           yes
