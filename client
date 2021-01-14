@@ -954,7 +954,7 @@ elif [[ $(uname -m) == "aarch64" ]];then
   wget --no-check-certificate -c -O /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_arm64.zip
 fi
 
-unzip /tmp/doh.zip -d ~/
+unzip /tmp/doh.zip -d /tmp
 mv -f /tmp/doh-server /opt/de_GWD/doh-server
 chmod +x /opt/de_GWD/doh-server
 rm -rf /tmp/doh*
