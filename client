@@ -1284,7 +1284,7 @@ mkdir -p /etc/pihole
 >/etc/pihole/adlists.list
 
 cat << EOF >/etc/pihole/setupVars.conf
-PIHOLE_INTERFACE=$ethernetnum
+PIHOLE_INTERFACE=$ethernetnum,wg0
 IPV4_ADDRESS=$localaddr/24
 PIHOLE_DNS_1=127.0.0.1#5350
 QUERY_LOGGING=true
@@ -1346,7 +1346,7 @@ chmod +x /opt/de_GWD/pihole_hotfix
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
-pihole restartdns
+pihole -a interface
 
 echo "$statusInstalled Pi-hole"
 }
