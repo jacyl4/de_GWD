@@ -29,7 +29,7 @@ conf-dir=/etc/dnsmasq.d
 listen-address=127.0.0.1
 port=5353
 EOF
-pihole restartdns  >/dev/null 2>&1
+pihole restartdns >/dev/null 2>&1
 systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
@@ -1204,7 +1204,7 @@ echo "$statusInstalled WebUI"
 installPihole(){
 piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r .tag_name)
 
-if [[ $(awk '{print$1}' /etc/pihole/localversions | cut -d- -f1) != $piholeRelease ]]; then
+if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]]; then
 
 if [[ -z $piholePW ]] || [[ $piholePW == "null" ]]; then
   piholePW="0000000000000000000000000000000000000000000000000000000000000000"
@@ -1255,6 +1255,9 @@ conf-dir=/etc/dnsmasq.d
 listen-address=127.0.0.1
 port=53
 EOF
+
+sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
+echo "PIHOLE_DNS_1=127.0.0.1#5350" >>/etc/pihole/setupVars.conf
 
 >/etc/pihole/dns-servers.conf
 cat << EOF >/etc/pihole/pihole-FTL.conf

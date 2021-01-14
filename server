@@ -31,6 +31,15 @@ if [[ -d /usr/local/bin/vtrui ]]; then
 mv -f /usr/local/bin/vtrui /opt/de_GWD/vtrui
 fi
 
+if [[ -d "/opt/AdGuardHome" ]]; then
+  systemctl stop AdGuardHome >/dev/null 2>&1
+  rm -rf /etc/systemd/system/AdGuardHome.service
+  rm -rf /lib/systemd/system/AdGuardHome.service
+  rm -rf /opt/AdGuardHome
+  rm -rf /usr/bin/yq
+fi
+
+
 rm -rf /usr/local/bin/autoUpdate
 rm -rf /usr/local/bin/iptablesrules*
 rm -rf /usr/local/bin/Q2H
@@ -41,34 +50,6 @@ rm -rf /usr/bin/yq
 rm -rf /etc/dns-over-https
 rm -rf /etc/nginx/conf.d/0_serverUpstream
 rm -rf /etc/nginx/conf.d/4_v2Proxy
-
-
-
-if [[ -d "/etc/pihole" ]]; then
-usermod -G www-data www-data
-killall -u pihole >/dev/null 2>&1
-deluser --remove-home pihole >/dev/null 2>&1
-groupdel pihole >/dev/null 2>&1
-
-/opt/pihole/uninstall.sh << EOF
-y
-n
-EOF
-
-rm -rf /usr/local/bin/pihole*
-rm -rf /etc/dnsmasq*
-
-sudo rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
-
-apt purge sqlite3 lighttpd dhcpcd5
-fi
-
-
-systemctl disable --now doh-server >/dev/null 2>&1
-rm -rf /lib/systemd/system/doh-server.service
-rm -rf /usr/local/bin/doh-server*
-rm -rf "/etc/NetworkManager/dispatcher.d"
-systemctl daemon-reload
 
 
 if [[ -f "/usr/bin/dockerd" ]]; then
@@ -122,10 +103,17 @@ echo "/swapfile swap swap defaults 0 0" >>/etc/fstab
 echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
 fi
 
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=5353
+EOF
+pihole restartdns >/dev/null 2>&1
+
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
-nameserver 8.8.8.8
 nameserver 1.1.1.1
+nameserver 8.8.8.8
 nameserver 1.0.0.1
 nameserver 8.8.4.4
 EOF
@@ -337,127 +325,63 @@ systemctl restart iptablesrules
 
 
 
-installAdG(){
-if [[ $(/opt/AdGuardHome/AdGuardHome --version 2>/dev/null | awk '{print$4}' | sed 's/.$//') != $(curl --silent "https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest" | jq -r .tag_name | sed 's/^.//') ]]; then
-  rm -rf /opt/AdGuardHome
-  rm -rf /etc/systemd/system/AdGuardHome.service
+installPihole(){
+piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r .tag_name)
 
-  curl -sSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh
+if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]]; then
+
+if [[ -z $piholePW ]] || [[ $piholePW == "null" ]]; then
+  piholePW="0000000000000000000000000000000000000000000000000000000000000000"
+fi
+
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
+mkdir -p /etc/pihole
+>/etc/pihole/adlists.list
+
+cat << EOF >/etc/pihole/setupVars.conf
+PIHOLE_INTERFACE=$ethernetnum
+IPV4_ADDRESS=$localaddr/24
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=8.8.8.8
+PIHOLE_DNS_3=1.0.0.1
+PIHOLE_DNS_4=8.8.4.4
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=false
+INSTALL_WEB_INTERFACE=false
+LIGHTTPD_ENABLED=false
+BLOCKING_ENABLED=true
+WEBPASSWORD=0000000000000000000000000000000000000000000000000000000000000000
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=false
+EOF
+
+rm -rf /etc/.pihole
+git clone https://github.com/pi-hole/pi-hole /etc/.pihole
+
+curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
 fi
 }
 
 
 
-AdGset(){
-cat << EOF >/opt/AdGuardHome/AdGuardHome.yaml
-bind_host: 127.0.0.1
-bind_port: 8080
-users: []
-http_proxy: ""
-language: ""
-rlimit_nofile: 100000
-debug_pprof: false
-web_session_ttl: 720
-dns:
-  bind_host: 127.0.0.1
-  port: 53
-  statistics_interval: 1
-  querylog_enabled: false
-  querylog_file_enabled: false
-  querylog_interval: 1
-  querylog_size_memory: 1000
-  anonymize_client_ip: false
-  protection_enabled: true
-  blocking_mode: default
-  blocking_ipv4: ""
-  blocking_ipv6: ""
-  blocked_response_ttl: 10
-  parental_block_host: family-block.dns.adguard.com
-  safebrowsing_block_host: standard-block.dns.adguard.com
-  ratelimit: 0
-  ratelimit_whitelist: []
-  refuse_any: false
-  upstream_dns:
-  - 8.8.8.8
-  - 8.8.4.4
-  - 1.1.1.1
-  - 1.0.0.1
-  upstream_dns_file: ""
-  bootstrap_dns:
-  - 8.8.8.8
-  - 8.8.4.4
-  - 1.1.1.1
-  - 1.0.0.1
-  all_servers: true
-  fastest_addr: false
-  allowed_clients: []
-  disallowed_clients: []
-  blocked_hosts:
-  - version.bind
-  - id.server
-  - hostname.bind
-  cache_size: 4194304
-  cache_ttl_min: 0
-  cache_ttl_max: 0
-  bogus_nxdomain: []
-  aaaa_disabled: true
-  enable_dnssec: false
-  edns_client_subnet: false
-  max_goroutines: 300
-  ipset: []
-  filtering_enabled: false
-  filters_update_interval: 24
-  parental_enabled: false
-  safesearch_enabled: false
-  safebrowsing_enabled: false
-  safebrowsing_cache_size: 1048576
-  safesearch_cache_size: 1048576
-  parental_cache_size: 1048576
-  cache_time: 30
-  rewrites: []
-  blocked_services: []
-tls:
-  enabled: true
-  server_name: ""
-  force_https: false
-  port_https: 8443
-  port_dns_over_tls: 853
-  port_dns_over_quic: 784
-  allow_unencrypted_doh: true
-  strict_sni_check: false
-  certificate_chain: ""
-  private_key: ""
-  certificate_path: ""
-  private_key_path: ""
-filters:
-whitelist_filters:
-user_rules:
-dhcp:
-clients:
-schema_version: 7
+piholeSet(){
+systemctl mask --now lighttpd
+systemctl mask --now dhcpcd
+systemctl daemon-reload >/dev/null 2>&1
+
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=53
 EOF
 
-rm -rf /etc/systemd/system/AdGuardHome.service
-cat << "EOF" >/lib/systemd/system/AdGuardHome.service
-[Unit]
-Description=AdGuardHome
-After=network.target
-
-[Service]
-LimitNPROC=64000
-LimitNOFILE=1000000
-ExecStart=/opt/AdGuardHome/AdGuardHome "-s" "run"
-ExecReload=/opt/AdGuardHome/AdGuardHome "-s" "reload"
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
+cat << EOF >/etc/pihole/pihole-FTL.conf
+PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
 EOF
-
-systemctl daemon-reload
-systemctl enable --now AdGuardHome
-systemctl reload AdGuardHome >/dev/null 2>&1
 
 >/etc/resolvconf/resolv.conf.d/head
 >/etc/resolvconf/resolv.conf.d/original
@@ -468,7 +392,7 @@ echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
-sleep 3
+pihole restartdns
 }
 
 
@@ -734,6 +658,68 @@ http {
   include /etc/nginx/conf.d/*.conf;
 }
 EOF
+
+rm -rf /opt/de_GWD/doh-server
+wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
+unzip ~/doh.zip -d ~/
+mv -f ~/doh-server /opt/de_GWD/doh-server
+chmod +x /opt/de_GWD/doh-server
+rm -rf ~/doh*
+
+cat << EOF >/opt/de_GWD/doh-server.conf
+listen = [ "127.0.0.1:8053" ]
+
+path = "/dq"
+
+upstream = [ "udp:127.0.0.1:53" ]
+
+timeout = 10
+tries = 3
+verbose = false
+log_guessed_client_ip = false
+EOF
+
+mkdir -p /etc/NetworkManager/dispatcher.d
+
+cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+
+chmod +x /etc/NetworkManager/dispatcher.d/doh-server
+
+cat << "EOF" > /lib/systemd/system/doh-server.service
+[Unit]
+Description=DNS-over-HTTPS server
+After=network.target
+
+[Service]
+User=root
+Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+ExecStart=/opt/de_GWD/doh-server -conf /opt/de_GWD/doh-server.conf
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload >/dev/null 2>&1
+systemctl enable doh-server
+systemctl restart doh-server
 }
 
 
@@ -901,10 +887,9 @@ location ~ /\.(?!well-known).* {
 }
 
 location /dq {
-  proxy_pass                http://127.0.0.1:8080/dns-query;
+  proxy_pass                http://127.0.0.1:8053/dq;
   proxy_set_header          Host \$host;
   proxy_set_header          X-Real-IP \$remote_addr;
-  proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_redirect            off;
   keepalive_requests        25600;
   keepalive_timeout         300 300;
@@ -1068,9 +1053,9 @@ preInstall
 
 installIptablesRules
 
-installAdG
+installPihole
 
-AdGset
+piholeSet
 
 installV2ray
 
@@ -1393,9 +1378,9 @@ preInstall
 
 installIptablesRules
 
-installAdG
+installPihole
 
-AdGset
+piholeSet
 
 installV2ray
 
@@ -1486,12 +1471,20 @@ fi
 
 
 start_menu(){
-if [[ $(systemctl is-active AdGuardHome) = "active" ]]; then
-    echo "[$statusGOOD] AdGuardHome    [working]"
-elif [ ! -f "/opt/AdGuardHome/AdGuardHome" ]; then
-    echo "[$statusBAD] AdGuardHome    [not installed]"
+if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+    echo "[$statusGOOD] Pi-hole        [working]"
+elif [ ! -f "/usr/local/bin/pihole" ]; then
+    echo "[$statusBAD] Pi-hole        [not installed]"
 else
-    echo "[$statusBAD] AdGuardHome    [start failed]"
+    echo "[$statusBAD] Pi-hole        [start failed]"
+fi
+
+if [[ $(systemctl is-active doh-server) = "active" ]]; then
+    echo "[$statusGOOD] DoH server     [working]"
+elif [[ ! -f "/opt/de_GWD/doh-server" ]]; then
+    echo "[$statusBAD] DoH server     [not Installed]"
+else
+    echo "[$statusBAD] DoH server     [start failed]"
 fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
