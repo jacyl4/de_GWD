@@ -45,10 +45,9 @@ server {
   ssl_stapling_file /var/www/ssl/ocsp.resp;
 
   add_header alt-svc 'quic=":$FWD0port"; h3-27=":$FWD0port"; h3-25=":$FWD0port"; h3-T050=":$FWD0port"; h3-Q050=":$FWD0port"; h3-Q049=":$FWD0port"; h3-Q048=":$FWD0port"; h3-Q046=":$FWD0port"; h3-Q043=":$FWD0port"; ma=86400';
-  add_header Referrer-Policy                    no-referrer;
   add_header X-Content-Type-Options             nosniff;
   add_header X-Download-Options                 noopen;
-  add_header X-Frame-Options                    DENY;
+  add_header X-Frame-Options                    SAMEORIGIN;
   add_header X-Permitted-Cross-Domain-Policies  none;
   add_header X-Robots-Tag                       none;
   add_header X-XSS-Protection                   "1; mode=block";
@@ -59,10 +58,9 @@ location ~ /\.(?!well-known).* {
 }
 
 location /dq {
-  proxy_pass                http://127.0.0.1:8080/dns-query;
+  proxy_pass                http://127.0.0.1:8053/dq;
   proxy_set_header          Host \$host;
   proxy_set_header          X-Real-IP \$remote_addr;
-  proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_redirect            off;
   keepalive_requests        25600;
   keepalive_timeout         300 300;
