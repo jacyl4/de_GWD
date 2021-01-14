@@ -39,7 +39,7 @@
                 </div>
           </div>
 </form>
-<button id="buttonSubmitpw" type="button" class="btn btn-primary btn-block">Login</button>
+<button id="buttonSubmitpw" type="button" class="btn btn-success btn-block">Login</button>
       </div>
     </div>
   </div>
