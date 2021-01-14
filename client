@@ -947,11 +947,17 @@ systemctl daemon-reload
 systemctl enable --now nginx
 
 rm -rf /opt/de_GWD/doh-server
-wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
-unzip ~/doh.zip -d ~/
-mv -f ~/doh-server /opt/de_GWD/doh-server
+
+if [[ $(uname -m) == "x86_64" ]];then
+  wget --no-check-certificate -c -O /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
+elif [[ $(uname -m) == "aarch64" ]];then
+  wget --no-check-certificate -c -O /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_arm64.zip
+fi
+
+unzip /tmp/doh.zip -d ~/
+mv -f /tmp/doh-server /opt/de_GWD/doh-server
 chmod +x /opt/de_GWD/doh-server
-rm -rf ~/doh*
+rm -rf /tmp/doh*
 
 cat << EOF >/opt/de_GWD/doh-server.conf
 listen = [ "127.0.0.1:8053" ]
@@ -1660,7 +1666,7 @@ blue "--------------------------------"
 changePWD(){
 sudo pihole -a -p
 
-piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf | cut -d= -f2)
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf 2>/dev/null | cut -d= -f2)
 
 jq --arg piholePW "$piholePW" '.address.PWD = $piholePW' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 chmod 666 /opt/de_GWD/0conf
@@ -1674,7 +1680,7 @@ blue "----------------------"
 updateGWD(){
 [ -f /opt/de_GWD/version.php ] && red "this is not client" && exit
 
-if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(awk '/PIHOLE_DNS_1/' /etc/pihole/setupVars.conf | cut -d= -f2) == "127.0.0.1#5350" ]] && [[ $(awk '/port/' /etc/dnsmasq.conf | cut -d= -f2) == "53" ]]; then
+if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(awk '/PIHOLE_DNS_1/' /etc/pihole/setupVars.conf 2>/dev/null | cut -d= -f2) == "127.0.0.1#5350" ]] && [[ $(awk '/port/' /etc/dnsmasq.conf | cut -d= -f2) == "53" ]]; then
   de_GWDconnect
 fi
 
@@ -1761,6 +1767,14 @@ elif [[ ! -f "/usr/sbin/nginx" ]]; then
     echo "[$statusBAD] Nginx          [not installed]"
 else
     echo "[$statusBAD] Nginx          [start failed]"
+fi
+
+if [[ $(systemctl is-active doh-server) = "active" ]]; then
+    echo "[$statusGOOD] DoH server     [working]"
+elif [[ ! -f "/opt/de_GWD/doh-server" ]]; then
+    echo "[$statusBAD] DoH server     [not Installed]"
+else
+    echo "[$statusBAD] DoH server     [start failed]"
 fi
 
 blue "-----------------------------------------------"

@@ -660,11 +660,11 @@ http {
 EOF
 
 rm -rf /opt/de_GWD/doh-server
-wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
-unzip ~/doh.zip -d ~/
-mv -f ~/doh-server /opt/de_GWD/doh-server
+wget --no-check-certificate -c -O /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
+unzip /tmp/doh.zip -d ~/
+mv -f /tmp/doh-server /opt/de_GWD/doh-server
 chmod +x /opt/de_GWD/doh-server
-rm -rf ~/doh*
+rm -rf /tmp/doh*
 
 cat << EOF >/opt/de_GWD/doh-server.conf
 listen = [ "127.0.0.1:8053" ]
@@ -1479,14 +1479,6 @@ else
     echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
-if [[ $(systemctl is-active doh-server) = "active" ]]; then
-    echo "[$statusGOOD] DoH server     [working]"
-elif [[ ! -f "/opt/de_GWD/doh-server" ]]; then
-    echo "[$statusBAD] DoH server     [not Installed]"
-else
-    echo "[$statusBAD] DoH server     [start failed]"
-fi
-
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
     echo "[$statusGOOD] V2RAY          [working]"
 elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
@@ -1501,6 +1493,14 @@ elif [[ ! -f "/usr/sbin/nginx" ]]; then
     echo "[$statusBAD] Nginx          [not installed]"
 else
     echo "[$statusBAD] Nginx          [start failed]"
+fi
+
+if [[ $(systemctl is-active doh-server) = "active" ]]; then
+    echo "[$statusGOOD] DoH server     [working]"
+elif [[ ! -f "/opt/de_GWD/doh-server" ]]; then
+    echo "[$statusBAD] DoH server     [not Installed]"
+else
+    echo "[$statusBAD] DoH server     [start failed]"
 fi
 
 blue "-----------------------------------------------"
