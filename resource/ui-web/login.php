@@ -30,7 +30,6 @@
 
   <div class="container">
     <div class="card card-login mx-auto mt-5">
-      <div class="card-header">登入</div>
       <div class="card-body">
 <form>
           <div class="form-group">
@@ -40,7 +39,7 @@
                 </div>
           </div>
 </form>
-<button id="buttonSubmitpw" type="button" class="btn btn-primary btn-block">登入</button>
+<button id="buttonSubmitpw" type="button" class="btn btn-primary btn-block">Login</button>
       </div>
     </div>
   </div>
