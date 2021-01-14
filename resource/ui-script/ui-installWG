@@ -15,6 +15,10 @@ if [[ $(uname -r 2>&1 | grep -o '[0-9.]*' | awk NR==1) < "5.6" ]]; then
     red "Update kernel first!"
 else
     apt install wireguard-tools
+
+    if [[ $(jq -r '.wireguard.server.sprivatekey' /opt/de_GWD/0conf) == "null" ]]; then
+        /opt/de_GWD/ui-WGgenSkey
+    fi
 fi
 
 blue "------------------------"
