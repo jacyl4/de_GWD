@@ -945,6 +945,68 @@ EOF
 
 systemctl daemon-reload
 systemctl enable --now nginx
+
+rm -rf /opt/de_GWD/doh-server
+wget --no-check-certificate -c -O ~/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
+unzip ~/doh.zip -d ~/
+mv -f ~/doh-server /opt/de_GWD/doh-server
+chmod +x /opt/de_GWD/doh-server
+rm -rf ~/doh*
+
+cat << EOF >/opt/de_GWD/doh-server.conf
+listen = [ "127.0.0.1:8053" ]
+
+path = "/dq"
+
+upstream = [ "udp:127.0.0.1:53" ]
+
+timeout = 10
+tries = 3
+verbose = false
+log_guessed_client_ip = false
+EOF
+
+mkdir -p /etc/NetworkManager/dispatcher.d
+
+cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+
+chmod +x /etc/NetworkManager/dispatcher.d/doh-server
+
+cat << "EOF" > /lib/systemd/system/doh-server.service
+[Unit]
+Description=DNS-over-HTTPS server
+After=network.target
+
+[Service]
+User=root
+Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+ExecStart=/opt/de_GWD/doh-server -conf /opt/de_GWD/doh-server.conf
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload >/dev/null 2>&1
+systemctl enable doh-server
+systemctl restart doh-server
 }
 
 
