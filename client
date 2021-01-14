@@ -1325,7 +1325,9 @@ port=53
 EOF
 
 sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_INTERFACE=/d' /etc/pihole/setupVars.conf
 echo "PIHOLE_DNS_1=127.0.0.1#5350" >>/etc/pihole/setupVars.conf
+echo "PIHOLE_INTERFACE=$ethernetnum,wg0" >>/etc/pihole/setupVars.conf
 
 >/etc/pihole/dns-servers.conf
 cat << EOF >/etc/pihole/pihole-FTL.conf
