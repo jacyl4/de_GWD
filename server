@@ -367,8 +367,6 @@ fi
 
 
 piholeSet(){
-rm -rf /etc/.pihole
-
 systemctl mask --now lighttpd
 systemctl mask --now dhcpcd
 systemctl daemon-reload >/dev/null 2>&1
