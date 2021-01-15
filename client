@@ -1303,7 +1303,6 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-rm -rf /etc/.pihole
 git clone https://github.com/pi-hole/pi-hole /etc/.pihole
 
 curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
@@ -1316,6 +1315,7 @@ piholeSet(){
 jq '.inbounds[0].port="5350"' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
 systemctl restart v2dns
 
+rm -rf /etc/.pihole
 rm -rf /var/www/html/index.lighttpd.orig
 systemctl mask --now lighttpd >/dev/null 2>&1
 systemctl mask --now dhcpcd >/dev/null 2>&1

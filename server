@@ -358,7 +358,6 @@ DNSSEC=false
 CONDITIONAL_FORWARDING=false
 EOF
 
-rm -rf /etc/.pihole
 git clone https://github.com/pi-hole/pi-hole /etc/.pihole
 
 curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
@@ -368,6 +367,8 @@ fi
 
 
 piholeSet(){
+rm -rf /etc/.pihole
+
 systemctl mask --now lighttpd
 systemctl mask --now dhcpcd
 systemctl daemon-reload >/dev/null 2>&1
