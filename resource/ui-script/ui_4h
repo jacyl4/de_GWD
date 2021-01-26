@@ -34,6 +34,5 @@ if [[ -n $(cat /opt/de_GWD/IPlistW) ]]; then
   done
 fi
 
-systemctl restart smartdns >/dev/null 2>&1
 systemctl restart v2dns >/dev/null 2>&1
 echo "$statusUpdated DNS"
