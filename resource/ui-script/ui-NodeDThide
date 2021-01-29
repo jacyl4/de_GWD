@@ -33,7 +33,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     {
       "mux": {
         "enabled": true,
-        "concurrency": 12
+        "concurrency": 8
       },
       "protocol": "vmess",
       "settings": {
@@ -70,7 +70,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
     {
       "mux": {
         "enabled": true,
-        "concurrency": 12
+        "concurrency": 8
       },
       "protocol": "vmess",
       "settings": {

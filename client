@@ -333,25 +333,16 @@ echo "$statuSuccess system config"
 SmartDNSset(){
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
-bind 127.0.0.1:5310
-bind-tcp 127.0.0.1:5310
+bind 127.0.0.1:5310 -no-cache
+bind-tcp 127.0.0.1:5310 -no-cache
 
 bind 127.0.0.1:5311 -no-speed-check -no-cache
 bind-tcp 127.0.0.1:5311 -no-speed-check -no-cache
 
-bind 127.0.0.1:5320 -group doh -no-speed-check 
-bind-tcp 127.0.0.1:5320 -group doh -no-speed-check 
+bind 127.0.0.1:5320 -group doh -no-speed-check -no-cache
+bind-tcp 127.0.0.1:5320 -group doh -no-speed-check -no-cache
 
-speed-check-mode        ping,tcp:80
-cache-size              10000
-rr-ttl                  600
-rr-ttl-min              60
-rr-ttl-max              3600
-force-AAAA-SOA          yes
-prefetch-domain         yes
-serve-expired           yes
-serve-expired-ttl       0
-serve-expired-reply-ttl 4
+force-AAAA-SOA yes
 
 server 114.114.114.114
 server 114.114.115.115
@@ -1274,8 +1265,9 @@ echo "$statusInstalled WebUI"
 
 installPihole(){
 piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r .tag_name)
+piholeFTLRelease=$(curl --silent "https://api.github.com/repos/pi-hole/FTL/releases/latest" | jq -r .tag_name)
 
-if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]]; then
+if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]] || [[ $(awk '{print$3}' /etc/pihole/localversions 2>/dev/null) != $piholeFTLRelease ]]; then
 
 if [[ -z $piholePW ]] || [[ $piholePW == "null" ]]; then
   piholePW="0000000000000000000000000000000000000000000000000000000000000000"
