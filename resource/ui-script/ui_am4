@@ -5,6 +5,8 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 statusInstalled=$(green "[ installed ]")
 
+service cron stop >/dev/null 2>&1
+
 /opt/de_GWD/tcpTime
 
 wget --no-check-certificate -c -O /tmp/geosite.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat
@@ -31,3 +33,5 @@ ipset -! -R </opt/de_GWD/chnrouteSET
 fi
 
 echo "$statusInstalled IP & Domain rules"
+
+service cron restart >/dev/null 2>&1
