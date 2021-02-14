@@ -81,14 +81,14 @@
           <span>中转</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="nodeMAN.php">
-          <i class="fas fa-stream"></i>
-          <span>节点管理</span></a>
-      </li>
-      <li class="nav-item">
         <a class="nav-link" href="listBW.php">
           <i class="fas fa-th-list"></i>
           <span>黑白名单</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="nodeMAN.php">
+          <i class="fas fa-stream"></i>
+          <span>节点管理</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="update.php">
@@ -180,7 +180,7 @@
             <i class="fas fa-reply"></i>
             默认中转线
 <span class="float-right mt-n1 mb-n2" id="FWD0button" style="display:none">
-<button id="buttonFWD0save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD0');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonFWD0save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD0');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
 <button id="buttonFWD0stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="FWD0switch">
@@ -250,7 +250,7 @@
             <i class="fas fa-reply-all"></i>
             并行中转线
 <span class="float-right mt-n1 mb-n2" id="FWD1button" style="display:none">
-<button id="buttonFWD1save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD1');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonFWD1save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkFWD1');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
 <button id="buttonFWD1stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span class="float-right mt-n1 mb-n2" id="FWD1switch">

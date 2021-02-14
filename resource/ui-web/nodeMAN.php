@@ -80,15 +80,15 @@
           <i class="fas fa-project-diagram"></i>
           <span>中转</span></a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="nodeMAN.php">
-          <i class="fas fa-stream"></i>
-          <span>节点管理</span></a>
-      </li>
       <li class="nav-item">
         <a class="nav-link" href="listBW.php">
           <i class="fas fa-th-list"></i>
           <span>黑白名单</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="nodeMAN.php">
+          <i class="fas fa-stream"></i>
+          <span>节点管理</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="update.php">
