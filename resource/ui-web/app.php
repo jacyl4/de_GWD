@@ -202,7 +202,7 @@ $('#NFSbody').css('display', 'block');
 function NFSdel(NFSdel){
 var NFSnum = $(NFSdel).parent().parent().find('input').attr('id')
 var NFSnum = NFSnum.replace(/[^0-9]/ig,"")
-var NFSpoint = $('#NFSpoint'+NFSnum).val()
+var NFSpoint = "/mnt/"+$('#NFSpoint'+NFSnum).val()
 $(NFSdel).parent().parent('.form-row').remove()
 $.get('./act/offNFS.php', {NFSpoint:NFSpoint}, function(result){})
 }
