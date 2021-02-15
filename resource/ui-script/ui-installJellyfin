@@ -12,9 +12,6 @@ echo "deb [arch=$(dpkg --print-architecture)] https://repo.jellyfin.org/debian $
 
 apt update && apt install jellyfin
 
-usermod -aG root jellyfin
-systemctl restart jellyfin
-
 cat << EOF >/etc/nginx/conf.d/jellyfin.conf
 server {
   listen 8097 quic reuseport;
@@ -76,6 +73,21 @@ fi
 
 systemctl reload nginx
 
+JavScraperURL=$(curl --silent "https://api.github.com/repos/JavScraper/Emby.Plugins.JavScraper/releases/latest" | jq -r .assets[1].browser_download_url)
+
+wget --no-check-certificate -c -O /tmp/JavScraper.zip $JavScraperURL
+
+rm -rf /var/lib/jellyfin/plugins/JavScraper.dll
+unzip /tmp/JavScraper.zip -d /var/lib/jellyfin/plugins
+
+rm -rf /tmp/JavScraper.zip
+
+chmod -R 755 /var/lib/jellyfin/plugins
+chown -R jellyfin:jellyfin /var/lib/jellyfin/plugins
+
+usermod -aG root jellyfin
+systemctl restart jellyfin
+
 blue "------------------------"
 blue "Install Jellyfin [done]"
 blue "------------------------"
@@ -84,6 +96,8 @@ blue "------------------------"
 
 
 uninstallJellyfin(){
+rm -rf /var/lib/jellyfin/plugins/JavScraper.dll
+
 apt autopurge at fontconfig-config fonts-dejavu-core jellyfin jellyfin-ffmpeg jellyfin-server jellyfin-web libass9 libbluray2 libcairo2 libdrm-common libdrm-intel1 libdrm2 libfl2 libfontconfig1 libfribidi0 libglib2.0-0 libgraphite2-3 libharfbuzz0b libmp3lame0 libnuma1 libogg0 libopus0 libpciaccess0 libpixman-1-0 libtheora0 libvdpau1 libvorbis0a libvorbisenc2 libvpx5 libwebp6 libwebpmux3 libx264-155 libx265-165 libxcb-render0 libxcb-shm0 libxrender1 libzvbi-common libzvbi0 ocl-icd-libopencl1
 
 rm -rf /etc/nginx/conf.d/jellyfin.conf
