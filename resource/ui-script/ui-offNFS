@@ -1,5 +1,4 @@
 #!/bin/bash
 NFSpoint=$1
 umount $NFSpoint
-rm -rf $NFSpoint
 sed -i "/$NFSpoint/d" /etc/fstab
