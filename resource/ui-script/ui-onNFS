@@ -1,0 +1,12 @@
+#!/bin/bash
+nfsNUM=$(jq -r '.NFS | length' /opt/de_GWD/0conf)
+
+for ((i=0; i<$nfsNUM; i++))
+do
+NFSpoint=$(jq -r --argjson i "$i" '.NFS[$i].NFSpoint' /opt/de_GWD/0conf)
+NFSserver=$(jq -r --argjson i "$i" '.NFS[$i].NFSserver' /opt/de_GWD/0conf)
+NFSaddress=$(jq -r --argjson i "$i" '.NFS[$i].NFSaddress' /opt/de_GWD/0conf)
+
+mkdir -p $NFSpoint
+mount -t nfs -o vers=3,nolock,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport $NFSserver:$NFSaddress $NFSpoint
+done

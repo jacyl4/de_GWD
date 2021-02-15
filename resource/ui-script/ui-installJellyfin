@@ -1,0 +1,61 @@
+#!/bin/bash
+clear
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+
+
+installJellyfin(){
+curl -fsSL  https://repo.jellyfin.org/debian/jellyfin_team.gpg.key | apt-key add -
+echo "deb [arch=$(dpkg --print-architecture)] https://repo.jellyfin.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/jellyfin.list
+
+apt update && apt install jellyfin
+
+usermod -aG root jellyfin
+systemctl restart jellyfin
+
+blue "------------------------"
+blue "Install Jellyfin [done]"
+blue "------------------------"
+}
+
+
+
+uninstallJellyfin(){
+apt autopurge at fontconfig-config fonts-dejavu-core jellyfin jellyfin-ffmpeg jellyfin-server jellyfin-web libass9 libbluray2 libcairo2 libdrm-common libdrm-intel1 libdrm2 libfl2 libfontconfig1 libfribidi0 libglib2.0-0 libgraphite2-3 libharfbuzz0b libmp3lame0 libnuma1 libogg0 libopus0 libpciaccess0 libpixman-1-0 libtheora0 libvdpau1 libvorbis0a libvorbisenc2 libvpx5 libwebp6 libwebpmux3 libx264-155 libx265-165 libxcb-render0 libxcb-shm0 libxrender1 libzvbi-common libzvbi0 ocl-icd-libopencl1
+
+blue "--------------------------"
+blue "Uninstall Jellyfin [done]"
+blue "--------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "         Jellyfin"
+    green "==============================="
+    green  "1. Install Jellyfin"
+    yellow "2. Uninstall Jellyfin"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installJellyfin
+    start_menu
+    ;;
+    2)
+    uninstallJellyfin
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu

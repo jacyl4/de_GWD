@@ -70,15 +70,20 @@
           <span>概览</span>
         </a>
       </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="forward.php">
+          <i class="fas fa-project-diagram"></i>
+          <span>中转</span></a>
+      </li>
       <li class="nav-item">
         <a class="nav-link" href="ddns.php">
           <i class="fas fa-ethernet"></i>
           <span>DDNS & LINK</span></a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="forward.php">
-          <i class="fas fa-project-diagram"></i>
-          <span>中转</span></a>
+      <li class="nav-item">
+        <a class="nav-link" href="app.php">
+          <i class="fab fa-app-store-ios"></i>
+          <span>应用</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="listBW.php">
