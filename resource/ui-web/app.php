@@ -163,14 +163,7 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fas fa-folder"></i>
-            Jellyfin
-<span id="JellyfinButton" class="float-right mt-n1 mb-n2 ml-4" style="display:none">
-<button id="buttonJellyfinAdd" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">新增</button>
-<button id="buttonOnJellyfin" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">应用</button>
-</span>
-<span id="NFSswitch" class="float-right mt-n1 mb-n2 ml-4">
-<button id="buttonJellyfinSwitch" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">展开</button>
-</span>
+            Jellyfin&nbsp(端口：8097)
 <span class="float-right mt-n1 mb-n2">
 <button id="buttonJellyfinInstall" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">install</button>
 </span>
@@ -239,6 +232,13 @@ window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
 
 $('#buttonNFSswitch').click(function(){
 NFSswitch()
+})
+
+$.get("./act/checkJellyfin.php", function(data){
+if (data == "installed"){
+NFSswitch()
+$('#buttonJellyfinInstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
+}
 })
 
 $('#buttonJellyfinInstall').click(function(){

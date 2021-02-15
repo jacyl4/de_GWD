@@ -90,4 +90,4 @@ if [[ $(uname -m) == "aarch64" ]];then
     sed -i '/quic/d' /etc/nginx/conf.d/forward0.conf
 fi
 
-/etc/nginx/conf.d/merge.sh
+systemctl reload nginx
