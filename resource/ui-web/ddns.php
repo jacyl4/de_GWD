@@ -53,7 +53,7 @@
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
       <li class="nav-item no-arrow mx-1">
-        <a class="nav-link" href="admin" target="_blank">
+        <a class="nav-link" href="/admin/" onclick="javascript:event.target.port=location.port" target="_blank">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Pi-Hole</span>
         </a>
