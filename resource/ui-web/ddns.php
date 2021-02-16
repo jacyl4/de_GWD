@@ -741,9 +741,7 @@ $('#buttonWGclientAdd').click(function(){
         </div>
       </div>
                           `)
-  $.get('./act/WGgenCkey.php', {WGnum:i}, function(result){})
-  $('#buttonWGgenCKey'+i).attr('class', 'btn btn-sm btn-warning')
-  $('#buttonWGgenCKey'+i).html('重新生成节点密钥对')
+  $.get('./act/WGgenCkey.php', {WGnum:i}, function(result){window.location.reload()})
 })
 
 $.get("./act/checkWG.php", function(data){
