@@ -183,13 +183,18 @@
         <div class="card mb-3">
           <div class="card-header">
             <i class="fab fa-youtube"></i>
-            Jellyfin&nbsp(端口：8097)
+            Jellyfin
 <span class="float-right mt-n1 mb-n2">
 <button id="buttonJellyfinInstall" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">install</button>
 </span>
           </div>
 
-          <div class="card-body" id="NFSbody" style="display:none">
+          <div class="card-body" id="JellyfinBody" style="display:none">
+            <div class="form-row">
+              <div class="col-md-12 input-group my-2">
+                <a type="button" class="btn btn-outline-secondary btn-sm" style="border-Radius: 0px;" href="/" onclick="javascript:event.target.port=8097" target="_blank">访问Jellyfin (HTTPS)</a>
+              </div>
+            </div>
           </div>
         </div>
         <!-- Page Content -->
@@ -217,6 +222,10 @@ function NFSswitch(){
 $('#NFSswitch').css('display', 'none'); 
 $('#NFSbutton').css('display', 'block'); 
 $('#NFSbody').css('display', 'block'); 
+};
+
+function JellyfinSwitch(){
+$('#JellyfinBody').css('display', 'block'); 
 };
 
 function NFSdel(NFSdel){
@@ -256,7 +265,7 @@ NFSswitch()
 
 $.get("./act/checkJellyfin.php", function(data){
 if (data == "installed"){
-NFSswitch()
+JellyfinSwitch()
 $('#buttonJellyfinInstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
 }
 })
