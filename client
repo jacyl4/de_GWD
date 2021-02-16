@@ -1142,7 +1142,7 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   proxy_set_header Early-Data \$ssl_early_data;
 
   add_header alt-svc 'quic=":443"; h3-27=":443"; h3-25=":443"; h3-T050=":443"; h3-Q050=":443"; h3-Q049=":443"; h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"; ma=86400';
-  add_header Referrer-Policy                    "no-referrer"       always;
+  add_header Referrer-Policy                    "origin"            always;
   add_header X-Content-Type-Options             "nosniff"           always;
   add_header X-Download-Options                 "noopen"            always;
   add_header X-Frame-Options                    "SAMEORIGIN"        always;
@@ -1161,10 +1161,9 @@ location ~ /\.(?!well-known).* {
 }
 
 location ~ [^/]\.php(/|$) {
-  fastcgi_pass unix:/run/php/php-fpm.sock;
-  fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-  fastcgi_index index.php;
   include fastcgi_params;
+  fastcgi_param SCRIPT_FILENAME \$document_root/\$fastcgi_script_name;
+  fastcgi_pass unix:/run/php/php-fpm.sock;
 }
 
 location ~ ^/ttyd(.*)$ {
@@ -1304,6 +1303,9 @@ EOF
 git clone https://github.com/pi-hole/pi-hole /etc/.pihole
 
 curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+
+chmod -R 755 /var/www/html
+usermod -aG pihole www-data
 fi
 }
 
