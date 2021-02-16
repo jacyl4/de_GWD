@@ -72,25 +72,30 @@
           <span>概览</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="forward.php">
+          <i class="fas fa-project-diagram"></i>
+          <span>中转</span></a>
+      </li>
       <li class="nav-item active">
         <a class="nav-link" href="ddns.php">
           <i class="fas fa-ethernet"></i>
           <span>DDNS & LINK</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="forward.php">
-          <i class="fas fa-project-diagram"></i>
-          <span>中转</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="nodeMAN.php">
-          <i class="fas fa-stream"></i>
-          <span>节点管理</span></a>
+        <a class="nav-link" href="app.php">
+          <i class="fab fa-app-store-ios"></i>
+          <span>应用</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="listBW.php">
           <i class="fas fa-th-list"></i>
           <span>黑白名单</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="nodeMAN.php">
+          <i class="fas fa-stream"></i>
+          <span>节点管理</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="update.php">
@@ -152,7 +157,7 @@
             <i class="fas fa-cloud"></i>
             <a href="http://www.pubyun.com" target="_blank">F3322 DDNS</a>
 <span id="ddns3322button" class="float-right mt-n1 mb-n2" style="display:none">
-<button id="buttonDDNS3322save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonDDNS3322save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
 <button id="buttonDDNS3322stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span id="ddns3322switch" class="float-right mt-n1 mb-n2">
@@ -192,7 +197,7 @@
             <i class="fas fa-cloud"></i>
             <a href="https://dash.cloudflare.com/login" target="_blank">CloudFlare DDNS</a>
 <span id="ddnsCFbutton" class="float-right mt-n1 mb-n2" style="display:none">
-<button id="buttonDDNSCFsave" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonDDNSCFsave" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
 <button id="buttonDDNSCFstop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span id="ddnsCFswitch" class="float-right mt-n1 mb-n2">
@@ -241,7 +246,7 @@
             <i class="fas fa-bacon"></i>
             FRP
 <span id="FRPbutton" class="float-right mt-n1 mb-n2 ml-4" style="display:none">
-<button id="buttonOnFRP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonOnFRP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">应用</button>
 <button id="buttonOffFRP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span id="FRPswitch" class="float-right mt-n1 mb-n2 ml-4">
@@ -305,7 +310,7 @@
             <i class="fas fa-archway"></i>
             WireGuard Server
 <span id="WGbutton" class="float-right mt-n1 mb-n2 ml-4" style="display:none">
-<button id="buttonOnWG" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">保存/开启</button>
+<button id="buttonOnWG" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">应用</button>
 <button id="buttonOffWG" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span id="WGswitch" class="float-right mt-n1 mb-n2 ml-4">
@@ -481,7 +486,7 @@ f3322domain=$('#f3322domain').val()
 f3322usr=$('#f3322usr').val()
 f3322pwd=$('#f3322pwd').val()
 $.get('./act/ddns3322save.php', {f3322domain:f3322domain, f3322usr:f3322usr, f3322pwd:f3322pwd}, function(result){window.location.reload()})
-alert("保存/开启DDNS。。。")
+alert("应用DDNS。。。")
 })
 
 $('#buttonDDNS3322stop').click(function(){
@@ -505,7 +510,7 @@ cfzoneid=$('#CFzoneid').val()
 cfapikey=$('#CFapikey').val()
 cfemail=$('#CFemail').val()
 $.get('./act/ddnsCFsave.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){window.location.reload()})
-alert("保存/开启DDNS。。。")
+alert("应用DDNS。。。")
 })
 
 $('#buttonDDNSCFstop').click(function(){
@@ -775,7 +780,7 @@ for( let i = 0; i<len; i++){
     }
 }
 $.get('./act/onWG.php', {WGaddress:WGaddress, WGport:WGport, sprivatekey:sprivatekey, spublickey:spublickey, WGclientsList:WGclientsList}, function(result){window.location.reload()})
-alert("保存/开启WireGuard。。。")
+alert("应用WireGuard。。。")
 })
 
 $('#buttonOffWG').click(function(){

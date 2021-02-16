@@ -71,24 +71,29 @@
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="forward.php">
+          <i class="fas fa-project-diagram"></i>
+          <span>中转</span></a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" href="ddns.php">
           <i class="fas fa-ethernet"></i>
           <span>DDNS & LINK</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="forward.php">
-          <i class="fas fa-project-diagram"></i>
-          <span>中转</span></a>
-      </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="nodeMAN.php">
-          <i class="fas fa-stream"></i>
-          <span>节点管理</span></a>
+        <a class="nav-link" href="app.php">
+          <i class="fab fa-app-store-ios"></i>
+          <span>应用</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="listBW.php">
           <i class="fas fa-th-list"></i>
           <span>黑白名单</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="nodeMAN.php">
+          <i class="fas fa-stream"></i>
+          <span>节点管理</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="update.php">

@@ -71,24 +71,29 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="ddns.php">
-          <i class="fas fa-ethernet"></i>
-          <span>DDNS & LINK</span></a>
-      </li>
-      <li class="nav-item">
         <a class="nav-link" href="forward.php">
           <i class="fas fa-project-diagram"></i>
           <span>中转</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="nodeMAN.php">
-          <i class="fas fa-stream"></i>
-          <span>节点管理</span></a>
+        <a class="nav-link" href="ddns.php">
+          <i class="fas fa-ethernet"></i>
+          <span>DDNS & LINK</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="app.php">
+          <i class="fab fa-app-store-ios"></i>
+          <span>应用</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="listBW.php">
           <i class="fas fa-th-list"></i>
           <span>黑白名单</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="nodeMAN.php">
+          <i class="fas fa-stream"></i>
+          <span>节点管理</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="update.php">
@@ -421,7 +426,7 @@
             DHCP
           <span class="float-right mt-n1 mb-n2">
                 <a class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" href="admin/settings.php?tab=piholedhcp" target="_blank">详情</a>
-                <button id="buttonOnDHCP" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;">保存/开启</button>
+                <button id="buttonOnDHCP" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;">应用</button>
                 <button id="buttonOffDHCP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">关闭</button>
           </span>
           </div>
