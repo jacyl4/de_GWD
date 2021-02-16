@@ -157,6 +157,25 @@
           </div>
 
           <div class="card-body" id="NFSbody" style="display:none">
+
+<!-- Modal -->
+<div id="NFSmodal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <input id="NFSpath" type="text" class="form-control" required="required" value="" READONLY>
+
+        <ul id="NFSlist" class="list-group mt-3" style="max-height:320px;overflow:scroll">
+        </ul>
+
+      </div>
+      <div class="modal-footer">
+        <button id="confirmNFSaddr" type="button" class="btn-sm btn-dark">应用</button>
+      </div>
+    </div>
+  </div>
+</div>
+
           </div>
         </div>
 
@@ -269,29 +288,12 @@ $('#buttonNFSAdd').click(function(){
           <button type="button" class="btn btn-outline-secondary btn-sm text-right ml-2" style="border-Radius: 0px;" onclick="NFSdel(this)">删除</button>
       </div>
     </div>
-
-<!-- Modal -->
-<div id="NFSmodal${i}" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-        <input id="NFSpath${i}" type="text" class="form-control" required="required" value="选择路径并应用" READONLY>
-
-        <ul id="NFSlist" class="list-group mt-3" style="max-height:320px;overflow:scroll">
-        </ul>
-
-      </div>
-      <div class="modal-footer">
-        <button id="confirmNFSaddr${i}" type="button" class="btn-sm btn-dark">应用</button>
-      </div>
-    </div>
-  </div>
-</div>
                           `)
 
   $('#NFSlink'+i).click(function(){
   var NFSserver = $('#NFSserver'+i).val()
-  $("#NFSmodal"+i).modal('show');
+  $("#NFSmodal").modal('show')
+  $("#NFSpath").val("选择路径并应用")
   $.get('./act/getNFSlist.php', {NFSserver:NFSserver}, function(data){
   var data = data.split('\n');
   var len = data.length;
@@ -302,17 +304,17 @@ $('#buttonNFSAdd').click(function(){
         <li id="NFSlistLine${i}" type="button" class="list-group-item">${NFSlistLine}</li>
                           `)
     $('#NFSlistLine'+i).click(function(){
-      $("#NFSpath"+i).val(NFSlistLine.split(' ')[0])
+      $("#NFSpath").val(NFSlistLine.split(' ')[0])
   })
   }
   })
   })
 
-  $('#confirmNFSaddr'+i).click(function(){
-    var NFSaddress = $('#NFSpath'+i).val()
+  $('#confirmNFSaddr').click(function(){
+    var NFSaddress = $('#NFSpath').val()
     $("#NFSaddress"+i).html(NFSaddress)
     $("#NFSpoint"+i).val("/mnt/"+NFSaddress.split('/')[NFSaddress.split('/').length - 1])
-    $("#NFSmodal"+i).modal('hide');
+    $("#NFSmodal").modal('hide');
   })
 })
 
