@@ -169,6 +169,7 @@
         </ul>
 
       </div>
+      <input id="NFSmodalID" type="hidden" value="">
       <div class="modal-footer">
         <button id="confirmNFSaddr" type="button" class="btn-sm btn-dark">应用</button>
       </div>
@@ -293,6 +294,7 @@ $('#buttonNFSAdd').click(function(){
   $('#NFSlink'+i).click(function(){
   var NFSserver = $('#NFSserver'+i).val()
   $("#NFSmodal").modal('show')
+  $(":hidden#NFSmodalID").val(i)
   $("#NFSpath").val("选择路径并应用")
   $.get('./act/getNFSlist.php', {NFSserver:NFSserver}, function(data){
   var data = data.split('\n');
@@ -309,13 +311,14 @@ $('#buttonNFSAdd').click(function(){
   }
   })
   })
+})
 
-  $('#confirmNFSaddr').click(function(){
-    var NFSaddress = $('#NFSpath').val()
-    $("#NFSaddress"+i).html(NFSaddress)
-    $("#NFSpoint"+i).val("/mnt/"+NFSaddress.split('/')[NFSaddress.split('/').length - 1])
-    $("#NFSmodal").modal('hide');
-  })
+$('#confirmNFSaddr').click(function(){
+  var NFSmodalID =  $(":hidden#NFSmodalID").val()
+  var NFSaddress = $('#NFSpath').val()
+  $("#NFSaddress"+NFSmodalID).html(NFSaddress)
+  $("#NFSpoint"+NFSmodalID).val("/mnt/"+NFSaddress.split('/')[NFSaddress.split('/').length - 1])
+  $("#NFSmodal").modal('hide')
 })
 
 $.get('./act/arrNFS.php', function(data) {
