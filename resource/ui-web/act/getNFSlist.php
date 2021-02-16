@@ -3,6 +3,6 @@
 <?php
 $NFSserver = $_GET['NFSserver'];
 
-echo exec("sudo showmount -e $NFSserver | sed '1d'");
+system("sudo showmount -e $NFSserver | sed '1d'");
 ?>
 <?php }?>
