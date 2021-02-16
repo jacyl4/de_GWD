@@ -15,6 +15,7 @@ topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
 
 sed -i "/server_name/c\server_name $domain;" /etc/nginx/conf.d/1_serverHead
 jq --arg serverName "$domain" '.address.serverName = $serverName' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+/etc/nginx/conf.d/merge.sh
 
 apt install netcat socat
 
