@@ -30,9 +30,6 @@ server {
   ssl_early_data on;
   proxy_set_header Early-Data \$ssl_early_data;
 
-  ssl_stapling on;
-  ssl_stapling_verify on;
-
   add_header alt-svc 'quic=":8097"; h3-27=":8097"; h3-25=":8097"; h3-T050=":8097"; h3-Q050=":8097"; h3-Q049=":8097"; h3-Q048=":8097"; h3-Q046=":8097"; h3-Q043=":8097"; ma=86400';
   add_header X-Content-Type-Options             nosniff;
   add_header X-Download-Options                 noopen;
