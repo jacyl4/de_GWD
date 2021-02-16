@@ -1318,6 +1318,7 @@ listen-address=127.0.0.1
 port=53
 EOF
 
+sed -i '/LIGHTTPD_ENABLED=/c\LIGHTTPD_ENABLED=false' /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_INTERFACE=/d' /etc/pihole/setupVars.conf
 echo "PIHOLE_DNS_1=127.0.0.1#5350" >>/etc/pihole/setupVars.conf
