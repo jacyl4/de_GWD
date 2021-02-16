@@ -10,7 +10,7 @@ NFSserver=$(jq -r --argjson i "$i" '.NFS[$i].NFSserver' /opt/de_GWD/0conf)
 NFSaddress=$(jq -r --argjson i "$i" '.NFS[$i].NFSaddress' /opt/de_GWD/0conf)
 
 mkdir -p $NFSpoint
-mount -t nfs -o vers=3,hard,rsize=1048576,wsize=1048576,timeo=600,retrans=2,nolock,noresvport $NFSserver:$NFSaddress $NFSpoint
+mount -t nfs -o vers=3,hard,rsize=1048576,wsize=1048576,timeo=600,retrans=2,nolock,noresvport,noatime $NFSserver:$NFSaddress $NFSpoint
 
-echo "$NFSserver:$NFSaddress $NFSpoint nfs nfsvers=3,hard,rsize=1048576,wsize=1048576,timeo=600,retrans=2,noresvport,nolock,_netdev 0 0" >>/etc/fstab
+echo "$NFSserver:$NFSaddress $NFSpoint nfs nfsvers=3,hard,rsize=1048576,wsize=1048576,timeo=600,retrans=2,nolock,noresvport,noatime,_netdev 0 0" >>/etc/fstab
 done
