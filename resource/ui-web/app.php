@@ -202,7 +202,7 @@ $('#NFSbody').css('display', 'block');
 function NFSdel(NFSdel){
 var NFSnum = $(NFSdel).parent().parent().find('input').attr('id')
 var NFSnum = NFSnum.replace(/[^0-9]/ig,"")
-var NFSpoint = "/mnt/"+$('#NFSpoint'+NFSnum).val()
+var NFSpoint = $('#NFSpoint'+NFSnum).val()
 $(NFSdel).parent().parent('.form-row').remove()
 $.get('./act/offNFS.php', {NFSpoint:NFSpoint}, function(result){})
 }
@@ -254,7 +254,7 @@ $('#buttonNFSAdd').click(function(){
         <div class="input-group-prepend">
           <span class="input-group-text">挂载点&nbsp<span class="badge bg-secondary">X</span></span>
         </div>
-          <input id="NFSpoint${i}" type="text" class="form-control" placeholder="新建文件夹名称" value="">
+          <input id="NFSpoint${i}" type="text" class="form-control" value="" READONLY>
       </div>
 
       <div class="col-md-8 input-group my-2">
@@ -311,6 +311,7 @@ $('#buttonNFSAdd').click(function(){
   $('#confirmNFSaddr'+i).click(function(){
     var NFSaddress = $('#NFSpath'+i).val()
     $("#NFSaddress"+i).html(NFSaddress)
+    $("#NFSpoint"+i).val("/mnt/"+NFSaddress.split('/')[NFSaddress.split('/').length - 1])
     $("#NFSmodal"+i).modal('hide');
   })
 })
@@ -319,7 +320,7 @@ $.get('./act/arrNFS.php', function(data) {
 var data = data.split('\n');
 var len = data.length;
 for( let i = 0; i<len; i++){
-  let NFSpoint = data[i].split(' ')[0].split('/mnt/')[1];
+  let NFSpoint = data[i].split(' ')[0];
   let NFSserver = data[i].split(' ')[2].split(':')[0];
   let NFSaddress = data[i].split(' ')[2].split(':')[1];
   $('#NFSbody').append(`
@@ -351,7 +352,7 @@ var NFSlist = []
 var len = $("#NFSbody .form-row").length
 var NFSpoint, NFSserver, NFSaddress
 for( let i = 0; i<len; i++){
-    var NFSpoint = "/mnt/"+$('#NFSpoint'+i).val()
+    var NFSpoint = $('#NFSpoint'+i).val()
     var NFSserver = $('#NFSserver'+i).val()
     var NFSaddress = $('#NFSaddress'+i).html()
     if ( NFSpoint !== '' && NFSserver !== '' && NFSaddress !== '') {
