@@ -188,11 +188,11 @@
                 <div class="form-row">
       <div class="input-group my-2 col-md-4">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">Update Addr</span>
+          <span class="input-group-text justify-content-center">本机地址</span>
         </div>
           <input id="updateAddr" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateAddr ?>">
         <div class="input-group-prepend input-group-append">
-          <span class="input-group-text justify-content-center">Port</span>
+          <span class="input-group-text justify-content-center">端口</span>
         </div>
           <input id="updatePort" type="text" class="form-control col-md-2" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updatePort ?>">
       </div>
@@ -202,13 +202,21 @@
           <span class="input-group-text justify-content-center">CMD</span>
         </div>
           <input id="updateCMD" type="text" class="form-control" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->update->updateCMD ?>">
-          <button id="buttonUpdateSave" type="button" class="btn btn-outline-secondary text-right px-3 ml-2">保存</button>
-          <button id="buttonUpdateRun" type="button" class="btn btn-outline-danger text-right px-3 ml-2">运行</button>
+          <button id="buttonUpdateSave" type="button" class="btn btn-outline-danger btn-sm text-right ml-2" style="border-Radius: 0px;">开启更新</button>
       </div>
-
-
                 </div>
 
+<!-- Modal -->
+<div id="updateModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-footer">
+        <input id="updateDst" type="text" class="form-control" value="" READONLY>
+        <button id="buttonUpdateRun" type="button" class="btn btn-danger">UPDATE</button>
+      </div>
+    </div>
+  </div>
+</div>
           </div>
         </div>
 
@@ -273,7 +281,10 @@ $('#buttonUpdateSave').click(function(){
 updateCMD=$('#updateCMD').val();
 updateAddr=$('#updateAddr').val();
 updatePort=$('#updatePort').val();
-$.get('./act/updateSave.php', {updateCMD:updateCMD,updateAddr:updateAddr,updatePort:updatePort}, function(result){window.location.reload()})
+$.get('./act/updateSave.php', {updateAddr:updateAddr,updatePort:updatePort,updateCMD:updateCMD}, function(data){
+$("#updateDst").val(data)
+$("#updateModal").modal('show')
+})
 })
 
 $('#buttonUpdateRun').click(function(){
