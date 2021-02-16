@@ -288,7 +288,7 @@ $('#buttonNFSAdd').click(function(){
 
       <div class="col-md-8 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">NFS服务器IP</span>
+          <span class="input-group-text justify-content-center">NFS服务器地址</span>
         </div>
           <input id="NFSserver${i}" type="text" class="form-control" style="max-width: 160px;" value="">
         <div class="input-group-prepend input-group-append">
@@ -348,7 +348,7 @@ for( let i = 0; i<len; i++){
 
       <div class="col-md-8 input-group my-2">
         <div class="input-group-prepend">
-          <span class="input-group-text justify-content-center">NFS服务器IP</span>
+          <span class="input-group-text justify-content-center">NFS服务器地址</span>
         </div>
           <input id="NFSserver${i}" type="text" class="form-control" style="max-width: 160px;" value="${NFSserver}" READONLY>
         <div class="input-group-prepend input-group-append">
