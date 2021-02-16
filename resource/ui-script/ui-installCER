@@ -8,14 +8,39 @@ red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 
 
 installCER(){
-crontab -l >/tmp/now.cron
-sed -i '/acme.sh/d' /tmp/now.cron
-crontab /tmp/now.cron
-rm -rf /tmp/now.cron
-rm -rf ~/.acme.sh
+CFapikey=$(jq -r '.FORWARD.APIkey' /opt/de_GWD/0conf)
+CFemail=$(jq -r '.FORWARD.Email' /opt/de_GWD/0conf)
+domain=$(jq -r '.FORWARD.domain' /opt/de_GWD/0conf)
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+sed -i "/server_name/c\server_name $domain;" /etc/nginx/conf.d/1_serverHead
+jq --arg serverName "$domain" '.address.serverName = $serverName' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
 apt install netcat socat
-rm -rf /var/www/ssl/*
+
+cat << EOF >/var/www/ssl/update_ocsp_cache
+#!/bin/bash
+wget --no-check-certificate -O /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+wget --no-check-certificate -O /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/*.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://r3.o.lencr.org \
+    -respout /var/www/ssl/ocsp.resp
+
+systemctl reload nginx
+EOF
+
+chmod +x /var/www/ssl/update_ocsp_cache
+
+if [[ $(/var/www/ssl/update_ocsp_cache | awk 'NR==1{print$2}') != "good" ]]; then
+rm -rf /var/www/ssl/*.cer
+rm -rf /var/www/ssl/*.key
 cat << EOF >/var/www/ssl/ocsp.resp
 0000 0000 0000 0000 0000 0000 0000 0000
 0000 0000 0000 0000 0000 0000 0000 0000
@@ -51,10 +76,11 @@ cat << EOF >/var/www/ssl/ocsp.resp
 0000 0000 0000 00
 EOF
 
-CFapikey=$(jq -r '.FORWARD.APIkey' /opt/de_GWD/0conf)
-CFemail=$(jq -r '.FORWARD.Email' /opt/de_GWD/0conf)
-domain=$(jq -r '.FORWARD.domain' /opt/de_GWD/0conf)
-topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+crontab -l >/tmp/now.cron
+sed -i '/acme.sh/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf ~/.acme.sh
 
 export CF_Key="$CFapikey"
 export CF_Email="$CFemail"
@@ -69,27 +95,8 @@ curl https://get.acme.sh | sh
                --fullchain-file /var/www/ssl/de_GWD.cer \
                --reloadcmd     "systemctl reload nginx"
 
+fi
 
-
-cat << EOF >/var/www/ssl/update_ocsp_cache
-#!/bin/bash
-wget --no-check-certificate -O /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
-wget --no-check-certificate -O /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
-cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
-cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
-
-openssl ocsp -no_nonce \
-    -issuer  /var/www/ssl/intermediate.pem \
-    -cert    /var/www/ssl/*.cer \
-    -CAfile  /var/www/ssl/bundle.pem \
-    -VAfile  /var/www/ssl/bundle.pem \
-    -url     http://r3.o.lencr.org \
-    -respout /var/www/ssl/ocsp.resp
-
-systemctl reload nginx
-EOF
-
-chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
 
 crontab -l >/tmp/now.cron
@@ -97,8 +104,6 @@ sed -i '/update_ocsp_cache/d' /tmp/now.cron
 echo '0 0 * * 6 /var/www/ssl/update_ocsp_cache' >>/tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
-
-
 
 blue "--------------------------------"
 blue  "Generate TLS Certificate [done]"

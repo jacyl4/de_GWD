@@ -136,6 +136,10 @@ source /etc/profile
 service cron stop >/dev/null 2>&1
 
 piholePW=$(jq -r '.address.PWD' /opt/de_GWD/0conf)
+serverName=$(jq -r '.address.serverName' /opt/de_GWD/0conf)
+if [[ -z $serverName ]] || [[ $serverName == "null" ]]; then
+serverName="de_GWD"
+fi
 
 doh1=$(jq -r '.dns.doh1' /opt/de_GWD/0conf)
 doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
@@ -1109,15 +1113,16 @@ rm -rf /etc/nginx/conf.d/forward*.conf
 
 touch /etc/nginx/conf.d/0_top
 
-cat << 'EOF' >/etc/nginx/conf.d/1_serverHead
+cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
         listen 80;
-        return 301 https://$host$request_uri;
+        return 301 https://\$host\$request_uri;
 }
 
 server {
   listen 443 quic reuseport;
   listen 443 ssl http2 fastopen=128 reuseport;
+  server_name $serverName;
   root /var/www/html;
   index index.php index.html index.htm;
 
