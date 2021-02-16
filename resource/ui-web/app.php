@@ -182,7 +182,7 @@
 
         <div class="card mb-3">
           <div class="card-header">
-            <i class="fas fa-folder"></i>
+            <i class="fab fa-youtube"></i>
             Jellyfin&nbsp(端口：8097)
 <span class="float-right mt-n1 mb-n2">
 <button id="buttonJellyfinInstall" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">install</button>
