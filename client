@@ -363,16 +363,16 @@ After=network.target
 
 [Service]
 Type=forking
-PIDFile=/run/smartdns.pid
 LimitNPROC=64000
 LimitNOFILE=1000000
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns -c /etc/smartdns/smartdns.conf -p /run/smartdns.pid
-ExecStop=/bin/kill -s QUIT $MAINPID
+ExecStop=/bin/kill -HUP $MAINPID
+KillMode=process
 ExecStopPost=/bin/rm -f /run/smartdns.pid
-KillMode=mixed
+PIDFile=/run/smartdns.pid
 Restart=always
 RestartSec=2
 
@@ -874,9 +874,12 @@ After=network.target
 
 [Service]
 Type=notify
-PIDFile=/run/php/php-fpm.pid
+LimitNPROC=64000
+LimitNOFILE=1000000
 ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
+ExecStopPost=/bin/rm -f /run/php-fpm.pid
+PIDFile=/run/php-fpm.pid
 Restart=always
 RestartSec=2
 
@@ -922,17 +925,19 @@ fi
 cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
-After=network.target nss-lookup.target
+After=network.target
 
 [Service]
 Type=forking
-PIDFile=/run/nginx.pid
+LimitNPROC=64000
+LimitNOFILE=1000000
 ExecStartPre=/usr/sbin/nginx -t
 ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
 ExecReload=/usr/sbin/nginx -s reload
 ExecStop=/bin/kill -s QUIT $MAINPID
+KillMode=process
 ExecStopPost=/bin/rm -f /run/nginx.pid
-KillMode=mixed
+PIDFile=/run/nginx.pid
 PrivateTmp=true
 Restart=always
 RestartSec=2s
