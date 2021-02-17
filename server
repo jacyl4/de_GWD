@@ -112,10 +112,10 @@ pihole restartdns >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
-nameserver 1.1.1.1
 nameserver 8.8.8.8
-nameserver 1.0.0.1
+nameserver 1.1.1.1
 nameserver 8.8.4.4
+nameserver 1.0.0.1
 EOF
 
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
@@ -342,10 +342,10 @@ mkdir -p /etc/pihole
 cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=1.1.1.1
-PIHOLE_DNS_2=8.8.8.8
-PIHOLE_DNS_3=1.0.0.1
-PIHOLE_DNS_4=8.8.4.4
+PIHOLE_DNS_1=8.8.8.8
+PIHOLE_DNS_2=1.1.1.1
+PIHOLE_DNS_3=8.8.4.4
+PIHOLE_DNS_4=1.0.0.1
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=false
 INSTALL_WEB_INTERFACE=false
