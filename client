@@ -485,6 +485,9 @@ NoNewPrivileges=true
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/v2dns/v2dns -config /opt/de_GWD/v2dns/config.json
+Nice=-5
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=50
 Restart=always
 
 [Install]
