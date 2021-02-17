@@ -68,10 +68,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       "tag": "proxy"
     },
     {
-      "mux": {
-        "enabled": true,
-        "concurrency": 8
-      },
       "protocol": "vmess",
       "settings": {
         "vnext": [

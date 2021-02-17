@@ -82,10 +82,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       "tag": "proxy"
     },
     {
-      "mux": {
-        "enabled": true,
-        "concurrency": 8
-      },
       "protocol": "vmess",
       "settings": {
         "vnext": [
@@ -119,10 +115,6 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       "tag": "netflix"
     },
     {
-      "mux": {
-        "enabled": true,
-        "concurrency": 8
-      },
       "protocol": "vmess",
       "settings": {
         "vnext": [
