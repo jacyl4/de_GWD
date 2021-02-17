@@ -6,7 +6,8 @@ cp -f /opt/de_GWD/vtrui/v2ctl /opt/de_GWD/vtrui1/v2ctl
 cp -f /opt/de_GWD/vtrui/geoip.dat /opt/de_GWD/vtrui1/geoip.dat
 chmod -R +x /opt/de_GWD/vtrui1
 
-cat << "EOF" >/lib/systemd/system/vtrui1.service
+rm -rf /lib/systemd/system/vtrui1.service
+cat << "EOF" >/etc/systemd/system/vtrui1.service
 [Unit]
 Description=vtrui1 Service
 After=network.target nss-lookup.target
@@ -16,12 +17,12 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 NoNewPrivileges=true
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/vtrui1/vtrui1 -config /opt/de_GWD/vtrui1/config.json
-Restart=always
-RestartSec=2
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target

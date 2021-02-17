@@ -37,7 +37,8 @@ $bind_port
 token = $FRPtoken
 EOF
 
-cat << EOF >/lib/systemd/system/frps.service
+rm -rf /lib/systemd/system/frps.service
+cat << EOF >/etc/systemd/system/frps.service
 [Unit]
 Description=Frp Server Service
 After=network.target
@@ -47,10 +48,10 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/frp/frps -c /opt/de_GWD/frp/frps.ini
-Restart=always
-RestartSec=2
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
@@ -71,6 +72,7 @@ blue "--------------------"
 
 uninstallFRPs(){
 systemctl stop frps
+rm -rf /etc/systemd/system/frps.service
 rm -rf /lib/systemd/system/frps.service
 systemctl daemon-reload
 

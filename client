@@ -76,6 +76,7 @@ fi
 
 
 systemctl disable --now doh-client >/dev/null 2>&1
+rm -rf /etc/systemd/system/doh-client.service
 rm -rf /lib/systemd/system/doh-client.service
 rm -rf /opt/de_GWD/doh-client*
 rm -rf "/etc/NetworkManager/dispatcher.d"
@@ -356,7 +357,8 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-cat << "EOF" >/lib/systemd/system/smartdns.service
+rm -rf /lib/systemd/system/smartdns.service
+cat << "EOF" >/etc/systemd/system/smartdns.service
 [Unit]
 Description=SmartDNS server
 After=network.target
@@ -365,13 +367,16 @@ After=network.target
 Type=forking
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 EnvironmentFile=/etc/default/smartdns
 ExecStart=/usr/sbin/smartdns -c /etc/smartdns/smartdns.conf -p /run/smartdns.pid
 KillMode=process
 ExecStopPost=/bin/rm -f /run/smartdns.pid
 PIDFile=/run/smartdns.pid
+Nice=-14
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=82
 Restart=always
-RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -464,7 +469,8 @@ jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
 jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' | sponge /opt/de_GWD/v2dns/config.json
 
-cat << EOF >/lib/systemd/system/v2dns.service
+rm -rf /lib/systemd/system/v2dns.service
+cat << EOF >/etc/systemd/system/v2dns.service
 [Unit]
 Description=v2dns Service
 After=network.target
@@ -474,12 +480,12 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 NoNewPrivileges=true
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/v2dns/v2dns -config /opt/de_GWD/v2dns/config.json
 Restart=always
-RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -552,7 +558,8 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui/config.json
 
-cat << EOF >/lib/systemd/system/vtrui.service
+rm -rf /lib/systemd/system/vtrui.service
+cat << EOF >/etc/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -562,12 +569,12 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 NoNewPrivileges=true
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/vtrui/vtrui -config /opt/de_GWD/vtrui/config.json
-Restart=always
-RestartSec=2
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
@@ -751,7 +758,8 @@ ip rule del fwmark 0x9
 EOF
 chmod +x /opt/de_GWD/iptables-proxy-down
 
-cat << EOF >/lib/systemd/system/iptables-proxy.service
+rm -rf /lib/systemd/system/iptables-proxy.service
+cat << EOF >/etc/systemd/system/iptables-proxy.service
 [Unit]
 Description=iptables-proxy
 
@@ -864,7 +872,8 @@ opcache.fast_shutdown=1
 opcache.save_comments=1
 EOF
 
-cat << "EOF" >/lib/systemd/system/php7.4-fpm.service
+rm -rf /lib/systemd/system/php7.4-fpm.service
+cat << "EOF" >/etc/systemd/system/php7.4-fpm.service
 [Unit]
 Description=The PHP 7.4 FastCGI Process Manager
 After=network.target
@@ -873,6 +882,7 @@ After=network.target
 Type=notify
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 ExecStopPost=/bin/rm -f /run/php-fpm.pid
@@ -919,7 +929,8 @@ elif [[ $(uname -m) == "aarch64" ]];then
   apt install nginx
 fi
 
-cat << "EOF" >/lib/systemd/system/nginx.service
+rm -rf /lib/systemd/system/nginx.service
+cat << "EOF" >/etc/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
 After=network.target
@@ -928,6 +939,7 @@ After=network.target
 Type=forking
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 ExecStartPre=/usr/sbin/nginx -t
 ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
 ExecReload=/usr/sbin/nginx -s reload
@@ -937,7 +949,7 @@ ExecStopPost=/bin/rm -f /run/nginx.pid
 PIDFile=/run/nginx.pid
 PrivateTmp=true
 Restart=always
-RestartSec=2s
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -991,7 +1003,8 @@ EOF
 
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
-cat << "EOF" > /lib/systemd/system/doh-server.service
+rm -rf /lib/systemd/system/doh-server.service
+cat << "EOF" > /etc/systemd/system/doh-server.service
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target
@@ -1001,10 +1014,10 @@ User=root
 Type=simple
 LimitNPROC=64000
 LimitNOFILE=1000000
+LimitCORE=infinity
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
 ExecStart=/opt/de_GWD/doh-server -conf /opt/de_GWD/doh-server.conf
 Restart=always
-RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -1241,7 +1254,8 @@ fi
 mv -f /tmp/ttyd /usr/bin/ttyd
 chmod +x /usr/bin/ttyd
 
-cat << EOF >/lib/systemd/system/updateGWD.service
+rm -rf /lib/systemd/system/updateGWD.service
+cat << EOF >/etc/systemd/system/updateGWD.service
 [Unit]
 Description=ttyd
 After=network.target
@@ -1255,7 +1269,6 @@ KillMode=process
 [Install]
 WantedBy=multi-user.target
 EOF
-
 systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /tmp/ui-script*
