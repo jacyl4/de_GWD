@@ -330,11 +330,6 @@ installPihole(){
 piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r .tag_name)
 
 if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]]; then
-
-if [[ -z $piholePW ]] || [[ $piholePW == "null" ]]; then
-  piholePW="0000000000000000000000000000000000000000000000000000000000000000"
-fi
-
 rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
 mkdir -p /etc/pihole
 >/etc/pihole/adlists.list
@@ -360,8 +355,9 @@ CONDITIONAL_FORWARDING=false
 EOF
 
 git clone https://github.com/pi-hole/pi-hole /etc/.pihole
-
 curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+chmod -R 755 /var/www/html
+usermod -aG pihole www-data
 fi
 }
 
