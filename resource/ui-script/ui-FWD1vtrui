@@ -71,6 +71,10 @@ cat >/opt/de_GWD/vtrui1/config.json << EOF
   ],
   "outbounds": [
     {
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
       "protocol": "vmess",
       "settings": {
         "vnext": [
