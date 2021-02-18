@@ -1727,9 +1727,9 @@ systemctl restart smartdns
 systemctl restart v2dns
 
 if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
-blue "----------------------"
-blue "Boost DNS [success]"
-blue "----------------------"
+green "----------------------"
+green "Boost DNS [success]"
+green "----------------------"
 else
 red "----------------------"
 red "Boost DNS [faild]"
