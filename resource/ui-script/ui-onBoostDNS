@@ -1,0 +1,22 @@
+#!/bin/bash
+sed -i '/Nice=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/smartdns.service
+
+sed -i '/Nice=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/v2dns.service
+
+sed -i '/Restart=/i\Nice=-10' /lib/systemd/system/smartdns.service
+sed -i '/Restart=/i\CPUSchedulingPolicy=fifo' /lib/systemd/system/smartdns.service
+sed -i '/Restart=/i\CPUSchedulingPriority=60' /lib/systemd/system/smartdns.service
+
+sed -i '/Restart=/i\Nice=-5' /lib/systemd/system/v2dns.service
+sed -i '/Restart=/i\CPUSchedulingPolicy=fifo' /lib/systemd/system/v2dns.service
+sed -i '/Restart=/i\CPUSchedulingPriority=55' /lib/systemd/system/v2dns.service
+
+systemctl daemon-reload
+systemctl restart smartdns
+systemctl restart v2dns
+
+jq --arg boostDNS "on" '.dns.boostDNS=$boostDNS' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
