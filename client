@@ -1721,6 +1721,7 @@ else
 red "----------------------"
 red "Boost DNS [faild]"
 red "----------------------"
+/opt/de_GWD/ui-offBoostDNS >/dev/null 2>&1
 fi
 elif [[ "$boostDNSswitch" = "2" ]]; then
 
