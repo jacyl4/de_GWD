@@ -302,8 +302,8 @@ EOF
 
 chmod +x /opt/de_GWD/iptablesrules-down
 
-rm -rf /lib/systemd/system/iptablesrules.service
-cat << EOF >/etc/systemd/system/iptablesrules.service
+rm -rf /etc/systemd/system/iptablesrules.service
+cat << EOF >/lib/systemd/system/iptablesrules.service
 [Unit]
 Description=iptablesrules
 After=network.target
@@ -438,8 +438,8 @@ done
 
 jq --arg v2path "$v2path" '.inbounds[0].streamSettings.wsSettings.path=$v2path' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 
-rm -rf /lib/systemd/system/vtrui.service
-cat << "EOF" >/etc/systemd/system/vtrui.service
+rm -rf /etc/systemd/system/vtrui.service
+cat << "EOF" >/lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -545,8 +545,8 @@ mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 fi
 
-rm -rf /lib/systemd/system/nginx.service
-cat << "EOF" >/etc/systemd/system/nginx.service
+rm -rf /etc/systemd/system/nginx.service
+cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
 After=network.target
@@ -695,8 +695,8 @@ EOF
 
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
-rm -rf /lib/systemd/system/doh-server.service
-cat << "EOF" >/etc/systemd/system/doh-server.service
+rm -rf /etc/systemd/system/doh-server.service
+cat << "EOF" >/lib/systemd/system/doh-server.service
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target

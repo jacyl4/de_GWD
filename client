@@ -357,8 +357,8 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-rm -rf /lib/systemd/system/smartdns.service
-cat << "EOF" >/etc/systemd/system/smartdns.service
+rm -rf /etc/systemd/system/smartdns.service
+cat << "EOF" >/lib/systemd/system/smartdns.service
 [Unit]
 Description=SmartDNS server
 After=network.target
@@ -469,8 +469,8 @@ jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
 jq --arg key "$domain" --arg value "$domainIP" '.dns.hosts += {($key): ($value)}' | sponge /opt/de_GWD/v2dns/config.json
 
-rm -rf /lib/systemd/system/v2dns.service
-cat << EOF >/etc/systemd/system/v2dns.service
+rm -rf /etc/systemd/system/v2dns.service
+cat << EOF >/lib/systemd/system/v2dns.service
 [Unit]
 Description=v2dns Service
 After=network.target
@@ -561,8 +561,8 @@ jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path'
 jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
 jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui/config.json
 
-rm -rf /lib/systemd/system/vtrui.service
-cat << EOF >/etc/systemd/system/vtrui.service
+rm -rf /etc/systemd/system/vtrui.service
+cat << EOF >/lib/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -761,8 +761,8 @@ ip rule del fwmark 0x9
 EOF
 chmod +x /opt/de_GWD/iptables-proxy-down
 
-rm -rf /lib/systemd/system/iptables-proxy.service
-cat << EOF >/etc/systemd/system/iptables-proxy.service
+rm -rf /etc/systemd/system/iptables-proxy.service
+cat << EOF >/lib/systemd/system/iptables-proxy.service
 [Unit]
 Description=iptables-proxy
 
@@ -875,8 +875,8 @@ opcache.fast_shutdown=1
 opcache.save_comments=1
 EOF
 
-rm -rf /lib/systemd/system/php7.4-fpm.service
-cat << "EOF" >/etc/systemd/system/php7.4-fpm.service
+rm -rf /etc/systemd/system/php7.4-fpm.service
+cat << "EOF" >/lib/systemd/system/php7.4-fpm.service
 [Unit]
 Description=The PHP 7.4 FastCGI Process Manager
 After=network.target
@@ -932,8 +932,8 @@ elif [[ $(uname -m) == "aarch64" ]];then
   apt install nginx
 fi
 
-rm -rf /lib/systemd/system/nginx.service
-cat << "EOF" >/etc/systemd/system/nginx.service
+rm -rf /etc/systemd/system/nginx.service
+cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
 After=network.target
@@ -1006,8 +1006,8 @@ EOF
 
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
-rm -rf /lib/systemd/system/doh-server.service
-cat << "EOF" > /etc/systemd/system/doh-server.service
+rm -rf /etc/systemd/system/doh-server.service
+cat << "EOF" > /lib/systemd/system/doh-server.service
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target
@@ -1260,8 +1260,8 @@ fi
 mv -f /tmp/ttyd /usr/bin/ttyd
 chmod +x /usr/bin/ttyd
 
-rm -rf /lib/systemd/system/updateGWD.service
-cat << EOF >/etc/systemd/system/updateGWD.service
+rm -rf /etc/systemd/system/updateGWD.service
+cat << EOF >/lib/systemd/system/updateGWD.service
 [Unit]
 Description=ttyd
 After=network.target

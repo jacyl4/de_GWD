@@ -6,8 +6,8 @@ cp -f /opt/de_GWD/vtrui/v2ctl /opt/de_GWD/vtrui1/v2ctl
 cp -f /opt/de_GWD/vtrui/geoip.dat /opt/de_GWD/vtrui1/geoip.dat
 chmod -R +x /opt/de_GWD/vtrui1
 
-rm -rf /lib/systemd/system/vtrui1.service
-cat << "EOF" >/etc/systemd/system/vtrui1.service
+rm -rf /etc/systemd/system/vtrui1.service
+cat << "EOF" >/lib/systemd/system/vtrui1.service
 [Unit]
 Description=vtrui1 Service
 After=network.target nss-lookup.target

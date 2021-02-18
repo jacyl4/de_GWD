@@ -26,8 +26,8 @@ remote_port = $(jq -r --argjson i "$i" '.FRP.clients[$i].remotePort' /opt/de_GWD
 EOF
 done
 
-rm -rf /lib/systemd/system/frpc.service
-cat << EOF >/etc/systemd/system/frpc.service
+rm -rf /etc/systemd/system/frpc.service
+cat << EOF >/lib/systemd/system/frpc.service
 [Unit]
 Description=Frp Client Service
 After=network.target
