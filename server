@@ -337,10 +337,8 @@ mkdir -p /etc/pihole
 cat << EOF >/etc/pihole/setupVars.conf
 PIHOLE_INTERFACE=$ethernetnum
 IPV4_ADDRESS=$localaddr/24
-PIHOLE_DNS_1=8.8.8.8
-PIHOLE_DNS_2=1.1.1.1
-PIHOLE_DNS_3=8.8.4.4
-PIHOLE_DNS_4=1.0.0.1
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=8.8.8.8
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=false
 INSTALL_WEB_INTERFACE=false
@@ -367,6 +365,16 @@ piholeSet(){
 systemctl mask --now lighttpd
 systemctl mask --now dhcpcd
 systemctl daemon-reload >/dev/null 2>&1
+
+sed -i '/PIHOLE_DNS/d' /etc/pihole/setupVars.conf
+cat << EOF >>/etc/pihole/setupVars.conf
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=8.8.8.8
+PIHOLE_DNS_3=1.0.0.1
+PIHOLE_DNS_4=8.8.4.4
+PIHOLE_DNS_5=208.67.222.222
+PIHOLE_DNS_6=208.67.220.220
+EOF
 
 cat << EOF >/etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d

@@ -17,7 +17,7 @@ doh2PortStr=$([ -n "$doh2Port" ] && echo $doh2Port | sed 's/^/:/')
 echo $doh1IP $doh2IP | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
 
 if [[ -z $(jq -r '.dns.china' /opt/de_GWD/0conf) ]] || [[ $(jq -r '.dns.china' /opt/de_GWD/0conf) = "null" ]]; then
-  jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+  jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 182.254.118.118 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 fi
 
 sed -i '/server /,$d' /etc/smartdns/smartdns.conf
