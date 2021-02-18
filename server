@@ -1097,9 +1097,10 @@ blue "---------------------------------------------"
 
 
 installBBRplus(){
-    green "==================="
-    green "Y. Install bbrplus"
-    green "==================="
+    green "================"
+    green "Install bbrplus"
+    green "================"
+    green  "Y. Install"
     read BBRplusConfirm
 
 if [[ "$BBRplusConfirm" = "Y" ]] || [[ "$BBRplusConfirm" = "y" ]]; then
@@ -1163,9 +1164,10 @@ blue "-----------------------"
 
 
 installBBR(){
-    green "============================="
-    green "Y. Install latest kernel BBR"
-    green "============================="
+    green "=========================="
+    green "Install latest kernel BBR"
+    green "=========================="
+    green  "Y. Install"
     read BBRconfirm
 
 if [[ "$BBRconfirm" = "Y" ]] || [[ "$BBRconfirm" = "y" ]]; then

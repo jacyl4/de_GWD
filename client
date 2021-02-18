@@ -374,9 +374,6 @@ KillMode=mixed
 ExecStop=/bin/kill -s STOP $MAINPID
 ExecStopPost=/bin/rm -f /run/smartdns.pid
 PIDFile=/run/smartdns.pid
-Nice=-10
-CPUSchedulingPolicy=fifo
-CPUSchedulingPriority=60
 Restart=always
 
 [Install]
@@ -486,9 +483,6 @@ NoNewPrivileges=true
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/v2dns/v2dns -config /opt/de_GWD/v2dns/config.json
-Nice=-5
-CPUSchedulingPolicy=fifo
-CPUSchedulingPriority=50
 Restart=always
 
 [Install]
@@ -1556,9 +1550,10 @@ blue "---------------------"
 
 
 installBBRplus(){
-    green "==================="
-    green "Y. Install bbrplus"
-    green "==================="
+    green "================"
+    green "Install bbrplus"
+    green "================"
+    green  "Y. Install"
     read BBRplusConfirm
 
 if [[ "$BBRplusConfirm" = "Y" ]] || [[ "$BBRplusConfirm" = "y" ]]; then
@@ -1622,9 +1617,10 @@ blue "-----------------------"
 
 
 installBBR(){
-    green "============================="
-    green "Y. Install latest kernel BBR"
-    green "============================="
+    green "=========================="
+    green "Install latest kernel BBR"
+    green "=========================="
+    green  "Y. Install"
     read BBRconfirm
 
 if [[ "$BBRconfirm" = "Y" ]] || [[ "$BBRconfirm" = "y" ]]; then
@@ -1699,6 +1695,70 @@ blue "Change password [done]"
 blue "----------------------"
 }
 
+
+
+boostDNS(){
+    green "=========="
+    green "Boost DNS"
+    green "=========="
+    green  "1. Enable"
+    yellow "2. Disable"
+    read boostDNSswitch
+
+if [[ "$boostDNSswitch" = "1" ]]; then
+sed -i '/Nice=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/smartdns.service
+
+sed -i '/Nice=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/v2dns.service
+
+sed -i '/Restart=/i\Nice=-10' /lib/systemd/system/smartdns.service
+sed -i '/Restart=/i\CPUSchedulingPolicy=fifo' /lib/systemd/system/smartdns.service
+sed -i '/Restart=/i\CPUSchedulingPriority=60' /lib/systemd/system/smartdns.service
+
+sed -i '/Restart=/i\Nice=-5' /lib/systemd/system/v2dns.service
+sed -i '/Restart=/i\CPUSchedulingPolicy=fifo' /lib/systemd/system/v2dns.service
+sed -i '/Restart=/i\CPUSchedulingPriority=55' /lib/systemd/system/v2dns.service
+
+systemctl daemon-reload
+systemctl restart smartdns
+systemctl restart v2dns
+
+if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
+blue "----------------------"
+blue "Boost DNS [success]"
+blue "----------------------"
+else
+red "----------------------"
+red "Boost DNS [faild]"
+red "----------------------"
+fi
+elif [[ "$boostDNSswitch" = "2" ]]; then
+sed -i '/Nice=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/smartdns.service
+
+sed -i '/Nice=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/v2dns.service
+
+systemctl daemon-reload
+systemctl restart smartdns
+systemctl restart v2dns
+
+if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
+green "----------------------"
+green "Boost DNS [success]"
+green "----------------------"
+else
+red "----------------------"
+red "Boost DNS [faild]"
+red "----------------------"
+fi
+fi
+}
 
 
 updateGWD(){
@@ -1815,6 +1875,7 @@ blue "-----------------------------------------------"
     green  "1. Install de_GWD"
     green  "2. Install bbrplus+fq and reboot"
     green  "3. Install latest kernel BBR and reboot"
+    yellow "8. Boost DNS"
     yellow "9. Change de_GWD password"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
@@ -1831,6 +1892,10 @@ blue "-----------------------------------------------"
     ;;
     3)
     installBBR
+    start_menu
+    ;;
+    8)
+    boostDNS
     start_menu
     ;;
     9)
