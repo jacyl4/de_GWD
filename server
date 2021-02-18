@@ -1505,7 +1505,7 @@ else
 fi
 
 blue "-----------------------------------------------"
-blue "Kernel: $(uname -r)"
+blue "Kernel:                         $(uname -r)"
 blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
 blue "-----------------------------------------------"
 
