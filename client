@@ -1131,6 +1131,9 @@ rm -rf /etc/nginx/conf.d/forward*.conf
 
 touch /etc/nginx/conf.d/0_top
 
+if [[ -z $serverName ]]; then
+serverName="de_GWD"
+fi
 cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
         listen 80;
