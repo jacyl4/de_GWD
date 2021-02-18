@@ -469,6 +469,10 @@ systemctl enable vtrui
 v2otUpstream(){
 cat << EOF >/tmp/vtruiOB0
     {
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
       "protocol": "vmess",
       "settings": {
         "vnext": [
