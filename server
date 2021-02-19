@@ -1516,16 +1516,16 @@ else
     echo "[$statusBAD] DoH server     [start failed]"
 fi
 
-blue "-----------------------------------------------"
+    blue  "--------------------------------------------------"
 blue "Kernel:                         $(uname -r)"
 blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
-blue "-----------------------------------------------"
+    blue  "--------------------------------------------------"
 
-    green "==============================================="
+    green "=================================================="
     green "         SERVER"
     green "Recommend: Debian 10"
     green "Author:    JacyL4"
-    green "==============================================="
+    green "=================================================="
 if [[ -f "/opt/de_GWD/version.php" ]]; then
     blue  "Version:$(echo $(awk 'NR==1' /opt/de_GWD/version.php))"
 fi

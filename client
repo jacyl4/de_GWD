@@ -1842,7 +1842,7 @@ else
     echo "[$statusBAD] DoH server     [start failed]"
 fi
 
-blue "-----------------------------------------------"
+    blue  "--------------------------------------------------"
 blue "Kernel:                         $(uname -r)"
 blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
 if [[ -n $(awk '/Nice/' /lib/systemd/system/smartdns.service 2>/dev/null) ]];then
@@ -1850,13 +1850,13 @@ blue "Boost DNS:                      Enable"
 else
 blue "Boost DNS:                      Disable"
 fi
-blue "-----------------------------------------------"
+    blue  "--------------------------------------------------"
 
-    green "==============================================="
+    green "=================================================="
     green "         CLIENT"
     green "Recommend: Debian 10 (amd64 && arm64)"
     green "Author:    JacyL4"
-    green "==============================================="
+    green "=================================================="
     echo ""
     green  "1. Install de_GWD"
     green  "2. Install bbrplus+fq and reboot"
