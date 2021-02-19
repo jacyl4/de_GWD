@@ -1531,7 +1531,7 @@ if [[ -f "/opt/de_GWD/version.php" ]]; then
 fi
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus+fq and reboot"
+    green  "2. Install bbrplus+fq_codel and reboot"
     green  "3. Install latest kernel BBR and reboot"
     red    "4. Change domain and generate new certificate"
     red    "5. Change v2ray path & UUID"
