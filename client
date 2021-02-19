@@ -1716,13 +1716,13 @@ if [[ "$boostDNSswitch" = "1" ]]; then
 /opt/de_GWD/ui-onBoostDNS >/dev/null 2>&1
 
 if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
-green "----------------------"
+green "-------------------"
 green "Boost DNS [success]"
-green "----------------------"
+green "-------------------"
 else
-red "----------------------"
+red "-----------------"
 red "Boost DNS [faild]"
-red "----------------------"
+red "-----------------"
 /opt/de_GWD/ui-offBoostDNS >/dev/null 2>&1
 fi
 elif [[ "$boostDNSswitch" = "2" ]]; then
@@ -1730,13 +1730,13 @@ elif [[ "$boostDNSswitch" = "2" ]]; then
 /opt/de_GWD/ui-offBoostDNS >/dev/null 2>&1
 
 if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
-green "----------------------"
+green "-------------------"
 green "Boost DNS [success]"
-green "----------------------"
+green "-------------------"
 else
-red "----------------------"
+red "-----------------"
 red "Boost DNS [faild]"
-red "----------------------"
+red "-----------------"
 fi
 fi
 }
