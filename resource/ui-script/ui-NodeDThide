@@ -35,7 +35,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
         "enabled": true,
         "concurrency": 8
       },
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
         "vnext": [
           {
@@ -44,7 +44,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "security": "auto",
+                "encryption": "none",
                 "level": 1
               }
             ]
@@ -68,7 +68,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       "tag": "proxy"
     },
     {
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
         "vnext": [
           {
@@ -77,7 +77,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
             "users": [
               {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "security": "auto",
+                "encryption": "none",
                 "level": 1
               }
             ]
