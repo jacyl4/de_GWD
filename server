@@ -491,7 +491,7 @@ cat << EOF >/tmp/vtruiOB0
             "users": [
               {
                 "id": "$upUUID",
-                "decryption": "none",
+                "encryption": "none",
                 "level": 1
               }
             ]
