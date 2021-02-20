@@ -1747,10 +1747,6 @@ fi
 updateGWD(){
 [ -f /opt/de_GWD/version.php ] && red "this is not client" && exit
 
-if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(awk '/PIHOLE_DNS_1/' /etc/pihole/setupVars.conf 2>/dev/null | cut -d= -f2) == "127.0.0.1#5350" ]] && [[ $(awk '/port/' /etc/dnsmasq.conf | cut -d= -f2) == "53" ]]; then
-  de_GWDconnect
-fi
-
 preDownload
 
 preUpdate
