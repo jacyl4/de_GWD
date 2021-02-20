@@ -36,6 +36,7 @@ rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
 nameserver 119.29.29.29
 nameserver 119.28.28.28
+nameserver 182.254.118.118
 nameserver 114.114.114.114
 nameserver 114.114.115.115
 EOF
@@ -178,6 +179,7 @@ else
 cat << EOF >/etc/resolv.conf
 nameserver 119.29.29.29
 nameserver 119.28.28.28
+nameserver 182.254.118.118
 nameserver 114.114.114.114
 nameserver 114.114.115.115
 EOF
