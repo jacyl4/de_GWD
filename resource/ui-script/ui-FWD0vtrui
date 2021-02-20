@@ -6,8 +6,9 @@ vtruiIn=`cat << EOF
    {
       "port": 11810,
       "listen": "127.0.0.1",
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
+        "decryption": "none",
         "clients": [
           {
             "id": "00000000-0000-0000-0000-000000000000",

@@ -425,8 +425,9 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     {
     "port":11810,
     "listen":"127.0.0.1",
-    "protocol":"vmess",
+    "protocol":"vless",
     "settings":{
+      "decryption": "none",
       "clients":[]
       },
     "streamSettings": {
@@ -481,7 +482,7 @@ cat << EOF >/tmp/vtruiOB0
         "enabled": true,
         "concurrency": 8
       },
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
         "vnext": [
           {
@@ -490,7 +491,7 @@ cat << EOF >/tmp/vtruiOB0
             "users": [
               {
                 "id": "$upUUID",
-                "security": "auto",
+                "encryption": "none",
                 "level": 1
               }
             ]

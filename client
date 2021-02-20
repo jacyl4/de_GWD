@@ -510,14 +510,14 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
 ],
 "outbounds":[
   {
-    "protocol":"vmess",
+    "protocol":"vless",
     "settings":{"vnext":[{
           "address":"xxxx.ooo",
           "port":443,
           "users":[
             {
               "id":"00000000-0000-0000-0000-000000000000",
-              "security": "auto",
+              "encryption":"none",
               "level": 1
             }
           ]
@@ -1746,10 +1746,6 @@ fi
 
 updateGWD(){
 [ -f /opt/de_GWD/version.php ] && red "this is not client" && exit
-
-if [[ $(cat /etc/resolv.conf | awk '/nameserver/{print$2}') = "127.0.0.1" ]] && [[ $(awk '/PIHOLE_DNS_1/' /etc/pihole/setupVars.conf 2>/dev/null | cut -d= -f2) == "127.0.0.1#5350" ]] && [[ $(awk '/port/' /etc/dnsmasq.conf | cut -d= -f2) == "53" ]]; then
-  de_GWDconnect
-fi
 
 preDownload
 
