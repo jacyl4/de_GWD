@@ -252,7 +252,7 @@ sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
 if [[ $(uname -r) =~ "bbrplus" ]]; then
-  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
   echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 else
   echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
@@ -1142,7 +1142,7 @@ cat << EOF >~/bbrkernel/clearkernel
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 sysctl -p
 crontab -l > ~/now.cron
@@ -1532,7 +1532,7 @@ if [[ -f "/opt/de_GWD/version.php" ]]; then
 fi
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus+fq_codel and reboot"
+    green  "2. Install bbrplus+fq and reboot"
     green  "3. Install latest kernel BBR and reboot"
     red    "4. Change domain and generate new certificate"
     red    "5. Change v2ray path & UUID"
