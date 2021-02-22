@@ -1472,6 +1472,8 @@ port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
+serverName="de_GWD"
+
 cat << EOF >/etc/network/interfaces
 source /etc/network/interfaces.d/*
 
@@ -1537,8 +1539,6 @@ de_GWDconnect
 installDep
 
 installNginx
-
-serverName="de_GWD"
 
 nginxSet
 

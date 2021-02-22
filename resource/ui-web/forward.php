@@ -273,7 +273,7 @@
     <label class="input-group-text">上级v2节点</label>
   </div>
   <div class="input-group-append">
-    <button id="v2nodeNAMEshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->upstream ?>"><?php $v2nodeID = json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->upstream; echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$v2nodeID]->name ?></button>
+    <button id="v2nodeNAMEshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->FORWARD->FWD1->upstream ?>"><?php system('sudo /opt/de_GWD/ui-checkVtrui1') ?></button>
     <div id="v2nodeNAME" class="dropdown-menu">
     </div>
   </div>
