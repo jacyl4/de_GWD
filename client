@@ -246,8 +246,16 @@ preConf(){
 cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
+root soft nofile 1000000
+root hard nofile 1000000
 * soft nproc 64000
 * hard nproc 64000
+root soft nproc 64000
+root hard nproc 64000
+* soft core unlimited
+* hard core unlimited
+root soft core unlimited
+root hard core unlimited
 EOF
 
 cat << EOF >~/.bash_profile
@@ -256,7 +264,11 @@ HISTCONTROL=ignoredups
 EOF
 source ~/.bash_profile
 
+modprobe iptable_nat
+modprobe nf_nat
 modprobe ip_conntrack
+modprobe nf_conntrack
+modprobe xt_conntrack
 cat << EOF >/etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 2
@@ -265,10 +277,14 @@ fs.inotify.max_user_instances = 819200
 fs.inotify.max_queued_events = 32000
 fs.inotify.max_user_watches = 64000
 net.unix.max_dgram_qlen = 1024
-net.nf_conntrack_max = 1000000
-net.netfilter.nf_conntrack_max = 1000000
+net.nf_conntrack_max = 131072
+net.netfilter.nf_conntrack_max = 131072
+net.netfilter.nf_conntrack_buckets = 65536
 net.netfilter.nf_conntrack_checksum = 0
-net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 5
+net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 30
+net.netfilter.nf_conntrack_tcp_timeout_time_wait = 30
+net.netfilter.nf_conntrack_tcp_timeout_close_wait = 15
+net.netfilter.nf_conntrack_tcp_timeout_established = 300
 net.core.netdev_max_backlog = 250000
 net.core.optmem_max = 4194304
 net.core.rmem_max = 4194304
