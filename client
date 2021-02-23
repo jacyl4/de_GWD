@@ -165,9 +165,8 @@ fi
 
 
 de_GWDconnect(){
-$(curl -Is google.com | head -n 1) >/dev/null 2>&1
-echo ""
-if [[ $(curl -Is google.com | head -n 1) =~ "HTTP" ]]; then
+echo
+if [[ $(curl -Is google.com | head -n 1) =~ "HTTP" ]] || [[ $(curl -Is youtube.com | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
