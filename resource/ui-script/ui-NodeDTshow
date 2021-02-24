@@ -168,7 +168,7 @@ cat >/opt/de_GWD/vtrui/config.json << EOF
       },
       {
         "type": "field",
-        "port": "53,5310,5311,5320,5350",
+        "port": "53,5310,5320,5350",
         "network": "tcp,udp",
         "outboundTag": "direct"
       },

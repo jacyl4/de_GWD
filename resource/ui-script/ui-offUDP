@@ -101,8 +101,6 @@ iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
