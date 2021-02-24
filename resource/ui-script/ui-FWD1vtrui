@@ -2,7 +2,6 @@
 rm -rf /opt/de_GWD/vtrui1
 mkdir -p /opt/de_GWD/vtrui1
 cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
-cp -f /opt/de_GWD/vtrui/v2ctl /opt/de_GWD/vtrui1/v2ctl
 cp -f /opt/de_GWD/vtrui/geoip.dat /opt/de_GWD/vtrui1/geoip.dat
 chmod -R +x /opt/de_GWD/vtrui1
 

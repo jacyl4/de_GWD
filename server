@@ -417,18 +417,16 @@ pihole restartdns
 
 
 
-installV2ray(){
+installXray(){
 rm -rf /opt/de_GWD/vtrui
 rm -rf /etc/vtrui
 mkdir -p /opt/de_GWD/vtrui
 wget --no-check-certificate -c -O /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
 rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui
-cp -f /tmp/vtrui/v2ray /opt/de_GWD/vtrui/vtrui
-cp -f /tmp/vtrui/v2ctl /opt/de_GWD/vtrui/v2ctl
+cp -f /tmp/vtrui/Xray /opt/de_GWD/vtrui/vtrui
 cp -f /tmp/vtrui/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 chmod +x /opt/de_GWD/vtrui/vtrui
-chmod +x /opt/de_GWD/vtrui/v2ctl
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
@@ -1083,7 +1081,7 @@ installPihole
 
 piholeSet
 
-installV2ray
+installXray
 
 v2otDirect
 
@@ -1326,7 +1324,7 @@ blue "-----------------------------------------------"
 
 
 
-changeV2rayVerify(){
+changeXrayVerify(){
     green "=========="
     green " New path"
     green "=========="
@@ -1346,32 +1344,32 @@ jq --arg nuuid "$nuuid" '.inbounds[0].settings.clients[0].id=$nuuid' | sponge /o
 
 systemctl restart vtrui
 blue "------------------------------"
-blue  "Change v2ray UUID&path [done]"
+blue  "Change Xray UUID&path [done]"
 blue "------------------------------"
 }
 
 
 
-changev2rayupstream(){
+changeXrayupstream(){
     green "==================================================="
-    green "Y. Change v2ray upstream / N. Delete v2ray upstream"
+    green "Y. Change Xray upstream / N. Delete Xray upstream"
     green "==================================================="
     read v2UpStreamYN
 
 if [[ "$v2UpStreamYN" = "Y" ]] || [[ "$v2UpStreamYN" = "y" ]]; then
 
     green "======================"
-    green "v2ray upstream domain"
+    green "Xray upstream domain"
     green "======================"
     read upDomainP
 
     green "======================"
-    green "v2ray upstream path"
+    green "Xray upstream path"
     green "======================"
     read upPath
 
     green "======================"
-    green "v2ray upstream UUID"
+    green "Xray upstream UUID"
     green "======================"
     read upUUID
 
@@ -1382,7 +1380,7 @@ upPort=$(echo $upDomainP | cut -d: -f2 | grep '^[[:digit:]]*$')
 v2otUpstream
 
 blue "-----------------------------"
-blue  "Change v2ray upstream [done]"
+blue  "Change Xray upstream [done]"
 blue "-----------------------------"
 
 elif [[ "$v2UpStreamYN" = "N" ]] || [[ "$v2UpStreamYN" = "n" ]]; then
@@ -1390,7 +1388,7 @@ elif [[ "$v2UpStreamYN" = "N" ]] || [[ "$v2UpStreamYN" = "n" ]]; then
 v2otDirect
 
 blue "-----------------------------"
-blue  "Delete v2ray upstream [done]"
+blue  "Delete Xray upstream [done]"
 blue "-----------------------------"
 fi
 }
@@ -1410,7 +1408,7 @@ installPihole
 
 piholeSet
 
-installV2ray
+installXray
 
 if [[ -n $upDomain ]] && [[ $upDomain != null ]]; then
   v2otUpstream
@@ -1445,7 +1443,7 @@ v2path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/c
 v2uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json)
 
 blue "---------------------------------------------"
-green "V2ray node information"
+green "Xray node information"
 echo ""
 blue "DoH:    $(yellow "$vpsdomainP/dq")"
 blue "Domain: $(yellow "$vpsdomainP")"
@@ -1508,11 +1506,11 @@ else
 fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusGOOD] V2RAY          [working]"
+    echo "[$statusGOOD] Xray           [working]"
 elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
-    echo "[$statusBAD] V2RAY          [not Installed]"
+    echo "[$statusBAD] Xray           [not Installed]"
 else
-    echo "[$statusBAD] V2RAY          [start failed]"
+    echo "[$statusBAD] Xray           [start failed]"
 fi
 
 if [[ $(systemctl is-active nginx) = "active" ]]; then
@@ -1549,11 +1547,11 @@ fi
     green  "2. Install bbrplus+fq_codel and reboot"
     green  "3. Install latest kernel BBR and reboot"
     red    "4. Change domain and generate new certificate"
-    red    "5. Change v2ray path & UUID"
+    red    "5. Change Xray path & UUID"
     red    "6. Change static IP"
-    yellow "7. Set v2ray upsteram"
+    yellow "7. Set Xray upsteram"
     yellow "0. Update de_GWD"
-    green  "11.Print v2ray node information"
+    green  "11.Print Xray node information"
     red    "00.AutoUpdate turn on/off"
     red    "CTRL+C EXIT"
     echo ""
@@ -1576,7 +1574,7 @@ fi
     start_menu
     ;;
     5)
-    changeV2rayVerify
+    changeXrayVerify
     start_menu
     ;;
     6)
@@ -1584,7 +1582,7 @@ fi
     start_menu
     ;;
     7)
-    changev2rayupstream
+    changeXrayupstream
     start_menu
     ;;
     0)

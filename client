@@ -427,7 +427,7 @@ echo "$statusInstalled smartdns"
 
 
 
-installV2ray(){
+installXray(){
 systemctl disable --now v2dns >/dev/null 2>&1
 systemctl disable --now vtrui >/dev/null 2>&1
 mkdir -p /opt/de_GWD/v2dns
@@ -435,14 +435,10 @@ mkdir -p /opt/de_GWD/vtrui
 
 rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui
-cp -f /tmp/vtrui/v2ray /opt/de_GWD/v2dns/v2dns
-cp -f /tmp/vtrui/v2ctl /opt/de_GWD/v2dns/v2ctl
-cp -f /tmp/vtrui/v2ray /opt/de_GWD/vtrui/vtrui
-cp -f /tmp/vtrui/v2ctl /opt/de_GWD/vtrui/v2ctl
+cp -f /tmp/vtrui/Xray /opt/de_GWD/v2dns/v2dns
+cp -f /tmp/vtrui/Xray /opt/de_GWD/vtrui/vtrui
 chmod +x /opt/de_GWD/v2dns/v2dns
-chmod +x /opt/de_GWD/v2dns/v2ctl
 chmod +x /opt/de_GWD/vtrui/vtrui
-chmod +x /opt/de_GWD/vtrui/v2ctl
 
 cat << EOF >/opt/de_GWD/v2dns/config.json
 {
@@ -1520,7 +1516,7 @@ cleanDep
 
 SmartDNSset
 
-installV2ray
+installXray
 
 installIptablesProxy
 
@@ -1770,7 +1766,7 @@ cleanDep
 
 SmartDNSset
 
-installV2ray
+installXray
 
 installIptablesProxy
 
@@ -1822,11 +1818,11 @@ else
 fi
 
 if [[ $(systemctl is-active vtrui) = "active" ]]; then
-    echo "[$statusGOOD] V2RAY          [working]"
+    echo "[$statusGOOD] Xray           [working]"
 elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
-    echo "[$statusBAD] V2RAY          [not Installed]"
+    echo "[$statusBAD] Xray           [not Installed]"
 else
-    echo "[$statusBAD] V2RAY          [start failed]"
+    echo "[$statusBAD] Xray           [start failed]"
 fi
 
 if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
