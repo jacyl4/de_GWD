@@ -84,6 +84,7 @@ rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
 
 if [[ $(uname -m) == "aarch64" ]];then
+  rm -rf /usr/share/nginx
   apt purge fontconfig-config fonts-dejavu-core libfontconfig1 libfreetype6 libgd3 libjbig0 libjpeg62-turbo libnginx-mod-http-auth-pam libnginx-mod-http-dav-ext libnginx-mod-http-echo libnginx-mod-http-geoip libnginx-mod-http-image-filter libnginx-mod-http-subs-filter libnginx-mod-http-upstream-fair libnginx-mod-http-xslt-filter libnginx-mod-mail libnginx-mod-stream libtiff5 libwebp6 libx11-6 libx11-data libxau6 libxcb1 libxdmcp6 libxpm4 libxslt1.1 nginx nginx-common nginx-full
 fi
 
