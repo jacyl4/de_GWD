@@ -375,7 +375,6 @@ server 223.5.5.5
 server 223.6.6.6
 EOF
 
-rm -rf /run/smartdns.pid
 rm -rf /etc/systemd/system/smartdns.service
 cat << "EOF" >/lib/systemd/system/smartdns.service
 [Unit]
@@ -388,6 +387,7 @@ LimitNPROC=64000
 LimitNOFILE=1000000
 LimitCORE=infinity
 EnvironmentFile=/etc/default/smartdns
+ExecStartPost=/bin/sh -c "echo $MAINPID >/run/smartdns.pid"
 ExecStart=/usr/sbin/smartdns -c /etc/smartdns/smartdns.conf -p /run/smartdns.pid
 KillMode=mixed
 ExecStop=/bin/kill -s STOP $MAINPID
@@ -890,7 +890,6 @@ opcache.fast_shutdown=1
 opcache.save_comments=1
 EOF
 
-rm -rf /run/php-fpm.pid
 rm -rf /etc/systemd/system/php7.4-fpm.service
 cat << "EOF" >/lib/systemd/system/php7.4-fpm.service
 [Unit]
@@ -948,7 +947,6 @@ elif [[ $(uname -m) == "aarch64" ]];then
   apt install nginx
 fi
 
-rm -rf /run/nginx.pid
 rm -rf /etc/systemd/system/nginx.service
 cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
@@ -975,6 +973,8 @@ RestartSec=2
 WantedBy=multi-user.target
 EOF
 
+mkdir /etc/systemd/system/nginx.service.d
+printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
 systemctl daemon-reload
 systemctl enable --now nginx
 

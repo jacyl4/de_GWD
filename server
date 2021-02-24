@@ -574,7 +574,6 @@ mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 fi
 
-rm -rf /run/nginx.pid
 rm -rf /etc/systemd/system/nginx.service
 cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
@@ -601,6 +600,8 @@ RestartSec=2s
 WantedBy=multi-user.target
 EOF
 
+mkdir /etc/systemd/system/nginx.service.d
+printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
 systemctl daemon-reload
 systemctl enable --now nginx
 
