@@ -450,8 +450,8 @@ doh2PortStr=$([ -n "$doh2Port" ] && echo $doh2Port | sed 's/^/:/')
 
 cat << EOF >>/etc/smartdns/smartdns.conf
 
-server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -no-check-certificate -exclude-default-group -group doh
-server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -no-check-certificate -exclude-default-group -group doh
+server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -exclude-default-group -group doh
+server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -exclude-default-group -group doh
 EOF
 systemctl restart smartdns
 
