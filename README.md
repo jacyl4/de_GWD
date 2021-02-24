@@ -23,7 +23,7 @@ bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
 [de_GWD doc](https://jacyl4.gitbook.io/de-gwd-doc/)
 
 ## Thanks to
-* [ v2fly/v2ray-core ](https://github.com/v2fly/v2ray-core)
+* [ XTLS/Xray-core ](https://github.com/XTLS/Xray-core)
 * [ Loyalsoldier/v2ray-rules-dat ](https://github.com/Loyalsoldier/v2ray-rules-dat)
 * [ pi-hole/pi-hole ](https://github.com/pi-hole/pi-hole)
 * [ m13253/dns-over-https ](https://github.com/m13253/dns-over-https)
