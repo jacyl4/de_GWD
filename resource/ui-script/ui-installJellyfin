@@ -14,7 +14,6 @@ apt update && apt install jellyfin
 
 cat << EOF >/etc/nginx/conf.d/jellyfin.conf
 server {
-  listen 8097 quic reuseport;
   listen 8097 ssl http2 fastopen=128 reuseport;
   root /var/www/html;
   
@@ -22,7 +21,7 @@ server {
   ssl_certificate_key /var/www/ssl/de_GWD.key;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
-  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_ciphers  'ECDHE-ECDSA-AES128-GCM-SHA256 ECDHE-ECDSA-CHACHA20-POLY1305 ECDHE-RSA-AES128-GCM-SHA256 ECDHE-RSA-CHACHA20-POLY1305 ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
   ssl_session_timeout 10m;
   ssl_session_cache builtin:1000 shared:SSL:10m;
   ssl_buffer_size 4k;
@@ -30,7 +29,6 @@ server {
   ssl_early_data on;
   proxy_set_header Early-Data \$ssl_early_data;
 
-  add_header alt-svc 'quic=":8097"; h3-27=":8097"; h3-25=":8097"; h3-T050=":8097"; h3-Q050=":8097"; h3-Q049=":8097"; h3-Q048=":8097"; h3-Q046=":8097"; h3-Q043=":8097"; ma=86400';
   add_header Referrer-Policy                    "no-referrer"       always;
   add_header X-Content-Type-Options             "nosniff"           always;
   add_header X-Download-Options                 "noopen"            always;
@@ -87,7 +85,6 @@ EOF
 
 if [[ $(uname -m) == "aarch64" ]];then
     sed -i '/ssl_early_data/d' /etc/nginx/conf.d/jellyfin.conf
-    sed -i '/quic/d' /etc/nginx/conf.d/jellyfin.conf
 fi
 
 systemctl reload nginx

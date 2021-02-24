@@ -11,7 +11,7 @@ statusInstalled=$(green "[ installed ]")
 statuSuccess=$(green "[ OK ]")
 statusFailed=$(red "[ failed ]")
 export DEBIAN_FRONTEND=noninteractive
-de_gwd_nginx="1.19.6"
+de_gwd_nginx="1.19.7"
 
 
 
@@ -574,6 +574,7 @@ mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 fi
 
+rm -rf /run/nginx.pid
 rm -rf /etc/systemd/system/nginx.service
 cat << "EOF" >/lib/systemd/system/nginx.service
 [Unit]
@@ -844,7 +845,6 @@ if [[ -n $port ]] && [[ $port != "443" ]]; then
 
 cat << EOF >/etc/nginx/conf.d/1_serverHead
 server {
-  listen $port quic reuseport;
   listen $port ssl http2 fastopen=128 reuseport;
   server_name $domain;
   root /var/www/html;
@@ -853,7 +853,6 @@ server {
   ssl_certificate /var/www/ssl/$topDomain.cer;
   ssl_certificate_key /var/www/ssl/$topDomain.key;
 
-  add_header alt-svc 'quic=":$port"; h3-27=":$port"; h3-25=":$port"; h3-T050=":$port"; h3-Q050=":$port"; h3-Q049=":$port"; h3-Q048=":$port"; h3-Q046=":$port"; h3-Q043=":$port"; ma=86400';
 EOF
 
 else
@@ -866,7 +865,6 @@ server {
 }
 
 server {
-  listen 443 quic reuseport;
   listen 443 ssl http2 fastopen=128 reuseport;
   server_name $domain;
   root /var/www/html;
@@ -875,7 +873,6 @@ server {
   ssl_certificate /var/www/ssl/$domain.cer;
   ssl_certificate_key /var/www/ssl/$domain.key;
 
-  add_header alt-svc 'quic=":443"; h3-27=":443"; h3-25=":443"; h3-T050=":443"; h3-Q050=":443"; h3-Q049=":443"; h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"; ma=86400';
 EOF
 
 fi
@@ -884,7 +881,7 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
-  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_ciphers  '[ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305|ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
   ssl_session_timeout 10m;
   ssl_session_cache builtin:1000 shared:SSL:10m;
   ssl_buffer_size 4k;

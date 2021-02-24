@@ -4,7 +4,6 @@ FWD1path=$(jq -r '.FORWARD.FWD1.path' /opt/de_GWD/0conf)
 
 cat << EOF >/etc/nginx/conf.d/forward1.conf
 server {
-  listen $FWD1port quic reuseport;
   listen $FWD1port ssl http2 fastopen=128 reuseport;
   root /var/www/html;
   
@@ -13,7 +12,7 @@ server {
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
-  ssl_ciphers TLS13+AESGCM+AES128:TLS13+AESGCM+AES256:TLS13+CHACHA20:EECDH+ECDSA+AESGCM+AES128:EECDH+ECDSA+CHACHA20:EECDH+ECDSA+AESGCM+AES256:EECDH+ECDSA+AES128+SHA:EECDH+ECDSA+AES256+SHA:EECDH+aRSA+AESGCM+AES128:EECDH+aRSA+CHACHA20:EECDH+aRSA+AESGCM+AES256:EECDH+aRSA+AES128+SHA:EECDH+aRSA+AES256+SHA:RSA+AES128+SHA:RSA+AES256+SHA:RSA+3DES;
+  ssl_ciphers  'ECDHE-ECDSA-AES128-GCM-SHA256 ECDHE-ECDSA-CHACHA20-POLY1305 ECDHE-RSA-AES128-GCM-SHA256 ECDHE-RSA-CHACHA20-POLY1305 ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
   ssl_session_timeout 10m;
   ssl_session_cache builtin:1000 shared:SSL:10m;
   ssl_buffer_size 4k;
@@ -25,7 +24,6 @@ server {
   ssl_stapling_verify on;
   ssl_stapling_file /var/www/ssl/ocsp.resp;
 
-  add_header alt-svc 'quic=":$FWD1port"; h3-27=":$FWD1port"; h3-25=":$FWD1port"; h3-T050=":$FWD1port"; h3-Q050=":$FWD1port"; h3-Q049=":$FWD1port"; h3-Q048=":$FWD1port"; h3-Q046=":$FWD1port"; h3-Q043=":$FWD1port"; ma=86400';
   add_header Referrer-Policy                    "no-referrer"       always;
   add_header X-Content-Type-Options             "nosniff"           always;
   add_header X-Download-Options                 "noopen"            always;
@@ -69,7 +67,6 @@ EOF
 
 if [[ $(uname -m) == "aarch64" ]];then
     sed -i '/ssl_early_data/d' /etc/nginx/conf.d/forward1.conf
-    sed -i '/quic/d' /etc/nginx/conf.d/forward1.conf
 fi
 
 systemctl reload nginx
