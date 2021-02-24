@@ -435,8 +435,8 @@ mkdir -p /opt/de_GWD/vtrui
 
 rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui
-cp -f /tmp/vtrui/Xray /opt/de_GWD/v2dns/v2dns
-cp -f /tmp/vtrui/Xray /opt/de_GWD/vtrui/vtrui
+cp -f /tmp/vtrui/xray /opt/de_GWD/v2dns/v2dns
+cp -f /tmp/vtrui/xray /opt/de_GWD/vtrui/vtrui
 chmod +x /opt/de_GWD/v2dns/v2dns
 chmod +x /opt/de_GWD/vtrui/vtrui
 

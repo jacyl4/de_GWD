@@ -424,7 +424,7 @@ mkdir -p /opt/de_GWD/vtrui
 wget --no-check-certificate -c -O /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
 rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui
-cp -f /tmp/vtrui/Xray /opt/de_GWD/vtrui/vtrui
+cp -f /tmp/vtrui/xray /opt/de_GWD/vtrui/vtrui
 cp -f /tmp/vtrui/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 chmod +x /opt/de_GWD/vtrui/vtrui
 
