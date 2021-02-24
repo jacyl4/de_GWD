@@ -1532,8 +1532,6 @@ preInstall
 
 preConf
 
-cleanDep
-
 SmartDNSset
 
 installXray
