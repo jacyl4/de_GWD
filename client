@@ -202,7 +202,7 @@ systemctl restart v2dns
 fi
 
 echo
-if [[ $(curl -Is google.com | head -n 1) =~ "HTTP" ]] || [[ $(curl -Is youtube.com | head -n 1) =~ "HTTP" ]]; then
+if [[ $(curl -Is google.com) =~ "HTTP" ]] || [[ $(curl -Is youtube.com) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
     echo "$statuSuccess de_GWD server connect"
