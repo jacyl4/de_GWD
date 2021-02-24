@@ -65,8 +65,4 @@ location $FWD1path {
 }
 EOF
 
-if [[ $(uname -m) == "aarch64" ]];then
-    sed -i '/ssl_early_data/d' /etc/nginx/conf.d/forward1.conf
-fi
-
 systemctl reload nginx

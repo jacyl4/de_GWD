@@ -83,10 +83,6 @@ location /socket {
 }
 EOF
 
-if [[ $(uname -m) == "aarch64" ]];then
-    sed -i '/ssl_early_data/d' /etc/nginx/conf.d/jellyfin.conf
-fi
-
 systemctl reload nginx
 
 JavScraperURL=$(curl --silent "https://api.github.com/repos/JavScraper/Emby.Plugins.JavScraper/releases/latest" | jq -r .assets[1].browser_download_url)

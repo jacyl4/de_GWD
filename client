@@ -83,6 +83,9 @@ rm -rf /opt/de_GWD/doh-client*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload
 
+if [[ $(uname -m) == "aarch64" ]];then
+  apt purge fontconfig-config fonts-dejavu-core libfontconfig1 libfreetype6 libgd3 libjbig0 libjpeg62-turbo libnginx-mod-http-auth-pam libnginx-mod-http-dav-ext libnginx-mod-http-echo libnginx-mod-http-geoip libnginx-mod-http-image-filter libnginx-mod-http-subs-filter libnginx-mod-http-upstream-fair libnginx-mod-http-xslt-filter libnginx-mod-mail libnginx-mod-stream libtiff5 libwebp6 libx11-6 libx11-data libxau6 libxcb1 libxdmcp6 libxpm4 libxslt1.1 nginx nginx-common nginx-full
+fi
 
 if [[ -f "/usr/bin/dockerd" ]]; then
 	docker stop nginx >/dev/null 2>&1
@@ -165,6 +168,38 @@ fi
 
 
 de_GWDconnect(){
+echo
+sed -i '/Nice=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/smartdns.service
+sed -i '/Nice=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/v2dns.service
+
+sed -i '/Restart=/i\Nice=-10' /lib/systemd/system/smartdns.service
+sed -i '/Restart=/i\CPUSchedulingPolicy=fifo' /lib/systemd/system/smartdns.service
+sed -i '/Restart=/i\CPUSchedulingPriority=60' /lib/systemd/system/smartdns.service
+sed -i '/Restart=/i\Nice=-9' /lib/systemd/system/v2dns.service
+sed -i '/Restart=/i\CPUSchedulingPolicy=fifo' /lib/systemd/system/v2dns.service
+sed -i '/Restart=/i\CPUSchedulingPriority=59' /lib/systemd/system/v2dns.service
+systemctl daemon-reload
+systemctl restart smartdns
+systemctl restart v2dns
+
+if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
+echo "$statuSuccess Boost DNS"
+else
+sed -i '/Nice=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/smartdns.service
+sed -i '/Nice=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/v2dns.service
+systemctl daemon-reload
+systemctl restart smartdns
+systemctl restart v2dns
+fi
+
 echo
 if [[ $(curl -Is google.com | head -n 1) =~ "HTTP" ]] || [[ $(curl -Is youtube.com | head -n 1) =~ "HTTP" ]]; then
     echo "$statuSuccess de_GWD server connect"
@@ -922,19 +957,19 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-if [[ $(uname -m) == "x86_64" ]];then
-  if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
-    rm -rf /tmp/nginx*
-    wget --no-check-certificate -c -O /tmp/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
-    unzip /tmp/nginx.zip -d /tmp
-    mv -f /tmp/nginx/nginx_amd64 /usr/sbin/nginx
-    chmod +x /usr/sbin/nginx
-    mkdir -p "/etc/nginx/conf.d/"
-    mv -f /tmp/nginx/conf/* /etc/nginx/
-    rm -rf /tmp/nginx*
-  fi
-elif [[ $(uname -m) == "aarch64" ]];then
-  apt install nginx
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
+  rm -rf /tmp/nginx*
+  wget --no-check-certificate -c -O /tmp/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+  unzip /tmp/nginx.zip -d /tmp
+    if [[ $(uname -m) == "x86_64" ]];then
+      mv -f /tmp/nginx/nginx_amd64 /usr/sbin/nginx
+    elif [[ $(uname -m) == "aarch64" ]];then
+      mv -f /tmp/nginx/nginx_arm64 /usr/sbin/nginx
+    fi
+  chmod +x /usr/sbin/nginx
+  mkdir -p "/etc/nginx/conf.d/"
+  mv -f /tmp/nginx/conf/* /etc/nginx/
+  rm -rf /tmp/nginx*
 fi
 
 rm -rf /etc/systemd/system/nginx.service
@@ -1210,11 +1245,6 @@ cat /etc/nginx/conf.d/2_tlsParameter >>/etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >>/etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/4_end >>/etc/nginx/conf.d/default.conf
 
-if [[ $(uname -m) == "aarch64" ]];then
-    sed -i '/ssl_early_data/d' /etc/nginx/conf.d/default.conf
-    sed -i '/brotli/d' /etc/nginx/nginx.conf
-fi
-
 systemctl reload nginx
 EOF
 
@@ -1413,10 +1443,6 @@ if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf) = "on" ]];then
 fi
 systemctl restart vtrui
 systemctl restart iptables-proxy
-
-if [[ $(jq -r '.dns.boostDNS' /opt/de_GWD/0conf) = "on" ]]; then
-  /opt/de_GWD/ui-onBoostDNS >/dev/null 2>&1
-fi
 
 crontab -l >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_am4/d' /tmp/now.cron
@@ -1708,45 +1734,6 @@ blue "----------------------"
 
 
 
-boostDNS(){
-    green "=========="
-    green "Boost DNS"
-    green "=========="
-    green  "1. Enable"
-    yellow "2. Disable"
-    read boostDNSswitch
-
-if [[ "$boostDNSswitch" = "1" ]]; then
-
-/opt/de_GWD/ui-onBoostDNS >/dev/null 2>&1
-
-if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
-green "-------------------"
-green "Boost DNS [success]"
-green "-------------------"
-else
-red "-----------------"
-red "Boost DNS [faild]"
-red "-----------------"
-/opt/de_GWD/ui-offBoostDNS >/dev/null 2>&1
-fi
-elif [[ "$boostDNSswitch" = "2" ]]; then
-
-/opt/de_GWD/ui-offBoostDNS >/dev/null 2>&1
-
-if [[ $(systemctl is-active smartdns) = "active" ]] && [[ $(systemctl is-active v2dns) = "active" ]]; then
-green "-------------------"
-green "Boost DNS [success]"
-green "-------------------"
-else
-red "-----------------"
-red "Boost DNS [faild]"
-red "-----------------"
-fi
-fi
-}
-
-
 updateGWD(){
 [ -f /opt/de_GWD/version.php ] && red "this is not client" && exit
 
@@ -1862,7 +1849,6 @@ fi
     green  "1. Install de_GWD"
     green  "2. Install bbrplus+fq_codel and reboot"
     green  "3. Install latest kernel BBR and reboot"
-    yellow "8. Boost DNS"
     yellow "9. Change de_GWD password"
     yellow "0. Update de_GWD"
     red    "CTRL+C EXIT"
@@ -1879,10 +1865,6 @@ fi
     ;;
     3)
     installBBR
-    start_menu
-    ;;
-    8)
-    boostDNS
     start_menu
     ;;
     9)
