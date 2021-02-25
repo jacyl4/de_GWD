@@ -370,11 +370,11 @@ $('#confirmNFSaddr').click(function(){
 
 $.get('./act/arrNFS.php', function(data) {
 var data = data.split('\n');
-var len = data.length;
+var len = data.length-1;
 for( let i = 0; i<len; i++){
-  let NFSpoint = data[i].split(' ')[0];
-  let NFSserver = data[i].split(' ')[2].split(':')[0];
-  let NFSaddress = data[i].split(' ')[2].split(':')[1];
+  let NFSpoint = data[i].split(/\s+/)[0];
+  let NFSserver = data[i].split(/\s+/)[2].split(':')[0];
+  let NFSaddress = data[i].split(/\s+/)[2].split(':')[1];
   $('#NFSbody').append(`
     <div class="form-row">
       <div class="col-md-4 input-group my-2">
