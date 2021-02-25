@@ -632,7 +632,7 @@ $('#FRPbindProtocol').html("KCP")
 
 $('#buttonFRPinstall').click(function(){
 $.get('./act/installFRPc.php', function(result){})
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
+window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
 })
 
 $('#buttonOnFRP').click(function(){
@@ -774,7 +774,7 @@ WGswitch()
 
 $('#buttonWGinstall').click(function(){
 $.get('./act/installWG.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes');
+window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes');
 })
 
 $('#buttonOnWG').click(function(){

@@ -303,7 +303,7 @@ $("#updateModal").modal('show')
 $('#buttonUpdateRun').click(function(){
 $.get('./act/updateRun.php', function(result){})
 var updateDst = "http://"+$("#updateDst").val()
-window.open(updateDst, 'popupWindow', 'width=800, height=600, scrollbars=yes')
+window.open(updateDst, 'popupWindow', 'width=1000, height=800, scrollbars=yes')
 })
 
 

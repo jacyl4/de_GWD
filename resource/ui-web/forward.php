@@ -392,7 +392,7 @@ cfdomain=$('#CFdomain').val()
 cfapikey=$('#CFapikey').val()
 cfemail=$('#CFemail').val()
 $.get('./act/genCER.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(result){})
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
+window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
 })
 
 $.get('./act/checkCER.php', function(data){

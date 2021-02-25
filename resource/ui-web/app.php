@@ -264,7 +264,7 @@ $('#netdataLi').css('display', 'block')
 
 $('#installNetdata').click(function(){
 $.get('./act/installNetdata.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
+window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
 })
 
 $.get("./act/checkNFS.php", function(data){
@@ -276,7 +276,7 @@ $('#buttonNFSinstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
 
 $('#buttonNFSinstall').click(function(){
 $.get('./act/installNFS.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
+window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
 })
 
 $('#buttonNFSswitch').click(function(){
@@ -292,7 +292,7 @@ $('#buttonJellyfinInstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
 
 $('#buttonJellyfinInstall').click(function(){
 $.get('./act/installJellyfin.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
+window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
 })
 
 $('#buttonNFSAdd').click(function(){
