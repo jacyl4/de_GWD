@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -rf /opt/de_GWD/update
 rm -rf ~/client*
 rm -rf ~/wget-log*
 rm -rf /wget-log*
