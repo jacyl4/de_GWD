@@ -632,7 +632,13 @@ $('#FRPbindProtocol').html("KCP")
 
 $('#buttonFRPinstall').click(function(){
 $.get('./act/installFRPc.php', function(result){})
-window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
+var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
+var timer = setInterval(function() { 
+    if(win.closed) {
+        clearInterval(timer);
+        $.get('./act/installZ.php', function(result){window.location.reload()})
+    }
+}, 500);
 })
 
 $('#buttonOnFRP').click(function(){
@@ -774,7 +780,13 @@ WGswitch()
 
 $('#buttonWGinstall').click(function(){
 $.get('./act/installWG.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes');
+var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
+var timer = setInterval(function() { 
+    if(win.closed) {
+        clearInterval(timer);
+        $.get('./act/installZ.php', function(result){window.location.reload()})
+    }
+}, 500);
 })
 
 $('#buttonOnWG').click(function(){

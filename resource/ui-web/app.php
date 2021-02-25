@@ -264,7 +264,13 @@ $('#netdataLi').css('display', 'block')
 
 $('#installNetdata').click(function(){
 $.get('./act/installNetdata.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
+var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
+var timer = setInterval(function() { 
+    if(win.closed) {
+        clearInterval(timer);
+        $.get('./act/installZ.php', function(result){window.location.reload()})
+    }
+}, 500);
 })
 
 $.get("./act/checkNFS.php", function(data){
@@ -275,8 +281,14 @@ $('#buttonNFSinstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
 })
 
 $('#buttonNFSinstall').click(function(){
-$.get('./act/installNFS.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
+$.get('./act/installNFS.php', function(){})
+var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
+var timer = setInterval(function() { 
+    if(win.closed) {
+        clearInterval(timer);
+        $.get('./act/installZ.php', function(result){window.location.reload()})
+    }
+}, 500);
 })
 
 $('#buttonNFSswitch').click(function(){
@@ -292,7 +304,13 @@ $('#buttonJellyfinInstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
 
 $('#buttonJellyfinInstall').click(function(){
 $.get('./act/installJellyfin.php', function(result){});
-window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
+var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
+var timer = setInterval(function() { 
+    if(win.closed) {
+        clearInterval(timer);
+        $.get('./act/installZ.php', function(result){window.location.reload()})
+    }
+}, 500);
 })
 
 $('#buttonNFSAdd').click(function(){

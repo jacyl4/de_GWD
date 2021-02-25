@@ -303,7 +303,13 @@ $("#updateModal").modal('show')
 $('#buttonUpdateRun').click(function(){
 $.get('./act/updateRun.php', function(result){})
 var updateDst = "http://"+$("#updateDst").val()
-window.open(updateDst, 'popupWindow', 'width=1000, height=800, scrollbars=yes')
+var win = window.open(updateDst, 'popupWindow', 'width=900, height=900, scrollbars=yes')
+var timer = setInterval(function() { 
+    if(win.closed) {
+        clearInterval(timer);
+        window.location.reload()
+    }
+}, 500);
 })
 
 

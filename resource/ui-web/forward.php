@@ -392,7 +392,13 @@ cfdomain=$('#CFdomain').val()
 cfapikey=$('#CFapikey').val()
 cfemail=$('#CFemail').val()
 $.get('./act/genCER.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(result){})
-window.open('/ttyd', 'popupWindow', 'width=1000, height=800, scrollbars=yes')
+var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
+var timer = setInterval(function() { 
+    if(win.closed) {
+        clearInterval(timer);
+        $.get('./act/installZ.php', function(result){window.location.reload()})
+    }
+}, 500);
 })
 
 $.get('./act/checkCER.php', function(data){
