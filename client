@@ -1024,14 +1024,11 @@ rm -rf /tmp/doh*
 
 cat << EOF >/opt/de_GWD/doh-server.conf
 listen = [ "127.0.0.1:8053" ]
-
+local_addr = ""
+cert = ""
+key = ""
 path = "/dq"
-
-upstream = [ 
-  "tcp:127.0.0.1:5320",
-  "udp:127.0.0.1:5320",
-]
-
+upstream = [ "tcp:127.0.0.1:5320" ]
 timeout = 10
 tries = 3
 verbose = false
