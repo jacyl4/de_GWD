@@ -35,7 +35,7 @@
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
-    <a class="navbar-brand mr-1" href="https://github.com/jacyl4/de_GWD/releases" target="_blank">寒月</a>
+    <a class="navbar-brand mr-1" href="index.php">寒月</a>
     <button class="btn btn-sm btn-outline-light mx-3" data-toggle="modal" data-target="#markThis">备注本机</button>
 
     <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="#">
