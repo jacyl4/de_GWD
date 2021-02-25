@@ -419,7 +419,7 @@ $('#FRPlocalMark'+FRPnum).val('')
 }
 
 function WGgenSkey(){
-$.post('./act/WGgenSkey.php', function(result){window.location.reload()})
+$.get('./act/WGgenSkey.php', function(result){window.location.reload()})
 }
 
 function WGgenCkey(WGgenCkey){
@@ -503,7 +503,7 @@ alert("应用DDNS。。。")
 })
 
 $('#buttonDDNS3322stop').click(function(){
-$.post('./act/ddns3322stop.php', function(result){window.location.reload()})
+$.get('./act/ddns3322stop.php', function(result){window.location.reload()})
 })
 
 
@@ -527,7 +527,7 @@ alert("应用DDNS。。。")
 })
 
 $('#buttonDDNSCFstop').click(function(){
-$.post('./act/ddnsCFstop.php', function(result){window.location.reload()})
+$.get('./act/ddnsCFstop.php', function(result){window.location.reload()})
 })
 
 
@@ -636,7 +636,7 @@ var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.post('./act/installZ.php', function(result){window.location.reload()})
+        $.get('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -663,7 +663,7 @@ $.get('./act/onFRP.php', {FRPdomain:FRPdomain, FRPtoken:FRPtoken, FRPbindPort:FR
 })
 
 $('#buttonOffFRP').click(function(){
-$.post('./act/offFRP.php', function(result){window.location.reload()})
+$.get('./act/offFRP.php', function(result){window.location.reload()})
 })
 
 $('#buttonGenFRPcmd').click(function(){
@@ -783,7 +783,7 @@ var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.post('./act/installZ.php', function(result){window.location.reload()})
+        $.get('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -809,7 +809,7 @@ alert("应用WireGuard。。。")
 })
 
 $('#buttonOffWG').click(function(){
-$.post('./act/offWG.php', function(result){window.location.reload()})
+$.get('./act/offWG.php', function(result){window.location.reload()})
 })
 
 })

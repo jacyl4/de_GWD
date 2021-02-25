@@ -241,7 +241,7 @@ var NFSnum = $(NFSdel).parent().parent().find('input').attr('id')
 var NFSnum = NFSnum.replace(/[^0-9]/ig,"")
 var NFSpoint = $('#NFSpoint'+NFSnum).val()
 $(NFSdel).parent().parent('.form-row').remove()
-$.post('./act/offNFS.php', {NFSpoint:NFSpoint}, function(){})
+$.get('./act/offNFS.php', {NFSpoint:NFSpoint}, function(){})
 }
 
 
@@ -268,7 +268,7 @@ var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.post('./act/installZ.php', function(result){window.location.reload()})
+        $.get('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -286,7 +286,7 @@ var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.post('./act/installZ.php', function(result){window.location.reload()})
+        $.get('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -308,7 +308,7 @@ var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.post('./act/installZ.php', function(result){window.location.reload()})
+        $.get('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })

@@ -396,7 +396,7 @@ var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.post('./act/installZ.php', function(result){window.location.reload()})
+        $.get('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -443,7 +443,7 @@ $.get('./act/FWD0save.php', {portCheck1:portCheck1, FWD0port:FWD0port, FWD0path:
 })
 
 $('#buttonFWD0stop').click(function(){
-$.post('./act/FWD0stop.php', function(result){window.location.reload()})
+$.get('./act/FWD0stop.php', function(result){window.location.reload()})
 })
 
 $('#buttonFWD1save').click(function(){
@@ -455,7 +455,7 @@ $.get('./act/FWD1save.php', {v2nodeID:v2nodeID, FWD1port:FWD1port, FWD1path:FWD1
 })
 
 $('#buttonFWD1stop').click(function(){
-$.post('./act/FWD1stop.php', function(result){window.location.reload()})
+$.get('./act/FWD1stop.php', function(result){window.location.reload()})
 })
 
 })

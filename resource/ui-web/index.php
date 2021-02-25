@@ -538,11 +538,11 @@ window.open("https://github.com/jacyl4/de_GWD/releases")
 })
 
 $('#buttonProxyRestart').click(function(){
-$.post('./act/proxyRestart.php', function(result){window.location.reload()})
+$.get('./act/proxyRestart.php', function(result){window.location.reload()})
 })
 
 $('#buttonProxyStop').click(function(){
-$.post('./act/proxyStop.php', function(result){window.location.reload()})
+$.get('./act/proxyStop.php', function(result){window.location.reload()})
 })
 
 $.get('./act/uptime.php', function(data){$('#uptime').text(data)})
@@ -628,11 +628,11 @@ $.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) })
 })
 
 $('#buttonOnUDP').click(function(){
-$.post('./act/onUDP.php', function(result){window.location.reload()})
+$.get('./act/onUDP.php', function(result){window.location.reload()})
 })
 
 $('#buttonOffUDP').click(function(){
-$.post('./act/offUDP.php', function(result){window.location.reload()})
+$.get('./act/offUDP.php', function(result){window.location.reload()})
 })
 
 $('#buttonSubmitlocalip').click(function(){
@@ -660,11 +660,11 @@ alert("应用DNS设置。。。")
 })
 
 $('#buttonOnAPPLE').click(function(){
-$.post('./act/onAPPLE.php', function(result){window.location.reload()})
+$.get('./act/onAPPLE.php', function(result){window.location.reload()})
 })
 
 $('#buttonOffAPPLE').click(function(){
-$.post('./act/offAPPLE.php', function(result){window.location.reload()})
+$.get('./act/offAPPLE.php', function(result){window.location.reload()})
 })
 
 $('#buttonSubmitStaticIP').click(function(){
@@ -682,7 +682,7 @@ alert('启动DHCP服务。。。')
 })
 
 $('#buttonOffDHCP').click(function(){
-$.post('./act/offDHCP.php', function(result){window.location.reload()})
+$.get('./act/offDHCP.php', function(result){window.location.reload()})
 alert('关闭DHCP服务。。。')
 })
 
