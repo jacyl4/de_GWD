@@ -51,7 +51,7 @@ LimitNOFILE=1000000
 LimitCORE=infinity
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/frp/frps -c /opt/de_GWD/frp/frps.ini
-Restart=on-failure
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
