@@ -20,7 +20,7 @@ LimitCORE=infinity
 NoNewPrivileges=true
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-ExecStart=/opt/de_GWD/vtrui1/vtrui1 -config /opt/de_GWD/vtrui1/config.json
+ExecStart=/opt/de_GWD/vtrui1/vtrui1 -c /opt/de_GWD/vtrui1/config.json
 Restart=always
 RestartSec=2ms
 

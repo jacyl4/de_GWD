@@ -476,7 +476,7 @@ LimitCORE=infinity
 NoNewPrivileges=true
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-ExecStart=/opt/de_GWD/vtrui/vtrui -config /opt/de_GWD/vtrui/config.json
+ExecStart=/opt/de_GWD/vtrui/vtrui -c /opt/de_GWD/vtrui/config.json
 Restart=always
 RestartSec=2ms
 
@@ -698,7 +698,10 @@ listen = [ "127.0.0.1:8053" ]
 
 path = "/dq"
 
-upstream = [ "udp:127.0.0.1:53" ]
+upstream = [ 
+  "tcp:127.0.0.1:53",
+  "udp:127.0.0.1:53",
+]
 
 timeout = 10
 tries = 3
