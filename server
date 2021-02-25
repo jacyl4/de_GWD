@@ -707,6 +707,8 @@ timeout = 10
 tries = 3
 verbose = false
 log_guessed_client_ip = false
+ecs_allow_non_global_ip = false
+ecs_use_precise_ip = false
 EOF
 
 mkdir -p /etc/NetworkManager/dispatcher.d
