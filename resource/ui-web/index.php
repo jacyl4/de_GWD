@@ -145,8 +145,8 @@
                 <div class="">版本检测</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <h6 class="float-left" style="margin-bottom: 0"><span id="currentver" class="badge badge-pill badge-light"></span></h6>
-                <h6 class="float-right" style="margin-bottom: 0"><span id="remotever" class=""></span></h6>
+                <h6 class="float-left" style="margin-bottom: 0"><span id="currentver" class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;"></span></h6>
+                <h6 class="float-right" style="margin-bottom: 0"><span id="remotever" class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;"></span></h6>
               </a>
             </div>
           </div>
@@ -502,11 +502,8 @@ var vera = $.trim(currentvernum)
 var verb = $.trim(remotevernum)
 $('#currentver').html(currentvernum+'本机')
 $('#remotever').html(remotevernum+' 发布')
-
-if (vera == verb) {
-$('#remotever').addClass('badge badge-pill badge-light')
-} else {
-$('#remotever').addClass('badge badge-pill badge-warning')
+if (vera != verb) {
+$('#remotever').attr('class','btn btn-warning')
 }
 })
 }
@@ -521,6 +518,10 @@ $.get('auth.php', {logout:'true'}, function(result){window.location.href="index.
 $('#buttonMarkThis').click(function(){
 markNametxt=$('#markName').val()
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
+
+$('#remotever').click(function(){
+window.open("https://github.com/jacyl4/de_GWD/releases")
 })
 
 $('#buttonProxyRestart').click(function(){
