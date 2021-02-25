@@ -57,7 +57,7 @@ location ~ /\.(?!well-known).* {
 }
 
 location /dq {
-  proxy_pass                http://127.0.0.1:5320;
+  proxy_pass                http://127.0.0.1:8053;
   proxy_set_header          Host \$host;
   proxy_set_header          Upgrade \$http_upgrade;
   proxy_set_header          Connection "upgrade";
