@@ -75,9 +75,7 @@ if [[ -f "/opt/de_GWD/0conf" ]] && [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) !=
   jq --arg updateCMD "bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/client)" '.update.updateCMD=$updateCMD' | sponge /opt/de_GWD/0conf
 fi
 
-if [[ -f /etc/nginx/conf.d/jellyfin.conf ]]; then
-  sed -i '/quic/d' /etc/nginx/conf.d/jellyfin.conf
-fi
+sed -i '/quic/d' /etc/nginx/conf.d/*.conf
 
 systemctl disable --now doh-client >/dev/null 2>&1
 rm -rf /etc/systemd/system/doh-client.service
