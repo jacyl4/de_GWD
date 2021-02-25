@@ -538,11 +538,11 @@ window.open("https://github.com/jacyl4/de_GWD/releases")
 })
 
 $('#buttonProxyRestart').click(function(){
-$.get('./act/proxyRestart.php', function(result){window.location.reload()})
+$.post('./act/proxyRestart.php', function(result){window.location.reload()})
 })
 
 $('#buttonProxyStop').click(function(){
-$.get('./act/proxyStop.php', function(result){window.location.reload()})
+$.post('./act/proxyStop.php', function(result){window.location.reload()})
 })
 
 $.get('./act/uptime.php', function(data){$('#uptime').text(data)})
@@ -576,21 +576,21 @@ for( let i = 0; i<len; i++){
   $('#switch'+i).click(function(){
     $("#nodeTable td:nth-child(6) button").attr('class', "btn btn-outline-secondary btn-sm")
     $('#switch'+i).attr('class', 'btn btn-success btn-sm');
-    $.get("./act/changeNode.php", {nodenum:i}, function(result){})
+    $.get("./act/changeNode.php", {nodenum:i}, function(){})
   })
 
   $('#nodenf').append("<a class='dropdown-item' href='#' id='nodenf"+i+"'>"+nodeNF+"</a>")
   $('#nodenf'+i).click(function(){
     $('#nodenfshow').html(nodeNF)
     $('#nodenfshow').val(i)
-    $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(result){})
+    $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(){})
   })
 
   $('#nodedt').append("<a class='dropdown-item' href='#' id='nodedt"+i+"'>"+nodeDT+"</a>");
   $('#nodedt'+i).click(function(){
     $('#nodedtshow').html(nodeDT)
     $('#nodedtshow').val(i)
-    $.get("./act/changeNodeDT.php", {nodedtnum:i}, function(result){})
+    $.get("./act/changeNodeDT.php", {nodedtnum:i}, function(){})
   })
 }
 })
@@ -628,11 +628,11 @@ $.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) })
 })
 
 $('#buttonOnUDP').click(function(){
-$.get('./act/onUDP.php', function(result){window.location.reload()})
+$.post('./act/onUDP.php', function(result){window.location.reload()})
 })
 
 $('#buttonOffUDP').click(function(){
-$.get('./act/offUDP.php', function(result){window.location.reload()})
+$.post('./act/offUDP.php', function(result){window.location.reload()})
 })
 
 $('#buttonSubmitlocalip').click(function(){
@@ -660,17 +660,17 @@ alert("应用DNS设置。。。")
 })
 
 $('#buttonOnAPPLE').click(function(){
-$.get('./act/onAPPLE.php', function(result){window.location.reload()})
+$.post('./act/onAPPLE.php', function(result){window.location.reload()})
 })
 
 $('#buttonOffAPPLE').click(function(){
-$.get('./act/offAPPLE.php', function(result){window.location.reload()})
+$.post('./act/offAPPLE.php', function(result){window.location.reload()})
 })
 
 $('#buttonSubmitStaticIP').click(function(){
 staticip1=$('#localip').val()
 staticip2=$('#upstreamip').val()
-$.get('./act/changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(result){})
+$.get('./act/changeStaticIP.php', {localip:staticip1, upstreamip:staticip2}, function(){})
 alert("本机已开始重新启动")
 })
 
@@ -682,7 +682,7 @@ alert('启动DHCP服务。。。')
 })
 
 $('#buttonOffDHCP').click(function(){
-$.get('./act/offDHCP.php', function(result){window.location.reload()})
+$.post('./act/offDHCP.php', function(result){window.location.reload()})
 alert('关闭DHCP服务。。。')
 })
 

@@ -241,7 +241,7 @@ var NFSnum = $(NFSdel).parent().parent().find('input').attr('id')
 var NFSnum = NFSnum.replace(/[^0-9]/ig,"")
 var NFSpoint = $('#NFSpoint'+NFSnum).val()
 $(NFSdel).parent().parent('.form-row').remove()
-$.get('./act/offNFS.php', {NFSpoint:NFSpoint}, function(result){})
+$.post('./act/offNFS.php', {NFSpoint:NFSpoint}, function(){})
 }
 
 
@@ -263,12 +263,12 @@ $('#netdataLi').css('display', 'block')
 })
 
 $('#installNetdata').click(function(){
-$.get('./act/installNetdata.php', function(result){});
+$.post('./act/installNetdata.php', function(){});
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.get('./act/installZ.php', function(result){window.location.reload()})
+        $.post('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -281,12 +281,12 @@ $('#buttonNFSinstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
 })
 
 $('#buttonNFSinstall').click(function(){
-$.get('./act/installNFS.php', function(){})
+$.post('./act/installNFS.php', function(){})
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.get('./act/installZ.php', function(result){window.location.reload()})
+        $.post('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -303,12 +303,12 @@ $('#buttonJellyfinInstall').attr('class', 'btn btn-outline-success btn-sm mt-1')
 })
 
 $('#buttonJellyfinInstall').click(function(){
-$.get('./act/installJellyfin.php', function(result){});
+$.post('./act/installJellyfin.php', function(){});
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.get('./act/installZ.php', function(result){window.location.reload()})
+        $.post('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })

@@ -301,7 +301,7 @@ $("#updateModal").modal('show')
 })
 
 $('#buttonUpdateRun').click(function(){
-$.get('./act/updateRun.php', function(result){})
+$.post('./act/updateRun.php', function(){})
 var updateDst = "http://"+$("#updateDst").val()
 var win = window.open(updateDst, 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 

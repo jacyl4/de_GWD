@@ -419,7 +419,7 @@ $('#FRPlocalMark'+FRPnum).val('')
 }
 
 function WGgenSkey(){
-$.get('./act/WGgenSkey.php', function(result){window.location.reload()})
+$.post('./act/WGgenSkey.php', function(result){window.location.reload()})
 }
 
 function WGgenCkey(WGgenCkey){
@@ -503,7 +503,7 @@ alert("应用DDNS。。。")
 })
 
 $('#buttonDDNS3322stop').click(function(){
-$.get('./act/ddns3322stop.php', function(result){window.location.reload()})
+$.post('./act/ddns3322stop.php', function(result){window.location.reload()})
 })
 
 
@@ -527,7 +527,7 @@ alert("应用DDNS。。。")
 })
 
 $('#buttonDDNSCFstop').click(function(){
-$.get('./act/ddnsCFstop.php', function(result){window.location.reload()})
+$.post('./act/ddnsCFstop.php', function(result){window.location.reload()})
 })
 
 
@@ -631,12 +631,12 @@ $('#FRPbindProtocol').html("KCP")
 })
 
 $('#buttonFRPinstall').click(function(){
-$.get('./act/installFRPc.php', function(result){})
+$.post('./act/installFRPc.php', function(){})
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.get('./act/installZ.php', function(result){window.location.reload()})
+        $.post('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -663,7 +663,7 @@ $.get('./act/onFRP.php', {FRPdomain:FRPdomain, FRPtoken:FRPtoken, FRPbindPort:FR
 })
 
 $('#buttonOffFRP').click(function(){
-$.get('./act/offFRP.php', function(result){window.location.reload()})
+$.post('./act/offFRP.php', function(result){window.location.reload()})
 })
 
 $('#buttonGenFRPcmd').click(function(){
@@ -673,7 +673,6 @@ $.get('./act/genFRPcmd.php', function(data){$('#frpCMD').val(data)})
 
 $.get('./act/arrWG.php', function(data) {
 var arrWGlist = JSON.parse(data)
-
 if (arrWGlist.server.sprivatekey == null || arrWGlist.server.sprivatekey == undefined || arrWGlist.server.sprivatekey == 'undefined' || arrWGlist.server.sprivatekey == ''){
 $('#WGgenSkey').attr('class', 'btn btn-sm btn-secondary')
 $('#WGgenSkey').html('生成密钥对')
@@ -779,12 +778,12 @@ WGswitch()
 })
 
 $('#buttonWGinstall').click(function(){
-$.get('./act/installWG.php', function(result){});
+$.post('./act/installWG.php', function(){});
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.get('./act/installZ.php', function(result){window.location.reload()})
+        $.post('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -810,7 +809,7 @@ alert("应用WireGuard。。。")
 })
 
 $('#buttonOffWG').click(function(){
-$.get('./act/offWG.php', function(result){window.location.reload()})
+$.post('./act/offWG.php', function(result){window.location.reload()})
 })
 
 })

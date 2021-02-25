@@ -391,12 +391,12 @@ $('#buttonGenCER').click(function(){
 cfdomain=$('#CFdomain').val()
 cfapikey=$('#CFapikey').val()
 cfemail=$('#CFemail').val()
-$.get('./act/genCER.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(result){})
+$.get('./act/genCER.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(){})
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
         clearInterval(timer);
-        $.get('./act/installZ.php', function(result){window.location.reload()})
+        $.post('./act/installZ.php', function(result){window.location.reload()})
     }
 }, 500);
 })
@@ -443,7 +443,7 @@ $.get('./act/FWD0save.php', {portCheck1:portCheck1, FWD0port:FWD0port, FWD0path:
 })
 
 $('#buttonFWD0stop').click(function(){
-$.get('./act/FWD0stop.php', function(result){window.location.reload()})
+$.post('./act/FWD0stop.php', function(result){window.location.reload()})
 })
 
 $('#buttonFWD1save').click(function(){
@@ -455,7 +455,7 @@ $.get('./act/FWD1save.php', {v2nodeID:v2nodeID, FWD1port:FWD1port, FWD1path:FWD1
 })
 
 $('#buttonFWD1stop').click(function(){
-$.get('./act/FWD1stop.php', function(result){window.location.reload()})
+$.post('./act/FWD1stop.php', function(result){window.location.reload()})
 })
 
 })
