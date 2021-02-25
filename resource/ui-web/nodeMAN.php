@@ -50,9 +50,16 @@
 
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
+      <li id="netdataLi" class="nav-item no-arrow mx-1" style="display:none">
+        <a class="nav-link" href="/netdata/" onclick="javascript:event.target.port=location.port" target="_blank">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Netdata</span>
+        </a>
+      </li>
+
       <li class="nav-item no-arrow mx-1">
         <a class="nav-link" href="/admin/" onclick="javascript:event.target.port=location.port" target="_blank">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <i class="fab fa-raspberry-pi"></i>
           <span>Pi-Hole</span>
         </a>
       </li>
@@ -214,6 +221,12 @@ $.get('auth.php', {logout:'true'}, function(result){window.location.href="index.
 $('#buttonMarkThis').click(function(){
 markNametxt=$('#markName').val()
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
+
+$.get("./act/checkNetdata.php", function(data){
+if (data == "installed"){
+$('#netdataLi').css('display', 'block')
+}
 })
 
 $.get('./act/arrV2node.php', function(data) {

@@ -50,9 +50,16 @@
 
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0">
+      <li id="netdataLi" class="nav-item no-arrow mx-1" style="display:none">
+        <a class="nav-link" href="/netdata/" onclick="javascript:event.target.port=location.port" target="_blank">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Netdata</span>
+        </a>
+      </li>
+
       <li class="nav-item no-arrow mx-1">
         <a class="nav-link" href="/admin/" onclick="javascript:event.target.port=location.port" target="_blank">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <i class="fab fa-raspberry-pi"></i>
           <span>Pi-Hole</span>
         </a>
       </li>
@@ -138,6 +145,7 @@
   </div>
 </div>
 
+<button id="installNetdata" type="button" class="btn btn-outline-secondary btn-sm mb-3" style="border-Radius: 0px;">install Netdata</button>
 
         <!-- Page Content -->      
         <div class="card mb-3">
@@ -245,6 +253,18 @@ $.get('auth.php', {logout:'true'}, function(result){window.location.href="index.
 $('#buttonMarkThis').click(function(){
 markNametxt=$('#markName').val()
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
+
+$.get("./act/checkNetdata.php", function(data){
+if (data == "installed"){
+$('#installNetdata').attr('class', 'btn btn-outline-success btn-sm mb-3')
+$('#netdataLi').css('display', 'block')
+}
+})
+
+$('#installNetdata').click(function(){
+$.get('./act/installNetdata.php', function(result){});
+window.open('/ttyd', 'popupWindow', 'width=800, height=600, scrollbars=yes')
 })
 
 $.get("./act/checkNFS.php", function(data){
