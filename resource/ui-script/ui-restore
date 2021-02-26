@@ -7,12 +7,6 @@ if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
 /opt/de_GWD/ui-onDHCP >/dev/null 2>&1
 fi
 
-if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
-  /opt/de_GWD/ui-onUDP r
-else
-  /opt/de_GWD/ui-offUDP r
-fi
-
 /opt/de_GWD/ui_4h
 
 if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
@@ -30,3 +24,8 @@ if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];th
 fi
 
 systemctl restart vtrui
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+  /opt/de_GWD/ui-onUDP r
+else
+  /opt/de_GWD/ui-offUDP r
+fi
