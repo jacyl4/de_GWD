@@ -729,8 +729,8 @@ iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 
-iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr:53
-iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr:53
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
@@ -822,10 +822,17 @@ systemctl daemon-reload
 systemctl enable iptables-proxy
 systemctl restart iptables-proxy
 
-cat << EOF >/etc/resolv.conf
-options single-request single-request-reopen timeout:1
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+options use-vc single-request single-request-reopen
 nameserver 127.0.0.1
 EOF
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 echo "$statusInstalled iptables-proxy"
 }
@@ -1397,12 +1404,6 @@ systemctl mask --now lighttpd >/dev/null 2>&1
 systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
-cat << EOF >/etc/dnsmasq.conf
-conf-dir=/etc/dnsmasq.d
-listen-address=127.0.0.1
-port=53
-EOF
-
 sed -i '/LIGHTTPD_ENABLED=/c\LIGHTTPD_ENABLED=false' /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
 sed -i '/PIHOLE_INTERFACE=/d' /etc/pihole/setupVars.conf
@@ -1426,17 +1427,11 @@ chmod +x /opt/de_GWD/pihole_hotfix
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
->/etc/resolvconf/resolv.conf.d/head
->/etc/resolvconf/resolv.conf.d/original
->/etc/resolvconf/resolv.conf.d/tail
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
-cat << EOF >/etc/resolvconf/resolv.conf.d/base
-options use-vc single-request single-request-reopen
-nameserver 127.0.0.1
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=53
 EOF
-ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
 
 pihole -a interface
 
