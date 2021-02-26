@@ -86,18 +86,9 @@ fi
 
 
 
->/opt/de_GWD/IPlistBlan
-jq -r '.listBlan[]' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' >/opt/de_GWD/IPlistBlan
-
->/opt/de_GWD/IPlistWlan
-jq -r '.listWlan[]' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' >/opt/de_GWD/IPlistWlan
-
-
-
 if [[ -n $(cat /tmp/v2dns_config) ]]; then
   mv -f /tmp/v2dns_config /opt/de_GWD/v2dns/config.json
 fi
-
 
 if [[ $(jq -r '.dns.APPLEdir' /opt/de_GWD/0conf) == "on" ]]; then
 /opt/de_GWD/ui-onAPPLE
@@ -105,6 +96,29 @@ else
 /opt/de_GWD/ui-offAPPLE
 fi
 
+>/opt/de_GWD/IPlistBlan
+jq -r '.listBlan[]' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' >/opt/de_GWD/IPlistBlan
 
-chmod 666 /opt/de_GWD/v2dns/config.json
-chmod 666 /opt/de_GWD/0conf
+>/opt/de_GWD/IPlistWlan
+jq -r '.listWlan[]' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' >/opt/de_GWD/IPlistWlan
+
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistB
+sed -i 's/^/add listB &/g' /opt/de_GWD/IPlistB
+mv -f /opt/de_GWD/IPlistB /opt/de_GWD/IPlistBSET
+ipset -! -R </opt/de_GWD/IPlistBSET
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistW
+sed -i 's/^/add listW &/g' /opt/de_GWD/IPlistW
+mv -f /opt/de_GWD/IPlistW /opt/de_GWD/IPlistWSET
+ipset -! -R </opt/de_GWD/IPlistWSET
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistBlan
+sed -i 's/^/add listBlan &/g' /opt/de_GWD/IPlistBlan
+mv -f /opt/de_GWD/IPlistBlan /opt/de_GWD/IPlistBlanSET
+ipset -! -R </opt/de_GWD/IPlistBlanSET
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistWlan
+sed -i 's/^/add listWlan &/g' /opt/de_GWD/IPlistWlan
+mv -f /opt/de_GWD/IPlistWlan /opt/de_GWD/IPlistWlanSET
+ipset -! -R </opt/de_GWD/IPlistWlanSET

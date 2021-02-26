@@ -12,3 +12,8 @@ if [[ -n "$localip" ]]; then
 
 	chmod 666 /opt/de_GWD/vtrui/config.json
 fi
+
+
+if [[ $1 == "r" ]]; then
+	systemctl restart vtrui
+fi

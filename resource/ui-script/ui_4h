@@ -5,34 +5,14 @@ green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
 statusUpdated=$(green "[  updated  ]")
 
-/opt/de_GWD/ui-saveDOH
+/opt/de_GWD/ui-saveSmartDNS
 
-if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) = "gfw" ]]; then
-  /opt/de_GWD/ui-dnsGFW >/dev/null 2>&1
-else
+/opt/de_GWD/ui-saveNode
+
+if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) = "chnw" ]]; then
   /opt/de_GWD/ui-dnsCHNW >/dev/null 2>&1
+elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) = "gfw" ]]; then
+  /opt/de_GWD/ui-dnsGFW >/dev/null 2>&1
 fi
 
-cat /opt/de_GWD/IPv2node | xargs -n 8 | while read line
-do
-  for IPv2node in $line
-  do
-    ipset add v2node $IPv2node >/dev/null 2>&1 &
-  done
-  wait
-done
-
-if [[ -n $(cat /opt/de_GWD/IPlistB) ]]; then
-  for iplistB in $(cat /opt/de_GWD/IPlistB); do
-    ipset add listB $iplistB >/dev/null 2>&1
-  done
-fi
-
-if [[ -n $(cat /opt/de_GWD/IPlistW) ]]; then
-  for iplistW in $(cat /opt/de_GWD/IPlistW); do
-    ipset add listW $iplistW >/dev/null 2>&1
-  done
-fi
-
-systemctl restart v2dns >/dev/null 2>&1
 echo "$statusUpdated DNS"

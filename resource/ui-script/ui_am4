@@ -28,7 +28,6 @@ if [[ $(ls -l /tmp/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
 sed -i '/^\s*$/d' /tmp/IPchnroute
 sed -i 's/^/add chnroute &/g' /tmp/IPchnroute
 mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET
-
 ipset -! -R </opt/de_GWD/chnrouteSET
 fi
 

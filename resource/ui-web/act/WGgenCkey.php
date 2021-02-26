@@ -3,6 +3,6 @@
 <?php
 $WGnum = $_GET['WGnum'];
 putenv("keyNUM=$WGnum");
-shell_exec('sudo /opt/de_GWD/ui-WGgenCkey $keyNUM');
+exec('sudo /opt/de_GWD/ui-WGgenCkey $keyNUM');
 ?>
 <?php }?>

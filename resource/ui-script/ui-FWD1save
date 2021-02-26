@@ -66,3 +66,164 @@ location $FWD1path {
 EOF
 
 systemctl reload nginx
+
+
+
+rm -rf /opt/de_GWD/vtrui1
+mkdir -p /opt/de_GWD/vtrui1
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
+cp -f /opt/de_GWD/vtrui/geoip.dat /opt/de_GWD/vtrui1/geoip.dat
+chmod -R +x /opt/de_GWD/vtrui1
+
+rm -rf /etc/systemd/system/vtrui1.service
+cat << "EOF" >/lib/systemd/system/vtrui1.service
+[Unit]
+Description=vtrui1 Service
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+Type=simple
+LimitNPROC=64000
+LimitNOFILE=1000000
+LimitCORE=infinity
+NoNewPrivileges=true
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+ExecStart=/opt/de_GWD/vtrui1/vtrui1 -c /opt/de_GWD/vtrui1/config.json
+Restart=always
+RestartSec=2ms
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable vtrui1
+systemctl restart vtrui1
+
+
+v2nodeID=$(jq -r '.FORWARD.FWD1.upstream' /opt/de_GWD/0conf)
+FWD1path=$(jq -r '.FORWARD.FWD1.path' /opt/de_GWD/0conf)
+FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[]' /opt/de_GWD/0conf)
+
+v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf)
+domain=$(echo $v2servn | cut -d: -f1)
+port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -z $port ] && port="443"
+
+uuidnum=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf)
+v2path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0conf)
+
+cat >/opt/de_GWD/vtrui1/config.json << EOF
+{
+  "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+  "inbounds":[
+   {
+      "port": 11811,
+      "listen": "127.0.0.1",
+      "protocol": "vless",
+      "settings": {
+        "decryption": "none",
+        "clients": [
+          {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "level": 1
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      },
+      "tag": "proxy"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {"domainStrategy": "UseIPv4"},
+      "streamSettings": {
+        "sockopt":{"mark":255}
+        },
+      "tag": "direct"
+    }
+  ],
+  "routing": {
+    "domainStrategy":"AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "port": "53,5310,5320,5350",
+        "network": "tcp,udp",
+        "outboundTag": "direct"
+      }
+    ]
+  }
+}
+EOF
+
+jq '.inbounds[0].settings.clients=[]' /opt/de_GWD/vtrui1/config.json |\
+jq --arg FWD1path "$FWD1path" '.inbounds[0].streamSettings.wsSettings.path=$FWD1path' |\
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' |\
+jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui1/config.json
+
+for uuid in $FWD1uuid; do
+uuidStr='{"id": "'$uuid'", "level": 1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
+done
+
+chmod 666 /opt/de_GWD/vtrui1/config.json
+
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui1
+fi

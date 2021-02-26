@@ -1,6 +1,6 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-shell_exec('sudo systemctl stop frpc');
+exec('sudo systemctl disable --now frpc');
 ?>
 <?php }?>

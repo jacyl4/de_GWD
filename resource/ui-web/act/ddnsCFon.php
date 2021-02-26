@@ -14,8 +14,6 @@ $conf['ddns']['ddnsCF']['cfEmail'] = $CFemail;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-shell_exec('sudo /opt/de_GWD/ui-ddnsCFgetDomainID');
-shell_exec('sudo /opt/de_GWD/ui-ddnsCFupdateIP');
-shell_exec('sudo /opt/de_GWD/ui-ddnsCFupdateOn');
+exec('sudo /opt/de_GWD/ui-ddnsCFon');
 ?>
 <?php }?>

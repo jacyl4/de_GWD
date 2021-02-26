@@ -644,16 +644,23 @@ echo "$statusInstalled v2dns && vtrui"
 
 
 installIptablesProxy(){
-touch /opt/de_GWD/IPdoh
-touch /opt/de_GWD/IPv2node
-touch /opt/de_GWD/IPlistB
-touch /opt/de_GWD/IPlistW
-touch /opt/de_GWD/IPlistBlan
-touch /opt/de_GWD/IPlistWlan
+touch /opt/de_GWD/IPdohSET
+touch /opt/de_GWD/IPv2nodeSET
+touch /opt/de_GWD/IPlistBSET
+touch /opt/de_GWD/IPlistWSET
+touch /opt/de_GWD/IPlistBlanSET
+touch /opt/de_GWD/IPlistWlanSET
 
-echo $doh1IP >/opt/de_GWD/IPdoh
-echo $doh2IP >>/opt/de_GWD/IPdoh
+echo $doh1IP $doh2IP | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
+sed -i 's/^/add doh &/g' /opt/de_GWD/IPdoh
+mv -f /opt/de_GWD/IPdoh /opt/de_GWD/IPdohSET
+ipset -! -R </opt/de_GWD/IPdohSET
+
 echo $domainIP >/opt/de_GWD/IPv2node
+sed -i '/^\s*$/d' /opt/de_GWD/IPv2node
+sed -i 's/^/add v2node &/g' /opt/de_GWD/IPv2node
+mv -f /opt/de_GWD/IPv2node /opt/de_GWD/IPv2nodeSET
+ipset -! -R </opt/de_GWD/IPv2nodeSET
 
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
@@ -682,42 +689,22 @@ for iplanip in \$lanip; do
 done
 
 ipset -N doh hash:ip family inet
-for IPdoh in \$(cat /opt/de_GWD/IPdoh); do
-  ipset add doh \$IPdoh
-done
+ipset -! -R </opt/de_GWD/IPdohSET
 
 ipset -N v2node hash:ip family inet
-for IPv2node in \$(cat /opt/de_GWD/IPv2node); do
-  ipset add v2node \$IPv2node
-done
+ipset -! -R </opt/de_GWD/IPv2nodeSET
 
 ipset -N listB hash:ip family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistB) ]]; then
-  for iplistB in \$(cat /opt/de_GWD/IPlistB); do
-    ipset add listB \$iplistB
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistBSET
 
 ipset -N listW hash:ip family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistW) ]]; then
-  for iplistW in \$(cat /opt/de_GWD/IPlistW); do
-    ipset add listW \$iplistW
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistWSET
 
 ipset -N listBlan hash:net family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistBlan) ]]; then
-  for iplistBlan in \$(cat /opt/de_GWD/IPlistBlan); do
-    ipset add listBlan \$iplistBlan
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistBlanSET
 
 ipset -N listWlan hash:net family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistWlan) ]]; then
-  for iplistWlan in \$(cat /opt/de_GWD/IPlistWlan); do
-    ipset add listWlan \$iplistWlan
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistWlanSET
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
@@ -1345,6 +1332,7 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
+ExecStartPre=/usr/bin/chmod +x /opt/de_GWD/update
 ExecStart=/usr/bin/ttyd -p 3000 -o /opt/de_GWD/update
 KillMode=process
 
@@ -1466,21 +1454,21 @@ postInstall(){
 
 /opt/de_GWD/ui_am4
 
-if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
-  /opt/de_GWD/ui-onUDP >/dev/null 2>&1
-else
-  /opt/de_GWD/ui-offUDP >/dev/null 2>&1
-fi
-
 if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
   /opt/de_GWD/ui-markThis >/dev/null 2>&1
 fi
 
-/opt/de_GWD/ui_4h
-
 if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf) == "on" ]]; then
 /opt/de_GWD/ui-onDHCP >/dev/null 2>&1
 fi
+
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-onUDP r >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-offUDP r >/dev/null 2>&1
+fi
+
+/opt/de_GWD/ui_4h
 
 if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf) = "block" ]]; then
   /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
@@ -1488,18 +1476,15 @@ elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf) = "none" ]]; then
   /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
 fi
 
-if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf) = "on" ]];then
-  /opt/de_GWD/ui-FWD1save
-  /opt/de_GWD/ui-FWD1vtrui
-  systemctl restart vtrui1
-fi
-
 if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf) = "on" ]];then
   /opt/de_GWD/ui-FWD0save
-  /opt/de_GWD/ui-FWD0vtrui
 fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf) = "on" ]];then
+  /opt/de_GWD/ui-FWD1save r
+fi
+
 systemctl restart vtrui
-systemctl restart iptables-proxy
 
 crontab -l >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_am4/d' /tmp/now.cron
