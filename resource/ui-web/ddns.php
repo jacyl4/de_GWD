@@ -638,7 +638,7 @@ var timer = setInterval(function() {
         clearInterval(timer);
         $.get('./act/installZ.php', function(result){window.location.reload()})
     }
-}, 500);
+}, 300);
 })
 
 $('#buttonOnFRP').click(function(){
@@ -785,7 +785,7 @@ var timer = setInterval(function() {
         clearInterval(timer);
         $.get('./act/installZ.php', function(result){window.location.reload()})
     }
-}, 500);
+}, 300);
 })
 
 $('#buttonOnWG').click(function(){

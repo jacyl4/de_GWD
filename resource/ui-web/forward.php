@@ -398,7 +398,7 @@ var timer = setInterval(function() {
         clearInterval(timer);
         $.get('./act/installZ.php', function(result){window.location.reload()})
     }
-}, 500);
+}, 300);
 })
 
 $.get('./act/checkCER.php', function(data){

@@ -272,7 +272,7 @@ var timer = setInterval(function() {
         clearInterval(timer);
         $.get('./act/installZ.php', function(result){window.location.reload()})
     }
-}, 500);
+}, 300);
 })
 
 $.get("./act/checkNFS.php", function(data){
@@ -290,7 +290,7 @@ var timer = setInterval(function() {
         clearInterval(timer);
         $.get('./act/installZ.php', function(result){window.location.reload()})
     }
-}, 500);
+}, 300);
 })
 
 $('#buttonNFSswitch').click(function(){
@@ -312,7 +312,7 @@ var timer = setInterval(function() {
         clearInterval(timer);
         $.get('./act/installZ.php', function(result){window.location.reload()})
     }
-}, 500);
+}, 300);
 })
 
 $('#buttonNFSAdd').click(function(){

@@ -309,7 +309,7 @@ var timer = setInterval(function() {
         clearInterval(timer);
         window.location.reload()
     }
-}, 500);
+}, 300);
 })
 
 
