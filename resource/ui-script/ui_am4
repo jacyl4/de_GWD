@@ -23,7 +23,7 @@ cp -f /tmp/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 rm -rf /tmp/geoip.dat
 fi
 
-wget --no-check-certificate -c -O /tmp/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/master/IPchnroute
+wget --no-check-certificate -c -O /tmp/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@master/IPchnroute
 if [[ $(ls -l /tmp/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
 sed -i '/^\s*$/d' /tmp/IPchnroute
 sed -i 's/^/add chnroute &/g' /tmp/IPchnroute
