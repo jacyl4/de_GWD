@@ -651,16 +651,14 @@ touch /opt/de_GWD/IPlistWSET
 touch /opt/de_GWD/IPlistBlanSET
 touch /opt/de_GWD/IPlistWlanSET
 
-echo $doh1IP $doh2IP | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
+echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
 sed -i 's/^/add doh &/g' /opt/de_GWD/IPdoh
 mv -f /opt/de_GWD/IPdoh /opt/de_GWD/IPdohSET
-ipset -! -R </opt/de_GWD/IPdohSET
 
 echo $domainIP >/opt/de_GWD/IPv2node
 sed -i '/^\s*$/d' /opt/de_GWD/IPv2node
 sed -i 's/^/add v2node &/g' /opt/de_GWD/IPv2node
 mv -f /opt/de_GWD/IPv2node /opt/de_GWD/IPv2nodeSET
-ipset -! -R </opt/de_GWD/IPv2nodeSET
 
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
