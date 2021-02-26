@@ -23,7 +23,7 @@ if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
 			for domainlistB in $listB
 			do
 			jq --arg listB "keyword:$domainlistB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_config | sponge /tmp/v2dns_config
-			listBIP=$(dig @127.0.0.1 $domainlistB -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			listBIP=$(dig @127.0.0.1 $domainlistB -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 			echo $listBIP >>/opt/de_GWD/IPlistB
 			jq --arg key "$domainlistB" --arg value "$listBIP" '.listB += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
 			done
@@ -40,7 +40,7 @@ if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
 			for domainlistW in $listW
 			do
 			jq --arg listW "keyword:$domainlistW" '.dns.servers[2].domains+=[$listW]' /tmp/v2dns_config | sponge /tmp/v2dns_config
-			listWIP=$(dig @127.0.0.1 $domainlistW -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			listWIP=$(dig @127.0.0.1 $domainlistW -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 			echo $listWIP >>/opt/de_GWD/IPlistW
 			jq --arg key "$domainlistW" --arg value "$listWIP" '.listW += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
 			done
@@ -58,7 +58,7 @@ elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
 			for domainlistB in $listB
 			do
 			jq --arg listB "keyword:$domainlistB" '.dns.servers[2].domains+=[$listB]' /tmp/v2dns_config | sponge /tmp/v2dns_config
-			listBIP=$(dig @127.0.0.1 $domainlistB -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			listBIP=$(dig @127.0.0.1 $domainlistB -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 			echo $listBIP >>/opt/de_GWD/IPlistB
 			jq --arg key "$domainlistB" --arg value "$listBIP" '.listB += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
 			done
@@ -75,7 +75,7 @@ elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
 			for domainlistW in $listW
 			do
 			jq --arg listW "keyword:$domainlistW" '.dns.servers[1].domains+=[$listW]' /tmp/v2dns_config | sponge /tmp/v2dns_config
-			listWIP=$(dig @127.0.0.1 $domainlistW -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			listWIP=$(dig @127.0.0.1 $domainlistW -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 			echo $listWIP >>/opt/de_GWD/IPlistW
 			jq --arg key "$domainlistW" --arg value "$listWIP" '.listW += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
 			done

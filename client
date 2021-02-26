@@ -394,13 +394,9 @@ echo "$statuSuccess system config"
 SmartDNSset(){
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
-bind 127.0.0.1:5310 -no-cache
 bind-tcp 127.0.0.1:5310 -no-cache
-
-bind 127.0.0.1:5320 -group doh -no-speed-check -no-cache
-bind-tcp 127.0.0.1:5320 -group doh -no-speed-check -no-cache
-
-force-AAAA-SOA yes
+bind-tcp 127.0.0.1:5311 -no-cache -no-speed-check
+bind-tcp 127.0.0.1:5320 -no-cache -no-speed-check -group doh
 
 server 114.114.114.114
 server 114.114.115.115
@@ -443,8 +439,8 @@ systemctl restart smartdns
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 
-doh1IP=$(dig @127.0.0.1 $doh1Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+doh1IP=$(dig @127.0.0.1 $doh1Domain -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 
 doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
 doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
@@ -487,7 +483,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
   {
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53},
+    "settings":{"network":"tcp","address":"0.0.0.0","port":53},
     "tag":"dnsin"
   }
 ],
@@ -513,7 +509,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 }
 EOF
 
-domainIP=$(dig @127.0.0.1 $domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | awk NR==1)
+domainIP=$(dig @127.0.0.1 $domain -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | awk NR==1)
 
 jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json |\
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
@@ -738,18 +734,22 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
+iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 
+iptables -t nat -A POSTROUTING -j MASQUERADE
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s localaddr -p tcp --dport 53 -j DNAT --to $localaddr
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s localaddr -p udp --dport 53 -j DNAT --to $localaddr
+
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
@@ -1414,6 +1414,7 @@ cat << EOF >/etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
 listen-address=127.0.0.1
 port=53
+no-hosts
 EOF
 
 sed -i '/LIGHTTPD_ENABLED=/c\LIGHTTPD_ENABLED=false' /etc/pihole/setupVars.conf

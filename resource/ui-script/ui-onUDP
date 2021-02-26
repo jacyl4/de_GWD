@@ -1,5 +1,6 @@
 #!/bin/bash
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
@@ -93,18 +94,22 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
+iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 
+iptables -t nat -A POSTROUTING -j MASQUERADE
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s localaddr -p tcp --dport 53 -j DNAT --to $localaddr
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s localaddr -p udp --dport 53 -j DNAT --to $localaddr
+
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
