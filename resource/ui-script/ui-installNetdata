@@ -13,6 +13,7 @@ else
 bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --dont-start-it --stable-channel --disable-telemetry
 fi
 
+systemctl restart netdata
 blue "----------------------"
 blue "Install Netdata [done]"
 blue "----------------------"
