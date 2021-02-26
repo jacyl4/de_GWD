@@ -1,4 +1,8 @@
 #!/bin/bash
+if [[ $1 == "smartdns" ]]; then
+  /opt/de_GWD/ui-saveSmartDNS
+fi
+
 cat << EOF >/tmp/v2dns_config
 {
 "dns":{
@@ -59,10 +63,6 @@ chmod 666 /opt/de_GWD/0conf
 /opt/de_GWD/ui-saveListBW
 
 systemctl restart v2dns
-
-if [[ $1 == "smartdns" ]]; then
-  /opt/de_GWD/ui-saveSmartDNS
-fi
 
 if [[ $2 == "f" ]]; then
   pihole -f
