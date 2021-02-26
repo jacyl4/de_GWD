@@ -631,7 +631,7 @@ $('#FRPbindProtocol').html("KCP")
 })
 
 $('#buttonFRPinstall').click(function(){
-$.post('./act/installFRPc.php', function(){})
+$.get('./act/installFRPc.php', function(){})
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
@@ -778,7 +778,7 @@ WGswitch()
 })
 
 $('#buttonWGinstall').click(function(){
-$.post('./act/installWG.php', function(){});
+$.get('./act/installWG.php', function(){});
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {

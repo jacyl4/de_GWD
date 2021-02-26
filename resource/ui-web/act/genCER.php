@@ -1,7 +1,6 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-ini_set('max_execution_time', '0');
 $conf = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
 $CFdomain = $_GET['CFdomain'];
 $CFapikey = $_GET['CFapikey'];
