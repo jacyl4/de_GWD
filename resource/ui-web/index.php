@@ -152,8 +152,8 @@
                 <div class="">版本检测</div>
               </div>
               <a class="card-footer text-white clearfix small z-1">
-                <h6 class="float-left" style="margin-bottom: 0"><span id="currentver" class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;"></span></h6>
-                <h6 class="float-right" style="margin-bottom: 0"><span id="remotever" class="btn btn-light" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;"></span></h6>
+                <h6 class="float-left" style="margin-bottom: 0"><span id="currentver" class="" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;"></span></h6>
+                <h6 class="float-right" style="margin-bottom: 0"><span id="remotever" class="" style="font-size:0.75rem;font-weight:600;line-height:0.35;border-radius:10rem;"></span></h6>
               </a>
             </div>
           </div>
@@ -503,12 +503,12 @@ $('#testYoutue').text("✗ 国外线路不通")
 })
 
 $.get("./act/version.php", function(data){
-var currentvernum = data.split("-")[0].substring(0)
-var remotevernum = data.split("-")[1].substring(0)
+var currentvernum = data.split("-")[0]
+var remotevernum = data.split("-")[1]
 var vera = $.trim(currentvernum)
 var verb = $.trim(remotevernum)
-$('#currentver').html(currentvernum+'本机')
-$('#remotever').html(remotevernum+' 发布')
+$('#currentver').attr('class','btn btn-light').html(currentvernum+'本机')
+$('#remotever').attr('class','btn btn-light').html(remotevernum+' 发布')
 if (vera != verb) {
 $('#remotever').attr('class','btn btn-warning')
 }
