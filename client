@@ -402,6 +402,8 @@ bind-tcp 127.0.0.1:5310 -no-cache
 bind-tcp 127.0.0.1:5311 -no-cache -no-speed-check
 bind-tcp 127.0.0.1:5320 -no-cache -no-speed-check -group doh
 
+force-AAAA-SOA yes
+
 server 114.114.114.114
 server 114.114.115.115
 server 119.29.29.29
@@ -1415,6 +1417,7 @@ echo "PIHOLE_INTERFACE=$ethernetnum,wg0" >>/etc/pihole/setupVars.conf
 >/etc/pihole/dns-servers.conf
 cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
 EOF
 
 cat << "EOF" >/opt/de_GWD/pihole_hotfix

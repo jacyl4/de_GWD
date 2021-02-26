@@ -401,6 +401,7 @@ EOF
 
 cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
+AAAA_QUERY_ANALYSIS=no
 EOF
 
 >/etc/resolvconf/resolv.conf.d/head
