@@ -1426,7 +1426,6 @@ echo "PIHOLE_INTERFACE=$ethernetnum,wg0" >>/etc/pihole/setupVars.conf
 >/etc/pihole/dns-servers.conf
 cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
-AAAA_QUERY_ANALYSIS=no
 EOF
 
 cat << "EOF" >/opt/de_GWD/pihole_hotfix
