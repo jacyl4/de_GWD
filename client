@@ -1431,8 +1431,6 @@ chmod +x /opt/de_GWD/pihole_hotfix
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
-pihole -a interface
-
 >/etc/resolvconf/resolv.conf.d/head
 >/etc/resolvconf/resolv.conf.d/original
 >/etc/resolvconf/resolv.conf.d/tail
@@ -1444,6 +1442,8 @@ nameserver 127.0.0.1
 EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
+
+pihole -a interface
 
 echo "$statusInstalled Pi-hole"
 }
