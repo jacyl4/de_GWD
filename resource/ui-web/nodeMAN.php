@@ -281,7 +281,6 @@ for( let i = 0; i<len; i++){
     }
 }
 $.get("./act/saveNode.php", {nodeList:nodeList}, function(result){ window.location.href="index.php" })
-alert("保存节点。。。")
 })
 
 })
