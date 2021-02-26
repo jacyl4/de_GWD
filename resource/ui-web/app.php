@@ -146,7 +146,7 @@
 </div>
 
 <div class="form-row col-md-12">
-<button id="installNetdata" type="button" class="btn btn-outline-secondary btn-sm" style="border-Radius: 0px;">install Netdata</button>
+<button id="installNetdata" type="button" class="btn btn-outline-secondary btn-sm mb-3" style="border-Radius: 0px;">install Netdata</button>
 </div>
 
         <!-- Page Content -->      
