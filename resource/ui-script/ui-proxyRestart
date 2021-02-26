@@ -6,7 +6,10 @@
 >/etc/resolvconf/resolv.conf.d/tail
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
-echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+options single-request single-request-reopen timeout:1
+nameserver 127.0.0.1
+EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 

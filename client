@@ -14,7 +14,7 @@ export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
 de_gwd_nginx="1.19.7"
 ttyd_version="1.6.2"
-branch="main"
+branch="dev"
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
@@ -34,6 +34,7 @@ systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
+options single-request single-request-reopen timeout:1 attempts:1 rotate
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 182.254.118.118
@@ -213,6 +214,7 @@ else
     echo "$statusFailed de_GWD server connect"
 
 cat << EOF >/etc/resolv.conf
+options single-request single-request-reopen timeout:1 attempts:1 rotate
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 182.254.118.118
@@ -832,7 +834,10 @@ systemctl restart iptables-proxy
 >/etc/resolvconf/resolv.conf.d/tail
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
-echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+options single-request single-request-reopen timeout:1
+nameserver 127.0.0.1
+EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
@@ -1232,9 +1237,10 @@ location ~ /\.(?!well-known).* {
 }
 
 location ~ [^/]\.php(/|$) {
-  include fastcgi_params;
-  fastcgi_param SCRIPT_FILENAME \$document_root/\$fastcgi_script_name;
-  fastcgi_pass unix:/run/php/php-fpm.sock;
+  fastcgi_pass        unix:/run/php/php-fpm.sock;
+  include             fastcgi_params;
+  fastcgi_param       SCRIPT_FILENAME \$document_root/\$fastcgi_script_name;
+  fastcgi_param       FQDN true;
 }
 
 location ~ ^/ttyd(.*)$ {
