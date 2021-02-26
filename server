@@ -410,7 +410,7 @@ EOF
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
 cat << EOF >/etc/resolvconf/resolv.conf.d/base
-options single-request single-request-reopen timeout:1
+options use-vc single-request single-request-reopen timeout:1
 nameserver 127.0.0.1
 EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
