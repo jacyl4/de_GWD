@@ -394,6 +394,10 @@ echo "$statuSuccess system config"
 SmartDNSset(){
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
+bind 127.0.0.1:5310 -no-cache
+bind 127.0.0.1:5311 -no-cache -no-speed-check
+bind 127.0.0.1:5320 -no-cache -no-speed-check -group doh
+
 bind-tcp 127.0.0.1:5310 -no-cache
 bind-tcp 127.0.0.1:5311 -no-cache -no-speed-check
 bind-tcp 127.0.0.1:5320 -no-cache -no-speed-check -group doh
@@ -483,7 +487,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
   {
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"network":"tcp","address":"0.0.0.0","port":53},
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53},
     "tag":"dnsin"
   }
 ],
@@ -734,21 +738,29 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
+iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5311 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 
 iptables -t nat -A POSTROUTING -j MASQUERADE
-iptables -t nat -A PREROUTING -i $ethernetnum ! -s localaddr -p tcp --dport 53 -j DNAT --to $localaddr
-iptables -t nat -A PREROUTING -i $ethernetnum ! -s localaddr -p udp --dport 53 -j DNAT --to $localaddr
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr:53
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr:53
 
 iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
