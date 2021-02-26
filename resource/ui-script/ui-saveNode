@@ -1,0 +1,15 @@
+#!/bin/bash
+>/opt/de_GWD/IPv2node
+jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1 | sort | uniq | sed '/^\s*$/d' | xargs -n 8 | while read line
+do
+  for domainV2node in $line
+  do
+  echo $(dig @127.0.0.1 $domainV2node -p 5320 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}') >>/opt/de_GWD/IPv2node &
+  done
+  wait
+done
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPv2node
+sed -i 's/^/add v2node &/g' /opt/de_GWD/IPv2node
+mv -f /opt/de_GWD/IPv2node /opt/de_GWD/IPv2nodeSET
+ipset -! -R </opt/de_GWD/IPv2nodeSET

@@ -34,6 +34,7 @@ systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
+options single-request single-request-reopen timeout:1 attempts:1 rotate
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 182.254.118.118
@@ -213,6 +214,7 @@ else
     echo "$statusFailed de_GWD server connect"
 
 cat << EOF >/etc/resolv.conf
+options single-request single-request-reopen timeout:1 attempts:1 rotate
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 182.254.118.118
@@ -393,12 +395,12 @@ SmartDNSset(){
 rm -rf /etc/smartdns/*.conf
 cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310 -no-cache
+bind 127.0.0.1:5311 -no-cache -no-speed-check
+bind 127.0.0.1:5320 -no-cache -no-speed-check -group doh
+
 bind-tcp 127.0.0.1:5310 -no-cache
-
-bind 127.0.0.1:5320 -group doh -no-speed-check -no-cache
-bind-tcp 127.0.0.1:5320 -group doh -no-speed-check -no-cache
-
-force-AAAA-SOA yes
+bind-tcp 127.0.0.1:5311 -no-cache -no-speed-check
+bind-tcp 127.0.0.1:5320 -no-cache -no-speed-check -group doh
 
 server 114.114.114.114
 server 114.114.115.115
@@ -441,8 +443,8 @@ systemctl restart smartdns
 doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 
-doh1IP=$(dig @127.0.0.1 $doh1Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+doh1IP=$(dig @127.0.0.1 $doh1Domain -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+doh2IP=$(dig @127.0.0.1 $doh2Domain -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 
 doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
 doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
@@ -511,7 +513,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 }
 EOF
 
-domainIP=$(dig @127.0.0.1 $domain -p 5310 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | awk NR==1)
+domainIP=$(dig @127.0.0.1 $domain -p 5310 +short +tcp | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | awk NR==1)
 
 jq --arg key "$doh1Domain" --arg value "$doh1IP" '.dns.hosts += {($key): ($value)}' /opt/de_GWD/v2dns/config.json |\
 jq --arg key "$doh2Domain" --arg value "$doh2IP" '.dns.hosts += {($key): ($value)}' |\
@@ -642,16 +644,21 @@ echo "$statusInstalled v2dns && vtrui"
 
 
 installIptablesProxy(){
-touch /opt/de_GWD/IPdoh
-touch /opt/de_GWD/IPv2node
-touch /opt/de_GWD/IPlistB
-touch /opt/de_GWD/IPlistW
-touch /opt/de_GWD/IPlistBlan
-touch /opt/de_GWD/IPlistWlan
+touch /opt/de_GWD/IPdohSET
+touch /opt/de_GWD/IPv2nodeSET
+touch /opt/de_GWD/IPlistBSET
+touch /opt/de_GWD/IPlistWSET
+touch /opt/de_GWD/IPlistBlanSET
+touch /opt/de_GWD/IPlistWlanSET
 
-echo $doh1IP >/opt/de_GWD/IPdoh
-echo $doh2IP >>/opt/de_GWD/IPdoh
+echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
+sed -i 's/^/add doh &/g' /opt/de_GWD/IPdoh
+mv -f /opt/de_GWD/IPdoh /opt/de_GWD/IPdohSET
+
 echo $domainIP >/opt/de_GWD/IPv2node
+sed -i '/^\s*$/d' /opt/de_GWD/IPv2node
+sed -i 's/^/add v2node &/g' /opt/de_GWD/IPv2node
+mv -f /opt/de_GWD/IPv2node /opt/de_GWD/IPv2nodeSET
 
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
@@ -680,42 +687,22 @@ for iplanip in \$lanip; do
 done
 
 ipset -N doh hash:ip family inet
-for IPdoh in \$(cat /opt/de_GWD/IPdoh); do
-  ipset add doh \$IPdoh
-done
+ipset -! -R </opt/de_GWD/IPdohSET
 
 ipset -N v2node hash:ip family inet
-for IPv2node in \$(cat /opt/de_GWD/IPv2node); do
-  ipset add v2node \$IPv2node
-done
+ipset -! -R </opt/de_GWD/IPv2nodeSET
 
 ipset -N listB hash:ip family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistB) ]]; then
-  for iplistB in \$(cat /opt/de_GWD/IPlistB); do
-    ipset add listB \$iplistB
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistBSET
 
 ipset -N listW hash:ip family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistW) ]]; then
-  for iplistW in \$(cat /opt/de_GWD/IPlistW); do
-    ipset add listW \$iplistW
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistWSET
 
 ipset -N listBlan hash:net family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistBlan) ]]; then
-  for iplistBlan in \$(cat /opt/de_GWD/IPlistBlan); do
-    ipset add listBlan \$iplistBlan
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistBlanSET
 
 ipset -N listWlan hash:net family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistWlan) ]]; then
-  for iplistWlan in \$(cat /opt/de_GWD/IPlistWlan); do
-    ipset add listWlan \$iplistWlan
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistWlanSET
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
@@ -736,18 +723,29 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
-iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5311 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr:53
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr:53
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
@@ -827,14 +825,10 @@ systemctl daemon-reload
 systemctl enable iptables-proxy
 systemctl restart iptables-proxy
 
->/etc/resolvconf/resolv.conf.d/head
->/etc/resolvconf/resolv.conf.d/original
->/etc/resolvconf/resolv.conf.d/tail
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
-echo "nameserver 127.0.0.1" >/etc/resolvconf/resolv.conf.d/base
-ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
+cat << EOF >/etc/resolv.conf
+options single-request single-request-reopen timeout:1
+nameserver 127.0.0.1
+EOF
 
 echo "$statusInstalled iptables-proxy"
 }
@@ -1232,9 +1226,10 @@ location ~ /\.(?!well-known).* {
 }
 
 location ~ [^/]\.php(/|$) {
-  include fastcgi_params;
-  fastcgi_param SCRIPT_FILENAME \$document_root/\$fastcgi_script_name;
-  fastcgi_pass unix:/run/php/php-fpm.sock;
+  fastcgi_pass        unix:/run/php/php-fpm.sock;
+  include             fastcgi_params;
+  fastcgi_param       SCRIPT_FILENAME \$document_root/\$fastcgi_script_name;
+  fastcgi_param       FQDN true;
 }
 
 location ~ ^/ttyd(.*)$ {
@@ -1335,6 +1330,7 @@ After=network.target
 [Service]
 User=root
 Type=oneshot
+ExecStartPre=/usr/bin/chmod +x /opt/de_GWD/update
 ExecStart=/usr/bin/ttyd -p 3000 -o /opt/de_GWD/update
 KillMode=process
 
@@ -1419,7 +1415,6 @@ echo "PIHOLE_INTERFACE=$ethernetnum,wg0" >>/etc/pihole/setupVars.conf
 >/etc/pihole/dns-servers.conf
 cat << EOF >/etc/pihole/pihole-FTL.conf
 PRIVACYLEVEL=0
-AAAA_QUERY_ANALYSIS=no
 EOF
 
 cat << "EOF" >/opt/de_GWD/pihole_hotfix
@@ -1435,6 +1430,18 @@ sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /v
 
 pihole -a interface
 
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+options use-vc single-request single-request-reopen
+nameserver 127.0.0.1
+EOF
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
+
 echo "$statusInstalled Pi-hole"
 }
 
@@ -1445,21 +1452,21 @@ postInstall(){
 
 /opt/de_GWD/ui_am4
 
-if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
-  /opt/de_GWD/ui-onUDP >/dev/null 2>&1
-else
-  /opt/de_GWD/ui-offUDP >/dev/null 2>&1
-fi
-
 if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
   /opt/de_GWD/ui-markThis >/dev/null 2>&1
 fi
 
-/opt/de_GWD/ui_4h
-
 if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf) == "on" ]]; then
 /opt/de_GWD/ui-onDHCP >/dev/null 2>&1
 fi
+
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-onUDP r >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-offUDP r >/dev/null 2>&1
+fi
+
+/opt/de_GWD/ui_4h
 
 if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf) = "block" ]]; then
   /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
@@ -1467,18 +1474,15 @@ elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf) = "none" ]]; then
   /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
 fi
 
-if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf) = "on" ]];then
-  /opt/de_GWD/ui-FWD1save
-  /opt/de_GWD/ui-FWD1vtrui
-  systemctl restart vtrui1
-fi
-
 if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf) = "on" ]];then
   /opt/de_GWD/ui-FWD0save
-  /opt/de_GWD/ui-FWD0vtrui
 fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf) = "on" ]];then
+  /opt/de_GWD/ui-FWD1save r
+fi
+
 systemctl restart vtrui
-systemctl restart iptables-proxy
 
 crontab -l >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_am4/d' /tmp/now.cron

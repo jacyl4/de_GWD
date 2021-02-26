@@ -24,3 +24,8 @@ chmod 666 /opt/de_GWD/vtrui/config.json
 chmod 666 /opt/de_GWD/0conf
 
 rm -rf /var/www/html/act/nodepre.txt
+
+
+if [[ $1 == "r" ]]; then
+	systemctl restart vtrui
+fi

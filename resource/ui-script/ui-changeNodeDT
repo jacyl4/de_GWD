@@ -23,3 +23,8 @@ jq --arg v2path "$v2path" '.v2nodeForUpdate[2].path=$v2path' | sponge /opt/de_GW
 chmod 666 /opt/de_GWD/vtrui/config.json
 
 rm -rf /var/www/html/act/nodedtpre.txt
+
+
+if [[ $1 == "r" ]]; then
+	systemctl restart vtrui
+fi

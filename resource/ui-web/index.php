@@ -41,8 +41,8 @@
     <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="#">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
-<span class="float-right badge text-success"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
+<span class="float-right badge text-info"><?php passthru('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
+<span class="float-right badge text-success"><?php passthru('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -183,7 +183,7 @@
               </div>
               <a class="card-footer text-white clearfix small z-1">
                 <span id="uptime" class="float-left"></span>
-                <span class="float-right"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkStatus');?></span>
+                <span class="float-right"><?php passthru('sudo /opt/de_GWD/ui-checkStatus');?></span>
               </a>
             </div>
           </div>
@@ -254,7 +254,7 @@
 <span class="float-right">
 <div class="input-group mr-4 mt-1 mb-4">
   <div class="input-group-prepend">
-    <button id="buttonOnUDP" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkUDP');?>" type="button">UDP代理</button>
+    <button id="buttonOnUDP" class="btn btn-<?php passthru('sudo /opt/de_GWD/ui-checkUDP');?>" type="button">UDP代理</button>
   </div>
   <div class="input-group-append">
     <button id="buttonOffUDP" class="btn btn-secondary" type="button">OFF</button>
@@ -300,7 +300,7 @@
   <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['divertLan']['ip'] as $k => $v) {echo "$v ";} ?>">
   </div>
   <div class="input-group-append">
-    <button id="buttonSubmitlocalip" class="btn btn-secondary" type="button">IP写入</button>
+    <button id="buttonSubmitDivertIP" class="btn btn-secondary" type="button">IP写入</button>
   </div>
 </div>
 </span>
@@ -316,8 +316,8 @@
             <i class="far fa-compass"></i>
             DNS
           <span class="float-right mt-n1 mb-n2">
-                <button id="buttonDnsCHNW" type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSchnw",'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">大陆白名单</button>
-                <button id="buttonDnsGFW" type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos("$DNSgfw",'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">GFWlist</button>
+                <button id="buttonDnsCHNW" type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSchnw,'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">大陆白名单</button>
+                <button id="buttonDnsGFW" type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSgfw,'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">GFWlist</button>
                 <button id="buttonSubmitDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">应用</button>
           </span>
           </div>
@@ -382,7 +382,7 @@
                   静态<br>
                   </span>
                 </div>
-                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6" placeholder="IP 空格 域名"><?php echo shell_exec("sudo /opt/de_GWD/ui-hostsCustomize"); ?></textarea>
+                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6" placeholder="IP 空格 域名"><?php passthru("sudo /opt/de_GWD/ui-hostsCustomize"); ?></textarea>
                 </div>
               </div>
             </div>
@@ -433,7 +433,7 @@
             DHCP
           <span class="float-right mt-n1 mb-n2">
                 <a class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" href="admin/settings.php?tab=piholedhcp" target="_blank">详情</a>
-                <button id="buttonOnDHCP" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;">应用</button>
+                <button id="buttonOnDHCP" type="button" class="btn btn-<?php passthru('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1" style="border-radius: 0px;">应用</button>
                 <button id="buttonOffDHCP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">关闭</button>
           </span>
           </div>
@@ -635,19 +635,17 @@ $('#buttonOffUDP').click(function(){
 $.get('./act/offUDP.php', function(result){window.location.reload()})
 })
 
-$('#buttonSubmitlocalip').click(function(){
-localiptxt=$('#nodedttext').val()
-$.get('./act/changeLocalIP.php', {localip:localiptxt}, function(result){window.location.reload()})
+$('#buttonSubmitDivertIP').click(function(){
+divertIP=$('#nodedttext').val()
+$.get('./act/changeDivertIP.php', {divertIP:divertIP}, function(result){window.location.reload()})
 })
 
 $('#buttonDnsCHNW').click(function(){
 $.get('./act/dnsCHNW.php', function(result){window.location.reload()})
-alert("切换至大陆白名单。。。")
 })
 
 $('#buttonDnsGFW').click(function(){
 $.get('./act/dnsGFW.php', function(result){window.location.reload()})
-alert("切换至GFWlist。。。")
 })
 
 $('#buttonSubmitDNS').click(function(){

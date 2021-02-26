@@ -2,15 +2,14 @@
 <?php if (isset($auth) && $auth) {?>
 <?php
 $conf = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
-$localip = $_GET['localip'];
+$divertIP = $_GET['divertIP'];
 
-$localip = explode(" ",$localip);
-$localip = array_filter($localip);
-$conf['divertLan']['ip'] = $localip;
+$divertIP = explode(" ",$divertIP);
+$divertIP = array_filter($divertIP);
+$conf['divertLan']['ip'] = $divertIP;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-shell_exec('sudo /opt/de_GWD/ui-changeDivertIP');
-shell_exec('sudo systemctl restart vtrui');
+exec('sudo /opt/de_GWD/ui-changeDivertIP r');
 ?>
 <?php }?>

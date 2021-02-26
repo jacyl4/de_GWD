@@ -1,5 +1,6 @@
 #!/bin/bash
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip a | grep "$ethernetnum" | awk '{print $2}' | awk 'END {print}' | cut -d'/' -f1)
 
 cat << EOF >/opt/de_GWD/iptables-proxy-up
 #!/bin/bash
@@ -37,42 +38,22 @@ for iplanip in \$lanip; do
 done
 
 ipset -N doh hash:ip family inet
-for IPdoh in \$(cat /opt/de_GWD/IPdoh); do
-  ipset add doh \$IPdoh
-done
+ipset -! -R </opt/de_GWD/IPdohSET
 
 ipset -N v2node hash:ip family inet
-for IPv2node in \$(cat /opt/de_GWD/IPv2node); do
-  ipset add v2node \$IPv2node
-done
+ipset -! -R </opt/de_GWD/IPv2nodeSET
 
 ipset -N listB hash:ip family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistB) ]]; then
-  for iplistB in \$(cat /opt/de_GWD/IPlistB); do
-    ipset add listB \$iplistB
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistBSET
 
 ipset -N listW hash:ip family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistW) ]]; then
-  for iplistW in \$(cat /opt/de_GWD/IPlistW); do
-    ipset add listW \$iplistW
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistWSET
 
 ipset -N listBlan hash:net family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistBlan) ]]; then
-  for iplistBlan in \$(cat /opt/de_GWD/IPlistBlan); do
-    ipset add listBlan \$iplistBlan
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistBlanSET
 
 ipset -N listWlan hash:net family inet
-if [[ -n \$(cat /opt/de_GWD/IPlistWlan) ]]; then
-  for iplistWlan in \$(cat /opt/de_GWD/IPlistWlan); do
-    ipset add listWlan \$iplistWlan
-  done
-fi
+ipset -! -R </opt/de_GWD/IPlistWlanSET
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
@@ -93,18 +74,29 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
-iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5311 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr:53
+iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr:53
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
@@ -139,3 +131,8 @@ chmod +x /opt/de_GWD/iptables-proxy-up
 jq '.address.udp="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
 chmod 666 /opt/de_GWD/0conf
+
+
+if [[ $1 == "r" ]]; then
+  systemctl restart iptables-proxy
+fi

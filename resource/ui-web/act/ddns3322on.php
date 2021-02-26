@@ -12,7 +12,6 @@ $conf['ddns']['ddns3322']['pwd'] = $f3322pwd;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-shell_exec('sudo /opt/de_GWD/ui-ddns3322updateIP');
-shell_exec('sudo /opt/de_GWD/ui-ddns3322updateOn');
+exec('sudo /opt/de_GWD/ui-ddns3322on');
 ?>
 <?php }?>

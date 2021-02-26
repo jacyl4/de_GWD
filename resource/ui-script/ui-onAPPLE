@@ -17,3 +17,7 @@ fi
 
 chmod 666 /opt/de_GWD/v2dns/config.json
 chmod 666 /opt/de_GWD/0conf
+
+if [[ $1 == "r" ]]; then
+	systemctl restart v2dns
+fi

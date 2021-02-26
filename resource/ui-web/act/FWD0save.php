@@ -18,10 +18,6 @@ $data['FORWARD']['FWD0']['uuid'] = $FWD0uuid;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-shell_exec('sudo /opt/de_GWD/ui-FWD0save');
-shell_exec('sudo /opt/de_GWD/ui-FWD0vtrui');
-
-shell_exec('sudo systemctl restart vtrui');
-shell_exec('sudo systemctl restart iptables-proxy');
+exec('sudo /opt/de_GWD/ui-FWD0save r');
 ?>
 <?php }?>

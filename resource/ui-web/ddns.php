@@ -43,8 +43,8 @@
     <button id="sidebarToggle" class="btn btn-link btn-sm text-white order-1 order-sm-0" href="javascript:void(0)">
       <i class="fas fa-bars"></i>
     </button>
-<span class="float-right badge text-info"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
-<span class="float-right badge text-success"><?php echo shell_exec('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
+<span class="float-right badge text-info"><?php passthru('sudo /opt/de_GWD/ui-checkEditionARM');?></span>
+<span class="float-right badge text-success"><?php passthru('sudo /opt/de_GWD/ui-checkEditionFWD');?></span>
 
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -164,8 +164,8 @@
             <i class="fas fa-cloud"></i>
             <a href="http://www.pubyun.com" target="_blank">F3322 DDNS</a>
 <span id="ddns3322button" class="float-right mt-n1 mb-n2" style="display:none">
-<button id="buttonDDNS3322save" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
-<button id="buttonDDNS3322stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
+<button id="buttonddns3322on" type="button" class="btn btn-<?php passthru('sudo /opt/de_GWD/ui-checkDDNS3322');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
+<button id="buttonddns3322off" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span id="ddns3322switch" class="float-right mt-n1 mb-n2">
 <button id="buttonDDNS3322switch" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">展开</button>
@@ -204,8 +204,8 @@
             <i class="fas fa-cloud"></i>
             <a href="https://dash.cloudflare.com/login" target="_blank">CloudFlare DDNS</a>
 <span id="ddnsCFbutton" class="float-right mt-n1 mb-n2" style="display:none">
-<button id="buttonDDNSCFsave" type="button" class="btn btn-<?php echo shell_exec('sudo /opt/de_GWD/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
-<button id="buttonDDNSCFstop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
+<button id="buttonddnsCFon" type="button" class="btn btn-<?php passthru('sudo /opt/de_GWD/ui-checkDDNScf');?> btn-sm mt-1" style="border-Radius: 0px;">应用</button>
+<button id="buttonddnsCFoff" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">关闭</button>
 </span>
 <span id="ddnsCFswitch" class="float-right mt-n1 mb-n2">
 <button id="buttonDDNSCFswitch" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">展开</button>
@@ -494,16 +494,16 @@ $('#buttonDDNS3322switch').click(function(){
 DDNS3322switch()
 })
 
-$('#buttonDDNS3322save').click(function(){
+$('#buttonddns3322on').click(function(){
 f3322domain=$('#f3322domain').val()
 f3322usr=$('#f3322usr').val()
 f3322pwd=$('#f3322pwd').val()
-$.get('./act/ddns3322save.php', {f3322domain:f3322domain, f3322usr:f3322usr, f3322pwd:f3322pwd}, function(result){window.location.reload()})
+$.get('./act/ddns3322on.php', {f3322domain:f3322domain, f3322usr:f3322usr, f3322pwd:f3322pwd}, function(result){window.location.reload()})
 alert("应用DDNS。。。")
 })
 
-$('#buttonDDNS3322stop').click(function(){
-$.get('./act/ddns3322stop.php', function(result){window.location.reload()})
+$('#buttonddns3322off').click(function(){
+$.get('./act/ddns3322off.php', function(result){window.location.reload()})
 })
 
 
@@ -517,17 +517,17 @@ $('#buttonDDNSCFswitch').click(function(){
 DDNSCFswitch()
 })
 
-$('#buttonDDNSCFsave').click(function(){
+$('#buttonddnsCFon').click(function(){
 cfdomain=$('#CFdomain').val()
 cfzoneid=$('#CFzoneid').val()
 cfapikey=$('#CFapikey').val()
 cfemail=$('#CFemail').val()
-$.get('./act/ddnsCFsave.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){window.location.reload()})
+$.get('./act/ddnsCFon.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){window.location.reload()})
 alert("应用DDNS。。。")
 })
 
-$('#buttonDDNSCFstop').click(function(){
-$.get('./act/ddnsCFstop.php', function(result){window.location.reload()})
+$('#buttonddnsCFoff').click(function(){
+$.get('./act/ddnsCFoff.php', function(result){window.location.reload()})
 })
 
 
