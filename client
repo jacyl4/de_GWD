@@ -841,17 +841,10 @@ systemctl daemon-reload
 systemctl enable iptables-proxy
 systemctl restart iptables-proxy
 
->/etc/resolvconf/resolv.conf.d/head
->/etc/resolvconf/resolv.conf.d/original
->/etc/resolvconf/resolv.conf.d/tail
-rm -rf /etc/resolv.conf
-rm -rf /run/resolvconf/interface
-cat << EOF >/etc/resolvconf/resolv.conf.d/base
-options use-vc single-request single-request-reopen timeout:1
+cat << EOF >/etc/resolv.conf
+options single-request single-request-reopen timeout:1
 nameserver 127.0.0.1
 EOF
-ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
-resolvconf -u
 
 echo "$statusInstalled iptables-proxy"
 }
@@ -1452,6 +1445,18 @@ sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.p
 sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 pihole -a interface
+
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+options use-vc single-request single-request-reopen timeout:1
+nameserver 127.0.0.1
+EOF
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
 
 echo "$statusInstalled Pi-hole"
 }
