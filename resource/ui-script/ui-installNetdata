@@ -13,10 +13,29 @@ else
 bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --dont-start-it --stable-channel --disable-telemetry
 fi
 
+if [[ $(grep KSM /boot/config-`uname -r`) = "CONFIG_KSM=y" ]]; then
+echo 1 >/sys/kernel/mm/ksm/run
+echo 1000 >/sys/kernel/mm/ksm/sleep_millisecs
+fi
+
 systemctl restart netdata
 blue "----------------------"
 blue "Install Netdata [done]"
 blue "----------------------"
+}
+
+
+
+uninstallNetdata(){
+systemctl disable --now netdata
+
+if [[ -f "/usr/libexec/netdata/netdata-uninstaller.sh" ]]; then
+/usr/libexec/netdata/netdata-uninstaller.sh
+
+blue "------------------------"
+blue "Uninstall Netdata [done]"
+blue "------------------------"
+fi
 }
 
 
@@ -38,7 +57,8 @@ start_menu(){
     green "         Netdata"
     green "==============================="
     green  "1. Install Netdata"
-    green  "2. Update Netdata"
+    red   "2. Uninstall Netdata"
+    yellow "0. Update Netdata"
     echo ""
     read -p "Select:" num
     case "$num" in
@@ -47,6 +67,10 @@ start_menu(){
     start_menu
     ;;
     2)
+    uninstallNetdata
+    start_menu
+    ;;
+    0)
     updateNetdata
     start_menu
     ;;
