@@ -1,9 +1,9 @@
 #!/bin/bash
 nodenum=$(cat /var/www/html/act/nodepre.txt)
 
-v2servn=$(jq --argjson nodenum "$nodenum" -r '.v2node[$nodenum].domain' /opt/de_GWD/0conf)
-uuidnum=$(jq --argjson nodenum "$nodenum" -r '.v2node[$nodenum].uuid' /opt/de_GWD/0conf)
-v2path=$(jq --argjson nodenum "$nodenum" -r '.v2node[$nodenum].path' /opt/de_GWD/0conf)
+v2servn=$(jq --argjson nodenum $nodenum -r '.v2node[$nodenum].domain' /opt/de_GWD/0conf)
+uuidnum=$(jq --argjson nodenum $nodenum -r '.v2node[$nodenum].uuid' /opt/de_GWD/0conf)
+v2path=$(jq --argjson nodenum $nodenum -r '.v2node[$nodenum].path' /opt/de_GWD/0conf)
 
 domain=$(echo -e $v2servn | cut -d: -f1)
 port=$(echo -e $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
