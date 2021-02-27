@@ -250,7 +250,6 @@ net.ipv4.tcp_orphan_retries = 2
 net.ipv4.tcp_syn_retries = 2
 net.ipv4.tcp_synack_retries = 2
 net.ipv4.tcp_sack = 1
-net.ipv4.tcp_ecn = 2 
 net.ipv4.tcp_max_syn_backlog = 32768
 net.ipv4.tcp_max_tw_buckets = 6000
 net.ipv4.tcp_max_orphans = 32768
