@@ -640,12 +640,12 @@ echo "$statusInstalled v2dns && vtrui"
 
 
 installIptablesProxy(){
-touch /opt/de_GWD/IPdohSET
-touch /opt/de_GWD/IPv2nodeSET
-touch /opt/de_GWD/IPlistBSET
-touch /opt/de_GWD/IPlistWSET
-touch /opt/de_GWD/IPlistBlanSET
-touch /opt/de_GWD/IPlistWlanSET
+>/opt/de_GWD/IPdohSET
+>/opt/de_GWD/IPv2nodeSET
+>/opt/de_GWD/IPlistBSET
+>/opt/de_GWD/IPlistWSET
+>/opt/de_GWD/IPlistBlanSET
+>/opt/de_GWD/IPlistWlanSET
 
 echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
 sed -i 's/^/add doh &/g' /opt/de_GWD/IPdoh
@@ -828,7 +828,6 @@ systemctl restart iptables-proxy
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
 cat << EOF >/etc/resolvconf/resolv.conf.d/base
-options use-vc
 nameserver 127.0.0.1
 EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf

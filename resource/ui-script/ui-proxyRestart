@@ -7,7 +7,6 @@
 rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
 cat << EOF >/etc/resolvconf/resolv.conf.d/base
-options use-vc
 nameserver 127.0.0.1
 EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
