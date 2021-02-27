@@ -34,12 +34,12 @@ systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
-options single-request single-request-reopen timeout:1 attempts:1 rotate
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 182.254.118.118
 nameserver 114.114.114.114
 nameserver 114.114.115.115
+options single-request single-request-reopen timeout:1 attempts:1 rotate
 EOF
 
 mkdir -p /opt/de_GWD
@@ -214,12 +214,12 @@ else
     echo "$statusFailed de_GWD server connect"
 
 cat << EOF >/etc/resolv.conf
-options single-request single-request-reopen timeout:1 attempts:1 rotate
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 182.254.118.118
 nameserver 114.114.114.114
 nameserver 114.114.115.115
+options single-request single-request-reopen timeout:1 attempts:1 rotate
 EOF
 
     exit
@@ -829,6 +829,7 @@ rm -rf /etc/resolv.conf
 rm -rf /run/resolvconf/interface
 cat << EOF >/etc/resolvconf/resolv.conf.d/base
 nameserver 127.0.0.1
+options single-request single-request-reopen
 EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
