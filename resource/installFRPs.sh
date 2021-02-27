@@ -52,7 +52,7 @@ LimitCORE=infinity
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/frp/frps -c /opt/de_GWD/frp/frps.ini
 Restart=always
-RestartSec=2ms
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
