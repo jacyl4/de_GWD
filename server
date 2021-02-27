@@ -286,9 +286,9 @@ installIptablesRules(){
 
 cat << EOF >/opt/de_GWD/iptablesrules-up
 #!/bin/bash
+iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
-iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
@@ -301,6 +301,7 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL NONE -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
 
 iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
 iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
@@ -315,6 +316,12 @@ cat << EOF >/opt/de_GWD/iptablesrules-down
 #!/bin/bash
 iptables -F
 iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -t raw -F
+iptables -t raw -X
 EOF
 
 chmod +x /opt/de_GWD/iptablesrules-down
