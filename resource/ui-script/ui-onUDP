@@ -58,11 +58,14 @@ ipset -! -R </opt/de_GWD/IPlistWlanSET
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
 
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
@@ -73,7 +76,6 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL NONE -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
 
 iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
