@@ -232,3 +232,8 @@ jq '.divertLan.display="block"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
 chmod 666 /opt/de_GWD/vtrui/config.json
 chmod 666 /opt/de_GWD/0conf
+
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui
+fi
