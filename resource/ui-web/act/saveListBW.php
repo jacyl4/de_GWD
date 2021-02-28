@@ -29,6 +29,6 @@ $conf['listWlan'] = $listWlan;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-if(strpos($conf,'geosite:cn') !== false) exec('sudo /opt/de_GWD/ui-dnsCHNW'); else exec('sudo /opt/de_GWD/ui-dnsGFW');
+if(strpos($conf,'geosite:cn') !== false) exec('sudo /opt/de_GWD/ui-dnsCHNW >/dev/null 2>&1 &'); else exec('sudo /opt/de_GWD/ui-dnsGFW >/dev/null 2>&1 &');
 ?>
 <?php }?>

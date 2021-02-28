@@ -7,6 +7,6 @@ $nodepre = fopen("nodepre.txt", "w");
 fwrite($nodepre, $nodenum);
 fclose($nodepre);
 
-exec('sudo /opt/de_GWD/ui-changeNode r');
+exec('sudo /opt/de_GWD/ui-changeNode r >/dev/null 2>&1 &');
 ?>
 <?php }?>

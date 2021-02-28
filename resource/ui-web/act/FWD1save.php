@@ -18,6 +18,6 @@ $data['FORWARD']['FWD1']['uuid'] = $FWD1uuid;
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-exec('sudo /opt/de_GWD/ui-FWD1save r');
+exec('sudo /opt/de_GWD/ui-FWD1save r >/dev/null 2>&1 &');
 ?>
 <?php }?>

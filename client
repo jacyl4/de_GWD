@@ -1437,7 +1437,7 @@ EOF
 chmod +x /opt/de_GWD/pihole_hotfix
 
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix >/dev/null 2>&1 &');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 cat << EOF >/etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d

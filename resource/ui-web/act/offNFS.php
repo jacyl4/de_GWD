@@ -3,6 +3,6 @@
 <?php
 $NFSpoint = $_GET['NFSpoint'];
 putenv("NFSpoint=$NFSpoint");
-exec('sudo /opt/de_GWD/ui-offNFS $NFSpoint');
+exec('sudo /opt/de_GWD/ui-offNFS $NFSpoint >/dev/null 2>&1 &');
 ?>
 <?php }?>

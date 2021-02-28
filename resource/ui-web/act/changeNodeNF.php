@@ -7,6 +7,6 @@ $nodenfpre = fopen("nodenfpre.txt", "w");
 fwrite($nodenfpre, $nodenfnum);
 fclose($nodenfpre);
 
-exec('sudo /opt/de_GWD/ui-changeNodeNF r');
+exec('sudo /opt/de_GWD/ui-changeNodeNF r >/dev/null 2>&1 &');
 ?>
 <?php }?>
