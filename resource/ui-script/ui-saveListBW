@@ -16,6 +16,11 @@ fi
 >/opt/de_GWD/IPlistW
 if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
 	jq '.dns.servers[1].domains=["keyword:play.googleapi.cn"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1 | while read line
+	do
+	  jq --arg line $line '.dns.servers[1].domains+=[$line]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	done
+
 	if [[ -n $(cat /tmp/listBpre) ]]; then
 		jq '.listB={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 		cat /tmp/listBpre | xargs -n 8 | while read listB 
@@ -50,6 +55,10 @@ if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
 
 elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
 	jq '.dns.servers[2].domains=["keyword:play.googleapi.cn"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1 | while read line
+	do
+	  jq --arg line $line '.dns.servers[3].domains+=[$line]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	done
 
 	if [[ -n $(cat /tmp/listBpre) ]]; then
 		jq '.listB={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
