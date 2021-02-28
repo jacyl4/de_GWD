@@ -318,6 +318,7 @@
           <span class="float-right mt-n1 mb-n2">
                 <button id="buttonDnsCHNW" type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSchnw,'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">大陆白名单</button>
                 <button id="buttonDnsGFW" type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSgfw,'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">GFWlist</button>
+                <button id="buttonDNSclear" type="button" class="btn btn-outline-secondary btn-sm mt-1 ml-2" style="border-radius: 0px;">清理缓存</button>
                 <button id="buttonSubmitDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">应用</button>
           </span>
           </div>
@@ -646,6 +647,11 @@ $.get('./act/dnsCHNW.php', function(result){window.location.reload()})
 
 $('#buttonDnsGFW').click(function(){
 $.get('./act/dnsGFW.php', function(result){window.location.reload()})
+})
+
+$('#buttonDNSclear').click(function(){
+$.get("./act/DNSclear.php", function(result){window.location.reload()})
+alert("清理DNS缓存。。。")
 })
 
 $('#buttonSubmitDNS').click(function(){
