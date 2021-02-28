@@ -651,7 +651,6 @@ $.get('./act/dnsGFW.php', function(result){window.location.reload()})
 
 $('#buttonDNSclear').click(function(){
 $.get("./act/DNSclear.php", function(result){window.location.reload()})
-alert("清理DNS缓存。。。")
 })
 
 $('#buttonSubmitDNS').click(function(){
@@ -660,7 +659,6 @@ dohtxt2=$('#DoH2').val()
 dnsChina=$("#dnsChina").val()
 hostsCustomize=$("#hostsCustomize").val()
 $.get("./act/saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload()})
-alert("应用DNS设置。。。")
 })
 
 $('#buttonOnAPPLE').click(function(){
