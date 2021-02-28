@@ -3,7 +3,7 @@ blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
 yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
 green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
 red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
-statusInstalled=$(green "[ installed ]")
+statusUpdated=$(green "[  updated  ]")
 
 service cron stop >/dev/null 2>&1
 
@@ -31,6 +31,6 @@ mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET
 ipset -! -R </opt/de_GWD/chnrouteSET
 fi
 
-echo "$statusInstalled IP & Domain rules"
-
 service cron restart >/dev/null 2>&1
+
+echo "$statusUpdated IP & Domain rules"
