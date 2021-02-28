@@ -64,9 +64,11 @@ iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
+iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,FIN FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,PSH PSH -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL ALL -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL NONE -j DROP
@@ -82,6 +84,8 @@ iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 9896 -i $ethernetnum -j DROP
 
 iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr:53
 iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr:53
@@ -97,6 +101,8 @@ iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 9896 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 9896 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT

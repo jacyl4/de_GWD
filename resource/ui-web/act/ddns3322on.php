@@ -12,6 +12,6 @@ $conf['ddns']['ddns3322']['pwd'] = $f3322pwd;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-exec('sudo /opt/de_GWD/ui-ddns3322on');
+exec('sudo /opt/de_GWD/ui-ddns3322on >/dev/null 2>&1 &');
 ?>
 <?php }?>

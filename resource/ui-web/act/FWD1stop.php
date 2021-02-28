@@ -6,6 +6,6 @@ $data['FORWARD']['FWD1']['status'] = "off";
 $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-exec('sudo /opt/de_GWD/ui-FWD1stop');
+exec('sudo /opt/de_GWD/ui-FWD1stop >/dev/null 2>&1 &');
 ?>
 <?php }?>

@@ -9,6 +9,6 @@ $conf['NFS'] = $NFSlist;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-exec('sudo /opt/de_GWD/ui-onNFS');
+exec('sudo /opt/de_GWD/ui-onNFS >/dev/null 2>&1 &');
 ?>
 <?php }?>

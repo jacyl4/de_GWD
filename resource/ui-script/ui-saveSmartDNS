@@ -14,7 +14,8 @@ doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
 doh1PortStr=$([ -n "$doh1Port" ] && echo $doh1Port | sed 's/^/:/')
 doh2PortStr=$([ -n "$doh2Port" ] && echo $doh2Port | sed 's/^/:/')
 
-echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
+echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPdoh
+sed -i '/^\s*$/d' /opt/de_GWD/IPdoh
 sed -i 's/^/add doh &/g' /opt/de_GWD/IPdoh
 mv -f /opt/de_GWD/IPdoh /opt/de_GWD/IPdohSET
 ipset -! -R </opt/de_GWD/IPdohSET

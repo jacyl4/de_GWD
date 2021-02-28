@@ -91,8 +91,8 @@ if [[ $(uname -m) == "aarch64" ]] && [[ -n $(dpkg -l | grep nginx) ]];then
 fi
 
 if [[ -f "/usr/bin/dockerd" ]]; then
-	docker stop nginx >/dev/null 2>&1
-	docker rm nginx >/dev/null 2>&1
+  docker stop nginx >/dev/null 2>&1
+  docker rm nginx >/dev/null 2>&1
 
 docker image ls 2>/dev/null | awk '/nginx/{print$3}' | while read line
 do
@@ -647,7 +647,8 @@ installIptablesProxy(){
 >/opt/de_GWD/IPlistBlanSET
 >/opt/de_GWD/IPlistWlanSET
 
-echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
+echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPdoh
+sed -i '/^\s*$/d' /opt/de_GWD/IPdoh
 sed -i 's/^/add doh &/g' /opt/de_GWD/IPdoh
 mv -f /opt/de_GWD/IPdoh /opt/de_GWD/IPdohSET
 
@@ -710,9 +711,11 @@ iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
+iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,FIN FIN -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,PSH PSH -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL ALL -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL NONE -j DROP
@@ -728,6 +731,8 @@ iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 9896 -i $ethernetnum -j DROP
 
 iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr:53
 iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr:53
@@ -743,6 +748,8 @@ iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 9896 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 9896 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
@@ -755,12 +762,16 @@ iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
 
 iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
 
 iptables -t mangle -A OUTPUT -p tcp -j V2PROXY
+iptables -t mangle -A OUTPUT -p udp -j V2PROXY
 
 iptables -t mangle -A PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
 
 iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
 
 if [[ \$(ip --oneline link show up | grep -v lo | awk '{print\$2}') =~ "wg0" ]]; then
 iptables -I FORWARD -i wg0 -j ACCEPT
@@ -1426,7 +1437,7 @@ EOF
 chmod +x /opt/de_GWD/pihole_hotfix
 
 sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix >/dev/null 2>&1 &');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 cat << EOF >/etc/dnsmasq.conf
 conf-dir=/etc/dnsmasq.d
