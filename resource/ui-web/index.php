@@ -318,6 +318,7 @@
           <span class="float-right mt-n1 mb-n2">
                 <button id="buttonDnsCHNW" type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSchnw,'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">大陆白名单</button>
                 <button id="buttonDnsGFW" type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSgfw,'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">GFWlist</button>
+                <button id="buttonclearDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1 ml-2" style="border-radius: 0px;">清理缓存</button>
                 <button id="buttonSubmitDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">应用</button>
           </span>
           </div>
@@ -641,11 +642,21 @@ $.get('./act/changeDivertIP.php', {divertIP:divertIP}, function(result){window.l
 })
 
 $('#buttonDnsCHNW').click(function(){
-$.get('./act/dnsCHNW.php', function(result){window.location.reload()})
+$.get('./act/dnsCHNW.php', function(){})
+$('#buttonDnsCHNW').attr('class', 'btn btn-success btn-sm mt-1')
+$('#buttonDnsGFW').attr('class', 'btn btn-outline-secondary btn-sm mt-1')
+alert("已切换至大陆白名单模式")
 })
 
 $('#buttonDnsGFW').click(function(){
-$.get('./act/dnsGFW.php', function(result){window.location.reload()})
+$.get('./act/dnsGFW.php', function(){})
+$('#buttonDnsCHNW').attr('class', 'btn btn-outline-secondary btn-sm mt-1')
+$('#buttonDnsGFW').attr('class', 'btn btn-success btn-sm mt-1')
+alert("已切换至GFWlist模式")
+})
+
+$('#buttonclearDNS').click(function(){
+$.get("./act/clearDNS.php", function(result){window.location.reload()})
 })
 
 $('#buttonSubmitDNS').click(function(){
@@ -654,7 +665,6 @@ dohtxt2=$('#DoH2').val()
 dnsChina=$("#dnsChina").val()
 hostsCustomize=$("#hostsCustomize").val()
 $.get("./act/saveDNS.php", {DoH1:dohtxt1, DoH2:dohtxt2, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){window.location.reload()})
-alert("应用DNS设置。。。")
 })
 
 $('#buttonOnAPPLE').click(function(){

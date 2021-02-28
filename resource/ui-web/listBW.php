@@ -249,7 +249,6 @@ listW=$("#listW").val()
 listBlan=$("#listBlan").val()
 listWlan=$("#listWlan").val()
 $.get("./act/saveListBW.php", {listB:listB, listW:listW, listBlan:listBlan, listWlan:listWlan}, function(result){ window.location.href="index.php" })
-alert("保存黑白名单。。。")
 })
 })
 </script>

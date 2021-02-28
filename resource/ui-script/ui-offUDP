@@ -83,6 +83,8 @@ iptables -A INPUT -p udp --dport 5311 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5321 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5321 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
@@ -115,6 +117,8 @@ iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5321 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5321 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 9896 -j ACCEPT

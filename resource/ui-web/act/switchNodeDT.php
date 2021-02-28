@@ -11,6 +11,6 @@ elseif ($switchNodeDT == "NodeDThide"){
     exec('sudo /opt/de_GWD/ui-NodeDThide r >/dev/null 2>&1 &');
 }
 
-if ($forward0 == "installed")	exec('sudo /opt/de_GWD/ui-FWD0save r >/dev/null 2>&1 &');
+if ($forward0 == "installed") exec('sudo /opt/de_GWD/ui-FWD0save r >/dev/null 2>&1 &');
 ?>
 <?php }?>
