@@ -5,6 +5,6 @@ if [[ $(systemctl is-active smartdns) = "active" ]]; then
 	else
 		echo "SmartDNS:OK"
 	fi
-elif [[ $(systemctl is-active smartdns) != "active" ]]; then
+else
 	echo "SmartDNS:Failed"
 fi

@@ -642,11 +642,17 @@ $.get('./act/changeDivertIP.php', {divertIP:divertIP}, function(result){window.l
 })
 
 $('#buttonDnsCHNW').click(function(){
-$.get('./act/dnsCHNW.php', function(result){window.location.reload()})
+$.get('./act/dnsCHNW.php', function(){})
+$('#buttonDnsCHNW').attr('class', 'btn btn-success btn-sm mt-1')
+$('#buttonDnsGFW').attr('class', 'btn btn-outline-secondary btn-sm mt-1')
+alert("已切换至大陆白名单模式")
 })
 
 $('#buttonDnsGFW').click(function(){
-$.get('./act/dnsGFW.php', function(result){window.location.reload()})
+$.get('./act/dnsGFW.php', function(){})
+$('#buttonDnsCHNW').attr('class', 'btn btn-outline-secondary btn-sm mt-1')
+$('#buttonDnsGFW').attr('class', 'btn btn-success btn-sm mt-1')
+alert("已切换至GFWlist模式")
 })
 
 $('#buttonDNSclear').click(function(){
