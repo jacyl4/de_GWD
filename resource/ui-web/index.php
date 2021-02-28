@@ -244,7 +244,7 @@
     <label class="input-group-text">Netflix 分流</label>
   </div>
   <div class="input-group-append">
-    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodenfnum = exec("/opt/de_GWD/ui-checkNodeNF"); echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$nodenfnum]->name; ?></button>
+    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodenfnum = exec('/opt/de_GWD/ui-checkNodeNF &'); echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$nodenfnum]->name; ?></button>
     <div id="nodenf" class="dropdown-menu">
     </div>
   </div>
@@ -287,7 +287,7 @@
     <label class="input-group-text">内网设备分流</label>
   </div>
   <div class="input-group-append">
-    <button id="nodedtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodedtnum = exec("/opt/de_GWD/ui-checkNodeDT"); echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$nodedtnum]->name; ?></button>
+    <button id="nodedtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodedtnum = exec('/opt/de_GWD/ui-checkNodeDT &'); echo json_decode(file_get_contents('/opt/de_GWD/0conf'))->v2node[$nodedtnum]->name; ?></button>
     <div id="nodedt" class="dropdown-menu">
     </div>
   </div>
