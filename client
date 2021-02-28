@@ -647,7 +647,8 @@ installIptablesProxy(){
 >/opt/de_GWD/IPlistBlanSET
 >/opt/de_GWD/IPlistWlanSET
 
-echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq | sed '/^\s*$/d' >/opt/de_GWD/IPdoh
+echo $doh1IP $doh2IP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPdoh
+sed -i '/^\s*$/d' /opt/de_GWD/IPdoh
 sed -i 's/^/add doh &/g' /opt/de_GWD/IPdoh
 mv -f /opt/de_GWD/IPdoh /opt/de_GWD/IPdohSET
 
