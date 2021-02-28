@@ -14,10 +14,13 @@ sed -i 's/^/add v2node &/g' /opt/de_GWD/IPv2node
 mv -f /opt/de_GWD/IPv2node /opt/de_GWD/IPv2nodeSET
 ipset -! -R </opt/de_GWD/IPv2nodeSET
 
-jq '.dns.servers[4].domains=[]' /opt/de_GWD/v2dns/config.json
+jq '.dns.servers[4].domains=[]' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
 jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1 | while read line
 do
   jq --arg line $line '.dns.servers[4].domains+=[$line]' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
 done
 chmod 666 /opt/de_GWD/v2dns/config.json
-systemctl restart v2dns
+
+if [[ $1 == "r" ]]; then
+	systemctl restart v2dns
+fi
