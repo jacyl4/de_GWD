@@ -318,7 +318,7 @@
           <span class="float-right mt-n1 mb-n2">
                 <button id="buttonDnsCHNW" type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSchnw,'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">大陆白名单</button>
                 <button id="buttonDnsGFW" type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSgfw,'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">GFWlist</button>
-                <button id="buttonDNSclear" type="button" class="btn btn-outline-secondary btn-sm mt-1 ml-2" style="border-radius: 0px;">清理缓存</button>
+                <button id="buttonclearDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1 ml-2" style="border-radius: 0px;">清理缓存</button>
                 <button id="buttonSubmitDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">应用</button>
           </span>
           </div>
@@ -655,8 +655,8 @@ $('#buttonDnsGFW').attr('class', 'btn btn-success btn-sm mt-1')
 alert("已切换至GFWlist模式")
 })
 
-$('#buttonDNSclear').click(function(){
-$.get("./act/DNSclear.php", function(result){window.location.reload()})
+$('#buttonclearDNS').click(function(){
+$.get("./act/clearDNS.php", function(result){window.location.reload()})
 })
 
 $('#buttonSubmitDNS').click(function(){

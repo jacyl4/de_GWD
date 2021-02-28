@@ -397,10 +397,12 @@ cat << EOF >/etc/smartdns/smartdns.conf
 bind 127.0.0.1:5310 -no-cache
 bind 127.0.0.1:5311 -no-cache -no-speed-check
 bind 127.0.0.1:5320 -no-cache -no-speed-check -group doh
+bind 127.0.0.1:5321 -no-speed-check -group doh
 
 bind-tcp 127.0.0.1:5310 -no-cache
 bind-tcp 127.0.0.1:5311 -no-cache -no-speed-check
 bind-tcp 127.0.0.1:5320 -no-cache -no-speed-check -group doh
+bind-tcp 127.0.0.1:5321 -no-speed-check -group doh
 
 force-AAAA-SOA yes
 
@@ -730,6 +732,8 @@ iptables -A INPUT -p udp --dport 5311 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
+iptables -A INPUT -p udp --dport 5321 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 5321 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
@@ -762,6 +766,8 @@ iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5321 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5321 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 9896 -j ACCEPT
