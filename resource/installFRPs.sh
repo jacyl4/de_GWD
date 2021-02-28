@@ -23,7 +23,7 @@ EOF
 fi
 
 installFRPs(){
-wget --no-check-certificate -O /tmp/frp.tar.gz https://gwd.seso.icu:10284/amd64_frp.tar.gz
+wget --no-check-certificate --show-progress -cqO /tmp/frp.tar.gz https://gwd.seso.icu:10284/amd64_frp.tar.gz
 tar zxvf /tmp/frp.tar.gz -C /tmp/
 
 mkdir -p /opt/de_GWD/frp

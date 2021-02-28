@@ -52,12 +52,12 @@ chmod +x /opt/de_GWD/tcpTime
 /opt/de_GWD/tcpTime
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /tmp/vtrui.zip https://$mirrorSite/amd64_vtrui.zip
+  wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://$mirrorSite/amd64_vtrui.zip
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /tmp/vtrui.zip https://$mirrorSite/arm64_vtrui.zip
+  wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://$mirrorSite/arm64_vtrui.zip
 fi
 
-wget --no-check-certificate -O /opt/de_GWD/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@master/IPchnroute
+wget --no-check-certificate --show-progress -cqO /opt/de_GWD/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@master/IPchnroute
 sed -i '/^\s*$/d' /opt/de_GWD/IPchnroute
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/IPchnroute
 mv -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
@@ -997,7 +997,7 @@ mkdir -p /var/cache/nginx/uwsgi_temp
 
 if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
   rm -rf /tmp/nginx*
-  wget --no-check-certificate -c -O /tmp/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+  wget --no-check-certificate --show-progress -cqO /tmp/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
   unzip /tmp/nginx.zip -d /tmp
     if [[ $(uname -m) == "x86_64" ]];then
       mv -f /tmp/nginx/nginx_amd64 /usr/sbin/nginx
@@ -1044,9 +1044,9 @@ systemctl enable --now nginx
 rm -rf /opt/de_GWD/doh-server
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
+  wget --no-check-certificate --show-progress -cqO /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_arm64.zip
+  wget --no-check-certificate --show-progress -cqO /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_arm64.zip
 fi
 
 unzip /tmp/doh.zip -d /tmp
@@ -1325,8 +1325,8 @@ chmod +x /etc/nginx/conf.d/merge.sh
 
 installWebUI(){
 cd ~
-wget --no-check-certificate -c -O /tmp/ui-script.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script/Archive.zip
-wget --no-check-certificate -c -O /tmp/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
+wget --no-check-certificate --show-progress -cqO /tmp/ui-script.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script/Archive.zip
+wget --no-check-certificate --show-progress -cqO /tmp/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
 
 if [[ $(ls -l /tmp/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l /tmp/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
 rm -rf /opt/de_GWD/ui-*
@@ -1342,7 +1342,7 @@ unzip /tmp/ui-script.zip -d /opt/de_GWD
 unzip /tmp/ui-web.zip -d /var/www/html
 fi
 
-wget --no-check-certificate -c -O /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+wget --no-check-certificate --show-progress -cqO /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
 
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
@@ -1352,9 +1352,9 @@ chmod +x /opt/de_GWD/*
 systemctl reload nginx
 
 if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.x86_64
+  wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.x86_64
 elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate -c -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.aarch64
+  wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.aarch64
 fi
 mv -f /tmp/ttyd /usr/bin/ttyd
 chmod +x /usr/bin/ttyd
@@ -1664,8 +1664,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 11265000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 44341000 ]]; then
 dpkg -i linux-headers.deb
@@ -1731,8 +1731,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-buster_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-buster_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
 dpkg -i linux-headers.deb

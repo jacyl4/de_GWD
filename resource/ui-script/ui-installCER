@@ -21,8 +21,8 @@ apt install netcat socat
 
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
-wget --no-check-certificate -O /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
-wget --no-check-certificate -O /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
 cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
 cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
 

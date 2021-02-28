@@ -9,21 +9,21 @@ service cron stop >/dev/null 2>&1
 
 /opt/de_GWD/tcpTime
 
-wget --no-check-certificate -c -O /tmp/geosite.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat
+wget --no-check-certificate --show-progress -cqO /tmp/geosite.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat
 if [[ $(ls -l /tmp/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
 cp -f /tmp/geosite.dat /opt/de_GWD/v2dns/geosite.dat
 cp -f /tmp/geosite.dat /opt/de_GWD/vtrui/geosite.dat
 rm -rf /tmp/geosite.dat
 fi
 
-wget --no-check-certificate -c -O /tmp/geoip.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat
+wget --no-check-certificate --show-progress -cqO /tmp/geoip.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat
 if [[ $(ls -l /tmp/geoip.dat | awk '{print$5}') -gt 240000 ]]; then
 cp -f /tmp/geoip.dat /opt/de_GWD/v2dns/geoip.dat
 cp -f /tmp/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 rm -rf /tmp/geoip.dat
 fi
 
-wget --no-check-certificate -c -O /tmp/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@master/IPchnroute
+wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@master/IPchnroute
 if [[ $(ls -l /tmp/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
 sed -i '/^\s*$/d' /tmp/IPchnroute
 sed -i 's/^/add chnroute &/g' /tmp/IPchnroute

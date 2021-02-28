@@ -87,7 +87,7 @@ systemctl reload nginx
 
 JavScraperURL=$(curl --silent "https://api.github.com/repos/JavScraper/Emby.Plugins.JavScraper/releases/latest" | jq -r .assets[1].browser_download_url)
 
-wget --no-check-certificate -c -O /tmp/JavScraper.zip $JavScraperURL
+wget --no-check-certificate --show-progress -cqO /tmp/JavScraper.zip $JavScraperURL
 
 rm -rf /var/lib/jellyfin/plugins/JavScraper.dll
 unzip /tmp/JavScraper.zip -d /var/lib/jellyfin/plugins

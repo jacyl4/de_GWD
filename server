@@ -449,7 +449,7 @@ installXray(){
 rm -rf /opt/de_GWD/vtrui
 rm -rf /etc/vtrui
 mkdir -p /opt/de_GWD/vtrui
-wget --no-check-certificate -c -O /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
+wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
 rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui
 cp -f /tmp/vtrui/xray /opt/de_GWD/vtrui/vtrui
@@ -583,7 +583,7 @@ installNginx(){
 if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
 
 rm -rf /tmp/nginx*
-wget --no-check-certificate -c -O /tmp/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
+wget --no-check-certificate --show-progress -cqO /tmp/nginx.zip https://github.com/jacyl4/de_GWD-nginx/releases/download/$de_gwd_nginx/nginx.zip
 unzip /tmp/nginx.zip -d /tmp
 mv -f /tmp/nginx/nginx_amd64 /usr/sbin/nginx
 chmod +x /usr/sbin/nginx
@@ -715,7 +715,7 @@ http {
 EOF
 
 rm -rf /opt/de_GWD/doh-server
-wget --no-check-certificate -c -O /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
+wget --no-check-certificate --show-progress -cqO /tmp/doh.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/master/doh/doh_s_amd64.zip
 unzip /tmp/doh.zip -d /tmp
 mv -f /tmp/doh-server /opt/de_GWD/doh-server
 chmod +x /opt/de_GWD/doh-server
@@ -841,8 +841,8 @@ curl https://get.acme.sh | sh
 ocspStapling(){
 cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
-wget --no-check-certificate -O /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
-wget --no-check-certificate -O /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
 cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
 cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
 
@@ -992,14 +992,14 @@ chmod +x /etc/nginx/conf.d/merge.sh
 postInstall(){
 indexpage=$(ls /var/www/html/index.* 2>/dev/null | wc -l)
 if [ "$indexpage" = "0" ]; then 
-wget --no-check-certificate -c -O /tmp/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/sample.zip
+wget --no-check-certificate --show-progress -cqO /tmp/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/sample.zip
 unzip /tmp/sample.zip -d /tmp
 cp -rf /tmp/sample/* /var/www/html/
 rm -rf /tmp/sample*
 fi
 
 rm -rf /opt/de_GWD/version.php
-wget --no-check-certificate -c -O /opt/de_GWD/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+wget --no-check-certificate --show-progress -cqO /opt/de_GWD/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
 
 if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
@@ -1007,7 +1007,7 @@ fi
 
 cat << "EOF" >/opt/de_GWD/autoUpdate
 #!/bin/bash
-wget --no-check-certificate -c -O ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/main/server
+wget --no-check-certificate --show-progress -cqO ~/update https://raw.githubusercontent.com/jacyl4/de_GWD/main/server
 sed -i '$d' ~/update
 echo "updateGWD" >>  ~/update
 chmod +x ~/update
@@ -1167,8 +1167,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-4.14.168-bbrplus_4.14.168-bbrplus-buster_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 11265000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 44341000 ]]; then
 dpkg -i linux-headers.deb
@@ -1234,8 +1234,8 @@ if [[ $(uname -m) == "aarch64" ]]; then
 elif [[ $(uname -m) == "x86_64" ]]; then
 apt install -y wget
 mkdir -p ~/bbrkernel && cd ~/bbrkernel
-wget --no-check-certificate -c -O ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-buster_amd64.deb
-wget --no-check-certificate -c -O ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-buster_amd64.deb
+wget --no-check-certificate --show-progress -cqO ~/bbrkernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-buster_amd64.deb
 
 if [[ $(ls -l ~/bbrkernel/linux-headers.deb | awk '{print$5}') -gt 7665000 ]] && [[ $(ls -l ~/bbrkernel/linux-image.deb | awk '{print$5}') -gt 45981000 ]]; then
 dpkg -i linux-headers.deb
