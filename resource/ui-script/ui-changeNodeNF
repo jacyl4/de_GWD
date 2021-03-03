@@ -1,0 +1,30 @@
+#!/bin/bash
+nodenfnum=$(cat /var/www/html/act/nodenfpre.txt)
+
+v2servn=$(jq --argjson nodenfnum "$nodenfnum" -r '.v2node[$nodenfnum].domain' /opt/de_GWD/0conf)
+uuidnum=$(jq --argjson nodenfnum "$nodenfnum" -r '.v2node[$nodenfnum].uuid' /opt/de_GWD/0conf)
+v2path=$(jq --argjson nodenfnum "$nodenfnum" -r '.v2node[$nodenfnum].path' /opt/de_GWD/0conf)
+
+domain=$(echo -e $v2servn | cut -d: -f1)
+port=$(echo -e $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -z $port ] && port="443"
+
+jq --arg domain "$domain" '.outbounds[1].settings.vnext[0].address=$domain' /opt/de_GWD/vtrui/config.json |\
+jq --argjson port "$port" '.outbounds[1].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[1].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[1].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui/config.json
+
+jq --arg domain "$domain" '.v2nodeForUpdate[1].address=$domain' /opt/de_GWD/0conf |\
+jq --arg port "$port" '.v2nodeForUpdate[1].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.v2nodeForUpdate[1].uuid=$uuidnum' |\
+jq --arg v2path "$v2path" '.v2nodeForUpdate[1].path=$v2path' | sponge /opt/de_GWD/0conf
+
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+rm -rf /var/www/html/act/nodenfpre.txt
+
+
+if [[ $1 == "r" ]]; then
+	systemctl restart vtrui >/dev/null
+fi
