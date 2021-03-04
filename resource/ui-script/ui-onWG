@@ -1,0 +1,52 @@
+#!/bin/bash
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+
+WGaddress=$(jq -r '.wireguard.server.WGaddress' /opt/de_GWD/0conf)
+WGport=$(jq -r '.wireguard.server.WGport' /opt/de_GWD/0conf)
+sprivatekey=$(jq -r '.wireguard.server.sprivatekey' /opt/de_GWD/0conf)
+spublickey=$(jq -r '.wireguard.server.spublickey' /opt/de_GWD/0conf)
+
+clientsNUM=$(jq -r '.wireguard.clients | length' /opt/de_GWD/0conf)
+clientsNUMinvalid=$(jq -r '.wireguard.clients[].cprivatekey' /opt/de_GWD/0conf | grep '^undefined$' | wc -l)
+clientsNUMgood=$[$clientsNUM-$clientsNUMinvalid]
+
+rm -rf /etc/wireguard/client*.conf
+
+cat << EOF >/etc/wireguard/wg0.conf
+[Interface]
+PrivateKey = $sprivatekey
+Address = 172.16.66.1/32
+ListenPort = $WGport
+DNS = 127.0.0.1
+MTU = 1420
+PostUp   = iptables -I FORWARD -i wg0 -j ACCEPT; iptables -I FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
+EOF
+
+for ((i=0; i<$clientsNUMgood; i++))
+do
+cat << EOF >>/etc/wireguard/wg0.conf
+
+[Peer]
+PublicKey = $(jq -r --argjson i "$i" '.wireguard.clients[$i].cpublickey' /opt/de_GWD/0conf)
+AllowedIPs = 172.16.66.$[$i+11]/32
+EOF
+
+cat >/etc/wireguard/client$[$i+1].conf << EOF
+[Interface]
+PrivateKey = $(jq -r --argjson i "$i" '.wireguard.clients[$i].cprivatekey' /opt/de_GWD/0conf)
+Address = 172.16.66.$[$i+11]/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $spublickey
+Endpoint = $WGaddress:$WGport
+AllowedIPs = 0.0.0.0/0
+EOF
+done
+chmod 600 /etc/wireguard/wg0.conf
+chmod 600 /etc/wireguard/client*.conf
+
+systemctl enable wg-quick@wg0 >/dev/null
+systemctl restart wg-quick@wg0 >/dev/null

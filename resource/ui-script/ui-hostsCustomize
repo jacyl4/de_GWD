@@ -1,0 +1,2 @@
+#!/bin/bash
+jq -r '.dns.hosts | to_entries[] | [.value, .key] | @tsv' /opt/de_GWD/0conf
