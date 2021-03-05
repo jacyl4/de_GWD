@@ -84,11 +84,10 @@ After=network.target nss-lookup.target
 [Service]
 User=root
 Type=simple
-LimitNPROC=64000
-LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitNOFILE=524288
 LimitCORE=infinity
 NoNewPrivileges=true
-AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/vtrui1/vtrui1 -c /opt/de_GWD/vtrui1/config.json
 Nice=-5
