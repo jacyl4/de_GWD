@@ -13,6 +13,7 @@ statusNONE=$(yellow "-")
 statusInstalled=$(green "[ installed ]")
 statuSuccess=$(green "[    OK     ]")
 statusFailed=$(red "[  failed   ]")
+statusWarning=$(yellow "[  warning  ]")
 statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
 export PIHOLE_SKIP_OS_CHECK=true
@@ -866,7 +867,7 @@ EOF
 ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
 resolvconf -u
 
-echo -n "$statusInstalled" && white "iptables-proxy"
+echo -n "$statusInstalled" && white "Iptables-Proxy"
 }
 
 
@@ -889,10 +890,16 @@ curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 script -c "apt update" /tmp/aptLOG
 apt upgrade && apt autoremove && apt autoclean
 
+[ -z "$(dpkg -l | grep php7.4-fpm)" ] && aptPKG+=(php7.4-fpm)
+[ -z "$(dpkg -l | grep php7.4-opcache)" ] && aptPKG+=(php7.4-opcache)
+[ -z "$(dpkg -l | grep php7.4-json)" ] && aptPKG+=(php7.4-json)
+[ -z "$(dpkg -l | grep libjemalloc-dev)" ] && aptPKG+=(libjemalloc-dev)
+
+if [[ -n $aptPKG ]]; then apt install $(echo ${aptPKG[@]}); fi
+unset aptPKG
+
 sed -i "/www-data/d" /etc/sudoers
 sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
-
-apt install php7.4-fpm php7.4-opcache php7.4-json libjemalloc-dev
 
 cat << EOF >/etc/php/7.4/fpm/php-fpm.conf
 [global]
@@ -911,10 +918,10 @@ listen.group = www-data
 listen = /run/php/php-fpm.sock
 
 pm = dynamic
-pm.max_children = 50
-pm.start_servers = 8
-pm.min_spare_servers = 8
-pm.max_spare_servers = 24
+pm.max_children = 20
+pm.start_servers = 5
+pm.min_spare_servers = 2
+pm.max_spare_servers = 15
 pm.max_requests = 1000
 
 env[HOSTNAME] = \$HOSTNAME
@@ -1831,9 +1838,9 @@ updateGWD(){
 installDep
 
 if [[ $(cat /tmp/aptLOG) =~ "failure" ]]; then
-  echo -n "$statusFailed" && white "de_GWD update stopped, please check network"
-  exit
+  echo -n "$statusWarning" && white "Network Unstable"
 fi
+
 preDownload
 
 preUpdate
