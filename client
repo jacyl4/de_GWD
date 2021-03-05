@@ -887,8 +887,9 @@ fi
 echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
 curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 
-script -c "apt update" /tmp/aptLOG
-apt upgrade && apt autoremove && apt autoclean
+script -c "apt update" /tmp/aptLOG1
+script -c "apt upgrade" /tmp/aptLOG2
+apt autoremove && apt autoclean
 
 echo
 echo -n "$statusUpdated" && white "Debian Update"
@@ -1847,7 +1848,7 @@ updateGWD(){
 
 updateAPT
 
-if [[ $(cat /tmp/aptLOG) =~ "failure" ]]; then
+if [[ -n $(grep -E "failure|failed" /tmp/aptLOG1) ]] || [[ -n $(grep -E "failure|failed" /tmp/aptLOG2) ]]; then
   echo -n "$statusWarning" && white "Network Unstable"
 fi
 
