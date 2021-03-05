@@ -36,6 +36,7 @@ mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET
 ipset -! -R </opt/de_GWD/chnrouteSET
 fi
 
+echo
 echo -n "$statusUpdated" && white "IP & Domain rules"
 
 if [[ $1 == "u" ]]; then
