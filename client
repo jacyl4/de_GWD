@@ -885,7 +885,7 @@ fi
 echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
 curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 
-apt update
+script -c "apt update" /tmp/aptLOG
 apt upgrade && apt autoremove && apt autoclean
 
 sed -i "/www-data/d" /etc/sudoers
@@ -976,6 +976,7 @@ systemctl daemon-reload >/dev/null
 systemctl enable php7.4-fpm >/dev/null 2>&1
 systemctl restart php7.4-fpm >/dev/null
 
+echo
 echo -n "$statusInstalled" && white "Dependencies"
 echo
 }
@@ -1362,8 +1363,6 @@ unzip /tmp/ui-script.zip -d /opt/de_GWD >/dev/null
 unzip /tmp/ui-web.zip -d /var/www/html >/dev/null
 fi
 
-wget --no-check-certificate --show-progress -cqO /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
-
 mkdir -p /var/www/html/restore
 chown -R www-data:www-data /var/www/html
 chmod -R +x /var/www/html
@@ -1403,6 +1402,8 @@ rm -rf /tmp/ui-web*
 if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
+
+wget --no-check-certificate --show-progress -cqO /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
 
 echo
 echo -n "$statusInstalled" && white "Web UI"
@@ -1828,6 +1829,10 @@ updateGWD(){
 
 installDep
 
+if [[ $(cat /tmp/aptLOG) =~ "failure" ]]; then
+  echo -n "$statusFailed" && white "de_GWD update stopped, please check network"
+  exit
+fi
 preDownload
 
 preUpdate
