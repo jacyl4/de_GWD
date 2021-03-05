@@ -42,7 +42,6 @@ cat << EOF >/tmp/v2dns_config
   "domainStrategy":"AsIs",
   "rules":[
     {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"},
-    {"type":"field","ip":["geoip:private"],"outboundTag":"direct"},
     {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
     {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"}
   ]
