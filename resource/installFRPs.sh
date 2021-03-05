@@ -49,8 +49,8 @@ After=network.target
 [Service]
 User=root
 Type=simple
-LimitNPROC=infinity
 LimitNOFILE=524288
+LimitNPROC=infinity
 LimitCORE=infinity
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/opt/de_GWD/frp/frps -c /opt/de_GWD/frp/frps.ini
