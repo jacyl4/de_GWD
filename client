@@ -380,9 +380,10 @@ bind-tcp 127.0.0.1:5320 -no-cache -no-speed-check -group doh
 bind-tcp 127.0.0.1:5321 -no-speed-check -group doh
 
 cache-size              100
+cache-persist           no
 rr-ttl                  600
-rr-ttl-min              60
-rr-ttl-max              43200
+rr-ttl-min              10
+rr-ttl-max              21600
 force-AAAA-SOA          yes
 prefetch-domain         yes
 serve-expired           yes
@@ -479,7 +480,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
   "hosts":{"localhost":"127.0.0.1"},
-  "servers":[{"address":"127.0.0.1","port":5320}]
+  "servers":[{"address":"127.0.0.1","port":5321}]
 },
 "inbounds":[
   {
