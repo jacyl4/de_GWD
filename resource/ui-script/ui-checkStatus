@@ -1,0 +1,10 @@
+#!/bin/bash
+if [[ $(systemctl is-active smartdns) = "active" ]]; then
+	if [[ -n $(awk '/Nice/' /lib/systemd/system/smartdns.service 2>/dev/null) ]]; then
+		echo "SmartDNS:Boost"
+	else
+		echo "SmartDNS:OK"
+	fi
+else
+	echo "SmartDNS:Failed"
+fi
