@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ "$(crontab -l)" =~ "ddns3322updateIP" ]]; then
+	echo "success"
+else
+	echo "outline-secondary"
+fi

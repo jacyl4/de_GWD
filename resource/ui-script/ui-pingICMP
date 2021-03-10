@@ -1,0 +1,4 @@
+#!/bin/bash
+nodeNUM=$1
+url=$(jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1  | awk NR==$nodeNUM)
+ping -n -c1 -w1 $url | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1

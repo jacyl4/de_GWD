@@ -1,0 +1,18 @@
+#!/bin/bash
+if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
+	appleDirect=$(jq '.dns.servers[2].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"] ' /opt/de_GWD/v2dns/config.json)
+	jq --argjson appleDirect "$appleDirect" '.dns.servers[2].domains=$appleDirect' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
+	jq 'del(.dns.APPLEdir)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
+	appleDirect=$(jq '.dns.servers[1].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"] ' /opt/de_GWD/v2dns/config.json)
+	jq --argjson appleDirect "$appleDirect" '.dns.servers[1].domains=$appleDirect' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
+	jq 'del(.dns.APPLEdir)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
+chmod 666 /opt/de_GWD/v2dns/config.json
+chmod 666 /opt/de_GWD/0conf
+
+
+if [[ $1 == "r" ]]; then
+	systemctl restart v2dns >/dev/null
+fi

@@ -1,0 +1,17 @@
+#!/bin/bash
+i=$1
+
+mkdir -p /etc/wireguard
+cd /etc/wireguard
+
+wg genkey | tee cprivatekey | wg pubkey > cpublickey
+
+cprivatekey=$(cat /etc/wireguard/cprivatekey)
+cpublickey=$(cat /etc/wireguard/cpublickey)
+
+jq --argjson i "$i" --arg cprivatekey "$cprivatekey" '.wireguard.clients[$i].cprivatekey=$cprivatekey' /opt/de_GWD/0conf |\
+jq --argjson i "$i" --arg cpublickey "$cpublickey" '.wireguard.clients[$i].cpublickey=$cpublickey' | sponge /opt/de_GWD/0conf
+
+chmod 666 /opt/de_GWD/0conf
+
+rm -rf /etc/wireguard/c*key
