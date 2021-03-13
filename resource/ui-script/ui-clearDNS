@@ -1,0 +1,4 @@
+#!/bin/bash
+systemctl restart smartdns >/dev/null
+systemctl restart v2dns >/dev/null
+pihole -f

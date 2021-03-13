@@ -1,0 +1,63 @@
+#!/bin/bash
+cat << EOF >/tmp/v2dns_config
+{
+"dns":{
+  "disableCache":true,
+  "hosts":{"localhost":"127.0.0.1"},
+  "servers":[
+  {"address":"127.0.0.1","port":5320},
+  {"address":"127.0.0.1","port":5320,"domains":["domain:google.com"]},
+  {"address":"127.0.0.1","port":5310,"domains":["domain:baidu.com"]},
+  {"address":"127.0.0.1","port":5310,"domains":["geosite:private","geosite:cn","geosite:tld-cn"],"expectIPs":["geoip:cn"]},
+  {"address":"127.0.0.1","port":5320}
+  ]
+},
+"inbounds":[
+  {
+    "port":5350,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "settings":{"network":"tcp,udp","address":"0.0.0.0","port":53},
+    "tag":"dnsin"
+  }
+],
+"outbounds":[
+  {
+    "protocol":"dns",
+    "streamSettings":{"sockopt":{"mark":255}},
+    "tag":"dnsout"
+  }
+],
+"routing":{
+  "domainStrategy":"AsIs",
+  "rules":[
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
+    {"type":"field","port":"53","network":"tcp,udp","outboundTag":"dnsout"}
+  ]
+}
+}
+EOF
+
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf) ]] && [[ $(jq -r '.dns.hosts' /opt/de_GWD/0conf) != "null" ]]; then
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /opt/de_GWD/0conf | while read line
+do
+  key=$(echo $line | awk '{print$1}')
+  value=$(echo $line | awk '{print$2}')
+  jq --arg key "$key" --arg value "$value" '.dns.hosts += {($key): ($value)}' /tmp/v2dns_config | sponge /tmp/v2dns_config
+done
+fi
+
+jq '.dns.DNSsplit="chnw"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+/opt/de_GWD/ui-saveListBW
+
+if [[ $(jq -r '.dns.APPLEdir' /opt/de_GWD/0conf) == "on" ]]; then
+/opt/de_GWD/ui-onAPPLE
+else
+/opt/de_GWD/ui-offAPPLE
+fi
+
+/opt/de_GWD/ui-saveSmartDNS
+
+/opt/de_GWD/ui-saveNode

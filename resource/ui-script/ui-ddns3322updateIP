@@ -1,0 +1,12 @@
+#!/bin/bash
+wanIP=$(curl http://members.3322.org/dyndns/getip)
+
+domain=$(jq -r '.ddns.ddns3322.domain' /opt/de_GWD/0conf)
+user=$(jq -r '.ddns.ddns3322.user' /opt/de_GWD/0conf)
+pwd=$(jq -r '.ddns.ddns3322.pwd' /opt/de_GWD/0conf)
+
+domainip=$(dig $domain -4 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+
+if [[ $wanIP != $domainip ]]; then
+curl -u $user:$pwd "http://www.3322.org/dyndns/update?hostname=$domain&myip=$wanIP"
+fi

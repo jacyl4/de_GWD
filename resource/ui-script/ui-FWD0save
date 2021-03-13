@@ -1,0 +1,128 @@
+#!/bin/bash
+PortCheck1=$(jq -r '.FORWARD.PortCheck1' /opt/de_GWD/0conf)
+domain=$(jq -r '.FORWARD.domain' /opt/de_GWD/0conf)
+FWD0port=$(jq -r '.FORWARD.FWD0.port' /opt/de_GWD/0conf)
+FWD0path=$(jq -r '.FORWARD.FWD0.path' /opt/de_GWD/0conf)
+
+  sed -i '/--dport 53 -i/d' /opt/de_GWD/iptables-proxy-up
+  sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-onUDP
+  sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-offUDP
+if [[ $PortCheck1 == "checked" ]];then
+  ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+
+  addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+  addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+
+  sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /opt/de_GWD/iptables-proxy-up
+  sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /opt/de_GWD/iptables-proxy-up
+
+  sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /opt/de_GWD/ui-onUDP
+  sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /opt/de_GWD/ui-onUDP
+  sed -i "/iptables -t mangle -N V2PROXY/i$addRule1" /opt/de_GWD/ui-offUDP
+  sed -i "/iptables -t mangle -N V2PROXY/i$addRule2" /opt/de_GWD/ui-offUDP
+fi
+
+cat << EOF >/etc/nginx/conf.d/forward0.conf
+server {
+  listen $FWD0port ssl http2 fastopen=128 reuseport;
+  server_name $domain;
+  root /var/www/html;
+  
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers  '[ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305|ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
+  ssl_session_timeout 10m;
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
+
+  add_header Referrer-Policy                    "no-referrer"       always;
+  add_header X-Content-Type-Options             "nosniff"           always;
+  add_header X-Download-Options                 "noopen"            always;
+  add_header X-Frame-Options                    "SAMEORIGIN"        always;
+  add_header X-Permitted-Cross-Domain-Policies  "none"              always;
+  add_header X-Robots-Tag                       "none"              always;
+  add_header X-XSS-Protection                   "1; mode=block"     always;
+  add_header Strict-Transport-Security          "max-age=63072000"  always;
+
+location ~ /\.(?!well-known).* {
+  deny all;
+}
+
+location /dq {
+  proxy_pass                http://127.0.0.1:8053/dq;
+  proxy_set_header          Host \$host;
+  proxy_set_header          X-Real-IP \$remote_addr;
+  proxy_redirect            off;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
+  proxy_buffering           off;
+  proxy_buffer_size         8k;
+}
+
+location $FWD0path {
+  proxy_pass                http://127.0.0.1:11810;
+  proxy_http_version        1.1;
+  proxy_set_header          Host \$http_host;
+  proxy_set_header          Upgrade \$http_upgrade;
+  proxy_set_header          Connection "upgrade";
+  proxy_set_header          X-Real-IP \$remote_addr;
+  proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_redirect            off;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
+  proxy_buffering           off;
+  proxy_buffer_size         8k;
+}
+}
+EOF
+
+systemctl reload nginx >/dev/null
+
+
+
+FWD0path=$(jq -r '.FORWARD.FWD0.path' /opt/de_GWD/0conf)
+FWD0uuid=$(jq -r '.FORWARD.FWD0.uuid[]' /opt/de_GWD/0conf)
+
+vtruiIn=`cat << EOF
+   {
+      "port": 11810,
+      "listen": "127.0.0.1",
+      "protocol": "vless",
+      "settings": {
+        "decryption": "none",
+        "clients": []
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        }
+      }
+    }
+EOF
+`
+jq --argjson vtruiIn "$vtruiIn" '.inbounds[1] = $vtruiIn' /opt/de_GWD/vtrui/config.json |\
+jq --arg FWD0path "$FWD0path" '.inbounds[1].streamSettings.wsSettings.path=$FWD0path' | sponge /opt/de_GWD/vtrui/config.json
+
+for uuid in $FWD0uuid; do
+uuidStr='{"id": "'$uuid'", "level": 1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[1].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+done
+
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+  systemctl restart iptables-proxy >/dev/null
+fi
