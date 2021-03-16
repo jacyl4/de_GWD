@@ -1,0 +1,242 @@
+#!/bin/bash
+domain=$(jq -r '.v2nodeForUpdate[0].address' /opt/de_GWD/0conf)
+port=$(jq -r '.v2nodeForUpdate[0].port' /opt/de_GWD/0conf)
+uuidnum=$(jq -r '.v2nodeForUpdate[0].uuid' /opt/de_GWD/0conf)
+v2path=$(jq -r '.v2nodeForUpdate[0].path' /opt/de_GWD/0conf)
+
+if [[ $(jq -r '.v2nodeForUpdate[1]' /opt/de_GWD/0conf 2>/dev/null) != "null" ]]; then
+nfDomain=$(jq -r '.v2nodeForUpdate[1].address' /opt/de_GWD/0conf)
+nfPort=$(jq -r '.v2nodeForUpdate[1].port' /opt/de_GWD/0conf)
+nfUuidnum=$(jq -r '.v2nodeForUpdate[1].uuid' /opt/de_GWD/0conf)
+nfV2path=$(jq -r '.v2nodeForUpdate[1].path' /opt/de_GWD/0conf)
+else
+nfDomain=$domain
+nfPort=$port
+nfUuidnum=$uuidnum
+nfV2path=$v2path
+fi
+
+if [[ $(jq -r '.v2nodeForUpdate[2]' /opt/de_GWD/0conf 2>/dev/null) != "null" ]]; then
+dtDomain=$(jq -r '.v2nodeForUpdate[2].address' /opt/de_GWD/0conf)
+dtPort=$(jq -r '.v2nodeForUpdate[2].port' /opt/de_GWD/0conf)
+dtUuidnum=$(jq -r '.v2nodeForUpdate[2].uuid' /opt/de_GWD/0conf)
+dtV2path=$(jq -r '.v2nodeForUpdate[2].path' /opt/de_GWD/0conf)
+else
+dtDomain=$domain
+dtPort=$port
+dtUuidnum=$uuidnum
+dtV2path=$v2path
+fi
+
+localip=$(jq -r '.divertLan.ip | to_entries[] | .value' /opt/de_GWD/0conf)
+
+cat << EOF >/opt/de_GWD/vtrui/config.json
+{
+  "dns":{"servers":["localhost"]},
+  "inbounds":[
+    {
+    "port":9896,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
+    "settings":{"network":"tcp,udp","followRedirect":true},
+    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+    }
+  ],
+  "outbounds": [
+    {
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy":"UseIPv4"
+        }
+      },
+      "tag": "proxy"
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy":"UseIPv4"
+        }
+      },
+      "tag": "netflix"
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "xxxx.ooo",
+            "port": 443,
+            "users": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/000000"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "xxxx.ooo",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy":"UseIPv4"
+        }
+      },
+      "tag": "diverttraffic"
+    },
+    {
+      "protocol": "freedom",
+      "settings":{"domainStrategy":"UseIPv4"},
+      "streamSettings": {
+        "sockopt":{"mark":255}
+        },
+      "tag": "direct"
+    }
+  ],
+  "routing": {
+    "domainStrategy":"AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "port": "53,4711,5310,5311,5320,5321,5350",
+        "network": "tcp,udp",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "source": [ "0.0.0.0" ],
+        "outboundTag": "diverttraffic"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:netflix",
+          "domain:netflix.ca",
+          "domain:netflix.com",
+          "domain:netflix.net",
+          "domain:nflxext.com",
+          "domain:nflximg.com",
+          "domain:nflximg.net",
+          "domain:nflxso.net",
+          "domain:nflxvideo.net",
+          "domain:nflxsearch.net",
+          "domain:netflixinvestor.com",
+          "domain:netflixdnstest0.com",
+          "domain:netflixdnstest1.com",
+          "domain:netflixdnstest2.com",
+          "domain:netflixdnstest3.com",
+          "domain:netflixdnstest4.com",
+          "domain:netflixdnstest5.com",
+          "domain:netflixdnstest6.com",
+          "domain:netflixdnstest7.com",
+          "domain:netflixdnstest8.com",
+          "domain:netflixdnstest9.com"
+        ],
+        "outboundTag": "netflix"
+      }
+    ]
+  }
+}
+EOF
+
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' /opt/de_GWD/vtrui/config.json |\
+jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' |\
+jq --arg nfDomain "$nfDomain" '.outbounds[1].settings.vnext[0].address=$nfDomain' |\
+jq --argjson nfPort "$nfPort" '.outbounds[1].settings.vnext[0].port=$nfPort' |\
+jq --arg nfUuidnum "$nfUuidnum" '.outbounds[1].settings.vnext[0].users[0].id=$nfUuidnum' |\
+jq --arg nfV2path "$nfV2path" '.outbounds[1].streamSettings.wsSettings.path=$nfV2path' |\
+jq --arg nfDomain "$nfDomain" '.outbounds[1].streamSettings.tlsSettings.serverName=$nfDomain' |\
+jq --arg dtDomain "$dtDomain" '.outbounds[2].settings.vnext[0].address=$dtDomain' |\
+jq --argjson dtPort "$dtPort" '.outbounds[2].settings.vnext[0].port=$dtPort' |\
+jq --arg dtUuidnum "$dtUuidnum" '.outbounds[2].settings.vnext[0].users[0].id=$dtUuidnum' |\
+jq --arg dtV2path "$dtV2path" '.outbounds[2].streamSettings.wsSettings.path=$dtV2path' |\
+jq --arg dtDomain "$dtDomain" '.outbounds[2].streamSettings.tlsSettings.serverName=$dtDomain' | sponge /opt/de_GWD/vtrui/config.json
+
+
+/opt/de_GWD/ui-changeDivertIP
+
+jq '.divertLan.display="block"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+
+chmod 666 /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/0conf
+
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi
