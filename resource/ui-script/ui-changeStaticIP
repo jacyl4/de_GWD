@@ -1,0 +1,13 @@
+#!/bin/bash
+localaddr=$(jq -r '.address.localIP' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+upstreamip=$(jq -r '.address.upstreamIP' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+
+if [[ -n $localaddr ]] && [[ -n $upstreamip ]]; then
+	sed -i "/address/c\address $localaddr" /etc/network/interfaces
+	sed -i "/gateway/c\gateway $upstreamip" /etc/network/interfaces
+
+	sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24" /etc/pihole/setupVars.conf
+
+	pihole restartdns
+	reboot
+fi

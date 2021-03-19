@@ -1,0 +1,20 @@
+name: purge jsdelivr cache
+
+on:
+  release:
+    types: [created]
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: purge jsdelivr cache
+      run: |
+        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/client
+        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/amd64_vtrui.zip
+        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/arm64_vtrui.zip
+        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/installFRPs.sh
+        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/amd64_frp.tar.gz
+        curl https://purge.jsdelivr.net/gh/jacyl4/de_GWD@main/resource/arm64_frp.tar.gz

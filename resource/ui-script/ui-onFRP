@@ -1,0 +1,53 @@
+#!/bin/bash
+FRPdomain=$(jq -r '.FRP.server.domain' /opt/de_GWD/0conf)
+FRPtoken=$(jq -r '.FRP.server.token' /opt/de_GWD/0conf)
+FRPbindPort=$(jq -r '.FRP.server.bindPort' /opt/de_GWD/0conf)
+FRPbindProtocol=$(jq -r '.FRP.server.bindProtocol' /opt/de_GWD/0conf)
+
+clientsNUM=$(jq -r '.FRP.clients | length' /opt/de_GWD/0conf)
+
+cat << EOF >/opt/de_GWD/frp/frpc.ini
+[common]
+server_addr = $FRPdomain
+token = $FRPtoken
+server_port = $FRPbindPort
+protocol = $(echo $FRPbindProtocol | tr '[:upper:]' '[:lower:]')
+EOF
+
+for ((i=0; i<$clientsNUM; i++))
+do
+cat << EOF >>/opt/de_GWD/frp/frpc.ini
+
+[$i]
+type = $(jq -r --argjson i "$i" '.FRP.clients[$i].remoteProtocol' /opt/de_GWD/0conf | tr '[:upper:]' '[:lower:]')
+local_ip = $(jq -r --argjson i "$i" '.FRP.clients[$i].localIP' /opt/de_GWD/0conf)
+local_port = $(jq -r --argjson i "$i" '.FRP.clients[$i].localPort' /opt/de_GWD/0conf)
+remote_port = $(jq -r --argjson i "$i" '.FRP.clients[$i].remotePort' /opt/de_GWD/0conf)
+EOF
+done
+
+rm -rf /etc/systemd/system/frpc.service
+cat << EOF >/lib/systemd/system/frpc.service
+[Unit]
+Description=Frp Client Service
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/frp/frpc -c /opt/de_GWD/frp/frpc.ini
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload >/dev/null
+systemctl enable frpc >/dev/null
+systemctl restart frpc >/dev/null

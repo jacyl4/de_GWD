@@ -1,0 +1,31 @@
+#!/bin/bash
+if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
+ 	/opt/de_GWD/ui-markThis
+fi
+
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+	/opt/de_GWD/ui-onDHCP
+fi
+
+if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "block" ]]; then
+ 	/opt/de_GWD/ui-NodeDTshow
+elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf 2>/dev/null) = "none" ]]; then
+ 	/opt/de_GWD/ui-NodeDThide
+fi
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+ 	/opt/de_GWD/ui-FWD0save
+fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+ 	/opt/de_GWD/ui-FWD1save r
+fi
+
+/opt/de_GWD/ui_4h
+systemctl restart vtrui >/dev/null
+
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+	/opt/de_GWD/ui-onUDP r
+else
+	/opt/de_GWD/ui-offUDP r
+fi

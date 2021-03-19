@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ $(ls /etc/nginx/conf.d) =~ "forward" ]]; then
+echo "FWD"
+fi
