@@ -1,0 +1,10 @@
+#!/bin/bash
+vtrui1=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui1/config.json)
+
+jq -r '.v2node[].domain' /opt/de_GWD/0conf >/tmp/vtruiDomains
+
+vtrui1NUM=$[$(grep -wn "$vtrui1" /tmp/vtruiDomains | cut -d: -f1)-1]
+
+jq -r --argjson i "$vtrui1NUM" '.v2node[$i].name' /opt/de_GWD/0conf
+
+rm -rf /tmp/vtruiDomains

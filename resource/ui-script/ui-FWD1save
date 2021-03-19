@@ -1,0 +1,203 @@
+#!/bin/bash
+domain=$(jq -r '.FORWARD.domain' /opt/de_GWD/0conf)
+FWD1port=$(jq -r '.FORWARD.FWD1.port' /opt/de_GWD/0conf)
+FWD1path=$(jq -r '.FORWARD.FWD1.path' /opt/de_GWD/0conf)
+
+rm -rf /dev/shm/de_GWD1.socket* >/dev/null 2>&1
+
+cat << EOF >/etc/nginx/conf.d/forward1.conf
+server {
+  listen $FWD1port ssl http2 fastopen=128 reuseport;
+  server_name $domain;
+  root /var/www/html;
+  
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers  '[ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305|ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
+  ssl_session_timeout 10m;
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
+
+  add_header Referrer-Policy                    "no-referrer"       always;
+  add_header X-Content-Type-Options             "nosniff"           always;
+  add_header X-Download-Options                 "noopen"            always;
+  add_header X-Frame-Options                    "SAMEORIGIN"        always;
+  add_header X-Permitted-Cross-Domain-Policies  "none"              always;
+  add_header X-Robots-Tag                       "none"              always;
+  add_header X-XSS-Protection                   "1; mode=block"     always;
+  add_header Strict-Transport-Security          "max-age=63072000"  always;
+
+location ~ /\.(?!well-known).* {
+  deny all;
+}
+
+location /dq {
+  proxy_pass                http://127.0.0.1:8053/dq;
+  proxy_set_header          Host \$host;
+  proxy_set_header          X-Real-IP \$remote_addr;
+}
+
+location $FWD1path {
+  if (\$http_upgrade != "websocket") { return 404; }
+  proxy_pass                http://unix:/dev/shm/de_GWD1.socket;
+  proxy_http_version        1.1;
+  proxy_set_header          Host \$http_host;
+  proxy_set_header          Upgrade \$http_upgrade;
+  proxy_set_header          Connection "upgrade";
+  proxy_set_header          X-Real-IP \$remote_addr;
+  proxy_set_header          X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_redirect            off;
+  keepalive_requests        25600;
+  keepalive_timeout         300 300;
+  proxy_buffering           off;
+  proxy_buffer_size         8k;
+}
+}
+EOF
+
+systemctl reload nginx >/dev/null
+
+
+
+rm -rf /opt/de_GWD/vtrui1
+mkdir -p /opt/de_GWD/vtrui1
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
+chmod -R +x /opt/de_GWD/vtrui1
+
+rm -rf /etc/systemd/system/vtrui1.service
+cat << "EOF" >/lib/systemd/system/vtrui1.service
+[Unit]
+Description=vtrui1 Service
+After=network.target nss-lookup.target
+
+[Service]
+User=www-data
+Type=simple
+ExecStart=/opt/de_GWD/vtrui1/vtrui1 -c /opt/de_GWD/vtrui1/config.json
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-5
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload >/dev/null
+systemctl enable vtrui1 >/dev/null
+systemctl restart vtrui1 >/dev/null
+
+if [[ $(systemctl is-active vtrui1) != "active" ]]; then
+sed -i '/Nice=/d' /lib/systemd/system/vtrui1.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/vtrui1.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/vtrui1.service
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui1 >/dev/null
+fi
+
+v2nodeID=$(jq -r '.FORWARD.FWD1.upstream' /opt/de_GWD/0conf)
+FWD1path=$(jq -r '.FORWARD.FWD1.path' /opt/de_GWD/0conf)
+FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[]' /opt/de_GWD/0conf)
+
+v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf)
+domain=$(echo $v2servn | cut -d: -f1)
+port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -z $port ] && port="443"
+
+uuidnum=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf)
+v2path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0conf)
+
+cat << EOF >/opt/de_GWD/vtrui1/config.json
+{
+  "dns":{"servers":["localhost"]},
+  "inbounds":[
+   {
+      "listen": "/dev/shm/de_GWD1.socket",
+      "protocol": "vless",
+      "settings": {
+        "decryption": "none",
+        "clients": []
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": ""
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "",
+            "port": 443,
+            "users": [
+              {
+                "id": "",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": ""
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy":"UseIPv4"
+        }
+      }
+    }
+  ]
+}
+EOF
+
+jq '.inbounds[0].settings.clients=[]' /opt/de_GWD/vtrui1/config.json |\
+jq --arg FWD1path "$FWD1path" '.inbounds[0].streamSettings.wsSettings.path=$FWD1path' |\
+jq --arg domain "$domain" '.outbounds[0].settings.vnext[0].address=$domain' |\
+jq --argjson port "$port" '.outbounds[0].settings.vnext[0].port=$port' |\
+jq --arg uuidnum "$uuidnum" '.outbounds[0].settings.vnext[0].users[0].id=$uuidnum' |\
+jq --arg v2path "$v2path" '.outbounds[0].streamSettings.wsSettings.path=$v2path' |\
+jq --arg domain "$domain" '.outbounds[0].streamSettings.tlsSettings.serverName=$domain' | sponge /opt/de_GWD/vtrui1/config.json
+
+for uuid in $FWD1uuid; do
+uuidStr='{"id": "'$uuid'", "level": 1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
+done
+
+chmod 666 /opt/de_GWD/vtrui1/config.json
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui1 >/dev/null
+fi
+
+/opt/de_GWD/ui-FWDb

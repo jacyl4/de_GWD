@@ -1,0 +1,10 @@
+#!/bin/bash
+markName=$(jq -r '.address.alias' /opt/de_GWD/0conf)
+
+sed -i "/<title>/c\<title>$markName \ 寒月</title>" /var/www/html/index.php
+sed -i "/<title>/c\<title>$markName \ 中转</title>" /var/www/html/forward.php
+sed -i "/<title>/c\<title>$markName \ DDNS & LINK</title>" /var/www/html/ddns.php
+sed -i "/<title>/c\<title>$markName \ 应用</title>" /var/www/html/app.php
+sed -i "/<title>/c\<title>$markName \ 黑白名单</title>" /var/www/html/listBW.php
+sed -i "/<title>/c\<title>$markName \ 节点管理</title>" /var/www/html/nodeMAN.php
+sed -i "/<title>/c\<title>$markName \ 更新</title>" /var/www/html/update.php
