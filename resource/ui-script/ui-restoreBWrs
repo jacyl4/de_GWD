@@ -1,0 +1,13 @@
+#!/bin/bash
+docker stop bitwardenrs
+rm -rf /opt/bitwardenrs
+
+unzip /var/www/html/restore/Bitwardenrs_bak.zip -d /tmp
+
+mkdir -p /opt/bitwardenrs
+mv -f /tmp/opt/bitwardenrs /opt/
+
+docker restart bitwardenrs
+
+rm -rf /tmp/opt
+rm -rf /var/www/html/restore/Bitwardenrs_bak.zip

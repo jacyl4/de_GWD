@@ -1,0 +1,3 @@
+#!/bin/bash
+url=$(jq -r '.v2node[].domain' /opt/de_GWD/0conf | awk NR==$1)
+echo "$(curl -o /dev/null -sw '%{time_connect}\n' https://$url) * 1000" | bc | awk '{printf ("%.0f\n",$1)}' 
