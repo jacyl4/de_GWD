@@ -1,0 +1,65 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+
+installDocker(){
+echo "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" >/etc/apt/sources.list.d/docker.list
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+
+apt update && apt install docker-ce docker-ce-cli containerd.io
+
+curl -L https://github.com/docker/compose/releases/download/$(curl -Ls https://www.servercow.de/docker-compose/latest.php)/docker-compose-$(uname -s)-$(uname -m) >/usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
+blue "---------------------"
+blue "Install Docker [done]"
+blue "---------------------"
+}
+
+
+
+uninstallDocker(){
+rm -rf /etc/apt/sources.list.d/docker.list
+apt purge docker-ce docker-ce-cli containerd.io
+rm -rf /usr/local/bin/docker-compose
+blue "-----------------------"
+blue "Uninstall Docker [done]"
+blue "-----------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "         Docker"
+    green "==============================="
+    green  "1. Install Docker"
+    yellow "2. Uninstall Docker"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installDocker
+    start_menu
+    ;;
+    2)
+    uninstallDocker
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
