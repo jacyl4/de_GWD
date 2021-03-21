@@ -1,7 +1,7 @@
 #!/bin/bash
 divertIP=$(jq '.v2nodeDIV.nodeDT.ip' /opt/de_GWD/0conf)
 
-if [[ -n $divertIP ]] || [[ $divertIP != "null" ]]; then
+if [[ -n $divertIP ]] && [[ $divertIP != "null" ]]; then
 cat << EOF >/tmp/RoutingDT
 {
         "type": "field",

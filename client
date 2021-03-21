@@ -85,10 +85,20 @@ if [[ $(jq -r '.v2nodeForUpdate' /opt/de_GWD/0conf) != "null" ]]; then
   updateUUID=$(jq -r '.v2nodeForUpdate[0].uuid' /opt/de_GWD/0conf)
 
   jq 'del(.v2nodeForUpdate)' /opt/de_GWD/0conf |\
+  jq 'del(.dns.boostDNS)' |\
   jq --arg updateDomain $updateDomain '.update.v2node.domain=$updateDomain' |\
   jq --arg updatePort $updatePort '.update.v2node.port=$updatePort' |\
   jq --arg updatePath $updatePath '.update.v2node.path=$updatePath' |\
   jq --arg updateUUID $updateUUID '.update.v2node.uuid=$updateUUID' | sponge /opt/de_GWD/0conf
+fi
+
+if [[ $(jq -r '.divertLan' /opt/de_GWD/0conf) != "null" ]]; then
+  divertIP=$(jq -r '.divertLan.ip[]' /opt/de_GWD/0conf)
+
+  jq 'del(.divertLan)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+  for IP in $divertIP; do
+  jq --arg IP $IP '.v2nodeDIV.nodeDT.ip+=[$IP]' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+  done
 fi
 
 sed -i '/quic/d' /etc/nginx/conf.d/*.conf
@@ -415,7 +425,7 @@ cache-size              100000
 cache-persist           no
 rr-ttl                  600
 rr-ttl-min              10
-rr-ttl-max              7200
+rr-ttl-max              3600
 force-AAAA-SOA          yes
 prefetch-domain         yes
 serve-expired           yes
@@ -508,6 +518,7 @@ rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui >/dev/null
 mv -f /tmp/vtrui/v2ray /opt/de_GWD/v2dns/v2dns
 mv -f /tmp/vtrui/xray /opt/de_GWD/vtrui/vtrui
+mv -f /tmp/vtrui/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 chmod +x /opt/de_GWD/v2dns/v2dns
 chmod +x /opt/de_GWD/vtrui/vtrui
 
@@ -566,7 +577,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
 ],
 "outbounds":[
   {
-    "tag": "default",
+    "tag":"default",
     "mux":{"enabled":true,"concurrency":8},
     "protocol":"vless",
     "settings":{"vnext":[{
