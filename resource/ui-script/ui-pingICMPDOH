@@ -1,3 +1,3 @@
 #!/bin/bash
-url=$(jq -r --arg doh "doh$1" '.dns."\($doh)"' /opt/de_GWD/0conf | cut -d/ -f1 | cut -d: -f1)
-ping -n -c1 -w1 $url | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1
+pingICMPDOH=$(jq -r --arg dohNUM "doh$1" '.dns[$dohNUM]' /opt/de_GWD/0conf | cut -d: -f1)
+ping -n -c1 -w1 $pingICMPDOH | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1

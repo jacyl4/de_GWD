@@ -195,11 +195,25 @@ echo "Asia/Shanghai" >/etc/timezone
 ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 if [[ $virt != "openvz" ]]; then
-modprobe iptable_nat
-modprobe nf_nat
-modprobe ip_conntrack
 modprobe nf_conntrack
+modprobe ip_conntrack
 modprobe xt_conntrack
+modprobe nf_nat
+modprobe iptable_nat
+
+sed -i '/nf_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/ip_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/xt_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/nf_nat/d' /etc/modules-load.d/modules.conf
+sed -i '/iptable_nat/d' /etc/modules-load.d/modules.conf
+cat << EOF >>/etc/modules-load.d/modules.conf
+modprobe nf_conntrack
+modprobe ip_conntrack
+modprobe xt_conntrack
+modprobe nf_nat
+modprobe iptable_nat
+EOF
+
 cat << EOF >/etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 2

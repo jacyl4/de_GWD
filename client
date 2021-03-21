@@ -18,7 +18,7 @@ statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
 de_gwd_nginx="1.19.8"
 ttyd_version="1.6.3"
-branch="main"
+branch="dev"
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
@@ -68,7 +68,7 @@ mv -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
 
 
 cleanDep() {
-if [[ -f "/opt/de_GWD/0conf" ]] && [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) != "null" ]]; then
+if [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) != "null" ]]; then
   updateCMD=$(jq -r '.updateCMD' /opt/de_GWD/0conf)
   updateAddr=$(jq -r '.address.localIP' /opt/de_GWD/0conf)
 
@@ -76,6 +76,19 @@ if [[ -f "/opt/de_GWD/0conf" ]] && [[ $(jq -r '.updateCMD' /opt/de_GWD/0conf) !=
   jq --arg updateAddr "$updateAddr" '.update.updateAddr=$updateAddr' |\
   jq --arg updatePort "3000" '.update.updatePort=$updatePort' |\
   jq --arg updateCMD "bash <(wget --no-check-certificate -qO- https://cdn.jsdelivr.net/gh/jacyl4/de_GWD@main/client)" '.update.updateCMD=$updateCMD' | sponge /opt/de_GWD/0conf
+fi
+
+if [[ $(jq -r '.v2nodeForUpdate' /opt/de_GWD/0conf) != "null" ]]; then
+  updateDomain=$(jq -r '.v2nodeForUpdate[0].address' /opt/de_GWD/0conf)
+  updatePort=$(jq -r '.v2nodeForUpdate[0].port' /opt/de_GWD/0conf)
+  updatePath=$(jq -r '.v2nodeForUpdate[0].path' /opt/de_GWD/0conf)
+  updateUUID=$(jq -r '.v2nodeForUpdate[0].uuid' /opt/de_GWD/0conf)
+
+  jq 'del(.v2nodeForUpdate)' /opt/de_GWD/0conf |\
+  jq --arg updateDomain $updateDomain '.update.v2node.domain=$updateDomain' |\
+  jq --arg updatePort $updatePort '.update.v2node.port=$updatePort' |\
+  jq --arg updatePath $updatePath '.update.v2node.path=$updatePath' |\
+  jq --arg updateUUID $updateUUID '.update.v2node.uuid=$updateUUID' | sponge /opt/de_GWD/0conf
 fi
 
 sed -i '/quic/d' /etc/nginx/conf.d/*.conf
@@ -154,10 +167,10 @@ localaddr=$(ip a | grep "$ethernetnum" | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d
 doh1=$(jq -r '.dns.doh1' /opt/de_GWD/0conf)
 doh2=$(jq -r '.dns.doh2' /opt/de_GWD/0conf)
 
-domain=$(jq -r '.v2nodeForUpdate[0].address' /opt/de_GWD/0conf)
-port=$(jq -r '.v2nodeForUpdate[0].port' /opt/de_GWD/0conf)
-v2path=$(jq -r '.v2nodeForUpdate[0].path' /opt/de_GWD/0conf)
-uuidnum=$(jq -r '.v2nodeForUpdate[0].uuid' /opt/de_GWD/0conf)
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf)
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
+v2path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
+uuidnum=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf)
 
 piholePW=$(jq -r '.address.PWD' /opt/de_GWD/0conf)
 
@@ -275,11 +288,25 @@ HISTCONTROL=ignoredups
 EOF
 source ~/.bash_profile
 
-modprobe iptable_nat
-modprobe nf_nat
-modprobe ip_conntrack
 modprobe nf_conntrack
+modprobe ip_conntrack
 modprobe xt_conntrack
+modprobe nf_nat
+modprobe iptable_nat
+
+sed -i '/nf_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/ip_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/xt_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/nf_nat/d' /etc/modules-load.d/modules.conf
+sed -i '/iptable_nat/d' /etc/modules-load.d/modules.conf
+cat << EOF >>/etc/modules-load.d/modules.conf
+modprobe nf_conntrack
+modprobe ip_conntrack
+modprobe xt_conntrack
+modprobe nf_nat
+modprobe iptable_nat
+EOF
+
 cat << EOF >/etc/sysctl.conf
 vm.overcommit_memory = 1
 vm.swappiness = 2
@@ -486,7 +513,7 @@ chmod +x /opt/de_GWD/vtrui/vtrui
 
 cat << EOF >/opt/de_GWD/v2dns/config.json
 {
-"dns":{"servers":[{"address":"127.0.0.1","port":5320}]},
+"dns":{"servers":[{"address":"127.0.0.1","port":5321}]},
 "routing":{
   "rules":[
     {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
@@ -514,6 +541,20 @@ EOF
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
 "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+"routing":{
+  "rules":[
+    {
+      "type":"field",
+      "ip":["geoip:private"],
+      "outboundTag": "direct"
+    },
+    {
+      "type":"field",
+      "port":"53,4711,5310,5311,5320,5321,5350",
+      "outboundTag": "direct"
+    }
+  ]
+},
 "inbounds":[
   {
     "port":9896,
@@ -525,6 +566,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
 ],
 "outbounds":[
   {
+    "tag": "default",
     "mux":{"enabled":true,"concurrency":8},
     "protocol":"vless",
     "settings":{"vnext":[{
@@ -552,6 +594,12 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
       },
       "sockopt":{"mark":255,"domainStrategy":"UseIPv4"}
     }
+  },
+  {
+    "tag":"direct",
+    "protocol":"freedom",
+    "settings":{"domainStrategy":"UseIPv4"},
+    "streamSettings":{"sockopt":{"mark":255}}
   }
 ]
 }
@@ -1518,9 +1566,16 @@ if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf) == "on" ]]; then
   /opt/de_GWD/ui-onDHCP
 fi
 
-if [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf) = "block" ]]; then
+if [[ $(jq -r '.v2nodeDIV.nodeNF.display' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-NodeNFshow >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-NodeNFhide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.v2nodeDIV.nodeDT.display' /opt/de_GWD/0conf) = "on" ]]; then
   /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
-elif [[ $(jq -r '.divertLan.display' /opt/de_GWD/0conf) = "none" ]]; then
+  /opt/de_GWD/ui-NodeDTip >/dev/null 2>&1
+else
   /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
 fi
 echo -n "$statusUpdated" && white "V2 Diversion"

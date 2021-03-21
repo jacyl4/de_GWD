@@ -22,8 +22,8 @@ ipset -! -R </opt/de_GWD/IPdohSET
 
 if [[ -z $(jq -r '.dns.china' /opt/de_GWD/0conf) ]] || [[ $(jq -r '.dns.china' /opt/de_GWD/0conf) = "null" ]]; then
   jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 182.254.118.118 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
-  chmod 666 /opt/de_GWD/0conf
 fi
+chmod 666 /opt/de_GWD/0conf
 
 sed -i '/server /,$d' /etc/smartdns/smartdns.conf
 sed -i '/server-https /,$d' /etc/smartdns/smartdns.conf
@@ -47,9 +47,6 @@ server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -exclude-defa
 EOF
 
 systemctl restart smartdns >/dev/null
-
-jq --arg doh1Domain "$doh1Domain" --arg doh1IP "$doh1IP" '.dns.hosts += {($doh1Domain): ($doh1IP)}' /opt/de_GWD/v2dns/config.json |\
-jq --arg doh2Domain "$doh2Domain" --arg doh2IP "$doh2IP" '.dns.hosts += {($doh2Domain): ($doh2IP)}' | sponge /opt/de_GWD/v2dns/config.json
 
 jq '.dns.servers[4].domains=[]' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
 jq --arg doh1Domain $doh1Domain '.dns.servers[4].domains+=[$doh1Domain]' /opt/de_GWD/v2dns/config.json |\

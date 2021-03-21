@@ -2,11 +2,7 @@
 <?php if (isset($auth) && $auth) {?>
 <?php
 $nodenfnum = $_GET['nodenfnum'];
-
-$nodenfpre = fopen("nodenfpre.txt", "w");
-fwrite($nodenfpre, $nodenfnum);
-fclose($nodenfpre);
-
-exec('sudo /opt/de_GWD/ui-changeNodeNF r >/dev/null 2>&1 &');
+putenv("nodenfnum=$nodenfnum");
+exec('sudo /opt/de_GWD/ui-changeNodeNF $nodenfnum &');
 ?>
 <?php }?>

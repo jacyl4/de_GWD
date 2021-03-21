@@ -1,3 +1,3 @@
 #!/bin/bash
-url=$(jq -r '.v2node[].domain' /opt/de_GWD/0conf | cut -d: -f1  | awk NR==$1)
-ping -n -c1 -w1 $url | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1
+pingICMP=$(jq -r --argjson domainNUM $1 '.v2node | to_entries[] | select(.key == $domainNUM) | .value.domain' /opt/de_GWD/0conf | cut -d: -f1)
+ping -n -c1 -w1 $pingICMP | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1

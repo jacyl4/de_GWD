@@ -267,21 +267,21 @@
 
           <div class="card-body">
 
+<?php $nodeDT = json_decode($de_GWDconf)->v2nodeDIV->nodeDT->display; ?>
 <span class="float-left mx-4 mb-3">
-<?php $nodeDT = json_decode($de_GWDconf)->divertLan->display; ?>
 <div class="input-group">
   <div class="input-group-prepend">
     <label class="input-group-text">内网设备分流</label>
   </div>
-  <div id="nodeDTlist" class="input-group-append input-group-append" style="display:<?php if($nodeDT == block) echo 'block'; else echo 'none'; ?>">
-    <button id="nodedtshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodedtnum = exec('/opt/de_GWD/ui-checkNodeDT &'); echo json_decode($de_GWDconf)->v2node[$nodedtnum]->name; ?></button>
+  <div id="nodeDTlist" class="input-group-append input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
+    <button id="nodeDTshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php passthru('/opt/de_GWD/ui-checkNodeDT &'); ?></button>
     <div id="nodedt" class="dropdown-menu">
     </div>
   </div>
-  <div id="nodeDTip" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == block) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeDTip" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode($de_GWDconf)->divertLan->ip as $k => $v) {echo "$v ";} ?>">
   </div>
-  <div id="nodeDTipButton" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == block) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeDTipButton" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <button id="buttonSubmitDivertIP" class="btn btn-outline-secondary" type="button">
       <span id="buttonSubmitDivertIPloading"></span>
       <span>IP写入</span>
@@ -290,25 +290,31 @@
   <div class="input-group-append">
     <button class="btn btn-secondary" type="button" onclick="nodeDTswitch(this)">
       <span id="buttonNodeDTloading"></span>
-      <span id="nodeDTtext"><?php if($nodeDT == block) echo 'OFF'; else echo 'ON'; ?></span>
+      <span id="nodeDTtext"><?php if($nodeDT == on) echo 'OFF'; else echo 'ON'; ?></span>
     </button>
   </div>
 </div>
 </span>
 
+<?php $nodeNF = json_decode($de_GWDconf)->v2nodeDIV->nodeNF->display; ?>
 <span class="float-right mx-4 mb-3">
 <div class="input-group">
   <div class="input-group-prepend">
     <label class="input-group-text">Netflix 分流</label>
   </div>
-  <div class="input-group-append">
-    <button id="nodenfshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php $nodenfnum = exec('/opt/de_GWD/ui-checkNodeNF &'); echo json_decode($de_GWDconf)->v2node[$nodenfnum]->name; ?></button>
+  <div id="nodeNFlist" class="input-group-prepend input-group-append" style="display:<?php if($nodeNF == on) echo 'block'; else echo 'none'; ?>">
+    <button id="nodeNFshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php passthru('/opt/de_GWD/ui-checkNodeNF &'); ?></button>
     <div id="nodenf" class="dropdown-menu">
     </div>
   </div>
+  <div class="input-group-append">
+    <button class="btn btn-secondary" type="button" onclick="nodeNFswitch(this)">
+      <span id="buttonNodeNFloading"></span>
+      <span id="nodeNFtext"><?php if($nodeNF == on) echo 'OFF'; else echo 'ON'; ?></span>
+    </button>
+  </div>
 </div>
 </span>
-
 
             <div class="table-responsive">
               <table class="table table-bordered table-hover text-center text-nowrap my-2">
@@ -328,7 +334,6 @@
             </div>
           </div>
         </div>
-
 
         <!-- row2 -->
         <div class="card mb-3">
@@ -590,12 +595,35 @@ $.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDThide"}, function(result){
 })
 }
 else {
-$.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(result){
+$.get('./act/switchNodeDT.php', {switchNodeDT:"NodeDTshow"}, function(data){
   $("#nodeDTlist").css("display", "block")
   $("#nodeDTip").css("display", "block")
   $("#nodeDTipButton").css("display", "block")
   $("#buttonNodeDTloading").removeClass()
+  $("#nodeDTshow").html(data)
   $("#nodeDTtext").html("OFF")
+})
+}
+}
+
+
+
+function nodeNFswitch(nodeNFswitch){
+$("#buttonNodeNFloading").attr("class", "spinner-border spinner-border-sm")
+var nodeNFtext = $(nodeNFswitch).find('#nodeNFtext').html()
+if (nodeNFtext == 'OFF'){
+$.get('./act/switchNodeNF.php', {switchNodeNF:"NodeNFhide"}, function(result){
+  $("#nodeNFlist").css("display", "none")
+  $("#buttonNodeNFloading").removeClass()
+  $("#nodeNFtext").html("ON")
+})
+}
+else {
+$.get('./act/switchNodeNF.php', {switchNodeNF:"NodeNFshow"}, function(data){
+  $("#nodeNFlist").css("display", "block")
+  $("#buttonNodeNFloading").removeClass()
+  $("#nodeNFshow").html(data)
+  $("#nodeNFtext").html("OFF")
 })
 }
 }
@@ -657,7 +685,6 @@ for( let i = 0; i<len; i++){
     $.get("./act/speedT.php", {speedT:i}, function(data){$('#speed'+i).attr('class', 'text-success'); $('#speed'+i).text(data)})
   })
 
-  $('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr('class', 'btn btn-success btn-sm')
   $('#switch'+i).click(function(){
     $("#nodeTable td:nth-child(6) button").attr('class', "btn btn-outline-secondary btn-sm")
     $('#switch'+i).attr('class', 'btn btn-success btn-sm');
@@ -666,18 +693,19 @@ for( let i = 0; i<len; i++){
 
   $('#nodenf').append("<a class='dropdown-item' href='#' id='nodenf"+i+"'>"+nodeNF+"</a>")
   $('#nodenf'+i).click(function(){
-    $('#nodenfshow').html(nodeNF)
-    $('#nodenfshow').val(i)
+    $('#nodeNFshow').html(nodeNF)
+    $('#nodeNFshow').val(i)
     $.get("./act/changeNodeNF.php", {nodenfnum:i}, function(){})
   })
 
   $('#nodedt').append("<a class='dropdown-item' href='#' id='nodedt"+i+"'>"+nodeDT+"</a>");
   $('#nodedt'+i).click(function(){
-    $('#nodedtshow').html(nodeDT)
-    $('#nodedtshow').val(i)
+    $('#nodeDTshow').html(nodeDT)
+    $('#nodeDTshow').val(i)
     $.get("./act/changeNodeDT.php", {nodedtnum:i}, function(){})
   })
 }
+$('#switch<?php echo exec('/opt/de_GWD/ui-checkNode');?>').attr('class', 'btn btn-success btn-sm')
 })
 
 $('#buttonPingTCP').click(function(){
@@ -721,7 +749,7 @@ $.get('./act/offUDP.php', function(result){
 $('#buttonSubmitDivertIP').click(function(){
 $("#buttonSubmitDivertIPloading").attr("class", "spinner-border spinner-border-sm")
 divertIP=$('#nodedttext').val()
-$.get('./act/changeDivertIP.php', {divertIP:divertIP}, function(result){
+$.get('./act/switchNodeDTip.php', {divertIP:divertIP}, function(result){
   $("#buttonSubmitDivertIPloading").removeClass()
 })
 })

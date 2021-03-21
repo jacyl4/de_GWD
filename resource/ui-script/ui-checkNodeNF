@@ -1,16 +1,11 @@
 #!/bin/bash
-port=$(jq '.outbounds[1].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
-domain=$(jq -r '.outbounds[1].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
+domain=$(jq -r '.outbounds[] | select(.tag == "netflix") | .settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
+port=$(jq -r '.outbounds[] | select(.tag == "netflix") | .settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
 
-if [[ "$port" -eq "443" ]]; then
+if [[ "$port" == "443" ]]; then
 nodecheck=$domain
 else
 nodecheck=$domain:$port
 fi
 
-nodecheck2=$(echo $nodecheck | cut -d. -f1)
-
-jq -r '.v2node | keys[] as $k | "\($k) \(.[$k] | .domain)"' /opt/de_GWD/0conf | awk '/'$nodecheck'/ {print$1}' >/tmp/nodechecknf
-jq -r '.v2node | keys[] as $k | "\($k) \(.[$k] | .domain)"' /opt/de_GWD/0conf | cut -d. -f1 | awk '/'$nodecheck2'/ {print$1}' >>/tmp/nodechecknf
-
-sort /tmp/nodechecknf | uniq -d
+jq -r --arg nodecheck $nodecheck '.v2node[] | select(.domain == $nodecheck) | .name' /opt/de_GWD/0conf
