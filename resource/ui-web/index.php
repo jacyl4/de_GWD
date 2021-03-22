@@ -279,7 +279,7 @@
     </div>
   </div>
   <div id="nodeDTip" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
-    <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode($de_GWDconf)->divertLan->ip as $k => $v) {echo "$v ";} ?>">
+    <input id="nodedttext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach (json_decode($de_GWDconf)->v2nodeDIV->nodeDT->ip as $k => $v) {echo "$v ";} ?>">
   </div>
   <div id="nodeDTipButton" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <button id="buttonSubmitDivertIP" class="btn btn-outline-secondary" type="button">

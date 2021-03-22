@@ -3,6 +3,6 @@
 <?php
 $nodedtnum = $_GET['nodedtnum'];
 putenv("nodedtnum=$nodedtnum");
-exec('sudo /opt/de_GWD/ui-changeNodeDT nodedtnum &');
+exec('sudo /opt/de_GWD/ui-changeNodeDT $nodedtnum &');
 ?>
 <?php }?>

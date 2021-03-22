@@ -972,10 +972,10 @@ listen.mode = 0666
 listen = /run/php/php7.4-fpm.sock
 
 pm = dynamic
-pm.max_children = 25
+pm.max_children = 30
 pm.start_servers = 10
 pm.min_spare_servers = 5
-pm.max_spare_servers = 20
+pm.max_spare_servers = 30
 pm.max_requests = 1000
 
 env[HOSTNAME] = \$HOSTNAME

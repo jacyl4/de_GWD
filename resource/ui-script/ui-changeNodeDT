@@ -15,7 +15,7 @@ chmod 666 /opt/de_GWD/0conf
 
 cat << EOF >/tmp/OBdt
 {
-      "tag": "diverttraffic",
+      "tag": "divertTraffic",
       "protocol": "vless",
       "settings": {
         "vnext": [
