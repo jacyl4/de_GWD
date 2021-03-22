@@ -18,7 +18,7 @@ statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
 de_gwd_nginx="1.19.8"
 ttyd_version="1.6.3"
-branch="dev"
+branch="main"
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
