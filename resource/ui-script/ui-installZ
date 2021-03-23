@@ -1,0 +1,5 @@
+#!/bin/bash
+ps -aux | grep 'ui-install' | sed '/grep/d' | awk '{print$2}' | while read line
+do
+kill -9 $line >/dev/null 2>&1 &
+done

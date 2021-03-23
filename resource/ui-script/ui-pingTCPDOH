@@ -1,0 +1,3 @@
+#!/bin/bash
+pingTCPDOH=$(jq -r --arg dohNUM "doh$1" '.dns[$dohNUM]' /opt/de_GWD/0conf)
+echo "$(curl -o /dev/null -sw '%{time_connect}\n' https://$pingTCPDOH) * 1000" | bc | awk '{printf ("%.0f\n",$1)}' 

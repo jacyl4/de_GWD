@@ -1,0 +1,58 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+
+installNFSsupport(){
+apt install nfs-common
+
+blue "--------------------------"
+blue "Install NFS support [done]"
+blue "--------------------------"
+}
+
+
+
+uninstallNFSsupport(){
+apt purge keyutils libevent-2.1-6 libnfsidmap2 libtirpc-common libtirpc3 nfs-common rpcbind
+
+blue "----------------------------"
+blue "Uninstall NFS support [done]"
+blue "----------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "         NFS support"
+    green "==============================="
+    green  "1. Install NFS support"
+    yellow "2. Uninstall NFS support"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installNFSsupport
+    start_menu
+    ;;
+    2)
+    uninstallNFSsupport
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
