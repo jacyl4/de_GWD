@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ -f "/etc/nginx/conf.d/forward0.conf" ]]; then
+	echo "success"
+else
+	echo "outline-secondary"
+fi
