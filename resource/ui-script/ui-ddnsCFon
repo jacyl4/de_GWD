@@ -1,0 +1,8 @@
+#!/bin/bash
+/opt/de_GWD/ui-ddnsCFupdateIP
+
+crontab -l >/tmp/now.cron
+sed -i '/ui-ddnsCF/d' /tmp/now.cron
+echo '*/2 * * * * /opt/de_GWD/ui-ddnsCFupdateIP >/dev/null 2>&1' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron

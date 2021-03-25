@@ -1,0 +1,25 @@
+#!/bin/bash
+/opt/de_GWD/ui-offAPPLE
+
+if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
+	jq --arg APPLE "geosite:apple" '.dns.servers[2].domains+=[$APPLE]' /opt/de_GWD/v2dns/config.json |\
+	jq --arg APPLE "geosite:apple-cn" '.dns.servers[2].domains+=[$APPLE]' |\
+	jq --arg APPLE "domain:icloud.com" '.dns.servers[2].domains+=[$APPLE]' |\
+	jq --arg APPLE "domain:icloud-content.com" '.dns.servers[2].domains+=[$APPLE]' | sponge /opt/de_GWD/v2dns/config.json
+
+	jq '.dns.APPLEdir="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
+	jq --arg APPLE "geosite:apple" '.dns.servers[1].domains+=[$APPLE]' /opt/de_GWD/v2dns/config.json |\
+	jq --arg APPLE "geosite:apple-cn" '.dns.servers[1].domains+=[$APPLE]' |\
+	jq --arg APPLE "domain:icloud.com" '.dns.servers[1].domains+=[$APPLE]' |\
+	jq --arg APPLE "domain:icloud-content.com" '.dns.servers[1].domains+=[$APPLE]' | sponge /opt/de_GWD/v2dns/config.json
+
+	jq '.dns.APPLEdir="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
+chmod 666 /opt/de_GWD/v2dns/config.json
+chmod 666 /opt/de_GWD/0conf
+
+if [[ $1 == "r" ]]; then
+	systemctl restart v2dns >/dev/null
+fi
