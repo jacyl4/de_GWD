@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ $(uname -m) = "aarch64" ]]; then
+echo "ARM"
+fi

@@ -1,0 +1,99 @@
+#!/bin/bash
+address=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $domainNUM) | .value.domain' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $domainNUM) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $domainNUM) | .value.path' /opt/de_GWD/0conf)
+
+domain=$(echo -e $address | cut -d: -f1)
+port=$(echo -e $address | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -z $port ] && port="443"
+
+jq --arg domain "$domain" '.v2nodeDIV.nodeNF.domain=$domain' /opt/de_GWD/0conf |\
+jq --arg port "$port" '.v2nodeDIV.nodeNF.port=$port' |\
+jq --arg uuid "$uuid" '.v2nodeDIV.nodeNF.uuid=$uuid' |\
+jq --arg path "$path" '.v2nodeDIV.nodeNF.path=$path' | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+if [[ -z $path ]] || [[ $path = "null" ]]; then
+OBnf=`cat << EOF
+    {
+      "tag": "netflix",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "flow": "xtls-rprx-direct",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$domain"
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIPv4"
+        }
+      }
+    }
+EOF
+`
+else
+OBnf=`cat << EOF
+{
+      "tag": "netflix",
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$domain",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIPv4"
+        }
+      }
+}
+EOF
+`
+fi
+
+jq 'del(.outbounds[] | select(.tag == "netflix"))' /opt/de_GWD/vtrui/config.json |\
+jq --argjson OBnf "$OBnf" '.outbounds+=[$OBnf]' | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+systemctl restart vtrui

@@ -1,0 +1,102 @@
+#!/bin/bash
+domain=$(jq -r '.v2nodeDIV.nodeDT.domain' /opt/de_GWD/0conf)
+port=$(jq -r '.v2nodeDIV.nodeDT.port' /opt/de_GWD/0conf)
+uuid=$(jq -r '.v2nodeDIV.nodeDT.uuid' /opt/de_GWD/0conf)
+path=$(jq -r '.v2nodeDIV.nodeDT.path' /opt/de_GWD/0conf)
+
+if [[ -z $domain ]] || [[ $domain = "null" ]]; then
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf)
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf)
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
+fi
+
+jq '.v2nodeDIV.nodeDT.display="on"' /opt/de_GWD/0conf |\
+jq --arg domain "$domain" '.v2nodeDIV.nodeDT.domain=$domain' |\
+jq --arg port "$port" '.v2nodeDIV.nodeDT.port=$port' |\
+jq --arg uuid "$uuid" '.v2nodeDIV.nodeDT.uuid=$uuid' |\
+jq --arg path "$path" '.v2nodeDIV.nodeDT.path=$path' | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+if [[ -z $path ]] || [[ $path = "null" ]]; then
+OBdt=`cat << EOF
+    {
+      "tag": "divertTraffic",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "flow": "xtls-rprx-direct",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$domain"
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIPv4"
+        }
+      }
+    }
+EOF
+`
+else
+OBdt=`cat << EOF
+{
+      "tag": "divertTraffic",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$domain",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIPv4"
+        }
+      }
+}
+EOF
+`
+fi
+
+jq 'del(.outbounds[] | select(.tag == "divertTraffic"))' /opt/de_GWD/vtrui/config.json |\
+jq --argjson OBdt "$OBdt" '.outbounds+=[$OBdt]' | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi

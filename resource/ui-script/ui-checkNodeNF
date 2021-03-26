@@ -1,0 +1,11 @@
+#!/bin/bash
+domain=$(jq -r '.outbounds[] | select(.tag == "netflix") | .settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
+port=$(jq -r '.outbounds[] | select(.tag == "netflix") | .settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
+
+if [[ "$port" == "443" ]]; then
+nodecheck=$domain
+else
+nodecheck=$domain:$port
+fi
+
+jq -r --arg nodecheck $nodecheck '.v2node[] | select(.domain == $nodecheck) | .name' /opt/de_GWD/0conf

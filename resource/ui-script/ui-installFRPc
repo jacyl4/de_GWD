@@ -1,0 +1,71 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+installFRP(){
+mkdir -p /opt/de_GWD/frp
+
+if [[ $(uname -m) = "x86_64" ]]; then
+wget --no-check-certificate --show-progress -cqO /tmp/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_frp.tar.gz
+elif [[ $(uname -m) = "aarch64" ]]; then
+wget --no-check-certificate --show-progress -cqO /tmp/frp.tar.gz https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/arm64_frp.tar.gz
+fi
+tar zxvf /tmp/frp.tar.gz -C /tmp/
+
+mv -f /tmp/frp_*/frpc /opt/de_GWD/frp/frpc
+chmod -R 755 /opt/de_GWD/frp
+chown -R root:root /opt/de_GWD/frp
+
+rm -rf /tmp/frp*
+blue "--------------------"
+blue  "install FRP [done]"
+blue "--------------------"
+}
+
+uninstallFRP(){
+systemctl disable --now frpc >/dev/null
+systemctl daemon-reload >/dev/null
+
+rm -rf /opt/de_GWD/frp
+
+jq 'del(.FRP)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+blue "--------------------"
+blue  "uninstall FRP [done]"
+blue "--------------------"
+}
+
+start_menu(){
+    green "==============================="
+    green "         FRP"
+    green "==============================="
+    green  "1. Install FRP"
+    yellow "2. Uninnstall FRP"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installFRP
+    start_menu
+    ;;
+    2)
+    uninstallFRP
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
