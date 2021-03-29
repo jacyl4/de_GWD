@@ -1,0 +1,3 @@
+#!/bin/bash
+speedT=$(jq -r --argjson domainNUM "$1" '.v2node[$domainNUM].domain' /opt/de_GWD/0conf)
+wget -O /dev/null https://$speedT/spt 2>&1 | sed '$d' | awk 'END{print$3}' | sed 's/(//'

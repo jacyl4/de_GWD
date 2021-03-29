@@ -1,0 +1,37 @@
+#!/bin/bash
+ssAddress=$(jq -r '.v2nodeDIV.ss.ssAddress' /opt/de_GWD/0conf)
+ssPort=$(jq -r '.v2nodeDIV.ss.ssPort' /opt/de_GWD/0conf)
+ssMethod=$(jq -r '.v2nodeDIV.ss.ssMethod' /opt/de_GWD/0conf)
+ssSecure=$(jq -r '.v2nodeDIV.ss.ssSecure' /opt/de_GWD/0conf)
+
+OBss=`cat << EOF
+{
+      "tag": "ss",
+      "protocol": "shadowsocks",
+      "settings": {
+        "servers": [
+          {
+            "address": "$ssAddress",
+            "port": $ssPort,
+            "method": "$ssMethod",
+            "password": "$ssSecure",
+            "level": 1
+          }
+        ]
+      },
+      "streamSettings": {
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIPv4"
+        }
+      }
+}
+EOF
+`
+
+jq --argjson OBss "$OBss" '.outbounds[0]=$OBss' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi

@@ -1,0 +1,106 @@
+#!/bin/bash
+rm -rf /opt/de_GWD/xDNSs
+mkdir -p /opt/de_GWD/xDNSs
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/xDNSs/xDNSs
+chmod +x /opt/de_GWD/xDNSs/xDNSs
+
+xDNSsPort=$(jq -r '.FORWARD.xDNSs.port' /opt/de_GWD/0conf)
+
+cat << EOF >/opt/de_GWD/xDNSs/config.json
+{
+  "routing":{
+    "rules":[
+      {"type":"field","inboundTag":["xDNSsIN"],"outboundTag":"xDNSsOUT"},
+      {"type":"field","port":"53","outboundTag":"xDNSsOUT"}
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "xDNSsIN",
+      "port": $xDNSsPort,
+      "protocol": "vless",
+      "settings":{
+        "decryption": "none",
+        "clients":[
+          {
+            "id":"ccabd6d0-beb2-4b8a-8f94-45f3dc235ebe",
+            "flow":"xtls-rprx-direct",
+            "level":1
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "alpn":["http/1.1"],
+          "certificates": [
+            {
+              "ocspStapling": 3600,
+              "certificateFile": "/var/www/ssl/de_GWD.cer",
+              "keyFile": "/var/www/ssl/de_GWD.key"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "blackhole"
+    },
+    {
+      "tag": "xDNSsOUT",
+      "protocol": "freedom",
+      "settings": {
+        "redirect": "127.0.0.1:53"
+      },
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+  ]
+}
+EOF
+
+chmod 666 /opt/de_GWD/xDNSs/config.json
+chmod 644 /var/www/ssl/*.key
+
+cat << "EOF" >/lib/systemd/system/xDNSs.service
+[Unit]
+Description=xDNS Server
+After=network.target nss-lookup.target
+
+[Service]
+User=www-data
+Type=simple
+ExecStart=/opt/de_GWD/xDNSs/xDNSs -c /opt/de_GWD/xDNSs/config.json
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-5
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload >/dev/null
+systemctl enable xDNSs >/dev/null
+systemctl restart xDNSs >/dev/null
+
+if [[ $(systemctl is-active xDNSs) != "active" ]]; then
+sed -i '/Nice=/d' /lib/systemd/system/xDNSs.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/xDNSs.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/xDNSs.service
+sed -i '/IOSchedulingClass=/d' /lib/systemd/system/xDNSs.service
+sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/xDNSs.service
+systemctl daemon-reload >/dev/null
+systemctl restart xDNSs >/dev/null
+fi

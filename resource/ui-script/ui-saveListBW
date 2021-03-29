@@ -1,0 +1,115 @@
+#!/bin/bash
+if [[ $(awk '/listB/ {print;exit}' /opt/de_GWD/0conf) =~ "[" ]]; then
+	jq -r '.listB[]' /opt/de_GWD/0conf | sort | uniq | sed '/^\s*$/d' >/tmp/listBpre
+elif [[ $(awk '/listB/ {print;exit}' /opt/de_GWD/0conf) =~ "{" ]]; then
+	jq -r '.listB | keys[]' /opt/de_GWD/0conf | sort | uniq | sed '/^\s*$/d' >/tmp/listBpre
+fi
+
+if [[ $(awk '/listW/ {print;exit}' /opt/de_GWD/0conf) =~ "[" ]]; then
+	jq -r '.listW[]' /opt/de_GWD/0conf | sort | uniq | sed '/^\s*$/d' >/tmp/listWpre
+elif [[ $(awk '/listW/ {print;exit}' /opt/de_GWD/0conf) =~ "{" ]]; then
+	jq -r '.listW | keys[]' /opt/de_GWD/0conf | sort | uniq | sed '/^\s*$/d' >/tmp/listWpre
+fi
+
+
+>/opt/de_GWD/IPlistB
+>/opt/de_GWD/IPlistW
+if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "chnw" ]]; then
+	jq '.dns.servers[1].domains=["domain:play.googleapi.cn"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	if [[ -f "/tmp/listBpre" ]] && [[ -n $(cat /tmp/listBpre) ]]; then
+		jq '.listB={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+		cat /tmp/listBpre | xargs -n 8 | while read listB 
+		do
+			for domainlistB in $listB
+			do
+			jq --arg listB "domain:$domainlistB" '.dns.servers[1].domains+=[$listB]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+			listBIP=$(dig @127.0.0.1 $domainlistB -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			echo $listBIP >>/opt/de_GWD/IPlistB
+			jq --arg key "$domainlistB" --arg value "$listBIP" '.listB += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
+			done
+			wait
+		done
+	fi
+
+
+	jq '.dns.servers[2].domains=["domain:live.com"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	if [[ -f "/tmp/listWpre" ]] && [[ -n $(cat /tmp/listWpre) ]]; then
+		jq '.listW={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+		cat /tmp/listWpre | xargs -n 8 | while read listW
+		do
+			for domainlistW in $listW
+			do
+			jq --arg listW "domain:$domainlistW" '.dns.servers[2].domains+=[$listW]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+			listWIP=$(dig @127.0.0.1 $domainlistW -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			echo $listWIP >>/opt/de_GWD/IPlistW
+			jq --arg key "$domainlistW" --arg value "$listWIP" '.listW += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
+			done
+			wait
+		done
+	fi
+
+elif [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) == "gfw" ]]; then
+	jq '.dns.servers[2].domains=["domain:play.googleapi.cn"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	if [[ -f "/tmp/listBpre" ]] && [[ -n $(cat /tmp/listBpre) ]]; then
+		jq '.listB={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+		cat /tmp/listBpre | xargs -n 8 | while read listB 
+		do
+			for domainlistB in $listB
+			do
+			jq --arg listB "domain:$domainlistB" '.dns.servers[2].domains+=[$listB]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+			listBIP=$(dig @127.0.0.1 $domainlistB -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			echo $listBIP >>/opt/de_GWD/IPlistB
+			jq --arg key "$domainlistB" --arg value "$listBIP" '.listB += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
+			done
+			wait
+		done
+	fi
+
+
+	jq '.dns.servers[1].domains=["domain:live.com"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+	if [[ -f "/tmp/listWpre" ]] && [[ -n $(cat /tmp/listWpre) ]]; then
+		jq '.listW={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+		cat /tmp/listWpre | xargs -n 8 | while read listW
+		do
+			for domainlistW in $listW
+			do
+			jq --arg listW "domain:$domainlistW" '.dns.servers[1].domains+=[$listW]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+			listWIP=$(dig @127.0.0.1 $domainlistW -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+			echo $listWIP >>/opt/de_GWD/IPlistW
+			jq --arg key "$domainlistW" --arg value "$listWIP" '.listW += {($key):$value}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf &
+			done
+			wait
+		done
+	fi
+fi
+
+if [[ -n $(cat /tmp/v2dns_config) ]]; then
+  mv -f /tmp/v2dns_config /opt/de_GWD/v2dns/config.json
+fi
+
+>/opt/de_GWD/IPlistBlan
+jq -r '.listBlan[]' /opt/de_GWD/0conf 2>/dev/null | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' >/opt/de_GWD/IPlistBlan
+
+>/opt/de_GWD/IPlistWlan
+jq -r '.listWlan[]' /opt/de_GWD/0conf 2>/dev/null | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' >/opt/de_GWD/IPlistWlan
+
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistB
+sed -i 's/^/add listB &/g' /opt/de_GWD/IPlistB
+mv -f /opt/de_GWD/IPlistB /opt/de_GWD/IPlistBSET
+ipset -! -R </opt/de_GWD/IPlistBSET
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistW
+sed -i 's/^/add listW &/g' /opt/de_GWD/IPlistW
+mv -f /opt/de_GWD/IPlistW /opt/de_GWD/IPlistWSET
+ipset -! -R </opt/de_GWD/IPlistWSET
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistBlan
+sed -i 's/^/add listBlan &/g' /opt/de_GWD/IPlistBlan
+mv -f /opt/de_GWD/IPlistBlan /opt/de_GWD/IPlistBlanSET
+ipset -! -R </opt/de_GWD/IPlistBlanSET
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPlistWlan
+sed -i 's/^/add listWlan &/g' /opt/de_GWD/IPlistWlan
+mv -f /opt/de_GWD/IPlistWlan /opt/de_GWD/IPlistWlanSET
+ipset -! -R </opt/de_GWD/IPlistWlanSET

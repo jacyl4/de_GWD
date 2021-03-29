@@ -1,0 +1,143 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+
+installJellyfin(){
+curl -fsSL  https://repo.jellyfin.org/debian/jellyfin_team.gpg.key | apt-key add -
+echo "deb [arch=$(dpkg --print-architecture)] https://repo.jellyfin.org/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" > /etc/apt/sources.list.d/jellyfin.list
+
+apt update && apt install jellyfin
+
+cat << EOF >/etc/nginx/conf.d/jellyfin.conf
+server {
+  listen 8097 ssl http2 fastopen=128 reuseport;
+  root /var/www/html;
+  
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers  '[ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305|ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
+  ssl_session_timeout 10m;
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  add_header Referrer-Policy                    "no-referrer"       always;
+  add_header X-Content-Type-Options             "nosniff"           always;
+  add_header X-Download-Options                 "noopen"            always;
+  add_header X-Frame-Options                    "SAMEORIGIN"        always;
+  add_header X-Permitted-Cross-Domain-Policies  "none"              always;
+  add_header X-Robots-Tag                       "none"              always;
+  add_header X-XSS-Protection                   "1; mode=block"     always;
+  add_header Strict-Transport-Security          "max-age=63072000"  always;
+
+location = / {
+  return 302 https://\$host:8097/web/;
+}
+
+location / {
+  proxy_pass                            http://127.0.0.1:8096;
+  proxy_set_header Host                 \$host;
+  proxy_set_header X-Real-IP            \$remote_addr;
+  proxy_set_header X-Forwarded-For      \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto    \$scheme;
+  proxy_set_header X-Forwarded-Protocol \$scheme;
+  proxy_set_header X-Forwarded-Host     \$http_host;
+  proxy_redirect                        off;
+  keepalive_requests                    25600;
+  keepalive_timeout                     300 300;
+  proxy_buffering                       off;
+  proxy_buffer_size                     8k;
+}
+
+location = /web/ {
+  proxy_pass                            http://127.0.0.1:8096/web/index.html;
+  proxy_set_header Host                 \$host;
+  proxy_set_header X-Real-IP            \$remote_addr;
+  proxy_set_header X-Forwarded-For      \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto    \$scheme;
+  proxy_set_header X-Forwarded-Protocol \$scheme;
+  proxy_set_header X-Forwarded-Host     \$http_host;
+}
+
+location /socket {
+  proxy_pass                            http://127.0.0.1:8096;
+  proxy_http_version                    1.1;
+  proxy_set_header Upgrade              \$http_upgrade;
+  proxy_set_header Connection           "upgrade";
+  proxy_set_header Host                 \$host;
+  proxy_set_header X-Real-IP            \$remote_addr;
+  proxy_set_header X-Forwarded-For      \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto    \$scheme;
+  proxy_set_header X-Forwarded-Protocol \$scheme;
+  proxy_set_header X-Forwarded-Host     \$http_host;
+}
+
+}
+EOF
+
+systemctl force-reload nginx >/dev/null
+
+usermod -aG root jellyfin
+systemctl restart jellyfin >/dev/null
+
+blue "------------------------"
+blue "Install Jellyfin [done]"
+blue "------------------------"
+}
+
+
+
+uninstallJellyfin(){
+rm -rf /var/lib/jellyfin/plugins/JavScraper.dll
+
+apt purge at fontconfig-config fonts-dejavu-core jellyfin jellyfin-ffmpeg jellyfin-server jellyfin-web libass9 libbluray2 libcairo2 libdrm-common libdrm-intel1 libdrm2 libfl2 libfontconfig1 libfribidi0 libglib2.0-0 libgraphite2-3 libharfbuzz0b libmp3lame0 libnuma1 libogg0 libopus0 libpciaccess0 libpixman-1-0 libtheora0 libvdpau1 libvorbis0a libvorbisenc2 libvpx5 libwebp6 libwebpmux3 libx264-155 libx265-165 libxcb-render0 libxcb-shm0 libxrender1 libzvbi-common libzvbi0 ocl-icd-libopencl1
+
+rm -rf /etc/nginx/conf.d/jellyfin.conf
+
+systemctl force-reload nginx >/dev/null
+
+blue "--------------------------"
+blue "Uninstall Jellyfin [done]"
+blue "--------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "         Jellyfin"
+    green "==============================="
+    green  "1. Install Jellyfin"
+    yellow "2. Uninstall Jellyfin"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installJellyfin
+    start_menu
+    ;;
+    2)
+    uninstallJellyfin
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
