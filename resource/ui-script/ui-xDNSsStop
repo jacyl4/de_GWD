@@ -1,0 +1,6 @@
+#!/bin/bash
+systemctl disable --now xDNSs >/dev/null
+rm -rf /lib/systemd/system/xDNSs.service
+systemctl daemon-reload >/dev/null
+
+rm -rf /opt/de_GWD/xDNSs

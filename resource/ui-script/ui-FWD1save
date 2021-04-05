@@ -1,0 +1,152 @@
+#!/bin/bash
+FWD1port=$(jq -r '.FORWARD.FWD1.port' /opt/de_GWD/0conf)
+FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[]' /opt/de_GWD/0conf)
+
+rm -rf /opt/de_GWD/vtrui1
+mkdir -p /opt/de_GWD/vtrui1
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
+chmod +x /opt/de_GWD/vtrui1/vtrui1
+
+
+v2nodeID=$(jq -r '.FORWARD.FWD1.upstream' /opt/de_GWD/0conf)
+
+v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf)
+domain=$(echo $v2servn | cut -d: -f1)
+port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -z $port ] && port="443"
+
+uuid=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf)
+path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0conf)
+
+cat << EOF >/opt/de_GWD/vtrui1/config.json
+{
+  "dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
+  "routing":{
+    "rules":[
+      {
+        "type": "field",
+        "inboundTag": [
+          "dnsFlow"
+        ],
+        "outboundTag": "direct"
+      }
+    ]
+  },
+  "inbounds":[
+    {
+      "port": $FWD1port,
+      "protocol": "vless",
+      "settings":{
+        "decryption": "none",
+        "clients":[]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "alpn": ["http/1.1"],
+          "certificates": [
+            {
+              "ocspStapling": 3600,
+              "certificateFile": "/var/www/ssl/de_GWD.cer",
+              "keyFile": "/var/www/ssl/de_GWD.key"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$domain",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy":"UseIPv4"
+        }
+      }
+    },
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+  ]
+}
+EOF
+
+for uuid in $FWD1uuid; do
+uuidStr='{"id":"'$uuid'","flow":"xtls-rprx-direct","level":1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
+done
+chmod 666 /opt/de_GWD/vtrui1/config.json
+chmod 644 /var/www/ssl/*.key
+
+rm -rf /etc/systemd/system/vtrui1.service
+cat << "EOF" >/lib/systemd/system/vtrui1.service
+[Unit]
+Description=vtrui1 Service
+After=network.target nss-lookup.target
+
+[Service]
+User=www-data
+Type=simple
+ExecStartPre=-/bin/rm -rf /dev/shm/de_GWD1.socket*
+ExecStart=/opt/de_GWD/vtrui1/vtrui1 -c /opt/de_GWD/vtrui1/config.json
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-5
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload >/dev/null
+systemctl enable vtrui1 >/dev/null
+systemctl restart vtrui1 >/dev/null
+
+if [[ $(systemctl is-active vtrui1) != "active" ]]; then
+sed -i '/Nice=/d' /lib/systemd/system/vtrui1.service
+sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/vtrui1.service
+sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/vtrui1.service
+sed -i '/IOSchedulingClass=/d' /lib/systemd/system/vtrui1.service
+sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/vtrui1.service
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui1 >/dev/null
+fi
+
+/opt/de_GWD/ui-FWDb

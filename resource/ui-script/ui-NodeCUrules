@@ -1,0 +1,20 @@
+#!/bin/bash
+customDomain=$(jq '.v2nodeDIV.nodeCU.rules' /opt/de_GWD/0conf)
+
+if [[ -n $customDomain ]] && [[ $customDomain != "null" ]] && [[ $customDomain != "[]" ]]; then
+RoutingCU=`cat << EOF
+{
+        "type": "field",
+        "domain": $customDomain,
+        "outboundTag": "custom"
+}
+EOF
+`
+jq 'del(.routing.rules[] | select(.outboundTag == "custom"))' /opt/de_GWD/vtrui/config.json |\
+jq --argjson RoutingCU "$RoutingCU" '.routing.rules+=[$RoutingCU]' | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+fi
+
+if [[ $1 == "r" ]]; then
+	systemctl restart vtrui >/dev/null
+fi

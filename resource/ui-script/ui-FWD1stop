@@ -1,0 +1,8 @@
+#!/bin/bash
+systemctl disable --now vtrui1 >/dev/null
+rm -rf /lib/systemd/system/vtrui1.service
+systemctl daemon-reload >/dev/null
+
+rm -rf /etc/nginx/conf.d/forward1.conf
+rm -rf /opt/de_GWD/vtrui1
+systemctl force-reload nginx >/dev/null
