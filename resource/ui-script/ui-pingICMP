@@ -1,0 +1,3 @@
+#!/bin/bash
+pingICMP=$(jq -r --argjson domainNUM "$1" '.v2node[$domainNUM].domain' /opt/de_GWD/0conf | cut -d: -f1)
+ping -n -c1 -w1 $pingICMP | grep 'time=' | cut -d= -f4 | cut -d' ' -f1 | cut -d. -f1

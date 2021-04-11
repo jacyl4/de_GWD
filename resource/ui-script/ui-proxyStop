@@ -1,0 +1,19 @@
+#!/bin/bash
+/opt/de_GWD/ui_2h
+
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+nameserver 127.0.0.1
+EOF
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
+
+sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
+echo "PIHOLE_DNS_1=127.0.0.1#5310" >>/etc/pihole/setupVars.conf
+pihole restartdns
+
+systemctl stop iptables-proxy

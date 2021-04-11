@@ -1,0 +1,20 @@
+#!/bin/bash
+rm -rf /opt/de_GWD/update
+rm -rf ~/client*
+rm -rf ~/wget-log*
+rm -rf /wget-log*
+rm -rf /var/log/*1*
+rm -rf /var/log/*2*
+rm -rf /var/log/*.gz
+rm -rf /var/www/html/log.log
+rm -rf /var/www/html/restore/*
+rm -rf /opt/de_GWD/__MACOSX
+rm -rf /var/www/html/__MACOSX
+
+sed -i '/^\s*$/d' /opt/de_GWD/0conf
+if [[ -n $(cat /opt/de_GWD/0conf) ]]; then
+	cp -f /opt/de_GWD/0conf /opt/de_GWD/0conf_bak
+elif [[ -z $(cat /opt/de_GWD/0conf) ]]; then
+	cp -f /opt/de_GWD/0conf_bak /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+fi

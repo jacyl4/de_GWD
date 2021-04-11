@@ -1,0 +1,2 @@
+#!/bin/bash
+/opt/de_GWD/ui-check_ssl_cert -H $(jq -r '.FORWARD.domain' /opt/de_GWD/0conf) | cut -d'(' -f2 | cut -d')' -f1 | sed '/^\s*$/d'

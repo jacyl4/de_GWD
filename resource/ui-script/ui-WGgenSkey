@@ -1,0 +1,15 @@
+#!/bin/bash
+mkdir -p /etc/wireguard
+cd /etc/wireguard
+
+wg genkey | tee sprivatekey | wg pubkey > spublickey
+
+sprivatekey=$(cat /etc/wireguard/sprivatekey)
+spublickey=$(cat /etc/wireguard/spublickey)
+
+jq --arg sprivatekey "$sprivatekey" '.wireguard.server.sprivatekey=$sprivatekey' /opt/de_GWD/0conf |\
+jq --arg spublickey "$spublickey" '.wireguard.server.spublickey=$spublickey' | sponge /opt/de_GWD/0conf
+
+chmod 666 /opt/de_GWD/0conf
+
+rm -rf /etc/wireguard/s*key
