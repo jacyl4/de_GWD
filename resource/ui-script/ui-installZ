@@ -1,0 +1,8 @@
+#!/bin/bash
+ps -aux | grep 'ui-install' | sed '/grep/d' | awk '{print$2}' | while read line
+do
+kill $line >/dev/null 2>&1 &
+done
+
+systemctl stop updateGWD >/dev/null 2>&1 &
+/usr/bin/screen -S updateGWD -X quit

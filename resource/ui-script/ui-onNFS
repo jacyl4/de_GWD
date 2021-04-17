@@ -1,0 +1,16 @@
+#!/bin/bash
+sed -i '/nfsvers/d' /etc/fstab
+
+nfsNUM=$(jq -r '.app.NFS | length' /opt/de_GWD/0conf)
+
+for ((i=0; i<$nfsNUM; i++))
+do
+NFSpoint=$(jq -r --argjson i "$i" '.app.NFS[$i].NFSpoint' /opt/de_GWD/0conf)
+NFSserver=$(jq -r --argjson i "$i" '.app.NFS[$i].NFSserver' /opt/de_GWD/0conf)
+NFSaddress=$(jq -r --argjson i "$i" '.app.NFS[$i].NFSaddress' /opt/de_GWD/0conf)
+
+mkdir -p $NFSpoint
+mount -t nfs -o vers=3,hard,intr,rsize=1048576,wsize=1048576,noresvport,proto=tcp,nolock,noatime,nodiratime $NFSserver:$NFSaddress $NFSpoint
+
+echo "$NFSserver:$NFSaddress $NFSpoint nfs nfsvers=3,hard,intr,rsize=1048576,wsize=1048576,noresvport,proto=tcp,nolock,noatime,nodiratime,_netdev 0 0" >>/etc/fstab
+done

@@ -1,0 +1,5 @@
+#!/bin/bash
+crontab -l >/tmp/now.cron
+sed -i '/ui-ddns3322/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron

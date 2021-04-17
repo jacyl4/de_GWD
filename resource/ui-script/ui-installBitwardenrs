@@ -1,0 +1,157 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+
+installBitwardenrs(){
+mkdir -p /opt/bitwardenrs
+
+docker pull bitwardenrs/server:latest
+docker run -d --name bitwardenrs --restart=always -v /opt/bitwardenrs/:/data/ -p 8098:80 bitwardenrs/server:latest
+
+cat << EOF >/etc/nginx/conf.d/bitwardenrs.conf
+server {
+  listen 8099 ssl http2;
+  server_name vault.*;
+  
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers  '[ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305|ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
+  ssl_session_timeout 10m;
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+  
+  client_max_body_size 128M;
+
+  location / {
+    proxy_pass http://127.0.0.1:8098;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+  }
+  
+  location /notifications/hub {
+    proxy_pass http://127.0.0.1:3012;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+  
+  location /notifications/hub/negotiate {
+    proxy_pass http://127.0.0.1:8098;
+  }
+}
+EOF
+systemctl force-reload nginx
+
+cat << EOF >/etc/logrotate.d/bitwarden
+/var/log/bitwarden/*.log {
+    # 以 bitwarden 用户和群组的身份执行轮换
+    su bitwarden bitwarden
+    # 每天轮换
+    daily
+    # 当尺寸大于 5M 时轮换
+    size 5M
+    # 压缩旧的日志文件
+    compress
+    # 在删除或邮寄到 mail 指令中指定的地址之前，保留 4 个轮换的日志文件
+    rotate 4
+    # 把当前日志备份并截断
+    copytruncate
+    # 如果日志文件不存在，继续下一个操作
+    missingok
+    # 如果日志文件为空则不进行轮换
+    notifempty
+    # 在轮换的日志文件中添加数字格式的日期
+    dateext
+    # dateext 的日期格式
+    dateformat -%Y-%m-%d-%s
+}
+EOF
+jq '.app.bitwardenrs="installed"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+blue "---------------------------"
+blue "Install Bitwarden_rs [done]"
+blue "---------------------------"
+}
+
+
+
+uninstallBitwardenrs(){
+docker stop bitwardenrs
+docker rm bitwardenrs
+
+docker image ls 2>/dev/null | awk '/bitwardenrs/{print$3}' | while read line
+do
+docker rmi $line 2>/dev/null 
+done
+
+rm -rf /opt/bitwardenrs
+rm -rf /etc/nginx/conf.d/bitwardenrs.conf
+systemctl force-reload nginx
+rm -rf /etc/logrotate.d/bitwarden
+jq 'del(.app.bitwardenrs)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+blue "-----------------------------"
+blue "Uninstall Bitwarden_rs [done]"
+blue "-----------------------------"
+}
+
+
+
+updateBitwardenrs(){
+docker stop bitwardenrs
+docker rm bitwardenrs
+
+docker pull bitwardenrs/server:latest
+docker run -d --name bitwardenrs --restart=always -v /opt/bitwardenrs/:/data/ -p 8098:80 bitwardenrs/server:latest
+
+docker system prune -f
+blue "--------------------------"
+blue "Update Bitwarden_rs [done]"
+blue "--------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "         Bitwarden_rs"
+    green "==============================="
+    green  "1. Install Bitwarden_rs"
+    yellow "2. Uninstall Bitwarden_rs"
+    green  "0. Update Bitwarden_rs"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installBitwardenrs
+    start_menu
+    ;;
+    2)
+    uninstallBitwardenrs
+    start_menu
+    ;;
+    0)
+    updateBitwardenrs
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
