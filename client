@@ -2259,7 +2259,7 @@ blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2
     green "=================================================="
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot(5.10.27)"
+    green  "2. Install bbrplus and reboot(5.10.28)"
     green  "3. Install XanMod kernel BBR and reboot"
     yellow "8. Change Web UI port & Web update port"
     yellow "9. Change de_GWD password"

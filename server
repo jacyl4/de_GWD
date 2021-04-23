@@ -1858,7 +1858,7 @@ fi
     green "=================================================="
     echo
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot(5.10.27)"
+    green  "2. Install bbrplus and reboot(5.10.28)"
     green  "3. Install XanMod kernel BBR and reboot"
     red    "4. Change domain and generate new certificate"
     red    "5. Change Xray path & UUID"
