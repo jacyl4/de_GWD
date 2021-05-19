@@ -1,0 +1,15 @@
+#!/bin/bash
+docker stop bitwarden
+
+unzip /var/www/html/restore/Bitwarden_bak.zip -d /tmp
+
+if [[ $(ls -l /tmp/opt 2>/dev/null | awk '{print$5}') -gt 1 ]]; then
+rm -rf /opt/bitwarden
+mkdir -p /opt/bitwarden
+mv -f /tmp/opt/bitwarden /opt/
+fi
+
+docker restart bitwarden
+
+rm -rf /tmp/opt
+rm -rf /var/www/html/restore/Bitwarden_bak.zip

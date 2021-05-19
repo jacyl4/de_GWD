@@ -9,13 +9,13 @@ cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
 white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
 
 
-installBitwardenrs(){
-mkdir -p /opt/bitwardenrs
+installBitwarden(){
+mkdir -p /opt/bitwarden
 
-docker pull bitwardenrs/server:latest
-docker run -d --name bitwardenrs --restart=always -v /opt/bitwardenrs/:/data/ -p 8098:80 bitwardenrs/server:latest
+docker pull vaultwarden/server:latest
+docker run -d --name bitwarden --restart=always -v /opt/bitwarden/:/data/ -p 8098:80 vaultwarden/server:latest
 
-cat << EOF >/etc/nginx/conf.d/bitwardenrs.conf
+cat << EOF >/etc/nginx/conf.d/bitwarden.conf
 server {
   listen 8099 ssl http2;
   server_name vault.*;
@@ -79,45 +79,55 @@ cat << EOF >/etc/logrotate.d/bitwarden
     dateformat -%Y-%m-%d-%s
 }
 EOF
-jq '.app.bitwardenrs="installed"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+jq '.app.bitwarden="installed"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 blue "---------------------------"
-blue "Install Bitwarden_rs [done]"
+blue "Install Bitwarden [done]"
 blue "---------------------------"
 }
 
 
 
-uninstallBitwardenrs(){
-docker stop bitwardenrs
-docker rm bitwardenrs
-
+uninstallBitwarden(){
+docker stop bitwardenrs >/dev/null 2>&1
+docker rm bitwardenrs >/dev/null 2>&1
 docker image ls 2>/dev/null | awk '/bitwardenrs/{print$3}' | while read line
 do
-docker rmi $line 2>/dev/null 
+docker rmi $line >/dev/null 2>&1
+done
+
+docker stop bitwarden >/dev/null 2>&1
+docker rm bitwarden >/dev/null 2>&1
+docker image ls 2>/dev/null | awk '/bitwarden/{print$3}' | while read line
+do
+docker rmi $line >/dev/null 2>&1
 done
 
 rm -rf /opt/bitwardenrs
+rm -rf /opt/bitwarden
 rm -rf /etc/nginx/conf.d/bitwardenrs.conf
+rm -rf /etc/nginx/conf.d/bitwarden.conf
 systemctl force-reload nginx
 rm -rf /etc/logrotate.d/bitwarden
 jq 'del(.app.bitwardenrs)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+jq 'del(.app.bitwarden)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 blue "-----------------------------"
-blue "Uninstall Bitwarden_rs [done]"
+blue "Uninstall Bitwarden [done]"
 blue "-----------------------------"
 }
 
 
 
-updateBitwardenrs(){
-docker stop bitwardenrs
-docker rm bitwardenrs
+updateBitwarden(){
+docker stop bitwarden
+docker rm bitwarden
 
-docker pull bitwardenrs/server:latest
-docker run -d --name bitwardenrs --restart=always -v /opt/bitwardenrs/:/data/ -p 8098:80 bitwardenrs/server:latest
+docker pull vaultwarden/server:latest
+docker run -d --name bitwarden --restart=always -v /opt/bitwarden/:/data/ -p 8098:80 vaultwarden/server:latest
+
 
 docker system prune -f
 blue "--------------------------"
-blue "Update Bitwarden_rs [done]"
+blue "Update Bitwarden [done]"
 blue "--------------------------"
 }
 
@@ -125,24 +135,24 @@ blue "--------------------------"
 
 start_menu(){
     green "==============================="
-    green "         Bitwarden_rs"
+    green "         Bitwarden"
     green "==============================="
-    green  "1. Install Bitwarden_rs"
-    yellow "2. Uninstall Bitwarden_rs"
-    green  "0. Update Bitwarden_rs"
+    green  "1. Install Bitwarden"
+    yellow "2. Uninstall Bitwarden"
+    green  "0. Update Bitwarden"
     echo ""
     read -p "Select:" num
     case "$num" in
     1)
-    installBitwardenrs
+    installBitwarden
     start_menu
     ;;
     2)
-    uninstallBitwardenrs
+    uninstallBitwarden
     start_menu
     ;;
     0)
-    updateBitwardenrs
+    updateBitwarden
     start_menu
     ;;
     *)

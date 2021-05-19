@@ -34,7 +34,7 @@
 <?php $de_GWDconf = json_decode(file_get_contents('/opt/de_GWD/0conf')); ?>
 <?php $checkNetdata = file_exists('/usr/libexec/netdata/netdata-updater.sh'); ?>
 <?php $checkJellyfin = file_exists('/usr/bin/jellyfin'); ?>
-<?php $checlBitwardenrs = $de_GWDconf->app->bitwardenrs; ?>
+<?php $checlBitwarden = $de_GWDconf->app->bitwarden; ?>
 
 <?php $checkNFS = file_exists('/var/lib/nfs/state') ?>
 <?php $checkDocker = file_exists('/usr/bin/docker') ?>
@@ -62,10 +62,10 @@
         </a>
       </li>
 
-      <li class="nav-item no-arrow mx-1" style="display:<?php if ($checlBitwardenrs === installed) echo 'block'; else echo 'none';?>">
+      <li class="nav-item no-arrow mx-1" style="display:<?php if ($checlBitwarden === installed) echo 'block'; else echo 'none';?>">
         <a class="nav-link" href="javascript:void(0)" onclick="window.open(location.origin+':8099')">
           <i class="fas fa-shield-alt"></i>
-          <span>Bitwarden_rs</span>
+          <span>Bitwarden</span>
         </a>
       </li>
 
@@ -257,18 +257,18 @@ EOT;
     <div class="form-row">
       <div class="col-md-6 input-group my-2">
         <div class="input-group-prepend">
-          <button id="buttonBWrsInstall" type="button" class="btn <?php if ($checlBitwardenrs === installed) echo 'btn-success'; else echo 'btn-outline-secondary'; ?>"><?php if ($checlBitwardenrs === installed) echo 'Bitwarden_rs'; else echo 'install Bitwarden_rs';?></button>
+          <button id="buttonBWrsInstall" type="button" class="btn <?php if ($checlBitwarden === installed) echo 'btn-success'; else echo 'btn-outline-secondary'; ?>"><?php if ($checlBitwarden === installed) echo 'Bitwarden'; else echo 'install Bitwarden';?></button>
         </div>
         <div class="input-group-prepend input-group-append">
-          <button id="bitwardenrsBackup" type="button" class="btn btn-outline-secondary">备份下载</button>
+          <button id="bitwardenBackup" type="button" class="btn btn-outline-secondary">备份下载</button>
         </div>
           <div class="custom-file">
-            <input id="bitwardenrsRestoreFile" type="file" class="custom-file-input">
-            <label id="bitwardenrsRestoreFileLabel" class="custom-file-label" for="bitwardenrsRestoreFile">...</label>
+            <input id="bitwardenRestoreFile" type="file" class="custom-file-input">
+            <label id="bitwardenRestoreFileLabel" class="custom-file-label" for="bitwardenRestoreFile">...</label>
           </div>
         <div class="input-group-append">
-          <button id="buttonBitwardenrsRestore" type="button" class="btn btn-outline-secondary">
-            <span id="buttonBitwardenrsRestoreLoading"></span>
+          <button id="buttonBitwardenRestore" type="button" class="btn btn-outline-secondary">
+            <span id="buttonBitwardenRestoreLoading"></span>
             <span>上传恢复</span>
           </button>
         </div>
@@ -440,7 +440,7 @@ $('#dockerBody').css('display', 'block');
 })
 
 $('#buttonBWrsInstall').click(function(){
-$.get('./act/installBitwardenrs.php', function(){})
+$.get('./act/installBitwarden.php', function(){})
 var win = window.open('/ttyd', 'popupWindow', 'width=900, height=900, scrollbars=yes')
 var timer = setInterval(function() { 
     if(win.closed) {
@@ -450,33 +450,33 @@ var timer = setInterval(function() {
 }, 300);
 })
 
-$('#bitwardenrsBackup').click(function(){
-$.get('./act/backupBWrs.php', function(result){window.location.href = "/restore/Bitwardenrs_bak.zip"})
+$('#bitwardenBackup').click(function(){
+$.get('./act/backupBitwarden.php', function(result){window.location.href = "/restore/Bitwarden_bak.zip"})
 })
 
-$('#bitwardenrsRestoreFile').on('change',function(){
+$('#bitwardenRestoreFile').on('change',function(){
   let fileName = $(this).val().split('\\').pop()
-  $(this).siblings('#bitwardenrsRestoreFileLabel').addClass('selected').html(fileName)
-  if( fileName != "Bitwardenrs_bak.zip" ){
-  alert("文件选择错误，备份文件名为 Bitwardenrs_bak.zip ")
+  $(this).siblings('#bitwardenRestoreFileLabel').addClass('selected').html(fileName)
+  if( fileName != "Bitwarden_bak.zip" ){
+  alert("文件选择错误，备份文件名为 Bitwarden_bak.zip ")
   }
 })
 
-$('#buttonBitwardenrsRestore').click(function(){
-$("#buttonBitwardenrsRestoreLoading").attr("class", "spinner-border spinner-border-sm")
-var file_data = $('#bitwardenrsRestoreFile').prop('files')[0]
+$('#buttonBitwardenRestore').click(function(){
+$("#buttonBitwardenRestoreLoading").attr("class", "spinner-border spinner-border-sm")
+var file_data = $('#bitwardenRestoreFile').prop('files')[0]
 console.log(file_data)
 var form_data = new FormData()
 form_data.append('file', file_data)
 $.ajax({
-        url: './act/restoreBWrs.php',
+        url: './act/restoreBitwarden.php',
         cache: false,
         contentType: false,
         processData: false,
         data: form_data,
         type: 'post',
         success: function(result){
-          $("#buttonBitwardenrsRestoreLoading").removeClass()
+          $("#buttonBitwardenRestoreLoading").removeClass()
         }
       })
 })

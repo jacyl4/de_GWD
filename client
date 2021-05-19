@@ -18,7 +18,7 @@ statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
 de_gwd_nginx="1.19.10"
 ttyd_version="1.6.3"
-branch="main"
+branch="dev"
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
@@ -161,6 +161,9 @@ if [[ -d "/opt/AdGuardHome" ]]; then
   rm -rf /usr/bin/yq
 fi
 
+if [[ -d "/opt/bitwardenrs" ]]; then
+  mv -f /opt/bitwardenrs /opt/bitwarden
+fi
 
 if [[ `dpkg -l | grep php | grep fpm | awk '{print $2}'` = "php7.3-fpm" ]] || [[ `dpkg -l | grep php | grep fpm | awk '{print $2}'` = "php8.0-fpm" ]]; then
 rm -rf /etc/php/7.3/

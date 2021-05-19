@@ -36,7 +36,7 @@ bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
 * [ tsl0922/ttyd ](https://github.com/tsl0922/ttyd)
 * [ netdata/netdata ](https://github.com/netdata/netdata)
 * [ jellyfin/jellyfin ](https://github.com/jellyfin/jellyfin)
-* [ dani-garcia/bitwarden_rs ](https://github.com/dani-garcia/bitwarden_rs)
+* [ dani-garcia/vaultwarden ](https://github.com/dani-garcia/vaultwarden)
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/jacyl4/de_GWD.svg)](https://starchart.cc/jacyl4/de_GWD)
