@@ -1162,6 +1162,7 @@ dpkg --configure -a
 [ -z "$(dpkg -l | grep php7.4-json)" ] && aptPKG+=(php7.4-json)
 [ -z "$(dpkg -l | grep libjemalloc-dev)" ] && aptPKG+=(libjemalloc-dev)
 [ -z "$(dpkg -l | grep screen)" ] && aptPKG+=(screen)
+[ -z "$(dpkg -l | grep zip)" ] && aptPKG+=(zip)
 [ -n "$aptPKG" ] && apt install $(echo ${aptPKG[@]})
 unset aptPKG
 
