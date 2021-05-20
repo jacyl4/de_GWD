@@ -161,6 +161,9 @@ if [[ -d "/opt/AdGuardHome" ]]; then
   rm -rf /usr/bin/yq
 fi
 
+if [[ -d "/opt/bitwardenrs" ]]; then
+  mv -f /opt/bitwardenrs /opt/bitwarden
+fi
 
 if [[ `dpkg -l | grep php | grep fpm | awk '{print $2}'` = "php7.3-fpm" ]] || [[ `dpkg -l | grep php | grep fpm | awk '{print $2}'` = "php8.0-fpm" ]]; then
 rm -rf /etc/php/7.3/
@@ -1159,6 +1162,7 @@ dpkg --configure -a
 [ -z "$(dpkg -l | grep php7.4-json)" ] && aptPKG+=(php7.4-json)
 [ -z "$(dpkg -l | grep libjemalloc-dev)" ] && aptPKG+=(libjemalloc-dev)
 [ -z "$(dpkg -l | grep screen)" ] && aptPKG+=(screen)
+[ -z "$(dpkg -l | grep zip)" ] && aptPKG+=(zip)
 [ -n "$aptPKG" ] && apt install $(echo ${aptPKG[@]})
 unset aptPKG
 
@@ -2259,7 +2263,7 @@ blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2
     green "=================================================="
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot(5.10.28)"
+    green  "2. Install bbrplus and reboot (5.10.28)"
     green  "3. Install XanMod kernel BBR and reboot"
     yellow "8. Change Web UI port & Web update port"
     yellow "9. Change de_GWD password"

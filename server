@@ -151,7 +151,6 @@ apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && 
 systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now systemd-resolved  >/dev/null 2>&1
 systemctl daemon-reload >/dev/null
-dpkg --configure -a
 
 source /etc/profile
 cat << EOF >~/.bash_profile
@@ -1401,6 +1400,8 @@ fi
 
 nginxWebConf
 
+systemctl restart nginx >/dev/null 2>&1
+
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
 blue "-----------------------------------------------"
@@ -1432,7 +1433,8 @@ upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/c
 xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
 
 nginxWebConf
-systemctl restart nginx
+
+systemctl restart nginx >/dev/null 2>&1
 
 v2in
 
@@ -1858,7 +1860,7 @@ fi
     green "=================================================="
     echo
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot(5.10.28)"
+    green  "2. Install bbrplus and reboot (5.10.28)"
     green  "3. Install XanMod kernel BBR and reboot"
     red    "4. Change domain and generate new certificate"
     red    "5. Change Xray path & UUID"
