@@ -18,7 +18,7 @@ statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
 de_gwd_nginx="1.19.10"
 ttyd_version="1.6.3"
-branch="dev"
+branch="main"
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
@@ -2263,7 +2263,7 @@ blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2
     green "=================================================="
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot(5.10.28)"
+    green  "2. Install bbrplus and reboot (5.10.28)"
     green  "3. Install XanMod kernel BBR and reboot"
     yellow "8. Change Web UI port & Web update port"
     yellow "9. Change de_GWD password"
