@@ -1,5 +1,5 @@
 #!/bin/bash
-wanIP=$(curl http://members.3322.org/dyndns/getip)
+wanIP=$(curl http://http://www.f3322.org/dyndns/getip)
 
 CFdomain=$(jq -r '.ddns.ddnsCF.cfDomain' /opt/de_GWD/0conf)
 CFzoneid=$(jq -r '.ddns.ddnsCF.cfZoneID' /opt/de_GWD/0conf)

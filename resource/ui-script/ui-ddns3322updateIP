@@ -1,5 +1,5 @@
 #!/bin/bash
-wanIP=$(curl http://members.3322.org/dyndns/getip)
+wanIP=$(curl http://http://www.f3322.org/dyndns/getip)
 
 domain=$(jq -r '.ddns.ddns3322.domain' /opt/de_GWD/0conf)
 user=$(jq -r '.ddns.ddns3322.user' /opt/de_GWD/0conf)

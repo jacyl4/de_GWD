@@ -170,7 +170,7 @@
         </div>
           <input id="wanIP" type="text" class="form-control text-center" value="" READONLY>
         <div class="input-group-append">
-          <button id="buttonShowIP" type="button" class="btn btn-secondary btn-sm">查询</button>
+          <button id="buttonShowIP" type="button" class="btn btn-outline-secondary btn-sm">查询</button>
         </div>
       </div>
 
