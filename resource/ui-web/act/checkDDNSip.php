@@ -1,5 +1,5 @@
 <?php
-$wanIP = exec('curl http://www.f3322.org/dyndns/getip');
+$wanIP = exec('sudo /opt/de_GWD/ui-wanIP');
 
 if(filter_var($wanIP, FILTER_VALIDATE_IP)) echo $wanIP;
 die();
