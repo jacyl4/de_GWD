@@ -396,7 +396,7 @@
     <div id="nodeCU" class="dropdown-menu">
     </div>
   </div>
-  <div id="nodeCUrulesButton" class="input-group-prepend input-group-append" style="display:<?php if($nodeCU == on) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeCUrulesButton" class="input-group-prepend" style="display:<?php if($nodeCU == on) echo 'block'; else echo 'none'; ?>">
     <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#nodeCUrules">规则</button>
   </div>
   <div class="input-group-append">
