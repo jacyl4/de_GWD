@@ -19,7 +19,7 @@
 ################################################################################
 # Constants
 
-VERSION=1.146.0
+VERSION=2.3.0
 SHORTNAME="SSL_CERT"
 
 VALID_ATTRIBUTES=",startdate,enddate,subject,issuer,modulus,serial,hash,email,ocsp_uri,fingerprint,"
@@ -40,6 +40,9 @@ STATUS_UNKNOWN=3
 WARNING_MSG=""
 CRITICAL_MSG=""
 ALL_MSG=""
+DEBUG=0
+DEBUG_FILE=""
+
 ################################################################################
 # Functions
 
@@ -65,8 +68,6 @@ usage() {
     echo "Options:"
     echo "   -A,--noauth                     ignore authority warnings (expiration only)"
     echo "      --all                        enables all the possible optional checks at the maximum level"
-    echo "      --altnames                   matches the pattern specified in -n with"
-    echo "                                   alternate names too"
     echo "      --check-ciphers grade        checks the offered ciphers"
     echo "      --check-ciphers-warnings     critical if nmap reports a warning for an offered cipher"
     echo "   -C,--clientcert path            use client certificate to authenticate"
@@ -84,8 +85,10 @@ usage() {
     echo "      --dane 301                   verify that a valid DANE-EE(3) Cert(0) SHA2-256(1) TLSA record exists"
     echo "      --dane 302                   verify that a valid DANE-EE(3) Cert(0) SHA2-512(2) TLSA record exists"
     echo "      --dane 311                   verify that a valid DANE-EE(3) SPKI(1) SHA2-256(1) TLSA record exists"
-    echo "      --date path                  path of the datebinary to be used"
-    echo "   -d,--debug                      produces debugging output"
+    echo "      --date path                  path of the date binary to be used"
+    echo "   -d,--debug                      produces debugging output (can be specified more than once)"
+    echo "      --debug-cert                 stores the retrieved certificates in the current directory"
+    echo "      --debug-file file            writes the debug messages to file"
     echo "      --dig-bin path               path of the dig binary to be used"
     echo "      --ecdsa                      signature algorithm selection: force ECDSA certificate"
     echo "      --element number             checks N cert element from the begining of the chain"
@@ -105,7 +108,9 @@ usage() {
     echo "   -h,--help,-?                    this help message"
     echo "      --http-use-get               use GET instead of HEAD (default) for the HTTP"
     echo "                                   related checks"
+    echo "      --ignore-altnames            ignores alternative names when matching pattern specified in -n (or the host name)"
     echo "      --ignore-exp                 ignore expiration date"
+    echo "      --ignore-host-cn             do not complain if the CN does not match the host name"
     echo "      --ignore-ocsp                do not check revocation with OCSP"
     echo "      --ignore-ocsp-timeout        ignore OCSP result when timeout occurs while checking"
     echo "      --ignore-sig-alg             do not check if the certificate was signed with SHA1"
@@ -129,6 +134,7 @@ usage() {
     echo "   -n,--cn name                    pattern to match the CN of the certificate (can be"
     echo "                                   specified multiple times)"
     echo "      --nmap-bin path              path of the nmap binary to be used"
+    echo "      --no-perf                    do not show performance data"
     echo "      --no-proxy                   ignores the http_proxy and https_proxy environment variables"
     echo "      --no-ssl2                    disable SSL version 2"
     echo "      --no-ssl3                    disable SSL version 3"
@@ -140,7 +146,6 @@ usage() {
     echo "                                   the given pattern"
     echo "      --not-valid-longer-than days critical if the certificate validity is longer than"
     echo "                                   the specified period"
-    echo "   -N,--host-cn                    match CN with the host name"
     echo "      --ocsp-critical hours        minimum number of hours an OCSP response has to be valid to"
     echo "                                   issue a critical status"
     echo "      --ocsp-warning hours         minimum number of hours an OCSP response has to be valid to"
@@ -162,6 +167,7 @@ usage() {
     echo "      --require-no-ssl3            critical if SSL version 3 is offered"
     echo "      --require-no-tls1            critical if TLS 1 is offered"
     echo "      --require-no-tls1_1          critical if TLS 1.1 is offered"
+    echo "      --resolve ip                 provides a custom IP address for the specified host"
     echo "   -s,--selfsigned                 allows self-signed certificates"
     echo "      --serial serialnum           pattern to match the serial number"
     echo "      --skip-element number        skip checks on N cert element from the begining of the chain"
@@ -186,7 +192,7 @@ usage() {
     echo "      --tls1_2                     force TLS version 1.2"
     echo "      --tls1_3                     force TLS version 1.3"
     echo "   -u,--url URL                    HTTP request URL"
-    echo "   -v,--verbose                    verbose output"
+    echo "   -v,--verbose                    verbose output (can be specified more than once)"
     echo "   -V,--version                    version"
     echo "   -w,--warning days               minimum number of days a certificate has to be valid"
     echo "                                   to issue a warning status. Default: ${WARNING_DAYS}"
@@ -195,9 +201,12 @@ usage() {
     echo "   -6                              force IPv6"
     echo
     echo "Deprecated options:"
+    echo "      --altnames                   matches the pattern specified in -n with"
+    echo "                                   alternate names too (enabled by default)"
     echo "      --days days                  minimum number of days a certificate has to be valid"
     echo "                                   (see --critical and --warning)"
-    echo "      --ocsp                       check revocation via OCSP"
+    echo "   -N,--host-cn                    match CN with the host name (enabled by default)"
+    echo "      --ocsp                       check revocation via OCSP (enabled by default)"
     echo "   -S,--ssl version                force SSL version (2,3)"
     echo "                                   (see: --ssl2 or --ssl3)"
     echo
@@ -212,20 +221,46 @@ usage() {
 # Prints the given message to STDERR with the prefix '[DBG] ' if the debug
 # command line option was specified
 # $1: string
+# $2: level (optional default 1)
 debuglog() {
-    if [ -n "${DEBUG}" ] ; then
+
+    MESSAGE=$1
+    LEVEL=$2
+
+    if [ -z "${LEVEL}" ] ; then
+        #default
+        LEVEL=1
+    fi
+
+    if [ "${LEVEL}" -le "${DEBUG}" ] ; then
         echo "${1}" | sed 's/^/[DBG] /' >&2
     fi
+
+    if [ -n "${DEBUG_FILE}" ] ; then
+        echo "${1}" >> "${DEBUG_FILE}"
+    fi
+
 }
 
 ################################################################################
 # Prints the given message to STDOUT if the verbose command line opttion was
 # specified
 # $1: string
+# $2: level (optional default 1)
 verboselog() {
-    if [ -n "${VERBOSE}" ] ; then
-        echo "${1}" >&2
+
+    MESSAGE=$1
+    LEVEL=$2
+
+    if [ -z "${LEVEL}" ] ; then
+        #default
+        LEVEL=1
     fi
+
+    if [ "${LEVEL}" -le "${VERBOSE}" ] ; then
+        echo "${MESSAGE}" >&2
+    fi
+
 }
 
 ################################################################################
@@ -243,9 +278,9 @@ trap_with_arg() {
 # Cleanup temporary files
 remove_temporary_files() {
     debuglog "cleaning up temporary files"
-    debuglog "$(echo "${TEMPORARY_FILES}" | tr '\ ' '\n')"
     # shellcheck disable=SC2086
     if [ -n "${TEMPORARY_FILES}" ]; then
+        debuglog "$(echo "${TEMPORARY_FILES}" | tr '\ ' '\n')"
         rm -f ${TEMPORARY_FILES}
     fi
 }
@@ -295,7 +330,7 @@ hours_until() {
         "BUSYBOX")
             BUSYBOX_DATE=$( echo "${DATE}" | sed 's/[ ][^ ]*$//' )
             debuglog "Computing number of hours until '${BUSYBOX_DATE}' (BusyBox compatible format)"
-            verboselog "Warning: BusyBox date does not support time zones. Using ${BUSYBOX_DATE} in the current zone instead of ${DATE}"
+            verboselog "warning: BusyBox date does not support time zones. Using ${BUSYBOX_DATE} in the current zone instead of ${DATE}"
             HOURS_UNTIL=$(( ( $(${DATEBIN} -d "${BUSYBOX_DATE}" +%s) - $(${DATEBIN} +%s) ) / 3600 ))
             ;;
         "GNU")
@@ -397,7 +432,7 @@ EOF
         fi
     fi
 
-    if [ -n "${DEBUG}" ] ; then
+    if [ "${DEBUG}" -ge 1 ] ; then
         if [ "${RET}" -eq 0 ] ; then
             debuglog '  true'
         else
@@ -417,7 +452,8 @@ prepend_critical_message() {
 
     debuglog "CRITICAL >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     debuglog "prepend_critical_message: new message    = $1"
-    debuglog "prepend_critical_message: HOST           = ${HOST}"
+    debuglog "prepend_critical_message: HOST_NAME      = ${HOST_NAME}"
+    debuglog "prepend_critical_message: HOST_ADDR      = ${HOST_ADDR}"
     debuglog "prepend_critical_message: CN             = ${CN}"
     debuglog "prepend_critical_message: SNI            = ${SNI}"
     debuglog "prepend_critical_message: FILE           = ${FILE}"
@@ -427,15 +463,19 @@ prepend_critical_message() {
     debuglog "prepend_critical_message: ALL_MSG 1      = ${ALL_MSG}"
 
     if [ -n "${CN}" ] ; then
-        tmp=" ${CN}"
+        if echo "${CN}" | grep -q -F 'unavailable' ; then
+            tmp=" ${SUBJECT_ALTERNATIVE_NAME}"
+        else
+            tmp=" ${CN}"
+        fi
     else
-        if [ -n "${HOST}" ] ; then
+        if [ -n "${HOST_NAME}" ] ; then
             if [ -n "${SNI}" ] ; then
                 tmp=" ${SNI}"
             elif [ -n "${FILE}" ] ; then
                 tmp=" ${FILE}"
             else
-                tmp=" ${HOST}"
+                tmp=" ${HOST_NAME}"
             fi
         fi
     fi
@@ -486,7 +526,8 @@ critical() {
 append_warning_message() {
 
     debuglog "WARNING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    debuglog "append_warning_message: HOST         = ${HOST}"
+    debuglog "append_warning_message: HOST_NAME    = ${HOST_NAME}"
+    debuglog "append_warning_message: HOST_ADDR    = ${HOST_ADDR}"
     debuglog "append_warning_message: CN           = ${CN}"
     debuglog "append_warning_message: SNI          = ${SNI}"
     debuglog "append_warning_message: FILE         = ${FILE}"
@@ -496,15 +537,19 @@ append_warning_message() {
     debuglog "prepend_warning_message: ALL_MSG 1   = ${ALL_MSG}"
 
     if [ -n "${CN}" ] ; then
-        tmp=" ${CN}"
+        if echo "${CN}" | grep -q -F 'unavailable' ; then
+            tmp=" ${SUBJECT_ALTERNATIVE_NAME}"
+        else
+            tmp=" ${CN}"
+        fi
     else
-        if [ -n "${HOST}" ] ; then
+        if [ -n "${HOST_NAME}" ] ; then
             if [ -n "${SNI}" ] ; then
                 tmp=" ${SNI}"
             elif [ -n "${FILE}" ] ; then
                 tmp=" ${FILE}"
             else
-                 tmp=" ${HOST}"
+                 tmp=" ${HOST_NAME}"
             fi
         fi
     fi
@@ -550,13 +595,13 @@ warning() {
 # Param
 #   $1 message
 unknown() {
-    if [ -n "${HOST}" ] ; then
+    if [ -n "${HOST_NAME}" ] ; then
         if [ -n "${SNI}" ] ; then
             tmp=" ${SNI}"
         elif [ -n "${FILE}" ] ; then
             tmp=" ${FILE}"
         else
-            tmp=" ${HOST}"
+            tmp=" ${HOST_NAME}"
         fi
     fi
     remove_temporary_files
@@ -870,7 +915,7 @@ check_ocsp() {
         fi
 
         # shellcheck disable=SC2086,SC2016
-        ELEMENT_ISSUER_URIS="$( ${OPENSSL} "${OPENSSL_COMMAND}" ${OPENSSL_PARAMS} -text -noout -in ${CERT_ELEMENT} | grep -F "CA Issuers" | grep -F -i "http" | sed -e "s/^.*CA Issuers - URI://" | tr -d '"!|;$(){}<>`&')"
+        ELEMENT_ISSUER_URIS="$( ${OPENSSL} "${OPENSSL_COMMAND}" ${OPENSSL_PARAMS} -text -noout -in ${CERT_ELEMENT} | grep -F "CA Issuers" | grep -F -i "http" | sed -e "s/^.*CA Issuers - URI://" | tr -d '"!|;${}<>`&')"
 
         if [ -z "${ELEMENT_ISSUER_URIS}" ] ; then
             verboselog "cannot find the CA Issuers in the certificate: disabling OCSP checks on element ${el_number}"
@@ -944,15 +989,15 @@ check_ocsp() {
 
                 debuglog "OCSP: issuer certificate type (3): $(${FILE_BIN} "${ISSUER_CERT_TMP}" | sed 's/.*://' )"
 
-                if [ -n "${DEBUG}" ] ; then
+                if [ -n "${DEBUG_CERT}" ] ; then
 
                     # remove trailing /
                     FILE_NAME=${ELEMENT_ISSUER_URI%/}
 
                     # remove everything up to the last slash
-                    FILE_NAME="${TMPDIR}/${FILE_NAME##*/}"
+                    FILE_NAME="${FILE_NAME##*/}"
 
-                    debuglog "OCSP: storing a copy of the retrieved issuer certificate to ${FILE_NAME}"
+                    debuglog "OCSP: storing a copy of the retrieved issuer certificate to ${FILE_NAME} for debugging purposes"
 
                     cp "${ISSUER_CERT_TMP}" "${FILE_NAME}"
 
@@ -1268,25 +1313,26 @@ fetch_certificate() {
     RET=0
 
     # IPv6 addresses need brackets in a URI
-    if [ "${HOST}" != "${HOST#*[0-9].[0-9]}" ]; then
-       debuglog "${HOST} is an IPv4 address"
-    elif [ "${HOST}" != "${HOST#*:[0-9a-fA-F]}" ]; then
-       debuglog "${HOST} is an IPv6 address"
-       if [ -z "${HOST##*\[*}" ] ; then
-           debuglog "${HOST} is already specified with brackets"
+    if [ "${HOST_ADDR}" != "${HOST_ADDR#*[0-9].[0-9]}" ]; then
+       debuglog "${HOST_ADDR} is an IPv4 address"
+    elif [ "${HOST_ADDR}" != "${HOST_ADDR#*:[0-9a-fA-F]}" ]; then
+       debuglog "${HOST_ADDR} is an IPv6 address"
+       if [ -z "${HOST_ADDR##*\[*}" ] ; then
+           debuglog "${HOST_ADDR} is already specified with brackets"
        else
-           debuglog "adding brackets to ${HOST}"
-           HOST="[${HOST}]"
+           debuglog "adding brackets to ${HOST_ADDR}"
+           HOST="[${HOST_ADDR}]"
        fi
     else
-        debuglog "${HOST} is not an IP address"
+        debuglog "${HOST_ADDR} is not an IP address"
     fi
 
     if [ -n "${REQUIRE_OCSP_STAPLING}" ] ; then
         STATUS='-status'
     fi
 
-    if [ -n "${DEBUG}" ] ; then
+    if [ "${DEBUG}" -ge 1 ] ; then
+        debuglog "Adding -ign_eof to the options"
         IGN_EOF='-ign_eof'
     fi
 
@@ -1295,51 +1341,51 @@ fetch_certificate() {
 
         case "${PROTOCOL}" in
             pop3|ftp)
-                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -starttls ${PROTOCOL} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             pop3s|ftps)
-                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             smtp)
-                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -starttls ${PROTOCOL} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} ${S_CLIENT_NAME} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} ${S_CLIENT_NAME} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             smtps)
-                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE}  ${S_CLIENT_NAME} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "printf 'QUIT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE}  ${S_CLIENT_NAME} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             irc|ldap)
-                exec_with_timeout "echo | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "echo | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             ircs|ldaps)
-                exec_with_timeout "echo | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "echo | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             imap)
-                exec_with_timeout "printf 'A01 LOGOUT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -starttls ${PROTOCOL} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "printf 'A01 LOGOUT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             imaps)
-                exec_with_timeout "printf 'A01 LOGOUT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "printf 'A01 LOGOUT\\n' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             postgres)
-                exec_with_timeout "printf 'X\\0\\0\\0\\4' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "printf 'X\\0\\0\\0\\4' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             sieve)
-                exec_with_timeout "echo 'LOGOUT' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "echo 'LOGOUT' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             xmpp|xmpp-server)
-                exec_with_timeout "echo 'Q' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST}:${XMPPPORT} ${XMPPHOST} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "echo 'Q' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${XMPPPORT} ${XMPPHOST} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             mysql)
-                exec_with_timeout "echo | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+                exec_with_timeout "echo | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -starttls ${PROTOCOL} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
                 RET=$?
                 ;;
             *)
@@ -1349,7 +1395,7 @@ fetch_certificate() {
 
     elif [ -n "${FILE}" ] ; then
 
-        if [ "${HOST}" = "localhost" ] ; then
+        if [ "${HOST_NAME}" = "localhost" ] ; then
 
             debuglog "check if we have to convert the file ${FILE} to PEM"
             debuglog "certificate type (1): $(${FILE_BIN} "${FILE}" | sed 's/.*://' )"
@@ -1398,20 +1444,22 @@ fetch_certificate() {
               ALPN='-alpn h2'
           fi
 
-        exec_with_timeout "printf '${HTTP_REQUEST}' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} ${ALPN} -connect ${HOST}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -showcerts -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
+        exec_with_timeout "printf '${HTTP_REQUEST}' | ${OPENSSL} s_client ${INETPROTO} ${CLIENT} ${CLIENTPASS} -crlf ${IGN_EOF} ${ALPN} -connect ${HOST_ADDR}:${PORT} ${SERVERNAME} ${SCLIENT_PROXY} ${SCLIENT_PROXY_ARGUMENT} -showcerts -verify 6 ${ROOT_CA} ${SSL_VERSION} ${SSL_VERSION_DISABLED} ${SSL_AU} ${STATUS} ${DANE} 2> ${ERROR} 1> ${CERT}"
         RET=$?
 
     fi
 
-    if [ -n "${DEBUG}" ] ; then
-        debuglog "storing a copy of the retrieved certificate in ${HOST}.crt"
-        cp "${CERT}" "${HOST}.crt"
+    if [ -n "${DEBUG_CERT}" ] ; then
 
-        debuglog "storing a copy of the OpenSSL errors in ${HOST}.error"
-        cp "${ERROR}" "${HOST}.error"
+        debuglog "storing a copy of the retrieved certificate in ${HOST_NAME}.crt for debugging purposes"
+        cp "${CERT}" "${HOST_NAME}.crt"
 
-        debuglog "Return value of the command = ${RET}"
+        debuglog "storing a copy of the OpenSSL errors in ${HOST_NAME}.error for debugging purposes"
+        cp "${ERROR}" "${HOST_NAME}.error"
+
     fi
+
+    debuglog "Return value of the command = ${RET}"
 
     if [ "${RET}" -ne 0 ] ; then
 
@@ -1420,27 +1468,26 @@ fetch_certificate() {
         # s_client could verify the server certificate because the server requires a client certificate
         if ascii_grep '^Client Certificate Types' "${CERT}" ; then
 
-            verboselog "The server requires a client certificate"
+            verboselog "the server requires a client certificate"
 
         elif ascii_grep 'nodename\ nor\ servname\ provided,\ or\ not\ known' "${ERROR}" ||
              ascii_grep 'connect\ argument\ or\ target\ parameter\ malformed\ or\ ambiguous' "${ERROR}" ; then
 
-            ERROR="${HOST} is not a valid hostname"
+            ERROR="${HOST_ADDR} is not a valid hostname"
             prepend_critical_message "${ERROR}"
-            critical "${SHORTNAME} CRITICAL: ${ERROR}"
-
+            critical "SSL_CERT CRITICAL ${HOST_NAME}: ${ERROR}"
 
         elif ascii_grep 'Connection\ refused' "${ERROR}" ; then
 
             ERROR='Connection refused'
             prepend_critical_message "${ERROR}"
-            critical "${SHORTNAME} CRITICAL: ${ERROR}"
+            critical "SSL_CERT CRITICAL ${HOST_NAME}: ${ERROR}"
 
 	elif ascii_grep 'Connection timed out' "${ERROR}" ; then
 
 	    ERROR='OpenSSL connection timed out'
 	    prepend_critical_message "${ERROR}"
-	    critical "${SHORTNAME} CRITICAL: ${ERROR}"
+            critical "SSL_CERT CRITICAL ${HOST_NAME}: ${ERROR}"
 
         elif ascii_grep 'dh\ key\ too\ small' "${ERROR}" ; then
 
@@ -1453,6 +1500,24 @@ fetch_certificate() {
         elif ascii_grep 'wrong\ version\ number' "${ERROR}" ; then
 
             prepend_critical_message 'No TLS connection possible'
+
+        elif ascii_grep 'Operation\ timed\ out' "${ERROR}" ; then
+
+            ERROR='OpenSSL timed out'
+            prepend_critical_message "${ERROR}"
+            critical "SSL_CERT CRITICAL ${HOST_NAME}: ${ERROR}"
+
+        elif ascii_grep 'write:errno=54' "${ERROR}" ; then
+
+            ERROR='No certificate returned (SNI reqired?)'
+            prepend_critical_message "${ERROR}"
+            critical "SSL_CERT CRITICAL ${HOST_NAME}: ${ERROR}"
+
+        elif ascii_grep "Didn't find STARTTLS in server response, trying anyway..." "${ERROR}" ; then
+
+            ERROR="Didn't find STARTTLS in server response"
+            prepend_critical_message "${ERROR}"
+            critical "SSL_CERT CRITICAL ${HOST_NAME}: ${ERROR}"
 
         else
 
@@ -1532,68 +1597,17 @@ check_option_argument() {
 }
 
 ################################################################################
-# Main
-################################################################################
-main() {
+# Parse command line options
+#
+# Params
+#  $* options
+parse_command_line_options() {
 
-    # Default values
-    DEBUG=""
-    FILE_BIN=""
-    CURL_BIN=""
-    CURL_PROXY=""
-    CURL_USER_AGENT=""
-    CUSTOM_HTTP_HEADER=""
-    DIG_BIN=""
-    NMAP_BIN=""
-    IGNORE_SSL_LABS_CACHE=""
-    PORT=""
-    XMPPPORT="5222"
-    XMPPHOST=""
-    SNI=""
-    TIMEOUT="120"
-    VERBOSE=""
-    FORCE_PERL_DATE=""
-    REQUIRE_SAN=""
-    REQUIRE_OCSP_STAPLING=""
-    OCSP="1" # enabled by default
-    OCSP_IGNORE_TIMEOUT=""
-    FORMAT=""
-    HTTP_METHOD="HEAD"
-    RSA=""
-    ECDSA=""
-    DANE=""
-    DISALLOWED_PROTOCOLS=""
-    WARNING_DAYS=20
-    CRITICAL_DAYS=15
-    ELEMENT=0
-    SKIP_ELEMENT=0
-    NO_PROXY=""
-    PROXY=""
-    CRL=""
-    SCT="1" # enabled by default
-    HTTP_REQUEST_URL="/"
+     COMMAND_LINE_ARGUMENTS=$*
 
-    # after 2020-09-01 we could set the default to 398 days because of Apple
-    # https://support.apple.com/en-us/HT211025
-    NOT_VALID_LONGER_THAN=""
-    FIRST_ELEMENT_ONLY=""
+     while true; do
 
-    # Set the default temp dir if not set
-    if [ -z "${TMPDIR}" ] ; then
-        TMPDIR="/tmp"
-    fi
-
-    ################################################################################
-    # Process command line options
-    #
-    # We do not use getopts since it is unable to process long options and it is
-    # Bash specific.
-
-    COMMAND_LINE_ARGUMENTS=$*
-
-    while true; do
-
-        case "$1" in
+         case "$1" in
 
             ########################################
             # Options without arguments
@@ -1619,8 +1633,11 @@ main() {
                 shift
                 ;;
             -d|--debug)
-                DEBUG=1
-                VERBOSE=1
+                DEBUG=$(( DEBUG + 1 ))
+                shift
+                ;;
+            --debug-cert)
+                DEBUG_CERT=1
                 shift
                 ;;
             -h|--help|-\?)
@@ -1642,6 +1659,15 @@ main() {
                 NOEXP=1
                 shift
                 ;;
+            --ignore-altnames)
+                ALTNAMES=
+                shift
+                ;;
+            --ignore-host-cn)
+                COMMON_NAME=
+                ALTNAMES=
+                shift
+                ;;
             --ignore-sig-alg)
                 NOSIGALG=1
                 shift
@@ -1656,6 +1682,10 @@ main() {
                 ;;
             --ignore-tls-renegotiation)
                 IGNORE_TLS_RENEGOTIATION='1'
+                shift
+                ;;
+            --no-perf)
+                NO_PERF=1
                 shift
                 ;;
             --no-proxy)
@@ -1767,7 +1797,7 @@ main() {
                 shift
                 ;;
             -v|--verbose)
-                VERBOSE=1
+                VERBOSE=$((VERBOSE+1))
                 shift
                 ;;
             -V|--version)
@@ -1823,6 +1853,11 @@ main() {
                 WARNING_DAYS="$2"
                 shift 2
                 ;;
+            --debug-file)
+                check_option_argument '--debug-file' "$2"
+                DEBUG_FILE="$2"
+                shift 2
+                ;;
             --dig-bin)
                 check_option_argument '--dig-bin' "$2"
                 DIG_BIN="$2"
@@ -1845,6 +1880,8 @@ main() {
             -f|--file)
                 check_option_argument ' -f|--file' "$2"
                 FILE="$2"
+                COMMON_NAME=
+                ALTNAMES=
                 shift 2
                 ;;
             --file-bin)
@@ -1909,11 +1946,7 @@ main() {
                 ;;
             -n|--cn)
                 check_option_argument ' -n|--cn' "$2"
-                if [ -n "${COMMON_NAME}" ]; then
-                    COMMON_NAME="${COMMON_NAME} ${2}"
-                else
-                    COMMON_NAME="${2}"
-                fi
+                COMMON_NAME="${2}"
                 shift 2
                 ;;
             --not-issued-by)
@@ -1966,6 +1999,11 @@ main() {
                 check_option_argument '--proxy' "$2"
                 PROXY="$2"
                 export http_proxy="$2"
+                shift 2
+                ;;
+            --resolve)
+                check_option_argument '--resolve' "$2"
+                RESOLVE="$2"
                 shift 2
                 ;;
             -r|--rootcert)
@@ -2075,7 +2113,21 @@ main() {
                 break
                 ;;
             -*)
-                unknown "invalid option: ${1}"
+                # we try to check for grouped variables
+                OPTION="${1}"
+                # if the option begins with a single dash and it's longer than one character
+                if ! echo "${OPTION}" | grep -q -- '^--' &&
+                        [ "$( echo "${OPTION}" | wc -c | sed 's/\ //g' )" -gt 3 ] ; then
+                    if [ -n "${DEBUG}" ] ; then
+                        echo "[DBG]   unknown option ${OPTION}: splitting since it could be an option group"
+                    fi
+                    for letter in $( echo "${OPTION}" | sed 's/^-//' | grep -o . ) ; do
+                        parse_command_line_options "-${letter}"
+                    done
+                    shift
+                else
+                    unknown "invalid option: ${1}"
+                fi
                 ;;
             *)
                 if [ -n "$1" ] ; then
@@ -2086,6 +2138,72 @@ main() {
         esac
 
     done
+
+}
+
+
+################################################################################
+# Main
+################################################################################
+main() {
+
+    # Default values
+    DEBUG="0"
+    FILE_BIN=""
+    CURL_BIN=""
+    CURL_PROXY=""
+    CURL_USER_AGENT=""
+    CUSTOM_HTTP_HEADER=""
+    DIG_BIN=""
+    NMAP_BIN=""
+    IGNORE_SSL_LABS_CACHE=""
+    PORT=""
+    XMPPPORT="5222"
+    XMPPHOST=""
+    SNI=""
+    TIMEOUT="120"
+    VERBOSE="0"
+    FORCE_PERL_DATE=""
+    REQUIRE_SAN=""
+    REQUIRE_OCSP_STAPLING=""
+    OCSP="1" # enabled by default
+    OCSP_IGNORE_TIMEOUT=""
+    FORMAT=""
+    HTTP_METHOD="HEAD"
+    RSA=""
+    ECDSA=""
+    DANE=""
+    DISALLOWED_PROTOCOLS=""
+    WARNING_DAYS=20
+    CRITICAL_DAYS=15
+    ELEMENT=0
+    SKIP_ELEMENT=0
+    NO_PROXY=""
+    PROXY=""
+    CRL=""
+    SCT="1" # enabled by default
+    HTTP_REQUEST_URL="/"
+
+    COMMON_NAME="__HOST__" # enabled by default
+    ALTNAMES=1 # enabled by default
+
+    # after 2020-09-01 we could set the default to 398 days because of Apple
+    # https://support.apple.com/en-us/HT211025
+    NOT_VALID_LONGER_THAN=""
+    FIRST_ELEMENT_ONLY=""
+
+    # Set the default temp dir if not set
+    if [ -z "${TMPDIR}" ] ; then
+        TMPDIR="/tmp"
+    fi
+
+    ################################################################################
+    # Process command line options
+    #
+    # We do not use getopts since it is unable to process long options and it is
+    # Bash specific.
+
+    parse_command_line_options "$@"
 
     ################################################################################
     # Default ports
@@ -2170,22 +2288,69 @@ main() {
 
     fi
 
-    ################################################################################
-    # Set COMMON_NAME to hostname if -N was given as argument.
-    # COMMON_NAME may be a space separated list of hostnames.
-    case ${COMMON_NAME} in
-        *__HOST__*) COMMON_NAME=$(echo "${COMMON_NAME}" | sed "s/__HOST__/${HOST}/") ;;
-        *) ;;
-    esac
-
-    ################################################################################
-    # Sanity checks
-
     ###############
     # Check options
     if [ -z "${HOST}" ] ; then
         usage "No host specified"
     fi
+
+    # we need the FQDN of an host to check the CN
+    if ! echo "${HOST}" | grep -q '[.]' && [ -z "${FILE}" ] && [ "${HOST}" != 'localhost' ] ; then
+        debuglog "Domain for ${HOST} missing"
+        DOMAIN=$( nslookup "${HOST}" | grep ^Name: | head -n 1 | cut -d. -f2- )
+        if [ -z "${DOMAIN}" ] ; then
+            unknown "Cannot resolve ${HOST}"
+        fi
+        debuglog "Adding domain ${DOMAIN} to ${HOST}"
+        HOST="${HOST}.${DOMAIN}"
+        debuglog "New host: ${HOST}"
+    fi
+
+    ################################################################################
+    # Ususally SERVERADDR and SERVERNAME both contain the fully qualified domain name
+    # (FQDN) or IP address of the host to check
+    #
+    # If --resolve is specified (defining an alternative IP address for the HOST
+    # we set SERVERADDR to the address specified with --resolve and SERVERNAME to the
+    # FQDN of the host.
+    #
+    # In addition we set the Server Name Indication (SNI) to HOST so that when
+    # connecting with the IP address the server will be able to deliver the
+    # correct certificate
+    #
+    if [ -n "${RESOLVE}" ] ; then
+
+        debuglog "Forcing ${HOST} to resolve to ${RESOLVE}"
+
+        HOST_ADDR="${RESOLVE}"
+        HOST_NAME="${HOST}"
+        SNI="${HOST}"
+
+    else
+
+        HOST_ADDR="${HOST}"
+        HOST_NAME="${HOST}"
+
+    fi
+
+    debuglog "SNI       = ${SNI}"
+    debuglog "HOST_NAME = ${HOST_NAME}"
+    debuglog "HOST_ADDR = ${HOST_ADDR}"
+
+
+    ################################################################################
+    # Set COMMON_NAME to hostname if -N was given as argument.
+    # COMMON_NAME may be a space separated list of hostnames.
+    case ${COMMON_NAME} in
+        *__HOST__*)
+            # localhost is used for files to be checked: we ignore it
+            if [ "${HOST_NAME}" != 'localhost' ] ; then
+                COMMON_NAME=$(echo "${COMMON_NAME}" | sed "s/__HOST__/${HOST_NAME}/")
+            fi
+            ;;
+        *) ;;
+    esac
+    debuglog "COMMON_NAME = ${COMMON_NAME}"
 
     if [ -n "${ALTNAMES}" ] && [ -z "${COMMON_NAME}" ] ; then
         unknown "--altnames requires a common name to match (--cn or --host-cn)"
@@ -2333,8 +2498,10 @@ main() {
     if [ -n "${SSL_LAB_WARN_ASSESTMENT}" ] ; then
         convert_grade "${SSL_LAB_WARN_ASSESTMENT}"
         SSL_LAB_WARN_ASSESTMENT_NUMERIC="${NUMERIC_SSL_LAB_GRADE}"
-        if [ "${SSL_LAB_WARN_ASSESTMENT_NUMERIC}" -lt "${SSL_LAB_CRIT_ASSESSMENT_NUMERIC}" ]; then
-            unknown  '--check-ssl-labs-warn must be greater than -L|--check-ssl-labs'
+        if [ -n "${SSL_LAB_CRIT_ASSESSMENT}" ] ; then
+            if [ "${SSL_LAB_WARN_ASSESTMENT_NUMERIC}" -lt "${SSL_LAB_CRIT_ASSESSMENT_NUMERIC}" ]; then
+                unknown  '--check-ssl-labs-warn must be greater than -L|--check-ssl-labs'
+            fi
         fi
     fi
 
@@ -2401,10 +2568,8 @@ main() {
     # cURL
     if [ -z "${CURL_BIN}" ] ; then
         if [ -n "${SSL_LAB_CRIT_ASSESSMENT}" ] || [ -n "${OCSP}" ] || [ -n "${CRL}" ] ; then
-            if [ -n "${DEBUG}" ] ; then
-                debuglog "cURL binary needed. SSL Labs = ${SSL_LAB_CRIT_ASSESSMENT}, OCSP = ${OCSP}, CURL = ${CRL}"
-                debuglog "cURL binary not specified"
-            fi
+            debuglog "cURL binary needed. SSL Labs = ${SSL_LAB_CRIT_ASSESSMENT}, OCSP = ${OCSP}, CURL = ${CRL}"
+            debuglog "cURL binary not specified"
 
             check_required_prog curl
             CURL_BIN=${PROG}
@@ -2448,18 +2613,18 @@ main() {
     EXPECT="$(command -v expect 2> /dev/null)"
     test -x "${EXPECT}" || EXPECT=""
     if [ -z "${EXPECT}" ] ; then
-        verboselog "expect not available"
+        verboselog "expect not available" 2
     else
-        verboselog "expect available (${EXPECT})"
+        verboselog "expect available (${EXPECT})" 2
     fi
 
     # Timeout (optional)
     TIMEOUT_BIN="$(command -v timeout 2> /dev/null)"
     test -x "${TIMEOUT_BIN}" || TIMEOUT_BIN=""
     if [ -z "${TIMEOUT_BIN}" ] ; then
-        verboselog "timeout not available"
+        verboselog "timeout not available" 2
     else
-        verboselog "timeout available (${TIMEOUT_BIN})"
+        verboselog "timeout available (${TIMEOUT_BIN})" 2
     fi
 
     if [ -z "${TIMEOUT_BIN}" ] && [ -z "${EXPECT}" ] ; then
@@ -2514,7 +2679,7 @@ main() {
             DATETYPE='BSD'
         fi
 
-        verboselog "found ${DATETYPE} date with timestamp support: enabling date computations"
+        verboselog "found ${DATETYPE} date with timestamp support: enabling date computations" 2
 
     fi
 
@@ -2522,10 +2687,11 @@ main() {
         DATETYPE="PERL"
     fi
 
-    if [ -n "${DEBUG}" ] ; then
+    if [ "${DEBUG}" -ge 1 ] ; then
+
         debuglog "check_ssl_cert version: ${VERSION}"
         debuglog "OpenSSL binary: ${OPENSSL}"
-        if [ -n "${DEBUG}" ] ; then
+        if [ "${DEBUG}" -ge 1 ] ; then
             debuglog "OpenSSL info:"
             ${OPENSSL} version -a | sed 's/^/[DBG]/'
         fi
@@ -2559,7 +2725,7 @@ main() {
         if [ -n "${SNI}" ]; then
             SERVERNAME="-servername ${SNI}"
         else
-            SERVERNAME="-servername ${HOST}"
+            SERVERNAME="-servername ${HOST_NAME}"
         fi
 
         debuglog "'${OPENSSL} s_client' supports '-servername': using ${SERVERNAME}"
@@ -2670,7 +2836,7 @@ main() {
     # Check if openssl s_client supports the -xmpphost option
     #
     if ${OPENSSL} s_client -help 2>&1 | grep -F -q -- -xmpphost ; then
-        XMPPHOST="-xmpphost ${XMPPHOST:-${HOST}}"
+        XMPPHOST="-xmpphost ${XMPPHOST:-${HOST_NAME}}"
         debuglog "'${OPENSSL} s_client' supports '-xmpphost': using ${XMPPHOST}"
     else
         if [ -n "${XMPPHOST}" ] ; then
@@ -2737,7 +2903,7 @@ main() {
     if [ -n "${SNI}" ]; then
         HOST_HEADER="${SNI}"
     else
-        HOST_HEADER="${HOST}"
+        HOST_HEADER="${HOST_NAME}"
     fi
 
     # add newline if custom HTTP header is defined
@@ -2752,15 +2918,15 @@ main() {
     if [ -n "${DISALLOWED_PROTOCOLS}" ] ; then
 
         # check if the host has an IPv6 address only (as nmap is not able to resolve without the -6 switch
-        if ${NMAP_BIN} "${HOST}" 2>&1 | grep -F -q 'Failed to resolve' ; then
-            debuglog 'nmap is not able to resolve the host name. Trying with -6 to force IPv6 for an IPv6-only host'
+        if ${NMAP_BIN} "${HOST_ADDR}" 2>&1 | grep -F -q 'Failed to resolve' ; then
+            debuglog "nmap is not able to resolve the host name (${HOST_ADDR}). Trying with -6 to force IPv6 for an IPv6-only host"
 
             NMAP_INETPROTO='-6'
         fi
 
-        debuglog "Executing ${NMAP_BIN} -Pn -p \"${PORT}\" \"${NMAP_INETPROTO}\" --script ssl-enum-ciphers \"${HOST}\" 2>&1 | grep '^|'"
+        debuglog "Executing ${NMAP_BIN} -Pn -p \"${PORT}\" \"${NMAP_INETPROTO}\" --script ssl-enum-ciphers \"${HOST_ADDR}\" 2>&1 | grep '^|'"
 
-        OFFERED_PROTOCOLS=$( ${NMAP_BIN} -Pn -p "${PORT}" "${NMAP_INETPROTO}" --script ssl-enum-ciphers "${HOST}" 2>&1 | grep '^|' )
+        OFFERED_PROTOCOLS=$( ${NMAP_BIN} -Pn -p "${PORT}" "${NMAP_INETPROTO}" --script ssl-enum-ciphers "${HOST_ADDR}" 2>&1 | grep '^|' )
 
         debuglog "offered cyphers and protocols:"
         debuglog "${OFFERED_PROTOCOLS}" | sed 's/^|/[DBG] /'
@@ -2787,9 +2953,9 @@ main() {
         DIG_BIN=${PROG}
         # check if OpenSSL supports -dane_tlsa_rrdata
         if ${OPENSSL} s_client -help 2>&1 | grep -F -q -- -dane_tlsa_rrdata || ${OPENSSL} s_client not_a_real_option 2>&1 | grep -F -q -- -dane_tlsa_rrdata; then
-            DIG_RESULT=$( "${DIG_BIN}" +short TLSA "_${PORT}._tcp.${HOST}" |while read -r L; do echo " -dane_tlsa_rrdata '${L}' "; done )
+            DIG_RESULT=$( "${DIG_BIN}" +short TLSA "_${PORT}._tcp.${HOST_ADDR}" |while read -r L; do echo " -dane_tlsa_rrdata '${L}' "; done )
             debuglog "Checking DANE (${DANE})"
-            debuglog "$(printf '%s\n' "${DIG_BIN} +short TLSA _${PORT}._tcp.${HOST} =")"
+            debuglog "$(printf '%s\n' "${DIG_BIN} +short TLSA _${PORT}._tcp.${HOST_ADDR} =")"
             debuglog "${DIG_RESULT}"
 
             case ${DANE} in
@@ -2815,10 +2981,10 @@ main() {
             debuglog "${DANE}"
 
             if [ ${#DANE} -lt 5 ]; then
-                prepend_critical_message "No matching TLSA records found at _${PORT}._tcp.${HOST}"
-                critical "${SHORTNAME} CRITICAL: No matching TLSA records found at _${PORT}._tcp.${HOST}"
+                prepend_critical_message "No matching TLSA records found at _${PORT}._tcp.${HOST_ADDR}"
+                critical "${SHORTNAME} CRITICAL: No matching TLSA records found at _${PORT}._tcp.${HOST_ADDR}"
             fi
-            DANE="${DANE} -dane_tlsa_domain ${HOST} "
+            DANE="${DANE} -dane_tlsa_domain ${HOST_ADDR} "
             debuglog "DBG] DANE = ${DANE}"
         else
             unknown 'OpenSSL s_client does not support DNS-based Authentication of Named Entities'
@@ -2890,12 +3056,20 @@ main() {
     # check for TLS renegotiation
     if [ -z "${IGNORE_TLS_RENEGOTIATION}" ] ; then
 
-        verboselog "Checking TLS renegotiation"
+        verboselog "checking TLS renegotiation"
 
         # see https://www.mcafee.com/blogs/enterprise/tips-securing-ssl-renegotiation/
 
-        exec_with_timeout "printf 'R\\n' | openssl s_client -connect ${HOST}:${PORT} 2>&1 | grep -F -q err"
-        RET=$?
+        case "${PROTOCOL}" in
+            pop3|ftp|smtp|irc|ldap|imap|postgres|sieve|xmpp|xmpp-server|mysql)
+                exec_with_timeout "printf 'R\\n' | openssl s_client -connect ${HOST_ADDR}:${PORT} -starttls ${PROTOCOL} 2>&1 | grep -F -q err"
+                RET=$?
+                ;;
+            *)
+                exec_with_timeout "printf 'R\\n' | openssl s_client -connect ${HOST_ADDR}:${PORT} 2>&1 | grep -F -q err"
+                RET=$?
+                ;;
+        esac
 
         if [ "${RET}" -eq 1 ] ; then
 
@@ -2947,7 +3121,7 @@ main() {
                 # - finally the substitution replaces every newline with a space on
                 #   the pattern space
                 ERROR_MESSAGE="$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/; /g' "${ERROR}")"
-                verboselog "Error: ${ERROR_MESSAGE}"
+                verboselog "error: ${ERROR_MESSAGE}"
                 prepend_critical_message "No certificate returned"
                 critical "${CRITICAL_MSG}"
             fi
@@ -2984,7 +3158,7 @@ main() {
         else
             CN='CN unavailable'
             if [ -z "${ALTNAMES}" ] ; then
-                verboselog "Certificate without common name (CN), enabling altername names"
+                verboselog "certificate without common name (CN), enabling altername names"
                 ALTNAMES=1
             fi
         fi
@@ -3073,7 +3247,7 @@ main() {
     # shellcheck disable=SC2086
     SIGNATURE_ALGORITHM="$(${OPENSSL} "${OPENSSL_COMMAND}" ${OPENSSL_PARAMS} -in "${CERT}" -text -noout | grep -m 1 -F 'Signature Algorithm')"
 
-    if [ -n "${DEBUG}" ] ; then
+    if [ "${DEBUG}" -ge 1 ] ; then
         debuglog "${SUBJECT}"
         debuglog "CN         = ${CN}"
         # shellcheck disable=SC2162
@@ -3170,15 +3344,16 @@ main() {
 
         debuglog "check CN: ${CN}"
         debuglog "COMMON_NAME = ${COMMON_NAME}"
+        debuglog "ALTNAMES    = ${ALTNAMES}"
 
         # Common name is case insensitive: using grep for comparison (and not 'case' with 'shopt -s nocasematch' as not defined in POSIX
 
         if echo "${CN}" | grep -q -i "^\\*\\." ; then
 
             # Or the literal with the wildcard
-            debuglog "checking if the common name matches ^$(echo "${CN}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9\-]*/' )\$"
-            if echo "${COMMON_NAME}" | grep -q -i "^$(echo "${CN}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9\-]*/' )\$" ; then
-                debuglog "the common name ${COMMON_NAME} matches ^$(echo "${CN}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9\-]*/' )\$"
+            debuglog "checking if the common name matches ^$(echo "${CN}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9_\-]*/' )\$"
+            if echo "${COMMON_NAME}" | grep -q -i "^$(echo "${CN}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9_\-]*/' )\$" ; then
+                debuglog "the common name ${COMMON_NAME} matches ^$(echo "${CN}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9_\-]*/' )\$"
                 ok="true"
             fi
 
@@ -3225,10 +3400,10 @@ main() {
                         fi
 
                         # Or the literal with the wildcard
-                        debuglog "checking if the common name matches ^$(echo "${alt_name}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9\-]*/' )\$"
+                        debuglog "checking if the common name matches ^$(echo "${alt_name}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9_\-]*/' )\$"
 
-                        if echo "${cn}" | grep -q -i "^$(echo "${alt_name}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9\-]*/' )\$" ; then
-                            debuglog "the common name ${cn} matches ^$(echo "${alt_name}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9\-]*/' )\$"
+                        if echo "${cn}" | grep -q -i "^$(echo "${alt_name}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9_\-]*/' )\$" ; then
+                            debuglog "the common name ${cn} matches ^$(echo "${alt_name}" | sed -e 's/[.]/[.]/g' -e 's/[*]/[A-Za-z0-9_\-]*/' )\$"
                             ok="true"
                         fi
 
@@ -3396,7 +3571,7 @@ main() {
     # Check SSL Labs
     if [ -n "${CHECK_CIPHERS}" ] || [ -n "${CHECK_CIPHERS_WARNINGS}" ] ; then
 
-        verboselog "Checking offered ciphers with nmap"
+        verboselog "checking offered ciphers with nmap"
 
         if [ -n "${CHECK_CIPHERS}" ] ; then
             debuglog "Checking offered ciphers (minimum level ${CHECK_CIPHERS}: ${CHECK_CIPHERS_NUMERIC})"
@@ -3405,9 +3580,9 @@ main() {
         create_temporary_file; NMAP_OUT=${TEMPFILE}
         create_temporary_file; NMAP_ERR=${TEMPFILE}
 
-        exec_with_timeout "nmap -sV --script ssl-enum-ciphers ${HOST} -p ${PORT}" "${NMAP_OUT}" "${NMAP_ERR}"
+        exec_with_timeout "nmap -sV --script ssl-enum-ciphers ${HOST_ADDR} -p ${PORT}" "${NMAP_OUT}" "${NMAP_ERR}"
 
-        if [ -n "${DEBUG}" ] ; then
+        if [ "${DEBUG}" -ge 1 ] ; then
             debuglog 'nmap output:'
             while read -r LINE; do
                 debuglog "${LINE}"
@@ -3426,7 +3601,7 @@ main() {
         fi
 
         if ! grep -F -q '| ssl-enum-ciphers' "${NMAP_OUT}" ; then
-            unknkown "empty nmap result while checking ciphers"
+            unknown "empty nmap result while checking ciphers"
         fi
 
         if [ -n "${CHECK_CIPHERS}" ] ; then
@@ -3439,7 +3614,7 @@ main() {
 
             # Check the grade
             if [ "${NMAP_GRADE_NUMERIC}" -lt "${CHECK_CIPHERS_NUMERIC}" ] ; then
-                prepend_critical_message "${HOST} offers ciphers with grade ${NMAP_GRADE} (instead of ${CHECK_CIPHERS})"
+                prepend_critical_message "${HOST_ADDR} offers ciphers with grade ${NMAP_GRADE} (instead of ${CHECK_CIPHERS})"
             fi
 
         fi
@@ -3469,7 +3644,7 @@ main() {
                 done < "${NMAP_OUT}"
 
                 WARNINGS=$( echo "${WARNINGS}" | sort | uniq | tr '\n' ',' | sed 's/,/,\ /g' | sed 's/,\ $//' )
-                prepend_critical_message "${HOST} offers ciphers with warning: ${WARNINGS}"
+                prepend_critical_message "${HOST_ADDR} offers ciphers with warning: ${WARNINGS}"
 
             fi
 
@@ -3481,25 +3656,25 @@ main() {
     # Check SSL Labs
     if [ -n "${SSL_LAB_CRIT_ASSESSMENT}" ] ; then
 
-        verboselog "Checking SSL Labs assessment"
+        verboselog "checking SSL Labs assessment"
 
         while true; do
 
             debuglog "http_proxy  = ${http_proxy}"
             debuglog "HTTPS_PROXY = ${HTTPS_PROXY}"
-            debuglog "executing ${CURL_BIN} ${CURL_PROXY} ${CURL_PROXY_ARGUMENT} ${INETPROTO} --silent \"https://api.ssllabs.com/api/v2/analyze?host=${HOST}${IGNORE_SSL_LABS_CACHE}\""
+            debuglog "executing ${CURL_BIN} ${CURL_PROXY} ${CURL_PROXY_ARGUMENT} ${INETPROTO} --silent \"https://api.ssllabs.com/api/v2/analyze?host=${HOST_NAME}${IGNORE_SSL_LABS_CACHE}\""
 
             if [ -n "${SNI}" ] ; then
                 JSON="$(${CURL_BIN} "${CURL_PROXY}" "${CURL_PROXY_ARGUMENT}" "${INETPROTO}" --silent "https://api.ssllabs.com/api/v2/analyze?host=${SNI}${IGNORE_SSL_LABS_CACHE}")"
                 CURL_RETURN_CODE=$?
             else
-                JSON="$(${CURL_BIN} "${CURL_PROXY}" "${CURL_PROXY_ARGUMENT}" "${INETPROTO}" --silent "https://api.ssllabs.com/api/v2/analyze?host=${HOST}${IGNORE_SSL_LABS_CACHE}")"
+                JSON="$(${CURL_BIN} "${CURL_PROXY}" "${CURL_PROXY_ARGUMENT}" "${INETPROTO}" --silent "https://api.ssllabs.com/api/v2/analyze?host=${HOST_NAME}${IGNORE_SSL_LABS_CACHE}")"
                 CURL_RETURN_CODE=$?
             fi
 
             if [ "${CURL_RETURN_CODE}" -ne 0 ] ; then
 
-                debuglog "curl returned ${CURL_RETURN_CODE}: ${CURL_BIN} ${CURL_PROXY} ${CURL_PROXY_ARGUMENT} ${INETPROTO} --silent \"https://api.ssllabs.com/api/v2/analyze?host=${HOST}${IGNORE_SSL_LABS_CACHE}\""
+                debuglog "curl returned ${CURL_RETURN_CODE}: ${CURL_BIN} ${CURL_PROXY} ${CURL_PROXY_ARGUMENT} ${INETPROTO} --silent \"https://api.ssllabs.com/api/v2/analyze?host=${HOST_NAME}${IGNORE_SSL_LABS_CACHE}\""
 
                 unknown "Error checking SSL Labs: curl returned ${CURL_RETURN_CODE}, see 'man curl' for details"
 
@@ -3507,7 +3682,7 @@ main() {
 
             JSON="$(printf '%s' "${JSON}" | tr '\n' ' ' )"
 
-            debuglog "Checking SSL Labs: ${CURL_BIN} ${CURL_PROXY} ${CURL_PROXY_ARGUMENT} ${INETPROTO} --silent \"https://api.ssllabs.com/api/v2/analyze?host=${HOST}\""
+            debuglog "Checking SSL Labs: ${CURL_BIN} ${CURL_PROXY} ${CURL_PROXY_ARGUMENT} ${INETPROTO} --silent \"https://api.ssllabs.com/api/v2/analyze?host=${HOST_NAME}\""
             debuglog "SSL Labs JSON: ${JSON}"
 
             # We clear the cache only on the first run
@@ -3535,6 +3710,7 @@ main() {
                             SSL_LABS_STATUS_MESSAGE=$(echo "${JSON}" \
                                                           | sed 's/.*"statusMessage":[ ]*"\([^"]*\)".*/\1/')
                             prepend_critical_message "SSL Labs error: ${SSL_LABS_STATUS_MESSAGE}"
+                            break
 
                         else
 
@@ -3568,7 +3744,7 @@ main() {
                         ;;
                     'IN_PROGRESS')
                         # Data not yet available: warn and continue
-                        verboselog "Warning: no cached data by SSL Labs, check initiated"
+                        verboselog "warning: no cached data by SSL Labs, check initiated"
                         ;;
                     'DNS')
                         verboselog "SSL Labs cannot resolve the domain name"
@@ -3588,7 +3764,7 @@ main() {
             fi
 
             WAIT_TIME=60
-            verboselog "Waiting ${WAIT_TIME} seconds"
+            verboselog "waiting ${WAIT_TIME} seconds"
 
             sleep "${WAIT_TIME}"
 
@@ -3751,10 +3927,13 @@ main() {
         fi
     fi
 
-    if [ -n "${TERSE}" ]; then
-        EXTRA_OUTPUT="${PERFORMANCE_DATA}"
-    else
-        EXTRA_OUTPUT="${LONG_OUTPUT}${PERFORMANCE_DATA}"
+    # long output
+    if [ -z "${TERSE}" ] ; then
+       EXTRA_OUTPUT="${LONG_OUTPUT}"
+    fi
+    # performance
+    if [ -z "${NO_PERF}" ] ; then
+        EXTRA_OUTPUT="${EXTRA_OUTPUT}${PERFORMANCE_DATA}"
     fi
 
     debuglog "output parameters: CA_ISSUER_MATCHED     = ${CA_ISSUER_MATCHED}"
