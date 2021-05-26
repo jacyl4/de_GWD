@@ -259,7 +259,7 @@ EOT;
         <div class="input-group-prepend">
           <button id="buttonBWrsInstall" type="button" class="btn <?php if ($checlBitwarden === installed) echo 'btn-success'; else echo 'btn-outline-secondary'; ?>"><?php if ($checlBitwarden === installed) echo 'Bitwarden'; else echo 'install Bitwarden';?></button>
         </div>
-        <div class="input-group-prepend input-group-append">
+        <div class="input-group-prepend">
           <button id="bitwardenBackup" type="button" class="btn btn-outline-secondary">备份下载</button>
         </div>
           <div class="custom-file">
