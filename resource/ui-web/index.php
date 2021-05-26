@@ -342,12 +342,12 @@
   <div class="input-group-prepend">
     <label class="input-group-text">内网设备</label>
   </div>
-  <div id="nodeDTlist" class="input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeDTlist" class="input-group-prepend" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <button id="nodeDTshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php passthru('/opt/de_GWD/ui-checkNodeDT &'); ?></button>
     <div id="nodeDT" class="dropdown-menu">
     </div>
   </div>
-  <div id="nodeDTip" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeDTip" class="input-group-prepend" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <input id="nodeDTtext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach ($de_GWDconf->v2nodeDIV->nodeDT->ip as $k => $v) {echo "$v ";} ?>">
   </div>
   <div id="nodeDTipButton" class="input-group-prepend" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
