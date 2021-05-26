@@ -342,7 +342,7 @@
   <div class="input-group-prepend">
     <label class="input-group-text">内网设备</label>
   </div>
-  <div id="nodeDTlist" class="input-group-append input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeDTlist" class="input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <button id="nodeDTshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php passthru('/opt/de_GWD/ui-checkNodeDT &'); ?></button>
     <div id="nodeDT" class="dropdown-menu">
     </div>
@@ -350,7 +350,7 @@
   <div id="nodeDTip" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <input id="nodeDTtext" type="text" class="form-control" placeholder="内网设备IP 空格分隔" value="<?php foreach ($de_GWDconf->v2nodeDIV->nodeDT->ip as $k => $v) {echo "$v ";} ?>">
   </div>
-  <div id="nodeDTipButton" class="input-group-prepend input-group-append" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeDTipButton" class="input-group-prepend" style="display:<?php if($nodeDT == on) echo 'block'; else echo 'none'; ?>">
     <button id="buttonSubmitDivertIP" class="btn btn-outline-secondary" type="button">
       <span id="buttonSubmitDivertIPloading"></span>
       <span>IP写入</span>
@@ -371,7 +371,7 @@
   <div class="input-group-prepend">
     <label class="input-group-text">Netflix</label>
   </div>
-  <div id="nodeNFlist" class="input-group-prepend input-group-append" style="display:<?php if($nodeNF == on) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeNFlist" class="input-group-prepend" style="display:<?php if($nodeNF == on) echo 'block'; else echo 'none'; ?>">
     <button id="nodeNFshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php passthru('/opt/de_GWD/ui-checkNodeNF &'); ?></button>
     <div id="nodeNF" class="dropdown-menu">
     </div>
@@ -391,7 +391,7 @@
   <div class="input-group-prepend">
     <label class="input-group-text">自定义</label>
   </div>
-  <div id="nodeCUlist" class="input-group-append input-group-append" style="display:<?php if($nodeCU == on) echo 'block'; else echo 'none'; ?>">
+  <div id="nodeCUlist" class="input-group-prepend" style="display:<?php if($nodeCU == on) echo 'block'; else echo 'none'; ?>">
     <button id="nodeCUshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"><?php passthru('/opt/de_GWD/ui-checkNodeCU &'); ?></button>
     <div id="nodeCU" class="dropdown-menu">
     </div>
