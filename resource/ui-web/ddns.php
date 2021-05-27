@@ -36,7 +36,7 @@
 <?php $de_GWDconf = json_decode(file_get_contents('/opt/de_GWD/0conf')); ?>
 <?php $checkNetdata = file_exists('/usr/libexec/netdata/netdata-updater.sh'); ?>
 <?php $checkJellyfin = file_exists('/usr/bin/jellyfin'); ?>
-<?php $checlBitwarden = $de_GWDconf->app->bitwarden; ?>
+<?php $checkBitwarden = $de_GWDconf->app->bitwarden; ?>
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
@@ -61,7 +61,7 @@
         </a>
       </li>
 
-      <li class="nav-item no-arrow mx-1" style="display:<?php if ($checlBitwarden === installed) echo 'block'; else echo 'none';?>">
+      <li class="nav-item no-arrow mx-1" style="display:<?php if ($checkBitwarden === installed) echo 'block'; else echo 'none';?>">
         <a class="nav-link" href="javascript:void(0)" onclick="window.open(location.origin+':8099')">
           <i class="fas fa-shield-alt"></i>
           <span>Bitwarden</span>

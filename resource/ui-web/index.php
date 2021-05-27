@@ -33,9 +33,10 @@
 
 <body id="page-top" class="sidebar-toggled fixed-padding">
 <?php $de_GWDconf = json_decode(file_get_contents('/opt/de_GWD/0conf')); ?>
+<?php $xDNS = $de_GWDconf->dns->xDNS; ?>
 <?php $checkNetdata = file_exists('/usr/libexec/netdata/netdata-updater.sh'); ?>
 <?php $checkJellyfin = file_exists('/usr/bin/jellyfin'); ?>
-<?php $checlBitwarden = $de_GWDconf->app->bitwarden; ?>
+<?php $checkBitwarden = $de_GWDconf->app->bitwarden; ?>
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
@@ -60,7 +61,7 @@
         </a>
       </li>
 
-      <li class="nav-item no-arrow mx-1" style="display:<?php if ($checlBitwarden === installed) echo 'block'; else echo 'none';?>">
+      <li class="nav-item no-arrow mx-1" style="display:<?php if ($checkBitwarden === installed) echo 'block'; else echo 'none';?>">
         <a class="nav-link" href="javascript:void(0)" onclick="window.open(location.origin+':8099')">
           <i class="fas fa-shield-alt"></i>
           <span>Bitwarden</span>
@@ -457,13 +458,19 @@
           <div class="card-body">
             <div class="form-row">
               <div class="col-md-5">
-              <div class="input-group my-2">
+              <div class="input-group my-2 mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text" style="min-width: 75px">xDNS</span>
                 </div>
-                <input type="text" id="xDNSc" class="form-control" placeholder="域名:端口" required="required" value="<?php $xDNS=$de_GWDconf->dns->xDNS; foreach ($xDNS as $k=>$v){if(strpos($v, "/dq")!== false){unset($xDNS[$k]);}}; echo $xDNS[0] ?>">
-                <div class="input-group-append">
-                  <span id="pingxDNS" class="input-group-text text-success"></span><span class="input-group-text text-secondary">ms</span>
+                <input type="text" id="xDNSc" class="form-control" placeholder="域名:端口" required="required" value="<?php echo $xDNS ?>" style="display:<?php if (empty($xDNS) === false) echo 'block'; else echo 'none';?>">
+                <div id="xDNSping" class="input-group-append" style="display:<?php if (empty($xDNS) === false) echo 'block'; else echo 'none';?>">
+                  <span id="pingxDNS" class="form-control input-group-text text-success"></span>
+                </div>
+                <div id="xDNSpingMS" class="input-group-append" style="display:<?php if (empty($xDNS) === false) echo 'block'; else echo 'none';?>">
+                  <span class="form-control input-group-text text-secondary">ms</span>
+                </div>
+                <div id="xDNSbutton" class="input-group-append" style="display:<?php if (empty($xDNS) === true) echo 'block'; else echo 'none';?>">
+                  <button id="openxDNS" class="form-control btn btn-outline-secondary" type="button"><i class="fas fa-angle-right"></i></button>
                 </div>
               </div>
               <div class="input-group my-2">
@@ -900,6 +907,13 @@ $.get('./act/changeNodeSS.php', {ssAddress:ssAddress, ssPort:ssPort, ssMethod:ss
   $("#buttonSSdetail").attr('class','btn btn-success btn-sm mt-1')
   $("#nodeTable td:nth-child(6) button").attr('class', "btn btn-outline-secondary btn-sm")
 })
+})
+
+$('#openxDNS').click(function(){
+$("#xDNSc").css("display", "block")
+$("#xDNSping").css("display", "block")
+$("#xDNSpingMS").css("display", "block")
+$("#xDNSbutton").css("display", "none")
 })
 
 $('#buttonclearDNS').click(function(){

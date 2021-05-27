@@ -90,6 +90,15 @@ jq 'del(.dns.doh2)' /opt/de_GWD/0conf |\
 jq --arg doh2 "$doh2" '.dns.xDNS+=[$doh2]' | sponge /opt/de_GWD/0conf
 fi
 
+if [[ $(jq -r '.dns.DOH' /opt/de_GWD/0conf) = "null" ]]; then
+xDNS=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | grep -v "/dq")
+doh1=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | grep "/dq" | awk NR==1)
+doh2=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | grep "/dq" | awk NR==2)
+jq --arg xDNS "$xDNS" '.dns.xDNS=$xDNS' /opt/de_GWD/0conf |\
+jq --arg doh1 "$doh1" '.dns.DOH+=[$doh1]' |\
+jq --arg doh2 "$doh2" '.dns.DOH+=[$doh2]' | sponge /opt/de_GWD/0conf
+fi
+
 if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) != "null" ]]; then
   jq 'del(.dns.DNSsplit)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 fi
@@ -207,9 +216,9 @@ service cron stop >/dev/null 2>&1
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 localaddr=$(ip a | grep "$ethernetnum" | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | tail -2 | head -n 1  | awk NR==1)
 
-xDNS1=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | awk NR==1)
-xDNS2=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | awk NR==2)
-xDNS3=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | awk NR==3)
+xDNS=$(jq -r '.dns.xDNS' /opt/de_GWD/0conf)
+doh1=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf | awk NR==1)
+doh2=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf | awk NR==2)
 
 domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf)
 port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
@@ -516,39 +525,33 @@ systemctl daemon-reload >/dev/null
 systemctl restart smartdns >/dev/null
 fi
 
-[ -n "$xDNS1" ] && xDNS1Domain=$(echo $xDNS1 | cut -d/ -f1 | cut -d: -f1)
-[ -n "$xDNS2" ] && xDNS2Domain=$(echo $xDNS2 | cut -d/ -f1 | cut -d: -f1)
-[ -n "$xDNS3" ] && xDNS3Domain=$(echo $xDNS3 | cut -d/ -f1 | cut -d: -f1)
+[ -n "$xDNS" ] && xDNSdomain=$(echo $xDNS | cut -d: -f1)
+[ -n "$doh1" ] && doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+[ -n "$doh2" ] && doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 
-[ -n "$xDNS1" ] && xDNS1IP=$(dig @127.0.0.1 $xDNS1Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
-[ -n "$xDNS2" ] && xDNS2IP=$(dig @127.0.0.1 $xDNS2Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
-[ -n "$xDNS3" ] && xDNS3IP=$(dig @127.0.0.1 $xDNS3Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
+[ -n "$xDNS" ] && xDNSIP=$(dig @127.0.0.1 $xDNSdomain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
+[ -n "$doh1" ] && doh1IP=$(dig @127.0.0.1 $doh1Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
+[ -n "$doh2" ] && doh2IP=$(dig @127.0.0.1 $doh2Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
 
-[ -n "$xDNS1" ] && xDNS1Port=$(echo $xDNS1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
-[ -n "$xDNS2" ] && xDNS2Port=$(echo $xDNS2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
-[ -n "$xDNS3" ] && xDNS3Port=$(echo $xDNS3 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -n "$xDNS" ] && xDNSPort=$(echo $xDNS | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -n "$doh1" ] && doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+[ -n "$doh2" ] && doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
 
-[ -n "$xDNS1" ] && xDNS1PortStr=$([ -n "$xDNS1Port" ] && echo $xDNS1Port | sed 's/^/:/')
-[ -n "$xDNS2" ] && xDNS2PortStr=$([ -n "$xDNS2Port" ] && echo $xDNS2Port | sed 's/^/:/')
-[ -n "$xDNS3" ] && xDNS3PortStr=$([ -n "$xDNS3Port" ] && echo $xDNS3Port | sed 's/^/:/')
+[ -n "$xDNS" ] && xDNSPortStr=$([ -n "$xDNSPort" ] && echo $xDNSPort | sed 's/^/:/')
+[ -n "$doh1" ] && doh1PortStr=$([ -n "$doh1Port" ] && echo $doh1Port | sed 's/^/:/')
+[ -n "$doh2" ] && doh2PortStr=$([ -n "$doh2Port" ] && echo $doh2Port | sed 's/^/:/')
 
 echo >>/etc/smartdns/smartdns.conf
-if [[ -n $xDNS1IP ]] && [[ $(echo $xDNS1 | cut -d/ -f2) == "dq" ]]; then
-echo "server-https https://$xDNS1IP$xDNS1PortStr/dq -host-name $xDNS1Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
+if [[ -n $doh1IP ]]; then
+echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 fi
 
-if [[ -n $xDNS2IP ]] && [[ $(echo $xDNS2 | cut -d/ -f2) == "dq" ]]; then
-echo "server-https https://$xDNS2IP$xDNS2PortStr/dq -host-name $xDNS2Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
-fi
-
-if [[ -n $xDNS3IP ]] && [[ $(echo $xDNS3 | cut -d/ -f2) == "dq" ]]; then
-echo "server-https https://$xDNS3IP$xDNS3PortStr/dq -host-name $xDNS3Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
+if [[ -n $doh2IP ]]; then
+echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 fi
 systemctl restart smartdns >/dev/null
 
-[ -n "$xDNS1" ] && [ $(echo $xDNS1 | cut -d/ -f2) != "dq" ] && xDNScDomain=$xDNS1Domain && xDNScPort=$xDNS1Port && xDNScIP=$xDNS1IP
-[ -n "$xDNS2" ] && [ $(echo $xDNS2 | cut -d/ -f2) != "dq" ] && xDNScDomain=$xDNS2Domain && xDNScPort=$xDNS2Port && xDNScIP=$xDNS2IP
-[ -n "$xDNS3" ] && [ $(echo $xDNS3 | cut -d/ -f2) != "dq" ] && xDNScDomain=$xDNS3Domain && xDNScPort=$xDNS3Port && xDNScIP=$xDNS3IP
+[ -n "$xDNS" ] && xDNScDomain=$xDNSdomain && xDNScPort=$xDNSPort && xDNScIP=$xDNSIP
 
 echo -n "$statusInstalled" && white "SmartDNS"
 }
@@ -601,10 +604,6 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
 ]
 }
 EOF
-
-[ -n "$xDNS1IP" ] && jq --arg xDNS1Domain "$xDNS1Domain" --arg xDNS1IP "$xDNS1IP" '.dns.hosts+={"\($xDNS1Domain)":"\($xDNS1IP)"}' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
-[ -n "$xDNS2IP" ] && jq --arg xDNS2Domain "$xDNS2Domain" --arg xDNS2IP "$xDNS2IP" '.dns.hosts+={"\($xDNS2Domain)":"\($xDNS2IP)"}' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
-[ -n "$xDNS3IP" ] && jq --arg xDNS3Domain "$xDNS3Domain" --arg xDNS3IP "$xDNS3IP" '.dns.hosts+={"\($xDNS3Domain)":"\($xDNS3IP)"}' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
@@ -823,7 +822,10 @@ systemctl restart vtrui >/dev/null
 if [[ -n $xDNScIP ]]; then
 cat << EOF >/opt/de_GWD/xDNSc/config.json
 {
-  "dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
+  "dns":{
+    "hosts":{"$xDNScDomain":"$xDNScIP"},
+    "tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]
+  },
   "routing":{
     "rules":[
       {"type":"field","inboundTag":["dnsFlow"],"outboundTag": "direct"},
@@ -2038,7 +2040,7 @@ installGWD(){
     green "==========================="
     green " DoH / xDNS"
     green "==========================="
-    read xDNS1
+    read xDNSorDOH
 
     green "==========================="
     green " Domain"
@@ -2056,6 +2058,12 @@ installGWD(){
     read path
 
 cd ~
+
+if [[ $xDNSorDOH =~ "/dq" ]]; then
+  doh1=$xDNSorDOH
+else
+  xDNS=$xDNSorDOH
+fi
 
 domain=$(echo $v2servn | cut -d: -f1)
 port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
@@ -2104,7 +2112,6 @@ jq '.v2node=[]' |\
 jq '.update={}' |\
 jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
 jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
-jq --arg xDNS1 "$xDNS1" '.dns.xDNS+=[$xDNS1]' |\
 jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
 jq --arg name "$v2servn" '.v2node[0].name=$name' |\
 jq --arg uuid "$uuid" '.v2node[0].uuid=$uuid' |\
@@ -2116,6 +2123,10 @@ jq --arg domain "$domain" '.update.v2node.domain=$domain' |\
 jq --arg port "$port" '.update.v2node.port=$port' |\
 jq --arg uuid "$uuid" '.update.v2node.uuid=$uuid' |\
 jq --arg path "$path" '.update.v2node.path=$path' | sponge /opt/de_GWD/0conf
+
+[ -n "$xDNS" ] && jq --arg xDNS "$xDNS" '.dns.xDNS=$xDNS' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+[ -n "$doh1" ] && jq --arg doh1 "$doh1" '.dns.DOH+=[$doh1]' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+
 chmod 666 /opt/de_GWD/0conf
 
 de_GWDconnect

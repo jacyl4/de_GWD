@@ -20,10 +20,10 @@ foreach($arr as $k=>$v){
         $hosts[$arr[1]] = $arr[0];
 }
 
-$xDNSarray = array();
-array_push($xDNSarray, "$xDNSc", "$DoH1", "$DoH2");
-$conf['dns']['xDNS'] = array();
-$conf['dns']['xDNS'] = $xDNSarray;
+$DOHarray = array();
+array_push($DOHarray, "$DoH1", "$DoH2");
+$conf['dns']['xDNS'] = $xDNSc;
+$conf['dns']['DOH'] = $DOHarray;
 $conf['dns']['china'] = $dnsChina;
 $conf['dns']['hosts'] = array();
 $conf['dns']['hosts'] = $hosts;
