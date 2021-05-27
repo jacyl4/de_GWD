@@ -1823,26 +1823,25 @@ if [[ "$BBRplusConfirm" = "" ]]; then
 if [[ $(uname -m) == "aarch64" ]]; then
   red "only work on x86_64"
 elif [[ $(uname -m) == "x86_64" ]]; then  
-mkdir -p ~/bbrKernel && cd ~/bbrKernel
+mkdir -p ~/bbrKernel
 wget --no-check-certificate --show-progress -cqO ~/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_amd64.deb
 wget --no-check-certificate --show-progress -cqO ~/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_amd64.deb
-
-dpkg -i linux-headers.deb
-dpkg -i linux-image.deb
+dpkg -i ~/bbrKernel/linux-headers.deb
+dpkg -i ~/bbrKernel/linux-image.deb
 
 if [[ -n $(dpkg --list | grep linux-image | grep bbrplus) ]]; then
-dpkg --list | grep xanmod | awk '{print $2}' | while read line
+dpkg --list | grep 'xanmod' | awk '{print $2}' | grep 'linux-' | while read line
 do
 apt purge -y $line
 done
 rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
 
-dpkg --list | grep linux-image | awk '{print $2}' | sed '/bbrplus/d' | while read line
+dpkg --list | grep 'linux-image' | awk '{print $2}' | sed '/bbrplus/d' | while read line
 do
 apt purge -y $line
 done
 
-dpkg --list | grep linux-headers | awk '{print $2}' | sed '/bbrplus/d' | while read line
+dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed '/bbrplus/d' | while read line
 do
 apt purge -y $line
 done
