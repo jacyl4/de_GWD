@@ -1293,12 +1293,12 @@ wget -cqO - https://dl.xanmod.org/gpg.key | apt-key --keyring /etc/apt/trusted.g
 apt update --fix-missing && apt upgrade --allow-downgrades && apt install linux-xanmod-lts
 
 if [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
-dpkg --list | grep linux-image | awk '{print $2}' | sed '/xanmod/d' | while read line
+dpkg --list | grep 'linux-image' | awk '{print $2}' | sed '/xanmod/d' | while read line
 do
 apt purge -y $line
 done
 
-dpkg --list | grep linux-headers | awk '{print $2}' | sed '/xanmod/d' | while read line
+dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed '/xanmod/d' | while read line
 do
 apt purge -y $line
 done
