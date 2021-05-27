@@ -21,7 +21,6 @@ cat << EOF >/opt/de_GWD/RproxyC/config.json
   "routing":{
     "rules":[
       {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"},
-      {"type":"field","port": "53","outboundTag": "direct"},
       {"type":"field","inboundTag":["bridge"],"domain":["full:reverse.localhost"],"outboundTag":"reverseTunnel"}
     ]
   },

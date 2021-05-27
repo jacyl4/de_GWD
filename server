@@ -806,11 +806,6 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
         "type":"field",
         "inboundTag":["dnsFlow"],
         "outboundTag":"direct"
-      },
-      {
-        "type":"field",
-        "port":"53",
-        "outboundTag":"direct"
       }
     ]
   },
