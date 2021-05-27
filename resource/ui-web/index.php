@@ -446,16 +446,6 @@
                   <span id="buttonclearDNSloading"></span>
                   <span>清理缓存</span>
                 </button>
-              <div class="btn-group">
-                <button id="buttonDnsGFW" type="button" class="btn btn-<?php $DNSgfw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSgfw,'geolocation-!cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">
-                  <span id="buttonDnsGFWloading"></span>
-                  <span>GFWlist</span>
-                </button>
-                <button id="buttonDnsCHNW" type="button" class="btn btn-<?php $DNSchnw = file_get_contents('/opt/de_GWD/v2dns/config.json'); if(strpos($DNSchnw,'geosite:cn') !== false) echo 'success'; else echo 'outline-secondary'; ?> btn-sm mt-1" style="border-radius: 0px;">
-                  <span id="buttonDnsCHNWloading"></span>
-                  <span>大陆白名单</span>
-                </button>
-              </div>
                 <button id="buttonSubmitDNS" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">
                   <span id="buttonSubmitDNSloading"></span>
                   <span>应用</span>
@@ -909,24 +899,6 @@ $.get('./act/changeNodeSS.php', {ssAddress:ssAddress, ssPort:ssPort, ssMethod:ss
   $("#ssDetail").modal('hide')
   $("#buttonSSdetail").attr('class','btn btn-success btn-sm mt-1')
   $("#nodeTable td:nth-child(6) button").attr('class', "btn btn-outline-secondary btn-sm")
-})
-})
-
-$('#buttonDnsCHNW').click(function(){
-$("#buttonDnsCHNWloading").attr("class", "spinner-border spinner-border-sm")
-$.get('./act/dnsCHNW.php', function(result){
-  $("#buttonDnsCHNWloading").removeClass()
-  $('#buttonDnsCHNW').attr('class', 'btn btn-success btn-sm mt-1')
-  $('#buttonDnsGFW').attr('class', 'btn btn-outline-secondary btn-sm mt-1')
-})
-})
-
-$('#buttonDnsGFW').click(function(){
-$("#buttonDnsGFWloading").attr("class", "spinner-border spinner-border-sm")
-$.get('./act/dnsGFW.php', function(){
-  $("#buttonDnsGFWloading").removeClass()
-  $('#buttonDnsCHNW').attr('class', 'btn btn-outline-secondary btn-sm mt-1')
-  $('#buttonDnsGFW').attr('class', 'btn btn-success btn-sm mt-1')
 })
 })
 
