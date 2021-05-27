@@ -330,8 +330,7 @@
           </span>
           </div>
           <div style="display: flex;flex-wrap: wrap;">
-            <button id="buttonPingTCP" type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;">Ping (TCP)</button>
-            <button id="buttonPingICMP" type="button" class="btn btn-outline-success btn-sm col-6" style="border-radius: 0px;">Ping (ICMP)</button>
+            <button id="buttonPingTCP" type="button" class="btn btn-outline-success btn-sm col-12" style="border-radius: 0px;">Ping (TCP)</button>
           </div>
 
           <div class="card-body">
@@ -833,19 +832,6 @@ $.each(nodeList, function(i){
 $.get("./act/pingTCPDOH1.php", function(data) { $('#pingDOH1').text(data) })
 $.get("./act/pingTCPDOH2.php", function(data) { $('#pingDOH2').text(data) })
 $.get("./act/pingTCPxDNS.php", function(data) { $('#pingxDNS').text(data) })
-})
-
-$('#buttonPingICMP').click(function(){
-$.get('./act/arrV2node.php', function(data) {
-var nodeList = JSON.parse(data)
-$.each(nodeList, function(i){
-  $.get("./act/pingICMP.php", {pingICMP:i}, function(data){ $('#ping'+i).text(data) })
-})
-})
-$.get("./act/pingICMPDOH1.php", function(data) { $('#pingDOH1').text(data) })
-$.get("./act/pingICMPDOH2.php", function(data) { $('#pingDOH2').text(data) })
-$.get("./act/pingICMPxDNS.php", function(data) { $('#pingxDNS').text(data) })
-
 })
 
 $('#buttonclearDIV').click(function(){
