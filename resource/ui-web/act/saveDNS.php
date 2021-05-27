@@ -31,6 +31,6 @@ $conf['dns']['hosts'] = $hosts;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
 file_put_contents('/opt/de_GWD/0conf', $newJsonString);
 
-if($conf['dns']['DNSsplit'] == chnw) exec('sudo /opt/de_GWD/ui-dnsCHNW r &'); else exec('sudo /opt/de_GWD/ui-dnsGFW r &');
+exec('sudo /opt/de_GWD/ui-DNSsplit r &');
 ?>
 <?php }?>

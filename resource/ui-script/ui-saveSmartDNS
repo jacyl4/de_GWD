@@ -1,30 +1,10 @@
 #!/bin/bash
 shttps[0]=$(grep 'server-https ' /etc/smartdns/smartdns.conf | awk NR==1)
 shttps[1]=$(grep 'server-https ' /etc/smartdns/smartdns.conf | awk NR==2)
+doh1IP0=$(echo ${shttps[0]} | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
+doh2IP0=$(echo ${shttps[1]} | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
 xDNScDomainO=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | grep -v "/dq" | cut -d: -f1)
 [ -f "/opt/de_GWD/xDNSc/config.json" ] && xDNScIPO=$(jq -r --arg domainO "$xDNScDomainO" '.dns.hosts."\($domainO)"' /opt/de_GWD/xDNSc/config.json)
-
-
-n=$[$(sed -n '/serve-expired-reply-ttl/=' /etc/smartdns/smartdns.conf)+1]
-sed -i "$n,\$d" /etc/smartdns/smartdns.conf
-
-if [[ -z $(jq -r '.dns.china' /opt/de_GWD/0conf) ]] || [[ $(jq -r '.dns.china' /opt/de_GWD/0conf) = "null" ]]; then
-  jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 182.254.118.118 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
-  chmod 666 /opt/de_GWD/0conf
-fi
-
-echo >>/etc/smartdns/smartdns.conf
-for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf); do
-    echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
-done
-systemctl restart smartdns
-
-
-cat << EOF >>/etc/smartdns/smartdns.conf
-
-server 127.0.0.1:5330 -exclude-default-group -group xDNS
-
-EOF
 
 
 doh1=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | grep "/dq" | awk NR==1)
@@ -47,6 +27,28 @@ xDNSc=$(jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | grep -v "/dq" | grep -v "null")
 [ -n "$xDNSc" ] && xDNScPort=$(echo $xDNSc | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -n "$xDNSc" ] && xDNScIP=$(dig @127.0.0.1 $xDNScDomain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
 
+
+if [[ $doh1IP != $doh1IP0 ]] || [[ $doh2IP != $doh2IP0 ]] || [[ $xDNScIP != $xDNScIPO ]] || [[ $1 == "r" ]]; then
+
+n=$[$(sed -n '/serve-expired-reply-ttl/=' /etc/smartdns/smartdns.conf)+1]
+sed -i "$n,\$d" /etc/smartdns/smartdns.conf
+
+if [[ -z $(jq -r '.dns.china' /opt/de_GWD/0conf) ]] || [[ $(jq -r '.dns.china' /opt/de_GWD/0conf) = "null" ]]; then
+  jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 182.254.118.118 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+  chmod 666 /opt/de_GWD/0conf
+fi
+
+echo >>/etc/smartdns/smartdns.conf
+for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf); do
+    echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
+done
+
+cat << EOF >>/etc/smartdns/smartdns.conf
+
+server 127.0.0.1:5330 -exclude-default-group -group xDNS
+
+EOF
+
 if [[ -n $doh1IP ]]; then
 echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 else
@@ -61,23 +63,15 @@ fi
 unset shttps
 systemctl restart smartdns >/dev/null
 
-echo $doh1IP $doh2IP $xDNScIP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPxDNS
-sed -i '/^\s*$/d' /opt/de_GWD/IPxDNS
-sed -i 's/^/add doh &/g' /opt/de_GWD/IPxDNS
-mv -f /opt/de_GWD/IPxDNS /opt/de_GWD/IPxDNSSET
-ipset -! -R </opt/de_GWD/IPxDNSSET
 
-if [[ -n "$xDNScIP" ]];then 
-jq --arg xDNScDomain "$xDNScDomain" --arg xDNScIP "$xDNScIP" '.dns.hosts+={"\($xDNScDomain)":"\($xDNScIP)"}' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
-else
-[ -n "$xDNScDomainO" ] && jq --arg xDNScDomain "$xDNScDomainO" --arg xDNScIP "$xDNScIPO" '.dns.hosts+={"\($xDNScDomain)":"\($xDNScIP)"}' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
-fi
-chmod 666 /opt/de_GWD/v2dns/config.json
 
 if [[ -n $xDNScIP ]]; then
 cat << EOF >/opt/de_GWD/xDNSc/config.json
 {
-  "dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
+  "dns":{
+    "hosts":{"$xDNScDomain":"$xDNScIP"},
+    "tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]
+  },
   "routing":{
     "rules":[
       {"type":"field","inboundTag":["dnsFlow"],"outboundTag": "direct"},
@@ -149,3 +143,9 @@ systemctl disable xDNSc >/dev/null 2>&1
 systemctl stop xDNSc >/dev/null
 fi
 
+echo $doh1IP $doh2IP $xDNScIP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPxDNS
+sed -i '/^\s*$/d' /opt/de_GWD/IPxDNS
+sed -i 's/^/add doh &/g' /opt/de_GWD/IPxDNS
+mv -f /opt/de_GWD/IPxDNS /opt/de_GWD/IPxDNSSET
+ipset -! -R </opt/de_GWD/IPxDNSSET
+fi

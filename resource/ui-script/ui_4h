@@ -8,10 +8,7 @@ cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
 white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
 statusUpdated=$(green "[  updated  ]")
 
-if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) = "gfw" ]]; then
-/opt/de_GWD/ui-dnsGFW
-else
-/opt/de_GWD/ui-dnsCHNW
-fi
-echo -n "$statusUpdated" && white "DNS Diversion"
+/opt/de_GWD/ui-DNSsplit
+
+echo -n "$statusUpdated" && white "DNS Divergence"
 echo

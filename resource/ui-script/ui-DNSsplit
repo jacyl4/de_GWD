@@ -40,9 +40,6 @@ if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf) ]] && [[ $(jq -r '.dns.hosts' /
 jq -r '.dns.hosts | to_entries[] | [.value, .key] | @tsv' /opt/de_GWD/0conf | sed 's/[[:space:]][[:space:]]*/ /g' >/etc/pihole/custom.list
 fi
 
-jq '.dns.DNSsplit="chnw"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
-chmod 666 /opt/de_GWD/0conf
-
 /opt/de_GWD/ui-saveListBW
 
 if [[ $(jq -r '.dns.APPLEdir' /opt/de_GWD/0conf) == "on" ]]; then
@@ -51,7 +48,7 @@ else
 /opt/de_GWD/ui-offAPPLE
 fi
 
-/opt/de_GWD/ui-saveSmartDNS
+/opt/de_GWD/ui-saveSmartDNS r
 
 /opt/de_GWD/ui-saveNode
 

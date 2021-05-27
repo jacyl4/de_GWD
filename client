@@ -90,6 +90,10 @@ jq 'del(.dns.doh2)' /opt/de_GWD/0conf |\
 jq --arg doh2 "$doh2" '.dns.xDNS+=[$doh2]' | sponge /opt/de_GWD/0conf
 fi
 
+if [[ $(jq -r '.dns.DNSsplit' /opt/de_GWD/0conf) != "null" ]]; then
+  jq 'del(.dns.DNSsplit)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
 if [[ $(jq -r '.dns.boostDNS' /opt/de_GWD/0conf) != "null" ]]; then
   jq 'del(.dns.boostDNS)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 fi
