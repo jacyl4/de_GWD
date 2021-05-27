@@ -1831,7 +1831,7 @@ dpkg -i linux-headers.deb
 dpkg -i linux-image.deb
 
 if [[ -n $(dpkg --list | grep linux-image | grep bbrplus) ]]; then
-dpkg --list | grep xanmod | while read line
+dpkg --list | grep xanmod | awk '{print $2}' | while read line
 do
 apt purge -y $line
 done
@@ -1967,7 +1967,7 @@ else
   echo
   echo -n "$statusWarning" && yellow "Installation Fallback"
 
-  dpkg --list | grep xanmod | while read line
+  dpkg --list | grep xanmod | awk '{print $2}' | while read line
   do
   apt purge -y $line
   done
