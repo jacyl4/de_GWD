@@ -7,8 +7,8 @@ xDNScDomainO=$(jq -r '.dns.xDNS' /opt/de_GWD/0conf | grep -v "/dq" | cut -d: -f1
 [ -f "/opt/de_GWD/xDNSc/config.json" ] && xDNScIPO=$(jq -r --arg domainO "$xDNScDomainO" '.dns.hosts."\($domainO)"' /opt/de_GWD/xDNSc/config.json)
 
 
-doh1=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf | grep "/dq" | awk NR==1)
-doh2=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf | grep "/dq" | awk NR==2)
+doh1=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | grep "/dq" | awk NR==1)
+doh2=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | grep "/dq" | awk NR==2)
 
 [ -n "$doh1" ] && doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 [ -n "$doh2" ] && doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
@@ -141,6 +141,7 @@ fi
 else
 systemctl disable xDNSc >/dev/null 2>&1
 systemctl stop xDNSc >/dev/null
+rm -rf /opt/de_GWD/xDNSc/config.json
 fi
 
 echo $doh1IP $doh2IP $xDNScIP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPxDNS
