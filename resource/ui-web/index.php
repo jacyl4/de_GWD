@@ -941,7 +941,7 @@ $.get('./act/offAPPLE.php', function(result){
 $('#buttonSubmitStaticIP').click(function(){
 staticip1=$('#localip').val()
 staticip2=$('#upstreamip').val()
-$.get('./act/reboot.php', {localip:staticip1, upstreamip:staticip2}, function(result){window.location.reload()})
+$.get('./act/reboot.php', {localip:staticip1, upstreamip:staticip2}, function(){})
 })
 
 $('#buttonOnDHCP').click(function(){
