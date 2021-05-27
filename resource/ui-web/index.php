@@ -471,7 +471,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text" style="min-width: 75px">xDNS</span>
                 </div>
-                <input type="text" id="xDNSc" class="form-control" placeholder="域名:端口" required="required" value="<?php passthru("sudo jq -r '.dns.xDNS[]' /opt/de_GWD/0conf | grep -v '/dq'");?>">
+                <input type="text" id="xDNSc" class="form-control" placeholder="域名:端口" required="required" value="<?php echo $de_GWDconf->dns->xDNS[0]; ?>">
                 <div class="input-group-append">
                   <span id="pingxDNS" class="input-group-text text-success"></span><span class="input-group-text text-secondary">ms</span>
                 </div>
