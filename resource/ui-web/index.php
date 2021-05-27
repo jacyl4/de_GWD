@@ -461,7 +461,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text" style="min-width: 75px">xDNS</span>
                 </div>
-                <input type="text" id="xDNSc" class="form-control" placeholder="域名:端口" required="required" value="<?php echo $de_GWDconf->dns->xDNS[0]; ?>">
+                <input type="text" id="xDNSc" class="form-control" placeholder="域名:端口" required="required" value="<?php $xDNS=$de_GWDconf->dns->xDNS; foreach ($xDNS as $k=>$v){if(strpos($v, "/dq")!== false){unset($xDNS[$k]);}}; echo $xDNS[0] ?>">
                 <div class="input-group-append">
                   <span id="pingxDNS" class="input-group-text text-success"></span><span class="input-group-text text-secondary">ms</span>
                 </div>

@@ -22,7 +22,6 @@ foreach($arr as $k=>$v){
 
 $xDNSarray = array();
 array_push($xDNSarray, "$xDNSc", "$DoH1", "$DoH2");
-$xDNSarray = array_filter(array_map('trim', $xDNSarray));
 $conf['dns']['xDNS'] = array();
 $conf['dns']['xDNS'] = $xDNSarray;
 $conf['dns']['china'] = $dnsChina;
