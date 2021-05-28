@@ -463,13 +463,13 @@
                   <span class="input-group-text" style="min-width: 75px">xDNS</span>
                 </div>
                 <input type="text" id="xDNSc" class="form-control" placeholder="域名:端口" required="required" value="<?php echo $xDNS ?>" style="display:<?php if (empty($xDNS) === false) echo 'block'; else echo 'none';?>">
-                <div id="xDNSping" class="input-group-append" style="display:<?php if (empty($xDNS) === false) echo 'block'; else echo 'none';?>">
+                <div id="xDNSping" class="input-group-prepend input-group-append" style="display:<?php if (empty($xDNS) === false) echo 'block'; else echo 'none';?>">
                   <span id="pingxDNS" class="form-control input-group-text text-success"></span>
                 </div>
                 <div id="xDNSpingMS" class="input-group-append" style="display:<?php if (empty($xDNS) === false) echo 'block'; else echo 'none';?>">
-                  <span class="form-control input-group-text text-secondary">ms</span>
+                  <span class="input-group-text text-secondary">ms</span>
                 </div>
-                <div id="xDNSbutton" class="input-group-append" style="display:<?php if (empty($xDNS) === true) echo 'block'; else echo 'none';?>">
+                <div id="xDNSbutton" class="input-group-prepend" style="display:<?php if (empty($xDNS) === true) echo 'block'; else echo 'none';?>">
                   <button id="openxDNS" class="form-control btn btn-outline-secondary" type="button"><i class="fas fa-angle-right"></i></button>
                 </div>
               </div>
