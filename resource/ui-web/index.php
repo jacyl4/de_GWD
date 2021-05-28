@@ -232,7 +232,7 @@
   <div class="modal-dialog modal-sm" style="top:50%" role="document">
     <div class="modal-content">
       <div class="modal-body">
-        <span class="modal-title">重启 并 清理内核</span>
+        <span class="modal-title">重启并清理内核</span>
       </div>
 
       <div class="modal-footer">
@@ -458,7 +458,7 @@
           <div class="card-body">
             <div class="form-row">
               <div class="col-md-5">
-              <div class="input-group my-2 mb-3">
+              <div class="input-group my-2 mb-4">
                 <div class="input-group-prepend">
                   <span class="input-group-text" style="min-width: 75px">xDNS</span>
                 </div>
