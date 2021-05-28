@@ -141,11 +141,6 @@ EOF
 
 apt update && apt install sudo locales net-tools netcat dnsutils resolvconf ipset wget curl git jq unzip bc ca-certificates apt-transport-https gnupg2 haveged socat moreutils libjemalloc-dev
 
-if [[ $virt != "openvz" ]]; then
-echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
-curl -fsSL  https://packages.sury.org/php/apt.gpg | apt-key add -
-fi
-
 apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
 
 systemctl enable --now haveged >/dev/null 2>&1
