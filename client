@@ -429,7 +429,7 @@ sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
 
 if [[ $(uname -r) =~ "bbrplus" ]]; then
-  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
   echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 elif [[ $(uname -r) =~ "xanmod" ]]; then
   echo "net.core.default_qdisc = fq_pie" >>/etc/sysctl.conf
@@ -1853,7 +1853,7 @@ cat << "EOF" >~/bbrKernel/clearkernel
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
 sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
-echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
 sysctl -p >/dev/null
 
