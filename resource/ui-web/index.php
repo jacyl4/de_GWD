@@ -231,12 +231,12 @@
 <div id="reboot" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="reboot" aria-hidden="true">
   <div class="modal-dialog modal-sm" style="top:50%" role="document">
     <div class="modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title">重启生效</h5>
+      <div class="modal-body">
+        <span class="modal-title">重启 并 清理内核</span>
       </div>
 
       <div class="modal-footer">
-        <button id="buttonReboot" type="button" class="btn btn-sm btn-outline-danger">立即重启</button>
+        <button id="buttonReboot" type="button" class="btn btn-sm btn-danger" style="border-radius: 0px;">立即重启</button>
       </div>
     </div>
   </div>
