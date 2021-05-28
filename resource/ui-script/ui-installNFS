@@ -10,7 +10,11 @@ white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
 
 
 installNFSsupport(){
-apt install nfs-common
+apt install autofs nfs-common
+
+cat << EOF >/etc/auto.master.d/nfs.autofs
+/-    /etc/auto.nfs
+EOF
 
 blue "--------------------------"
 blue "Install NFS support [done]"
@@ -20,7 +24,9 @@ blue "--------------------------"
 
 
 uninstallNFSsupport(){
-apt purge keyutils libevent-2.1-6 libnfsidmap2 libtirpc-common libtirpc3 nfs-common rpcbind
+apt purge autofs nfs-common
+
+rm -rf /etc/auto.master.d/nfs.autofs
 
 blue "----------------------------"
 blue "Uninstall NFS support [done]"

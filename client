@@ -133,6 +133,8 @@ if [[ $(jq -r '.divertLan' /opt/de_GWD/0conf) != "null" ]]; then
   done
 fi
 
+sed -i "/nfsvers/d" /etc/fstab
+
 sed -i '/quic/d' /etc/nginx/conf.d/*.conf
 
 systemctl disable --now doh-client >/dev/null 2>&1

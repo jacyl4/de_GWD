@@ -36,7 +36,7 @@
 <?php $checkJellyfin = file_exists('/usr/bin/jellyfin'); ?>
 <?php $checkBitwarden = $de_GWDconf->app->bitwarden; ?>
 
-<?php $checkNFS = file_exists('/var/lib/nfs/state') ?>
+<?php $checkNFS = file_exists('/etc/auto.master.d/nfs.autofs') ?>
 <?php $checkDocker = file_exists('/usr/bin/docker') ?>
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
