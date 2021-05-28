@@ -236,7 +236,7 @@
       </div>
 
       <div class="modal-footer">
-        <button id="buttonSubmitStaticIP" type="button" class="btn btn-sm btn-outline-danger">立即重启</button>
+        <button id="buttonReboot" type="button" class="btn btn-sm btn-outline-danger">立即重启</button>
       </div>
     </div>
   </div>
@@ -952,10 +952,10 @@ $.get('./act/offAPPLE.php', function(result){
 })
 })
 
-$('#buttonSubmitStaticIP').click(function(){
+$('#buttonReboot').click(function(){
 staticip1=$('#localip').val()
 staticip2=$('#upstreamip').val()
-$.get('./act/reboot.php', {localip:staticip1, upstreamip:staticip2}, function(){})
+$.get('./act/reboot.php', {localip:staticip1, upstreamip:staticip2}, function(result){window.location.reload()})
 })
 
 $('#buttonOnDHCP').click(function(){

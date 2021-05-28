@@ -6,6 +6,7 @@ if [[ -n $localaddr ]] && [[ -n $upstreamip ]]; then
 	sed -i "/address/c\address $localaddr" /etc/network/interfaces
 	sed -i "/gateway/c\gateway $upstreamip" /etc/network/interfaces
 	sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24" /etc/pihole/setupVars.conf
+fi
 
 cat << "EOF" >~/clearKernel
 #!/bin/bash
@@ -35,6 +36,5 @@ echo '@reboot ~/clearKernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
-	reboot
-fi
-
+sleep 2
+reboot
