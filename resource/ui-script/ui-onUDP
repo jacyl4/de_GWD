@@ -94,9 +94,6 @@ iptables -A INPUT -p tcp --dport 4711 -i $ethernetnum -j DROP
 iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 9896 -i $ethernetnum -j DROP
 
-iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p tcp --dport 53 -j DNAT --to $localaddr:53
-iptables -t nat -A PREROUTING -i $ethernetnum ! -s $localaddr -p udp --dport 53 -j DNAT --to $localaddr:53
-
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
