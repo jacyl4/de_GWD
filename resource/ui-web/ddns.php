@@ -415,7 +415,7 @@
       <footer class="sticky-footer">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by JacyL4 2021</span>
+            <span>Copyright © de_GWD by JacyL4 2017 ~ 2021</span>
           </div>
         </div>
       </footer>
