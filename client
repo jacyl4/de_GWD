@@ -1142,11 +1142,16 @@ deb http://deb.debian.org/debian-security buster/updates main contrib non-free
 EOF
 fi
 
-apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
+echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
+script -c "curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add - " /tmp/phpGPG
 
-echo
-echo -n "$statusUpdated" && white "Debian Update"
-echo
+if [[ -n $(grep -E "OK" /tmp/phpGPG) ]]; then
+  apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
+
+  echo
+  echo -n "$statusUpdated" && white "Debian Update"
+  echo
+fi
 }
 
 
