@@ -1143,15 +1143,13 @@ EOF
 fi
 
 echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
-script -c "curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add - " /tmp/phpGPG
+curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 
-if [[ -n $(grep -E "OK" /tmp/phpGPG) ]]; then
-  apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
+apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
 
-  echo
-  echo -n "$statusUpdated" && white "Debian Update"
-  echo
-fi
+echo
+echo -n "$statusUpdated" && white "Debian Update"
+echo
 }
 
 
