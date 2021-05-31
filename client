@@ -16,7 +16,7 @@ statusFailed=$(red "[  failed   ]")
 statusWarning=$(yellow "[  warning  ]")
 statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
-de_gwd_nginx="1.19.10"
+de_gwd_nginx="1.21.0"
 ttyd_version="1.6.3"
 branch="main"
 
@@ -63,6 +63,7 @@ wget --no-check-certificate --show-progress -cqO /opt/de_GWD/IPchnroute https://
 sed -i '/^\s*$/d' /opt/de_GWD/IPchnroute
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/IPchnroute
 mv -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
+echo
 }
 
 
@@ -239,6 +240,18 @@ if [[ -z $domain ]] || [[ -z $uuid ]]; then
   blue "Please update again"
   exit
 fi
+
+blue "---------------------------------------------"
+green "Xray node information"
+echo ""
+[ -n "$xDNS" ] && blue "xDNS:      $(yellow "$xDNS")"
+[ -n "$doh1" ] && blue "DoH1:      $(yellow "$doh1")"
+[ -n "$doh2" ] && blue "DoH2:      $(yellow "$doh2")"
+blue "Domain:    $(yellow "$domain")"
+blue "Port:      $(yellow "$port")"
+blue "UUID:      $(yellow "$uuid")"
+blue "Path:      $(yellow "$path")"
+blue "---------------------------------------------"
 }
 
 
@@ -442,8 +455,8 @@ else
 fi
 sysctl -p >/dev/null
 
-echo
 echo -n "$statuSuccess" && white "System Config"
+echo
 }
 
 
@@ -1147,7 +1160,6 @@ curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
 
 apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
 
-echo
 echo -n "$statusUpdated" && white "Debian Update"
 echo
 }
@@ -2070,13 +2082,13 @@ updateGWD(){
 
 updateAPT
 
-preDownload
-
 cleanDep
 
 preUpdate
 
 preConf
+
+preDownload
 
 SmartDNSset
 

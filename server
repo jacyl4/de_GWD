@@ -15,7 +15,7 @@ statuSuccess=$(green "[    OK     ]")
 statusFailed=$(red "[  failed   ]")
 virt=$(systemd-detect-virt)
 export DEBIAN_FRONTEND=noninteractive
-de_gwd_nginx="1.19.10"
+de_gwd_nginx="1.21.0"
 
 
 
