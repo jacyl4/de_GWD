@@ -241,17 +241,19 @@ if [[ -z $domain ]] || [[ -z $uuid ]]; then
   exit
 fi
 
-blue "---------------------------------------------"
+blue "###################################################"
+green "DNS information"
+echo
+[ -n "$xDNS" ] && blue "xDNS:         $(yellow "$xDNS")"
+[ -n "$doh1" ] && blue "DoH1:         $(yellow "$doh1")"
+[ -n "$doh2" ] && blue "DoH2:         $(yellow "$doh2")"
 green "Xray node information"
-echo ""
-[ -n "$xDNS" ] && blue "xDNS:      $(yellow "$xDNS")"
-[ -n "$doh1" ] && blue "DoH1:      $(yellow "$doh1")"
-[ -n "$doh2" ] && blue "DoH2:      $(yellow "$doh2")"
-blue "Domain:    $(yellow "$domain")"
-blue "Port:      $(yellow "$port")"
-blue "UUID:      $(yellow "$uuid")"
-blue "Path:      $(yellow "$path")"
-blue "---------------------------------------------"
+echo
+blue "Domain:       $(yellow "$domain")"
+blue "Port:         $(yellow "$port")"
+blue "UUID:         $(yellow "$uuid")"
+blue "Path:         $(yellow "$path")"
+blue "###################################################"
 }
 
 

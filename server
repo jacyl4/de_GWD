@@ -1467,7 +1467,7 @@ xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
 
 blue "---------------------------------------------"
 green "Xray node information"
-echo ""
+echo
 blue "DoH:       $(yellow "$vpsdomainP/dq")"
 blue "Domain:    $(yellow "$vpsdomainP")"
 blue "UUID:      $(yellow "$uuids")"
