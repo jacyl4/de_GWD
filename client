@@ -255,6 +255,7 @@ blue "Port:         $(yellow "$port")"
 blue "UUID:         $(yellow "$uuid")"
 blue "Path:         $(yellow "$path")"
 blue "###################################################"
+echo
 }
 
 
