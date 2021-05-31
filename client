@@ -247,6 +247,7 @@ echo
 [ -n "$xDNS" ] && blue "xDNS:         $(yellow "$xDNS")"
 [ -n "$doh1" ] && blue "DoH1:         $(yellow "$doh1")"
 [ -n "$doh2" ] && blue "DoH2:         $(yellow "$doh2")"
+echo
 green "Xray node information"
 echo
 blue "Domain:       $(yellow "$domain")"
