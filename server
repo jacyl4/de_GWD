@@ -1055,6 +1055,15 @@ EOF
 chmod +x /opt/de_GWD/Q2H
 /opt/de_GWD/Q2H
 
+cat << "EOF" >/opt/de_GWD/Qday
+#!/bin/bash
+if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]]; then
+"/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh"
+systemctl reload nginx
+fi
+EOF
+chmod +x /opt/de_GWD/Qday
+
 cat << "EOF" >/opt/de_GWD/Q4amSun
 #!/bin/bash
 wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
@@ -1069,9 +1078,11 @@ chmod +x /opt/de_GWD/Q4amSun
 
 crontab -l >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Q2H/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/Qday/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Q4amSun/d' /tmp/now.cron
 cat << EOF >>/tmp/now.cron
 0 */2 * * * /opt/de_GWD/Q2H
+0 */24 * * * /opt/de_GWD/Qday
 0 4 * * 7 /opt/de_GWD/Q4amSun
 EOF
 crontab /tmp/now.cron
