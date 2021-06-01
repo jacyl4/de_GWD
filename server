@@ -1057,7 +1057,7 @@ chmod +x /opt/de_GWD/Q2H
 
 cat << "EOF" >/opt/de_GWD/Qday
 #!/bin/bash
-if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]]; then
+if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]] && [[ -d "/root/.acme.sh" ]]; then
 "/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh"
 systemctl reload nginx
 fi
