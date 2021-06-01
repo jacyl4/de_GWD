@@ -1438,6 +1438,8 @@ location ~ ^/ttyd(.*)$ {
   proxy_read_timeout          216000;
   proxy_redirect              off;
   proxy_store                 off;
+  add_header                  X-Cache \$upstream_cache_status;
+  add_header                  Cache-Control no-cache;
 }
 
 location = /netdata {
@@ -1455,6 +1457,8 @@ location ~ /netdata/(?<ndpath>.*) {
   proxy_pass_request_headers  on;
   proxy_redirect              off;
   proxy_store                 off;
+  add_header                  X-Cache \$upstream_cache_status;
+  add_header                  Cache-Control no-cache;
 }
 }
 EOF
