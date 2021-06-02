@@ -1166,6 +1166,9 @@ echo
 
 
 installDep(){
+sed -i "/www-data/d" /etc/sudoers
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+
 dpkg --configure -a
 [ -z "$(dpkg -l | grep php7.4-fpm)" ] && aptPKG+=(php7.4-fpm)
 [ -z "$(dpkg -l | grep php7.4-json)" ] && aptPKG+=(php7.4-json)
@@ -1175,6 +1178,33 @@ dpkg --configure -a
 [ -n "$aptPKG" ] && apt install $(echo ${aptPKG[@]})
 unset aptPKG
 
+sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
+sed -i "/enable_dl =/c\enable_dl = off" /etc/php/7.4/fpm/php.ini
+sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
+sed -i "/disable_classes =/c\disable_classes =" /etc/php/7.4/fpm/php.ini
+sed -i "/^upload_max_filesize/c\upload_max_filesize = 32M" /etc/php/7.4/fpm/php.ini
+sed -i "/^post_max_size/c\post_max_size = 48M" /etc/php/7.4/fpm/php.ini
+sed -i "/^memory_limit/c\memory_limit = 512m" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_execution_time/c\max_execution_time = 600" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_input_vars/c\max_input_vars = 3000" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_input_time/c\max_input_time = 1000" /etc/php/7.4/fpm/php.ini
+sed -i "s/^zend_extension/;&/" /etc/php/7.4/fpm/php.ini
+sed -i "s/^opcache/;&/" /etc/php/7.4/fpm/php.ini
+
+cat << EOF >/etc/php/7.4/mods-available/opcache.ini
+; configuration for php opcache module
+; priority=10
+zend_extension=opcache.so
+opcache.enable=1
+opcache.enable_cli=1
+opcache.jit_buffer_size=512M
+opcache.memory_consumption=128
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=10000
+opcache.revalidate_freq=1
+opcache.fast_shutdown=1
+opcache.save_comments=1
+EOF
 
 cat << EOF >/etc/php/7.4/fpm/php-fpm.conf
 [global]
@@ -1207,32 +1237,6 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
-sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
-sed -i "/^upload_max_filesize/c\upload_max_filesize = 32M" /etc/php/7.4/fpm/php.ini
-sed -i "/^post_max_size/c\post_max_size = 48M" /etc/php/7.4/fpm/php.ini
-sed -i "/^memory_limit/c\memory_limit = 512m" /etc/php/7.4/fpm/php.ini
-sed -i "/^max_execution_time/c\max_execution_time = 600" /etc/php/7.4/fpm/php.ini
-sed -i "/^max_input_vars/c\max_input_vars = 3000" /etc/php/7.4/fpm/php.ini
-sed -i "/^max_input_time/c\max_input_time = 1000" /etc/php/7.4/fpm/php.ini
-sed -i "s/^zend_extension/;&/" /etc/php/7.4/fpm/php.ini
-sed -i "s/^opcache/;&/" /etc/php/7.4/fpm/php.ini
-
-cat << EOF >/etc/php/7.4/mods-available/opcache.ini
-; configuration for php opcache module
-; priority=10
-zend_extension=opcache.so
-opcache.enable=1
-opcache.enable_cli=1
-opcache.jit_buffer_size=512M
-opcache.memory_consumption=128
-opcache.interned_strings_buffer=8
-opcache.max_accelerated_files=10000
-opcache.revalidate_freq=1
-opcache.fast_shutdown=1
-opcache.save_comments=1
-EOF
-
 rm -rf /etc/systemd/system/php7.4-fpm.service
 cat << "EOF" >/lib/systemd/system/php7.4-fpm.service
 [Unit]
@@ -1258,9 +1262,6 @@ EOF
 systemctl daemon-reload >/dev/null
 systemctl enable php7.4-fpm >/dev/null 2>&1
 systemctl restart php7.4-fpm >/dev/null
-
-sed -i "/www-data/d" /etc/sudoers
-sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
 
 echo -n "$statusUpdated" && white "Dependencies"
 echo
