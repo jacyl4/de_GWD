@@ -36,7 +36,7 @@ mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET
 ipset -! -R </opt/de_GWD/chnrouteSET
 fi
 
-if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]] && [[ -d "/root/.acme.sh" ]]; then
+if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]] && [[ -d "/root/.acme.sh" ]] && [[ $(curl -Is get.acme.sh) =~ "HTTP" ]]; then
 "/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh" >/dev/null 2>&1
 systemctl reload nginx >/dev/null 2>&1
 fi
