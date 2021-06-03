@@ -498,8 +498,6 @@ server 223.5.5.5
 server 223.6.6.6
 server 1.1.1.1 -exclude-default-group -group xDNS
 server 8.8.8.8 -exclude-default-group -group xDNS
-server 1.0.0.1 -exclude-default-group -group xDNS
-server 8.8.4.4 -exclude-default-group -group xDNS
 EOF
 
 rm -rf /run/smartdns.pid

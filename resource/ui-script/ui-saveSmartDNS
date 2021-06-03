@@ -46,8 +46,6 @@ done
 cat << EOF >>/etc/smartdns/smartdns.conf
 server 1.1.1.1 -exclude-default-group -group xDNS
 server 8.8.8.8 -exclude-default-group -group xDNS
-server 1.0.0.1 -exclude-default-group -group xDNS
-server 8.8.4.4 -exclude-default-group -group xDNS
 EOF
 
 [ -n "$xDNSc" ] && echo "server 127.0.0.1:5330 -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
