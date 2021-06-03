@@ -38,7 +38,6 @@ systemctl stop iptables-proxy >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
-options rotate
 nameserver 119.29.29.29
 nameserver 182.254.118.118
 nameserver 114.114.114.114
@@ -272,7 +271,6 @@ else
     echo -n "$statusFailed" && white "de_GWD server connect"
 
 cat << EOF >/etc/resolv.conf
-options rotate
 nameserver 119.29.29.29
 nameserver 119.28.28.28
 nameserver 182.254.118.118
@@ -474,8 +472,8 @@ bind-tcp 127.0.0.1:5310
 bind 127.0.0.1:5311 -no-cache -no-speed-check
 bind-tcp 127.0.0.1:5311 -no-cache -no-speed-check
 
-bind 127.0.0.1:5320 -no-speed-check -group xDNS
-bind-tcp 127.0.0.1:5320 -no-speed-check -group xDNS
+bind 127.0.0.1:5320 -no-cache -no-speed-check -group xDNS
+bind-tcp 127.0.0.1:5320 -no-cache -no-speed-check -group xDNS
 
 bind 127.0.0.1:5321 -no-cache -group xDNS
 bind-tcp 127.0.0.1:5321 -no-cache -group xDNS

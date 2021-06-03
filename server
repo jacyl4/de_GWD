@@ -109,7 +109,6 @@ pihole restartdns >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
-options rotate
 nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
