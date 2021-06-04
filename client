@@ -609,7 +609,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
     "tag":"dnsin",
     "port":53,
     "protocol":"dokodemo-door",
-    "settings":{"address":"127.0.0.1","port":5321,"network":"tcp,udp"}
+    "settings":{"address":"127.0.0.1","port":5310,"network":"tcp,udp"}
   }
 ],
 "outbounds":[
@@ -849,7 +849,7 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
       "tag":"xDNScIN",
       "port":5330,
       "protocol":"dokodemo-door",
-      "settings":{"address":"127.0.0.1","port":5321,"network":"tcp,udp"}
+      "settings":{"address":"127.0.0.1","port":5310,"network":"tcp,udp"}
     }
   ],
   "outbounds": [
