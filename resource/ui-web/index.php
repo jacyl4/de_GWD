@@ -503,6 +503,12 @@
                 </div>
                   <textarea id="dnsChina" class="form-control" aria-label="dnsChina" rows="6"><?php
 preg_match_all('/(?<=\bserver )\S+/is', $smartdnsConf, $dnsClist);
+if(($index = array_search('1.1.1.1',$dnsClist[0]))){
+unset($dnsClist[0][$index]);
+}
+if(($index = array_search('8.8.8.8',$dnsClist[0]))){
+unset($dnsClist[0][$index]);
+}
 if(($index = array_search('127.0.0.1:5330',$dnsClist[0]))){
 unset($dnsClist[0][$index]);
 }
