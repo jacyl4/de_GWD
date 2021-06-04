@@ -2086,7 +2086,13 @@ blue "---------------------"
 updateGWD(){
 [ -f /opt/de_GWD/version.php ] && red "this is not client" && exit
 
+    echo -n "Update Debian system? (Y/N)" && read -n 1 updateDebian
+    echo
+    echo
+
+if [[ "$updateDebian" = "Y" ]] || [[ "$updateDebian" = "y" ]]; then
 updateAPT
+fi
 
 cleanDep
 
