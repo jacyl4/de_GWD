@@ -1049,6 +1049,8 @@ iptables -t mangle -A V2PROXY -p tcp --dport 4711 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 9896 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 9896 -j ACCEPT
 
+iptables -t mangle -A V2PROXY -p udp -d 1.1.1.1/32 -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -d 8.8.8.8/32 -j MARK --set-mark 0x9
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
