@@ -14,7 +14,10 @@ fi
 
 >/opt/de_GWD/IPlistB
 >/opt/de_GWD/IPlistW
-jq '.dns.servers[1].domains=["domain:play.googleapi.cn"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+jq 'del(.dns.servers[1].domains)' /tmp/v2dns_config |\
+jq '.dns.servers[1].domains+=["domain:play.googleapi.cn"]' |\
+jq '.dns.servers[1].domains+=["domain:raw.githubusercontent.com"]' | sponge /tmp/v2dns_config
+
 if [[ -f "/tmp/listBpre" ]] && [[ -n $(cat /tmp/listBpre) ]]; then
 	jq '.listB={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 	cat /tmp/listBpre | xargs -n 8 | while read listB 
@@ -30,7 +33,10 @@ if [[ -f "/tmp/listBpre" ]] && [[ -n $(cat /tmp/listBpre) ]]; then
 	done
 fi
 
-jq '.dns.servers[2].domains=["domain:live.com"]' /tmp/v2dns_config | sponge /tmp/v2dns_config
+
+jq 'del(.dns.servers[2].domains)' /tmp/v2dns_config |\
+jq '.dns.servers[2].domains+=["domain:live.com"]' | sponge /tmp/v2dns_config
+
 if [[ -f "/tmp/listWpre" ]] && [[ -n $(cat /tmp/listWpre) ]]; then
 	jq '.listW={}' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 	cat /tmp/listWpre | xargs -n 8 | while read listW
