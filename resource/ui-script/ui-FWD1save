@@ -29,11 +29,6 @@ cat << EOF >/opt/de_GWD/vtrui1/config.json
           "dnsFlow"
         ],
         "outboundTag": "direct"
-      },
-      {
-        "type":"field",
-        "port":"53",
-        "outboundTag": "direct"
       }
     ]
   },

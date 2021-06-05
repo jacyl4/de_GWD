@@ -12,6 +12,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     {
       "type":"field",
       "ip":["1.1.1.1","8.8.8.8"],
+      "port":"53",
       "outboundTag": "default"
     },
     {
@@ -24,11 +25,6 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     {
       "type":"field",
       "ip":["geoip:private"],
-      "outboundTag": "direct"
-    },
-    {
-      "type":"field",
-      "port":"53",
       "outboundTag": "direct"
     }
   ]
