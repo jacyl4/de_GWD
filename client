@@ -629,7 +629,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
   "rules":[
     {
       "type":"field",
-      "ip":["1.1.1.1/32","8.8.8.8/32"],
+      "ip":["1.1.1.1","8.8.8.8"],
       "outboundTag": "default"
     },
     {
