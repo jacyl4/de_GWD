@@ -3,7 +3,6 @@ cat << EOF >/tmp/v2dns_config
 {
 "dns":{
   "tag":"dnsFlow",
-  "queryStrategy":"UseIPv4",
   "disableCache":true,
   "servers":[
   {"address":"127.0.0.1","port":5320},
