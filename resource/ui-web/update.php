@@ -160,11 +160,11 @@
   </div>
 </div>
 
-<div id="donate" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="donate" aria-hidden="true">
+<div id="donateModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="donate" aria-hidden="true">
   <div class="modal-dialog modal-sm" style="top:50%" role="document">
     <div class="modal-content">
       <div class="modal-body mx-auto">
-        <img src="./vendor/pic/EaMjS1J8yfrVv4N.png" width="260">
+        <img id="donatePic" src="" width="260">
       </div>
     </div>
   </div>
@@ -244,7 +244,7 @@
 
 <div class="row mt-4">
     <div class="col"><hr></div>
-    <div class="col-auto"><a href="javascript:void(0)" data-toggle="modal" data-target="#donate">捐赠</a></div>
+    <div class="col-auto"><a id="donateLink" href="javascript:void(0)">捐赠</a></div>
     <div class="col"><hr></div>
 </div>
 
@@ -275,6 +275,11 @@ $.get('auth.php', {logout:'true'}, function(result){window.location.href="index.
 $('#buttonMarkThis').click(function(){
 markNametxt=$('#markName').val()
 $.get('./act/markThis.php', {markName:markNametxt}, function(result){window.location.reload()})
+})
+
+$('#donateLink').click(function(){
+$('#donateModal').modal('show')
+$('#donatePic').attr('src', 'https://tlgur.com/d/GXjqrpl4')
 })
 
 $('#buttonBackup').click(function(){
