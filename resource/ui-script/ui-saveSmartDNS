@@ -43,11 +43,6 @@ for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf); do
     echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
 done
 
-cat << EOF >>/etc/smartdns/smartdns.conf
-server 1.1.1.1 -group xDNS -exclude-default-group
-server 8.8.8.8 -group xDNS -exclude-default-group
-EOF
-
 [ -n "$xDNSc" ] && echo "server 127.0.0.1:5330 -group xDNS -exclude-default-group" >>/etc/smartdns/smartdns.conf
 
 if [[ -n $doh1IP ]]; then
