@@ -2,7 +2,9 @@
 cat << EOF >/tmp/v2dns_config
 {
 "dns":{
+  "queryStrategy":"UseIPv4",
   "disableCache":true,
+  "disableFallback":true,
   "servers":[
   {"address":"127.0.0.1","port":5320},
   {"address":"127.0.0.1","port":5320,"domains":["domain:google.com"]},
