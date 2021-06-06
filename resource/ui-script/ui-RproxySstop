@@ -1,0 +1,5 @@
+#!/bin/bash
+systemctl disable --now RproxyS >/dev/null
+rm -rf /lib/systemd/system/RproxyS.service
+rm -rf /opt/de_GWD/RproxyS
+systemctl daemon-reload >/dev/null
