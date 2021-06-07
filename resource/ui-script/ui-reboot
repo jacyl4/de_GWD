@@ -22,7 +22,7 @@ do
 apt purge -y $line
 done
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 sed -i '/clearKernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -31,7 +31,7 @@ systemctl restart sshd >/dev/null
 EOF
 chmod +x ~/clearKernel
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 echo '@reboot ~/clearKernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron

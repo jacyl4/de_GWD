@@ -84,7 +84,7 @@ cat << EOF >/var/www/ssl/ocsp.resp
 0000 0000 0000 00
 EOF
 
-crontab -l >/tmp/now.cron
+crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/acme.sh/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
@@ -104,12 +104,6 @@ curl https://get.acme.sh | sh
 fi
 
 /var/www/ssl/update_ocsp_cache
-
-crontab -l >/tmp/now.cron
-sed -i '/update_ocsp_cache/d' /tmp/now.cron
-echo '0 0 * * * /var/www/ssl/update_ocsp_cache' >>/tmp/now.cron
-crontab /tmp/now.cron
-rm -rf /tmp/now.cron
 
 blue "--------------------------------"
 blue  "Generate TLS Certificate [done]"

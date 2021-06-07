@@ -59,8 +59,9 @@ rm -rf /etc/nginx/conf.d/4_v2Proxy
 rm -rf /etc/ld.so.preload
 ldconfig
 
-crontab -l >/tmp/now.cron
+crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
 
@@ -518,7 +519,7 @@ fi
 
 
 makeSSL_D(){
-crontab -l >/tmp/now.cron
+crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/acme.sh/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
@@ -543,7 +544,7 @@ curl https://get.acme.sh | sh
 
 
 makeSSL_W(){
-crontab -l >/tmp/now.cron
+crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/acme.sh/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
@@ -596,12 +597,6 @@ EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache
 /var/www/ssl/update_ocsp_cache
-
-crontab -l >/tmp/now.cron
-sed -i '/update_ocsp_cache/d' /tmp/now.cron
-echo '0 0 * * * /var/www/ssl/update_ocsp_cache' >>/tmp/now.cron
-crontab /tmp/now.cron
-rm -rf /tmp/now.cron
 }
 
 
@@ -1019,7 +1014,7 @@ echo "updateGWD" >>  /tmp/autoUpdate
 chmod +x /tmp/autoUpdate
 /tmp/autoUpdate
 
-crontab -l > /tmp/now.cron
+crontab -l 2>/dev/null > /tmp/now.cron
 sed -i '/autoUpdate/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
@@ -1044,7 +1039,7 @@ localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
 remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
 
 if [[ $localVer != $remoteVer ]]; then
-crontab -l > /tmp/now.cron
+crontab -l 2>/dev/null > /tmp/now.cron
 sed -i '/autoUpdate/d' /tmp/now.cron
 echo '30 4 * * *  /opt/de_GWD/autoUpdate' >> /tmp/now.cron
 crontab /tmp/now.cron
@@ -1058,8 +1053,9 @@ cat << "EOF" >/opt/de_GWD/Qday
 #!/bin/bash
 if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]] && [[ -d "/root/.acme.sh" ]]; then
 "/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh"
-systemctl reload nginx
 fi
+
+/var/www/ssl/update_ocsp_cache
 EOF
 chmod +x /opt/de_GWD/Qday
 
@@ -1075,7 +1071,7 @@ fi
 EOF
 chmod +x /opt/de_GWD/Q4amSun
 
-crontab -l >/tmp/now.cron
+crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Q2H/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Qday/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Q4amSun/d' /tmp/now.cron
@@ -1171,7 +1167,7 @@ do
 apt purge -y $line
 done
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1180,7 +1176,7 @@ systemctl restart sshd >/dev/null
 EOF
 chmod +x ~/bbrKernel/clearkernel
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 echo '@reboot ~/bbrKernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1249,7 +1245,7 @@ do
 apt purge -y $line
 done
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1258,7 +1254,7 @@ systemctl restart sshd >/dev/null
 EOF
 chmod +x ~/bbrKernel/clearkernel
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 echo '@reboot ~/bbrKernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1509,7 +1505,7 @@ localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
 remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
 
 if [[ $localVer != $remoteVer ]]; then
-crontab -l > /tmp/now.cron
+crontab -l 2>/dev/null > /tmp/now.cron
 sed -i '/autoUpdate/d' /tmp/now.cron
 echo '30 4 * * *  /opt/de_GWD/autoUpdate' >> /tmp/now.cron
 crontab /tmp/now.cron
@@ -1524,7 +1520,7 @@ blue "--------------------------"
 elif [[ "$autoUpdateswitch" = "N" ]] || [[ "$autoUpdateswitch" = "n" ]]; then
 sed -i '/localVer=/,$d' /opt/de_GWD/Q2H
 
-crontab -l > /tmp/now.cron
+crontab -l 2>/dev/null > /tmp/now.cron
 sed -i '/autoUpdate/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron

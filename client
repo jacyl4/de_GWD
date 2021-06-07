@@ -187,8 +187,9 @@ rm -rf /etc/php/8.0/
 apt purge '^php8.0.*'
 fi
 
-crontab -l >/tmp/now.cron
+crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' /tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
 
@@ -1697,7 +1698,7 @@ fi
 
 /opt/de_GWD/ui_2h
 
-crontab -l >/tmp/now.cron
+crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_am4/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_4h/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/ui_2h/d' /tmp/now.cron
@@ -1800,7 +1801,7 @@ do
 apt purge -y $line
 done
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1809,7 +1810,7 @@ systemctl restart sshd >/dev/null
 EOF
 chmod +x ~/bbrKernel/clearkernel
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 echo '@reboot ~/bbrKernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1876,7 +1877,7 @@ do
 apt purge -y $line
 done
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
@@ -1885,7 +1886,7 @@ systemctl restart sshd >/dev/null
 EOF
 chmod +x ~/bbrKernel/clearkernel
 
-crontab -l > ~/now.cron
+crontab -l 2>/dev/null > ~/now.cron
 echo '@reboot ~/bbrKernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron

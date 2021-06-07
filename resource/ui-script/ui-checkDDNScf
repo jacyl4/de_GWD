@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ "$(crontab -l)" =~ "ddnsCFupdateIP" ]]; then
+if [[ "$(crontab -l 2>/dev/null)" =~ "ddnsCFupdateIP" ]]; then
 	echo "success"
 else
 	echo "outline-secondary"
