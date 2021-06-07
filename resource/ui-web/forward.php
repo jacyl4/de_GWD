@@ -334,7 +334,7 @@
                   UUID
                   </span>
                 </div>
-                  <textarea id="FWD0uuid" class="form-control" rows="4"><?php foreach ($de_GWDconf->FORWARD->FWD0->uuid as $k => $v) {echo "$v\n";} ?></textarea>
+                  <textarea id="FWD0uuid" class="form-control" placeholder="一行一个UUID" rows="4"><?php foreach ($de_GWDconf->FORWARD->FWD0->uuid as $k => $v) {echo "$v\n";} ?></textarea>
                 </div>
               </div>
             </div>
@@ -408,7 +408,7 @@
                   UUID
                   </span>
                 </div>
-                  <textarea id="FWD1uuid" class="form-control" rows="4"><?php foreach ($de_GWDconf->FORWARD->FWD1->uuid as $k => $v) {echo "$v\n";} ?></textarea>
+                  <textarea id="FWD1uuid" class="form-control" placeholder="一行一个UUID" rows="4"><?php foreach ($de_GWDconf->FORWARD->FWD1->uuid as $k => $v) {echo "$v\n";} ?></textarea>
                 </div>
               </div>
             </div>
