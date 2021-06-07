@@ -39,7 +39,10 @@ fi
 if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]] && [[ -d "/root/.acme.sh" ]] && [[ $(curl -Is get.acme.sh) =~ "HTTP" ]]; then
 "/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh" >/dev/null 2>&1
 fi
+
+if [[ $(curl -Is google.com) =~ "HTTP" ]] || [[ $(curl -Is youtube.com) =~ "HTTP" ]]; then
 /var/www/ssl/update_ocsp_cache
+fi
 
 echo
 echo -n "$statusUpdated" && white "IP & Domain rules"
