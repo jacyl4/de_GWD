@@ -418,7 +418,7 @@
     <div class="card bg-light border-secondary mb-3">
           <div class="card-header">
             <i class="fas fa-share-square"></i>
-            内网穿透 服务端
+            内网穿透 服务端 (公网设置)
 <span id="RproxySbutton" class="float-right mt-n1 mb-n2" style="display:<?php if (empty($RproxySconf) === false) echo 'block'; else echo 'none';?>">
 <div class="btn-group">
 <button id="buttonRproxySstop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">
@@ -549,7 +549,7 @@ EOT;
     <div class="card bg-light border-secondary mb-3">
           <div class="card-header">
             <i class="far fa-share-square"></i>
-            内网穿透 客户端
+            内网穿透 客户端 (内网设置)
 <span id="RproxyCbutton" class="float-right mt-n1 mb-n2" style="display:<?php if (empty($RproxyCconf) === false) echo 'block'; else echo 'none';?>">
 <div class="btn-group">
 <button id="buttonRproxyCstop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">
