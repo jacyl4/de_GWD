@@ -41,7 +41,7 @@ if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 25920
 fi
 
 if [[ $(curl -Is google.com) =~ "HTTP" ]] || [[ $(curl -Is youtube.com) =~ "HTTP" ]]; then
-/var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache >/dev/null 2>&1
 fi
 
 echo
