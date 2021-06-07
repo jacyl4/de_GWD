@@ -41,6 +41,8 @@
 <?php $checkxDNSs = exec('sudo systemctl is-active xDNSs'); ?>
 <?php $xDNSsConf = file_exists('/opt/de_GWD/xDNSs/config.json'); ?>
 
+<?php $checkBlock53 = $de_GWDconf->FORWARD->block53; ?>
+
 <?php $checkVtrui = exec('sudo systemctl is-active vtrui'); ?>
 <?php $vtruiConf = json_decode(file_get_contents('/opt/de_GWD/vtrui/config.json')); ?>
 <?php $checkFWD0 = empty($vtruiConf->inbounds[1]); ?>
@@ -278,7 +280,7 @@
   <span id="buttonBlock53offLoading"></span>
   <span>关闭</span>
 </button>
-<button id="buttonBlock53on" type="button" class="btn <?php if ($checkFWD0 === false && $checkVtrui === active) echo 'btn-success'; else echo 'btn-outline-secondary';?> btn-sm mt-1" style="border-Radius: 0px;">
+<button id="buttonBlock53on" type="button" class="btn <?php if ($checkBlock53 === on) echo 'btn-success'; else echo 'btn-outline-secondary';?> btn-sm mt-1" style="border-Radius: 0px;">
   <span id="buttonBlock53onLoading"></span>
   <span>不对外开放53端口</span>
 </button>
