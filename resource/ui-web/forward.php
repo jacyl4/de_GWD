@@ -852,6 +852,7 @@ $.get('./act/block53off.php', function(result){
   $("#buttonBlock53offLoading").removeClass()
   $("#buttonBlock53on").attr('class','btn btn-outline-secondary btn-sm mt-1')
 })
+})
 
 $('#buttonFWD0save').click(function(){
 $("#buttonFWD0saveLoading").attr("class", "spinner-border spinner-border-sm")
