@@ -1599,11 +1599,10 @@ systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 
 sed -i '/LIGHTTPD_ENABLED=/c\LIGHTTPD_ENABLED=false' /etc/pihole/setupVars.conf
-sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
-echo "PIHOLE_DNS_1=127.0.0.1#5350" >>/etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf && echo "PIHOLE_DNS_1=127.0.0.1#5350" >>/etc/pihole/setupVars.conf
 sed -i "/PIHOLE_INTERFACE=/c\PIHOLE_INTERFACE=$ethernetnum,wg0" /etc/pihole/setupVars.conf
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24" /etc/pihole/setupVars.conf
-sed -i "/API_EXCLUDE_DOMAINS=/c\API_EXCLUDE_DOMAINS=www.google.com,www.baidu.com,raw.githubusercontent.com,api.cloudflare.com,www.f3322.org" /etc/pihole/setupVars.conf
+sed -i '/API_EXCLUDE_DOMAINS/d' /etc/pihole/setupVars.conf && echo "API_EXCLUDE_DOMAINS=www.google.com,www.baidu.com,raw.githubusercontent.com,api.cloudflare.com,www.f3322.org" >>/etc/pihole/setupVars.conf
 
 >/etc/pihole/dns-servers.conf
 cat << EOF >/etc/pihole/pihole-FTL.conf
