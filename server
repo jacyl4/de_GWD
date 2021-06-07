@@ -26,11 +26,6 @@ mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
 rm -f /etc/nginx/conf.d/3_proxyPath
 fi
 
-mkdir -p /opt/de_GWD
-if [[ -d /usr/local/bin/frp ]]; then
-mv -f /usr/local/bin/frp /opt/de_GWD/frp
-fi
-
 if [[ -d /usr/local/bin/vtrui ]]; then
 mv -f /usr/local/bin/vtrui /opt/de_GWD/vtrui
 fi
@@ -42,6 +37,22 @@ if [[ -d "/opt/AdGuardHome" ]]; then
   rm -rf /opt/AdGuardHome
   rm -rf /usr/bin/yq
 fi
+
+systemctl disable frps >/dev/null 2>&1
+systemctl disable frpc >/dev/null 2>&1
+systemctl stop frps >/dev/null 2>&1
+systemctl stop frpc >/dev/null 2>&1
+
+rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
+rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
+rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
+rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
+
+rm -rf /opt/de_GWD/frps
+rm -rf /opt/de_GWD/frpc
+
+jq 'del(.FRP)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 
 [ ! -f "/var/www/ssl/de_GWD.cer" ] && mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer && sed -i '/ssl_certificate /c\ssl_certificate \/var\/www\/ssl\/de_GWD.cer;' /etc/nginx/conf.d/default.conf
 [ ! -f "/var/www/ssl/de_GWD.key" ] && mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key && sed -i '/ssl_certificate_key /c\ssl_certificate_key \/var\/www\/ssl\/de_GWD.key;' /etc/nginx/conf.d/default.conf
