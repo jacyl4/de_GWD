@@ -1,8 +1,6 @@
 #!/bin/bash
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 
-if [[ $(jq -r '.FORWARD.PortCheck1' /opt/de_GWD/0conf) == "checked" ]];then
-
 sed -i '/--dport 53 -i/d' /opt/de_GWD/iptables-proxy-up
 sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-onUDP
 sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-offUDP
@@ -22,4 +20,3 @@ systemctl restart iptables-proxy
 
 sed -i "/net.ipv4.ip_forward/c\net.ipv4.ip_forward = 0" /etc/sysctl.conf
 sysctl -p >/dev/null
-fi

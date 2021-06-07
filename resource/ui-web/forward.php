@@ -274,6 +274,17 @@
             默认中转线
 <span id="FWD0button" class="float-right mt-n1 mb-n2" style="display:<?php if ($checkFWD0 === false) echo 'block'; else echo 'none';?>">
 <div class="btn-group">
+<button id="buttonBlock53off" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">
+  <span id="buttonBlock53offLoading"></span>
+  <span>关闭</span>
+</button>
+<button id="buttonBlock53on" type="button" class="btn <?php if ($checkFWD0 === false && $checkVtrui === active) echo 'btn-success'; else echo 'btn-outline-secondary';?> btn-sm mt-1" style="border-Radius: 0px;">
+  <span id="buttonBlock53onLoading"></span>
+  <span>不对外开放53端口</span>
+</button>
+</div>
+
+<div class="btn-group">
 <button id="buttonFWD0stop" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-Radius: 0px;">
   <span id="buttonFWD0stopLoading"></span>
   <span>关闭</span>
@@ -292,13 +303,6 @@
           <div id="FWD0body" class="card-body" style="display:<?php if ($checkFWD0 === false) echo 'block'; else echo 'none';?>">
             <div class="form-row">
               <div class="col-md-3 mt-auto">
-
-<span class="float-left mb-3">
-<div class="form-group form-check ml-4 mt-1 my-2">
-    <input id="portCheck1" type="checkbox" class="form-check-input" <?php echo $de_GWDconf->FORWARD->PortCheck1 ?>>
-    <label class="form-check-label" for="portCheck1">阻止外部访问本机53端口</label>
-</div>
-</span>
 
               <div class="input-group my-2">
                 <div class="input-group-prepend">
@@ -832,16 +836,26 @@ $.get('./act/xDNSsStop.php', function(result){
 })
 })
 
+$('#buttonBlock53on').click(function(){
+$("#buttonBlock53onLoading").attr("class", "spinner-border spinner-border-sm")
+$.get('./act/block53on.php', function(result){
+  $("#buttonBlock53onLoading").removeClass()
+  $("#buttonBlock53on").attr('class','btn btn-success btn-sm mt-1')
+})
+})
+
+$('#buttonBlock53off').click(function(){
+$("#buttonBlock53offLoading").attr("class", "spinner-border spinner-border-sm")
+$.get('./act/block53off.php', function(result){
+  $("#buttonBlock53offLoading").removeClass()
+  $("#buttonBlock53on").attr('class','btn btn-outline-secondary btn-sm mt-1')
+})
+
 $('#buttonFWD0save').click(function(){
 $("#buttonFWD0saveLoading").attr("class", "spinner-border spinner-border-sm")
-if ($('#portCheck1').prop('checked') == true) {
-  var portCheck1 = "checked"
-} else {
-  var portCheck1 = ""
-}
 FWD0port=$('#FWD0port').val()
 FWD0uuid=$('#FWD0uuid').val()
-$.get('./act/FWD0save.php', {portCheck1:portCheck1, FWD0port:FWD0port, FWD0uuid:FWD0uuid}, function(result){
+$.get('./act/FWD0save.php', {FWD0port:FWD0port, FWD0uuid:FWD0uuid}, function(result){
   $("#buttonFWD0saveLoading").removeClass()
   window.location.reload()
 })

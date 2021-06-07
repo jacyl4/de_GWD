@@ -107,6 +107,10 @@ if [[ $(jq -r '.dns.boostDNS' /opt/de_GWD/0conf) != "null" ]]; then
   jq 'del(.dns.boostDNS)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 fi
 
+if [[ $(jq -r '.FORWARD.PortCheck1' /opt/de_GWD/0conf) != "null" ]]; then
+  jq 'del(.FORWARD.PortCheck1)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
 if [[ $(jq -r '.NFS' /opt/de_GWD/0conf) != "null" ]]; then
   jq 'del(.NFS)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 fi
@@ -1688,13 +1692,19 @@ if [[ $(jq -r '.FORWARD.Rproxy.server.status' /opt/de_GWD/0conf 2>/dev/null) = "
   /opt/de_GWD/ui-RproxySsave >/dev/null 2>&1
 fi
 
-systemctl restart vtrui >/dev/null
-
 if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf) = "on" ]]; then
-  /opt/de_GWD/ui-onUDP r
+  /opt/de_GWD/ui-onUDP
 else
-  /opt/de_GWD/ui-offUDP r
+  /opt/de_GWD/ui-offUDP
 fi
+
+if [[ $(jq -r '.FORWARD.block53' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-block53on
+else
+  /opt/de_GWD/ui-block53off
+fi
+
+systemctl restart vtrui >/dev/null
 
 /opt/de_GWD/ui_2h
 
