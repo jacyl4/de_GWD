@@ -3,8 +3,11 @@
 
 [![Telegram](https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg)](https://t.me/de_GWD)  
 
-![de_GWD index](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/index.png)
-![de_GWD update](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/update.png)
+![de_GWD 1](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/1.png)
+![de_GWD 2](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/2.png)
+![de_GWD 3](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/3.png)
+![de_GWD 4](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/4.png)
+![de_GWD 5](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/5.png)
 ## Server (amd64 & arm64):
 ```
 apt install -y wget
