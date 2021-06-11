@@ -11,11 +11,13 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 ```
 
 
+
 ## Client (amd64 & arm64):
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
 ```
+
 
 
 ![de_GWD 1](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/1.png)
