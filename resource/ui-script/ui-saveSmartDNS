@@ -4,7 +4,7 @@ shttps[1]=$(grep 'server-https ' /etc/smartdns/smartdns.conf | awk NR==2)
 doh1IP0=$(echo ${shttps[0]} | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
 doh2IP0=$(echo ${shttps[1]} | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
 xDNScDomainO=$(jq -r '.dns.xDNS' /opt/de_GWD/0conf | grep -v "/dq" | cut -d: -f1)
-[ -f "/opt/de_GWD/xDNSc/config.json" ] && xDNScIPO=$(jq -r --arg domainO "$xDNScDomainO" '.dns.hosts."\($domainO)"' /opt/de_GWD/xDNSc/config.json)
+xDNScIPO=$(jq -r --arg domainO "$xDNScDomainO" '.dns.hosts."\($domainO)"' /opt/de_GWD/xDNSc/config.json | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 
 
 doh1=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | grep "/dq" | awk NR==1)
@@ -28,7 +28,7 @@ xDNSc=$(jq -r '.dns.xDNS' /opt/de_GWD/0conf | grep -v "/dq" | grep -v "null")
 [ -n "$xDNSc" ] && xDNScIP=$(dig @127.0.0.1 $xDNScDomain -4p 5311 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
 
 
-if [[ $doh1IP != $doh1IP0 ]] || [[ $doh2IP != $doh2IP0 ]] || [[ $xDNScIP != $xDNScIPO ]] || [[ $1 == "r" ]]; then
+if [[ $doh1IP != $doh1IP0 ]] || [[ $doh2IP != $doh2IP0 ]] || [[ $1 == "r" ]]; then
 
 n=$[$(sed -n '/serve-expired-reply-ttl/=' /etc/smartdns/smartdns.conf)+1]
 sed -i "$n,\$d" /etc/smartdns/smartdns.conf
@@ -59,7 +59,7 @@ fi
 unset shttps
 
 systemctl restart smartdns >/dev/null
-
+fi
 
 
 if [[ -n $xDNScIP ]]; then
@@ -126,7 +126,6 @@ EOF
 
 systemctl enable xDNSc >/dev/null 2>&1
 systemctl restart xDNSc >/dev/null
-
 if [[ $(systemctl is-active xDNSc) != "active" ]]; then
 sed -i '/Nice=/d' /lib/systemd/system/xDNSc.service
 sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/xDNSc.service
@@ -145,4 +144,3 @@ sed -i '/^\s*$/d' /opt/de_GWD/IPxDNS
 sed -i 's/^/add doh &/g' /opt/de_GWD/IPxDNS
 mv -f /opt/de_GWD/IPxDNS /opt/de_GWD/IPxDNSSET
 ipset -! -R </opt/de_GWD/IPxDNSSET
-fi
