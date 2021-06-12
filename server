@@ -1033,6 +1033,20 @@ rm -rf /tmp/autoUpdate
 EOF
 chmod +x /opt/de_GWD/autoUpdate
 
+cat << "EOF" >/opt/de_GWD/Qprobe
+#!/bin/bash
+latency=$(echo "$(curl -o /dev/null -sw '%{time_connect}\n' https://www.youtube.com/red) * 1000" | bc | awk '{printf ("%.2f\n",$1)}')
+
+time=$(date '+%H:%M')
+
+echo "$time $latency" >>/var/www/html/probe
+
+if [[ $(cat /var/www/html/probe | wc -l) -ge 144 ]]; then
+  tac /var/www/html/probe | sed '145,$d' | tac | sponge /var/www/html/probe
+fi
+EOF
+chmod +x /opt/de_GWD/Qprobe
+
 cat << "EOF" >/opt/de_GWD/Q2H
 #!/bin/bash
 virt=$(systemd-detect-virt)
@@ -1083,10 +1097,12 @@ EOF
 chmod +x /opt/de_GWD/Q4amSun
 
 crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/Qprobe/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Q2H/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Qday/d' /tmp/now.cron
 sed -i '/\/opt\/de_GWD\/Q4amSun/d' /tmp/now.cron
 cat << EOF >>/tmp/now.cron
+*/5 * * * * /opt/de_GWD/Qprobe
 0 */2 * * * /opt/de_GWD/Q2H
 0 */24 * * * /opt/de_GWD/Qday
 0 4 * * 7 /opt/de_GWD/Q4amSun
@@ -1488,6 +1504,8 @@ xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
 
 blue "---------------------------------------------"
 green "Xray node information"
+echo
+blue "Probe:     $(yellow "$vpsdomainP/probe")"
 echo
 blue "DoH:       $(yellow "$vpsdomainP/dq")"
 blue "Domain:    $(yellow "$vpsdomainP")"
