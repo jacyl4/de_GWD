@@ -1687,7 +1687,7 @@ if [[ $(jq -r '.v2nodeDIV.nodeDT.display' /opt/de_GWD/0conf) = "on" ]]; then
 else
   /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
 fi
-echo -n "$statusUpdated" && white "V2 Divergence"
+echo -n "$statusUpdated" && white "V2 Split"
 
 if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
   /opt/de_GWD/ui-FWD0save >/dev/null 2>&1

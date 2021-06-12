@@ -10,5 +10,5 @@ statusUpdated=$(green "[  updated  ]")
 
 /opt/de_GWD/ui-DNSsplit
 
-echo -n "$statusUpdated" && white "DNS Divergence"
+echo -n "$statusUpdated" && white "DNS Split"
 echo
