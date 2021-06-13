@@ -246,30 +246,21 @@
 
           <div id="ddnsCFbody" class="card-body" style="display:none">
     <div class="form-row">
-      <div class="col-md-6 input-group my-2">
+      <div class="col-md-3 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text" style="min-width: 120px;">域名</span>
         </div>
           <input id="CFdomain" type="text" class="form-control" value="<?php echo $de_GWDconf->ddns->ddnsCF->cfDomain ?>">
       </div>
 
-      <div class="col-md-6 input-group my-2">
-        <div class="input-group-prepend">
-          <span class="input-group-text" style="min-width: 120px;">Zone ID</span>
-        </div>
-          <input id="CFzoneid" type="text" class="form-control" value="<?php echo $de_GWDconf->ddns->ddnsCF->cfZoneID ?>">
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="col-md-6 input-group my-2">
+      <div class="col-md-5 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text" style="min-width: 120px;">CF API KEY</span>
         </div>
           <input id="CFapikey" type="text" class="form-control" value="<?php echo $de_GWDconf->ddns->ddnsCF->cfAPIkey ?>">
       </div>
 
-      <div class="col-md-6 input-group my-2">
+      <div class="col-md-4 input-group my-2">
         <div class="input-group-prepend">
           <span class="input-group-text" style="min-width: 120px;">CF E-mail</span>
         </div>
@@ -474,10 +465,9 @@ DDNSCFswitch()
 $('#buttonddnsCFon').click(function(){
 $("#buttonddnsCFonLoading").attr("class", "spinner-border spinner-border-sm")
 cfdomain=$('#CFdomain').val()
-cfzoneid=$('#CFzoneid').val()
 cfapikey=$('#CFapikey').val()
 cfemail=$('#CFemail').val()
-$.get('./act/onDDNScf.php', {CFdomain:cfdomain, CFzoneid:cfzoneid, CFapikey:cfapikey, CFemail:cfemail}, function(result){
+$.get('./act/onDDNScf.php', {CFdomain:cfdomain, CFapikey:cfapikey, CFemail:cfemail}, function(result){
   $("#buttonddnsCFonLoading").removeClass()
   $('#buttonddnsCFon').attr('class', 'btn btn-success btn-sm mt-1')
 })

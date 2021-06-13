@@ -3,12 +3,10 @@
 <?php
 $conf = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
 $CFdomain = $_GET['CFdomain'];
-$CFzoneid = $_GET['CFzoneid'];
 $CFapikey = $_GET['CFapikey'];
 $CFemail = $_GET['CFemail'];
 
 $conf['ddns']['ddnsCF']['cfDomain'] = $CFdomain;
-$conf['ddns']['ddnsCF']['cfZoneID'] = $CFzoneid;
 $conf['ddns']['ddnsCF']['cfAPIkey'] = $CFapikey;
 $conf['ddns']['ddnsCF']['cfEmail'] = $CFemail;
 $newJsonString = json_encode($conf, JSON_PRETTY_PRINT);
