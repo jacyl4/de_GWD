@@ -545,6 +545,7 @@ rm -rf /var/www/ssl/*.key
 
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --set-default-ca  --server letsencrypt
 ~/.acme.sh/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain -k ec-256
 ~/.acme.sh/acme.sh --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/de_GWD.key  \
@@ -578,6 +579,7 @@ rm -rf /var/www/ssl/*.key
 
 curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --upgrade  --auto-upgrade
+~/.acme.sh/acme.sh --set-default-ca  --server letsencrypt
 ~/.acme.sh/acme.sh --issue -d $domain -w /var/www/html -k ec-256
 ~/.acme.sh/acme.sh --installcert -d $domain --ecc \
                --key-file       /var/www/ssl/de_GWD.key  \
