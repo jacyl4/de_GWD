@@ -1515,10 +1515,10 @@ echo
 
 installWebUI(){
 cd ~
-wget --no-check-certificate --show-progress -cqO /tmp/ui-script.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-script/Archive.zip
-wget --no-check-certificate --show-progress -cqO /tmp/ui-web.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/ui-web/Archive.zip
+wget --no-check-certificate --show-progress -cqO /tmp/client.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip
+unzip /tmp/client.zip -d /tmp >/dev/null
 
-if [[ $(ls -l /tmp/ui-script.zip | awk '{print$5}') -gt 29000 ]] && [[ $(ls -l /tmp/ui-web.zip | awk '{print$5}') -gt 2625000 ]]; then
+if [[ $(ls -l '/tmp/client.zip' | awk '{print$5}') -gt 2750000 ]]; then
 rm -rf /opt/de_GWD/ui-*
 rm -rf /opt/de_GWD/ui_*
 rm -rf /var/www/html/*.php
@@ -1528,8 +1528,8 @@ rm -rf /var/www/html/vendor
 rm -rf /var/www/html/css
 rm -rf /var/www/html/js
 
-unzip /tmp/ui-script.zip -d /opt/de_GWD >/dev/null
-unzip /tmp/ui-web.zip -d /var/www/html >/dev/null
+mv -f /tmp/ui-script/* /opt/de_GWD >/dev/null
+mv -f /tmp/ui-web/* /var/www/html >/dev/null
 fi
 
 mkdir -p /var/www/html/restore
@@ -1568,6 +1568,7 @@ systemctl daemon-reload >/dev/null 2>&1
 
 rm -rf /tmp/ui-script*
 rm -rf /tmp/ui-web*
+rm -rf /tmp/client.zip
 
 if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
