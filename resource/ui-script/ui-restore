@@ -1,0 +1,54 @@
+#!/bin/bash
+if [[ $(ls -l /var/www/html/restore/de_GWD_bak 2>/dev/null | awk '{print$5}') -gt 1 ]]; then
+mv -f /var/www/html/restore/de_GWD_bak /opt/de_GWD/0conf
+
+if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then
+ 	/opt/de_GWD/ui-markThis
+fi
+
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+	/opt/de_GWD/ui-onDHCP
+fi
+
+  /opt/de_GWD/ui-NodeOne
+if [[ $(jq -r '.v2nodeDIV.nodeNF.display' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-NodeNFshow >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-NodeNFhide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.v2nodeDIV.nodeCU.display' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-NodeCUshow >/dev/null 2>&1
+  /opt/de_GWD/ui-NodeCUrules >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-NodeCUhide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.v2nodeDIV.nodeDT.display' /opt/de_GWD/0conf) = "on" ]]; then
+  /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
+  /opt/de_GWD/ui-NodeDTip >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+ 	/opt/de_GWD/ui-FWD0save
+fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+ 	/opt/de_GWD/ui-FWD1save
+fi
+
+if [[ $(jq -r '.FORWARD.xDNSs.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-xDNSsSave
+fi
+
+/opt/de_GWD/ui_4h
+systemctl restart vtrui >/dev/null
+
+if [[ $(jq -r '.address.udp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+	/opt/de_GWD/ui-onUDP r
+else
+	/opt/de_GWD/ui-offUDP r
+fi
+fi

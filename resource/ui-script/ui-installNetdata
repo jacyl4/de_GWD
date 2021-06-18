@@ -1,0 +1,89 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+
+installNetdata(){
+if [[ -f "/usr/libexec/netdata/netdata-updater.sh" ]]; then
+bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --dont-start-it --stable-channel --disable-telemetry --reinstall --allow-duplicate-install
+else
+bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --dont-start-it --stable-channel --disable-telemetry --allow-duplicate-install
+fi
+
+if [[ $(grep KSM /boot/config-`uname -r`) = "CONFIG_KSM=y" ]]; then
+echo 1 >/sys/kernel/mm/ksm/run
+echo 1000 >/sys/kernel/mm/ksm/sleep_millisecs
+fi
+
+systemctl restart netdata >/dev/null
+blue "----------------------"
+blue "Install Netdata [done]"
+blue "----------------------"
+}
+
+
+
+uninstallNetdata(){
+systemctl disable --now netdata >/dev/null
+
+if [[ -f "/usr/libexec/netdata/netdata-uninstaller.sh" ]]; then
+/usr/libexec/netdata/netdata-uninstaller.sh --force --yes --env /etc/netdata/.environment
+
+blue "------------------------"
+blue "Uninstall Netdata [done]"
+blue "------------------------"
+fi
+}
+
+
+
+updateNetdata(){
+if [[ -f "/usr/libexec/netdata/netdata-updater.sh" ]]; then
+/usr/libexec/netdata/netdata-updater.sh
+
+blue "---------------------"
+blue "Update Netdata [done]"
+blue "---------------------"
+fi
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "         Netdata"
+    green "==============================="
+    green  "1. Install Netdata"
+    yellow "2. Uninstall Netdata"
+    green  "0. Update Netdata"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installNetdata
+    start_menu
+    ;;
+    2)
+    uninstallNetdata
+    start_menu
+    ;;
+    0)
+    updateNetdata
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
