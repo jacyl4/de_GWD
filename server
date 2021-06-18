@@ -547,6 +547,7 @@ export CF_Email="$CFemail"
 
 rm -rf /var/www/ssl/*.cer
 rm -rf /var/www/ssl/*.key
+rm -rf /var/www/ssl/*.pem
 [ ! -f "/var/www/ssl/dhparam.pem" ] && openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 curl https://get.acme.sh | sh
@@ -581,6 +582,7 @@ systemctl force-reload nginx
 
 rm -rf /var/www/ssl/*.cer
 rm -rf /var/www/ssl/*.key
+rm -rf /var/www/ssl/*.pem
 [ ! -f "/var/www/ssl/dhparam.pem" ] && openssl dhparam -out /var/www/ssl/dhparam.pem 2048
 
 curl https://get.acme.sh | sh
@@ -598,8 +600,9 @@ ocspStapling(){
 cat << "EOF" >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
 if [[ -n $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 86400 | grep ' not ') ]]; then
-wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
-wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+[ ! -f "/var/www/ssl/intermediate.pem" ] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+[ ! -f "/var/www/ssl/root.pem" ] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+
 cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
 cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
 
