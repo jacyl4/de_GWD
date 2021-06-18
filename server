@@ -16,7 +16,7 @@ statusFailed=$(red "[  failed   ]")
 export DEBIAN_FRONTEND=noninteractive
 de_gwd_nginx="1.21.0-1"
 virt=$(systemd-detect-virt)
-virtKVM="kvm xen"
+virtVM="qemu kvm amazon zvm vmware microsoft oracle powervm xen bochs uml parallels bhyve qnx"
 
 
 preUpdate(){
@@ -99,7 +99,7 @@ xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
 
 
 preInstall(){
-if [[ $(free -m | awk 'NR==3{print$2}') = "0" ]] && [[ -n $(echo $virtKVM | grep "$virt") ]]; then
+if [[ $(free -m | awk 'NR==3{print$2}') = "0" ]] && [[ -n $(echo $virtVM | grep "$virt") ]]; then
 fallocate -l 1G /swapfile
 dd if=/dev/zero of=/swapfile bs=1k count=1024k status=progress
 chmod 600 /swapfile
@@ -123,7 +123,7 @@ nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
 
-if [[ -n $(echo $virtKVM | grep "$virt") ]]; then
+if [[ -n $(echo $virtVM | grep "$virt") ]]; then
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 fi
@@ -150,7 +150,7 @@ EOF
 
 apt update && apt install sudo locales net-tools netcat dnsutils resolvconf ipset wget curl git jq unzip bc ca-certificates apt-transport-https gnupg2 haveged socat moreutils
 
-if [[ -n $(echo $virtKVM | grep "$virt") ]]; then
+if [[ -n $(echo $virtVM | grep "$virt") ]]; then
 echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
 curl -fsSL  https://packages.sury.org/php/apt.gpg | apt-key add -
 fi
@@ -206,7 +206,7 @@ locale-gen en_US.UTF-8
 echo "Asia/Shanghai" >/etc/timezone
 ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-if [[ -n $(echo $virtKVM | grep "$virt") ]]; then
+if [[ -n $(echo $virtVM | grep "$virt") ]]; then
 modprobe nf_conntrack
 modprobe ip_conntrack
 modprobe xt_conntrack
@@ -1066,7 +1066,7 @@ chmod +x /opt/de_GWD/Qprobe
 cat << "EOF" >/opt/de_GWD/Q2H
 #!/bin/bash
 virt=$(systemd-detect-virt)
-if [[ -n $(echo $virtKVM | grep "$virt") ]]; then
+if [[ -n $(echo $virtVM | grep "$virt") ]]; then
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
 fi
@@ -1129,7 +1129,7 @@ crontab /tmp/now.cron
 rm -rf /tmp/now.cron
 service cron restart >/dev/null 2>&1
 
-if [[ -z $(echo $virtKVM | grep "$virt") ]]; then
+if [[ -z $(echo $virtVM | grep "$virt") ]]; then
 sed -i '/Nice=/d' /lib/systemd/system/doh-server.service
 sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/doh-server.service
 sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/doh-server.service
@@ -1163,7 +1163,7 @@ installBBRplus(){
     green "Press [Enter] to continue:"
     read -s -n 1 BBRplusConfirm
 
-if [[ "$BBRplusConfirm" = "" ]] && [[ -n $(echo $virtKVM | grep "$virt") ]]; then
+if [[ "$BBRplusConfirm" = "" ]] && [[ -n $(echo $virtVM | grep "$virt") ]]; then
 
 if [[ $(uname -m) == "aarch64" ]]; then
   red "only work on x86_64"
@@ -1235,7 +1235,7 @@ else
   exit
 fi
 fi
-elif [[ "$BBRplusConfirm" = "" ]] && [[ -z $(echo $virtKVM | grep "$virt") ]]; then
+elif [[ "$BBRplusConfirm" = "" ]] && [[ -z $(echo $virtVM | grep "$virt") ]]; then
   bash <(wget --no-check-certificate -qO- https://github.com/mzz2017/lkl-haproxy/raw/master/lkl-haproxy.sh)
 fi
 }
@@ -1747,7 +1747,7 @@ else
     echo "[$statusBAD] AutoUpdate     [stopped]"
 fi
 
-if [[ -z $(echo $virtKVM | grep "$virt") ]]; then
+if [[ -z $(echo $virtVM | grep "$virt") ]]; then
     blue  "--------------------------------------------------"
     blue  $virt
     blue  "Kernel:                         $(uname -r)"
