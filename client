@@ -35,6 +35,9 @@ port=0
 EOF
 pihole restartdns >/dev/null 2>&1
 systemctl stop iptables-proxy >/dev/null 2>&1
+systemctl stop v2dns >/dev/null 2>&1
+systemctl stop smartdns >/dev/null 2>&1
+systemctl stop vtrui >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
