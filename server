@@ -896,6 +896,7 @@ User=www-data
 Type=simple
 ExecStartPre=-/bin/rm -rf /dev/shm/de_GWD.socket*
 ExecStart=/opt/de_GWD/vtrui/vtrui -c /opt/de_GWD/vtrui/config.json
+ExecStop=-/bin/rm -rf /dev/shm/de_GWD.socket*
 AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 LimitNOFILE=1000000
