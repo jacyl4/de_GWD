@@ -1558,7 +1558,7 @@ After=network.target
 User=root
 Type=oneshot
 ExecStartPre=/usr/bin/chmod +x /opt/de_GWD/update
-ExecStart=/usr/bin/screen -DmS updateGWD /usr/bin/ttyd -p $updatePort -o /opt/de_GWD/update
+ExecStart=/usr/bin/screen -dmS updateGWD /usr/bin/ttyd -p $updatePort -o /opt/de_GWD/update
 KillMode=process
 
 [Install]
