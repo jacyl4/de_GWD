@@ -595,8 +595,9 @@ curl https://get.acme.sh | sh
 
 
 ocspStapling(){
-cat << EOF >/var/www/ssl/update_ocsp_cache
+cat << "EOF" >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
+if [[ -n $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 86400 | grep ' not ') ]]; then
 wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
 wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
 cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
@@ -612,6 +613,7 @@ openssl ocsp -no_nonce \
 
 chmod 644 /var/www/ssl/*.key
 systemctl force-reload nginx >/dev/null
+fi
 EOF
 
 chmod +x /var/www/ssl/update_ocsp_cache
@@ -1087,7 +1089,7 @@ chmod +x /opt/de_GWD/Q2H
 
 cat << "EOF" >/opt/de_GWD/Qday
 #!/bin/bash
-if [[ $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200) =~ "Certificate will expire" ]] && [[ -d "/root/.acme.sh" ]]; then
+if [[ -z $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200 | grep ' not ') ]] && [[ -d "/root/.acme.sh" ]]; then
 "/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
 "/root/.acme.sh"/acme.sh --set-default-ca  --server letsencrypt
 "/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh"
