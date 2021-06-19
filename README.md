@@ -12,7 +12,7 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 
 
 
-## Client (amd64 & arm64) only suppurt kvm:
+## Client (amd64 & arm64):
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
