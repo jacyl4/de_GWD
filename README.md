@@ -4,7 +4,7 @@
 [![Telegram](https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg)](https://t.me/de_GWD)
 [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/pgwwzevfNS)
 
-## Server (amd64 & arm64):
+## Server (amd64 & arm64) support kvm xen openvz lxc and so on:
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4/de_GWD/main/server)
@@ -12,7 +12,7 @@ bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/jacyl4
 
 
 
-## Client (amd64 & arm64):
+## Client (amd64 & arm64) only suppurt kvm:
 ```
 apt install -y wget
 bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)
