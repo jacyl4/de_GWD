@@ -183,19 +183,19 @@ if [[ -d "/opt/AdGuardHome" ]]; then
   rm -rf /usr/bin/yq
 fi
 
+if [[ -f "/lib/systemd/system/frps.service" ]] || [[ -f "/lib/systemd/system/frpc.service" ]]; then
 systemctl disable frps >/dev/null 2>&1
 systemctl disable frpc >/dev/null 2>&1
 systemctl stop frps >/dev/null 2>&1
 systemctl stop frpc >/dev/null 2>&1
-
 rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
 rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
 rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
 rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
-
 rm -rf /opt/de_GWD/frps
 rm -rf /opt/de_GWD/frpc
+fi
 
 jq 'del(.FRP)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 

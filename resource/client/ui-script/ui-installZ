@@ -5,4 +5,3 @@ kill $line >/dev/null 2>&1
 done
 
 systemctl stop updateGWD
-/usr/bin/screen -S updateGWD -X quit

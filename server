@@ -38,19 +38,19 @@ if [[ -d "/opt/AdGuardHome" ]]; then
   rm -rf /usr/bin/yq
 fi
 
+if [[ -f "/lib/systemd/system/frps.service" ]] || [[ -f "/lib/systemd/system/frpc.service" ]]; then
 systemctl disable frps >/dev/null 2>&1
 systemctl disable frpc >/dev/null 2>&1
 systemctl stop frps >/dev/null 2>&1
 systemctl stop frpc >/dev/null 2>&1
-
 rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
 rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
 rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
 rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
-systemctl daemon-reload >/dev/null 2>&1
-
+systemctl daemon-reload >/dev/null 2>&1 2>&1
 rm -rf /opt/de_GWD/frps
 rm -rf /opt/de_GWD/frpc
+fi
 
 [ ! -f "/var/www/ssl/de_GWD.cer" ] && mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer && sed -i '/ssl_certificate /c\ssl_certificate \/var\/www\/ssl\/de_GWD.cer;' /etc/nginx/conf.d/default.conf
 [ ! -f "/var/www/ssl/de_GWD.key" ] && mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key && sed -i '/ssl_certificate_key /c\ssl_certificate_key \/var\/www\/ssl\/de_GWD.key;' /etc/nginx/conf.d/default.conf
@@ -60,13 +60,11 @@ rm -rf /usr/local/bin/iptablesrules*
 rm -rf /usr/local/bin/Q2H
 rm -rf /usr/local/bin/version.php
 rm -rf /usr/local/bin/vtrui
-
 rm -rf /usr/bin/yq
 rm -rf /etc/dns-over-https
 rm -rf /etc/nginx/conf.d/0_serverUpstream
 rm -rf /etc/nginx/conf.d/4_v2Proxy
 rm -rf /etc/ld.so.preload
-ldconfig
 
 crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
@@ -115,10 +113,11 @@ conf-dir=/etc/dnsmasq.d
 listen-address=127.0.0.1
 port=0
 EOF
-pihole restartdns >/dev/null 2>&1
+[ -n "$(ps -e | grep 'pihole' )" ] && pihole restartdns >/dev/null 2>&1
 
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
+options rotate
 nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
@@ -148,19 +147,14 @@ deb http://deb.debian.org/debian buster-backports main contrib non-free
 deb http://deb.debian.org/debian-security buster/updates main contrib non-free
 EOF
 
-apt update && apt install sudo locales net-tools netcat dnsutils resolvconf ipset wget curl git jq unzip bc ca-certificates apt-transport-https gnupg2 haveged socat moreutils
-
-if [[ -n $(echo $virtVM | grep "$virt") ]]; then
-echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
-curl -fsSL  https://packages.sury.org/php/apt.gpg | apt-key add -
-fi
+apt update && apt install sudo locales net-tools netcat dnsutils resolvconf ipset wget curl git jq unzip bc ca-certificates apt-transport-https gnupg2 haveged socat moreutils screen
 
 dpkg --configure -a
 apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
 
 systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now systemd-resolved  >/dev/null 2>&1
-systemctl daemon-reload >/dev/null
+systemctl daemon-reload >/dev/null 2>&1
 
 source /etc/profile
 cat << EOF >~/.bash_profile
@@ -183,28 +177,6 @@ root hard nproc unlimited
 root soft core unlimited
 root hard core unlimited
 EOF
-
-echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
-cat << EOF >/etc/default/locale
-LANG=en_US.UTF-8
-LANGUAGE=en_US.UTF-8
-LC_CTYPE="en_US.UTF-8"
-LC_NUMERIC="en_US.UTF-8"
-LC_TIME="en_US.UTF-8"
-LC_COLLATE="en_US.UTF-8"
-LC_MONETARY="en_US.UTF-8"
-LC_MESSAGES="en_US.UTF-8"
-LC_PAPER="en_US.UTF-8"
-LC_NAME="en_US.UTF-8"
-LC_ADDRESS="en_US.UTF-8"
-LC_TELEPHONE="en_US.UTF-8"
-LC_MEASUREMENT="en_US.UTF-8"
-LC_IDENTIFICATION="en_US.UTF-8"
-LC_ALL=en_US.UTF-8
-EOF
-locale-gen en_US.UTF-8
-echo "Asia/Shanghai" >/etc/timezone
-ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 if [[ -n $(echo $virtVM | grep "$virt") ]]; then
 modprobe nf_conntrack
@@ -298,13 +270,36 @@ else
 fi
 sysctl -p >/dev/null
 fi
+
+echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+cat << EOF >/etc/default/locale
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+locale-gen en_US.UTF-8
+echo "Asia/Shanghai" >/etc/timezone
+ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
 mkdir -p /opt/de_GWD
 }
 
 
 
 installPihole(){
-piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r .tag_name)
+piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r '.tag_name')
 
 if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]]; then
 export PIHOLE_SKIP_OS_CHECK=true
@@ -340,7 +335,7 @@ fi
 piholeSet(){
 systemctl mask --now lighttpd
 systemctl mask --now dhcpcd
-systemctl daemon-reload >/dev/null
+systemctl daemon-reload >/dev/null 2>&1
 
 sed -i "/PIHOLE_INTERFACE=/c\PIHOLE_INTERFACE=$ethernetnums" /etc/pihole/setupVars.conf
 sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24" /etc/pihole/setupVars.conf
@@ -411,8 +406,8 @@ esac
 EOF
 chmod +x /etc/NetworkManager/dispatcher.d/doh-server
 
-rm -rf /etc/systemd/system/doh-server.service
-cat << "EOF" >/lib/systemd/system/doh-server.service
+rm -rf /lib/systemd/system/doh-server.service
+cat << "EOF" >/etc/systemd/system/doh-server.service
 [Unit]
 Description=DNS-over-HTTPS server
 After=network.target
@@ -437,17 +432,9 @@ RestartSec=1
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload >/dev/null
-systemctl enable doh-server >/dev/null 2>&1
-systemctl restart doh-server >/dev/null 2>&1
-
-if [[ $(systemctl is-active doh-server) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/doh-server.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/doh-server.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/doh-server.service
-systemctl daemon-reload >/dev/null
-systemctl restart doh-server >/dev/null 2>&1
-fi
+systemctl daemon-reload >/dev/null 2>&1
+systemctl enable doh-server
+systemctl restart doh-server
 }
 
 
@@ -463,7 +450,7 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
   rm -rf /usr/sbin/nginx
     if [[ $(uname -m) == "x86_64" ]];then
       wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_amd64
@@ -478,8 +465,8 @@ if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemct
   rm -rf /tmp/nginx*
 fi
 
-rm -rf /etc/systemd/system/nginx.service
-cat << "EOF" >/lib/systemd/system/nginx.service
+rm -rf /lib/systemd/system/nginx.service
+cat << "EOF" >/etc/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
 After=network.target
@@ -511,19 +498,7 @@ EOF
 
 mkdir -p "/etc/systemd/system/nginx.service.d"
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" >/etc/systemd/system/nginx.service.d/override.conf
-systemctl daemon-reload >/dev/null
-systemctl enable nginx >/dev/null 2>&1
-systemctl restart nginx >/dev/null 2>&1
-
-if [[ $(systemctl is-active nginx) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/nginx.service
-systemctl daemon-reload >/dev/null
-systemctl restart nginx >/dev/null 2>&1
-fi
+systemctl daemon-reload >/dev/null 2>&1
 
 if [[ -n $(dpkg -l | grep 'jemalloc') ]]; then
 dpkg --list | grep jemalloc | awk '{print $2}' | while read line
@@ -578,7 +553,8 @@ server {
     index       index.php index.html index.htm;
 }
 EOF
-systemctl force-reload nginx
+[ "$(systemctl is-active 'nginx')" = "active" ] && systemctl force-reload nginx
+[ "$(systemctl is-active 'nginx')" != "active" ] && systemctl restart nginx
 
 rm -rf /var/www/ssl/*.cer
 rm -rf /var/www/ssl/*.key
@@ -603,8 +579,7 @@ if [[ -n $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 86
 [ ! -f "/var/www/ssl/intermediate.pem" ] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
 [ ! -f "/var/www/ssl/root.pem" ] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
 
-cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
-cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
+[ ! -f "/var/www/ssl/bundle.pem" ] && cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem && cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
 
 openssl ocsp -no_nonce \
     -issuer  /var/www/ssl/intermediate.pem \
@@ -726,7 +701,7 @@ cat /etc/nginx/conf.d/2_tlsParameter >>/etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/3_reverseProxy >>/etc/nginx/conf.d/default.conf
 cat /etc/nginx/conf.d/4_end >>/etc/nginx/conf.d/default.conf
 
-systemctl force-reload nginx >/dev/null
+systemctl force-reload nginx
 EOF
 chmod +x /etc/nginx/conf.d/merge.sh
 /etc/nginx/conf.d/merge.sh
@@ -890,8 +865,8 @@ rm -rf /tmp/vtrui*
 }
 
 v2start(){
-rm -rf /etc/systemd/system/vtrui.service
-cat << "EOF" >/lib/systemd/system/vtrui.service
+rm -rf /lib/systemd/system/vtrui.service
+cat << "EOF" >/etc/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -920,19 +895,7 @@ RestartSec=1
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload >/dev/null
-systemctl enable vtrui >/dev/null 2>&1
-systemctl restart vtrui >/dev/null 2>&1
-
-if [[ $(systemctl is-active vtrui) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/vtrui.service
-systemctl daemon-reload >/dev/null
-systemctl restart vtrui >/dev/null 2>&1
-fi
+systemctl daemon-reload >/dev/null 2>&1
 }
 
 
@@ -993,8 +956,8 @@ ipset -X chnroute >/dev/null 2>&1
 EOF
 chmod +x /opt/de_GWD/iptablesrules-down
 
-rm -rf /etc/systemd/system/iptablesrules.service
-cat << EOF >/lib/systemd/system/iptablesrules.service
+rm -rf /lib/systemd/system/iptablesrules.service
+cat << EOF >/etc/systemd/system/iptablesrules.service
 [Unit]
 Description=iptablesrules
 After=network.target
@@ -1010,8 +973,8 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload >/dev/null
-systemctl enable iptablesrules >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
+systemctl enable iptablesrules
 systemctl restart iptablesrules
 }
 
@@ -1096,6 +1059,10 @@ if [[ -z $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 25
 "/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
 "/root/.acme.sh"/acme.sh --set-default-ca  --server letsencrypt
 "/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh"
+
+sslFolder=$(ls "/root/.acme.sh" | grep '_ecc')
+cp -f "/root/.acme.sh"/$sslFolder/fullchain.cer /var/www/ssl/de_GWD.cer
+cp -f "/root/.acme.sh"/$sslFolder/*.key /var/www/ssl/de_GWD.key 
 fi
 
 /var/www/ssl/update_ocsp_cache
@@ -1129,27 +1096,69 @@ crontab /tmp/now.cron
 rm -rf /tmp/now.cron
 service cron restart >/dev/null 2>&1
 
+cat << "EOF" >/tmp/sysRestart
+#!/bin/bash
 if [[ -z $(echo $virtVM | grep "$virt") ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/doh-server.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/doh-server.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/doh-server.service
+sed -i '/Nice=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
 
-sed -i '/Nice=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/vtrui.service
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
 
-sed -i '/Nice=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/nginx.service
-systemctl daemon-reload >/dev/null
-systemctl restart doh-server >/dev/null 2>&1
-systemctl restart vtrui >/dev/null 2>&1
-systemctl restart nginx >/dev/null 2>&1
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+systemctl daemon-reload >/dev/null 2>&1
+systemctl restart doh-server
+systemctl restart vtrui
+systemctl restart nginx
+else
+
+if [[ $(systemctl is-active doh-server) != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
+systemctl daemon-reload >/dev/null 2>&1
+systemctl restart doh-server
 fi
+
+systemctl enable nginx
+systemctl restart nginx
+if [[ $(systemctl is-active nginx) != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
+systemctl daemon-reload >/dev/null 2>&1
+systemctl restart nginx
+fi
+
+systemctl enable vtrui
+systemctl restart vtrui
+if [[ $(systemctl is-active vtrui) != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+systemctl daemon-reload >/dev/null 2>&1
+systemctl restart vtrui
+fi
+
+fi
+
+rm -rf /tmp/sysRestart
+EOF
+chmod +x /tmp/sysRestart
+
+screen -dmS sysRestart /tmp/sysRestart
 }
 
 
@@ -1367,7 +1376,7 @@ fi
 
 nginxWebConf
 
-systemctl restart nginx >/dev/null 2>&1
+systemctl force-reload nginx
 
 blue "-----------------------------------------------"
 blue "Change domain and issue new certificates [done]"
@@ -1401,7 +1410,7 @@ xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
 
 nginxWebConf
 
-systemctl restart nginx >/dev/null 2>&1
+systemctl force-reload nginx
 
 v2in
 
@@ -1420,6 +1429,7 @@ installV2
 v2start
 
 systemctl restart iptablesrules
+systemctl restart vtrui
 
 blue "-----------------------------"
 blue  "Change Xray UUID&path [done]"
@@ -1457,6 +1467,8 @@ v2inForward
 systemctl restart iptablesrules
 v2start
 
+systemctl restart vtrui
+
 blue "--------------------------"
 blue  "Enable XTLS Server [done]"
 blue "--------------------------"
@@ -1482,6 +1494,8 @@ v2outForward
 systemctl restart iptablesrules
 v2start
 
+systemctl restart vtrui
+
 blue "-----------------------"
 blue  "Set XTLS Client [done]"
 blue "-----------------------"
@@ -1493,6 +1507,8 @@ v2outDirect
 
 systemctl restart iptablesrules
 v2start
+
+systemctl restart vtrui
 
 blue "--------------------------"
 blue  "Delete XTLS Client [done]"
@@ -1709,7 +1725,7 @@ blue "---------------------"
 
 
 start_menu(){
-if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+if [[ $(systemctl is-active 'pihole-FTL') = "active" ]]; then
     echo "[$statusGOOD] Pi-hole        [working]"
 elif [ ! -f "/usr/local/bin/pihole" ]; then
     echo "[$statusBAD] Pi-hole        [not installed]"
@@ -1717,7 +1733,7 @@ else
     echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
-if [[ $(systemctl is-active nginx) = "active" ]]; then
+if [[ $(systemctl is-active 'nginx') = "active" ]]; then
     echo "[$statusGOOD] Nginx          [working]"
 elif [[ ! -f "/usr/sbin/nginx" ]]; then
     echo "[$statusBAD] Nginx          [not installed]"
@@ -1725,7 +1741,7 @@ else
     echo "[$statusBAD] Nginx          [start failed]"
 fi
 
-if [[ $(systemctl is-active vtrui) = "active" ]]; then
+if [[ $(systemctl is-active 'vtrui') = "active" ]]; then
     echo "[$statusGOOD] Xray           [working]"
 elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
     echo "[$statusBAD] Xray           [not Installed]"
@@ -1733,7 +1749,7 @@ else
     echo "[$statusBAD] Xray           [start failed]"
 fi
 
-if [[ $(systemctl is-active doh-server) = "active" ]]; then
+if [[ $(systemctl is-active 'doh-server') = "active" ]]; then
     echo "[$statusGOOD] DoH server     [working]"
 elif [[ ! -f "/opt/de_GWD/doh-server" ]]; then
     echo "[$statusBAD] DoH server     [not Installed]"
