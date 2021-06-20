@@ -126,10 +126,10 @@ EOF
 
 systemctl enable xDNSc >/dev/null 2>&1
 systemctl restart xDNSc >/dev/null
-if [[ $(systemctl is-active xDNSc) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/xDNSc.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/xDNSc.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/xDNSc.service
+if [[ $(systemctl is-active 'xDNSc') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/xDNSc.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/xDNSc.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/xDNSc.service
 systemctl daemon-reload >/dev/null
 systemctl restart xDNSc >/dev/null
 fi

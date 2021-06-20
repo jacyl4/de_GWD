@@ -63,7 +63,7 @@ EOF
 chmod 666 /opt/de_GWD/xDNSs/config.json
 chmod 644 /var/www/ssl/*.key
 
-cat << "EOF" >/lib/systemd/system/xDNSs.service
+cat << "EOF" >/etc/systemd/system/xDNSs.service
 [Unit]
 Description=xDNS Server
 After=network.target nss-lookup.target
@@ -94,12 +94,12 @@ systemctl daemon-reload >/dev/null
 systemctl enable xDNSs >/dev/null
 systemctl restart xDNSs >/dev/null
 
-if [[ $(systemctl is-active xDNSs) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/xDNSs.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/xDNSs.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/xDNSs.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/xDNSs.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/xDNSs.service
+if [[ $(systemctl is-active 'xDNSs') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/xDNSs.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/xDNSs.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/xDNSs.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/xDNSs.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/xDNSs.service
 systemctl daemon-reload >/dev/null
 systemctl restart xDNSs >/dev/null
 fi

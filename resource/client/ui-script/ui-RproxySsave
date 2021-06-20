@@ -107,8 +107,8 @@ fi
 chmod 666 /opt/de_GWD/RproxyS/config.json
 chmod 644 /var/www/ssl/*.key
 
-rm -rf /etc/systemd/system/RproxyS.service
-cat << "EOF" >/lib/systemd/system/RproxyS.service
+rm -rf /lib/systemd/system/RproxyS.service
+cat << "EOF" >/etc/systemd/system/RproxyS.service
 [Unit]
 Description=Rproxy Service
 After=network.target nss-lookup.target
@@ -139,12 +139,12 @@ systemctl daemon-reload >/dev/null
 systemctl enable RproxyS >/dev/null
 systemctl restart RproxyS >/dev/null
 
-if [[ $(systemctl is-active RproxyS) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/RproxyS.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/RproxyS.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/RproxyS.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/RproxyS.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/RproxyS.service
+if [[ $(systemctl is-active 'RproxyS') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/RproxyS.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/RproxyS.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/RproxyS.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/RproxyS.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/RproxyS.service
 systemctl daemon-reload >/dev/null
 systemctl restart RproxyS >/dev/null
 fi

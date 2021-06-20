@@ -106,8 +106,8 @@ done
 chmod 666 /opt/de_GWD/vtrui1/config.json
 chmod 644 /var/www/ssl/*.key
 
-rm -rf /etc/systemd/system/vtrui1.service
-cat << "EOF" >/lib/systemd/system/vtrui1.service
+rm -rf /lib/systemd/system/vtrui1.service
+cat << "EOF" >/etc/systemd/system/vtrui1.service
 [Unit]
 Description=vtrui1 Service
 After=network.target nss-lookup.target
@@ -138,12 +138,12 @@ systemctl daemon-reload >/dev/null
 systemctl enable vtrui1 >/dev/null
 systemctl restart vtrui1 >/dev/null
 
-if [[ $(systemctl is-active vtrui1) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/vtrui1.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/vtrui1.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/vtrui1.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/vtrui1.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/vtrui1.service
+if [[ $(systemctl is-active 'vtrui1') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui1.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui1.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui1.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui1.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui1.service
 systemctl daemon-reload >/dev/null
 systemctl restart vtrui1 >/dev/null
 fi

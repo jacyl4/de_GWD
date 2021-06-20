@@ -145,15 +145,15 @@ sed -i "/nfsvers/d" /etc/fstab
 sed -i '/quic/d' /etc/nginx/conf.d/*.conf
 
 systemctl disable --now doh-client >/dev/null 2>&1
-rm -rf /etc/systemd/system/doh-client.service
 rm -rf /lib/systemd/system/doh-client.service
+rm -rf /etc/systemd/system/doh-client.service
 rm -rf /opt/de_GWD/doh-client*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload >/dev/null 2>&1
 
 systemctl disable --now doh-server >/dev/null 2>&1
-rm -rf /etc/systemd/system/doh-server.service
 rm -rf /lib/systemd/system/doh-server.service
+rm -rf /etc/systemd/system/doh-server.service
 rm -rf /opt/de_GWD/doh-server*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload >/dev/null 2>&1
@@ -177,8 +177,8 @@ fi
 
 if [[ -d "/opt/AdGuardHome" ]]; then
   systemctl stop AdGuardHome >/dev/null 2>&1
-  rm -rf /etc/systemd/system/AdGuardHome.service
   rm -rf /lib/systemd/system/AdGuardHome.service
+  rm -rf /etc/systemd/system/AdGuardHome.service
   rm -rf /opt/AdGuardHome
   rm -rf /usr/bin/yq
 fi
@@ -188,10 +188,10 @@ systemctl disable frps >/dev/null 2>&1
 systemctl disable frpc >/dev/null 2>&1
 systemctl stop frps >/dev/null 2>&1
 systemctl stop frpc >/dev/null 2>&1
-rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
 rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
-rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
+rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
 rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
+rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
 systemctl daemon-reload >/dev/null 2>&1
 rm -rf /opt/de_GWD/frps
 rm -rf /opt/de_GWD/frpc
@@ -525,8 +525,8 @@ server 8.8.8.8 -group xDNS -exclude-default-group
 EOF
 
 rm -rf /run/smartdns.pid
-rm -rf /etc/systemd/system/smartdns.service
-cat << "EOF" >/lib/systemd/system/smartdns.service
+rm -rf /lib/systemd/system/smartdns.service
+cat << "EOF" >/etc/systemd/system/smartdns.service
 [Unit]
 Description=SmartDNS
 After=network.target
@@ -559,10 +559,10 @@ systemctl daemon-reload >/dev/null
 systemctl enable smartdns >/dev/null 2>&1
 systemctl restart smartdns >/dev/null
 
-if [[ $(systemctl is-active smartdns) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/smartdns.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/smartdns.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/smartdns.service
+if [[ $(systemctl is-active 'smartdns') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/smartdns.service
 systemctl daemon-reload >/dev/null
 systemctl restart smartdns >/dev/null
 fi
@@ -776,8 +776,8 @@ fi
 
 jq --argjson OBdefault "$OBdefault" '.outbounds[0]=$OBdefault' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 
-rm -rf /etc/systemd/system/xDNSc.service
-cat << EOF >/lib/systemd/system/xDNSc.service
+rm -rf /lib/systemd/system/xDNSc.service
+cat << EOF >/etc/systemd/system/xDNSc.service
 [Unit]
 Description=xDNS Client
 After=network.target
@@ -802,8 +802,8 @@ RestartSec=1
 WantedBy=multi-user.target
 EOF
 
-rm -rf /etc/systemd/system/v2dns.service
-cat << EOF >/lib/systemd/system/v2dns.service
+rm -rf /lib/systemd/system/v2dns.service
+cat << EOF >/etc/systemd/system/v2dns.service
 [Unit]
 Description=v2dns Service
 After=network.target
@@ -828,8 +828,8 @@ RestartSec=1
 WantedBy=multi-user.target
 EOF
 
-rm -rf /etc/systemd/system/vtrui.service
-cat << EOF >/lib/systemd/system/vtrui.service
+rm -rf /lib/systemd/system/vtrui.service
+cat << EOF >/etc/systemd/system/vtrui.service
 [Unit]
 Description=vtrui Service
 After=network.target nss-lookup.target
@@ -927,29 +927,29 @@ EOF
 systemctl enable xDNSc >/dev/null 2>&1
 systemctl restart xDNSc >/dev/null
 
-if [[ $(systemctl is-active xDNSc) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/xDNSc.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/xDNSc.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/xDNSc.service
+if [[ $(systemctl is-active 'xDNSc') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/xDNSc.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/xDNSc.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/xDNSc.service
 systemctl daemon-reload >/dev/null
 systemctl restart xDNSc >/dev/null
 fi
 fi
 
-if [[ $(systemctl is-active v2dns) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/v2dns.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/v2dns.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/v2dns.service
+if [[ $(systemctl is-active 'v2dns') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/v2dns.service
 systemctl daemon-reload >/dev/null
 systemctl restart v2dns >/dev/null
 fi
 
-if [[ $(systemctl is-active vtrui) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/vtrui.service
+if [[ $(systemctl is-active 'vtrui') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
 systemctl daemon-reload >/dev/null
 systemctl restart vtrui >/dev/null
 fi
@@ -1137,8 +1137,8 @@ ip rule del fwmark 0x9
 EOF
 chmod +x /opt/de_GWD/iptables-proxy-down
 
-rm -rf /etc/systemd/system/iptables-proxy.service
-cat << EOF >/lib/systemd/system/iptables-proxy.service
+rm -rf /lib/systemd/system/iptables-proxy.service
+cat << EOF >/etc/systemd/system/iptables-proxy.service
 [Unit]
 Description=iptables-proxy
 
@@ -1266,8 +1266,8 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-rm -rf /etc/systemd/system/php7.4-fpm.service
-cat << "EOF" >/lib/systemd/system/php7.4-fpm.service
+rm -rf /lib/systemd/system/php7.4-fpm.service
+cat << "EOF" >/etc/systemd/system/php7.4-fpm.service
 [Unit]
 Description=The PHP 7.4 FastCGI Process Manager
 After=network.target
@@ -1309,7 +1309,7 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active nginx) != "active" ]]; then
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
   rm -rf /usr/sbin/nginx
     if [[ $(uname -m) == "x86_64" ]];then
       wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_amd64
@@ -1324,8 +1324,8 @@ if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemct
   rm -rf /tmp/nginx*
 fi
 
-rm -rf /etc/systemd/system/nginx.service
-cat << "EOF" >/lib/systemd/system/nginx.service
+rm -rf /lib/systemd/system/nginx.service
+cat << "EOF" >/etc/systemd/system/nginx.service
 [Unit]
 Description=The NGINX http and reverse proxy server
 After=network.target
@@ -1361,12 +1361,12 @@ systemctl daemon-reload >/dev/null
 systemctl enable nginx >/dev/null 2>&1
 systemctl restart nginx >/dev/null
 
-if [[ $(systemctl is-active nginx) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/nginx.service
+if [[ $(systemctl is-active 'nginx') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
 systemctl daemon-reload >/dev/null
 systemctl restart nginx >/dev/null
 fi
@@ -1551,8 +1551,8 @@ mv -f /tmp/ttyd /usr/bin/ttyd
 chmod +x /usr/bin/ttyd
 
 [ -z "$(echo $updatePort | grep '^[[:digit:]]*$')" ] && updatePort="3000"
-rm -rf /etc/systemd/system/updateGWD.service
-cat << EOF >/lib/systemd/system/updateGWD.service
+rm -rf /lib/systemd/system/updateGWD.service
+cat << EOF >/etc/systemd/system/updateGWD.service
 [Unit]
 Description=updateGWD
 After=network.target
@@ -1749,26 +1749,26 @@ crontab /tmp/now.cron
 rm -rf /tmp/now.cron
 service cron restart >/dev/null 2>&1
 
-if [[ $(systemctl is-active smartdns) != "active" ]] && [[ $(systemctl is-active v2dns) != "active" ]] && [[ $(systemctl is-active vtrui) != "active" ]] && [[ $(systemctl is-active nginx) != "active" ]]; then
-sed -i '/Nice=/d' /lib/systemd/system/smartdns.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/smartdns.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/smartdns.service
+if [[ $(systemctl is-active 'smartdns') != "active" ]] && [[ $(systemctl is-active 'v2dns') != "active" ]] && [[ $(systemctl is-active 'vtrui') != "active" ]] && [[ $(systemctl is-active 'nginx') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/smartdns.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/smartdns.service
 
-sed -i '/Nice=/d' /lib/systemd/system/v2dns.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/v2dns.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/v2dns.service
+sed -i '/Nice=/d' /etc/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/v2dns.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/v2dns.service
 
-sed -i '/Nice=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/vtrui.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/vtrui.service
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
 
-sed -i '/Nice=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPolicy=/d' /lib/systemd/system/nginx.service
-sed -i '/CPUSchedulingPriority=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingClass=/d' /lib/systemd/system/nginx.service
-sed -i '/IOSchedulingPriority=/d' /lib/systemd/system/nginx.service
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
 systemctl daemon-reload >/dev/null 2>&1
 systemctl restart smartdns >/dev/null 2>&1
 systemctl restart v2dns >/dev/null 2>&1
@@ -1970,7 +1970,7 @@ fi
 
 nginxSet
 
-sed -i "/ExecStart=/c\ExecStart=/usr/bin/ttyd -p $updatePort -o /opt/de_GWD/update" /lib/systemd/system/updateGWD.service
+sed -i "/ExecStart=/c\ExecStart=/usr/bin/ttyd -p $updatePort -o /opt/de_GWD/update" /etc/systemd/system/updateGWD.service
 systemctl daemon-reload >/dev/null 2>&1
 
 jq --arg updatePort $updatePort '.update.updatePort=$updatePort' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
@@ -2172,7 +2172,7 @@ blue "--------------------"
 
 
 start_menu(){
-if [[ $(systemctl is-active pihole-FTL) = "active" ]]; then
+if [[ $(systemctl is-active 'pihole-FTL') = "active" ]]; then
     echo "[$statusGOOD] Pi-hole        [working]"
 elif [ ! -f "/usr/local/bin/pihole" ]; then
     echo "[$statusBAD] Pi-hole        [not installed]"
@@ -2180,7 +2180,7 @@ else
     echo "[$statusBAD] Pi-hole        [start failed]"
 fi
 
-if [[ $(systemctl is-active smartdns) = "active" ]]; then
+if [[ $(systemctl is-active 'smartdns') = "active" ]]; then
     echo "[$statusGOOD] SmartDNS       [working]"
 elif [[ ! -f "/usr/sbin/smartdns" ]]; then
     echo "[$statusBAD] SmartDNS       [not Installed]"
@@ -2188,7 +2188,7 @@ else
     echo "[$statusBAD] SmartDNS       [start failed]"
 fi
 
-if [[ $(systemctl is-active v2dns) = "active" ]]; then
+if [[ $(systemctl is-active 'v2dns') = "active" ]]; then
     echo "[$statusGOOD] V2DNS          [working]"
 elif [[ ! -d "/opt/de_GWD/v2dns" ]]; then
     echo "[$statusBAD] V2DNS          [not Installed]"
@@ -2196,7 +2196,7 @@ else
     echo "[$statusBAD] V2DNS          [start failed]"
 fi
 
-if [[ $(systemctl is-active vtrui) = "active" ]]; then
+if [[ $(systemctl is-active 'vtrui') = "active" ]]; then
     echo "[$statusGOOD] Xray           [working]"
 elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
     echo "[$statusBAD] Xray           [not Installed]"
@@ -2204,7 +2204,7 @@ else
     echo "[$statusBAD] Xray           [start failed]"
 fi
 
-if [[ $(systemctl is-active nginx) = "active" ]]; then
+if [[ $(systemctl is-active 'nginx') = "active" ]]; then
     echo "[$statusGOOD] Nginx          [working]"
 elif [[ ! -f "/usr/sbin/nginx" ]]; then
     echo "[$statusBAD] Nginx          [not installed]"
@@ -2212,7 +2212,7 @@ else
     echo "[$statusBAD] Nginx          [start failed]"
 fi
 
-if [[ $(systemctl is-active php7.4-fpm) = "active" ]]; then
+if [[ $(systemctl is-active 'php7.4-fpm') = "active" ]]; then
     echo "[$statusGOOD] php7.4-FPM     [working]"
 elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
     echo "[$statusBAD] php7.4-FPM     [not installed]"
