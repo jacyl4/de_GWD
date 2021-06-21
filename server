@@ -432,9 +432,15 @@ RestartSec=1
 WantedBy=multi-user.target
 EOF
 
+if [[ -z $(echo $virtVM | grep "$virt") ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
+fi
+
 systemctl daemon-reload >/dev/null 2>&1
 systemctl enable doh-server
-systemctl restart doh-server
+systemctl restart doh-server >/dev/null 2>&1
 }
 
 
@@ -496,6 +502,14 @@ RestartSec=1
 WantedBy=multi-user.target
 EOF
 
+if [[ -z $(echo $virtVM | grep "$virt") ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
+fi
+
 mkdir -p "/etc/systemd/system/nginx.service.d"
 printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" >/etc/systemd/system/nginx.service.d/override.conf
 systemctl daemon-reload >/dev/null 2>&1
@@ -532,7 +546,7 @@ curl https://get.acme.sh | sh
 "/root/.acme.sh"/acme.sh --installcert -d $topDomain --ecc \
                --key-file       /var/www/ssl/de_GWD.key  \
                --fullchain-file /var/www/ssl/de_GWD.cer \
-               --reloadcmd     "chmod 644 /var/www/ssl/*.key && systemctl force-reload nginx && systemctl restart vtrui*"
+               --reloadcmd     "chmod 644 /var/www/ssl/*.key >/dev/null 2>&1 && systemctl force-reload nginx >/dev/null 2>&1 && systemctl restart vtrui* >/dev/null 2>&1"
 }
 
 
@@ -553,8 +567,8 @@ server {
     index       index.php index.html index.htm;
 }
 EOF
-[ "$(systemctl is-active 'nginx')" = "active" ] && systemctl force-reload nginx
-[ "$(systemctl is-active 'nginx')" != "active" ] && systemctl restart nginx
+[ "$(systemctl is-active 'nginx')" = "active" ] && systemctl force-reload nginx >/dev/null 2>&1
+[ "$(systemctl is-active 'nginx')" != "active" ] && systemctl restart nginx >/dev/null 2>&1
 
 rm -rf /var/www/ssl/*.cer
 rm -rf /var/www/ssl/*.key
@@ -568,7 +582,7 @@ curl https://get.acme.sh | sh
 "/root/.acme.sh"/acme.sh --installcert -d $domain --ecc \
                --key-file       /var/www/ssl/de_GWD.key  \
                --fullchain-file /var/www/ssl/de_GWD.cer \
-               --reloadcmd     "chmod 644 /var/www/ssl/*.key && systemctl force-reload nginx && systemctl restart vtrui*"
+               --reloadcmd     "chmod 644 /var/www/ssl/*.key >/dev/null 2>&1 && systemctl force-reload nginx >/dev/null 2>&1 && systemctl restart vtrui* >/dev/null 2>&1"
 }
 
 
@@ -895,6 +909,14 @@ RestartSec=1
 WantedBy=multi-user.target
 EOF
 
+if [[ -z $(echo $virtVM | grep "$virt") ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+fi
+
 systemctl daemon-reload >/dev/null 2>&1
 }
 
@@ -975,7 +997,7 @@ EOF
 
 systemctl daemon-reload >/dev/null 2>&1
 systemctl enable iptablesrules
-systemctl restart iptablesrules
+systemctl restart iptablesrules >/dev/null 2>&1
 }
 
 
@@ -1098,38 +1120,16 @@ service cron restart >/dev/null 2>&1
 
 cat << "EOF" >/tmp/sysRestart
 #!/bin/bash
-if [[ -z $(echo $virtVM | grep "$virt") ]]; then
-sed -i '/Nice=/d' /etc/systemd/system/doh-server.service
-sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/doh-server.service
-sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
-
-sed -i '/Nice=/d' /etc/systemd/system/nginx.service
-sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
-sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
-sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
-sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
-
-sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
-sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
-sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
-sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
-systemctl daemon-reload >/dev/null 2>&1
-systemctl restart doh-server
-systemctl restart vtrui
-systemctl restart nginx
-else
-
 if [[ $(systemctl is-active doh-server) != "active" ]]; then
 sed -i '/Nice=/d' /etc/systemd/system/doh-server.service
 sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/doh-server.service
 sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
 systemctl daemon-reload >/dev/null 2>&1
-systemctl restart doh-server
+systemctl restart doh-server >/dev/null 2>&1
 fi
 
 systemctl enable nginx
-systemctl restart nginx
+systemctl restart nginx >/dev/null 2>&1
 if [[ $(systemctl is-active nginx) != "active" ]]; then
 sed -i '/Nice=/d' /etc/systemd/system/nginx.service
 sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
@@ -1137,7 +1137,7 @@ sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
 sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
 sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
 systemctl daemon-reload >/dev/null 2>&1
-systemctl restart nginx
+systemctl restart nginx >/dev/null 2>&1
 fi
 
 systemctl enable vtrui
@@ -1149,9 +1149,7 @@ sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
 sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
 sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
 systemctl daemon-reload >/dev/null 2>&1
-systemctl restart vtrui
-fi
-
+systemctl restart vtrui >/dev/null 2>&1
 fi
 
 rm -rf /tmp/sysRestart
@@ -1226,7 +1224,7 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrKernel
-systemctl restart sshd >/dev/null
+systemctl restart sshd >/dev/null 2>&1
 EOF
 chmod +x ~/bbrKernel/clearkernel
 
@@ -1304,7 +1302,7 @@ sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 rm -rf ~/bbrKernel
-systemctl restart sshd >/dev/null
+systemctl restart sshd >/dev/null 2>&1
 EOF
 chmod +x ~/bbrKernel/clearkernel
 
@@ -1428,8 +1426,8 @@ installV2
 
 v2start
 
-systemctl restart iptablesrules
-systemctl restart vtrui
+systemctl restart iptablesrules >/dev/null 2>&1
+systemctl restart vtrui >/dev/null 2>&1
 
 blue "-----------------------------"
 blue  "Change Xray UUID&path [done]"
@@ -1464,10 +1462,10 @@ uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json
 
 v2inForward
 
-systemctl restart iptablesrules
+systemctl restart iptablesrules >/dev/null 2>&1
 v2start
 
-systemctl restart vtrui
+systemctl restart vtrui >/dev/null 2>&1
 
 blue "--------------------------"
 blue  "Enable XTLS Server [done]"
@@ -1491,10 +1489,10 @@ elif [[ "$v2xtlsEnable" = "2" ]]; then
 
 v2outForward
 
-systemctl restart iptablesrules
+systemctl restart iptablesrules >/dev/null 2>&1
 v2start
 
-systemctl restart vtrui
+systemctl restart vtrui >/dev/null 2>&1
 
 blue "-----------------------"
 blue  "Set XTLS Client [done]"
@@ -1505,10 +1503,10 @@ elif [[ "$v2xtlsYN" = "2" ]]; then
 jq 'del(.inbounds[] | select(.tag == "forward"))' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 v2outDirect
 
-systemctl restart iptablesrules
+systemctl restart iptablesrules >/dev/null 2>&1
 v2start
 
-systemctl restart vtrui
+systemctl restart vtrui >/dev/null 2>&1
 
 blue "--------------------------"
 blue  "Delete XTLS Client [done]"
