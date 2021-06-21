@@ -439,7 +439,7 @@ sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
 fi
 
 systemctl daemon-reload >/dev/null 2>&1
-systemctl enable doh-server
+systemctl enable doh-server >/dev/null 2>&1
 systemctl restart doh-server >/dev/null 2>&1
 }
 
@@ -996,7 +996,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload >/dev/null 2>&1
-systemctl enable iptablesrules
+systemctl enable iptablesrules >/dev/null 2>&1
 systemctl restart iptablesrules >/dev/null 2>&1
 }
 
@@ -1128,7 +1128,7 @@ systemctl daemon-reload >/dev/null 2>&1
 systemctl restart doh-server >/dev/null 2>&1
 fi
 
-systemctl enable nginx
+systemctl enable nginx >/dev/null 2>&1
 systemctl restart nginx >/dev/null 2>&1
 if [[ $(systemctl is-active nginx) != "active" ]]; then
 sed -i '/Nice=/d' /etc/systemd/system/nginx.service
@@ -1140,8 +1140,8 @@ systemctl daemon-reload >/dev/null 2>&1
 systemctl restart nginx >/dev/null 2>&1
 fi
 
-systemctl enable vtrui
-systemctl restart vtrui
+systemctl enable vtrui >/dev/null 2>&1
+systemctl restart vtrui >/dev/null 2>&1
 if [[ $(systemctl is-active vtrui) != "active" ]]; then
 sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
 sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
@@ -1157,6 +1157,41 @@ EOF
 chmod +x /tmp/sysRestart
 
 screen -dmS sysRestart /tmp/sysRestart
+
+if [[ "$(dpkg --list | grep linux-image | wc -l)" -gt "1" ]]; then
+red "Kernel updated & reboot"
+
+cat << "EOF" >~/clearKernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+crontab -l 2>/dev/null > ~/now.cron
+sed -i '/clearKernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/clearKernel
+systemctl restart sshd >/dev/null
+EOF
+chmod +x ~/clearKernel
+
+crontab -l 2>/dev/null > ~/now.cron
+echo '@reboot ~/clearKernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+sleep 2
+reboot
+fi
 }
 
 
