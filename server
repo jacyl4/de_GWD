@@ -1190,7 +1190,7 @@ crontab ~/now.cron
 rm -rf ~/now.cron
 
 sleep 2
-reboot
+sudo reboot
 fi
 }
 
