@@ -17,11 +17,10 @@ port=$(echo -e $RproxyStunnelAddress | cut -d: -f2 | grep '^[[:digit:]]*$')
 
 cat << EOF >/opt/de_GWD/RproxyC/config.json
 {
-  "dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
+  "dns":{"servers":[{"address":"127.0.0.1","port":53}]},
   "routing":{
     "rules":[
-      {"type":"field","inboundTag":["bridge"],"domain":["full:reverse.localhost"],"outboundTag":"reverseTunnel"},
-      {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
+      {"type":"field","inboundTag":["bridge"],"domain":["full:reverse.localhost"],"outboundTag":"reverseTunnel"}
     ]
   },
   "reverse": {
@@ -61,11 +60,6 @@ cat << EOF >/opt/de_GWD/RproxyC/config.json
           "domainStrategy": "UseIPv4"
         }
       }
-    },
-    {
-      "tag":"direct",
-      "protocol":"freedom",
-      "streamSettings":{"sockopt":{"mark":255}}
     }
   ]
 }
