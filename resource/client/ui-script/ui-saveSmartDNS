@@ -77,6 +77,7 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
     {
       "tag":"xDNScIN",
       "port":5330,
+      "listen":"127.0.0.1",
       "protocol":"dokodemo-door",
       "settings":{"address":"127.0.0.1","network":"tcp,udp"}
     }
