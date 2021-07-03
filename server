@@ -1034,6 +1034,8 @@ chmod +x /opt/de_GWD/Qprobe
 cat << "EOF" >/opt/de_GWD/Q2H
 #!/bin/bash
 virt=$(systemd-detect-virt)
+virtCON="openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch"
+
 if [[ -z $(echo $virtCON | grep "$virt") ]]; then
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 hwclock -w
