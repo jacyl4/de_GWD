@@ -16,6 +16,7 @@ statusFailed=$(red "[  failed   ]")
 statusWarning=$(yellow "[  warning  ]")
 statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
+bbrplusVer="5.10.45"
 de_gwd_nginx="1.21.0-1"
 ttyd_version="1.6.3"
 branch="main"
@@ -1749,36 +1750,43 @@ installBBRplus(){
     read -s -n 1 BBRplusConfirm
 
 if [[ "$BBRplusConfirm" = "" ]]; then
+mkdir -p /boot/grub
+mkdir -p /boot/bbrKernel
+
+[[ -d "/sys/firmware/efi" ]] && [[ -z "$(dpkg -l | grep 'grub-efi')" ]] && sudo apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
+[[ ! -d "/sys/firmware/efi" ]] && [[ -z "$(dpkg -l | grep 'grub2-common')" ]] && sudo apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 if [[ $(uname -m) == "aarch64" ]]; then
-  red "only work on x86_64"
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_arm64.deb
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_arm64.deb
 elif [[ $(uname -m) == "x86_64" ]]; then  
-mkdir -p ~/bbrKernel
-wget --no-check-certificate --show-progress -cqO ~/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_amd64.deb
-wget --no-check-certificate --show-progress -cqO ~/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_amd64.deb
-dpkg -i ~/bbrKernel/linux-headers.deb
-dpkg -i ~/bbrKernel/linux-image.deb
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_amd64.deb
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_amd64.deb
+fi
 
-if [[ -n $(dpkg --list | grep linux-image | grep bbrplus) ]]; then
+dpkg -i /boot/bbrKernel/linux-headers.deb
+dpkg -i /boot/bbrKernel/linux-image.deb
+
+if [[ -n $(dpkg --list | grep 'linux-image' | grep 'bbrplus') ]]; then
 dpkg --list | grep 'xanmod' | awk '{print $2}' | grep 'linux-' | while read line
 do
 apt purge -y $line
 done
 rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
 
-dpkg --list | grep 'linux-image' | awk '{print $2}' | sed '/bbrplus/d' | while read line
+dpkg --list | grep 'linux-image' | awk '{print $2}' | sed "/$bbrplusVer-bbrplus/d" | while read line
 do
 apt purge -y $line
 done
 
-dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed '/bbrplus/d' | while read line
+dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed "/$bbrplusVer-bbrplus/d" | while read line
 do
 apt purge -y $line
 done
 
 update-grub
 
-cat << "EOF" >~/bbrKernel/clearkernel
+cat << "EOF" >/boot/bbrKernel/clearkernel
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
@@ -1801,13 +1809,13 @@ crontab -l 2>/dev/null > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-rm -rf ~/bbrKernel
+rm -rf /boot/bbrKernel
 systemctl restart sshd >/dev/null
 EOF
-chmod +x ~/bbrKernel/clearkernel
+chmod +x /boot/bbrKernel/clearkernel
 
 crontab -l 2>/dev/null > ~/now.cron
-echo '@reboot ~/bbrKernel/clearkernel' >> ~/now.cron
+echo '@reboot /boot/bbrKernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
@@ -1818,7 +1826,6 @@ reboot
 else
   echo -n "$statusFailed" && red "bbrplus kernel install failed"
   exit
-fi
 fi
 fi
 }
@@ -1837,7 +1844,7 @@ if [[ "$XanModconfirm" = "" ]]; then
 if [[ $(uname -m) == "aarch64" ]]; then
   red "only work on x86_64"
 elif [[ $(uname -m) == "x86_64" ]]; then
-mkdir -p ~/bbrKernel
+mkdir -p /boot/bbrKernel
 echo 'deb http://deb.xanmod.org releases main' >/etc/apt/sources.list.d/xanmod-kernel.list
 wget -cqO - https://dl.xanmod.org/gpg.key | apt-key --keyring /etc/apt/trusted.gpg.d/xanmod-kernel.gpg add -
 
@@ -1854,7 +1861,7 @@ do
 apt purge -y $line
 done
 
-cat << "EOF" >~/bbrKernel/clearkernel
+cat << "EOF" >/boot/bbrKernel/clearkernel
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
@@ -1877,13 +1884,13 @@ crontab -l 2>/dev/null > ~/now.cron
 sed -i '/clearkernel/d' ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
-rm -rf ~/bbrKernel
+rm -rf /boot/bbrKernel
 systemctl restart sshd >/dev/null
 EOF
-chmod +x ~/bbrKernel/clearkernel
+chmod +x /boot/bbrKernel/clearkernel
 
 crontab -l 2>/dev/null > ~/now.cron
-echo '@reboot ~/bbrKernel/clearkernel' >> ~/now.cron
+echo '@reboot /boot/bbrKernel/clearkernel' >> ~/now.cron
 crontab ~/now.cron
 rm -rf ~/now.cron
 
@@ -2211,7 +2218,7 @@ blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2
     green "=================================================="
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot (5.11.22)"
+    green  "2. Install bbrplus and reboot ($bbrplusVer)"
     green  "3. Install XanMod kernel BBR and reboot"
     yellow "8. Change Web UI port & Web update port"
     yellow "9. Change de_GWD password"
