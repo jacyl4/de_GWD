@@ -1517,7 +1517,7 @@ rm -rf /tmp/ui-script*
 rm -rf /tmp/ui-web*
 rm -rf /tmp/client.zip
 
-if [[ $(du -sk '/var/www/html/spt' 2>/dev/null | awk '{print$1}') != '102400' ]]; then
+if [[ $(du -sk '/var/www/html/spt' 2>/dev/null | awk '{print$1}') -lt '102400' ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
 
