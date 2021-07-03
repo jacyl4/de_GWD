@@ -24,7 +24,7 @@ cat << EOF >/tmp/v2dns_config
     "port":5350,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "settings":{"address":"127.0.0.1","port":5321,"network":"tcp,udp"}
+    "settings":{"address":"127.0.0.1","port":5320,"network":"tcp,udp"}
   }
 ],
 "outbounds":[
