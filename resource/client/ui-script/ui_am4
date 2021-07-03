@@ -15,21 +15,21 @@ fi
 /opt/de_GWD/tcpTime
 
 wget --no-check-certificate --show-progress -cqO /tmp/geosite.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat
-if [[ $(ls -l /tmp/geosite.dat | awk '{print$5}') -gt 240000 ]]; then
+if [[ $(du -sk '/tmp/geosite.dat' 2>/dev/null | awk '{print$1}') -gt '4400' ]]; then
 cp -f /tmp/geosite.dat /opt/de_GWD/v2dns/geosite.dat
 cp -f /tmp/geosite.dat /opt/de_GWD/vtrui/geosite.dat
 rm -rf /tmp/geosite.dat
 fi
 
 wget --no-check-certificate --show-progress -cqO /tmp/geoip.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat
-if [[ $(ls -l /tmp/geoip.dat | awk '{print$5}') -gt 240000 ]]; then
+if [[ $(du -sk '/tmp/geoip.dat' 2>/dev/null | awk '{print$1}') -gt '5600' ]]; then
 cp -f /tmp/geoip.dat /opt/de_GWD/v2dns/geoip.dat
 cp -f /tmp/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 rm -rf /tmp/geoip.dat
 fi
 
 wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
-if [[ $(ls -l /tmp/IPchnroute | awk '{print$5}') -gt 80000 ]]; then
+if [[ $(du -sk '/tmp/IPchnroute' 2>/dev/null | awk '{print$1}') -gt '130' ]]; then
 sed -i '/^\s*$/d' /tmp/IPchnroute
 sed -i 's/^/add chnroute &/g' /tmp/IPchnroute
 mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET

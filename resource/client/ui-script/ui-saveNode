@@ -11,7 +11,7 @@ done
 
 sed -i '/^\s*$/d' /opt/de_GWD/IPv2node
 sed -i 's/^/add v2node &/g' /opt/de_GWD/IPv2node
-if [[ $(cat /opt/de_GWD/IPv2node 2>/dev/nul | wc -l) != "0" ]]; then
+if [[ $(du -sk '/opt/de_GWD/IPv2node' 2>/dev/null | awk '{print$1}') != "0" ]]; then
 mv -f /opt/de_GWD/IPv2node /opt/de_GWD/IPv2nodeSET
 ipset -! -R </opt/de_GWD/IPv2nodeSET
 fi

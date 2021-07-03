@@ -1471,9 +1471,10 @@ echo
 installWebUI(){
 cd ~
 wget --no-check-certificate --show-progress -cqO /tmp/client.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip
-unzip /tmp/client.zip -d /tmp >/dev/null
 
-if [[ $(ls -l '/tmp/client.zip' | awk '{print$5}') -gt 2750000 ]]; then
+if [[ $(du -sk '/tmp/client.zip' 2>/dev/null | awk '{print$1}') -gt '2600' ]]; then
+unzip /tmp/client.zip -d /tmp >/dev/null 2>&1
+
 rm -rf /opt/de_GWD/ui-*
 rm -rf /opt/de_GWD/ui_*
 rm -rf /var/www/html/*.php
@@ -1499,8 +1500,8 @@ if [[ $(uname -m) == "x86_64" ]];then
 elif [[ $(uname -m) == "aarch64" ]];then
   wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.aarch64
 fi
-mv -f /tmp/ttyd /usr/bin/ttyd
-chmod +x /usr/bin/ttyd
+
+[[ "$(du -sk '/tmp/ttyd' 2>/dev/null | awk '{print$1}')" -gt '1000' ]] && mv -f /tmp/ttyd /usr/bin/ttyd && chmod +x /usr/bin/ttyd
 
 [ -z "$(echo $updatePort | grep '^[[:digit:]]*$')" ] && updatePort="3000"
 rm -rf /lib/systemd/system/updateGWD.service
@@ -1525,7 +1526,7 @@ rm -rf /tmp/ui-script*
 rm -rf /tmp/ui-web*
 rm -rf /tmp/client.zip
 
-if [[ $(ls -l /var/www/html/spt 2>/dev/null | awk '{print$5}') != "104857600" ]]; then
+if [[ $(du -sk '/var/www/html/spt' 2>/dev/null | awk '{print$1}') != '102400' ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
 
@@ -2180,19 +2181,19 @@ fi
 
 white "----------------------------"
 
-if [[ $(cat /opt/de_GWD/v2dns/geosite.dat 2>/dev/null | wc -l) -gt 30000 ]]; then
+if [[ $(du -sk '/opt/de_GWD/v2dns/geosite.dat' 2>/dev/null | awk '{print$1}') -gt '4400' ]]; then
     echo "[$statusGOOD] GeoSite        [loaded]"
 else
     echo "[$statusBAD] GeoSite        [incomplete]"
 fi
 
-if [[ $(cat /opt/de_GWD/v2dns/geoip.dat 2>/dev/null | wc -l) -gt 400000 ]]; then
+if [[ $(du -sk '/opt/de_GWD/v2dns/geoip.dat' 2>/dev/null | awk '{print$1}') -gt '5600' ]]; then
     echo "[$statusGOOD] GeoIP          [loaded]"
 else
     echo "[$statusBAD] GeoIP          [incomplete]"
 fi
 
-if [[ $(cat /opt/de_GWD/chnrouteSET 2>/dev/null | wc -l) -gt 7000 ]]; then
+if [[ $(du -sk '/opt/de_GWD/chnrouteSET' 2>/dev/null | awk '{print$1}') -gt '240' ]]; then
     echo "[$statusGOOD] ChnrouteIP     [loaded]"
 else
     echo "[$statusBAD] ChnrouteIP     [incomplete]"
