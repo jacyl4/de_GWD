@@ -1013,21 +1013,6 @@ ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5321 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5321 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5330 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5330 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 4711 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 4711 -j ACCEPT
-
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
