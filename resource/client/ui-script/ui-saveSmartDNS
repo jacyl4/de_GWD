@@ -43,16 +43,16 @@ for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf); do
     echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
 done
 
-[ -n "$xDNSc" ] && echo "server 127.0.0.1:5330 -group xDNS -exclude-default-group" >>/etc/smartdns/smartdns.conf
+[ -n "$xDNSc" ] && echo "server 127.0.0.1:5330 -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 
 if [[ -n $doh1IP ]]; then
-echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -group xDNS -exclude-default-group" >>/etc/smartdns/smartdns.conf
+echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 else
 echo ${shttps[0]} >>/etc/smartdns/smartdns.conf
 fi
 
 if [[ -n $doh2IP ]]; then
-echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -group xDNS -exclude-default-group" >>/etc/smartdns/smartdns.conf
+echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 else
 echo ${shttps[1]} >>/etc/smartdns/smartdns.conf
 fi

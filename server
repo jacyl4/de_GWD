@@ -731,16 +731,6 @@ mkdir -p /opt/de_GWD/vtrui
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-  "dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
-  "routing":{
-    "rules":[
-      {
-        "type":"field",
-        "inboundTag":["dnsFlow"],
-        "outboundTag":"direct"
-      }
-    ]
-  },
   "inbounds":[
     {
       "listen":"/dev/shm/de_GWD.socket",
@@ -842,16 +832,8 @@ OBup=`cat << EOF
     }
 EOF
 `
-OBdir=`cat << EOF
-    {
-      "tag":"direct",
-      "protocol":"freedom"
-    }
-EOF
-`
 jq '.outbounds=[]' /opt/de_GWD/vtrui/config.json |\
-jq --argjson OBup "$OBup" '.outbounds+=[$OBup]' |\
-jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' | sponge /opt/de_GWD/vtrui/config.json
+jq --argjson OBup "$OBup" '.outbounds+=[$OBup]' | sponge /opt/de_GWD/vtrui/config.json
 }
 
 v2outDirect(){

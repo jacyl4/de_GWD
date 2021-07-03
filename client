@@ -497,11 +497,11 @@ bind-tcp 127.0.0.1:5310
 bind 127.0.0.1:5311 -no-speed-check -no-cache
 bind-tcp 127.0.0.1:5311 -no-speed-check -no-cache
 
-bind 127.0.0.1:5320 -group xDNS -no-speed-check -no-cache
-bind-tcp 127.0.0.1:5320 -group xDNS -no-speed-check -no-cache
+bind 127.0.0.1:5320 -no-speed-check -no-cache -group xDNS
+bind-tcp 127.0.0.1:5320 -no-speed-check -no-cache -group xDNS
 
-bind 127.0.0.1:5321 -group xDNS -no-cache
-bind-tcp 127.0.0.1:5321 -group xDNS -no-cache
+bind 127.0.0.1:5321 -no-cache -group xDNS
+bind-tcp 127.0.0.1:5321 -no-cache -group xDNS
 
 speed-check-mode        ping,tcp:443
 cache-size              10000
@@ -521,8 +521,8 @@ server 119.28.28.28
 server 182.254.118.118
 server 223.5.5.5
 server 223.6.6.6
-server 1.1.1.1 -group xDNS -exclude-default-group
-server 8.8.8.8 -group xDNS -exclude-default-group
+server 1.1.1.1 -exclude-default-group -group xDNS
+server 8.8.8.8 -exclude-default-group -group xDNS
 EOF
 
 rm -rf /run/smartdns.pid
@@ -568,7 +568,7 @@ systemctl daemon-reload >/dev/null
 systemctl restart smartdns >/dev/null
 fi
 
-[ -n "$xDNS" ] && xDNSdomain=$(echo $xDNS | cut -d: -f1) && echo "server 127.0.0.1:5330 -group xDNS -exclude-default-group" >>/etc/smartdns/smartdns.conf
+[ -n "$xDNS" ] && xDNSdomain=$(echo $xDNS | cut -d: -f1) && echo "server 127.0.0.1:5330 -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 [ -n "$doh1" ] && doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
 [ -n "$doh2" ] && doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
 
@@ -586,11 +586,11 @@ fi
 
 echo >>/etc/smartdns/smartdns.conf
 if [[ -n $doh1IP ]]; then
-echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -group xDNS -exclude-default-group" >>/etc/smartdns/smartdns.conf
+echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 fi
 
 if [[ -n $doh2IP ]]; then
-echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -group xDNS -exclude-default-group" >>/etc/smartdns/smartdns.conf
+echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -exclude-default-group -group xDNS" >>/etc/smartdns/smartdns.conf
 fi
 systemctl restart smartdns >/dev/null
 
