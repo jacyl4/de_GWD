@@ -67,11 +67,10 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
 {
   "dns":{
     "hosts":{"$xDNScDomain":"$xDNScIP"},
-    "tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]
+    "servers":[{"address":"127.0.0.1","port":53}]
   },
   "routing":{
     "rules":[
-      {"type":"field","inboundTag":["dnsFlow"],"outboundTag": "direct"},
       {"type":"field","inboundTag":["xDNScIN"],"outboundTag":"xDNScOUT"}
     ]
   },
@@ -114,11 +113,6 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
           "domainStrategy": "UseIPv4"
         }
       }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "streamSettings": {"sockopt":{"mark":255}}
     }
   ]
 }
