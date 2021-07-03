@@ -621,11 +621,13 @@ rm -rf /tmp/vtrui*
 cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
+  "tag":"dnsFlow",
   "servers":[{"address":"127.0.0.1","port":5320}]
 },
 "routing":{
   "rules":[
-    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
+    {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
   ]
 },
 "inbounds":[
@@ -642,6 +644,11 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
     "tag":"dnsout",
     "protocol":"dns",
     "streamSettings":{"sockopt":{"mark":255}}
+  },
+  {
+    "tag":"direct",
+    "protocol":"freedom",
+    "streamSettings":{"sockopt":{"mark":255}}
   }
 ]
 }
@@ -649,14 +656,15 @@ EOF
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-"dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+"dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
 "routing":{
   "rules":[
     {
       "type":"field",
       "ip":["geoip:private"],
       "outboundTag": "direct"
-    }
+    },
+    {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
   ]
 },
 "inbounds":[
@@ -853,11 +861,13 @@ if [[ -n $xDNScIP ]]; then
 cat << EOF >/opt/de_GWD/xDNSc/config.json
 {
   "dns":{
+    "tag":"dnsFlow",
     "hosts":{"$xDNScDomain":"$xDNScIP"}
   },
   "routing":{
     "rules":[
-      {"type":"field","inboundTag":["xDNScIN"],"outboundTag":"xDNScOUT"}
+      {"type":"field","inboundTag":["xDNScIN"],"outboundTag":"xDNScOUT"},
+      {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
     ]
   },
   "inbounds": [
@@ -900,6 +910,11 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
           "domainStrategy": "UseIPv4"
         }
       }
+    },
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
     }
   ]
 }

@@ -66,11 +66,13 @@ if [[ -n $xDNScIP ]]; then
 cat << EOF >/opt/de_GWD/xDNSc/config.json
 {
   "dns":{
+    "tag":"dnsFlow",
     "hosts":{"$xDNScDomain":"$xDNScIP"}
   },
   "routing":{
     "rules":[
-      {"type":"field","inboundTag":["xDNScIN"],"outboundTag":"xDNScOUT"}
+      {"type":"field","inboundTag":["xDNScIN"],"outboundTag":"xDNScOUT"},
+      {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
     ]
   },
   "inbounds": [
@@ -113,6 +115,11 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
           "domainStrategy": "UseIPv4"
         }
       }
+    },
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
     }
   ]
 }

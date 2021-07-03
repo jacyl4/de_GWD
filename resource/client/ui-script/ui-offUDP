@@ -77,23 +77,6 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 
-iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5311 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5321 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5321 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5330 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5330 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 4711 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 4711 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 9896 -i $ethernetnum -j DROP
-
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT

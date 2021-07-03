@@ -6,14 +6,15 @@ path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-"dns":{"servers":[{"address":"127.0.0.1","port":53}]},
+"dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
 "routing":{
   "rules":[
     {
       "type":"field",
       "ip":["geoip:private"],
       "outboundTag": "direct"
-    }
+    },
+    {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
   ]
 },
 "inbounds":[
