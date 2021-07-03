@@ -1753,8 +1753,8 @@ if [[ "$BBRplusConfirm" = "" ]]; then
 mkdir -p /boot/grub
 mkdir -p /boot/bbrKernel
 
-[[ -d "/sys/firmware/efi" ]] && [[ -z "$(dpkg -l | grep 'grub-efi')" ]] && sudo apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
-[[ ! -d "/sys/firmware/efi" ]] && [[ -z "$(dpkg -l | grep 'grub2-common')" ]] && sudo apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z "$(which 'update-grub')" ]] && [[ -d "/sys/firmware/efi" ]] && sudo apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z "$(which 'update-grub')" ]] && [[ ! -d "/sys/firmware/efi" ]] && sudo apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 if [[ $(uname -m) == "aarch64" ]]; then
 wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_arm64.deb
