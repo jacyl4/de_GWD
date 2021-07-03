@@ -621,7 +621,7 @@ rm -rf /tmp/vtrui*
 cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
-  "servers":[{"address":"127.0.0.1","port":5320}]
+  "servers":[{"address":"127.0.0.1","port":5321}]
 },
 "routing":{
   "rules":[
