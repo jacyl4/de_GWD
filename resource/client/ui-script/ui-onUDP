@@ -95,8 +95,6 @@ iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
 iptables -A INPUT -p tcp --dport 9896 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
-iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
 iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
