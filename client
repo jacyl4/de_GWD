@@ -620,14 +620,12 @@ rm -rf /tmp/vtrui*
 cat << EOF >/opt/de_GWD/v2dns/config.json
 {
 "dns":{
-  "tag":"dnsFlow",
   "hosts":{"localhost":"127.0.0.1"},
   "servers":[{"address":"127.0.0.1","port":5321}]
 },
 "routing":{
   "rules":[
-    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
-    {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
   ]
 },
 "inbounds":[
@@ -643,11 +641,6 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
     "tag":"dnsout",
     "protocol":"dns",
     "streamSettings":{"sockopt":{"mark":255}}
-  },
-  {
-    "tag":"direct",
-    "protocol":"freedom",
-    "streamSettings":{"sockopt":{"mark":255}}
   }
 ]
 }
@@ -655,16 +648,9 @@ EOF
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
-"dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
+"dns":{"servers":[{"address":"127.0.0.1","port":53}]},
 "routing":{
   "rules":[
-    {
-      "type": "field",
-      "inboundTag": [
-        "dnsFlow"
-      ],
-      "outboundTag": "direct"
-    },
     {
       "type":"field",
       "ip":["geoip:private"],
@@ -1023,42 +1009,6 @@ ipset -! -R </opt/de_GWD/IPlistWlanSET
 
 ip rule add fwmark 0x9 table 100 pref 100
 ip route add local 0.0.0.0/0 dev lo table 100
-
-iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
-iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,FIN FIN -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ACK,PSH PSH -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ALL ALL -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ALL NONE -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ALL FIN,PSH,URG -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-
-iptables -A INPUT -p udp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5310 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5311 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5311 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5320 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5320 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5321 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5321 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5330 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5330 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 5350 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 5350 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 4711 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 4711 -i $ethernetnum -j DROP
-iptables -A INPUT -p udp --dport 9896 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 9896 -i $ethernetnum -j DROP
 
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
@@ -1583,8 +1533,8 @@ wget --no-check-certificate --show-progress -cqO /var/www/html/act/version.php h
 
 
 installPihole(){
-piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r .tag_name)
-piholeFTLRelease=$(curl --silent "https://api.github.com/repos/pi-hole/FTL/releases/latest" | jq -r .tag_name)
+piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r '.tag_name')
+piholeFTLRelease=$(curl --silent "https://api.github.com/repos/pi-hole/FTL/releases/latest" | jq -r '.tag_name')
 
 if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]] || [[ $(awk '{print$3}' /etc/pihole/localversions 2>/dev/null) != $piholeFTLRelease ]]; then
 export PIHOLE_SKIP_OS_CHECK=true
