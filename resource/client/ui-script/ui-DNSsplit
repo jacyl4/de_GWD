@@ -2,7 +2,6 @@
 cat << EOF >/tmp/v2dns_config
 {
 "dns":{
-  "tag":"dnsFlow",
   "disableCache":true,
   "servers":[
   {"address":"127.0.0.1","port":5320},
@@ -14,8 +13,7 @@ cat << EOF >/tmp/v2dns_config
 },
 "routing":{
   "rules":[
-    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
-    {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
   ]
 },
 "inbounds":[
@@ -24,18 +22,13 @@ cat << EOF >/tmp/v2dns_config
     "port":5350,
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
-    "settings":{"address":"127.0.0.1","port":5320,"network":"tcp,udp"}
+    "settings":{"address":"127.0.0.1","network":"tcp,udp"}
   }
 ],
 "outbounds":[
   {
     "tag":"dnsout",
     "protocol":"dns",
-    "streamSettings":{"sockopt":{"mark":255}}
-  },
-  {
-    "tag":"direct",
-    "protocol":"freedom",
     "streamSettings":{"sockopt":{"mark":255}}
   }
 ]
