@@ -176,7 +176,7 @@
           <div class="card-body">
 
           <div class="form-row">
-            <div class="col-md-3">
+            <div class="col-md-3 my-2">
               <div class="card">
                 <div class="card-header">
                   <span>黑名单域名（走国外线路）</span>
@@ -185,7 +185,7 @@
               </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-3 my-2">
               <div class="card">
                 <div class="card-header">
                   <span>白名单域名（走国内线路）</span>
@@ -194,7 +194,7 @@
               </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-3 my-2">
               <div class="card">
                 <div class="card-header">
                   <span>内网设备 黑名单IP（全局走国外线路）</span>
@@ -203,7 +203,7 @@
               </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-3 my-2">
               <div class="card">
                 <div class="card-header">
                   <span>内网设备 白名单IP（全局走国内线路）</span>
