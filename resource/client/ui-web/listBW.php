@@ -175,52 +175,43 @@
           </div>
           <div class="card-body">
 
-<div class="form-row">
-          <div class="col-md-3 my-2">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
-            黑名单域名（走国外线路）<br>
-            </span>
-          </div>
-            <textarea id="listB" class="form-control" aria-label="listB" rows="12" placeholder="一行一个域名"><?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['listB'] as $k => $v) {echo "$k\n";} ?></textarea>
-          </div>
-          </div>
+          <div class="form-row">
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-header">
+                  <span>黑名单域名（走国外线路）</span>
+                </div>
+                  <textarea id="listB" class="form-control" aria-label="listB" rows="12" placeholder="一行一个域名"><?php foreach ($de_GWDconf->listB as $k => $v) {echo "$k\n";} ?></textarea>
+              </div>
+            </div>
 
-          <div class="col-md-3 my-2">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
-            白名单域名（走国内线路）<br>
-            </span>
-          </div>
-            <textarea id="listW" class="form-control" aria-label="listW" rows="12" placeholder="一行一个域名"><?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['listW'] as $k => $v) {echo "$k\n";} ?></textarea>
-          </div>
-          </div>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-header">
+                  <span>白名单域名（走国内线路）</span>
+                </div>
+                  <textarea id="listW" class="form-control" aria-label="listW" rows="12" placeholder="一行一个域名"><?php foreach ($de_GWDconf->listW as $k => $v) {echo "$k\n";} ?></textarea>
+              </div>
+            </div>
 
-          <div class="col-md-3 my-2">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
-            内网设备 黑名单IP（全局走国外线路）<br>
-            </span>
-          </div>
-            <textarea id="listBlan" class="form-control" aria-label="listBlan" rows="12" placeholder="一行一个IP"><?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['listBlan'] as $k => $v) {echo "$v\n";} ?></textarea>
-          </div>
-          </div>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-header">
+                  <span>内网设备 黑名单IP（全局走国外线路）</span>
+                </div>
+                  <textarea id="listBlan" class="form-control" aria-label="listBlan" rows="12" placeholder="一行一个IP"><?php foreach ($de_GWDconf->listBlan as $k => $v) {echo "$v\n";} ?></textarea>
+              </div>
+            </div>
 
-          <div class="col-md-3 my-2">
-          <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text w-25 px-4" style="writing-mode: vertical-rl">
-            内网设备 白名单IP（全局走国内线路）<br>
-            </span>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-header">
+                  <span>内网设备 白名单IP（全局走国内线路）</span>
+                </div>
+                  <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="12" placeholder="一行一个IP"><?php foreach ($de_GWDconf->listWlan as $k => $v) {echo "$v\n";} ?></textarea>
+              </div>
+            </div>
           </div>
-            <textarea id="listWlan" class="form-control" aria-label="listWlan" rows="12" placeholder="一行一个IP"><?php foreach (json_decode(file_get_contents('/opt/de_GWD/0conf'), true)['listWlan'] as $k => $v) {echo "$v\n";} ?></textarea>
-          </div>
-          </div>
-</div>
-
 
           </div>
           </div>
