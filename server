@@ -15,7 +15,7 @@ statuSuccess=$(green "[    OK     ]")
 statusFailed=$(red "[  failed   ]")
 export DEBIAN_FRONTEND=noninteractive
 bbrplusVer="5.10.45"
-de_gwd_nginx="1.21.0-1"
+de_gwd_nginx="1.21.1"
 virt=$(systemd-detect-virt)
 virtCON="openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch"
 
@@ -467,8 +467,11 @@ if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemct
   chmod +x /usr/sbin/nginx
   mkdir -p "/etc/nginx/conf.d/"
   wget --no-check-certificate --show-progress -cqO /tmp/nginxConf.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginxConf.zip
-  unzip /tmp/nginxConf.zip -d /tmp >/dev/null
-  mv -f /tmp/nginxConf/* /etc/nginx/
+  if [[ -n "$(unzip -t /tmp/nginxConf.zip 2>/dev/null | grep 'No errors')" ]]; then
+    unzip /tmp/nginxConf.zip -d /tmp >/dev/null && mv -f /tmp/nginxConf/* /etc/nginx
+  else
+    echo -n "$statusFailed" && red "Nginx config files download failed"
+  fi
   rm -rf /tmp/nginx*
 fi
 
