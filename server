@@ -968,9 +968,6 @@ iptables -A INPUT -m set --match-set chnroute src -p udp --dport \$xtlsPort -j D
 iptables -A INPUT -m set --match-set chnroute src -p tcp --dport \$xtlsPort -j DROP
 fi
 
-iptables -t mangle -A PREROUTING -m conntrack --ctstate INVALID -j DROP
-iptables -t mangle -A PREROUTING -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
-iptables -t mangle -A PREROUTING -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
 iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 iptables -t mangle -A PREROUTING -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
