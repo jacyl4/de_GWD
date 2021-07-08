@@ -112,7 +112,7 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
     },

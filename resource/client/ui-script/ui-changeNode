@@ -44,7 +44,7 @@ OBdefault=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
     }
@@ -86,7 +86,7 @@ OBdefault=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
     }

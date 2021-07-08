@@ -42,7 +42,7 @@ OBdt=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
     }
@@ -80,7 +80,7 @@ OBdt=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
 }

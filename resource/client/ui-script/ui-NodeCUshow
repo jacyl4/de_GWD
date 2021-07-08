@@ -47,7 +47,7 @@ OBcu=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
     }
@@ -89,7 +89,7 @@ OBcu=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
 }

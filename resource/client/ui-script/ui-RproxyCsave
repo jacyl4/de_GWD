@@ -58,7 +58,7 @@ cat << EOF >/opt/de_GWD/RproxyC/config.json
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy": "UseIPv4"
+          "domainStrategy": "UseIP"
         }
       }
     },
