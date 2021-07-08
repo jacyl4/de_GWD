@@ -92,7 +92,7 @@ uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json
 upDomain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
 upPort=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
 upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/config.json)
-xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
+xtlsPort=$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
 }
 
 
@@ -916,7 +916,7 @@ cat << EOF >/opt/de_GWD/iptablesrules-up
 #!/bin/bash
 ipset -N chnroute hash:net family inet hashsize 4096 maxelem 100000
 
-xtlsPort=\$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
+xtlsPort=\$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
 
 if [[ -n \$xtlsPort ]] && [[ \$xtlsPort != null ]]; then
 wget --no-check-certificate --show-progress -cqO /opt/de_GWD/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
@@ -1436,7 +1436,7 @@ uuids=$nuuid
 upDomain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
 upPort=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
 upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/config.json)
-xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
+xtlsPort=$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
 
 nginxWebConf
 
@@ -1564,7 +1564,7 @@ uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json
 upDomain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
 upPort=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
 upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/config.json)
-xtlsPort=$(jq -r '.inbounds[1].port' /opt/de_GWD/vtrui/config.json)
+xtlsPort=$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
 
 blue "---------------------------------------------"
 green "Xray node information"
