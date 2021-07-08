@@ -837,8 +837,28 @@ OBup=`cat << EOF
 EOF
 `
 
+OBdir=`cat << EOF
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "settings":{}
+    }
+EOF
+`
+
+OBblo=`cat << EOF
+    {
+      "tag":"blocked",
+      "protocol":"blackhole",
+      "settings":{}
+    }
+EOF
+`
+
 jq '.outbounds=[]' /opt/de_GWD/vtrui/config.json |\
-jq --argjson OBup "$OBup" '.outbounds+=[$OBup]' | sponge /opt/de_GWD/vtrui/config.json
+jq --argjson OBup "$OBup" '.outbounds+=[$OBup]' |\
+jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' |\
+jq --argjson OBblo "$OBblo" '.outbounds+=[$OBblo]' | sponge /opt/de_GWD/vtrui/config.json
 }
 
 v2outDirect(){
@@ -850,8 +870,19 @@ OBdir=`cat << EOF
     }
 EOF
 `
+
+OBblo=`cat << EOF
+    {
+      "tag":"blocked",
+      "protocol":"blackhole",
+      "settings":{}
+    }
+EOF
+`
+
 jq '.outbounds=[]' /opt/de_GWD/vtrui/config.json |\
-jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' | sponge /opt/de_GWD/vtrui/config.json
+jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' |\
+jq --argjson OBblo "$OBblo" '.outbounds+=[$OBblo]' | sponge /opt/de_GWD/vtrui/config.json
 }
 
 installV2(){
