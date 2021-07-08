@@ -20,12 +20,6 @@ path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0c
 
 cat << EOF >/opt/de_GWD/vtrui1/config.json
 {
-  "dns":{"tag":"dnsFlow","servers":[{"address":"127.0.0.1","port":53}]},
-  "routing":{
-    "rules":[
-      {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
-    ]
-  },
   "inbounds":[
     {
       "port": $FWD1port,
@@ -83,12 +77,6 @@ cat << EOF >/opt/de_GWD/vtrui1/config.json
           "domainStrategy":"UseIP"
         }
       }
-    },
-    {
-      "tag":"direct",
-      "protocol":"freedom",
-      "settings":{},
-      "streamSettings":{"sockopt":{"mark":255}}
     }
   ]
 }
