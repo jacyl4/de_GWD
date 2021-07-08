@@ -119,6 +119,7 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
     {
       "tag":"direct",
       "protocol":"freedom",
+      "settings":{},
       "streamSettings":{"sockopt":{"mark":255}}
     }
   ]

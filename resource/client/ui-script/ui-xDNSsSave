@@ -46,7 +46,8 @@ cat << EOF >/opt/de_GWD/xDNSs/config.json
   ],
   "outbounds": [
     {
-      "protocol": "blackhole"
+      "protocol": "blackhole",
+      "settings": {}
     },
     {
       "tag": "xDNSsOUT",

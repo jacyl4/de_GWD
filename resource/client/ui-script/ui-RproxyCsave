@@ -65,6 +65,7 @@ cat << EOF >/opt/de_GWD/RproxyC/config.json
     {
       "tag":"direct",
       "protocol":"freedom",
+      "settings":{},
       "streamSettings":{"sockopt":{"mark":255}}
     }
   ]
@@ -112,7 +113,8 @@ EOF
 OBout=`cat << EOF
     {
       "tag": "directOut",
-      "protocol": "freedom"
+      "protocol": "freedom",
+      "settings": {}
     }
 EOF
 `

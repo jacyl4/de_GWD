@@ -752,7 +752,8 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
         "network":"ws",
         "wsSettings":{
           "path":"$path"
-        }
+        },
+        "security":"none"
       }
     }
   ]
@@ -845,7 +846,8 @@ EOF
 OBdir=`cat << EOF
     {
       "tag":"direct",
-      "protocol":"freedom"
+      "protocol":"freedom",
+      "settings":{}
     }
 EOF
 `
@@ -859,7 +861,8 @@ v2outDirect(){
 OBdir=`cat << EOF
     {
       "tag":"direct",
-      "protocol":"freedom"
+      "protocol":"freedom",
+      "settings":{}
     }
 EOF
 `
