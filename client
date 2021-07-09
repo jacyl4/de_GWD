@@ -17,7 +17,7 @@ statusWarning=$(yellow "[  warning  ]")
 statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
 bbrplusVer="5.10.45"
-de_gwd_nginx="1.21.1"
+de_gwd_nginx="1.21.1-1"
 ttyd_version="1.6.3"
 branch="main"
 

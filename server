@@ -15,7 +15,7 @@ statuSuccess=$(green "[    OK     ]")
 statusFailed=$(red "[  failed   ]")
 export DEBIAN_FRONTEND=noninteractive
 bbrplusVer="5.10.45"
-de_gwd_nginx="1.21.1"
+de_gwd_nginx="1.21.1-1"
 virt=$(systemd-detect-virt)
 virtCON="openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch"
 
