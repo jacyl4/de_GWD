@@ -28,7 +28,6 @@ cat << EOF >> /etc/pihole/setupVars.conf
 REV_SERVER=true
 REV_SERVER_CIDR=$localaddrCIDR
 REV_SERVER_TARGET=$localaddr
-REV_SERVER_DOMAIN=lan
 EOF
 	/opt/de_GWD/pihole_hotfix
 
