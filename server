@@ -1210,6 +1210,7 @@ rm -rf ~/now.cron
 
 sleep 2
 sudo reboot
+exit
 fi
 }
 
@@ -1297,7 +1298,8 @@ rm -rf ~/now.cron
 blue "-----------------------"
 blue  "Install bbrplus [done]"
 blue "-----------------------"
-reboot
+sudo reboot
+exit
 else
   echo -n "$statusFailed" && red "bbrplus kernel install failed"
   exit
@@ -1374,7 +1376,8 @@ rm -rf ~/now.cron
 blue "--------------------------------"
 blue "Install XanMod kernel BBR [done]"
 blue "--------------------------------"
-reboot
+sudo reboot
+exit
 else
   echo -n "$statusFailed" && red "XanMod kernel install failed"
   echo
