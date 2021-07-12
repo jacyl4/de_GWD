@@ -16,8 +16,10 @@ statusFailed=$(red "[  failed   ]")
 export DEBIAN_FRONTEND=noninteractive
 bbrplusVer="5.10.45"
 de_gwd_nginx="1.21.1-1"
+architecture=$(dpkg --print-architecture)
 virt=$(systemd-detect-virt)
 virtCON="openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch"
+
 
 
 preUpdate(){
@@ -371,11 +373,7 @@ pihole -a interface
 
 
 rm -rf /opt/de_GWD/doh-server*
-if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate --show-progress -cqO /opt/de_GWD/doh-server https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/doh/doh_s_amd64
-elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate --show-progress -cqO /opt/de_GWD/doh-server https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/doh/doh_s_arm64
-fi
+wget --no-check-certificate --show-progress -cqO /opt/de_GWD/doh-server https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/doh/doh_s_$architecture
 chmod +x /opt/de_GWD/doh-server
 
 cat << EOF >/opt/de_GWD/doh-server.conf
@@ -459,15 +457,11 @@ mkdir -p /var/cache/nginx/uwsgi_temp
 
 if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
   rm -rf /usr/sbin/nginx
-    if [[ $(uname -m) == "x86_64" ]];then
-      wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_amd64
-    elif [[ $(uname -m) == "aarch64" ]];then
-      wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_arm64
-    fi
+  wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_$architecture
   chmod +x /usr/sbin/nginx
   mkdir -p "/etc/nginx/conf.d/"
   wget --no-check-certificate --show-progress -cqO /tmp/nginxConf.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginxConf.zip
-  if [[ -n "$(unzip -t /tmp/nginxConf.zip 2>/dev/null | grep 'No errors')" ]]; then
+  if [[ -n "$(unzip -tq /tmp/nginxConf.zip 2>/dev/null | grep 'No errors')" ]]; then
     unzip /tmp/nginxConf.zip -d /tmp >/dev/null && mv -f /tmp/nginxConf/* /etc/nginx
   else
     echo -n "$statusFailed" && red "Nginx config files download failed"
@@ -886,11 +880,7 @@ jq --argjson OBblo "$OBblo" '.outbounds+=[$OBblo]' | sponge /opt/de_GWD/vtrui/co
 }
 
 installV2(){
-if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/amd64_vtrui.zip
-elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/arm64_vtrui.zip
-fi
+wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/"$architecture"_vtrui.zip
 rm -rf /tmp/vtrui
 unzip /tmp/vtrui.zip -d /tmp/vtrui >/dev/null 2>&1
 mv -f /tmp/vtrui/xray /opt/de_GWD/vtrui/vtrui
@@ -1031,7 +1021,7 @@ fi
 rm -rf /opt/de_GWD/version.php
 wget --no-check-certificate --show-progress -cqO /opt/de_GWD/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
 
-if [[ $(du -sk '/var/www/html/spt' 2>/dev/null | awk '{print$1}') != '102400' ]]; then
+if [[ $(du -sk /var/www/html/spt 2>/dev/null | awk '{print$1}') -lt 102400 ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
 
@@ -1113,7 +1103,7 @@ chmod +x /opt/de_GWD/Qday
 cat << "EOF" >/opt/de_GWD/Q4amSun
 #!/bin/bash
 wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
-if [[ $(du -sk '/tmp/IPchnroute' 2>/dev/null | awk '{print$1}') -gt '130' ]]; then
+if [[ $(du -sk /tmp/IPchnroute 2>/dev/null | awk '{print$1}') -gt 130 ]]; then
 sed -i '/^\s*$/d' /tmp/IPchnroute
 sed -i 's/^/add chnroute &/g' /tmp/IPchnroute
 mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET
@@ -1232,13 +1222,8 @@ mkdir -p /boot/bbrKernel
 [[ -z "$(which 'update-grub')" ]] && [[ -d "/sys/firmware/efi" ]] && sudo apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
 [[ -z "$(which 'update-grub')" ]] && [[ ! -d "/sys/firmware/efi" ]] && sudo apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
 
-if [[ $(uname -m) == "aarch64" ]]; then
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_arm64.deb
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_arm64.deb
-elif [[ $(uname -m) == "x86_64" ]]; then  
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_amd64.deb
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_amd64.deb
-fi
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_$architecture.deb
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_$architecture.deb
 
 dpkg -i /boot/bbrKernel/linux-image.deb
 dpkg -i /boot/bbrKernel/linux-headers.deb
@@ -1320,9 +1305,9 @@ installBBR(){
 
 if [[ "$XanModconfirm" = "" ]]; then
 
-if [[ $(uname -m) == "aarch64" ]]; then
+if [[ $architecture != "amd64" ]]; then
   red "only work on x86_64"
-elif [[ $(uname -m) == "x86_64" ]]; then
+elif [[ $architecture == "amd64" ]]; then
 mkdir -p /boot/bbrKernel
 echo 'deb http://deb.xanmod.org releases main' >/etc/apt/sources.list.d/xanmod-kernel.list
 wget -cqO - https://dl.xanmod.org/gpg.key | apt-key --keyring /etc/apt/trusted.gpg.d/xanmod-kernel.gpg add -

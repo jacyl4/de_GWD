@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ $(du -sk '/var/www/html/restore/de_GWD_bak' 2>/dev/null | awk '{print$1}') -gt '1' ]]; then
+if [[ $(du -sk /var/www/html/restore/de_GWD_bak 2>/dev/null | awk '{print$1}') -gt 1 ]]; then
 mv -f /var/www/html/restore/de_GWD_bak /opt/de_GWD/0conf
 
 if [[ $(jq -r '.address.alias' /opt/de_GWD/0conf) != "null" ]]; then

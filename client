@@ -25,7 +25,7 @@ installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/c
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
 
 aptLocal="mirrors.aliyun.com"
-
+architecture=$(dpkg --print-architecture)
 
 
 preDownload() {
@@ -56,13 +56,22 @@ EOF
 chmod +x /opt/de_GWD/tcpTime
 /opt/de_GWD/tcpTime
 
-if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://$mirrorSite/amd64_vtrui.zip
-elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://$mirrorSite/arm64_vtrui.zip
-fi
+unset DLloop
+until [[ $(unzip -tq /tmp/vtrui.zip 2>/dev/null) =~ "No errors" ]]
+do
+   wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://$mirrorSite/"$architecture"_vtrui.zip
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
 
-wget --no-check-certificate --show-progress -cqO /opt/de_GWD/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@main/IPchnroute
+unset DLloop
+until [[ $(du -sk /opt/de_GWD/IPchnroute 2>/dev/null | awk '{print$1}') -gt 130 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /opt/de_GWD/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@main/IPchnroute
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
 sed -i '/^\s*$/d' /opt/de_GWD/IPchnroute
 sed -i 's/^/add chnroute &/g' /opt/de_GWD/IPchnroute
 mv -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
@@ -159,7 +168,7 @@ rm -rf /opt/de_GWD/doh-server*
 rm -rf "/etc/NetworkManager/dispatcher.d"
 systemctl daemon-reload >/dev/null 2>&1
 
-if [[ $(uname -m) == "aarch64" ]] && [[ -n $(dpkg -l | grep nginx) ]];then
+if [[ $architecture == "arm64" ]] && [[ -n $(dpkg -l | grep nginx) ]];then
   rm -rf /usr/share/nginx
   apt purge fontconfig-config fonts-dejavu-core libfontconfig1 libfreetype6 libgd3 libjbig0 libjpeg62-turbo libnginx-mod-http-auth-pam libnginx-mod-http-dav-ext libnginx-mod-http-echo libnginx-mod-http-geoip libnginx-mod-http-image-filter libnginx-mod-http-subs-filter libnginx-mod-http-upstream-fair libnginx-mod-http-xslt-filter libnginx-mod-mail libnginx-mod-stream libtiff5 libwebp6 libx11-6 libx11-data libxau6 libxcb1 libxdmcp6 libxpm4 libxslt1.1 nginx nginx-common nginx-full
 fi
@@ -1120,7 +1129,7 @@ echo -n "$statusInstalled" && white "Iptables-Proxy"
 
 
 updateAPT(){
-if [[ $(uname -m) == "x86_64" ]];then
+if [[ $architecture == "amd64" ]];then
 cat << EOF >/etc/apt/sources.list
 deb http://deb.debian.org/debian buster main contrib non-free
 deb http://deb.debian.org/debian buster-updates main contrib non-free
@@ -1257,19 +1266,24 @@ mkdir -p /var/cache/nginx/uwsgi_temp
 
 if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
   rm -rf /usr/sbin/nginx
-    if [[ $(uname -m) == "x86_64" ]];then
-      wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_amd64
-    elif [[ $(uname -m) == "aarch64" ]];then
-      wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_arm64
-    fi
+  unset DLloop
+  until [[ $(du -sk /tmp/nginx 2>/dev/null | awk '{print$1}') -gt 25000 ]]
+  do
+     wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_"$architecture"
+     ((DLloop+=1))
+     [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+  done
   chmod +x /usr/sbin/nginx
+
   mkdir -p "/etc/nginx/conf.d/"
-  wget --no-check-certificate --show-progress -cqO /tmp/nginxConf.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginxConf.zip
-  if [[ -n "$(unzip -t /tmp/nginxConf.zip 2>/dev/null | grep 'No errors')" ]]; then
-    unzip /tmp/nginxConf.zip -d /tmp >/dev/null && mv -f /tmp/nginxConf/* /etc/nginx
-  else
-    echo -n "$statusFailed" && red "Nginx config files download failed"
-  fi
+  unset DLloop
+  until [[ $(unzip -tq /tmp/nginxConf.zip 2>/dev/null) =~ "No errors" ]]
+  do
+     wget --no-check-certificate --show-progress -cqO /tmp/nginxConf.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginxConf.zip
+     ((DLloop+=1))
+     [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+  done
+  unzip /tmp/nginxConf.zip -d /tmp >/dev/null && mv -f /tmp/nginxConf/* /etc/nginx
   rm -rf /tmp/nginx*
 fi
 
@@ -1467,9 +1481,15 @@ echo
 
 installWebUI(){
 cd ~
-wget --no-check-certificate --show-progress -cqO /tmp/client.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip
+unset DLloop
+until [[ $(unzip -tq /tmp/client.zip 2>/dev/null) =~ "No errors" ]]
+do
+   wget --no-check-certificate --show-progress -cqO /tmp/client.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
 
-if [[ $(du -sk '/tmp/client.zip' 2>/dev/null | awk '{print$1}') -gt '2600' ]]; then
+if [[ $(du -sk /tmp/client.zip 2>/dev/null | awk '{print$1}') -gt 2600 ]]; then
 unzip /tmp/client.zip -d /tmp >/dev/null 2>&1
 
 rm -rf /opt/de_GWD/ui-*
@@ -1492,13 +1512,15 @@ chmod +x /opt/de_GWD/*
 
 systemctl force-reload nginx >/dev/null
 
-if [[ $(uname -m) == "x86_64" ]];then
-  wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.x86_64
-elif [[ $(uname -m) == "aarch64" ]];then
-  wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.aarch64
-fi
+unset DLloop
+until [[ $(du -sk /tmp/ttyd 2>/dev/null | awk '{print$1}') -gt 1000 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.$(uname -m)
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
 
-[[ "$(du -sk '/tmp/ttyd' 2>/dev/null | awk '{print$1}')" -gt '1000' ]] && mv -f /tmp/ttyd /usr/bin/ttyd && chmod +x /usr/bin/ttyd
+[[ "$(du -sk /tmp/ttyd 2>/dev/null | awk '{print$1}')" -gt 1000 ]] && mv -f /tmp/ttyd /usr/bin/ttyd && chmod +x /usr/bin/ttyd
 
 [ -z "$(echo $updatePort | grep '^[[:digit:]]*$')" ] && updatePort="3000"
 rm -rf /lib/systemd/system/updateGWD.service
@@ -1523,11 +1545,18 @@ rm -rf /tmp/ui-script*
 rm -rf /tmp/ui-web*
 rm -rf /tmp/client.zip
 
-if [[ $(du -sk '/var/www/html/spt' 2>/dev/null | awk '{print$1}') -lt '102400' ]]; then
+if [[ $(du -sk /var/www/html/spt 2>/dev/null | awk '{print$1}') -lt 102400 ]]; then
   dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
 fi
 
-wget --no-check-certificate --show-progress -cqO /var/www/html/act/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+unset DLloop
+until [[ $(du -sk /tmp/version.php 2>/dev/null | awk '{print$1}') -ge 4 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /tmp/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+mv -f /tmp/version.php /var/www/html/act/version.php
 }
 
 
@@ -1746,13 +1775,8 @@ mkdir -p /boot/bbrKernel
 [[ -z "$(which 'update-grub')" ]] && [[ -d "/sys/firmware/efi" ]] && sudo apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
 [[ -z "$(which 'update-grub')" ]] && [[ ! -d "/sys/firmware/efi" ]] && sudo apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
 
-if [[ $(uname -m) == "aarch64" ]]; then
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_arm64.deb
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_arm64.deb
-elif [[ $(uname -m) == "x86_64" ]]; then  
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_amd64.deb
-wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_amd64.deb
-fi
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_$architecture.deb
+wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_$architecture.deb
 
 dpkg -i /boot/bbrKernel/linux-image.deb
 dpkg -i /boot/bbrKernel/linux-headers.deb
@@ -1832,9 +1856,9 @@ installBBR(){
 
 if [[ "$XanModconfirm" = "" ]]; then
 
-if [[ $(uname -m) == "aarch64" ]]; then
+if [[ $architecture != "amd64" ]]; then
   red "only work on x86_64"
-elif [[ $(uname -m) == "x86_64" ]]; then
+elif [[ $architecture == "amd64" ]]; then
 mkdir -p /boot/bbrKernel
 echo 'deb http://deb.xanmod.org releases main' >/etc/apt/sources.list.d/xanmod-kernel.list
 wget -cqO - https://dl.xanmod.org/gpg.key | apt-key --keyring /etc/apt/trusted.gpg.d/xanmod-kernel.gpg add -
@@ -2180,19 +2204,19 @@ fi
 
 white "----------------------------"
 
-if [[ $(du -sk '/opt/de_GWD/v2dns/geosite.dat' 2>/dev/null | awk '{print$1}') -gt '4400' ]]; then
+if [[ $(du -sk /opt/de_GWD/v2dns/geosite.dat 2>/dev/null | awk '{print$1}') -gt 4400 ]]; then
     echo "[$statusGOOD] GeoSite        [loaded]"
 else
     echo "[$statusBAD] GeoSite        [incomplete]"
 fi
 
-if [[ $(du -sk '/opt/de_GWD/v2dns/geoip.dat' 2>/dev/null | awk '{print$1}') -gt '5600' ]]; then
+if [[ $(du -sk /opt/de_GWD/v2dns/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5600 ]]; then
     echo "[$statusGOOD] GeoIP          [loaded]"
 else
     echo "[$statusBAD] GeoIP          [incomplete]"
 fi
 
-if [[ $(du -sk '/opt/de_GWD/chnrouteSET' 2>/dev/null | awk '{print$1}') -gt '240' ]]; then
+if [[ $(du -sk /opt/de_GWD/chnrouteSET 2>/dev/null | awk '{print$1}') -gt 240 ]]; then
     echo "[$statusGOOD] ChnrouteIP     [loaded]"
 else
     echo "[$statusBAD] ChnrouteIP     [incomplete]"
