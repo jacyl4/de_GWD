@@ -1512,13 +1512,15 @@ chmod +x /opt/de_GWD/*
 
 systemctl force-reload nginx >/dev/null
 
-unset DLloop
-until [[ $(du -sk /tmp/ttyd 2>/dev/null | awk '{print$1}') -gt 1000 ]]
-do
-   wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.$(uname -m)
-   ((DLloop+=1))
-   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
-done
+if [[ $(ttyd -v 2>&1 | grep -o '[0-9]\.[0-9]\.[0-9]') != $ttyd_version ]]; then
+  unset DLloop
+  until [[ $(du -sk /tmp/ttyd 2>/dev/null | awk '{print$1}') -gt 1000 ]]
+  do
+     wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.$(uname -m)
+     ((DLloop+=1))
+     [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+  done
+fi
 
 [[ "$(du -sk /tmp/ttyd 2>/dev/null | awk '{print$1}')" -gt 1000 ]] && mv -f /tmp/ttyd /usr/bin/ttyd && chmod +x /usr/bin/ttyd
 
