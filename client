@@ -16,16 +16,17 @@ statusFailed=$(red "[  failed   ]")
 statusWarning=$(yellow "[  warning  ]")
 statusUpdated=$(green "[  updated  ]")
 export DEBIAN_FRONTEND=noninteractive
-bbrplusVer="5.10.45"
-de_gwd_nginx="1.21.1-1"
-ttyd_version="1.6.3"
+BBRPLUS_Ver="5.10.45"
+NGINX_Ver="1.21.1-1"
+TTYD_Ver="1.6.3"
 branch="main"
+architecture=$(dpkg --print-architecture)
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
 mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
 
 aptLocal="mirrors.aliyun.com"
-architecture=$(dpkg --print-architecture)
+
 
 
 preDownload() {
@@ -1264,7 +1265,7 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $NGINX_Ver ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
   rm -rf /usr/sbin/nginx
   unset DLloop
   until [[ $(du -sk /tmp/nginx 2>/dev/null | awk '{print$1}') -gt 25000 ]]
@@ -1512,11 +1513,11 @@ chmod +x /opt/de_GWD/*
 
 systemctl force-reload nginx >/dev/null
 
-if [[ $(ttyd -v 2>&1 | grep -o '[0-9]\.[0-9]\.[0-9]') != $ttyd_version ]]; then
+if [[ $(ttyd -v 2>&1 | grep -o '[0-9]\.[0-9]\.[0-9]') != $TTYD_Ver ]]; then
   unset DLloop
   until [[ $(du -sk /tmp/ttyd 2>/dev/null | awk '{print$1}') -gt 1000 ]]
   do
-     wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$ttyd_version/ttyd.$(uname -m)
+     wget --no-check-certificate --show-progress -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$TTYD_Ver/ttyd.$(uname -m)
      ((DLloop+=1))
      [[ "$DLloop" = 3 ]] && break && red "Download Failed"
   done
@@ -1790,12 +1791,12 @@ apt purge -y $line
 done
 rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
 
-dpkg --list | grep 'linux-image' | awk '{print $2}' | sed "/$bbrplusVer-bbrplus/d" | while read line
+dpkg --list | grep 'linux-image' | awk '{print $2}' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
 do
 apt purge -y $line
 done
 
-dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed "/$bbrplusVer-bbrplus/d" | while read line
+dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
 do
 apt purge -y $line
 done
@@ -2236,7 +2237,7 @@ blue "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2
     green "=================================================="
     echo ""
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot ($bbrplusVer)"
+    green  "2. Install bbrplus and reboot ($BBRPLUS_Ver)"
     green  "3. Install XanMod kernel BBR and reboot"
     yellow "8. Change Web UI port & Web update port"
     yellow "9. Change de_GWD password"

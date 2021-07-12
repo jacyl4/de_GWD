@@ -14,8 +14,8 @@ statusInstalled=$(green "[ installed ]")
 statuSuccess=$(green "[    OK     ]")
 statusFailed=$(red "[  failed   ]")
 export DEBIAN_FRONTEND=noninteractive
-bbrplusVer="5.10.45"
-de_gwd_nginx="1.21.1-1"
+BBRPLUS_Ver="5.10.45"
+NGINX_Ver="1.21.1-1"
 architecture=$(dpkg --print-architecture)
 virt=$(systemd-detect-virt)
 virtCON="openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch"
@@ -455,7 +455,7 @@ mkdir -p /var/cache/nginx/fastcgi_temp
 mkdir -p /var/cache/nginx/scgi_temp
 mkdir -p /var/cache/nginx/uwsgi_temp
 
-if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $de_gwd_nginx ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $NGINX_Ver ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
   rm -rf /usr/sbin/nginx
   wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_$architecture
   chmod +x /usr/sbin/nginx
@@ -1235,12 +1235,12 @@ apt purge -y $line
 done
 rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
 
-dpkg --list | grep 'linux-image' | awk '{print $2}' | sed "/$bbrplusVer-bbrplus/d" | while read line
+dpkg --list | grep 'linux-image' | awk '{print $2}' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
 do
 apt purge -y $line
 done
 
-dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed "/$bbrplusVer-bbrplus/d" | while read line
+dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
 do
 apt purge -y $line
 done
@@ -1891,7 +1891,7 @@ fi
     green "=================================================="
     echo
     green  "1. Install de_GWD"
-    green  "2. Install bbrplus and reboot ($bbrplusVer)"
+    green  "2. Install bbrplus and reboot ($BBRPLUS_Ver)"
     green  "3. Install XanMod kernel BBR and reboot"
     red    "4. Change domain and generate new certificate"
     red    "5. Change Xray path & UUID"
