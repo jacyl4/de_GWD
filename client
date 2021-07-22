@@ -2236,7 +2236,7 @@ else
     echo "[$statusBAD] GeoSite        [incomplete]"
 fi
 
-if [[ $(du -sk /opt/de_GWD/v2dns/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5600 ]]; then
+if [[ $(du -sk /opt/de_GWD/v2dns/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5000 ]]; then
     echo "[$statusGOOD] GeoIP          [loaded]"
 else
     echo "[$statusBAD] GeoIP          [incomplete]"
