@@ -29,14 +29,14 @@ rm -rf /tmp/geosite.dat
 fi
 
 unset DLloop
-until [[ $(du -sk /tmp/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5600 ]]
+until [[ $(du -sk /tmp/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5000 ]]
 do
    wget --no-check-certificate --show-progress -cqO /tmp/geoip.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat
    ((DLloop+=1))
    [[ "$DLloop" = 3 ]] && break && red "Download Failed"
 done
 
-if [[ $(du -sk /tmp/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5600 ]]; then
+if [[ $(du -sk /tmp/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5000 ]]; then
 cp -f /tmp/geoip.dat /opt/de_GWD/v2dns/geoip.dat
 cp -f /tmp/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 rm -rf /tmp/geoip.dat
