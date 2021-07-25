@@ -1814,6 +1814,7 @@ do
 apt purge -y $line
 done
 rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+apt-key del E734E623 >/dev/null 2>&1
 
 dpkg --list | grep 'linux-image' | awk '{print $2}' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
 do
@@ -1952,6 +1953,7 @@ else
   done
 
   rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  apt-key del E734E623 >/dev/null 2>&1
   echo -n "$statusWarning" && yellow "Exit"
   exit
 fi
