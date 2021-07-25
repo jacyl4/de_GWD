@@ -118,12 +118,12 @@ blue "-----------------------------"
 
 
 updateBitwarden(){
+docker pull vaultwarden/server:latest
+
 docker stop bitwarden
 docker rm bitwarden
 
-docker pull vaultwarden/server:latest
 docker run -d --name bitwarden --restart=always -v /opt/bitwarden/:/data/ -p 8098:80 vaultwarden/server:latest
-
 
 docker system prune -f
 blue "--------------------------"
