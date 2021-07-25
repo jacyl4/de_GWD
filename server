@@ -661,6 +661,12 @@ sed -i '/SERVER_BASE_START/,/SERVER_BASE_END/d' /etc/nginx/conf.d/default.conf
 sed -i '/DOH_START/,/DOH_END/d' /etc/nginx/conf.d/default.conf
 sed -i '/V2_START/,/V2_END/d' /etc/nginx/conf.d/default.conf
 sed -i '$s/}$//' /etc/nginx/conf.d/default.conf
+
+until [[ $(head -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
+do
+   sed -i '1d' /etc/nginx/conf.d/default.conf
+done
+
 until [[ $(tail -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
 do
    sed -i '$d' /etc/nginx/conf.d/default.conf
