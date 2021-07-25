@@ -661,6 +661,10 @@ sed -i '/SERVER_BASE_START/,/SERVER_BASE_END/d' /etc/nginx/conf.d/default.conf
 sed -i '/DOH_START/,/DOH_END/d' /etc/nginx/conf.d/default.conf
 sed -i '/V2_START/,/V2_END/d' /etc/nginx/conf.d/default.conf
 sed -i '$s/}$//' /etc/nginx/conf.d/default.conf
+until [[ $(tail -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
+do
+   sed -i '$d' /etc/nginx/conf.d/default.conf
+done
 
 cat << EOF >/etc/nginx/conf.d/default.conf
 #SERVER_BASE_START
@@ -730,7 +734,6 @@ location $path {
   add_header                  Cache-Control no-cache;
 }
 #V2_END
-
 $(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
 }
 EOF

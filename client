@@ -1389,6 +1389,10 @@ sed -i '/PHP_START/,/PHP_END/d' /etc/nginx/conf.d/default.conf
 sed -i '/TTYD_START/,/TTYD_END/d' /etc/nginx/conf.d/default.conf
 sed -i '/NETDATA_START/,/NETDATA_END/d' /etc/nginx/conf.d/default.conf
 sed -i '$s/}$//' /etc/nginx/conf.d/default.conf
+until [[ $(tail -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
+do
+   sed -i '$d' /etc/nginx/conf.d/default.conf
+done
 
 cat << EOF >/etc/nginx/conf.d/default.conf
 #SERVER_BASE_START
@@ -1471,7 +1475,6 @@ location ~ /netdata/(?<ndpath>.*) {
   add_header                  Cache-Control no-cache;
 }
 #NETDATA_END
-
 $(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
 }
 EOF
