@@ -1193,8 +1193,8 @@ chmod +x /tmp/sysRestart
 
 screen -dmS sysRestart /tmp/sysRestart
 
-if [[ "$(dpkg --list | grep linux-image | wc -l)" -gt "1" ]]; then
-red "Kernel updated & reboot"
+if [[ "$(dpkg --list | grep linux-image | wc -l)" != "1" ]] && [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
+red "Xanmod kernel updated & reboot"
 
 cat << "EOF" >~/clearKernel
 #!/bin/bash
