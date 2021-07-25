@@ -641,12 +641,11 @@ chmod +x /var/www/ssl/update_ocsp_cache
 
 
 nginxWebConf(){
+[ -f "/etc/nginx/conf.d/merge.sh" ] && rm -rf /etc/nginx/conf.d/*
 [ -z $port ] && port="443"
 
-touch /etc/nginx/conf.d/0_top
-
 if [[ $port = "443" ]]; then
-cat << EOF >/etc/nginx/conf.d/1_serverHead
+cat << EOF >/etc/nginx/conf.d/80.conf
 server {
   listen 80;
   server_name $domain;
@@ -654,11 +653,17 @@ server {
 }
 EOF
 else
->/etc/nginx/conf.d/1_serverHead
+rm -rf /etc/nginx/conf.d/80.conf
 fi
 
-cat << EOF >>/etc/nginx/conf.d/1_serverHead
+touch /etc/nginx/conf.d/default.conf
+sed -i '/SERVER_BASE_START/,/SERVER_BASE_END/d' /etc/nginx/conf.d/default.conf
+sed -i '/DOH_START/,/DOH_END/d' /etc/nginx/conf.d/default.conf
+sed -i '/V2_START/,/V2_END/d' /etc/nginx/conf.d/default.conf
+sed -i '$s/}$//' /etc/nginx/conf.d/default.conf
 
+cat << EOF >/etc/nginx/conf.d/default.conf
+#SERVER_BASE_START
 server {
   listen $port ssl http2 fastopen=128 reuseport;
   server_name $domain;
@@ -667,10 +672,6 @@ server {
 
   ssl_certificate /var/www/ssl/de_GWD.cer;
   ssl_certificate_key /var/www/ssl/de_GWD.key;
-EOF
-
-cat << EOF >/etc/nginx/conf.d/2_tlsParameter
-
   ssl_dhparam /var/www/ssl/dhparam.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers on;
@@ -694,15 +695,13 @@ cat << EOF >/etc/nginx/conf.d/2_tlsParameter
   add_header X-Robots-Tag                       "none"              always;
   add_header X-XSS-Protection                   "1; mode=block"     always;
   add_header Strict-Transport-Security          "max-age=63072000"  always;
-EOF
-
-touch /etc/nginx/conf.d/3_reverseProxy
-cat << EOF >/etc/nginx/conf.d/4_end
 
 location ~ /\.(?!well-known).* {
   deny all;
 }
+#SERVER_BASE_END
 
+#DOH_START
 location /dq {
   proxy_pass                  http://127.0.0.1:8053/dq;
   proxy_set_header            Host \$host;
@@ -710,7 +709,9 @@ location /dq {
   add_header                  X-Cache \$upstream_cache_status;
   add_header                  Cache-Control no-cache;
 }
+#DOH_END
 
+#V2_START
 location $path {
   if (\$http_upgrade != "websocket") { return 404; }
   proxy_pass                  http://unix:/dev/shm/de_GWD.socket;
@@ -728,23 +729,11 @@ location $path {
   add_header                  X-Cache \$upstream_cache_status;
   add_header                  Cache-Control no-cache;
 }
+#V2_END
+
+$(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
 }
 EOF
-
-cat << EOF >/etc/nginx/conf.d/merge.sh
-#!/bin/bash
-rm -rf /etc/nginx/conf.d/default.conf
-
-cat /etc/nginx/conf.d/0_top >/etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/1_serverHead >>/etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/2_tlsParameter >>/etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/3_reverseProxy >>/etc/nginx/conf.d/default.conf
-cat /etc/nginx/conf.d/4_end >>/etc/nginx/conf.d/default.conf
-
-systemctl force-reload nginx
-EOF
-chmod +x /etc/nginx/conf.d/merge.sh
-/etc/nginx/conf.d/merge.sh
 }
 
 
