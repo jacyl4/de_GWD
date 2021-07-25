@@ -1140,7 +1140,8 @@ EOF
 fi
 
 echo "deb https://packages.sury.org/php/ buster main" >/etc/apt/sources.list.d/php.list
-curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
+apt-key del 95BD4743 >/dev/null 2>&1
+wget --no-check-certificate -cqO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
 
