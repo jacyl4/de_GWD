@@ -1481,6 +1481,7 @@ location ~ /netdata/(?<ndpath>.*) {
   add_header                  Cache-Control no-cache;
 }
 #NETDATA_END
+
 $(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
 }
 EOF
