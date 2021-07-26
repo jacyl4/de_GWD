@@ -1,4 +1,5 @@
 #!/bin/bash
+FWD1address=$(jq -r '.FORWARD.FWD1.address' /opt/de_GWD/0conf)
 FWD1port=$(jq -r '.FORWARD.FWD1.port' /opt/de_GWD/0conf)
 FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[]' /opt/de_GWD/0conf)
 
@@ -7,8 +8,7 @@ mkdir -p /opt/de_GWD/vtrui1
 cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
 chmod +x /opt/de_GWD/vtrui1/vtrui1
 
-
-v2nodeID=$(jq -r '.FORWARD.FWD1.upstream' /opt/de_GWD/0conf)
+v2nodeID=$(jq -r --arg FWD1address $FWD1address '.v2node | to_entries[] | select(.value.domain == $FWD1address) | .key' /opt/de_GWD/0conf)
 
 v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf)
 domain=$(echo $v2servn | cut -d: -f1)
@@ -46,8 +46,52 @@ cat << EOF >/opt/de_GWD/vtrui1/config.json
       }
     }
   ],
-  "outbounds": [
+  "outbounds": []
+}
+EOF
+
+if [[ -z $path ]] || [[ $path = "null" ]]; then
+OBfwd=`cat << EOF
     {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "flow": "xtls-rprx-direct",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBfwd=`cat << EOF
+{
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
       "protocol": "vless",
       "settings": {
         "vnext": [
@@ -76,18 +120,19 @@ cat << EOF >/opt/de_GWD/vtrui1/config.json
         },
         "sockopt": {
           "mark": 255,
-          "domainStrategy":"UseIP"
+          "domainStrategy": "UseIP"
         }
       }
-    }
-  ]
 }
 EOF
+`
+fi
 
 for uuid in $FWD1uuid; do
 uuidStr='{"id":"'$uuid'","flow":"xtls-rprx-direct","level":1}'
 jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
 done
+jq --argjson OBfwd "$OBfwd" '.outbounds[0]=$OBfwd' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
 chmod 666 /opt/de_GWD/vtrui1/config.json
 chmod 644 /var/www/ssl/*.key
 

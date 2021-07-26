@@ -1,7 +1,7 @@
 <?php require_once('../auth.php'); ?>
 <?php if (isset($auth) && $auth) {?>
 <?php
-$v2nodeID = $_GET['v2nodeID'];
+$FWD1address = $_GET['FWD1address'];
 $FWD1port = $_GET['FWD1port'];
 $FWD1uuid = $_GET['FWD1uuid'];
 
@@ -10,7 +10,7 @@ $FWD1uuid = array_filter(array_map('trim', $FWD1uuid));
 
 $data = json_decode(file_get_contents('/opt/de_GWD/0conf'), true);
 $data['FORWARD']['FWD1'] = array();
-$data['FORWARD']['FWD1']['upstream'] = $v2nodeID;
+$data['FORWARD']['FWD1']['address'] = $FWD1address;
 $data['FORWARD']['FWD1']['status'] = "on";
 $data['FORWARD']['FWD1']['port'] = $FWD1port;
 $data['FORWARD']['FWD1']['uuid'] = $FWD1uuid;
