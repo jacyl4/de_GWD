@@ -178,13 +178,13 @@
               <table class="table table-bordered table-striped text-center text-nowrap my-2">
                 <thead>
                   <tr>
-                    <th><a id="buttonAddLine" style="color:#28a745" href="javascript:void(0)"><i class="far fa-plus-square"></i></a></th>
+                    <th><a id="buttonAddLine" style="color:#28a745" href="javascript:void(0)"><i class="fas fa-plus-square fa-lg"></i></a></th>
                     <th class="text-nowrap text-center"><———— 地址 ————></th>
                     <th class="text-nowrap text-center"><———— 节点名 ————></th>
                     <th class="text-nowrap text-center"><———————— UUID ————————></th>
                     <th class="text-nowrap text-center"><—— PATH ——></th>
-                    <th class="text-nowrap text-center"><i class="fas fa-caret-square-up"></i></th>
-                    <th class="text-nowrap text-center"><i class="fas fa-caret-square-down"></i></th>
+                    <th class="text-nowrap text-center"><i class="fas fa-caret-square-up fa-lg"></i></th>
+                    <th class="text-nowrap text-center"><i class="fas fa-caret-square-down fa-lg"></i></th>
                   </tr>
                 </thead>
                 <tbody id="nodeTable">
@@ -192,13 +192,21 @@
 for( $i=0; $i<count($de_GWDconf->v2node); $i++){
   $num = $i+1;
   $domain = $de_GWDconf->v2node[$i]->domain;
+  $tls = $de_GWDconf->v2node[$i]->tls;
   $name = $de_GWDconf->v2node[$i]->name;
   $path = $de_GWDconf->v2node[$i]->path;
   $uuid = $de_GWDconf->v2node[$i]->uuid;
 print <<<EOT
 <tr>
 <td class="align-middle">$num</td>
-<td class="align-middle"><input type="text" class="form-control" value="$domain"></td>
+<td class="align-middle">
+  <div class="input-group">
+      <input type="text" class="form-control" value="$domain">
+    <div class="input-group-append">
+      <button type="button" class="btn btn-secondary btn-sm" value="$tls" onclick="commitTls(this)">tls</button>
+    </div>
+  </div>
+</td>
 <td class="align-middle"><input type="text" class="form-control" value="$name"></td>
 <td class="align-middle"><input type="text" class="form-control" value="$uuid"></td>
 <td class="align-middle"><input type="text" class="form-control" value="$path"></td>
@@ -233,6 +241,34 @@ EOT;
   </div>
   <!-- /#wrapper -->
 <script>
+function commitTls(commitTls){
+var i = $(commitTls).closest('tr').find('td').first().text()
+var tlsValue = $(commitTls).val()
+$('#nodeTable').append(`
+<div id="commitTlsModal${i}" class="modal fade" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="input-group">
+          <input id="serverName${i}" type="text" class="form-control" value="${tlsValue}"></input>
+          <div class="input-group-append">
+            <button id="serverNameSave${i}" type="button" class="btn btn-secondary btn-sm">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+                        `)
+$('#commitTlsModal'+i).modal('show')
+
+$('#serverNameSave'+i).click(function(){
+serverName=$('#serverName'+i).val()
+$(commitTls).val(serverName);
+$('#commitTlsModal'+i).modal('hide')
+})
+}
+
 function moveUp(obj) { 
 var current = $(obj).parent().parent();
 var prev = current.prev();
@@ -266,7 +302,14 @@ $('#buttonAddLine').click(function(){
   $('#nodeTable').append(`
                           <tr>
                           <td class="align-middle">${i+1}</td>
-                          <td class="align-middle"><input type="text" class="form-control" value=""></td>
+                          <td class="align-middle">
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="">
+                              <div class="input-group-append">
+                                <button type="button" class="btn btn-secondary btn-sm">tls</button>
+                              </div>
+                            </div>
+                          </td>
                           <td class="align-middle"><input type="text" class="form-control" value=""></td>
                           <td class="align-middle"><input type="text" class="form-control" value=""></td>
                           <td class="align-middle"><input type="text" class="form-control" value=""></td>
@@ -279,17 +322,21 @@ $('#buttonAddLine').click(function(){
 $('#buttonSaveNode').click(function(){
 $("#buttonSaveNodeLoading").attr("class", "spinner-border spinner-border-sm")
 var nodeList = []
-var domain, name, path, uuid
+var domain, tls, name, path, uuid
 var len = $("#nodeTable td:nth-child(1)").length
 var trList = $("#nodeTable").children("tr")
 for( let i = 0; i<len; i++){
     var tdArr = trList.eq(i).find("td")
     var domain = tdArr.eq(1).find('input').val()
+    var tls = tdArr.eq(1).find('button').val()
     var name = tdArr.eq(2).find('input').val()
     var uuid = tdArr.eq(3).find('input').val()
     var path = tdArr.eq(4).find('input').val()
+    if (tls == '' ) {
+    var tls = domain.split(':')[0]
+    }
     if (domain !== '' && name !== '' && uuid !== '' ) {
-    nodeList.push({domain, name, uuid, path})
+    nodeList.push({domain, tls, name, uuid, path})
     }
 }
 $.get("./act/saveNode.php", {nodeList:nodeList}, function(result){
@@ -297,7 +344,6 @@ $.get("./act/saveNode.php", {nodeList:nodeList}, function(result){
   window.location.href="index.php"
 })
 })
-
 })
 </script>
 

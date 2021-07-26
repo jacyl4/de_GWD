@@ -15,6 +15,7 @@ domain=$(echo $v2servn | cut -d: -f1)
 port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
 
+tls=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].tls" /opt/de_GWD/0conf)
 uuid=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf)
 path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0conf)
 
@@ -69,7 +70,7 @@ cat << EOF >/opt/de_GWD/vtrui1/config.json
         },
         "security": "tls",
         "tlsSettings": {
-          "serverName": "$domain",
+          "serverName": "$tls",
           "allowInsecure": false
         },
         "sockopt": {

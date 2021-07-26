@@ -1,5 +1,6 @@
 #!/bin/bash
 address=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $domainNUM) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $domainNUM) | .value.tls' /opt/de_GWD/0conf)
 uuid=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $domainNUM) | .value.uuid' /opt/de_GWD/0conf)
 path=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $domainNUM) | .value.path' /opt/de_GWD/0conf)
 
@@ -9,6 +10,7 @@ port=$(echo -e $address | cut -d: -f2 | grep '^[[:digit:]]*$')
 
 jq '.update.v2node={}' /opt/de_GWD/0conf |\
 jq --arg domain "$domain" '.update.v2node.domain=$domain' |\
+jq --arg tls "$tls" '.update.v2node.tls=$tls' |\
 jq --arg port "$port" '.update.v2node.port=$port' |\
 jq --arg uuid "$uuid" '.update.v2node.uuid=$uuid' |\
 jq --arg path "$path" '.update.v2node.path=$path' | sponge /opt/de_GWD/0conf
@@ -40,7 +42,8 @@ OBdefault=`cat << EOF
         "network": "tcp",
         "security": "xtls",
         "xtlsSettings": {
-          "serverName": "$domain"
+          "serverName": "$tls",
+          "allowInsecure": false
         },
         "sockopt": {
           "mark": 255,
@@ -81,7 +84,7 @@ OBdefault=`cat << EOF
         },
         "security": "tls",
         "tlsSettings": {
-          "serverName": "$domain",
+          "serverName": "$tls",
           "allowInsecure": false
         },
         "sockopt": {
