@@ -1,8 +1,11 @@
 #!/bin/bash
 domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf)
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf)
 port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
 uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf)
 path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
+
+[ -z "$tls" ] || [ "$tls" == "null" ] && tls=$domain
 
 cat << EOF >/opt/de_GWD/vtrui/config.json
 {
@@ -66,7 +69,8 @@ OBdefault=`cat << EOF
         "network": "tcp",
         "security": "xtls",
         "xtlsSettings": {
-          "serverName": "$domain"
+          "serverName": "$tls",
+          "allowInsecure": false
         },
         "sockopt": {
           "mark": 255,
@@ -107,7 +111,7 @@ OBdefault=`cat << EOF
         },
         "security": "tls",
         "tlsSettings": {
-          "serverName": "$domain",
+          "serverName": "$tls",
           "allowInsecure": false
         },
         "sockopt": {

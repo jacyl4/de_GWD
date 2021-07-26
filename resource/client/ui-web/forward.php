@@ -48,6 +48,7 @@
 <?php $checkFWD0 = empty($vtruiConf->inbounds[1]); ?>
 
 <?php $checkVtrui1 = exec('sudo systemctl is-active vtrui1'); ?>
+<?php $checkVtrui1OB = explode("\n", shell_exec('sudo /opt/de_GWD/ui-checkVtrui1')); ?>
 <?php $checkFWD1 = file_exists('/opt/de_GWD/vtrui1/config.json'); ?>
 
 <?php $checkRproxyS = exec('sudo systemctl is-active RproxyS'); ?>
@@ -373,8 +374,8 @@
     <label class="input-group-text">上级v2节点</label>
   </div>
   <div class="input-group-append">
-    <button id="v2nodeNAMEshow" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo $de_GWDconf->FORWARD->FWD1->upstream ?>"><?php passthru('sudo /opt/de_GWD/ui-checkVtrui1') ?></button>
-    <div id="v2nodeNAME" class="dropdown-menu">
+    <button id="FWD1address" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" value="<?php echo $checkVtrui1OB[1] ?>"><?php echo $checkVtrui1OB[0] ?></button>
+    <div id="FWD1addressDrop" class="dropdown-menu">
     </div>
   </div>
 </div>
@@ -812,8 +813,9 @@ var nodeList = JSON.parse(data)
 var len = nodeList.length
 for( let i = 0; i<len; i++){
   let name = nodeList[i].name
-  $('#v2nodeNAME').append("<a class='dropdown-item' href='#' id='nodeName"+i+"'>"+name+"</a>");
-  $('#nodeName'+i).click(function(){ $('#v2nodeNAMEshow').html(name); $('#v2nodeNAMEshow').val(i)})
+  let address = nodeList[i].domain
+  $('#FWD1addressDrop').append("<a class='dropdown-item' href='#' id='nodeName"+i+"'>"+name+"</a>");
+  $('#nodeName'+i).click(function(){ $('#FWD1address').html(name); $('#FWD1address').val(address)})
 }
 })
 
@@ -877,13 +879,12 @@ $.get('./act/FWD0stop.php', function(result){
 
 $('#buttonFWD1save').click(function(){
 $("#buttonFWD1saveLoading").attr("class", "spinner-border spinner-border-sm")
-v2nodeID=$('#v2nodeNAMEshow').val()
+FWD1address=$('#FWD1address').val()
 FWD1port=$('#FWD1port').val()
 FWD1uuid=$('#FWD1uuid').val()
-$.get('./act/FWD1save.php', {v2nodeID:v2nodeID, FWD1port:FWD1port, FWD1uuid:FWD1uuid}, function(result){
+$.get('./act/FWD1save.php', {FWD1address:FWD1address, FWD1port:FWD1port, FWD1uuid:FWD1uuid}, function(result){
   $("#buttonFWD1saveLoading").removeClass()
   window.location.reload()
-
 })
 })
 
