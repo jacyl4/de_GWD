@@ -19,7 +19,7 @@ export DEBIAN_FRONTEND=noninteractive
 BBRPLUS_Ver="5.10.45"
 NGINX_Ver="1.21.1-1"
 TTYD_Ver="1.6.3"
-branch="dev"
+branch="main"
 architecture=$(dpkg --print-architecture)
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
