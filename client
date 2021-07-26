@@ -19,7 +19,7 @@ export DEBIAN_FRONTEND=noninteractive
 BBRPLUS_Ver="5.10.45"
 NGINX_Ver="1.21.1-1"
 TTYD_Ver="1.6.3"
-branch="main"
+branch="dev"
 architecture=$(dpkg --print-architecture)
 
 installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
@@ -258,6 +258,7 @@ doh1=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | awk NR==1)
 doh2=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | awk NR==2)
 
 domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf)
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf)
 port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
 uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf)
 path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
@@ -727,7 +728,8 @@ OBdefault=`cat << EOF
         "network": "tcp",
         "security": "xtls",
         "xtlsSettings": {
-          "serverName": "$domain"
+          "serverName": "$tls",
+          "allowInsecure": false
         },
         "sockopt": {
           "mark": 255,
@@ -768,7 +770,7 @@ OBdefault=`cat << EOF
         },
         "security": "tls",
         "tlsSettings": {
-          "serverName": "$domain",
+          "serverName": "$tls",
           "allowInsecure": false
         },
         "sockopt": {
@@ -2059,6 +2061,7 @@ fi
 domain=$(echo $v2servn | cut -d: -f1)
 port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
+tls=$domain
 
 ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
 

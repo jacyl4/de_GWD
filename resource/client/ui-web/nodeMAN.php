@@ -306,7 +306,7 @@ $('#buttonAddLine').click(function(){
                             <div class="input-group">
                                 <input type="text" class="form-control" value="">
                               <div class="input-group-append">
-                                <button type="button" class="btn btn-secondary btn-sm">tls</button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="commitTls(this)">tls</button>
                               </div>
                             </div>
                           </td>
