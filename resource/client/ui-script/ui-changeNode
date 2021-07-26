@@ -7,7 +7,7 @@ path=$(jq -r --argjson domainNUM "$1" '.v2node | to_entries[] | select(.key == $
 domain=$(echo -e $address | cut -d: -f1)
 port=$(echo -e $address | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
-[ -z "$tls" ] && tls=$domain
+[ -z "$tls" ] || [ "$tls" == "null" ] && tls=$domain
 
 jq '.update.v2node={}' /opt/de_GWD/0conf |\
 jq --arg domain "$domain" '.update.v2node.domain=$domain' |\

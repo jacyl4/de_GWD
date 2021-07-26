@@ -14,7 +14,7 @@ v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_G
 domain=$(echo $v2servn | cut -d: -f1)
 port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
 [ -z $port ] && port="443"
-[ -z "$tls" ] && tls=$domain
+[ -z "$tls" ] || [ "$tls" == "null" ] && tls=$domain
 
 tls=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].tls" /opt/de_GWD/0conf)
 uuid=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf)

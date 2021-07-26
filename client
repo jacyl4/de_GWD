@@ -263,7 +263,7 @@ port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
 uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf)
 path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
 
-[ -z "$tls" ] && tls=$domain
+[ -z "$tls" ] || [ "$tls" == "null" ] && tls=$domain
 
 piholePW=$(jq -r '.address.PWD' /opt/de_GWD/0conf)
 
