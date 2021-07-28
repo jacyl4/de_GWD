@@ -1,0 +1,10 @@
+#!/bin/bash
+sed -i '/REV_SERVER=/d' /etc/pihole/setupVars.conf
+sed -i '/REV_SERVER_CIDR=/d' /etc/pihole/setupVars.conf
+sed -i '/REV_SERVER_TARGET=/d' /etc/pihole/setupVars.conf
+sed -i '/REV_SERVER_DOMAIN=/d' /etc/pihole/setupVars.conf
+
+pihole -a disabledhcp
+
+jq 'del(.address.dhcp)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf

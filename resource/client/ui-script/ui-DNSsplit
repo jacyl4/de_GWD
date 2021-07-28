@@ -1,0 +1,64 @@
+#!/bin/bash
+cat << EOF >/tmp/v2dns_config
+{
+"dns":{
+  "tag":"dnsFlow",
+  "disableCache":true,
+  "servers":[
+  {"address":"127.0.0.1","port":5320},
+  {"address":"127.0.0.1","port":5320,"skipFallback":true,"domains":[]},
+  {"address":"127.0.0.1","port":5320,"skipFallback":true,"domains":["domain:google.com"]},
+  {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["domain:baidu.com"]},
+  {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["geosite:private","geosite:cn"],"expectIPs":["geoip:cn"]}
+  ]
+},
+"routing":{
+  "rules":[
+    {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
+    {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
+  ]
+},
+"inbounds":[
+  {
+    "tag":"dnsin",
+    "port":5350,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "settings":{"address":"127.0.0.1","network":"tcp,udp"}
+  }
+],
+"outbounds":[
+  {
+    "tag":"dnsout",
+    "protocol":"dns",
+    "streamSettings":{"sockopt":{"mark":255}}
+  },
+  {
+    "tag":"direct",
+    "protocol":"freedom",
+    "settings":{},
+    "streamSettings":{"sockopt":{"mark":255}}
+  }
+]
+}
+EOF
+
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf) ]] && [[ $(jq -r '.dns.hosts' /opt/de_GWD/0conf) != "null" ]]; then
+jq -r '.dns.hosts | to_entries[] | [.value, .key] | @tsv' /opt/de_GWD/0conf | sed 's/[[:space:]][[:space:]]*/ /g' >/etc/pihole/custom.list
+fi
+
+/opt/de_GWD/ui-saveListBW
+
+if [[ $(jq -r '.dns.APPLEdir' /opt/de_GWD/0conf) == "on" ]]; then
+/opt/de_GWD/ui-onAPPLE
+else
+/opt/de_GWD/ui-offAPPLE
+fi
+
+/opt/de_GWD/ui-saveSmartDNS r
+
+/opt/de_GWD/ui-saveNode
+
+if [[ $1 == "r" ]]; then
+  pihole restartdns
+fi

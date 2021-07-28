@@ -1,0 +1,150 @@
+#!/bin/bash
+rm -rf /opt/de_GWD/RproxyS
+mkdir -p /opt/de_GWD/RproxyS
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/RproxyS/RproxyS
+chmod +x /opt/de_GWD/RproxyS/RproxyS
+
+RproxySinStatus=$(jq -r '.FORWARD.Rproxy.server.inStatus' /opt/de_GWD/0conf)
+RproxySmappingStatus=$(jq -r '.FORWARD.Rproxy.server.mappingStatus' /opt/de_GWD/0conf)
+
+RproxyStunnelPort=$(jq -r '.FORWARD.Rproxy.server.tunnel.port' /opt/de_GWD/0conf)
+RproxyStunnelUUID=$(jq -r '.FORWARD.Rproxy.server.tunnel.uuid' /opt/de_GWD/0conf)
+RproxySinPort=$(jq -r '.FORWARD.Rproxy.server.in.port' /opt/de_GWD/0conf)
+RproxySinUUID=$(jq -r '.FORWARD.Rproxy.server.in.uuid[]' /opt/de_GWD/0conf)
+RproxySmappingList=$(jq -r '.FORWARD.Rproxy.server.mapping' /opt/de_GWD/0conf)
+
+cat << EOF >/opt/de_GWD/RproxyS/config.json
+{
+  "routing":{
+    "rules":[
+    {"type":"field","inboundTag":["reverseTunnel"],"domain":["full:reverse.localhost"],"outboundTag":"portal"},
+    {"type":"field","inboundTag":["reverseTunnel"],"outboundTag":"portal"}
+    ]
+  },
+  "reverse": {
+    "portals": [{
+        "tag": "portal",
+        "domain": "reverse.localhost"
+     }]
+  },
+  "inbounds": [
+    {
+      "tag": "reverseTunnel",
+      "port": $RproxyStunnelPort,
+      "protocol": "vless",
+      "settings":{
+        "decryption": "none",
+        "clients":[
+          {
+            "id":"$RproxyStunnelUUID",
+            "flow":"xtls-rprx-direct",
+            "level":1
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "alpn":["http/1.1"],
+          "certificates": [
+            {
+              "ocspStapling": 3600,
+              "certificateFile": "/var/www/ssl/de_GWD.cer",
+              "keyFile": "/var/www/ssl/de_GWD.key"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+EOF
+
+
+if [[ $RproxySinStatus == "on" ]]; then
+for uuid in $RproxySinUUID; do
+uuidStr='{"id":"'$uuid'","flow":"xtls-rprx-direct","level":1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/RproxyS/config.json | sponge /opt/de_GWD/RproxyS/config.json
+done
+
+uniqueClient=$(jq '.inbounds[0].settings.clients | unique' /opt/de_GWD/RproxyS/config.json)
+jq --argjson uniqueClient "$uniqueClient" '.inbounds[0].settings.clients=$uniqueClient' /opt/de_GWD/RproxyS/config.json | sponge /opt/de_GWD/RproxyS/config.json
+fi
+
+
+if [[ $RproxySmappingStatus == "on" ]]; then
+
+len=$(echo $RproxySmappingList | jq length)
+
+for (( i=0; i<$len; i++ )); do
+port=$(echo $RproxySmappingList | jq -r --argjson i "$i" '.[$i].port')
+protocol=$(echo $RproxySmappingList | jq -r --argjson i "$i" '.[$i].protocol')
+
+RontingMapping=`cat << EOF
+      {"type":"field","inboundTag":["mapping$i"],"outboundTag":"portal"}
+EOF
+`
+
+IBmapping=`cat << EOF
+    {
+      "tag": "mapping$i",
+      "port": $port,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": $port,
+        "network": "$protocol"
+      }
+    }
+EOF
+`
+jq --argjson RontingMapping "$RontingMapping" '.routing.rules+=[$RontingMapping]' /opt/de_GWD/RproxyS/config.json |\
+jq --argjson IBmapping "$IBmapping" '.inbounds+=[$IBmapping]' | sponge /opt/de_GWD/RproxyS/config.json
+done
+fi
+
+chmod 666 /opt/de_GWD/RproxyS/config.json
+chmod 644 /var/www/ssl/*.key
+
+rm -rf /lib/systemd/system/RproxyS.service
+cat << "EOF" >/etc/systemd/system/RproxyS.service
+[Unit]
+Description=Rproxy Service
+After=network.target nss-lookup.target
+
+[Service]
+User=www-data
+Type=simple
+ExecStart=/opt/de_GWD/RproxyS/RproxyS -c /opt/de_GWD/RproxyS/config.json
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-5
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload >/dev/null
+systemctl enable RproxyS >/dev/null
+systemctl restart RproxyS >/dev/null
+
+if [[ $(systemctl is-active 'RproxyS') != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/RproxyS.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/RproxyS.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/RproxyS.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/RproxyS.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/RproxyS.service
+systemctl daemon-reload >/dev/null
+systemctl restart RproxyS >/dev/null
+fi
