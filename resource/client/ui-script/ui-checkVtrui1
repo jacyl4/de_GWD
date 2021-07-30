@@ -1,0 +1,16 @@
+#!/bin/bash
+vtrui1Domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui1/config.json)
+vtrui1Port=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui1/config.json)
+
+jq -r '.v2node[].domain' /opt/de_GWD/0conf >/tmp/vtruiDomains
+
+vtrui1NUM=$[$(grep -wn "$vtrui1Domain" /tmp/vtruiDomains | cut -d: -f1)-1]
+
+jq -r --argjson i "$vtrui1NUM" '.v2node[$i].name' /opt/de_GWD/0conf
+
+if [[ "$port" == "443" ]]; then
+echo $vtrui1Domain
+else
+echo "$vtrui1Domain:$vtrui1Port"
+fi
+rm -rf /tmp/vtruiDomains

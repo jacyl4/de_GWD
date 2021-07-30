@@ -1,0 +1,2054 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+statusNONE=$(yellow "-")
+statusInstalled=$(green "[ installed ]")
+statuSuccess=$(green "[    OK     ]")
+statusFailed=$(red "[  failed   ]")
+export DEBIAN_FRONTEND=noninteractive
+BBRPLUS_Ver="5.10.45"
+NGINX_Ver="1.21.1-1"
+architecture=$(dpkg --print-architecture)
+virt=$(systemd-detect-virt)
+virtCON="openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch"
+
+
+
+preUpdate(){
+if [[ -f "/etc/nginx/conf.d/supp_head" ]] && [[ -f "/etc/nginx/conf.d/supp_body" ]]; then
+mv -f /etc/nginx/conf.d/supp_head /etc/nginx/conf.d/0_top
+mv -f /etc/nginx/conf.d/supp_body /etc/nginx/conf.d/3_reverseProxy
+rm -f /etc/nginx/conf.d/3_proxyPath
+fi
+
+if [[ -d /usr/local/bin/vtrui ]]; then
+mv -f /usr/local/bin/vtrui /opt/de_GWD/vtrui
+fi
+
+if [[ -d "/opt/AdGuardHome" ]]; then
+  systemctl stop AdGuardHome >/dev/null 2>&1
+  rm -rf /etc/systemd/system/AdGuardHome.service
+  rm -rf /lib/systemd/system/AdGuardHome.service
+  rm -rf /opt/AdGuardHome
+  rm -rf /usr/bin/yq
+fi
+
+if [[ -f "/lib/systemd/system/frps.service" ]] || [[ -f "/lib/systemd/system/frpc.service" ]]; then
+systemctl disable frps >/dev/null 2>&1
+systemctl disable frpc >/dev/null 2>&1
+systemctl stop frps >/dev/null 2>&1
+systemctl stop frpc >/dev/null 2>&1
+rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
+rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
+rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
+rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1 2>&1
+rm -rf /opt/de_GWD/frps
+rm -rf /opt/de_GWD/frpc
+fi
+
+[ ! -f "/var/www/ssl/de_GWD.cer" ] && mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer && sed -i '/ssl_certificate /c\ssl_certificate \/var\/www\/ssl\/de_GWD.cer;' /etc/nginx/conf.d/default.conf
+[ ! -f "/var/www/ssl/de_GWD.key" ] && mv -f /var/www/ssl/*.key /var/www/ssl/de_GWD.key && sed -i '/ssl_certificate_key /c\ssl_certificate_key \/var\/www\/ssl\/de_GWD.key;' /etc/nginx/conf.d/default.conf
+
+rm -rf /usr/local/bin/autoUpdate
+rm -rf /usr/local/bin/iptablesrules*
+rm -rf /usr/local/bin/Q2H
+rm -rf /usr/local/bin/version.php
+rm -rf /usr/local/bin/vtrui
+rm -rf /usr/bin/yq
+rm -rf /etc/dns-over-https
+rm -rf /etc/nginx/conf.d/0_serverUpstream
+rm -rf /etc/nginx/conf.d/4_v2Proxy
+rm -rf /etc/ld.so.preload
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+
+
+
+cd ~
+service cron stop >/dev/null 2>&1
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+ethernetnums=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | xargs | sed 's/ /,/g')
+localaddr=$(ip a | grep "$ethernetnum" | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | tail -2 | head -n 1  | awk NR==1)
+
+domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf | grep '^[[:digit:]]*$')
+
+path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/config.json)
+uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json)
+
+upDomain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
+upPort=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
+upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/config.json)
+xtlsPort=$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
+}
+
+
+
+preInstall(){
+if [[ $(free -m | awk 'NR==3{print$2}') = "0" ]] && [[ -z $(echo $virtCON | grep "$virt") ]]; then
+fallocate -l 1G /swapfile
+dd if=/dev/zero of=/swapfile bs=1k count=1024k status=progress
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+sed -i "/swapfile/d" /etc/fstab
+echo "/swapfile swap swap defaults 0 0" >>/etc/fstab
+echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
+fi
+
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=0
+EOF
+[ -n "$(ps -e | grep 'pihole' )" ] && pihole restartdns >/dev/null 2>&1
+
+rm -rf /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
+options rotate
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+EOF
+
+if [[ -z $(echo $virtCON | grep "$virt") ]]; then
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+fi
+
+cat << EOF >/etc/apt/apt.conf.d/01InstallLess
+APT::Get::Assume-Yes "true";
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+EOF
+
+cat << EOF >/etc/apt/apt.conf.d/71debconf
+Dpkg::Options {
+   "--force-confdef";
+   "--force-confold";
+};
+EOF
+
+cat << EOF >/etc/apt/sources.list
+deb http://deb.debian.org/debian buster main contrib non-free
+deb http://deb.debian.org/debian buster-updates main contrib non-free
+deb http://deb.debian.org/debian buster-backports main contrib non-free
+deb http://deb.debian.org/debian-security buster/updates main contrib non-free
+EOF
+
+dpkg --configure -a
+apt update --fix-missing && apt upgrade --allow-downgrades && apt autoremove && apt autoclean
+
+apt install sudo locales net-tools netcat dnsutils resolvconf ipset wget curl git jq unzip bc ca-certificates apt-transport-https gnupg2 haveged socat moreutils screen
+
+systemctl enable --now haveged >/dev/null 2>&1
+systemctl mask --now systemd-resolved  >/dev/null 2>&1
+systemctl daemon-reload >/dev/null 2>&1
+
+source /etc/profile
+cat << EOF >~/.bash_profile
+ulimit -n 1000000
+HISTCONTROL=ignoredups
+EOF
+source ~/.bash_profile
+
+cat << EOF >/etc/security/limits.conf
+* soft nofile 1000000
+* hard nofile 1000000
+root soft nofile 1000000
+root hard nofile 1000000
+* soft nproc unlimited
+* hard nproc unlimited
+root soft nproc unlimited
+root hard nproc unlimited
+* soft core unlimited
+* hard core unlimited
+root soft core unlimited
+root hard core unlimited
+EOF
+
+modprobe nf_conntrack
+modprobe xt_conntrack
+modprobe ip_conntrack
+modprobe nf_nat
+modprobe xt_nat
+modprobe iptable_nat
+modprobe ip_tables
+
+sed -i '/nf_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/xt_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/ip_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/nf_nat/d' /etc/modules-load.d/modules.conf
+sed -i '/xt_nat/d' /etc/modules-load.d/modules.conf
+sed -i '/iptable_nat/d' /etc/modules-load.d/modules.conf
+sed -i '/ip_tables/d' /etc/modules-load.d/modules.conf
+cat << EOF >>/etc/modules-load.d/modules.conf
+nf_conntrack
+xt_conntrack
+ip_conntrack
+nf_nat
+xt_nat
+iptable_nat
+ip_tables
+EOF
+
+if [[ -z $(echo $virtCON | grep "$virt") ]]; then
+cat << EOF >/etc/sysctl.conf
+vm.overcommit_memory = 1
+vm.swappiness = 5
+fs.nr_open = 1000000
+fs.file-max = 1000000
+fs.inotify.max_user_instances = 819200
+fs.inotify.max_queued_events = 32000
+fs.inotify.max_user_watches = 64000
+net.unix.max_dgram_qlen = 1024
+net.nf_conntrack_max = 131072
+net.netfilter.nf_conntrack_max = 131072
+net.netfilter.nf_conntrack_buckets = 65536
+net.netfilter.nf_conntrack_checksum = 0
+net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 30
+net.netfilter.nf_conntrack_tcp_timeout_time_wait = 30
+net.netfilter.nf_conntrack_tcp_timeout_close_wait = 15
+net.netfilter.nf_conntrack_tcp_timeout_established = 300
+net.core.netdev_max_backlog = 250000
+net.core.optmem_max = 4194304
+net.core.rmem_max = 4194304
+net.core.rmem_default = 4194304
+net.core.wmem_max = 4194304
+net.core.wmem_default = 4194304
+net.core.somaxconn = 65535
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+net.ipv4.conf.all.arp_ignore = 1
+net.ipv4.conf.default.arp_ignore = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.ip_local_port_range = 1024 65535
+net.ipv4.tcp_window_scaling = 1
+net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_ecn = 0
+net.ipv4.tcp_timestamps = 0
+net.ipv4.tcp_syncookies = 0
+net.ipv4.tcp_tw_reuse = 0
+net.ipv4.tcp_fin_timeout = 10
+net.ipv4.tcp_orphan_retries = 2
+net.ipv4.tcp_syn_retries = 2
+net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_sack = 1
+net.ipv4.tcp_max_syn_backlog = 32768
+net.ipv4.tcp_max_tw_buckets = 6000
+net.ipv4.tcp_max_orphans = 32768
+net.ipv4.tcp_rmem = 4096 87380 4194304
+net.ipv4.tcp_wmem = 4096 65536 4194304
+net.ipv4.udp_rmem_min = 8192
+net.ipv4.udp_wmem_min = 8192
+net.ipv4.tcp_keepalive_time = 1800
+net.ipv4.tcp_keepalive_intvl = 15
+net.ipv4.tcp_keepalive_probes = 5
+net.ipv4.tcp_rfc1337 = 1
+net.ipv4.tcp_slow_start_after_idle = 0
+net.ipv4.tcp_notsent_lowat = 16384
+EOF
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+if [[ $(uname -r) =~ "bbrplus" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
+elif [[ $(uname -r) =~ "xanmod" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+else
+  echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+fi
+sysctl -p >/dev/null
+fi
+
+echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+cat << EOF >/etc/default/locale
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+locale-gen en_US.UTF-8
+echo "Asia/Shanghai" >/etc/timezone
+ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+mkdir -p /opt/de_GWD
+}
+
+
+
+installPihole(){
+piholeRelease=$(curl --silent "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r '.tag_name')
+
+if [[ $(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | cut -d- -f1) != $piholeRelease ]] || [[ $(systemctl is-active 'pihole-FTL') != "active" ]]; then
+export PIHOLE_SKIP_OS_CHECK=true
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
+mkdir -p /etc/pihole
+>/etc/pihole/adlists.list
+
+cat << EOF >/etc/pihole/setupVars.conf
+PIHOLE_INTERFACE=$ethernetnums
+IPV4_ADDRESS=$localaddr/24
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=8.8.8.8
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=false
+INSTALL_WEB_INTERFACE=false
+LIGHTTPD_ENABLED=false
+BLOCKING_ENABLED=true
+WEBPASSWORD=0000000000000000000000000000000000000000000000000000000000000000
+DNSMASQ_LISTENING=single
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+CONDITIONAL_FORWARDING=false
+EOF
+
+git clone https://github.com/pi-hole/pi-hole /etc/.pihole
+curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+fi
+}
+
+
+
+piholeSet(){
+systemctl mask --now lighttpd
+systemctl mask --now dhcpcd
+systemctl daemon-reload >/dev/null 2>&1
+
+sed -i "/PIHOLE_INTERFACE=/c\PIHOLE_INTERFACE=$ethernetnums" /etc/pihole/setupVars.conf
+sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localaddr/24" /etc/pihole/setupVars.conf
+sed -i '/PIHOLE_DNS_/d' /etc/pihole/setupVars.conf
+cat << EOF >>/etc/pihole/setupVars.conf
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=8.8.8.8
+PIHOLE_DNS_3=1.0.0.1
+PIHOLE_DNS_4=8.8.4.4
+PIHOLE_DNS_5=208.67.222.222
+PIHOLE_DNS_6=208.67.220.220
+EOF
+
+cat << EOF >/etc/pihole/pihole-FTL.conf
+BLOCKINGMODE=NULL
+CNAME_DEEP_INSPECT=true
+BLOCK_ESNI=true
+EDNS0_ECS=true
+RATE_LIMIT=0/0
+
+MAXLOGAGE=24.0
+PRIVACYLEVEL=0
+IGNORE_LOCALHOST=no
+AAAA_QUERY_ANALYSIS=yes
+ANALYZE_ONLY_A_AND_AAAA=false
+SOCKET_LISTENING=localonly
+FTLPORT=4711
+RESOLVE_IPV6=yes
+RESOLVE_IPV4=yes
+DELAY_STARTUP=0
+NICE=-10
+MAXNETAGE=30
+NAMES_FROM_NETDB=true
+REFRESH_HOSTNAMES=IPV4
+PARSE_ARP_CACHE=true
+
+DBIMPORT=yes
+MAXDBDAYS=30
+DBINTERVAL=1.0
+EOF
+
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=53
+EOF
+
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+nameserver 127.0.0.1
+EOF
+ln -fs /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+resolvconf -u
+
+pihole -a interface
+
+
+rm -rf /opt/de_GWD/doh-server*
+
+unset DLloop
+until [[ $(du -sk /opt/de_GWD/doh-server 2>/dev/null | awk '{print$1}') -gt 8000 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /opt/de_GWD/doh-server https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/doh/doh_s_$architecture
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+chmod +x /opt/de_GWD/doh-server
+
+cat << EOF >/opt/de_GWD/doh-server.conf
+listen = [ "127.0.0.1:8053" ]
+path = "/dq"
+upstream = [ "udp:127.0.0.1:53" ]
+timeout = 10
+tries = 3
+verbose = false
+log_guessed_client_ip = false
+ecs_allow_non_global_ip = false
+ecs_use_precise_ip = false
+EOF
+
+mkdir -p /etc/NetworkManager/dispatcher.d
+cat << "EOF" > /etc/NetworkManager/dispatcher.d/doh-server
+#!/bin/bash
+case "$2" in
+    up)
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    down)
+        /usr/bin/systemctl is-active doh-server.service >/dev/null && /usr/bin/systemctl restart doh-server.service
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/doh-server
+
+rm -rf /lib/systemd/system/doh-server.service
+cat << "EOF" >/etc/systemd/system/doh-server.service
+[Unit]
+Description=DNS-over-HTTPS server
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/doh-server -conf /opt/de_GWD/doh-server.conf
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-12
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+if [[ -n $(echo $virtCON | grep "$virt") ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
+fi
+
+systemctl daemon-reload >/dev/null 2>&1
+systemctl enable doh-server >/dev/null 2>&1
+systemctl restart doh-server >/dev/null 2>&1
+}
+
+
+
+installNginx(){
+mkdir -p /etc/nginx
+mkdir -p /var/www/html
+mkdir -p /var/www/ssl
+mkdir -p /var/log/nginx
+mkdir -p /var/cache/nginx/client_temp
+mkdir -p /var/cache/nginx/proxy_temp
+mkdir -p /var/cache/nginx/fastcgi_temp
+mkdir -p /var/cache/nginx/scgi_temp
+mkdir -p /var/cache/nginx/uwsgi_temp
+
+if [[ $(nginx -v 2>&1 | grep -o '[0-9.]*$') != $NGINX_Ver ]] || [[ $(systemctl is-active 'nginx') != "active" ]]; then
+  rm -rf /usr/sbin/nginx
+  unset DLloop
+  until [[ $(du -sk /tmp/nginx 2>/dev/null | awk '{print$1}') -gt 25000 ]]
+  do
+     wget --no-check-certificate --show-progress -cqO /usr/sbin/nginx https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginx_"$architecture"
+     ((DLloop+=1))
+     [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+  done
+  chmod +x /usr/sbin/nginx
+
+  mkdir -p "/etc/nginx/conf.d/"
+  unset DLloop
+  until [[ $(unzip -tq /tmp/nginxConf.zip 2>/dev/null) =~ "No errors" ]]
+  do
+     wget --no-check-certificate --show-progress -cqO /tmp/nginxConf.zip https://raw.githubusercontent.com/jacyl4/de_GWD-nginx/main/nginx/nginxConf.zip
+     ((DLloop+=1))
+     [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+  done
+  unzip /tmp/nginxConf.zip -d /tmp >/dev/null && mv -f /tmp/nginxConf/* /etc/nginx
+  rm -rf /tmp/nginx*
+fi
+
+rm -rf /lib/systemd/system/nginx.service
+cat << "EOF" >/etc/systemd/system/nginx.service
+[Unit]
+Description=The NGINX http and reverse proxy server
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+ExecStopPost=/bin/rm -f /run/nginx.pid
+KillMode=process
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+PrivateTmp=true
+Nice=-4
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+if [[ -n $(echo $virtCON | grep "$virt") ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
+fi
+
+mkdir -p "/etc/systemd/system/nginx.service.d"
+printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" >/etc/systemd/system/nginx.service.d/override.conf
+systemctl daemon-reload >/dev/null 2>&1
+
+if [[ -n $(dpkg -l | grep 'jemalloc') ]]; then
+dpkg --list | grep jemalloc | awk '{print $2}' | while read line
+do
+apt purge -y $line
+done
+fi
+}
+
+
+
+makeSSL_D(){
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/acme.sh/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf "/root/.acme.sh"
+
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+rm -rf /var/www/ssl/*.cer
+rm -rf /var/www/ssl/*.key
+rm -rf /var/www/ssl/*.pem
+[ ! -f "/var/www/ssl/dhparam.pem" ] && openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+curl https://get.acme.sh | sh
+"/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
+"/root/.acme.sh"/acme.sh --set-default-ca  --server letsencrypt
+"/root/.acme.sh"/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain -k ec-256
+"/root/.acme.sh"/acme.sh --installcert -d $topDomain --ecc \
+               --key-file       /var/www/ssl/de_GWD.key  \
+               --fullchain-file /var/www/ssl/de_GWD.cer \
+               --reloadcmd     "chmod 644 /var/www/ssl/*.key >/dev/null 2>&1 && systemctl force-reload nginx >/dev/null 2>&1 && systemctl restart vtrui* >/dev/null 2>&1"
+}
+
+
+
+makeSSL_W(){
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/acme.sh/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf "/root/.acme.sh"
+
+rm -rf /etc/nginx/conf.d/default.conf
+cat << EOF >/etc/nginx/conf.d/default.conf
+#SERVER_BASE_START
+server {
+    listen      80;
+    server_name $domain;
+    root        /var/www/html;
+    index       index.php index.html index.htm;
+#SERVER_BASE_END
+}
+EOF
+[ "$(systemctl is-active 'nginx')" = "active" ] && systemctl force-reload nginx >/dev/null 2>&1
+[ "$(systemctl is-active 'nginx')" != "active" ] && systemctl restart nginx >/dev/null 2>&1
+
+rm -rf /var/www/ssl/*.cer
+rm -rf /var/www/ssl/*.key
+rm -rf /var/www/ssl/*.pem
+[ ! -f "/var/www/ssl/dhparam.pem" ] && openssl dhparam -out /var/www/ssl/dhparam.pem 2048
+
+curl https://get.acme.sh | sh
+"/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
+"/root/.acme.sh"/acme.sh --set-default-ca  --server letsencrypt
+"/root/.acme.sh"/acme.sh --issue -d $domain -w /var/www/html -k ec-256
+"/root/.acme.sh"/acme.sh --installcert -d $domain --ecc \
+               --key-file       /var/www/ssl/de_GWD.key  \
+               --fullchain-file /var/www/ssl/de_GWD.cer \
+               --reloadcmd     "chmod 644 /var/www/ssl/*.key >/dev/null 2>&1 && systemctl force-reload nginx >/dev/null 2>&1 && systemctl restart vtrui* >/dev/null 2>&1"
+}
+
+
+ocspStapling(){
+cat << "EOF" >/var/www/ssl/update_ocsp_cache
+#!/bin/bash
+if [[ -n $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 86400 | grep ' not ') ]]; then
+[ ! -f "/var/www/ssl/intermediate.pem" ] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+[ ! -f "/var/www/ssl/root.pem" ] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+
+[ ! -f "/var/www/ssl/bundle.pem" ] && cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem && cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/*.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://r3.o.lencr.org \
+    -respout /var/www/ssl/ocsp.resp
+
+chmod 644 /var/www/ssl/*.key
+systemctl force-reload nginx >/dev/null
+fi
+EOF
+
+chmod +x /var/www/ssl/update_ocsp_cache
+/var/www/ssl/update_ocsp_cache
+}
+
+
+
+nginxWebConf(){
+[ -f "/etc/nginx/conf.d/merge.sh" ] && rm -rf /etc/nginx/conf.d/*
+[ -z $port ] && port="443"
+
+if [[ $port = "443" ]]; then
+cat << EOF >/etc/nginx/conf.d/80.conf
+server {
+  listen 80;
+  server_name $domain;
+  return 301 https://\$server_name\$request_uri;
+}
+EOF
+else
+rm -rf /etc/nginx/conf.d/80.conf
+fi
+
+touch /etc/nginx/conf.d/default.conf
+sed -i '/SERVER_BASE_START/,/SERVER_BASE_END/d' /etc/nginx/conf.d/default.conf
+sed -i '/DOH_START/,/DOH_END/d' /etc/nginx/conf.d/default.conf
+sed -i '/V2_START/,/V2_END/d' /etc/nginx/conf.d/default.conf
+sed -i '$s/}$//' /etc/nginx/conf.d/default.conf
+
+until [[ $(head -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
+do
+   sed -i '1d' /etc/nginx/conf.d/default.conf
+done
+
+until [[ $(tail -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
+do
+   sed -i '$d' /etc/nginx/conf.d/default.conf
+done
+
+cat << EOF >/etc/nginx/conf.d/default.conf
+#SERVER_BASE_START
+server {
+  listen $port ssl http2 fastopen=128 reuseport;
+  server_name $domain;
+  root /var/www/html;
+  index index.php index.html index.htm;
+
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers  '[ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305|ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
+  ssl_session_timeout 10m;
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_stapling_file /var/www/ssl/ocsp.resp;
+  
+  add_header Referrer-Policy                    "no-referrer"       always;
+  add_header X-Content-Type-Options             "nosniff"           always;
+  add_header X-Download-Options                 "noopen"            always;
+  add_header X-Frame-Options                    "SAMEORIGIN"        always;
+  add_header X-Permitted-Cross-Domain-Policies  "none"              always;
+  add_header X-Robots-Tag                       "none"              always;
+  add_header X-XSS-Protection                   "1; mode=block"     always;
+  add_header Strict-Transport-Security          "max-age=63072000"  always;
+
+location ~ /\.(?!well-known).* {
+  deny all;
+}
+#SERVER_BASE_END
+
+#DOH_START
+location /dq {
+  proxy_pass                  http://127.0.0.1:8053/dq;
+  proxy_set_header            Host \$host;
+  proxy_set_header            X-Real-IP \$remote_addr;
+  add_header                  X-Cache \$upstream_cache_status;
+  add_header                  Cache-Control no-cache;
+}
+#DOH_END
+
+#V2_START
+location $path {
+  if (\$http_upgrade != "websocket") { return 404; }
+  proxy_pass                  http://unix:/dev/shm/de_GWD.socket;
+  proxy_http_version          1.1;
+  proxy_set_header            Host \$http_host;
+  proxy_set_header            Upgrade \$http_upgrade;
+  proxy_set_header            Connection "upgrade";
+  proxy_set_header            X-Real-IP \$remote_addr;
+  proxy_set_header            X-Forwarded-For \$proxy_add_x_forwarded_for;
+  keepalive_requests          25600;
+  keepalive_timeout           300 300;
+  proxy_redirect              off;
+  proxy_buffering             off;
+  proxy_buffer_size           8k;
+  add_header                  X-Cache \$upstream_cache_status;
+  add_header                  Cache-Control no-cache;
+}
+#V2_END
+
+$(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
+}
+EOF
+}
+
+
+
+v2in(){
+rm -rf /etc/vtrui*
+rm -rf /opt/de_GWD/vtrui
+mkdir -p /opt/de_GWD/vtrui
+
+cat << EOF >/opt/de_GWD/vtrui/config.json
+{
+  "inbounds":[
+    {
+      "listen":"/dev/shm/de_GWD.socket",
+      "protocol":"vless",
+      "settings":{
+        "decryption":"none",
+        "clients":[]
+      },
+      "streamSettings":{
+        "network":"ws",
+        "wsSettings":{
+          "path":"$path"
+        },
+        "security":"none"
+      }
+    }
+  ]
+}
+EOF
+
+for uuid in $uuids; do
+uuidStr='{"id": "'$uuid'", "level": 1}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+done
+}
+
+v2inForward(){
+chmod 644 /var/www/ssl/*.key
+uuid=$(echo $uuids | cut -d' ' -f1)
+IBup=`cat << EOF
+    {
+      "tag": "forward",
+      "port": $xtlsPort,
+      "protocol": "vless",
+      "settings":{
+        "decryption": "none",
+        "clients":[
+          {
+            "id":"$uuid",
+            "flow":"xtls-rprx-direct",
+            "level":1
+          }
+        ],
+        "fallbacks":[{
+          "dest":$port
+        }]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "alpn":["http/1.1"],
+          "certificates": [
+            {
+              "ocspStapling": 3600,
+              "certificateFile": "/var/www/ssl/de_GWD.cer",
+              "keyFile": "/var/www/ssl/de_GWD.key"
+            }
+          ]
+        }
+      }
+    }
+EOF
+`
+
+jq 'del(.inbounds[] | select(.tag == "forward"))' /opt/de_GWD/vtrui/config.json |\
+jq --argjson IBup "$IBup" '.inbounds+=[$IBup]' | sponge /opt/de_GWD/vtrui/config.json
+}
+
+v2outForward(){
+OBup=`cat << EOF
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$upDomain",
+            "port": $upPort,
+            "users": [
+              {
+                "id": "$upUUID",
+                "flow": "xtls-rprx-direct",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$upDomain"
+        },
+        "sockopt":{
+          "domainStrategy":"UseIP"
+        }
+      }
+    }
+EOF
+`
+
+OBdir=`cat << EOF
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "settings":{}
+    }
+EOF
+`
+
+OBblo=`cat << EOF
+    {
+      "tag":"blocked",
+      "protocol":"blackhole",
+      "settings":{}
+    }
+EOF
+`
+
+jq '.outbounds=[]' /opt/de_GWD/vtrui/config.json |\
+jq --argjson OBup "$OBup" '.outbounds+=[$OBup]' |\
+jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' |\
+jq --argjson OBblo "$OBblo" '.outbounds+=[$OBblo]' | sponge /opt/de_GWD/vtrui/config.json
+}
+
+v2outDirect(){
+OBdir=`cat << EOF
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "settings":{}
+    }
+EOF
+`
+
+OBblo=`cat << EOF
+    {
+      "tag":"blocked",
+      "protocol":"blackhole",
+      "settings":{}
+    }
+EOF
+`
+
+jq '.outbounds=[]' /opt/de_GWD/vtrui/config.json |\
+jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' |\
+jq --argjson OBblo "$OBblo" '.outbounds+=[$OBblo]' | sponge /opt/de_GWD/vtrui/config.json
+}
+
+installV2(){
+unset DLloop
+until [[ $(unzip -tq /tmp/vtrui.zip 2>/dev/null) =~ "No errors" ]]
+do
+   wget --no-check-certificate --show-progress -cqO /tmp/vtrui.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/"$architecture"_vtrui.zip
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
+rm -rf /tmp/vtrui
+unzip /tmp/vtrui.zip -d /tmp/vtrui >/dev/null 2>&1
+mv -f /tmp/vtrui/xray /opt/de_GWD/vtrui/vtrui
+chmod +x /opt/de_GWD/vtrui/vtrui
+rm -rf /tmp/vtrui*
+}
+
+v2start(){
+rm -rf /lib/systemd/system/vtrui.service
+cat << "EOF" >/etc/systemd/system/vtrui.service
+[Unit]
+Description=vtrui Service
+After=network.target nss-lookup.target
+
+[Service]
+User=www-data
+Type=simple
+ExecStartPre=-/bin/rm -rf /dev/shm/de_GWD.socket*
+ExecStart=/opt/de_GWD/vtrui/vtrui -c /opt/de_GWD/vtrui/config.json
+ExecStop=-/bin/rm -rf /dev/shm/de_GWD.socket*
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-5
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+if [[ -n $(echo $virtCON | grep "$virt") ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+fi
+
+systemctl daemon-reload >/dev/null 2>&1
+}
+
+
+
+installIptablesRules(){
+cat << EOF >/opt/de_GWD/iptablesrules-up
+#!/bin/bash
+ipset -N chnroute hash:net family inet hashsize 4096 maxelem 100000
+
+xtlsPort=\$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
+
+if [[ -n \$xtlsPort ]] && [[ \$xtlsPort != null ]]; then
+unset DLloop
+until [[ \$(du -sk /opt/de_GWD/IPchnroute 2>/dev/null | awk '{print\$1}') -gt 130 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /opt/de_GWD/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
+   ((DLloop+=1))
+   [[ "\$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
+sed -i '/^\s*$/d' /opt/de_GWD/IPchnroute
+sed -i 's/^/add chnroute &/g' /opt/de_GWD/IPchnroute
+mv -f /opt/de_GWD/IPchnroute /opt/de_GWD/chnrouteSET
+ipset -! -R </opt/de_GWD/chnrouteSET
+fi
+
+iptables -A INPUT -p udp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -s 127.0.0.1,172.17.0.0/24,172.16.66.0/24 -j ACCEPT
+
+iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP
+iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP
+
+if [[ -n \$xtlsPort ]] && [[ \$xtlsPort != null ]]; then
+iptables -A INPUT -m set --match-set chnroute src -p udp --dport \$xtlsPort -j DROP
+iptables -A INPUT -m set --match-set chnroute src -p tcp --dport \$xtlsPort -j DROP
+fi
+
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,ACK FIN -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,URG URG -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,FIN FIN -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,PSH PSH -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL ALL -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL NONE -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+EOF
+chmod +x /opt/de_GWD/iptablesrules-up
+
+cat << EOF >/opt/de_GWD/iptablesrules-down
+#!/bin/bash
+iptables -F INPUT
+iptables -t mangle -F PREROUTING
+
+ipset -F chnroute >/dev/null 2>&1
+ipset -X chnroute >/dev/null 2>&1
+EOF
+chmod +x /opt/de_GWD/iptablesrules-down
+
+rm -rf /lib/systemd/system/iptablesrules.service
+cat << EOF >/etc/systemd/system/iptablesrules.service
+[Unit]
+Description=iptablesrules
+After=network.target
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/bin/bash /opt/de_GWD/iptablesrules-up
+ExecStop=/bin/bash /opt/de_GWD/iptablesrules-down
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload >/dev/null 2>&1
+systemctl enable iptablesrules >/dev/null 2>&1
+systemctl restart iptablesrules >/dev/null 2>&1
+}
+
+
+
+postInstall(){
+indexpage=$(ls /var/www/html/* 2>/dev/null | wc -l)
+if [ "$indexpage" -lt 5 ]; then 
+
+unset DLloop
+until [[ $(unzip -tq /tmp/sample.zip 2>/dev/null) =~ "No errors" ]]
+do
+   wget --no-check-certificate --show-progress -cqO /tmp/sample.zip https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/sample.zip
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
+unzip /tmp/sample.zip -d /tmp >/dev/null 2>&1
+cp -rf /tmp/sample/* /var/www/html/
+rm -rf /tmp/sample*
+fi
+
+rm -rf /opt/de_GWD/version.php
+unset DLloop
+until [[ $(du -sk /opt/de_GWD/version.php 2>/dev/null | awk '{print$1}') -ge 4 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /opt/de_GWD/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
+if [[ $(du -sk /var/www/html/spt 2>/dev/null | awk '{print$1}') -lt 102400 ]]; then
+  dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
+fi
+
+cat << "EOF" >/opt/de_GWD/autoUpdate
+#!/bin/bash
+wget --no-check-certificate --show-progress -cqO /tmp/autoUpdate https://raw.githubusercontent.com/jacyl4/de_GWD/main/server
+sed -i '$d' /tmp/autoUpdate
+echo "updateGWD" >>  /tmp/autoUpdate
+chmod +x /tmp/autoUpdate
+/tmp/autoUpdate
+
+crontab -l 2>/dev/null > /tmp/now.cron
+sed -i '/autoUpdate/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf /tmp/autoUpdate
+EOF
+chmod +x /opt/de_GWD/autoUpdate
+
+cat << "EOF" >/opt/de_GWD/Qprobe
+#!/bin/bash
+latency=$(echo "$(curl -o /dev/null -sw '%{time_connect}\n' https://www.youtube.com/red) * 1000" | bc | awk '{printf ("%.2f\n",$1)}')
+
+time=$(date '+%H:%M')
+
+echo "$time $latency" >>/var/www/html/probe
+
+if [[ $(cat /var/www/html/probe | wc -l) -ge 144 ]]; then
+  tac /var/www/html/probe | sed '145,$d' | tac | sponge /var/www/html/probe
+fi
+EOF
+chmod +x /opt/de_GWD/Qprobe
+
+cat << "EOF" >/opt/de_GWD/Q2H
+#!/bin/bash
+virt=$(systemd-detect-virt)
+virtCON="openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch"
+
+if [[ -z $(echo $virtCON | grep "$virt") ]]; then
+date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+fi
+
+rm -rf ~/server*
+rm -rf /var/log/*1
+rm -rf /var/log/*2
+rm -rf /var/log/*gz
+
+localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
+remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
+
+if [[ $localVer != $remoteVer ]]; then
+crontab -l 2>/dev/null > /tmp/now.cron
+sed -i '/autoUpdate/d' /tmp/now.cron
+echo '30 4 * * *  /opt/de_GWD/autoUpdate' >> /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+EOF
+chmod +x /opt/de_GWD/Q2H
+/opt/de_GWD/Q2H
+
+cat << "EOF" >/opt/de_GWD/Qday
+#!/bin/bash
+if [[ -z $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200 | grep ' not ') ]] && [[ -d "/root/.acme.sh" ]]; then
+"/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
+"/root/.acme.sh"/acme.sh --set-default-ca  --server letsencrypt
+"/root/.acme.sh"/acme.sh --cron --force --home "/root/.acme.sh"
+
+sslFolder=$(ls "/root/.acme.sh" | grep '_ecc')
+cp -f "/root/.acme.sh"/$sslFolder/fullchain.cer /var/www/ssl/de_GWD.cer
+cp -f "/root/.acme.sh"/$sslFolder/*.key /var/www/ssl/de_GWD.key 
+fi
+
+/var/www/ssl/update_ocsp_cache
+EOF
+chmod +x /opt/de_GWD/Qday
+
+cat << "EOF" >/opt/de_GWD/Q4amSun
+#!/bin/bash
+unset DLloop
+until [[ \$(du -sk /tmp/IPchnroute 2>/dev/null | awk '{print\$1}') -gt 130 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
+   ((DLloop+=1))
+   [[ "\$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
+if [[ $(du -sk /tmp/IPchnroute 2>/dev/null | awk '{print$1}') -gt 130 ]]; then
+sed -i '/^\s*$/d' /tmp/IPchnroute
+sed -i 's/^/add chnroute &/g' /tmp/IPchnroute
+mv -f /tmp/IPchnroute /opt/de_GWD/chnrouteSET
+ipset -! -R </opt/de_GWD/chnrouteSET
+fi
+EOF
+chmod +x /opt/de_GWD/Q4amSun
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/Qprobe/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/Q2H/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/Qday/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/Q4amSun/d' /tmp/now.cron
+cat << EOF >>/tmp/now.cron
+*/5 * * * * /opt/de_GWD/Qprobe
+0 */2 * * * /opt/de_GWD/Q2H
+0 */24 * * * /opt/de_GWD/Qday
+0 4 * * 7 /opt/de_GWD/Q4amSun
+EOF
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+service cron restart >/dev/null 2>&1
+
+cat << "EOF" >/tmp/sysRestart
+#!/bin/bash
+if [[ $(systemctl is-active doh-server) != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/doh-server.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/doh-server.service
+systemctl daemon-reload >/dev/null 2>&1
+systemctl restart doh-server >/dev/null 2>&1
+fi
+
+systemctl enable nginx >/dev/null 2>&1
+systemctl restart nginx >/dev/null 2>&1
+if [[ $(systemctl is-active nginx) != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/nginx.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/nginx.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/nginx.service
+systemctl daemon-reload >/dev/null 2>&1
+systemctl restart nginx >/dev/null 2>&1
+fi
+
+systemctl enable vtrui >/dev/null 2>&1
+systemctl restart vtrui >/dev/null 2>&1
+if [[ $(systemctl is-active vtrui) != "active" ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/vtrui.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/vtrui.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/vtrui.service
+systemctl daemon-reload >/dev/null 2>&1
+systemctl restart vtrui >/dev/null 2>&1
+fi
+
+rm -rf /tmp/sysRestart
+EOF
+chmod +x /tmp/sysRestart
+
+screen -dmS sysRestart /tmp/sysRestart
+sleep 2
+
+if [[ "$(dpkg --list | grep linux-image | wc -l)" != "1" ]] && [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
+red "Xanmod kernel updated & reboot"
+
+cat << "EOF" >~/clearKernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+crontab -l 2>/dev/null > ~/now.cron
+sed -i '/clearKernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf ~/clearKernel
+systemctl restart sshd >/dev/null
+EOF
+chmod +x ~/clearKernel
+
+crontab -l 2>/dev/null > ~/now.cron
+echo '@reboot ~/clearKernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+sleep 2
+sudo reboot
+exit
+fi
+}
+
+
+
+
+
+installBBRplus(){
+    green "================"
+    green "Install bbrplus"
+    green "================"
+    green "Press [Enter] to continue:"
+    read -s -n 1 BBRplusConfirm
+
+if [[ "$BBRplusConfirm" = "" ]] && [[ -z $(echo $virtCON | grep "$virt") ]]; then
+mkdir -p /boot/grub
+mkdir -p /boot/bbrKernel
+
+[[ -z "$(which 'update-grub')" ]] && [[ -d "/sys/firmware/efi" ]] && sudo apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z "$(which 'update-grub')" ]] && [[ ! -d "/sys/firmware/efi" ]] && sudo apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+unset DLloop
+until [[ $(du -sk /boot/bbrKernel/linux-image.deb 2>/dev/null | awk '{print$1}') -gt 40000 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-image-bbrplus_$architecture.deb
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
+unset DLloop
+until [[ $(du -sk /boot/bbrKernel/linux-headers.deb 2>/dev/null | awk '{print$1}') -gt 7000 ]]
+do
+   wget --no-check-certificate --show-progress -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/linux-headers-bbrplus_$architecture.deb
+   ((DLloop+=1))
+   [[ "$DLloop" = 3 ]] && break && red "Download Failed"
+done
+
+dpkg -i /boot/bbrKernel/linux-image.deb
+dpkg -i /boot/bbrKernel/linux-headers.deb
+
+if [[ -n $(dpkg --list | grep 'linux-image' | grep 'bbrplus') ]]; then
+dpkg --list | grep 'xanmod' | awk '{print $2}' | grep 'linux-' | while read line
+do
+apt purge -y $line
+done
+rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+apt-key del E734E623 >/dev/null 2>&1
+
+dpkg --list | grep 'linux-image' | awk '{print $2}' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
+do
+apt purge -y $line
+done
+
+dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
+do
+apt purge -y $line
+done
+
+update-grub
+
+cat << "EOF" >/boot/bbrKernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
+sysctl -p >/dev/null
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+crontab -l 2>/dev/null > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf /boot/bbrKernel
+systemctl restart sshd >/dev/null 2>&1
+EOF
+chmod +x /boot/bbrKernel/clearkernel
+
+crontab -l 2>/dev/null > ~/now.cron
+echo '@reboot /boot/bbrKernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "-----------------------"
+blue  "Install bbrplus [done]"
+blue "-----------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "bbrplus kernel install failed"
+  exit
+fi
+elif [[ "$BBRplusConfirm" = "" ]] && [[ -n $(echo $virtCON | grep "$virt") ]]; then
+  bash <(wget --no-check-certificate -qO- https://github.com/mzz2017/lkl-haproxy/raw/master/lkl-haproxy.sh)
+fi
+}
+
+
+
+installBBR(){
+    green "=========================="
+    green "Install XanMod kernel BBR"
+    green "=========================="
+    green "Press [Enter] to continue:"
+    read -s -n 1 XanModconfirm
+
+if [[ "$XanModconfirm" = "" ]]; then
+
+if [[ $architecture != "amd64" ]]; then
+  red "only work on x86_64"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/bbrKernel
+echo 'deb http://deb.xanmod.org releases main' >/etc/apt/sources.list.d/xanmod-kernel.list
+wget -cqO - https://dl.xanmod.org/gpg.key | apt-key --keyring /etc/apt/trusted.gpg.d/xanmod-kernel.gpg add -
+
+apt update --fix-missing && apt upgrade --allow-downgrades && apt install linux-xanmod-lts
+
+if [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
+dpkg --list | grep 'linux-image' | awk '{print $2}' | sed '/xanmod/d' | while read line
+do
+apt purge -y $line
+done
+
+dpkg --list | grep 'linux-headers' | awk '{print $2}' | sed '/xanmod/d' | while read line
+do
+apt purge -y $line
+done
+
+cat << "EOF" >/boot/bbrKernel/clearkernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_congestion_control/d" /etc/sysctl.conf
+echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+sysctl -p >/dev/null
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt purge -y $line
+done
+
+crontab -l 2>/dev/null > ~/now.cron
+sed -i '/clearkernel/d' ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+rm -rf /boot/bbrKernel
+systemctl restart sshd >/dev/null 2>&1
+EOF
+chmod +x /boot/bbrKernel/clearkernel
+
+crontab -l 2>/dev/null > ~/now.cron
+echo '@reboot /boot/bbrKernel/clearkernel' >> ~/now.cron
+crontab ~/now.cron
+rm -rf ~/now.cron
+
+blue "--------------------------------"
+blue "Install XanMod kernel BBR [done]"
+blue "--------------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "XanMod kernel install failed"
+  echo
+  echo -n "$statusWarning" && yellow "Installation Fallback"
+
+  dpkg --list | grep xanmod | awk '{print $2}' | while read line
+  do
+  apt purge -y $line
+  done
+
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  apt-key del E734E623 >/dev/null 2>&1
+  echo -n "$statusWarning" && yellow "Exit"
+  exit
+fi
+fi
+fi
+}
+
+
+
+changeDomain(){
+    green "=================="
+    green " Input new domain"
+    green "=================="
+    read vpsdomainP
+
+domain=$(echo $vpsdomainP | cut -d: -f1)
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+port=$(echo $vpsdomainP | cut -d: -f2| grep '^[[:digit:]]*$')
+[ -z $port ] && port="443"
+
+if [[ -n $port ]] && [[ $port != "443" ]]; then
+
+    green "==============================="
+    green " Cloudflare API KEY"
+    green "==============================="
+    read CFapikey
+
+    green "==============================="
+    green " Cloudflare Email"
+    green "==============================="
+    read CFemail
+
+fi
+
+path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/config.json)
+
+if [[ -n $port ]] && [[ $port != "443" ]]; then
+makeSSL_D
+
+ocspStapling
+else
+makeSSL_W
+
+ocspStapling
+fi
+
+nginxWebConf
+
+systemctl force-reload nginx
+
+blue "-----------------------------------------------"
+blue "Change domain and issue new certificates [done]"
+blue "-----------------------------------------------"
+}
+
+
+
+changeXrayVerify(){
+    green "=========="
+    green " New UUID"
+    green "=========="
+    read nuuid
+
+    green "=========="
+    green " New path"
+    green "=========="
+    read npath
+
+domain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf | grep '^[[:digit:]]*$')
+
+path=$npath
+uuids=$nuuid
+
+upDomain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
+upPort=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
+upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/config.json)
+xtlsPort=$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
+
+nginxWebConf
+
+systemctl force-reload nginx
+
+v2in
+
+if [[ -n $xtlsPort ]] && [[ $xtlsPort != null ]]; then
+  v2inForward
+fi
+
+if [[ -n $upDomain ]] && [[ $upDomain != null ]]; then
+  v2outForward
+else
+  v2outDirect
+fi
+
+installV2
+
+v2start
+
+systemctl restart iptablesrules >/dev/null 2>&1
+systemctl restart vtrui >/dev/null 2>&1
+
+blue "-----------------------------"
+blue  "Change Xray UUID&path [done]"
+blue "-----------------------------"
+}
+
+
+
+changeXTLSF(){
+    green "======================="
+    green "1: Set XTLS Forward"
+    green "2: Delete XTLS Forward"
+    green "======================="
+    read -n 1 v2xtlsYN
+echo
+if [[ "$v2xtlsYN" = "1" ]]; then
+
+    green "======================="
+    green "1: XTLS Server"
+    green "2: XTLS Client"
+    green "======================="
+    read -n 1 v2xtlsEnable
+echo
+if [[ "$v2xtlsEnable" = "1" ]]; then
+    green "======================="
+    green "XTLS Port"
+    green "======================="
+    read xtlsPort
+
+port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
+uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json)
+
+v2inForward
+
+systemctl restart iptablesrules >/dev/null 2>&1
+v2start
+
+systemctl restart vtrui >/dev/null 2>&1
+
+blue "--------------------------"
+blue  "Enable XTLS Server [done]"
+blue "--------------------------"
+
+elif [[ "$v2xtlsEnable" = "2" ]]; then
+    green "====================="
+    green "XTLS upstream Domain"
+    green "====================="
+    read upDomain
+
+    green "====================="
+    green "XTLS upstream UUID"
+    green "====================="
+    read upUUID
+
+    green "====================="
+    green "XTLS upstream Port"
+    green "====================="
+    read upPort
+
+v2outForward
+
+systemctl restart iptablesrules >/dev/null 2>&1
+v2start
+
+systemctl restart vtrui >/dev/null 2>&1
+
+blue "-----------------------"
+blue  "Set XTLS Client [done]"
+blue "-----------------------"
+fi
+elif [[ "$v2xtlsYN" = "2" ]]; then
+
+jq 'del(.inbounds[] | select(.tag == "forward"))' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+v2outDirect
+
+systemctl restart iptablesrules >/dev/null 2>&1
+v2start
+
+systemctl restart vtrui >/dev/null 2>&1
+
+blue "--------------------------"
+blue  "Delete XTLS Client [done]"
+blue "--------------------------"
+fi
+}
+
+
+
+printNode(){
+vpsdomain=$(awk '/server_name/ {print$2;exit}' /etc/nginx/conf.d/default.conf | sed 's/.$//')
+port=$(awk '/ssl http2 fastopen=128 reuseport/ {print$2}' /etc/nginx/conf.d/default.conf)
+
+if [[ $port = "443" ]]; then
+vpsdomainP=$vpsdomain
+else
+vpsdomainP=$vpsdomain:$port
+fi
+
+path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/config.json)
+uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json)
+
+upDomain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json)
+upPort=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui/config.json)
+upUUID=$(jq -r '.outbounds[0].settings.vnext[0].users[0].id' /opt/de_GWD/vtrui/config.json)
+xtlsPort=$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json)
+
+blue "---------------------------------------------"
+green "Xray node information"
+echo
+blue "Probe:     $(yellow "$vpsdomainP/probe")"
+echo
+blue "DoH:       $(yellow "$vpsdomainP/dq")"
+blue "Domain:    $(yellow "$vpsdomainP")"
+blue "UUID:      $(yellow "$uuids")"
+blue "Path:      $(yellow "$path?ed=2048")"
+
+if [[ -n $xtlsPort ]] && [[ $xtlsPort != null ]]; then
+blue "XTLS Port: $(yellow "$xtlsPort")"
+fi
+blue "---------------------------------------------"
+}
+
+
+
+autoUpdateGWD(){
+    green "=============================================="
+    green "Y. Turn on AutoUpdate / N. Turn off AutoUpdate"
+    green "=============================================="
+    read -s -n 1 autoUpdateswitch
+echo
+if [[ "$autoUpdateswitch" = "Y" ]] || [[ "$autoUpdateswitch" = "y" ]]; then 
+sed -i '/localVer=/,$d' /opt/de_GWD/Q2H
+
+cat << "EOF" >>/opt/de_GWD/Q2H
+localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
+remoteVer=$(curl -s https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | awk 'NR==1')
+
+if [[ $localVer != $remoteVer ]]; then
+crontab -l 2>/dev/null > /tmp/now.cron
+sed -i '/autoUpdate/d' /tmp/now.cron
+echo '30 4 * * *  /opt/de_GWD/autoUpdate' >> /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+EOF
+
+blue "--------------------------"
+blue  "AutoUpdate turn on [done]"
+blue "--------------------------"
+
+elif [[ "$autoUpdateswitch" = "N" ]] || [[ "$autoUpdateswitch" = "n" ]]; then
+sed -i '/localVer=/,$d' /opt/de_GWD/Q2H
+
+crontab -l 2>/dev/null > /tmp/now.cron
+sed -i '/autoUpdate/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+
+blue "---------------------------"
+blue  "AutoUpdate turn off [done]"
+blue "---------------------------"
+fi
+}
+
+
+
+installGWD(){
+    green "=================="
+    green " Input VPS domain"
+    green "=================="
+    read vpsdomainP
+
+domain=$(echo $vpsdomainP | cut -d: -f1)
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+port=$(echo $vpsdomainP | cut -d: -f2| grep '^[[:digit:]]*$')
+[ -z $port ] && port="443"
+
+if [[ -n $port ]] && [[ $port != "443" ]]; then
+
+    green "==============================="
+    green " Cloudflare API KEY"
+    green "==============================="
+    read CFapikey
+
+    green "==============================="
+    green " Cloudflare Email"
+    green "==============================="
+    read CFemail
+
+fi
+
+cd ~
+
+uuids=$(cat /proc/sys/kernel/random/uuid)
+path="/$(echo $uuids | awk '{print substr($0,length($1)-5)}')"
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+ethernetnums=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | xargs | sed 's/ /,/g')
+localaddr=$(ip a | grep "$ethernetnum" | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | tail -2 | head -n 1  | awk NR==1)
+
+preInstall
+
+installPihole
+
+piholeSet
+
+if [[ -n $port ]] && [[ $port != "443" ]]; then
+
+installNginx
+
+makeSSL_D
+
+ocspStapling
+
+nginxWebConf
+
+else
+
+installNginx
+
+makeSSL_W
+
+ocspStapling
+
+nginxWebConf
+
+fi
+
+v2in
+
+v2outDirect
+
+installV2
+
+v2start
+
+installIptablesRules
+
+postInstall
+
+printNode
+
+blue "----------------------"
+blue  "Install de_GWD [done]"
+blue "----------------------"
+}
+
+
+
+updateGWD(){
+[ ! -f /opt/de_GWD/version.php ] && red "this is not server" && exit
+
+preUpdate
+
+preInstall
+
+installPihole
+
+piholeSet
+
+installNginx
+
+ocspStapling
+
+nginxWebConf
+
+v2in
+
+if [[ -n $xtlsPort ]] && [[ $xtlsPort != null ]]; then
+  v2inForward
+fi
+
+if [[ -n $upDomain ]] && [[ $upDomain != null ]]; then
+  v2outForward
+else
+  v2outDirect
+fi
+
+installV2
+
+v2start
+
+installIptablesRules
+
+postInstall
+
+blue "---------------------"
+blue  "Update de_GWD [done]"
+blue "---------------------"
+}
+
+
+
+
+start_menu(){
+if [[ $(systemctl is-active 'pihole-FTL') = "active" ]]; then
+    echo "[$statusGOOD] Pi-hole        [working]"
+elif [ ! -f "/usr/local/bin/pihole" ]; then
+    echo "[$statusBAD] Pi-hole        [not installed]"
+else
+    echo "[$statusBAD] Pi-hole        [start failed]"
+fi
+
+if [[ $(systemctl is-active 'nginx') = "active" ]]; then
+    echo "[$statusGOOD] Nginx          [working]"
+elif [[ ! -f "/usr/sbin/nginx" ]]; then
+    echo "[$statusBAD] Nginx          [not installed]"
+else
+    echo "[$statusBAD] Nginx          [start failed]"
+fi
+
+if [[ $(systemctl is-active 'vtrui') = "active" ]]; then
+    echo "[$statusGOOD] Xray           [working]"
+elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
+    echo "[$statusBAD] Xray           [not Installed]"
+else
+    echo "[$statusBAD] Xray           [start failed]"
+fi
+
+if [[ $(systemctl is-active 'doh-server') = "active" ]]; then
+    echo "[$statusGOOD] DoH server     [working]"
+elif [[ ! -f "/opt/de_GWD/doh-server" ]]; then
+    echo "[$statusBAD] DoH server     [not Installed]"
+else
+    echo "[$statusBAD] DoH server     [start failed]"
+fi
+
+if [[ -n $(cat /opt/de_GWD/Q2H 2>/dev/null | grep "localVer") ]]; then
+    echo "[$statusGOOD] AutoUpdate     [working]"
+else
+    echo "[$statusBAD] AutoUpdate     [stopped]"
+fi
+
+if [[ -n $(echo $virtCON | grep "$virt") ]]; then
+    blue  "--------------------------------------------------"
+    blue  $virt
+    blue  "Kernel:                         $(uname -r)"
+    blue  "--------------------------------------------------"
+if [[ -f "/opt/de_GWD/version.php" ]]; then
+    blue  "Version:$(echo $(awk 'NR==1' /opt/de_GWD/version.php))"
+fi
+    green "=================================================="
+    green "       SERVER"
+    green "Recommend: Debian 10"
+    green "Author:    JacyL4"
+    green "=================================================="
+    echo
+    green  "1. Install de_GWD"
+    green  "2. Install bbrplus"
+    red    "4. Change domain and generate new certificate"
+    red    "5. Change Xray path & UUID"
+    yellow "0. Update de_GWD"
+    red    "00.AutoUpdate turn on/off"
+    green  "11.Print Xray node information"
+    red    "44.Set XTLS Forward"
+    red    "CTRL+C EXIT"
+    echo
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installGWD
+    start_menu
+    ;;
+    2)
+    installBBRplus
+    start_menu
+    ;;
+    4)
+    changeDomain
+    start_menu
+    ;;
+    5)
+    changeXrayVerify
+    start_menu
+    ;;
+    0)
+    updateGWD
+    start_menu
+    ;;
+    00)
+    autoUpdateGWD
+    start_menu
+    ;;
+    11)
+    printNode
+    start_menu
+    ;;
+    44)
+    changeXTLSF
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+
+else
+    blue  "--------------------------------------------------"
+    blue  $virt
+    blue  "Kernel:                         $(uname -r)"
+    blue  "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
+    blue  "--------------------------------------------------"
+if [[ -f "/opt/de_GWD/version.php" ]]; then
+    blue  "Version:$(echo $(awk 'NR==1' /opt/de_GWD/version.php))"
+fi
+    green "=================================================="
+    green "       SERVER"
+    green "Recommend: Debian 10"
+    green "Author:    JacyL4"
+    green "=================================================="
+    echo
+    green  "1. Install de_GWD"
+    green  "2. Install bbrplus and reboot ($BBRPLUS_Ver)"
+    green  "3. Install XanMod kernel BBR and reboot"
+    red    "4. Change domain and generate new certificate"
+    red    "5. Change Xray path & UUID"
+    yellow "0. Update de_GWD"
+    red    "00.AutoUpdate turn on/off"
+    green  "11.Print Xray node information"
+    red    "44.Set XTLS Forward"
+    red    "CTRL+C EXIT"
+    echo
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installGWD
+    start_menu
+    ;;
+    2)
+    installBBRplus
+    start_menu
+    ;;
+    3)
+    installBBR
+    start_menu
+    ;;
+    4)
+    changeDomain
+    start_menu
+    ;;
+    5)
+    changeXrayVerify
+    start_menu
+    ;;
+    0)
+    updateGWD
+    start_menu
+    ;;
+    00)
+    autoUpdateGWD
+    start_menu
+    ;;
+    11)
+    printNode
+    start_menu
+    ;;
+    44)
+    changeXTLSF
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+fi
+}
+
+start_menu
