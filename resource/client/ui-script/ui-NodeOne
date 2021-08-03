@@ -1,0 +1,143 @@
+#!/bin/bash
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf)
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf)
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf)
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
+
+[ -z "$tls" ] || [ "$tls" == "null" ] && tls=$domain
+
+cat << EOF >/opt/de_GWD/vtrui/config.json
+{
+"dns":{
+  "tag":"dnsFlow",
+  "servers":[{"address":"127.0.0.1","port":53}]
+},
+"routing":{
+  "rules":[
+    {
+      "type":"field",
+      "ip":["geoip:private"],
+      "outboundTag": "direct"
+    },
+    {"type":"field","inboundTag":["dnsFlow"],"outboundTag":"direct"}
+  ]
+},
+"inbounds":[
+  {
+    "port":9896,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "settings":{"network":"tcp,udp","followRedirect":true},
+    "sniffing":{"enabled":true,"destOverride":["http","tls"]},
+    "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+  }
+],
+"outbounds":[
+  {
+    "tag":"default"
+  },
+  {
+    "tag":"direct",
+    "protocol":"freedom",
+    "settings":{},
+    "streamSettings":{"sockopt":{"mark":255}}
+  }
+]
+}
+EOF
+
+if [[ -z $path ]] || [[ $path = "null" ]]; then
+OBdefault=`cat << EOF
+    {
+      "tag": "default",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "flow": "xtls-rprx-splice",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBdefault=`cat << EOF
+{
+      "tag": "default",
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+fi
+
+jq --argjson OBdefault "$OBdefault" '.outbounds[0]=$OBdefault' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+if [[ $1 == "f" ]]; then
+  jq '.v2nodeDIV.nodeNF.display="off"' /opt/de_GWD/0conf |\
+  jq '.v2nodeDIV.nodeCU.display="off"' |\
+  jq '.v2nodeDIV.nodeDT.display="off"' | sponge /opt/de_GWD/0conf
+  chmod 666 /opt/de_GWD/0conf
+fi
+
+if [[ $2 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi
+
