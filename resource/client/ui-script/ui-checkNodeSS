@@ -1,0 +1,8 @@
+#!/bin/bash
+checkSS=$(jq -r '.outbounds[0].tag' /opt/de_GWD/vtrui/config.json)
+
+if [[ "$checkSS" == "ss" ]]; then
+echo "btn-success"
+else
+echo "btn-outline-secondary"
+fi

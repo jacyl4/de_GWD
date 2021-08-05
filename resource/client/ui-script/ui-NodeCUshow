@@ -1,0 +1,112 @@
+#!/bin/bash
+domain=$(jq -r '.v2nodeDIV.nodeCU.domain' /opt/de_GWD/0conf)
+tls=$(jq -r '.v2nodeDIV.nodeCU.tls' /opt/de_GWD/0conf)
+port=$(jq -r '.v2nodeDIV.nodeCU.port' /opt/de_GWD/0conf)
+uuid=$(jq -r '.v2nodeDIV.nodeCU.uuid' /opt/de_GWD/0conf)
+path=$(jq -r '.v2nodeDIV.nodeCU.path' /opt/de_GWD/0conf)
+
+if [[ -z $domain ]] || [[ $domain = "null" ]]; then
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf)
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf)
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf)
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf)
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf)
+fi
+
+[ -z "$tls" ] || [ "$tls" == "null" ] && tls=$domain
+
+jq '.v2nodeDIV.nodeCU.display="on"' /opt/de_GWD/0conf |\
+jq --arg domain "$domain" '.v2nodeDIV.nodeCU.domain=$domain' |\
+jq --arg tls "$tls" '.v2nodeDIV.nodeCU.tls=$tls' |\
+jq --arg port "$port" '.v2nodeDIV.nodeCU.port=$port' |\
+jq --arg uuid "$uuid" '.v2nodeDIV.nodeCU.uuid=$uuid' |\
+jq --arg path "$path" '.v2nodeDIV.nodeCU.path=$path' | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+if [[ -z $path ]] || [[ $path = "null" ]]; then
+OBcu=`cat << EOF
+    {
+      "tag": "custom",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "flow": "xtls-rprx-splice",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBcu=`cat << EOF
+{
+      "tag": "custom",
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+fi
+
+jq 'del(.outbounds[] | select(.tag == "custom"))' /opt/de_GWD/vtrui/config.json |\
+jq --argjson OBcu "$OBcu" '.outbounds+=[$OBcu]' | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi
