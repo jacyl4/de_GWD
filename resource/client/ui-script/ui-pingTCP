@@ -1,0 +1,3 @@
+#!/bin/bash
+pingTCP=$(jq -r --argjson domainNUM "$1" '.v2node[$domainNUM].domain' /opt/de_GWD/0conf)
+echo "$(curl -o /dev/null -sw '%{time_connect}\n' https://$pingTCP) * 1000" | bc | awk '{printf ("%.0f\n",$1)}' 

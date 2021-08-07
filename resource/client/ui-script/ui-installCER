@@ -1,0 +1,203 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+purple() { echo -e "\033[35m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+
+
+installCER(){
+CFapikey=$(jq -r '.FORWARD.APIkey' /opt/de_GWD/0conf)
+CFemail=$(jq -r '.FORWARD.Email' /opt/de_GWD/0conf)
+domain=$(jq -r '.FORWARD.domain' /opt/de_GWD/0conf)
+topDomain=$(echo $domain | rev | awk -F. '{print $1"."$2}' | rev)
+
+[[ -f "/etc/nginx/conf.d/80.conf" ]] && sed -i "/server_name/c\server_name $domain;" /etc/nginx/conf.d/80.conf
+sed -i "/server_name/c\server_name $domain;" /etc/nginx/conf.d/default.conf
+jq --arg serverName "$domain" '.address.serverName = $serverName' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+systemctl reload nginx
+
+[[ -z $(dpkg -l | grep netcat) ]] && aptPKG+=(netcat)
+[[ -z $(dpkg -l | grep socat) ]] && aptPKG+=(socat)
+[[ -n $aptPKG ]] && apt install $(echo ${aptPKG[@]})
+unset aptPKG
+
+cat << EOF >/var/www/ssl/update_ocsp_cache
+#!/bin/bash
+[[ ! -f "/var/www/ssl/intermediate.pem" ]] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+[[ ! -f "/var/www/ssl/root.pem" ]] && wget --no-check-certificate --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+
+cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
+cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
+
+openssl ocsp -no_nonce \
+    -issuer  /var/www/ssl/intermediate.pem \
+    -cert    /var/www/ssl/*.cer \
+    -CAfile  /var/www/ssl/bundle.pem \
+    -VAfile  /var/www/ssl/bundle.pem \
+    -url     http://r3.o.lencr.org \
+    -respout /var/www/ssl/ocsp.resp
+
+systemctl force-reload nginx >/dev/null
+EOF
+chmod +x /var/www/ssl/update_ocsp_cache
+
+if [[ $(/var/www/ssl/update_ocsp_cache | awk 'NR==1{print$2}') != "good" ]]; then
+rm -rf /var/www/ssl/*.cer
+rm -rf /var/www/ssl/*.key
+rm -rf /var/www/ssl/*.pem
+cat << EOF >/var/www/ssl/ocsp.resp
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 00
+EOF
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/acme.sh/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf "/root/.acme.sh"
+
+export CF_Key="$CFapikey"
+export CF_Email="$CFemail"
+
+curl https://get.acme.sh | sh
+"/root/.acme.sh"/acme.sh --force --upgrade  --auto-upgrade
+"/root/.acme.sh"/acme.sh --force --set-default-ca  --server letsencrypt
+"/root/.acme.sh"/acme.sh --force --issue --dns dns_cf -d $topDomain -d *.$topDomain -k ec-256
+"/root/.acme.sh"/acme.sh --force --installcert -d $topDomain --ecc \
+               --key-file       /var/www/ssl/de_GWD.key  \
+               --fullchain-file /var/www/ssl/de_GWD.cer \
+               --reloadcmd     "chmod 644 /var/www/ssl/*.key && systemctl force-reload nginx"
+fi
+
+/var/www/ssl/update_ocsp_cache
+
+[[ -d "/opt/de_GWD/vtrui" ]] && systemctl restart vtrui
+[[ -d "/opt/de_GWD/vtrui1" ]] && systemctl restart vtrui1
+[[ -d "/opt/de_GWD/xDNSs" ]] && systemctl restart xDNSs
+[[ -d "/opt/de_GWD/RproxyS" ]] && systemctl restart RproxyS
+
+blue "--------------------------------"
+blue  "Generate TLS Certificate [done]"
+blue "--------------------------------"
+}
+
+
+
+initCER(){
+mkdir -p /var/www/ssl && cd /var/www/ssl
+
+openssl req -x509 -nodes -days 3650 \
+  -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
+  -config <(cat /etc/ssl/openssl.cnf \
+    <(printf '[SAN]\nsubjectAltName=DNS:localhost')) \
+  -newkey rsa:2048 \
+  -keyout de_GWD.key \
+  -out de_GWD.cer
+  
+cd ~
+
+cat << EOF >/var/www/ssl/ocsp.resp
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 00
+EOF
+
+systemctl force-reload nginx
+blue "--------------------------------"
+blue  "Initialize TLS Certificate [done]"
+blue "--------------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "     Domain & Certificate"
+    green "==============================="
+    green  "1. Generate TLS Certificate"
+    yellow "2. Initialize TLS Certificate"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installCER
+    start_menu
+    ;;
+    2)
+    initCER
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
