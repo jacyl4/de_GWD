@@ -1,0 +1,3 @@
+#!/bin/bash
+pihole -f
+systemctl restart smartdns >/dev/null

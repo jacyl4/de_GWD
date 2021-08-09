@@ -1,0 +1,20 @@
+#!/bin/bash
+divertIP=$(jq '.v2nodeDIV.nodeDT.ip' /opt/de_GWD/0conf)
+
+if [[ -n $divertIP ]] && [[ $divertIP != "null" ]] && [[ $divertIP != "[]" ]]; then
+RoutingDT=`cat << EOF
+{
+        "type": "field",
+        "source": $divertIP,
+        "outboundTag": "divertTraffic"
+}
+EOF
+`
+jq 'del(.routing.rules[] | select(.outboundTag == "divertTraffic"))' /opt/de_GWD/vtrui/config.json |\
+jq --argjson RoutingDT "$RoutingDT" '.routing.rules+=[$RoutingDT]' | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+fi
+
+if [[ $1 == "r" ]]; then
+	systemctl restart vtrui >/dev/null
+fi
