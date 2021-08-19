@@ -1,0 +1,153 @@
+#!/bin/bash
+domain=$(jq -r '.v2nodeDIV.nodeNF.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+tls=$(jq -r '.v2nodeDIV.nodeNF.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.v2nodeDIV.nodeNF.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r '.v2nodeDIV.nodeNF.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r '.v2nodeDIV.nodeNF.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+if [[ -z $domain ]]; then
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+fi
+
+[[ -z $tls ]] && tls=$domain
+
+jq '.v2nodeDIV.nodeNF.display="on"' /opt/de_GWD/0conf |\
+jq --arg domain "$domain" '.v2nodeDIV.nodeNF.domain=$domain' |\
+jq --arg tls "$tls" '.v2nodeDIV.nodeNF.tls=$tls' |\
+jq --arg port "$port" '.v2nodeDIV.nodeNF.port=$port' |\
+jq --arg uuid "$uuid" '.v2nodeDIV.nodeNF.uuid=$uuid' |\
+jq --arg path "$path" '.v2nodeDIV.nodeNF.path=$path' | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+if [[ -z $path ]]; then
+OBnf=`cat << EOF
+    {
+      "tag": "netflix",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "flow": "xtls-rprx-splice",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "alpn":["h2"],
+          "minVersion": "1.3",
+          "maxVersion": "1.3",
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tproxy": "off",
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBnf=`cat << EOF
+{
+      "tag": "netflix",
+      "mux": {
+        "enabled": true,
+        "concurrency": 8
+      },
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tproxy": "off",
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+fi
+
+RoutingNF=`cat << EOF
+{
+        "type": "field",
+        "domain": [
+          "geosite:netflix",
+          "domain:netflix.ca",
+          "domain:netflix.com",
+          "domain:netflix.net",
+          "domain:nflxext.com",
+          "domain:nflximg.com",
+          "domain:nflximg.net",
+          "domain:nflxso.net",
+          "domain:nflxvideo.net",
+          "domain:nflxsearch.net",
+          "domain:netflixinvestor.com",
+          "domain:netflixdnstest0.com",
+          "domain:netflixdnstest1.com",
+          "domain:netflixdnstest2.com",
+          "domain:netflixdnstest3.com",
+          "domain:netflixdnstest4.com",
+          "domain:netflixdnstest5.com",
+          "domain:netflixdnstest6.com",
+          "domain:netflixdnstest7.com",
+          "domain:netflixdnstest8.com",
+          "domain:netflixdnstest9.com"
+        ],
+        "outboundTag": "netflix"
+}
+EOF
+`
+
+jq 'del(.routing.rules[] | select(.outboundTag == "netflix"))' /opt/de_GWD/vtrui/config.json |\
+jq 'del(.outbounds[] | select(.tag == "netflix"))' |\
+jq --argjson RoutingNF "$RoutingNF" '.routing.rules+=[$RoutingNF]' |\
+jq --argjson OBnf "$OBnf" '.outbounds+=[$OBnf]' | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi
