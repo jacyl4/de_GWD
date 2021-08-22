@@ -1,0 +1,22 @@
+#!/bin/bash
+localVer=$(awk 'NR==1' /var/www/html/act/version.php)
+remoteVer=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+
+echo $localVer >/tmp/de_GWD_Ver
+echo $remoteVer >>/tmp/de_GWD_Ver
+
+VerCP=$(cat /tmp/de_GWD_Ver | sort -rV | uniq | awk NR==2)
+
+if [[ $VerCP == $localVer ]]; then
+systemctl stop php7.4-fpm
+
+wget --timeout=5 -t 5 -cqO /tmp/autoUpdate https://raw.githubusercontent.com/jacyl4/de_GWD/main/client
+sed -i '$d' /tmp/autoUpdate
+echo "updateGWD auto" >>/tmp/autoUpdate
+chmod +x /tmp/autoUpdate
+/tmp/autoUpdate
+
+systemctl restart php7.4-fpm
+fi
+
+rm -rf /tmp/de_GWD_Ver

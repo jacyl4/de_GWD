@@ -1,0 +1,83 @@
+#!/bin/bash
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+statusUpdated=$(green "[  updated  ]")
+
+if [[ $1 == "u" ]]; then
+	service cron stop
+fi
+
+/opt/de_GWD/tcpTime
+
+[[ -f "/opt/de_GWD/.repo/geosite.dat" ]] && geosite_sha256sumL=$(sha256sum /opt/de_GWD/.repo/geosite.dat 2>/dev/null | awk '{print$1}')
+geosite_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat.sha256sum | awk '{print$1}')
+
+if [[ $geosite_sha256sum != $geosite_sha256sumL ]]; then
+rm -rf /opt/de_GWD/.repo/geosite.dat
+wget --show-progress --timeout=5 -t 5 -cqO /opt/de_GWD/.repo/geosite.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat
+[[ $? -ne 0 ]] && red "Download Failed"
+fi
+
+[[ -f "/opt/de_GWD/.repo/geoip.dat" ]] && geoip_sha256sumL=$(sha256sum /opt/de_GWD/.repo/geoip.dat 2>/dev/null | awk '{print$1}')
+geoip_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat.sha256sum | awk '{print$1}')
+
+if [[ $geoip_sha256sum != $geoip_sha256sumL ]]; then
+rm -rf /opt/de_GWD/.repo/geoip.dat
+wget --show-progress --timeout=5 -t 5 -cqO /opt/de_GWD/.repo/geoip.dat https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat
+[[ $? -ne 0 ]] && red "Download Failed"
+fi
+
+[[ -f "/opt/de_GWD/.repo/IPchnroute" ]] && IPchnroute_sha256sumL=$(sha256sum /opt/de_GWD/.repo/IPchnroute 2>/dev/null | awk '{print$1}')
+IPchnroute_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
+
+if [[ $IPchnroute_sha256sum != $IPchnroute_sha256sumL ]]; then
+rm -rf /opt/de_GWD/.repo/IPchnroute
+wget --show-progress --timeout=5 -t 5 -cqO /opt/de_GWD/.repo/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
+[[ $? -ne 0 ]] && red "Download Failed"
+fi
+
+if [[ $(du -sk /opt/de_GWD/.repo/geosite.dat 2>/dev/null | awk '{print$1}') -gt 4400 ]]; then
+cp -f /opt/de_GWD/.repo/geosite.dat /opt/de_GWD/v2dns/geosite.dat
+cp -f /opt/de_GWD/.repo/geosite.dat /opt/de_GWD/vtrui/geosite.dat
+fi
+
+if [[ $(du -sk /opt/de_GWD/.repo/geoip.dat 2>/dev/null | awk '{print$1}') -gt 5000 ]]; then
+cp -f /opt/de_GWD/.repo/geoip.dat /opt/de_GWD/v2dns/geoip.dat
+cp -f /opt/de_GWD/.repo/geoip.dat /opt/de_GWD/vtrui/geoip.dat
+fi
+
+if [[ $(du -sk /opt/de_GWD/.repo/IPchnroute 2>/dev/null | awk '{print$1}') -gt 130 ]]; then
+cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/chnrouteSET
+sed -i '/^\s*$/d' /opt/de_GWD/chnrouteSET
+sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
+ipset -! -R </opt/de_GWD/chnrouteSET
+fi
+
+if [[ -z $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200 | grep ' not ') ]] && [[ -d "/root/.acme.sh" ]] && [[ $(curl -Is get.acme.sh) =~ "HTTP" ]]; then
+"/root/.acme.sh"/acme.sh --force --upgrade  --auto-upgrade
+"/root/.acme.sh"/acme.sh --force --set-default-ca  --server letsencrypt
+"/root/.acme.sh"/acme.sh --force --cron --home "/root/.acme.sh" >/dev/null 2>&1
+
+sslFolder=$(ls "/root/.acme.sh" | grep '_ecc')
+cp -f "/root/.acme.sh"/$sslFolder/fullchain.cer /var/www/ssl/de_GWD.cer
+cp -f "/root/.acme.sh"/$sslFolder/*.key /var/www/ssl/de_GWD.key
+
+[[ -d "/opt/de_GWD/vtrui" ]] && systemctl restart vtrui
+[[ -d "/opt/de_GWD/vtrui1" ]] && systemctl restart vtrui1
+[[ -d "/opt/de_GWD/xDNSs" ]] && systemctl restart xDNSs
+[[ -d "/opt/de_GWD/RproxyS" ]] && systemctl restart RproxyS
+fi
+
+if [[ $(curl -Is google.com) =~ "HTTP" ]] || [[ $(curl -Is youtube.com) =~ "HTTP" ]]; then
+/var/www/ssl/update_ocsp_cache >/dev/null 2>&1
+fi
+
+echo -n "$statusUpdated" && white "IP & Domain rules"
+
+if [[ $1 == "u" ]]; then
+	service cron restart
+fi
