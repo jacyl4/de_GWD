@@ -1,0 +1,10 @@
+#!/bin/bash
+sed -i "/net.ipv4.ip_forward /c\net.ipv4.ip_forward = 1" /etc/sysctl.conf
+sed -i '/net.core.default_qdisc/c\net.core.default_qdisc = fq_codel' /etc/sysctl.conf
+sysctl -p >/dev/null
+systemctl restart systemd-sysctl
+
+sed -i '/--dport 53 -i/d' /opt/de_GWD/iptables-proxy-up
+sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-onUDP
+sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-offUDP
+systemctl restart iptables-proxy
