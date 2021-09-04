@@ -1,0 +1,45 @@
+#!/bin/bash
+FWD0port=$(jq -r '.FORWARD.FWD0.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+FWD0uuid=$(jq -r '.FORWARD.FWD0.uuid[].FWD0uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+XTLSin=`cat << EOF
+    {
+      "port": $FWD0port,
+      "protocol": "vless",
+      "settings":{
+        "decryption": "none",
+        "clients":[]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "alpn": ["h2"],
+          "minVersion": "1.3",
+          "maxVersion": "1.3",
+          "certificates": [
+            {
+              "certificateFile": "/var/www/ssl/de_GWD.cer",
+              "keyFile": "/var/www/ssl/de_GWD.key"
+            }
+          ]
+        },
+        "sockopt":{
+          "tcpFastOpen":true
+        }
+      }
+    }
+EOF
+`
+jq --argjson XTLSin "$XTLSin" '.inbounds[1]=$XTLSin' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+for uuid in $FWD0uuid; do
+uuidStr='{"id":"'$uuid'","flow":"xtls-rprx-direct","level":0}'
+jq --argjson uuidStr1 "$uuidStr" '.inbounds[1].settings.clients+=[$uuidStr1]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+done
+chmod 666 /opt/de_GWD/vtrui/config.json
+chmod 644 /var/www/ssl/*.key
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi

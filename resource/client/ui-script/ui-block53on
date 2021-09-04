@@ -1,0 +1,34 @@
+#!/bin/bash
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+
+sed -i "/net.ipv4.ip_forward =/c\net.ipv4.ip_forward = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.rp_filter =/c\net.ipv4.conf.all.rp_filter = 1" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.rp_filter =/c\net.ipv4.conf.default.rp_filter = 1" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.send_redirects =/c\net.ipv4.conf.all.send_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.send_redirects =/c\net.ipv4.conf.default.send_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.accept_redirects =/c\net.ipv4.conf.all.accept_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.accept_redirects =/c\net.ipv4.conf.default.accept_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.secure_redirects =/c\net.ipv4.conf.all.secure_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.secure_redirects =/c\net.ipv4.conf.default.secure_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.accept_source_route =/c\net.ipv4.conf.all.accept_source_route = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.accept_source_route =/c\net.ipv4.conf.default.accept_source_route = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_tw_reuse =/c\net.ipv4.tcp_tw_reuse = 2" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_frto =/c\net.ipv4.tcp_frto = 0" /etc/sysctl.conf
+sysctl -p >/dev/null
+systemctl restart systemd-sysctl
+
+sed -i '/--dport 53 -i/d' /opt/de_GWD/iptables-proxy-up
+sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-onUDP
+sed -i '/--dport 53 -i/d' /opt/de_GWD/ui-offUDP
+
+addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
+addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+
+sed -i "/^iptables -t mangle -N V2PROXY$/i$addRule1" /opt/de_GWD/iptables-proxy-up
+sed -i "/^iptables -t mangle -N V2PROXY$/i$addRule2" /opt/de_GWD/iptables-proxy-up
+
+sed -i "/^iptables -t mangle -N V2PROXY$/i$addRule1" /opt/de_GWD/ui-onUDP
+sed -i "/^iptables -t mangle -N V2PROXY$/i$addRule2" /opt/de_GWD/ui-onUDP
+sed -i "/^iptables -t mangle -N V2PROXY$/i$addRule1" /opt/de_GWD/ui-offUDP
+sed -i "/^iptables -t mangle -N V2PROXY$/i$addRule2" /opt/de_GWD/ui-offUDP
+systemctl restart iptables-proxy
