@@ -1,0 +1,95 @@
+#!/bin/bash
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1 | awk 'NR==1{print}')
+
+WGaddress=$(jq -r '.wireguard.server.WGaddress' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+WGport=$(jq -r '.wireguard.server.WGport' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+sprivatekey=$(jq -r '.wireguard.server.sprivatekey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+spublickey=$(jq -r '.wireguard.server.spublickey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+clientsNUM=$(jq -r '.wireguard.clients | length' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+clientsNUMinvalid=$(jq -r '.wireguard.clients[].cprivatekey' /opt/de_GWD/0conf | grep '^undefined$' | wc -l)
+clientsNUMgood=$[$clientsNUM-$clientsNUMinvalid]
+
+rm -rf /etc/wireguard/client*.conf
+
+cat << EOF >/etc/wireguard/wg0.conf
+[Interface]
+PrivateKey = $sprivatekey
+Address = 172.16.66.1/32
+ListenPort = $WGport
+DNS = 127.0.0.1
+MTU = 1420
+PostUp   = iptables -I FORWARD -i wg0 -j ACCEPT; iptables -I FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
+EOF
+
+for ((i=0; i<$clientsNUMgood; i++))
+do
+cat << EOF >>/etc/wireguard/wg0.conf
+
+[Peer]
+PublicKey = $(jq -r --argjson i "$i" '.wireguard.clients[$i].cpublickey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+AllowedIPs = 172.16.66.$[$i+11]/32
+EOF
+
+cat >/etc/wireguard/client$[$i+1].conf << EOF
+[Interface]
+PrivateKey = $(jq -r --argjson i "$i" '.wireguard.clients[$i].cprivatekey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+Address = 172.16.66.$[$i+11]/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $spublickey
+Endpoint = $WGaddress:$WGport
+AllowedIPs = 0.0.0.0/0
+EOF
+done
+chmod 600 /etc/wireguard/wg0.conf
+chmod 600 /etc/wireguard/client*.conf
+
+rm -rf /lib/systemd/system/wg-quick@.service
+cat << "EOF" >/etc/systemd/system/wg-quick@.service
+[Unit]
+Description=WireGuard via wg-quick(8) for %I
+After=network-online.target nss-lookup.target
+Wants=network-online.target nss-lookup.target
+PartOf=wg-quick.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/wg-quick up %i
+ExecStop=/usr/bin/wg-quick down %i
+ExecReload=/bin/bash -c 'exec /usr/bin/wg syncconf %i <(exec /usr/bin/wg-quick strip %i)'
+Environment=WG_ENDPOINT_RESOLUTION_RETRIES=infinity
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+PrivateTmp=false
+NoNewPrivileges=yes
+Nice=-7
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ls -sf /etc/systemd/system/wg-quick@.service /lib/systemd/system/wg-quick@.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart wg-quick@wg0
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/wg-quick@.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/wg-quick@.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/wg-quick@.service
+ls -sf /etc/systemd/system/wg-quick@.service /lib/systemd/system/wg-quick@.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart wg-quick@wg0
+fi
+systemctl enable wg-quick@wg0 >/dev/null 2>&1
+
+ip route show | while read line
+do
+ip route change $line initcwnd 32 initrwnd 32
+done
