@@ -24,7 +24,7 @@ piholeCoreRelease_reserved="v5.4"
 piholeWebUIRelease_reserved="v5.6"
 piholeFTLRelease_reserved="v5.9"
 BBRPLUS_Ver="5.10.63"
-branch="dev"
+branch="main"
 
 
 tobeBuster(){
