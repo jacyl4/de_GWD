@@ -639,7 +639,7 @@ elif [[ $sha256sumL != $2 ]]; then
 fi
 }
 
-IPchnroute_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
+IPchnroute_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
 
 if [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $IPchnroute_sha256sum) == "false" ]]; then
 rm -rf /tmp/IPchnroute
@@ -1507,23 +1507,21 @@ installBBRplus(){
 
 if [[ $BBRplusConfirm = "" ]] && [[ $virtVC == "vm" ]]; then
 mkdir -p /boot/grub
-mkdir -p /boot/bbrKernel
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
 
-[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
-[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
-
-wget --show-progress -t 5 -T 10 -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_$architecture.deb
-[[ -f "/boot/bbrKernel/linux-image.deb" ]] && linux_image_sha256sumL=$(sha256sum /boot/bbrKernel/linux-image.deb 2>/dev/null | awk '{print$1}')
-linux_image_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_"$architecture".deb.sha256sum)
+wget --show-progress -t 5 -T 10 -cqO /tmp/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_$architecture.deb
+[[ -f "/tmp/linux-image.deb" ]] && linux_image_sha256sumL=$(sha256sum /tmp/linux-image.deb 2>/dev/null | awk '{print$1}')
+linux_image_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_"$architecture".deb.sha256sum)
 [[ $linux_image_sha256sum != $linux_image_sha256sumL ]] && red "Download Failed" && exit
 
-wget --show-progress -t 5 -T 10 -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_$architecture.deb
-[[ -f "/boot/bbrKernel/linux-headers.deb" ]] && linux_headers_sha256sumL=$(sha256sum /boot/bbrKernel/linux-headers.deb 2>/dev/null | awk '{print$1}')
-linux_headers_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_"$architecture".deb.sha256sum)
+wget --show-progress -t 5 -T 10 -cqO /tmp/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_$architecture.deb
+[[ -f "/tmp/linux-headers.deb" ]] && linux_headers_sha256sumL=$(sha256sum /tmp/linux-headers.deb 2>/dev/null | awk '{print$1}')
+linux_headers_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_"$architecture".deb.sha256sum)
 [[ $linux_headers_sha256sum != $linux_headers_sha256sumL ]] && red "Download Failed" && exit
 
-dpkg -i /boot/bbrKernel/linux-image.deb
-dpkg -i /boot/bbrKernel/linux-headers.deb
+dpkg -i /tmp/linux-image.deb
+dpkg -i /tmp/linux-headers.deb
 
 if [[ -n $(dpkg --list | grep 'linux-image' | grep 'bbrplus') ]]; then
 dpkg --list | grep 'xanmod' | awk '{print $2}' | grep 'linux-' | while read line
@@ -1543,6 +1541,7 @@ do
 apt -y --purge autoremove $line
 done
 
+update-initramfs -u -k all
 update-grub
 
 if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
@@ -1613,7 +1612,10 @@ if [[ $XanModconfirm = "" ]]; then
 if [[ $architecture != "amd64" ]]; then
   red "only work on x86_64"
 elif [[ $architecture == "amd64" ]]; then
-mkdir -p /boot/bbrKernel
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
 curl -fsSLo- https://dl.xanmod.org/gpg.key | gpg --dearmor >/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg] http://deb.xanmod.org releases main" >/etc/apt/sources.list.d/xanmod-kernel.list
 
@@ -2294,7 +2296,7 @@ if [[ $autoUpdateswitch = "Y" ]] || [[ $autoUpdateswitch = "y" ]]; then
 cat << "EOF" >/opt/de_GWD/autoUpdate
 #!/bin/bash
 localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
-remoteVer=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+remoteVer=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
 
 echo $localVer >/tmp/de_GWD_Ver
 echo $remoteVer >>/tmp/de_GWD_Ver

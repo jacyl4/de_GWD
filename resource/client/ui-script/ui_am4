@@ -22,9 +22,9 @@ elif [[ $sha256sumL != $2 ]]; then
 fi
 }
 
-geosite_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat.sha256sum | awk '{print$1}')
-geoip_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/Loyalsoldier/geoip/release/cn.dat.sha256sum | awk '{print$1}')
-IPchnroute_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
+geosite_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat.sha256sum | awk '{print$1}')
+geoip_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/Loyalsoldier/geoip/release/cn.dat.sha256sum | awk '{print$1}')
+IPchnroute_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
 
 if [[ $(checkSum /opt/de_GWD/.repo/geosite.dat $geosite_sha256sum) == "false" ]]; then
 rm -rf /tmp/geosite.dat

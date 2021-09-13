@@ -9,7 +9,7 @@ else
 cat << "EOF" >/opt/de_GWD/autoUpdate
 #!/bin/bash
 localVer=$(awk 'NR==1' /var/www/html/act/version.php)
-remoteVer=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+remoteVer=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
 
 echo $localVer >/tmp/de_GWD_Ver
 echo $remoteVer >>/tmp/de_GWD_Ver

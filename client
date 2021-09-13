@@ -402,6 +402,8 @@ HISTCONTROL=ignoredups
 EOF
 source ~/.bash_profile
 
+[[ $architecture == "arm64" ]] && echo 'alias reboot="sync; reboot -f"' >~/.bash_aliases
+
 cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
 * hard nofile 1000000
@@ -738,7 +740,8 @@ systemctl enable smartdns >/dev/null 2>&1
 [[ -n $xDNS ]] && xDNSIP=$(dig @127.0.0.1 $xDNSdomain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
 [[ -n $doh1 ]] && doh1IP=$(dig @127.0.0.1 $doh1Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
 [[ -n $doh2 ]] && doh2IP=$(dig @127.0.0.1 $doh2Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
-                domainIP=$(dig @127.0.0.1 $domain -4p 5320 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+
+domainIP=$(dig @127.0.0.1 $domain -4p 5320 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
 
 [[ -n $xDNS ]] && xDNSPort=$(echo $xDNS | cut -d: -f2 | grep '^[[:digit:]]*$')
 [[ -n $doh1 ]] && doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
@@ -2000,6 +2003,10 @@ swapoff --all
 sed -i '2,$d' /etc/fstab
 echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
 update-initramfs -u -k all
+
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
 update-grub
 fi
 }
@@ -2018,23 +2025,21 @@ installBBRplus(){
 
 if [[ $BBRplusConfirm = "" ]]; then
 mkdir -p /boot/grub
-mkdir -p /boot/bbrKernel
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
 
-[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && sudo grub-mkconfig -o /boot/grub/grub.cfg
-[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && sudo grub-mkconfig -o /boot/grub/grub.cfg
-
-wget --show-progress -t 5 -T 10 -cqO /boot/bbrKernel/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_$architecture.deb
-[[ -f "/boot/bbrKernel/linux-image.deb" ]] && linux_image_sha256sumL=$(sha256sum /boot/bbrKernel/linux-image.deb 2>/dev/null | awk '{print$1}')
-linux_image_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_"$architecture".deb.sha256sum)
+wget --show-progress -t 5 -T 10 -cqO /tmp/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_$architecture.deb
+[[ -f "/tmp/linux-image.deb" ]] && linux_image_sha256sumL=$(sha256sum /tmp/linux-image.deb 2>/dev/null | awk '{print$1}')
+linux_image_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_"$architecture".deb.sha256sum)
 [[ $linux_image_sha256sum != $linux_image_sha256sumL ]] && red "Download Failed" && exit
 
-wget --show-progress -t 5 -T 10 -cqO /boot/bbrKernel/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_$architecture.deb
-[[ -f "/boot/bbrKernel/linux-headers.deb" ]] && linux_headers_sha256sumL=$(sha256sum /boot/bbrKernel/linux-headers.deb 2>/dev/null | awk '{print$1}')
-linux_headers_sha256sum=$(curl -fsSLm 5 https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_"$architecture".deb.sha256sum)
+wget --show-progress -t 5 -T 10 -cqO /tmp/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_$architecture.deb
+[[ -f "/tmp/linux-headers.deb" ]] && linux_headers_sha256sumL=$(sha256sum /tmp/linux-headers.deb 2>/dev/null | awk '{print$1}')
+linux_headers_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_"$architecture".deb.sha256sum)
 [[ $linux_headers_sha256sum != $linux_headers_sha256sumL ]] && red "Download Failed" && exit
 
-dpkg -i /boot/bbrKernel/linux-image.deb
-dpkg -i /boot/bbrKernel/linux-headers.deb
+dpkg -i /tmp/linux-image.deb
+dpkg -i /tmp/linux-headers.deb
 
 if [[ -n $(dpkg --list | grep 'linux-image' | grep 'bbrplus') ]]; then
 dpkg --list | grep 'xanmod' | awk '{print $2}' | grep 'linux-' | while read line
@@ -2054,6 +2059,7 @@ do
 apt -y --purge autoremove $line
 done
 
+update-initramfs -u -k all
 update-grub
 
 if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
@@ -2122,7 +2128,10 @@ if [[ $XanModconfirm = "" ]]; then
 if [[ $architecture != "amd64" ]]; then
   red "only work on x86_64"
 elif [[ $architecture == "amd64" ]]; then
-mkdir -p /boot/bbrKernel
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
 curl -fsSLo- https://dl.xanmod.org/gpg.key | gpg --dearmor >/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg] http://deb.xanmod.org releases main" >/etc/apt/sources.list.d/xanmod-kernel.list
 
