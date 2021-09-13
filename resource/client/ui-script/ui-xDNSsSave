@@ -75,7 +75,7 @@ Description=xDNS Server
 After=network.target nss-lookup.target
 
 [Service]
-User=www-data
+User=root
 Type=simple
 ExecStart=/opt/de_GWD/xDNSs/xDNSs -c /opt/de_GWD/xDNSs/config.json
 AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE

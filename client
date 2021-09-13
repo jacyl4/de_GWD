@@ -1159,7 +1159,7 @@ Description=vtrui
 After=network.target nss-lookup.target
 
 [Service]
-User=www-data
+User=root
 Type=simple
 ExecStart=/opt/de_GWD/vtrui/vtrui -c /opt/de_GWD/vtrui/config.json
 AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE

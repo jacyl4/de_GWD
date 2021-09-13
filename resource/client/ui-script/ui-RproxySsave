@@ -116,7 +116,7 @@ Description=Rproxy Service
 After=network.target nss-lookup.target
 
 [Service]
-User=www-data
+User=root
 Type=simple
 ExecStart=/opt/de_GWD/RproxyS/RproxyS -c /opt/de_GWD/RproxyS/config.json
 AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
