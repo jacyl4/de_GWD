@@ -43,6 +43,8 @@ deb http://$chnAPTsource/debian buster-updates main contrib non-free
 deb http://$chnAPTsource/debian-security buster/updates main contrib non-free
 EOF
 
+[[ $architecture == "arm64" ]] && echo "deb https://mirrors.tuna.tsinghua.edu.cn/armbian buster main buster-utils buster-desktop" >/etc/apt/sources.list.d/armbian.list
+
 sed -i "s/ stretch / buster /g" /etc/apt/sources.list.d/* >/dev/null 2>&1
 apt update --fix-missing && apt upgrade --allow-downgrades
 apt full-upgrade && apt --purge autoremove && apt autoclean
@@ -57,6 +59,8 @@ deb http://$chnAPTsource/debian bullseye-updates main contrib non-free
 deb http://$chnAPTsource/debian bullseye-backports main contrib non-free
 deb http://$chnAPTsource/debian-security bullseye-security main contrib non-free
 EOF
+
+[[ $architecture == "arm64" ]] && echo "deb https://mirrors.tuna.tsinghua.edu.cn/armbian bullseye main bullseye-utils bullseye-desktop" >/etc/apt/sources.list.d/armbian.list
 
 sed -i "s/ buster / bullseye /g" /etc/apt/sources.list.d/* >/dev/null 2>&1
 apt update --fix-missing && apt upgrade --allow-downgrades
@@ -1988,6 +1992,15 @@ rm -rf /opt/de_GWD/update
 
 if [[ $(dpkg --list | grep linux-image | wc -l) != "1" ]] && [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
 red "Xanmod kernel updated"
+fi
+
+if [[ $architecture == "arm64" ]] && [[ -n $(cat /proc/swaps | sed '1d') ]]; then
+swapoff $(swapon --show | grep "partition" | awk '{print$1}') >/dev/null 2>&1
+swapoff --all
+sed -i '2,$d' /etc/fstab
+echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
+update-initramfs -u -k all
+update-grub
 fi
 }
 
