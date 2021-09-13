@@ -113,11 +113,11 @@ wget --show-progress -t 5 -T 10 -cqO /tmp/client.zip https://raw.githubuserconte
 fi
 
 localVer=$(awk 'NR==1' /opt/de_GWD/.repo/version.php 2>/dev/null)
-remoteVer=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php | head -n 1)
+remoteVer=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
 
 if [[ $localVer != $remoteVer ]]; then
 rm -rf /tmp/version.php
-wget --show-progress -t 5 -T 10 -cqO /tmp/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/version.php
+wget --show-progress -t 5 -T 10 -cqO /tmp/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
 [[ $? -ne 0 ]] && red "Download Failed" && exit
 [[ $(du -sk /tmp/version.php 2>/dev/null | awk '{print$1}') -ge 4 ]] && mv -f /tmp/version.php /opt/de_GWD/.repo/version.php
 fi
@@ -454,6 +454,19 @@ source /etc/profile
 systemctl enable --now haveged >/dev/null 2>&1
 systemctl mask --now systemd-resolved >/dev/null 2>&1
 systemctl daemon-reload >/dev/null
+
+if [[ $architecture == "arm64" ]] && [[ -n $(cat /proc/swaps | sed '1d') ]]; then
+swapoff $(swapon --show | grep "partition" | awk '{print$1}') >/dev/null 2>&1
+swapoff --all
+sed -i '2,$d' /etc/fstab
+echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
+update-initramfs -u -k all
+
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+update-grub
+fi
 }
 
 
@@ -1995,19 +2008,6 @@ rm -rf /opt/de_GWD/update
 
 if [[ $(dpkg --list | grep linux-image | wc -l) != "1" ]] && [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
 red "Xanmod kernel updated"
-fi
-
-if [[ $architecture == "arm64" ]] && [[ -n $(cat /proc/swaps | sed '1d') ]]; then
-swapoff $(swapon --show | grep "partition" | awk '{print$1}') >/dev/null 2>&1
-swapoff --all
-sed -i '2,$d' /etc/fstab
-echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
-update-initramfs -u -k all
-
-mkdir -p /boot/grub
-[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
-[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
-update-grub
 fi
 }
 
