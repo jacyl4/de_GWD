@@ -829,18 +829,18 @@ ipset -! -R </opt/de_GWD/IPlistWlanSET
 iptables -t mangle -N V2PROXY
 iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
 iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5310 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5310 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5311 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5311 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5320 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5320 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5321 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5321 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5330 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5330 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p udp --dport 5350 -s 127.0.0.1 -j ACCEPT
-iptables -t mangle -A V2PROXY -p tcp --dport 5350 -s 127.0.0.1 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5321 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5321 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5330 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5330 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
 
 iptables -t mangle -A V2PROXY -m set --match-set doh dst -j ACCEPT
 iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
@@ -965,7 +965,7 @@ cat << EOF >/opt/de_GWD/v2dns/config.json
       "port":53,
       "protocol":"dokodemo-door",
       "settings":{"address":"127.0.0.1","network":"tcp,udp"},
-      "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"off","mark":255}}
+      "streamSettings":{"sockopt":{"tcpFastOpen":true}}
     }
   ],
   "outbounds":[
@@ -1241,7 +1241,7 @@ cat << EOF >/opt/de_GWD/xDNSc/config.json
       "listen":"127.0.0.1",
       "protocol":"dokodemo-door",
       "settings":{"address":"127.0.0.1","network":"tcp,udp"},
-      "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"off","mark":255}}
+      "streamSettings":{"sockopt":{"tcpFastOpen":true}}
     }
   ],
   "outbounds": [

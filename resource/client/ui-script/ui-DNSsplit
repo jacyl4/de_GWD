@@ -24,7 +24,7 @@ cat << EOF >/tmp/v2dns_config
       "listen":"127.0.0.1",
       "protocol":"dokodemo-door",
       "settings":{"address":"127.0.0.1","network":"tcp,udp"},
-      "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"off","mark":255}}
+      "streamSettings":{"sockopt":{"tcpFastOpen":true}}
     }
   ],
   "outbounds":[
