@@ -399,10 +399,10 @@ EOF
 cat << EOF >~/.bash_profile
 ulimit -n 1000000
 HISTCONTROL=ignoredups
+
+alias reboot="sudo systemctl reboot"
 EOF
 source ~/.bash_profile
-
-[[ $architecture == "arm64" ]] && echo 'alias reboot="sync; reboot -f"' >~/.bash_aliases
 
 cat << EOF >/etc/security/limits.conf
 * soft nofile 1000000
@@ -461,11 +461,6 @@ swapoff --all
 sed -i '2,$d' /etc/fstab
 echo "RESUME=" >/etc/initramfs-tools/conf.d/resume
 update-initramfs -u -k all
-
-mkdir -p /boot/grub
-[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
-[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
-update-grub
 fi
 }
 

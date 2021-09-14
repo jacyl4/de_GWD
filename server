@@ -251,6 +251,8 @@ source /etc/profile
 cat << EOF >~/.bash_profile
 ulimit -n 1000000
 HISTCONTROL=ignoredups
+
+alias reboot="sudo systemctl reboot"
 EOF
 source ~/.bash_profile
 
