@@ -419,6 +419,8 @@ root soft core unlimited
 root hard core unlimited
 EOF
 
+[[ $architecture == "arm64" ]] && apt-mark hold linux-image-current-sunxi64
+
 dpkg --configure -a
 
 if [[ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) == "stretch" ]]; then
@@ -1549,9 +1551,7 @@ openssl req -x509 -nodes -days 3650 \
 cd ~
 fi
 
-if [[ -z $serverName ]]; then
-serverName="de_GWD"
-fi
+[[ -z $serverName ]] && serverName="de_GWD"
 
 [[ -z $(echo $webUIport | grep '^[[:digit:]]*$') ]] && webUIport="443"
 jq --arg webUIport $webUIport '.address.webUIport=$webUIport' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
@@ -1682,8 +1682,6 @@ location ~ /netdata/(?<ndpath>.*) {
 $(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
 }
 EOF
-
-systemctl restart nginx
 
 echo -n "$statusUpdated" && white "Nginx"
 }
