@@ -1,0 +1,167 @@
+#!/bin/bash
+rm -rf /opt/de_GWD/RproxyC
+mkdir -p /opt/de_GWD/RproxyC
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/RproxyC/RproxyC
+chmod +x /opt/de_GWD/RproxyC/RproxyC
+
+RproxyCoutStatus=$(jq -r '.FORWARD.Rproxy.client.outStatus' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+RproxyCmappingStatus=$(jq -r '.FORWARD.Rproxy.client.mappingStatus' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+RproxyStunnelAddress=$(jq -r '.FORWARD.Rproxy.client.tunnel.address' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+RproxyStunnelUUID=$(jq -r '.FORWARD.Rproxy.client.tunnel.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+RproxyCmappingList=$(jq -r '.FORWARD.Rproxy.client.mapping' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+domain=$(echo -e $RproxyStunnelAddress | cut -d: -f1)
+port=$(echo -e $RproxyStunnelAddress | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -z $port ]] && port="443"
+
+cat << EOF >/opt/de_GWD/RproxyC/config.json
+{
+  "dns":{
+    "servers":["localhost"]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","inboundTag":["bridge"],"domain":["full:reverse.localhost"],"outboundTag":"reverseTunnel"}
+    ]
+  },
+  "reverse": {
+    "bridges": [{
+        "tag": "bridge",
+        "domain": "reverse.localhost"
+    }]
+  },
+  "outbounds": [
+    {
+      "tag": "reverseTunnel",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$RproxyStunnelUUID",
+                "encryption": "none",
+                "flow": "xtls-rprx-splice",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$domain",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tproxy": "off",
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+  ]
+}
+EOF
+
+
+if [[ $RproxyCmappingStatus == "on" ]]; then
+  
+len=$(echo $RproxyCmappingList | jq length)
+
+for (( i=0; i<$len; i++ )); do
+extPort=$(echo $RproxyCmappingList | jq -r --argjson i "$i" '.[$i].extPort')
+extProtocol=$(echo $RproxyCmappingList | jq -r --argjson i "$i" '.[$i].extProtocol')
+intIP=$(echo $RproxyCmappingList | jq -r --argjson i "$i" '.[$i].intIP')
+intPort=$(echo $RproxyCmappingList | jq -r --argjson i "$i" '.[$i].intPort')
+
+RontingMapping=`cat << EOF
+      {"type":"field","inboundTag":["bridge"],"port":"$extPort","network":"$extProtocol","outboundTag":"mapping$i"}
+EOF
+`
+
+OBmapping=`cat << EOF
+    {
+      "tag": "mapping$i",
+      "protocol": "freedom",
+      "settings": {
+        "redirect": "$intIP:$intPort"
+      },
+      "streamSettings":{"sockopt":{"tcpFastOpen":true}}
+    }
+EOF
+`
+jq --argjson RontingMapping "$RontingMapping" '.routing.rules+=[$RontingMapping]' /opt/de_GWD/RproxyC/config.json |\
+jq --argjson OBmapping "$OBmapping" '.outbounds+=[$OBmapping]' | sponge /opt/de_GWD/RproxyC/config.json
+done
+fi
+
+
+if [[ $RproxyCoutStatus == "on" ]]; then
+RontingOut=`cat << EOF
+      {"type":"field","inboundTag":["bridge"],"outboundTag":"directOut"}
+EOF
+`
+
+OBout=`cat << EOF
+    {
+      "tag": "directOut",
+      "protocol": "freedom",
+      "streamSettings":{"sockopt":{"tcpFastOpen":true}}
+    }
+EOF
+`
+
+jq --argjson RontingOut "$RontingOut" '.routing.rules+=[$RontingOut]' /opt/de_GWD/RproxyC/config.json |\
+jq --argjson OBout "$OBout" '.outbounds+=[$OBout]' | sponge /opt/de_GWD/RproxyC/config.json
+fi
+
+chmod 666 /opt/de_GWD/RproxyC/config.json
+chmod 644 /var/www/ssl/*.key
+
+rm -rf /lib/systemd/system/RproxyC.service
+cat << "EOF" >/etc/systemd/system/RproxyC.service
+[Unit]
+Description=Rproxy client
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/RproxyC/RproxyC -c /opt/de_GWD/RproxyC/config.json
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-7
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/RproxyC.service /lib/systemd/system/RproxyC.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart RproxyC
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/RproxyC.service
+sed -i '/CPUSchedulingPolicy=/d' /etc/systemd/system/RproxyC.service
+sed -i '/CPUSchedulingPriority=/d' /etc/systemd/system/RproxyC.service
+sed -i '/IOSchedulingClass=/d' /etc/systemd/system/RproxyC.service
+sed -i '/IOSchedulingPriority=/d' /etc/systemd/system/RproxyC.service
+ln -sf /etc/systemd/system/RproxyC.service /lib/systemd/system/RproxyC.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart RproxyC
+fi
+systemctl enable RproxyC >/dev/null
