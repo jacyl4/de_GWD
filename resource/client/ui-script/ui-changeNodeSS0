@@ -1,0 +1,92 @@
+#!/bin/bash
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+[[ -z $tls ]] && tls=$domain
+
+if [[ -z $path ]]; then
+OBdefault=`cat << EOF
+    {
+      "tag": "default",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "flow": "xtls-rprx-splice",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "tcpFastOpen": true,
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBdefault=`cat << EOF
+{
+      "tag": "default",
+      "protocol": "vless",
+      "mux":{"enabled":true,"concurrency":12},
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "tcpFastOpen": true,
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+fi
+
+jq --argjson OBdefault "$OBdefault" '.outbounds[0]=$OBdefault' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+systemctl restart vtrui
