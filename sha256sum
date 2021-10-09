@@ -1,0 +1,14 @@
+#!/bin/bash
+sha256sum ./resource/linux-headers-bbrplus_amd64.deb | awk '{print$1}' >./resource/linux-headers-bbrplus_amd64.deb.sha256sum
+sha256sum ./resource/linux-image-bbrplus_amd64.deb | awk '{print$1}' >./resource/linux-image-bbrplus_amd64.deb.sha256sum
+sha256sum ./resource/linux-headers-bbrplus_arm64.deb | awk '{print$1}' >./resource/linux-headers-bbrplus_arm64.deb.sha256sum
+sha256sum ./resource/linux-image-bbrplus_arm64.deb | awk '{print$1}' >./resource/linux-image-bbrplus_arm64.deb.sha256sum
+sha256sum ./resource/vtrui_amd64.zip | awk '{print$1}' >./resource/vtrui_amd64.zip.sha256sum
+sha256sum ./resource/vtrui_arm64.zip | awk '{print$1}' >./resource/vtrui_arm64.zip.sha256sum
+sha256sum ./resource/client/Archive.zip | awk '{print$1}' >./resource/client/Archive.zip.sha256sum
+sha256sum ./resource/sample.zip | awk '{print$1}' >./resource/sample.zip.sha256sum
+sha256sum ./resource/doh/doh_s_amd64 | awk '{print$1}' >./resource/doh/doh_s_amd64.sha256sum
+sha256sum ./resource/doh/doh_s_arm64 | awk '{print$1}' >./resource/doh/doh_s_arm64.sha256sum
+sha256sum ./resource/nginx/nginx_amd64 | awk '{print$1}' >./resource/nginx/nginx_amd64.sha256sum
+sha256sum ./resource/nginx/nginx_arm64 | awk '{print$1}' >./resource/nginx/nginx_arm64.sha256sum
+sha256sum ./resource/nginx/nginxConf.zip | awk '{print$1}' >./resource/nginx/nginxConf.zip.sha256sum

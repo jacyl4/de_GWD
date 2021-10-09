@@ -1,0 +1,5 @@
+#!/bin/bash
+rm -rf /etc/nginx/conf.d/forward0.conf
+jq "del(.inbounds[1])" /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+systemctl restart vtrui >/dev/null
+systemctl force-reload nginx >/dev/null
