@@ -1,0 +1,188 @@
+#!/bin/bash
+FWD1port=$(jq -r '.FORWARD.FWD1.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[].FWD1uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+FWD1upstream=$(jq -r '.FORWARD.FWD1.upstream' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+rm -rf /opt/de_GWD/vtrui1
+mkdir -p /opt/de_GWD/vtrui1
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
+cp -f /opt/de_GWD/vtrui/private.dat /opt/de_GWD/vtrui1/private.dat
+chmod +x /opt/de_GWD/vtrui1/vtrui1
+
+v2nodeID=$(jq -r --arg FWD1upstream $FWD1upstream '.v2node | to_entries[] | select(.value.domain == $FWD1upstream) | .key' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+v2servn=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+domain=$(echo $v2servn | cut -d: -f1)
+port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -z $port ]] && port="443"
+[[ -z $tls ]] && tls=$domain
+
+tls=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].tls" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+cat << EOF >/opt/de_GWD/vtrui1/config.json
+{
+  "dns":{
+    "servers":["localhost"]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","ip":["ext:private.dat:private"],"outboundTag":"direct"}
+    ]
+  },
+  "inbounds":[
+    {
+      "port": $FWD1port,
+      "protocol": "vless",
+      "settings":{
+        "decryption": "none",
+        "clients":[]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "rejectUnknownSni": true,
+          "alpn":["h2","http/1.1"],
+          "certificates": [
+            {
+              "certificateFile": "/var/www/ssl/de_GWD.cer",
+              "keyFile": "/var/www/ssl/de_GWD.key"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+EOF
+
+if [[ -z $path ]]; then
+OBfwd=`cat << EOF
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "flow": "xtls-rprx-splice",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBfwd=`cat << EOF
+{
+      "protocol": "vless",
+      "mux":{"enabled":true,"concurrency":1},
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+fi
+
+OBdir=`cat << EOF
+{
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+}
+EOF
+`
+
+for uuid in $FWD1uuid; do
+uuidStr='{"id":"'$uuid'","flow":"xtls-rprx-direct","level":0}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
+done
+jq '.outbounds=[]' /opt/de_GWD/vtrui1/config.json |\
+jq --argjson OBfwd "$OBfwd" '.outbounds+=[$OBfwd]' |\
+jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' | sponge /opt/de_GWD/vtrui1/config.json
+
+chmod 666 /opt/de_GWD/vtrui1/config.json
+chmod 644 /var/www/ssl/*.key
+
+rm -rf /lib/systemd/system/vtrui1.service
+cat << "EOF" >/etc/systemd/system/vtrui1.service
+[Unit]
+Description=vtrui1
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/vtrui1/vtrui1 -c /opt/de_GWD/vtrui1/config.json
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-8
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/vtrui1.service /lib/systemd/system/vtrui1.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui1
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui1.service
+ln -sf /etc/systemd/system/vtrui1.service /lib/systemd/system/vtrui1.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui1
+fi
+systemctl enable vtrui1 >/dev/null 2>&1

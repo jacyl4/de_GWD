@@ -1,0 +1,63 @@
+#!/bin/bash
+cat << EOF >/tmp/v2dns_config
+{
+  "dns":{
+    "tag":"dnsflow",
+    "disableCache":true,
+    "servers":[
+    {"address":"127.0.0.1","port":5321},
+    {"address":"127.0.0.1","port":5321,"skipFallback":true,"domains":[]},
+    {"address":"127.0.0.1","port":5321,"skipFallback":true,"domains":["domain:google.com"]},
+    {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["domain:baidu.com"]},
+    {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["geosite:private","geosite:cn","geosite:tld-cn"],"expectIPs":["geoip:cn"]}
+    ]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
+      {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"}
+    ]
+  },
+  "inbounds":[
+    {
+      "tag":"dnsin",
+      "port":5350,
+      "listen":"127.0.0.1",
+      "protocol":"dokodemo-door",
+      "settings":{"address":"127.0.0.1","network":"tcp,udp"}
+    }
+  ],
+  "outbounds":[
+    {
+      "tag":"dnsout",
+      "protocol":"dns",
+      "streamSettings":{"sockopt":{"mark":255}}
+    },
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+  ]
+}
+EOF
+
+/opt/de_GWD/ui-saveListBW
+
+if [[ $(jq -r '.dns.APPLEcn' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+/opt/de_GWD/ui-onAPPLE
+else
+/opt/de_GWD/ui-offAPPLE
+fi
+
+if [[ $(jq -r '.dns.STEAMcn' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+/opt/de_GWD/ui-onSTEAM
+else
+/opt/de_GWD/ui-offSTEAM
+fi
+
+/opt/de_GWD/ui-saveNode
+
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+jq -r '.dns.hosts | to_entries[] | [.value, .key] | @tsv' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | sed 's/[[:space:]][[:space:]]*/ /g' >/etc/pihole/custom.list
+fi
