@@ -1,0 +1,122 @@
+#!/bin/bash
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip -4 a | grep inet | grep -v 127.0.0 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
+localCIDR="$(echo $localaddr | rev | cut -d'.' -f2-4 | rev).0/24"
+
+cat << EOF >/opt/de_GWD/iptables-proxy-up
+#!/bin/bash
+ip rule add fwmark 0x9 table 220 prio 100
+ip route add local default dev lo scope host table 220
+
+lanip="$localCIDR \
+0.0.0.0/8 \
+100.64.0.0/10 \
+127.0.0.0/8 \
+169.254.0.0/16 \
+10.0.0.0/8 \
+172.16.0.0/12 \
+192.168.0.0/16 \
+255.255.255.255/32 \
+114.114.114.114/32 \
+114.114.115.115/32 \
+119.29.29.29/32 \
+119.28.28.28/32 \
+182.254.118.118/32 \
+223.5.5.5/32 \
+223.6.6.6/32"
+
+ipset -N lanip nethash
+for iplanip in \$lanip; do
+  ipset add lanip \$iplanip
+done
+
+ipset -N chnroute nethash hashsize 4096 maxelem 100000
+ipset -! -R </opt/de_GWD/chnrouteSET
+
+ipset -N GlobalDNS iphash
+ipset -! -R </opt/de_GWD/IPGlobalDNSSET
+
+ipset -N v2node iphash
+ipset -! -R </opt/de_GWD/IPv2nodeSET
+
+ipset -N listB iphash
+ipset -! -R </opt/de_GWD/IPlistBSET
+
+ipset -N listW iphash
+ipset -! -R </opt/de_GWD/IPlistWSET
+
+ipset -N listBlan iphash
+ipset -! -R </opt/de_GWD/IPlistBlanSET
+
+ipset -N listWlan iphash
+ipset -! -R </opt/de_GWD/IPlistWlanSET
+
+iptables -A INPUT -p tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+iptables -A INPUT -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+iptables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
+iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
+iptables -A INPUT -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
+iptables -A INPUT -p tcp --tcp-flags FIN,ACK FIN -j DROP
+iptables -A INPUT -p tcp --tcp-flags ACK,URG URG -j DROP
+iptables -A INPUT -p tcp --tcp-flags ACK,FIN FIN -j DROP
+iptables -A INPUT -p tcp --tcp-flags ACK,PSH PSH -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+
+iptables -t mangle -N V2PROXY
+iptables -t mangle -A V2PROXY -p udp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 53 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 4711 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 4711 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5310 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5311 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5311 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5320 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5321 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5321 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5330 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5330 -j ACCEPT
+iptables -t mangle -A V2PROXY -p udp --dport 5350 -j ACCEPT
+iptables -t mangle -A V2PROXY -p tcp --dport 5350 -j ACCEPT
+
+iptables -t mangle -A V2PROXY -m set --match-set GlobalDNS dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set v2node dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listBlan src -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listWlan src -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set lanip dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set listB dst -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -m set --match-set listW dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m set --match-set chnroute dst -j ACCEPT
+iptables -t mangle -A V2PROXY -m mark --mark 0xff -j ACCEPT
+
+iptables -t mangle -A V2PROXY -p tcp -j MARK --set-mark 0x9
+iptables -t mangle -A V2PROXY -p udp -j MARK --set-mark 0x9
+
+iptables -t mangle -A PREROUTING -p tcp -m mark ! --mark 0x9 -j V2PROXY
+iptables -t mangle -A PREROUTING -p udp -m mark ! --mark 0x9 -j V2PROXY
+
+iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
+
+iptables -t mangle -A OUTPUT -p tcp -j V2PROXY
+iptables -t mangle -A OUTPUT -p udp -j V2PROXY
+
+if [[ \$(ip --oneline link show up | grep -v lo | awk '{print\$2}') =~ "wg0" ]]; then
+iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
+iptables -I FORWARD -i wg0 -j ACCEPT; iptables -I FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
+fi
+EOF
+chmod +x /opt/de_GWD/iptables-proxy-up
+
+jq '.address.udp="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+
+chmod 666 /opt/de_GWD/0conf
+
+if [[ $1 == "r" ]]; then
+  systemctl restart iptables-proxy >/dev/null
+fi
