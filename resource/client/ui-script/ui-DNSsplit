@@ -6,7 +6,7 @@ cat << EOF >/tmp/v2dns_config
     "disableCache":true,
     "servers":[
     {"address":"127.0.0.1","port":5321},
-    {"address":"127.0.0.1","port":5321,"skipFallback":true,"domains":[]},
+    {"address":"127.0.0.1","port":5320,"skipFallback":true,"domains":[]},
     {"address":"127.0.0.1","port":5321,"skipFallback":true,"domains":["domain:google.com"]},
     {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["domain:baidu.com"]},
     {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["geosite:private","geosite:cn","geosite:tld-cn"],"expectIPs":["geoip:cn"]}
