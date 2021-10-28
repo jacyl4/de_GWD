@@ -7,6 +7,13 @@ cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
 white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
 statusUpdated=$(green "[  updated  ]")
 
+serverConnect1=$(curl -Ism 5 google.com | grep 'HTTP')
+serverConnect2=$(curl -Ism 5 youtube.com | grep 'HTTP')
+
+if [[ -z $serverConnect1 ]] && [[ -z $serverConnect2 ]]; then
+exit
+fi
+
 if [[ $1 == "u" ]]; then
 	service cron stop
 fi
@@ -63,7 +70,7 @@ sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
 ipset -! -R </opt/de_GWD/chnrouteSET
 fi
 
-if [[ -z $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200 | grep ' not ') ]] && [[ -d "/root/.acme.sh" ]] && [[ $(curl -Is get.acme.sh) =~ "HTTP" ]]; then
+if [[ -z $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200 | grep ' not ') ]] && [[ -d "/root/.acme.sh" ]]; then
 "/root/.acme.sh"/acme.sh --force --upgrade  --auto-upgrade
 "/root/.acme.sh"/acme.sh --force --set-default-ca  --server letsencrypt
 "/root/.acme.sh"/acme.sh --force --cron --home "/root/.acme.sh" >/dev/null 2>&1
@@ -72,15 +79,11 @@ sslFolder=$(ls "/root/.acme.sh" | grep '_ecc')
 cp -f "/root/.acme.sh"/$sslFolder/fullchain.cer /var/www/ssl/de_GWD.cer
 cp -f "/root/.acme.sh"/$sslFolder/*.key /var/www/ssl/de_GWD.key
 
-[[ -d "/opt/de_GWD/vtrui" ]] && systemctl restart vtrui
 [[ -d "/opt/de_GWD/vtrui1" ]] && systemctl restart vtrui1
-[[ -d "/opt/de_GWD/coredns" ]] && systemctl restart coredns
 [[ -d "/opt/de_GWD/RproxyS" ]] && systemctl restart RproxyS
 fi
 
-if [[ $(curl -Is google.com) =~ "HTTP" ]] || [[ $(curl -Is youtube.com) =~ "HTTP" ]]; then
 /var/www/ssl/update_ocsp_cache >/dev/null 2>&1
-fi
 
 echo -n "$statusUpdated" && white "IP & Domain rules"
 
