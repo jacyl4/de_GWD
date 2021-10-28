@@ -996,7 +996,8 @@ $.get("./act/saveDNS.php", {DoGc:DoGc, DoH1:doh1txt, DoH2:doh2txt, dnsChina:dnsC
 
 $('#buttonOnSTEAM').click(function(){
 $("#buttonOnSTEAMloading").attr("class", "spinner-border spinner-border-sm")
-$.get('./act/onSTEAM.php', function(result){
+STEAMcn="on"
+$.get('./act/DNSsteam.php', {STEAMcn:STEAMcn}, function(result){
   $("#buttonOnSTEAMloading").removeClass()
   $("#buttonOnSTEAM").attr("class", "btn btn-success btn-sm mt-1")
 })
@@ -1004,7 +1005,8 @@ $.get('./act/onSTEAM.php', function(result){
 
 $('#buttonOffSTEAM').click(function(){
 $("#buttonOffSTEAMloading").attr("class", "spinner-border spinner-border-sm")
-$.get('./act/offSTEAM.php', function(result){
+STEAMcn="off"
+$.get('./act/DNSsteam.php', {STEAMcn:STEAMcn}, function(result){
   $("#buttonOffSTEAMloading").removeClass()
   $("#buttonOnSTEAM").attr("class", "btn btn-outline-secondary btn-sm mt-1")
 })
@@ -1012,7 +1014,8 @@ $.get('./act/offSTEAM.php', function(result){
 
 $('#buttonOnAPPLE').click(function(){
 $("#buttonOnAPPLEloading").attr("class", "spinner-border spinner-border-sm")
-$.get('./act/onAPPLE.php', function(result){
+APPLEcn="on"
+$.get('./act/DNSapple.php', {APPLEcn:APPLEcn}, function(result){
   $("#buttonOnAPPLEloading").removeClass()
   $("#buttonOnAPPLE").attr("class", "btn btn-success btn-sm mt-1")
 })
@@ -1020,7 +1023,8 @@ $.get('./act/onAPPLE.php', function(result){
 
 $('#buttonOffAPPLE').click(function(){
 $("#buttonOffAPPLEloading").attr("class", "spinner-border spinner-border-sm")
-$.get('./act/offAPPLE.php', function(result){
+APPLEcn="off"
+$.get('./act/DNSapple.php', {APPLEcn:APPLEcn}, function(result){
   $("#buttonOffAPPLEloading").removeClass()
   $("#buttonOnAPPLE").attr("class", "btn btn-outline-secondary btn-sm mt-1")
 })

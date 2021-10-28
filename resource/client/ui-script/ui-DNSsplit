@@ -44,17 +44,7 @@ EOF
 
 /opt/de_GWD/ui-saveListBW
 
-if [[ $(jq -r '.dns.APPLEcn' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
-/opt/de_GWD/ui-onAPPLE
-else
-/opt/de_GWD/ui-offAPPLE
-fi
-
-if [[ $(jq -r '.dns.STEAMcn' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
-/opt/de_GWD/ui-onSTEAM
-else
-/opt/de_GWD/ui-offSTEAM
-fi
+/opt/de_GWD/ui-DNSsplitPST
 
 /opt/de_GWD/ui-saveNode
 

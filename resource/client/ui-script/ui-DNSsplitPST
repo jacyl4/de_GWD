@@ -1,0 +1,24 @@
+#!/bin/bash
+appleCN=$(jq -r '.dns.servers[3].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+streamCN=$(jq -r '.dns.servers[3].domains - ["geosite:category-games@cn"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+
+jq --argjson appleCN "$appleCN" '.dns.servers[3].domains=$appleCN' /opt/de_GWD/v2dns/config.json |\
+jq --argjson streamCN "$streamCN" '.dns.servers[3].domains=$streamCN' | sponge /opt/de_GWD/v2dns/config.json
+
+if [[ $(jq -r '.dns.APPLEcn' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+jq --arg APPLE "geosite:apple" '.dns.servers[3].domains+=[$APPLE]' /opt/de_GWD/v2dns/config.json |\
+jq --arg APPLE "geosite:apple-cn" '.dns.servers[3].domains+=[$APPLE]' |\
+jq --arg APPLE "domain:icloud.com" '.dns.servers[3].domains+=[$APPLE]' |\
+jq --arg APPLE "domain:icloud-content.com" '.dns.servers[3].domains+=[$APPLE]' | sponge /opt/de_GWD/v2dns/config.json
+fi
+
+if [[ $(jq -r '.dns.STEAMcn' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+jq --arg STEAM "geosite:category-games@cn" '.dns.servers[3].domains+=[$STEAM]' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
+fi
+
+chmod 666 /opt/de_GWD/v2dns/config.json
+chmod 666 /opt/de_GWD/0conf
+
+if [[ $1 == "r" ]]; then
+  systemctl restart v2dns >/dev/null
+fi
