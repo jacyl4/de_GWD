@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ -n $(grep -E "p udp -j TPROXY --on-ip 127.0.0.1" /opt/de_GWD/iptables-proxy-up) ]]; then
+	echo "success"
+else
+	echo "outline-secondary"
+fi
