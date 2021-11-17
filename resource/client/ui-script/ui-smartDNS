@@ -1,0 +1,102 @@
+#!/bin/bash
+unset shttps
+shttps[0]=$(grep 'server-https ' /etc/smartdns/smartdns.conf | awk NR==1)
+shttps[1]=$(grep 'server-https ' /etc/smartdns/smartdns.conf | awk NR==2)
+doh1IP0=$(echo ${shttps[0]} | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
+doh2IP0=$(echo ${shttps[1]} | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | sed '/^\s*$/d')
+doh1=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | grep "/dq" | awk NR==1)
+doh2=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | grep "/dq" | awk NR==2)
+DoG=$(jq -r '.dns.DoG' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+[[ -n $DoG ]] && DoGcIPO=$(awk '/grpc ./' /opt/de_GWD/coredns/corefile | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+
+[[ -n $doh1 ]] && doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+[[ -n $doh2 ]] && doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+
+[[ -n $doh1 ]] && doh1IP=$(dig @127.0.0.1 $doh1Domain -4p 5311 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+[[ -n $doh2 ]] && doh2IP=$(dig @127.0.0.1 $doh2Domain -4p 5311 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+
+[[ -n $doh1 ]] && doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -n $doh2 ]] && doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+
+[[ -n $doh1 ]] && doh1PortStr=$([[ -n $doh1Port ]] && echo $doh1Port | sed 's/^/:/')
+[[ -n $doh2 ]] && doh2PortStr=$([[ -n $doh2Port ]] && echo $doh2Port | sed 's/^/:/')
+
+[[ -n $DoG ]] && DoGcDomain=$(echo $DoG | cut -d: -f1)
+[[ -n $DoG ]] && DoGcPort=$(echo $DoG | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -n $DoG ]] && DoGcIP=$(dig @127.0.0.1 $DoGcDomain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+
+
+
+if [[ -n $DoGcIP ]] && [[ $DoGcIP != $DoGcIP0 ]]; then
+sed -i '/DoGc_START/,/DoGc_END/d' /opt/de_GWD/coredns/corefile
+cat << EOF >>/opt/de_GWD/coredns/corefile
+#DoGc_START
+.:5330 {
+  bind 127.0.0.1
+  grpc . $DoGcIP:$DoGcPort {
+    tls_servername $DoGcDomain
+  }
+  cache 30
+}
+#DoGc_END
+EOF
+systemctl restart coredns
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/coredns.service
+ln -sf /etc/systemd/system/coredns.service /lib/systemd/system/coredns.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart coredns
+fi
+systemctl enable coredns >/dev/null 2>&1
+elif [[ -z $DoGcIP ]]; then
+sed -i '/server 127.0.0.1:5330/d' /etc/smartdns/smartdns.conf
+sed -i '/DoGc_START/,/DoGc_END/d' /opt/de_GWD/coredns/corefile
+if [[ $(cat /opt/de_GWD/coredns/corefile | wc -c) -le 50 ]]; then
+systemctl disable coredns >/dev/null 2>&1
+systemctl stop coredns
+else
+systemctl restart coredns
+fi
+fi
+
+
+
+n=$[$(sed -n '/ignore-ip 127.0.0.1/=' /etc/smartdns/smartdns.conf)+1]
+sed -i "$n,\$d" /etc/smartdns/smartdns.conf
+
+if [[ -z $(jq -r '.dns.china' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+  jq --arg dnsChina "114.114.114.114 114.114.115.115 119.29.29.29 119.28.28.28 182.254.118.118 223.5.5.5 223.6.6.6" '.dns.china=$dnsChina' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+  chmod 666 /opt/de_GWD/0conf
+fi
+
+echo >>/etc/smartdns/smartdns.conf
+for dnsChina in $(jq -r '.dns.china' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$'); do
+    echo "server $dnsChina" >>/etc/smartdns/smartdns.conf
+done
+
+[[ -n $DoGcIP ]] && echo "server 127.0.0.1:5330 -exclude-default-group -group GlobalDNS" >>/etc/smartdns/smartdns.conf
+
+if [[ -n $doh1IP ]]; then
+echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -exclude-default-group -group GlobalDNS" >>/etc/smartdns/smartdns.conf
+else
+echo ${shttps[0]} >>/etc/smartdns/smartdns.conf
+fi
+
+if [[ -n $doh2IP ]]; then
+echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -exclude-default-group -group GlobalDNS" >>/etc/smartdns/smartdns.conf
+else
+echo ${shttps[1]} >>/etc/smartdns/smartdns.conf
+fi
+
+
+
+if [[ $DoGcIP != $DoGcIPO ]] || [[ $doh1IP != $doh1IP0 ]] || [[ $doh2IP != $doh2IP0 ]]; then
+systemctl restart smartdns >/dev/null
+fi
+
+echo $DoGcIP $doh1IP $doh2IP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPGlobalDNSSET
+sed -i '/^\s*$/d' /opt/de_GWD/IPGlobalDNSSET
+sed -i 's/^/add GlobalDNS &/g' /opt/de_GWD/IPGlobalDNSSET
+ipset -F GlobalDNS >/dev/null 2>&1
+ipset -! -R </opt/de_GWD/IPGlobalDNSSET
