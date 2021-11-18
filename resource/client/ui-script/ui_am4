@@ -64,11 +64,22 @@ cp -f /opt/de_GWD/.repo/geoip.dat /opt/de_GWD/v2dns/geoip.dat
 fi
 
 if [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $IPchnroute_sha256sum) == "true" ]]; then
-cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/chnrouteSET
-sed -i '/^\s*$/d' /opt/de_GWD/chnrouteSET
-sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
-ipset -F chnroute >/dev/null 2>&1
-ipset -! -R </opt/de_GWD/chnrouteSET
+cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/nftables/IP_CHNROUTE
+sed -i '/^\s*$/d' /opt/de_GWD/nftables/IP_CHNROUTE
+sed -i 's/$/,/g' /opt/de_GWD/nftables/IP_CHNROUTE
+nft flush set ip de_GWD CHNROUTE
+cat << EOF >/opt/de_GWD/nftables/SET_CHNROUTE.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set CHNROUTE {
+                type ipv4_addr
+                flags interval
+                elements = { $(cat /opt/de_GWD/nftables/IP_CHNROUTE) }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_CHNROUTE.nft
+/opt/de_GWD/nftables/SET_CHNROUTE.nft
 fi
 
 if [[ -z $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 259200 | grep ' not ') ]] && [[ -d "/root/.acme.sh" ]]; then

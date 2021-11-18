@@ -1,7 +1,7 @@
 #!/bin/bash
 /opt/de_GWD/ui_2h
 
-systemctl restart iptables-proxy >/dev/null
+systemctl restart nftables >/dev/null
 systemctl restart v2dns >/dev/null
 
 >/etc/resolvconf/resolv.conf.d/head

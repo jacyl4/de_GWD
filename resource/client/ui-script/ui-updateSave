@@ -2,7 +2,7 @@
 if [[ $(du -sk /opt/de_GWD/update 2>/dev/null | awk '{print$1}') -le 1 ]]; then
 updateCMDaddr=$(jq -r '.update.updateCMD' /opt/de_GWD/0conf 2>/dev/null | grep -oP "https://\K[^']+" | sed s'/.$//')
 
-systemctl stop iptables-proxy
+systemctl stop nftables
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
 nameserver 119.29.29.29

@@ -16,11 +16,12 @@ sed -i "/net.ipv4.tcp_tw_reuse =/c\net.ipv4.tcp_tw_reuse = 2" /etc/sysctl.conf
 sysctl -p >/dev/null 2>&1
 systemctl restart systemd-sysctl
 
-sed -i '/--dport 53 -i/d' /opt/de_GWD/iptables-proxy-up
+sed -i '/tcp dport 53 meta iifname/d' /opt/de_GWD/opt/de_GWD/nftables/nftables
+sed -i '/udp dport 53 meta iifname/d' /opt/de_GWD/opt/de_GWD/nftables/nftables
 
-addRule1="iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP"
-addRule2="iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP"
+addRule1="tcp dport 53 meta iifname "$ethernetnum" DROP"
+addRule2="udp dport 53 meta iifname "$ethernetnum" DROP"
 
-sed -i "/^iptables -t mangle -N de_GWD$/i$addRule1" /opt/de_GWD/iptables-proxy-up
-sed -i "/^iptables -t mangle -N de_GWD$/i$addRule2" /opt/de_GWD/iptables-proxy-up
-systemctl restart iptables-proxy
+sed -i "/# Drop 53 in$/a$addRule2" /opt/de_GWD/opt/de_GWD/nftables/nftables
+sed -i "/# Drop 53 in$/a$addRule1" /opt/de_GWD/opt/de_GWD/nftables/nftables
+systemctl restart nftables

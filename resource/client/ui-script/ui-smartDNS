@@ -95,8 +95,17 @@ if [[ $DoGcIP != $DoGcIPO ]] || [[ $doh1IP != $doh1IP0 ]] || [[ $doh2IP != $doh2
 systemctl restart smartdns >/dev/null
 fi
 
-echo $DoGcIP $doh1IP $doh2IP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPGlobalDNSSET
-sed -i '/^\s*$/d' /opt/de_GWD/IPGlobalDNSSET
-sed -i 's/^/add GlobalDNS &/g' /opt/de_GWD/IPGlobalDNSSET
-ipset -F GlobalDNS >/dev/null 2>&1
-ipset -! -R </opt/de_GWD/IPGlobalDNSSET
+echo $DoGcIP $doh1IP $doh2IP | xargs -n1 | sort | uniq | sed 's/$/,/g' >/opt/de_GWD/nftables/IP_GlobalDNS
+nft flush set ip de_GWD GlobalDNS
+cat << EOF >/opt/de_GWD/nftables/SET_GlobalDNS.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set GlobalDNS {
+                type ipv4_addr
+                flags interval
+                elements = { $(cat /opt/de_GWD/nftables/IP_GlobalDNS) }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_GlobalDNS.nft
+/opt/de_GWD/nftables/SET_GlobalDNS.nft

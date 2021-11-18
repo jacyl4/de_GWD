@@ -20,4 +20,4 @@ sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
 echo "PIHOLE_DNS_1=127.0.0.1#5310" >>/etc/pihole/setupVars.conf
 pihole restartdns
 
-systemctl stop iptables-proxy
+systemctl stop nftables

@@ -21,7 +21,7 @@ piholeCoreRelease_reserved="v5.6"
 piholeWebUIRelease_reserved="v5.8"
 piholeFTLRelease_reserved="v5.11"
 BBRPLUS_Ver="5.10.79"
-branch="main"
+branch="dev"
 
 
 
@@ -97,8 +97,11 @@ echo -n "$statusUpdated" && white "Repository"
 
 preDownload(){
 systemctl stop iptables-proxy >/dev/null 2>&1
+systemctl disable iptables-proxy >/dev/null 2>&1
 iptables -t mangle -F V2PROXY >/dev/null 2>&1
 iptables -t mangle -X V2PROXY >/dev/null 2>&1
+
+systemctl stop nftables >/dev/null 2>&1
 systemctl stop v2dns >/dev/null 2>&1
 systemctl stop smartdns >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
@@ -144,9 +147,10 @@ fi
 wget --show-progress -t 5 -T 10 -cqO /opt/de_GWD/.repo/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@main/IPchnroute
 
 if [[ $(du -sk /opt/de_GWD/.repo/IPchnroute 2>/dev/null | awk '{print$1}') -gt 130 ]]; then
-cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/chnrouteSET
-sed -i '/^\s*$/d' /opt/de_GWD/chnrouteSET
-sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
+mkdir -p /opt/de_GWD/nftables
+cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/nftables/IP_CHNROUTE
+sed -i '/^\s*$/d' /opt/de_GWD/nftables/IP_CHNROUTE
+sed -i 's/$/,/g' /opt/de_GWD/nftables/IP_CHNROUTE
 fi
 }
 
@@ -311,7 +315,7 @@ if [[ $1 == "u" ]]; then
         repoDL
         [[ -z $serverConnect1 ]] || [[ -z $serverConnect2 ]] && exit
     else
-        if [[ -n $serverConnect1 ]] && [[ -n $serverConnect2 ]] && [[ $(systemctl is-active 'v2dns') == "active" ]] && [[ $(systemctl is-active 'vtrui') == "active" ]] && [[ $(systemctl is-active 'iptables-proxy') == "active" ]]; then
+        if [[ -n $serverConnect1 ]] && [[ -n $serverConnect2 ]] && [[ $(systemctl is-active 'v2dns') == "active" ]] && [[ $(systemctl is-active 'vtrui') == "active" ]]; then
         green "[   OK   ]"
         de_GWDconnect_check="OK"
             green "================================="
@@ -331,7 +335,7 @@ if [[ $1 == "u" ]]; then
         fi
     fi
 else
-    if [[ -n $serverConnect1 ]] && [[ -n $serverConnect2 ]] && [[ $(systemctl is-active 'v2dns') == "active" ]] && [[ $(systemctl is-active 'vtrui') == "active" ]] && [[ $(systemctl is-active 'iptables-proxy') == "active" ]]; then
+    if [[ -n $serverConnect1 ]] && [[ -n $serverConnect2 ]] && [[ $(systemctl is-active 'v2dns') == "active" ]] && [[ $(systemctl is-active 'vtrui') == "active" ]]; then
         echo -e "\r\c" && echo -n "$statuSuccess" && white "de_GWD server connect"
     else
         echo -e "\r\c" && echo -n "$statusFailed" && white "de_GWD server connect"
@@ -401,8 +405,7 @@ unset aptPKG
 [[ -z $(dpkg -l | grep ' dnsutils ') ]] && aptPKG+=(dnsutils)
 [[ -z $(dpkg -l | grep ' resolvconf ') ]] && aptPKG+=(resolvconf)
 [[ -z $(dpkg -l | grep ' net-tools ') ]] && aptPKG+=(net-tools)
-[[ -z $(dpkg -l | grep ' iptables ') ]] && aptPKG+=(iptables)
-[[ -z $(dpkg -l | grep ' ipset ') ]] && aptPKG+=(ipset)
+[[ -z $(dpkg -l | grep ' nftables ') ]] && aptPKG+=(nftables)
 [[ -z $(dpkg -l | grep ' wget ') ]] && aptPKG+=(wget)
 [[ -z $(dpkg -l | grep ' curl ') ]] && aptPKG+=(curl)
 [[ -z $(dpkg -l | grep ' git ') ]] && aptPKG+=(git)
@@ -462,16 +465,12 @@ sed -i '/xt_conntrack/d' /etc/modules-load.d/modules.conf
 sed -i '/ip_conntrack/d' /etc/modules-load.d/modules.conf
 sed -i '/nf_nat/d' /etc/modules-load.d/modules.conf
 sed -i '/xt_nat/d' /etc/modules-load.d/modules.conf
-sed -i '/iptable_nat/d' /etc/modules-load.d/modules.conf
-sed -i '/ip_tables/d' /etc/modules-load.d/modules.conf
 cat << EOF >>/etc/modules-load.d/modules.conf
 nf_conntrack
 xt_conntrack
 ip_conntrack
 nf_nat
 xt_nat
-iptable_nat
-ip_tables
 EOF
 
 cat << EOF >/etc/sysctl.conf
@@ -725,198 +724,234 @@ echo -n "$statusInstalled" && white "SmartDNS"
 
 
 
-installIptablesProxy(){
->/opt/de_GWD/IPGlobalDNSSET
->/opt/de_GWD/IPv2nodeSET
->/opt/de_GWD/IPlistBSET
->/opt/de_GWD/IPlistWSET
->/opt/de_GWD/IPlistBlanSET
->/opt/de_GWD/IPlistWlanSET
+installNftables(){
+cat << EOF >/opt/de_GWD/nftables/SET_CHNROUTE.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set CHNROUTE {
+                type ipv4_addr
+                flags interval
+                elements = { $(cat /opt/de_GWD/nftables/IP_CHNROUTE) }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_CHNROUTE.nft
+/opt/de_GWD/nftables/SET_CHNROUTE.nft
 
-echo $DoGIP $doh1IP $doh2IP | xargs -n 1 | sort | uniq >/opt/de_GWD/IPGlobalDNSSET
-sed -i '/^\s*$/d' /opt/de_GWD/IPGlobalDNSSET
-sed -i 's/^/add GlobalDNS &/g' /opt/de_GWD/IPGlobalDNSSET
+echo $DoGIP $doh1IP $doh2IP | xargs -n1 | sort | uniq | sed 's/$/,/g' >/opt/de_GWD/nftables/IP_GlobalDNS
+cat << EOF >/opt/de_GWD/nftables/SET_GlobalDNS.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set GlobalDNS {
+                type ipv4_addr
+                flags interval
+                elements = { $(cat /opt/de_GWD/nftables/IP_GlobalDNS) }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_GlobalDNS.nft
+/opt/de_GWD/nftables/SET_GlobalDNS.nft
 
-echo $domainIP >/opt/de_GWD/IPv2nodeSET
-sed -i '/^\s*$/d' /opt/de_GWD/IPv2nodeSET
-sed -i 's/^/add v2node &/g' /opt/de_GWD/IPv2nodeSET
+cat << EOF >/opt/de_GWD/nftables/SET_V2NODE.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set V2NODE {
+                type ipv4_addr
+                flags interval
+                elements = { $domainIP }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_V2NODE.nft
+/opt/de_GWD/nftables/SET_V2NODE.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listB 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listB_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listB) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listB.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listB {
+                type ipv4_addr
+                flags interval
+                $IP_listB_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listB.nft
+/opt/de_GWD/nftables/SET_listB.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listW 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listW_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listW) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listW.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listW {
+                type ipv4_addr
+                flags interval
+                $IP_listW_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listW.nft
+/opt/de_GWD/nftables/SET_listW.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listBlan 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listBlan_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listBlan) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listBlan.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listBlan {
+                type ipv4_addr
+                flags interval
+                $IP_listBlan_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listBlan.nft
+/opt/de_GWD/nftables/SET_listBlan.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listWlan 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listWlan_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listWlan) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listWlan.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listWlan {
+                type ipv4_addr
+                flags interval
+                $IP_listWlan_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listWlan.nft
+/opt/de_GWD/nftables/SET_listWlan.nft
 
 localCIDR="$(echo $localaddr | rev | cut -d'.' -f2-4 | rev).0/24"
+cat << EOF >/opt/de_GWD/nftables/nftables
+#!/usr/sbin/nft -f
 
-cat << EOF >/opt/de_GWD/iptables-proxy-up
-#!/bin/bash
-ip rule add fwmark 0x9 table 220 prio 100
-ip route add local default dev lo scope host table 220
+include "/opt/de_GWD/nftables/*.nft"
 
-lanip="$localCIDR \
-10.0.0.0/8 \
-100.64.0.0/10 \
-127.0.0.0/8 \
-169.254.0.0/16 \
-172.16.0.0/12 \
-192.0.0.0/24 \
-192.168.0.0/16 \
-224.0.0.0/4 \
-240.0.0.0/4 \
-255.255.255.255/32 \
-114.114.114.114/32 \
-114.114.115.115/32 \
-119.29.29.29/32 \
-119.28.28.28/32 \
-182.254.118.118/32 \
-223.5.5.5/32 \
-223.6.6.6/32"
+define RESERVED_IP = {
+        $localCIDR,
+        10.0.0.0/8,
+        100.64.0.0/10,
+        127.0.0.0/8,
+        169.254.0.0/16,
+        172.16.0.0/12,
+        192.0.0.0/24,
+        192.168.0.0/16,
+        224.0.0.0/4,
+        240.0.0.0/4,
+        255.255.255.255/32,
+        114.114.114.114/32,
+        114.114.115.115/32,
+        119.29.29.29/32,
+        119.28.28.28/32,
+        182.254.118.118/32,
+        223.5.5.5/32,
+        223.6.6.6/32
+}
 
-ipset -N lanip nethash
-for iplanip in \$lanip; do
-  ipset add lanip \$iplanip
-done
-
-ipset -N chnroute nethash hashsize 4096 maxelem 100000
-ipset -! -R </opt/de_GWD/chnrouteSET
-
-ipset -N GlobalDNS iphash
-ipset -! -R </opt/de_GWD/IPGlobalDNSSET
-
-ipset -N v2node iphash
-ipset -! -R </opt/de_GWD/IPv2nodeSET
-
-ipset -N listB iphash
-ipset -! -R </opt/de_GWD/IPlistBSET
-
-ipset -N listW iphash
-ipset -! -R </opt/de_GWD/IPlistWSET
-
-ipset -N listBlan iphash
-ipset -! -R </opt/de_GWD/IPlistBlanSET
-
-ipset -N listWlan iphash
-ipset -! -R </opt/de_GWD/IPlistWlanSET
-
-iptables -A INPUT -p tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
-iptables -A INPUT -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
-iptables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
-iptables -A INPUT -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
-iptables -A INPUT -p tcp --tcp-flags FIN,ACK FIN -j DROP
-iptables -A INPUT -p tcp --tcp-flags ACK,URG URG -j DROP
-iptables -A INPUT -p tcp --tcp-flags ACK,FIN FIN -j DROP
-iptables -A INPUT -p tcp --tcp-flags ACK,PSH PSH -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-
-iptables -t mangle -N de_GWD
-iptables -t mangle -A de_GWD -p udp --dport 53 -j RETURN
-iptables -t mangle -A de_GWD -p tcp --dport 53 -j RETURN
-
-iptables -t mangle -A de_GWD -m set --match-set GlobalDNS dst -j RETURN
-iptables -t mangle -A de_GWD -m set --match-set v2node dst -j RETURN
-iptables -t mangle -A de_GWD -m set --match-set listBlan src -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
-iptables -t mangle -A de_GWD -m set --match-set listWlan src -j RETURN
-iptables -t mangle -A de_GWD -m set --match-set lanip dst -j RETURN
-iptables -t mangle -A de_GWD -m set --match-set listB dst -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
-iptables -t mangle -A de_GWD -m set --match-set listW dst -j RETURN
-iptables -t mangle -A de_GWD -m set --match-set chnroute dst -j RETURN
-iptables -t mangle -A de_GWD -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
-iptables -t mangle -A de_GWD -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 9896 --tproxy-mark 0x9
-iptables -t mangle -A PREROUTING -j de_GWD
-
-iptables -t mangle -N de_GWD_SELF
-iptables -t mangle -A de_GWD_SELF -p udp --dport 53 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 53 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p udp --dport 4711 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 4711 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p udp --dport 5310 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 5310 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p udp --dport 5311 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 5311 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p udp --dport 5320 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 5320 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p udp --dport 5321 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 5321 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p udp --dport 5330 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 5330 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p udp --dport 5350 -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp --dport 5350 -j RETURN
-
-iptables -t mangle -A de_GWD_SELF -m set --match-set GlobalDNS dst -j RETURN
-iptables -t mangle -A de_GWD_SELF -m set --match-set v2node dst -j RETURN
-iptables -t mangle -A de_GWD_SELF -m set --match-set listBlan src -j MARK --set-mark 0x9
-iptables -t mangle -A de_GWD_SELF -m set --match-set listWlan src -j RETURN
-iptables -t mangle -A de_GWD_SELF -m set --match-set lanip dst -j RETURN
-iptables -t mangle -A de_GWD_SELF -m set --match-set listB dst -j MARK --set-mark 0x9
-iptables -t mangle -A de_GWD_SELF -m set --match-set listW dst -j RETURN
-iptables -t mangle -A de_GWD_SELF -m set --match-set chnroute dst -j RETURN
-
-iptables -t mangle -A de_GWD_SELF -m mark --mark 0xff -j RETURN
-iptables -t mangle -A de_GWD_SELF -p tcp -j MARK --set-mark 0x9
-iptables -t mangle -A de_GWD_SELF -p udp -j MARK --set-mark 0x9
-iptables -t mangle -A OUTPUT -j de_GWD_SELF
-
-if [[ \$(ip --oneline link show up | grep -v lo | awk '{print\$2}') =~ "wg0" ]]; then
-iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
-iptables -I FORWARD -i wg0 -j ACCEPT; iptables -I FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s 172.16.66.0/24 -o $ethernetnum -j MASQUERADE
-fi
+table ip de_GWD {
+        set CHNROUTE {
+                type ipv4_addr
+                flags interval
+        }
+        set GlobalDNS {
+                type ipv4_addr
+                flags interval
+        }
+        set V2NODE {
+                type ipv4_addr
+                flags interval
+        }
+        set listB {
+                type ipv4_addr
+                flags interval
+        }
+        set listW {
+                type ipv4_addr
+                flags interval
+        }
+        set listBlan {
+                type ipv4_addr
+                flags interval
+        }
+        set listWlan {
+                type ipv4_addr
+                flags interval
+        }
+        chain prerouting {
+                type filter hook prerouting priority mangle; policy accept;
+                tcp dport 53 return
+                udp dport 53 return
+                ip daddr @GlobalDNS return
+                ip daddr @V2NODE return
+                ip saddr @listBlan ip protocol tcp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip saddr @listBlan ip protocol udp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip saddr @listWlan return
+                ip daddr \$RESERVED_IP return
+                ip daddr @listB ip protocol tcp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip daddr @listB ip protocol udp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip daddr @listW return
+                ip daddr @CHNROUTE return
+                ip protocol tcp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip protocol udp tproxy to 127.0.0.1:9896 meta mark set 0x9
+        }
+        chain output {
+                type route hook output priority mangle; policy accept;
+                tcp dport 53 return
+                udp dport 53 return
+                tcp dport 4711 return
+                udp dport 4711 return
+                tcp dport 5310 return
+                udp dport 5310 return
+                tcp dport 5311 return
+                udp dport 5311 return
+                tcp dport 5320 return
+                udp dport 5320 return
+                tcp dport 5321 return
+                udp dport 5321 return
+                tcp dport 5330 return
+                udp dport 5330 return
+                tcp dport 5350 return
+                udp dport 5350 return
+                ip daddr @GlobalDNS return
+                ip daddr @V2NODE return
+                ip daddr \$RESERVED_IP return
+                ip daddr @listB meta mark set 0x9
+                ip daddr @listW return
+                ip daddr @CHNROUTE return
+                meta mark 0xff return
+                ip protocol tcp meta mark set 0x9
+                ip protocol udp meta mark set 0x9
+        }
+}
 EOF
-chmod +x /opt/de_GWD/iptables-proxy-up
 
-cat << EOF >/opt/de_GWD/iptables-proxy-down
-#!/bin/bash
-iptables -t mangle -F OUTPUT
-iptables -t mangle -F PREROUTING
-iptables -t mangle -F de_GWD
-iptables -t mangle -X de_GWD
-iptables -t mangle -F de_GWD_SELF
-iptables -t mangle -X de_GWD_SELF
-iptables -F INPUT
-
-ipset -F chnroute >/dev/null 2>&1
-ipset -X chnroute >/dev/null 2>&1
-ipset -F lanip >/dev/null 2>&1
-ipset -X lanip >/dev/null 2>&1
-ipset -F GlobalDNS >/dev/null 2>&1
-ipset -X GlobalDNS >/dev/null 2>&1
-ipset -F v2node >/dev/null 2>&1
-ipset -X v2node >/dev/null 2>&1
-ipset -F listB >/dev/null 2>&1
-ipset -X listB >/dev/null 2>&1
-ipset -F listW >/dev/null 2>&1
-ipset -X listW >/dev/null 2>&1
-ipset -F listBlan >/dev/null 2>&1
-ipset -X listBlan >/dev/null 2>&1
-ipset -F listWlan >/dev/null 2>&1
-ipset -X listWlan >/dev/null 2>&1
-
-ip rule del fwmark 0x9
-ip route flush table 220
-ip route flush cache
-EOF
-chmod +x /opt/de_GWD/iptables-proxy-down
-
-rm -rf /lib/systemd/system/iptables-proxy.service
-cat << EOF >/etc/systemd/system/iptables-proxy.service
+rm -rf /lib/systemd/system/nftables.service
+cat << EOF >/etc/systemd/system/nftables.service
 [Unit]
-Description=iptables-proxy
+Description=nftables
+Wants=network-pre.target
+Before=network-pre.target shutdown.target
+Conflicts=shutdown.target
+DefaultDependencies=no
 
 [Service]
-User=root
 Type=oneshot
-ExecStart=/bin/bash /opt/de_GWD/iptables-proxy-up
-ExecStop=/bin/bash /opt/de_GWD/iptables-proxy-down
 RemainAfterExit=yes
+StandardInput=null
+ProtectSystem=full
+ProtectHome=true
+ExecStart=/usr/sbin/nft -f /opt/de_GWD/nftables/nftables ; /usr/sbin/ip route add local default dev lo scope host table 220 ; /usr/sbin/ip rule add fwmark 0x9 table 220 prio 100
+ExecStop=/usr/sbin/nft flush ruleset ; /usr/sbin/ip route del local default dev lo table 220 ; /usr/sbin/ip rule del table 220
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=sysinit.target
 EOF
-ln -sf /etc/systemd/system/iptables-proxy.service /lib/systemd/system/iptables-proxy.service >/dev/null 2>&1
+ln -sf /etc/systemd/system/nftables.service /lib/systemd/system/nftables.service >/dev/null 2>&1
 systemctl daemon-reload >/dev/null
-systemctl restart iptables-proxy
-systemctl enable iptables-proxy >/dev/null 2>&1
+systemctl restart nftables
+systemctl enable nftables >/dev/null 2>&1
 
-echo -n "$statusInstalled" && white "Iptables-Proxy"
+echo -n "$statusInstalled" && white "nftables"
 }
 
 
@@ -2251,7 +2286,7 @@ preDownload
 
 SmartDNSset
 
-installIptablesProxy
+installNftables
 
 installXray
 
@@ -2326,7 +2361,7 @@ preDownload
 
 SmartDNSset
 
-installIptablesProxy
+installNftables
 
 installXray
 
@@ -2423,7 +2458,7 @@ else
     echo "[$statusBAD] GeoIP          [incomplete]"
 fi
 
-if [[ $(du -sk /opt/de_GWD/chnrouteSET 2>/dev/null | awk '{print$1}') -gt 240 ]]; then
+if [[ $(du -sk /opt/de_GWD/nftables/IP_CHNROUTE 2>/dev/null | awk '{print$1}') -gt 240 ]]; then
     echo "[$statusGOOD] ChnrouteIP     [loaded]"
 else
     echo "[$statusBAD] ChnrouteIP     [incomplete]"

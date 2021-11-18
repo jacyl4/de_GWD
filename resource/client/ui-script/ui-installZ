@@ -4,7 +4,6 @@ rm -rf /opt/de_GWD/update
 [[ $(systemctl is-active 'updateGWD') == "active" ]] && systemctl stop updateGWD
 
 [[ -n $(cat /etc/resolv.conf | grep -v '127.0.0.1') ]] && resolvconf -u
-[[ $(systemctl is-active 'iptables-proxy') != "active" ]] && systemctl restart iptables-proxy
 
 ps -aux | grep 'ui-install' | sed '/grep/d' | awk '{print$2}' | while read line
 do
