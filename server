@@ -24,7 +24,7 @@ piholeCoreRelease_reserved="v5.6"
 piholeWebUIRelease_reserved="v5.8"
 piholeFTLRelease_reserved="v5.11"
 BBRPLUS_Ver="5.10.79"
-branch="dev"
+branch="main"
 
 
 
