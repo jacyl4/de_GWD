@@ -110,17 +110,28 @@ if [[ -d "/opt/AdGuardHome" ]]; then
 fi
 
 if [[ -f "/lib/systemd/system/frps.service" ]] || [[ -f "/lib/systemd/system/frpc.service" ]]; then
-systemctl disable frps >/dev/null 2>&1
-systemctl disable frpc >/dev/null 2>&1
-systemctl stop frps >/dev/null 2>&1
-systemctl stop frpc >/dev/null 2>&1
-rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
-rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
-rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
-rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
-systemctl daemon-reload >/dev/null
-rm -rf /opt/de_GWD/frps
-rm -rf /opt/de_GWD/frpc
+  systemctl disable frps >/dev/null 2>&1
+  systemctl disable frpc >/dev/null 2>&1
+  systemctl stop frps >/dev/null 2>&1
+  systemctl stop frpc >/dev/null 2>&1
+  rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
+  rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
+  rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
+  rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
+  systemctl daemon-reload >/dev/null
+  rm -rf /opt/de_GWD/frps
+  rm -rf /opt/de_GWD/frpc
+fi
+
+if [[  -f "/opt/de_GWD/iptablesrules-up" ]]; then
+  systemctl disable iptablesrules >/dev/null 2>&1
+  systemctl stop iptablesrules >/dev/null 2>&1
+  rm -rf /etc/systemd/system/iptablesrules.service >/dev/null 2>&1
+  rm -rf /lib/systemd/system/iptablesrules.service >/dev/null 2>&1
+  systemctl daemon-reload >/dev/null
+  rm -rf /opt/de_GWD/iptablesrules-down
+  rm -rf /opt/de_GWD/iptablesrules-up
+  rm -rf /opt/de_GWD/Q4amSun
 fi
 
 [[ ! -f "/var/www/ssl/de_GWD.cer" ]] && mv -f /var/www/ssl/*.cer /var/www/ssl/de_GWD.cer && sed -i '/ssl_certificate /c\ssl_certificate \/var\/www\/ssl\/de_GWD.cer;' /etc/nginx/conf.d/default.conf
@@ -128,6 +139,9 @@ fi
 
 [[ -f "/etc/nginx/conf.d/merge.sh" ]] && rm -rf /etc/nginx/conf.d/*
 
+[[ -n $(dpkg -l | grep ' ipset ') ]] && apt --purge autoremove ipset
+
+rm -rf /opt/de_GWD/.repo/IPchnroute
 rm -rf /usr/local/bin/autoUpdate
 rm -rf /usr/local/bin/iptablesrules*
 rm -rf /usr/local/bin/Q2H
@@ -265,8 +279,7 @@ unset aptPKG
 [[ -z $(dpkg -l | grep ' dnsutils ') ]] && aptPKG+=(dnsutils)
 [[ -z $(dpkg -l | grep ' net-tools ') ]] && aptPKG+=(net-tools)
 [[ -z $(dpkg -l | grep ' resolvconf ') ]] && aptPKG+=(resolvconf)
-[[ -z $(dpkg -l | grep ' iptables ') ]] && aptPKG+=(iptables)
-[[ -z $(dpkg -l | grep ' ipset ') ]] && aptPKG+=(ipset)
+[[ -z $(dpkg -l | grep ' nftables ') ]] && aptPKG+=(nftables)
 [[ -z $(dpkg -l | grep ' wget ') ]] && aptPKG+=(wget)
 [[ -z $(dpkg -l | grep ' curl ') ]] && aptPKG+=(curl)
 [[ -z $(dpkg -l | grep ' git ') ]] && aptPKG+=(git)
@@ -290,6 +303,17 @@ systemctl daemon-reload >/dev/null
 
 [[ -n $(which setenforce) ]] && setenforce 0
 [[ -f "/etc/selinux/config" ]] && sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
+if [[ -n $(dpkg -l | grep ' docker-ce ') ]] && [[ -n $(dpkg -l | grep ' containerd.io ') ]] && [[ ! -f "/etc/docker/daemon.json" ]]; then
+mkdir -p /etc/docker/
+systemctl stop docker containerd
+cat << EOF >/etc/docker/daemon.json
+{
+  "iptables": false
+}
+EOF
+systemctl restart docker
+fi
 
 DPKGclean=$(dpkg --list | grep "^rc" | cut -d " " -f 3)
 [[ -n $DPKGclean ]] && echo $DPKGclean | xargs sudo dpkg --purge
@@ -601,93 +625,105 @@ pihole -a interface
 
 
 
-installIptablesRules(){
-cat << "EOF" >/opt/de_GWD/Q4amSun
-#!/bin/bash
-checkSum(){
-sha256sumL=$(sha256sum $1 2>/dev/null | awk '{print$1}')
-if [[ $sha256sumL == $2 ]]; then 
-  echo "true"
-elif [[ $sha256sumL != $2 ]]; then
-  echo "false"
-fi
+installNftables(){
+mkdir -p /opt/de_GWD/nftables
+cat << EOF >/opt/de_GWD/nftables/default.nft
+#!/usr/sbin/nft -f
+table inet filter {
+        chain input {
+                type filter hook input priority 0;
+                iifname lo accept
+                ct state established,related accept
+                tcp flags != syn ct state new drop
+                tcp flags & (fin|syn) == (fin|syn) drop
+                tcp flags & (syn|rst) == (syn|rst) drop
+                tcp flags & (fin|syn|rst|psh|ack|urg) < (fin) drop
+                tcp flags & (fin|syn|rst|psh|ack|urg) == (fin|psh|urg) drop
+                ct state invalid counter drop
+                # Drop 53 in
+                tcp dport 53 iifname $ethernetnum drop
+                udp dport 53 iifname $ethernetnum drop
+        }
+        chain forward {
+                type filter hook forward priority 0;
+                # Docker traffic
+                counter jump DOCKER-USER
+                counter jump DOCKER-ISOLATION-STAGE-1
+                oifname docker0 ct state established,related counter accept
+                oifname docker0 counter jump DOCKER
+                iifname docker0 oifname != "docker0" counter accept
+                iifname docker0 oifname "docker0" counter accept
+        }
+        chain output {
+                type filter hook output priority 0;
+                oifname lo accept
+        }
+        chain DOCKER {
+        }
+        chain DOCKER-USER {
+                counter return
+        }
+        chain DOCKER-ISOLATION-STAGE-1 {
+                iifname "docker0" oifname != docker0 counter jump DOCKER-ISOLATION-STAGE-2
+                counter return
+        }
+        chain DOCKER-ISOLATION-STAGE-2 {
+                oifname docker0 counter drop
+                counter return
+        }
 }
 
-IPchnroute_sha256sum=$(curl -m 5 -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
-
-if [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $IPchnroute_sha256sum) == "false" ]]; then
-rm -rf /tmp/IPchnroute
-wget --show-progress -t 5 -T 10 -cqO /tmp/IPchnroute https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
-[[ $(checkSum /tmp/IPchnroute $IPchnroute_sha256sum) == "false" ]] && red "Download Failed" && exit
-[[ $(checkSum /tmp/IPchnroute $IPchnroute_sha256sum) == "true" ]] && mv -f /tmp/IPchnroute /opt/de_GWD/.repo/IPchnroute
-fi
-
-if [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $IPchnroute_sha256sum) == "true" ]]; then
-cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/chnrouteSET
-sed -i '/^\s*$/d' /opt/de_GWD/chnrouteSET
-sed -i 's/^/add chnroute &/g' /opt/de_GWD/chnrouteSET
-fi
-
-ipset -F chnroute >/dev/null 2>&1
-ipset -X chnroute >/dev/null 2>&1
-ipset -N chnroute nethash hashsize 4096 maxelem 100000 >/dev/null 2>&1
-ipset -! -R </opt/de_GWD/chnrouteSET
+table ip router {
+        chain prerouting {
+                type nat hook prerouting priority 0;
+                #Docker
+                fib daddr type local counter jump DOCKER
+        }
+        chain postrouting {
+                type nat hook postrouting priority 0;
+                # Docker
+                oifname != docker0 ip saddr 172.17.0.0/16 counter masquerade
+        }
+        chain input {
+                type nat hook input priority 0;
+        }
+        chain output {
+                type nat hook output priority 0;
+                ip daddr != 127.0.0.0/8 fib daddr type local counter jump DOCKER
+        }
+        chain DOCKER {
+                iifname docker0 counter return
+        }
+}
 EOF
-chmod +x /opt/de_GWD/Q4amSun
-/opt/de_GWD/Q4amSun
+chmod +x /opt/de_GWD/nftables/default.nft
 
-cat << EOF >/opt/de_GWD/iptablesrules-up
-#!/bin/bash
-xtlsPort=\$(jq -r '.inbounds[] | select(.tag == "forward") | .port' /opt/de_GWD/vtrui/config.json 2>/dev/null | grep -v '^null\$')
-
-[[ -n \$xtlsPort ]] && iptables -A INPUT -m set --match-set chnroute src -p tcp --dport \$xtlsPort -j DROP
-
-iptables -A INPUT -p tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
-iptables -A INPUT -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
-iptables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
-iptables -A INPUT -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
-iptables -A INPUT -p tcp --tcp-flags FIN,ACK FIN -j DROP
-iptables -A INPUT -p tcp --tcp-flags ACK,URG URG -j DROP
-iptables -A INPUT -p tcp --tcp-flags ACK,FIN FIN -j DROP
-iptables -A INPUT -p tcp --tcp-flags ACK,PSH PSH -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-
-iptables -A INPUT -p udp --dport 53 -i $ethernetnum -j DROP
-iptables -A INPUT -p tcp --dport 53 -i $ethernetnum -j DROP
-EOF
-chmod +x /opt/de_GWD/iptablesrules-up
-
-cat << EOF >/opt/de_GWD/iptablesrules-down
-#!/bin/bash
-iptables -F INPUT
-iptables -t mangle -F PREROUTING
-EOF
-chmod +x /opt/de_GWD/iptablesrules-down
-
-rm -rf /lib/systemd/system/iptablesrules.service
-cat << EOF >/etc/systemd/system/iptablesrules.service
+rm -rf /lib/systemd/system/nftables.service
+cat << EOF >/etc/systemd/system/nftables.service
 [Unit]
-Description=iptablesrules
-After=network.target
+Description=nftables
+Wants=network-pre.target
+Before=network-pre.target shutdown.target
+Conflicts=shutdown.target
+DefaultDependencies=no
 
 [Service]
 User=root
 Type=oneshot
-ExecStart=/bin/bash /opt/de_GWD/iptablesrules-up
-ExecStop=/bin/bash /opt/de_GWD/iptablesrules-down
 RemainAfterExit=yes
+StandardInput=null
+ProtectSystem=full
+ProtectHome=true
+ExecStart=/usr/sbin/nft -f /opt/de_GWD/nftables/default.nft
+ExecStop=/usr/sbin/nft flush ruleset
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=sysinit.target
 EOF
-ln -sf /etc/systemd/system/iptablesrules.service /lib/systemd/system/iptablesrules.service >/dev/null 2>&1
+ln -sf /etc/systemd/system/nftables.service /lib/systemd/system/nftables.service >/dev/null 2>&1
 systemctl daemon-reload >/dev/null
-systemctl enable iptablesrules >/dev/null 2>&1
+systemctl restart nftables
+systemctl enable nftables >/dev/null 2>&1
 }
 
 
@@ -1367,7 +1403,6 @@ sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
 cat << EOF >>/tmp/now.cron
 0 */2 * * * /opt/de_GWD/Q2H
 0 0 * * * /opt/de_GWD/Qday
-0 5 * * 7 /opt/de_GWD/Q4amSun
 @reboot /opt/de_GWD/clearKernel
 EOF
 crontab /tmp/now.cron
@@ -1381,8 +1416,6 @@ cat << "EOF" >/tmp/comRestart
 virt=$(systemd-detect-virt)
 [[ -z $(echo "openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch" | grep $virt) ]] && virtVC="vm"
 [[ -n $(echo "openvz lxc lxc-libvirt systemd-nspawn docker podman rkt wsl proot pouch" | grep $virt) ]] && virtVC="container"
-
-systemctl restart iptablesrules
 
 if [[ $virtVC == "container" ]]; then
 sed -i '/de_GWD.socket/c\proxy_pass http://127.0.0.1:9896;' /etc/nginx/conf.d/default.conf
@@ -1720,7 +1753,6 @@ else
   xrayOutboundDirect
 fi
 
-systemctl restart iptablesrules >/dev/null 2>&1
 systemctl restart vtrui >/dev/null 2>&1
 
 blue "-----------------------------"
@@ -1735,8 +1767,8 @@ changeWGCF(){
     green "[1]: Enable Cloudflare wireguard upstream (WARP)"
     green "[2]: Delete Cloudflare wireguard upstream (WARP)"
     green "================================================"
-    read -s -n 1 WGCFset
-if [[ $WGCFset = "1" ]]; then
+    read -s -n 1 WGCFswitch
+if [[ $WGCFswitch = "1" ]]; then
 uname -r 2>&1 | grep -o '[0-9.]*' | head -n 1 >/tmp/kernelVer
 echo "5.6" >>/tmp/kernelVer
 
@@ -1832,7 +1864,7 @@ else
 echo -n "$statusFailed" && red "This vps has no IPv4 address"
 fi
 fi
-elif [[ $WGCFset = "2" ]]; then
+elif [[ $WGCFswitch = "2" ]]; then
 cat << "EOF" >/tmp/WGCFstop
 #!/bin/bash
 systemctl stop wg-quick@wgcf
@@ -1879,7 +1911,6 @@ upPort=$(echo $upDomainP | cut -d: -f2| grep '^[[:digit:]]*$')
 
 xrayOutboundForward
 
-systemctl restart iptablesrules >/dev/null 2>&1
 systemctl restart vtrui >/dev/null 2>&1
 
 blue "-----------------------"
@@ -1897,7 +1928,6 @@ uuids=$(jq -r '.inbounds[0].settings.clients[].id' /opt/de_GWD/vtrui/config.json
 
 xrayInboundForward
 
-systemctl restart iptablesrules >/dev/null 2>&1
 systemctl restart vtrui >/dev/null 2>&1
 
 blue "-----------------------"
@@ -1908,7 +1938,6 @@ elif [[ $xtlsSet = "3" ]]; then
 jq 'del(.inbounds[] | select(.tag == "forward"))' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 xrayOutboundDirect
 
-systemctl restart iptablesrules >/dev/null 2>&1
 systemctl restart vtrui >/dev/null 2>&1
 
 blue "--------------------------"
@@ -2158,7 +2187,7 @@ installPihole
 
 piholeSet
 
-installIptablesRules
+installNftables
 
 repoDL
 
@@ -2204,7 +2233,7 @@ installPihole
 
 piholeSet
 
-installIptablesRules
+installNftables
 
 repoDL
 

@@ -449,6 +449,17 @@ systemctl daemon-reload >/dev/null
 
 [[ -n $(which setenforce) ]] && setenforce 0
 [[ -f "/etc/selinux/config" ]] && sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
+if [[ -n $(dpkg -l | grep ' docker-ce ') ]] && [[ -n $(dpkg -l | grep ' containerd.io ') ]] && [[ ! -f "/etc/docker/daemon.json" ]]; then
+mkdir -p /etc/docker/
+systemctl stop docker containerd
+cat << EOF >/etc/docker/daemon.json
+{
+  "iptables": false
+}
+EOF
+systemctl restart docker
+fi
 }
 
 
@@ -844,6 +855,82 @@ EOF
 chmod +x /opt/de_GWD/nftables/SET_listWlan.nft
 /opt/de_GWD/nftables/SET_listWlan.nft
 
+cat << EOF >/opt/de_GWD/nftables/default.nft
+#!/usr/sbin/nft -f
+table inet filter {
+        chain input {
+                type filter hook input priority 0;
+                iifname lo accept
+                ct state established,related accept
+                tcp flags != syn ct state new drop
+                tcp flags & (fin|syn) == (fin|syn) drop
+                tcp flags & (syn|rst) == (syn|rst) drop
+                tcp flags & (fin|syn|rst|psh|ack|urg) < (fin) drop
+                tcp flags & (fin|syn|rst|psh|ack|urg) == (fin|psh|urg) drop
+                ct state invalid counter drop
+                # Drop 53 in
+        }
+        chain forward {
+                type filter hook forward priority 0;
+                # WireGuard traffic
+                iifname wg0 accept
+                oifname wg0 accept
+
+                # Docker traffic
+                counter jump DOCKER-USER
+                counter jump DOCKER-ISOLATION-STAGE-1
+                oifname docker0 ct state established,related counter accept
+                oifname docker0 counter jump DOCKER
+                iifname docker0 oifname != "docker0" counter accept
+                iifname docker0 oifname "docker0" counter accept
+        }
+        chain output {
+                type filter hook output priority 0;
+                oifname lo accept
+        }
+        chain DOCKER {
+        }
+        chain DOCKER-USER {
+                counter return
+        }
+        chain DOCKER-ISOLATION-STAGE-1 {
+                iifname "docker0" oifname != docker0 counter jump DOCKER-ISOLATION-STAGE-2
+                counter return
+        }
+        chain DOCKER-ISOLATION-STAGE-2 {
+                oifname docker0 counter drop
+                counter return
+        }
+}
+
+table ip router {
+        chain prerouting {
+                type nat hook prerouting priority 0;
+                #Docker
+                fib daddr type local counter jump DOCKER
+        }
+        chain postrouting {
+                type nat hook postrouting priority 0;
+                # Wireguard masquerade traffic
+                oifname $ethernetnum ip saddr 172.16.66.0/24 masquerade
+
+                # Docker
+                oifname != docker0 ip saddr 172.17.0.0/16 counter masquerade
+        }
+        chain input {
+                type nat hook input priority 0;
+        }
+        chain output {
+                type nat hook output priority 0;
+                ip daddr != 127.0.0.0/8 fib daddr type local counter jump DOCKER
+        }
+        chain DOCKER {
+                iifname docker0 counter return
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/default.nft
+
 localCIDR="$(echo $localaddr | rev | cut -d'.' -f2-4 | rev).0/24"
 cat << EOF >/opt/de_GWD/nftables/nftables
 #!/usr/sbin/nft -f
@@ -946,20 +1033,8 @@ table ip de_GWD {
                 ip protocol udp meta mark set 0x9
         }
 }
-
-table inet filter {
-        chain input {
-                type filter hook input priority 0;
-                # Drop 53 in
-        }
-        chain forward {
-                type filter hook forward priority 0;
-        }
-        chain output {
-                type filter hook output priority 0;
-        }
-}
 EOF
+chmod +x /opt/de_GWD/nftables/nftables
 
 rm -rf /lib/systemd/system/nftables.service
 cat << EOF >/etc/systemd/system/nftables.service
@@ -971,6 +1046,7 @@ Conflicts=shutdown.target
 DefaultDependencies=no
 
 [Service]
+User=root
 Type=oneshot
 RemainAfterExit=yes
 StandardInput=null
