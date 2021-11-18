@@ -14,6 +14,6 @@ sed -i "/net.ipv4.tcp_tw_reuse =/c\net.ipv4.tcp_tw_reuse = 1" /etc/sysctl.conf
 sysctl -p >/dev/null 2>&1
 systemctl restart systemd-sysctl
 
-sed -i '/tcp dport 53 meta iifname/d' /opt/de_GWD/opt/de_GWD/nftables/nftables
-sed -i '/udp dport 53 meta iifname/d' /opt/de_GWD/opt/de_GWD/nftables/nftables
+sed -i '/tcp dport 53 meta iifname/d' /opt/de_GWD/nftables/nftables
+sed -i '/udp dport 53 meta iifname/d' /opt/de_GWD/nftables/nftables
 systemctl restart nftables

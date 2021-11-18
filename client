@@ -221,6 +221,8 @@ if [[ `dpkg -l | grep php | grep fpm | awk '{print $2}'` = "php7.3-fpm" ]] || [[
     apt --purge autoremove '^php8.0.*'
 fi
 
+[[ -n $(dpkg -l | grep ' ipset ') ]] && apt --purge autoremove ipset
+
 crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
 sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' /tmp/now.cron
@@ -240,6 +242,13 @@ rm -rf /opt/de_GWD/v2dns
 rm -rf /opt/de_GWD/vtrui
 rm -rf /opt/de_GWD/ttyd
 rm -rf /opt/de_GWD/IPxDNSSET
+rm -rf /opt/de_GWD/chnrouteSET
+rm -rf /opt/de_GWD/IPGlobalDNSSET
+rm -rf /opt/de_GWD/IPlistBlanSET
+rm -rf /opt/de_GWD/IPlistBSET
+rm -rf /opt/de_GWD/IPlistWlanSET
+rm -rf /opt/de_GWD/IPlistWSET
+rm -rf /opt/de_GWD/IPv2nodeSET
 rm -rf /opt/de_GWD/__MACOSX
 rm -rf /var/www/html/__MACOSX
 rm -rf /etc/ld.so.preload
@@ -921,6 +930,19 @@ table ip de_GWD {
                 meta mark 0xff return
                 ip protocol tcp meta mark set 0x9
                 ip protocol udp meta mark set 0x9
+        }
+}
+
+table inet filter {
+        chain input {
+                type filter hook input priority 0;
+                # Drop 53 in
+        }
+        chain forward {
+                type filter hook forward priority 0;
+        }
+        chain output {
+                type filter hook output priority 0;
         }
 }
 EOF
