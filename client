@@ -101,7 +101,12 @@ systemctl disable iptables-proxy >/dev/null 2>&1
 iptables -t mangle -F V2PROXY >/dev/null 2>&1
 iptables -t mangle -X V2PROXY >/dev/null 2>&1
 
-systemctl stop nftables >/dev/null 2>&1
+nft delete table ip de_GWD >/dev/null 2>&1
+ip rule del table 220 >/dev/null 2>&1
+ip route flush table 220 >/dev/null 2>&1
+ip route flush cache >/dev/null 2>&1
+ip route del local default dev lo table 220 >/dev/null 2>&1
+
 systemctl stop v2dns >/dev/null 2>&1
 systemctl stop smartdns >/dev/null 2>&1
 systemctl stop vtrui >/dev/null 2>&1
@@ -203,6 +208,7 @@ if [[ -f "/etc/systemd/system/iptables-proxy.service" ]] || [[ -f "/lib/systemd/
     rm -rf /etc/systemd/system/iptables-proxy.service >/dev/null 2>&1
     rm -rf /lib/systemd/system/iptables-proxy.service >/dev/null 2>&1
     systemctl daemon-reload >/dev/null
+    /opt/de_GWD/iptables-proxy-down
     rm -rf /opt/de_GWD/iptables-proxy-down
     rm -rf /opt/de_GWD/iptables-proxy-up
 fi
@@ -1052,8 +1058,8 @@ RemainAfterExit=yes
 StandardInput=null
 ProtectSystem=full
 ProtectHome=true
-ExecStart=/usr/sbin/nft -f /opt/de_GWD/nftables/nftables ; /usr/sbin/ip route add local default dev lo scope host table 220 ; /usr/sbin/ip rule add fwmark 0x9 table 220 prio 100
-ExecStop=/usr/sbin/nft flush ruleset ; /usr/sbin/ip route del local default dev lo table 220 ; /usr/sbin/ip rule del table 220
+ExecStart=/usr/sbin/nft -f /opt/de_GWD/nftables/nftables ; $(which ip) route add local default dev lo scope host table 220 ; $(which ip) rule add fwmark 0x9 table 220 prio 100
+ExecStop=/usr/sbin/nft flush ruleset ; $(which ip) rule del table 220 ; $(which ip) route del local default dev lo table 220
 
 [Install]
 WantedBy=sysinit.target
