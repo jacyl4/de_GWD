@@ -160,21 +160,29 @@ cleanDep(){
 sed -i "/nfsvers/d" /etc/fstab >/dev/null 2>&1
 sed -i '/quic/d' /etc/nginx/conf.d/*.conf >/dev/null 2>&1
 
-systemctl disable --now doh-client >/dev/null 2>&1
-rm -rf /lib/systemd/system/doh-client.service
-rm -rf /etc/systemd/system/doh-client.service
-rm -rf /opt/de_GWD/doh-client*
-rm -rf "/etc/NetworkManager/dispatcher.d"
-systemctl daemon-reload >/dev/null
-
-systemctl disable --now doh-server >/dev/null 2>&1
-rm -rf /lib/systemd/system/doh-server.service
-rm -rf /etc/systemd/system/doh-server.service
-rm -rf /opt/de_GWD/doh-server*
-rm -rf "/etc/NetworkManager/dispatcher.d"
-systemctl daemon-reload >/dev/null
-
 jq 'del(.dns.APPLEdir)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+
+if [[ -d "/opt/bitwardenrs" ]]; then
+   mv -f /opt/bitwardenrs /opt/bitwarden
+fi
+
+if [[ -f "/etc/systemd/system/doh-client.service" ]] || [[ -f "/lib/systemd/system/doh-client.service" ]]; then
+    systemctl disable --now doh-client >/dev/null 2>&1
+    rm -rf /lib/systemd/system/doh-client.service
+    rm -rf /etc/systemd/system/doh-client.service
+    rm -rf /opt/de_GWD/doh-client*
+    rm -rf "/etc/NetworkManager/dispatcher.d"
+    systemctl daemon-reload >/dev/null
+fi
+
+if [[ -f "/etc/systemd/system/doh-server.service" ]] || [[ -f "/lib/systemd/system/doh-server.service" ]]; then
+    systemctl disable --now doh-server >/dev/null 2>&1
+    rm -rf /lib/systemd/system/doh-server.service
+    rm -rf /etc/systemd/system/doh-server.service
+    rm -rf /opt/de_GWD/doh-server*
+    rm -rf "/etc/NetworkManager/dispatcher.d"
+    systemctl daemon-reload >/dev/null
+fi
 
 if [[ -f "/lib/systemd/system/frps.service" ]] || [[ -f "/lib/systemd/system/frpc.service" ]]; then
     systemctl disable frps >/dev/null 2>&1
@@ -190,9 +198,15 @@ if [[ -f "/lib/systemd/system/frps.service" ]] || [[ -f "/lib/systemd/system/frp
     rm -rf /opt/de_GWD/frpc
 fi
 
-if [[ -d "/opt/bitwardenrs" ]]; then
-  mv -f /opt/bitwardenrs /opt/bitwarden
+if [[ -f "/etc/systemd/system/iptables-proxy.service" ]] || [[ -f "/lib/systemd/system/iptables-proxy.service" ]]; then
+    systemctl disable iptables-proxy >/dev/null 2>&1
+    rm -rf /etc/systemd/system/iptables-proxy.service >/dev/null 2>&1
+    rm -rf /lib/systemd/system/iptables-proxy.service >/dev/null 2>&1
+    systemctl daemon-reload >/dev/null
+    rm -rf /opt/de_GWD/iptables-proxy-down
+    rm -rf /opt/de_GWD/iptables-proxy-up
 fi
+
 
 if [[ -d "/opt/de_GWD/xDNSc" ]]; then
     systemctl disable xDNSc >/dev/null 2>&1
