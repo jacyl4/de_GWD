@@ -1,0 +1,185 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+
+
+installMariaDB(){
+    green "=================="
+    green " Datadase user"
+    green "=================="
+    read sqluser
+
+    green "=================="
+    green " Datadase password"
+    green "=================="
+    read sqlpw
+
+    green "=================="
+    green " Datadase name"
+    green "=================="
+    read sqlnm
+    
+apt update && apt install mariadb-server
+[[ $? -ne 0 ]] && rm -rf /var/lib/apt/lists/lock
+
+mysql_secure_installation
+
+green "Enter current password for root again"
+read sqlrootpw
+
+cat << EOF > ~/.my.cnf
+[client]
+user=root
+password=$sqlrootpw
+EOF
+
+mysql -e "create database $sqlnm default charset utf8 collate utf8_general_ci;"
+mysql -e "CREATE USER '$sqluser'@'localhost' IDENTIFIED BY '$sqlpw';"
+mysql -e "grant all privileges on $sqlnm.* TO '$sqluser'@'localhost';"
+rm -rf ~/.my.cnf
+
+cat << EOF > /etc/mysql/my.cnf
+[client]
+default-character-set = utf8mb4
+port                  = 3306
+socket                = /run/mysqld/mysqld.sock
+
+[mysqld]
+user         = mysql
+pid-file     = /run/mysqld/mysqld.pid
+socket       = /run/mysqld/mysqld.sock
+port         = 3306
+bind-address =127.0.0.1
+basedir      = /usr
+datadir      = /var/lib/mysql
+tmpdir       = /tmp
+lc_messages_dir   = /usr/share/mysql
+lc_messages       = en_US
+open_files_limit  = 65535
+skip-external-locking
+
+max_allowed_packet      = 32M
+max_connections         = 300
+table_open_cache        = 100
+sort_buffer_size        = 4M
+
+thread_cache_size       = 200
+key_buffer_size         = 64M
+myisam_recover_options  = BACKUP
+myisam_sort_buffer_size = 64M
+bulk_insert_buffer_size = 16M
+read_buffer_size        = 2M
+read_rnd_buffer_size    = 1M
+
+skip-name-resolve
+default_storage_engine          = InnoDB
+innodb_buffer_pool_instances    = 1
+innodb_buffer_pool_size         = 256M
+innodb_open_files               = 300
+innodb_io_capacity              = 1000
+innodb_read_io_threads          = 64
+innodb_write_io_threads         = 64
+innodb_log_buffer_size          = 32M
+innodb_log_file_size            = 256M
+innodb_file_per_table           = 1
+innodb_flush_log_at_trx_commit  = 2
+innodb_flush_method             = O_DIRECT
+innodb_max_dirty_pages_pct      = 90
+innodb_large_prefix             = on
+innodb_file_format              = barracuda
+
+query_cache_type          = 1
+query_cache_limit         = 512K
+query_cache_min_res_unit  = 2k
+query_cache_size          = 64M
+tmp_table_size            = 32M
+max_heap_table_size       = 32M
+
+log_warnings        = 2
+slow_query_log      = 1
+slow_query_log_file = /var/log/mysql/mariadb-slow.log
+long_query_time     = 1
+log_slow_verbosity  = query_plan
+log_bin             = /var/log/mysql/mariadb-bin
+log_bin_index       = /var/log/mysql/mariadb-bin.index
+expire_logs_days    = 10
+max_binlog_size     = 100M
+
+concurrent_insert     = 2
+connect_timeout       = 5
+wait_timeout          = 600
+character-set-server  = utf8mb4
+collation-server      = utf8mb4_general_ci
+transaction_isolation = READ-COMMITTED
+binlog_format         = ROW
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet = 16M
+
+[mysql]
+no-auto-rehash
+
+[isamchk]
+key_buffer = 16M
+
+!include /etc/mysql/mariadb.cnf
+!includedir /etc/mysql/conf.d/
+EOF
+systemctl restart mariadb
+blue "----------------------"
+blue "Install MariaDB [done]"
+blue "----------------------"
+}
+
+
+
+uninstallMariaDB(){
+systemctl stop mariadb
+systemctl disable mariadb
+rm -rf /etc/mysql
+rm -rf /var/lib/mysql
+
+apt --purge remove mariadb*
+dpkg --configure -a
+
+blue "------------------------"
+blue "Uninstall MariaDB [done]"
+blue "------------------------"
+}
+
+
+
+start_menu(){
+    green "==============================="
+    green "         MariaDB"
+    green "==============================="
+    green  "1. Install MariaDB"
+    yellow "2. Uninstall MariaDB"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installMariaDB
+    start_menu
+    ;;
+    2)
+    uninstallMariaDB
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu

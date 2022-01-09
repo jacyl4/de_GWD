@@ -1,0 +1,2792 @@
+#!/bin/bash
+clear
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+statusNONE=$(yellow "-")
+statusInstalled=$(green "[ installed ]")
+statuSuccess=$(green "[    OK     ]")
+statusFailed=$(red "[  failed   ]")
+statusWarning=$(yellow "[  warning  ]")
+statusUpdated=$(green "[  updated  ]")
+TTYD_Ver="1.6.3"
+export DEBIAN_FRONTEND=noninteractive
+architecture=$(dpkg --print-architecture)
+piholeCoreRelease_reserved="v5.8.1"
+piholeFTLRelease_reserved="v5.13"
+piholeWebUIRelease_reserved="v5.10.1"
+BBRPLUS_Ver="5.10.89"
+branch="main"
+
+
+
+installCMD="bash <(wget --no-check-certificate -qO- https://gwd.seso.icu:10284/client)"
+mirrorSite=$(echo $installCMD | awk -F/ '{print$3}')
+
+
+if [[ $architecture == "arm64" ]];then
+chnAPTsource="mirrors.tuna.tsinghua.edu.cn"
+elif [[ $architecture == "amd64" ]]; then
+chnAPTsource="mirrors.aliyun.com"
+fi
+
+
+
+checkSum(){
+sha256sumL=$(sha256sum $1 2>/dev/null | awk '{print$1}')
+if [[ $sha256sumL == $2 ]]; then 
+  echo "true"
+elif [[ $sha256sumL != $2 ]]; then
+  echo "false"
+fi
+}
+
+
+
+repoDL(){
+sha256sum_nginx=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginx_"$architecture".sha256sum)
+sha256sum_nginxConf=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginxConf.zip.sha256sum)
+sha256sum_client=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip.sha256sum)
+
+if [[ $(checkSum /usr/sbin/nginx $sha256sum_nginx) == "false" ]]; then
+rm -rf /tmp/nginx
+wget --show-progress -t 5 -T 10 -cqO /tmp/nginx https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginx_"$architecture"
+[[ $(checkSum /tmp/nginx $sha256sum_nginx) == "false" ]] && red "Download Failed" && exit
+[[ $(checkSum /tmp/nginx $sha256sum_nginx) == "true" ]] && mv -f /tmp/nginx /usr/sbin/nginx && chmod +x /usr/sbin/nginx
+fi
+
+if [[ $(ttyd -v 2>&1 | grep -o '[0-9]\.[0-9]\.[0-9]') != $TTYD_Ver ]]; then
+wget --show-progress -t 5 -T 10 -cqO /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/$TTYD_Ver/ttyd.$(uname -m)
+[[ $? -ne 0 ]] && red "Download Failed"
+[[ $(du -sk /tmp/ttyd 2>/dev/null | awk '{print$1}') -gt 1000 ]] && mv -f /tmp/ttyd /usr/bin/ttyd && chmod +x /usr/bin/ttyd
+fi
+
+if [[ $(checkSum /opt/de_GWD/.repo/nginxConf.zip $sha256sum_nginxConf) == "false" ]]; then
+rm -rf /tmp/nginxConf.zip
+wget --show-progress -t 5 -T 10 -cqO /tmp/nginxConf.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginxConf.zip
+[[ $(checkSum /tmp/nginxConf.zip $sha256sum_nginxConf) == "false" ]] && red "Download Failed" && exit
+[[ $(checkSum /tmp/nginxConf.zip $sha256sum_nginxConf) == "true" ]] && mv -f /tmp/nginxConf.zip /opt/de_GWD/.repo/nginxConf.zip
+fi
+
+if [[ $(checkSum /opt/de_GWD/.repo/client.zip $sha256sum_client) == "false" ]]; then
+rm -rf /tmp/client.zip
+wget --show-progress -t 5 -T 10 -cqO /tmp/client.zip https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip
+[[ $(checkSum /tmp/client.zip $sha256sum_client) == "false" ]] && red "Download Failed" && exit
+[[ $(checkSum /tmp/client.zip $sha256sum_client) == "true" ]] && mv -f /tmp/client.zip /opt/de_GWD/.repo/client.zip
+fi
+
+localVer=$(awk 'NR==1' /opt/de_GWD/.repo/version.php 2>/dev/null)
+remoteVer=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+
+if [[ $localVer != $remoteVer ]]; then
+rm -rf /tmp/version.php
+wget --show-progress -t 5 -T 10 -cqO /tmp/version.php https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php
+[[ $? -ne 0 ]] && red "Download Failed" && exit
+[[ $(du -sk /tmp/version.php 2>/dev/null | awk '{print$1}') -ge 4 ]] && mv -f /tmp/version.php /opt/de_GWD/.repo/version.php
+fi
+
+echo -n "$statusUpdated" && white "Repository"
+}
+
+
+
+preDownload(){
+systemctl stop iptables-proxy >/dev/null 2>&1
+systemctl disable iptables-proxy >/dev/null 2>&1
+iptables -t mangle -F V2PROXY >/dev/null 2>&1
+iptables -t mangle -X V2PROXY >/dev/null 2>&1
+
+nft delete table ip de_GWD >/dev/null 2>&1
+ip rule del table 220 >/dev/null 2>&1
+ip route flush table 220 >/dev/null 2>&1
+ip route flush cache >/dev/null 2>&1
+ip route del local default dev lo table 220 >/dev/null 2>&1
+
+systemctl stop v2dns >/dev/null 2>&1
+systemctl stop smartdns >/dev/null 2>&1
+systemctl stop vtrui >/dev/null 2>&1
+
+if [[ -n "$(ps -e | grep 'pihole-FTL' )" ]]; then
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+listen-address=127.0.0.1
+port=0
+EOF
+echo
+pihole restartdns >/dev/null 2>&1
+fi
+
+cat << EOF >/etc/resolv.conf
+nameserver 119.29.29.29
+nameserver 182.254.118.118
+nameserver 114.114.114.114
+EOF
+
+mkdir -p /opt/de_GWD
+mkdir -p /opt/de_GWD/.repo
+cat << "EOF" >/opt/de_GWD/tcpTime
+#!/bin/bash
+echo
+date -s "$(wget -qSO- --max-redirect=0 --dns-timeout=3 aliyun.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z" | grep -v ' 08:00:00 '
+[[ $? -ne "0" ]] && date -s "$(wget -qSO- --max-redirect=0 --dns-timeout=3 whatismyip.akamai.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+hwclock -w
+echo
+EOF
+chmod +x /opt/de_GWD/tcpTime
+/opt/de_GWD/tcpTime
+
+sha256sum_vtrui=$(curl -fsSLo- https://"$mirrorSite"/vtrui_"$architecture".zip.sha256sum)
+
+if [[ $(checkSum /opt/de_GWD/.repo/vtrui.zip $sha256sum_vtrui) == "false" ]]; then
+rm -rf /tmp/vtrui.zip
+wget --show-progress -t 5 -T 10 -cqO /tmp/vtrui.zip https://"$mirrorSite"/vtrui_"$architecture".zip
+[[ $(checkSum /tmp/vtrui.zip $sha256sum_vtrui) == "false" ]] && red "Download Failed" && exit
+[[ $(checkSum /tmp/vtrui.zip $sha256sum_vtrui) == "true" ]] && mv -f /tmp/vtrui.zip /opt/de_GWD/.repo/vtrui.zip
+fi
+
+wget --show-progress -t 5 -T 10 -cqO /opt/de_GWD/.repo/IPchnroute https://cdn.jsdelivr.net/gh/jacyl4/chnroute@main/IPchnroute
+
+if [[ $(du -sk /opt/de_GWD/.repo/IPchnroute 2>/dev/null | awk '{print$1}') -gt 130 ]]; then
+mkdir -p /opt/de_GWD/nftables
+cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/nftables/IP_CHNROUTE
+sed -i '/^\s*$/d' /opt/de_GWD/nftables/IP_CHNROUTE
+sed -i 's/$/,/g' /opt/de_GWD/nftables/IP_CHNROUTE
+fi
+}
+
+
+
+cleanDep(){
+sed -i "/nfsvers/d" /etc/fstab >/dev/null 2>&1
+sed -i '/quic/d' /etc/nginx/conf.d/*.conf >/dev/null 2>&1
+
+jq 'del(.dns.APPLEdir)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+
+if [[ -d "/opt/bitwardenrs" ]]; then
+   mv -f /opt/bitwardenrs /opt/bitwarden
+fi
+
+if [[ -f "/etc/systemd/system/doh-client.service" ]] || [[ -f "/lib/systemd/system/doh-client.service" ]]; then
+    systemctl disable --now doh-client >/dev/null 2>&1
+    rm -rf /lib/systemd/system/doh-client.service
+    rm -rf /etc/systemd/system/doh-client.service
+    rm -rf /opt/de_GWD/doh-client*
+    rm -rf "/etc/NetworkManager/dispatcher.d"
+    systemctl daemon-reload >/dev/null
+fi
+
+if [[ -f "/etc/systemd/system/doh-server.service" ]] || [[ -f "/lib/systemd/system/doh-server.service" ]]; then
+    systemctl disable --now doh-server >/dev/null 2>&1
+    rm -rf /lib/systemd/system/doh-server.service
+    rm -rf /etc/systemd/system/doh-server.service
+    rm -rf /opt/de_GWD/doh-server*
+    rm -rf "/etc/NetworkManager/dispatcher.d"
+    systemctl daemon-reload >/dev/null
+fi
+
+if [[ -f "/lib/systemd/system/frps.service" ]] || [[ -f "/lib/systemd/system/frpc.service" ]]; then
+    systemctl disable frps >/dev/null 2>&1
+    systemctl disable frpc >/dev/null 2>&1
+    systemctl stop frps >/dev/null 2>&1
+    systemctl stop frpc >/dev/null 2>&1
+    rm -rf /lib/systemd/system/frps.service >/dev/null 2>&1
+    rm -rf /etc/systemd/system/frps.service >/dev/null 2>&1
+    rm -rf /lib/systemd/system/frpc.service >/dev/null 2>&1
+    rm -rf /etc/systemd/system/frpc.service >/dev/null 2>&1
+    systemctl daemon-reload >/dev/null
+    rm -rf /opt/de_GWD/frps
+    rm -rf /opt/de_GWD/frpc
+fi
+
+if [[ -f "/etc/systemd/system/iptables-proxy.service" ]] || [[ -f "/lib/systemd/system/iptables-proxy.service" ]]; then
+    systemctl disable iptables-proxy >/dev/null 2>&1
+    rm -rf /etc/systemd/system/iptables-proxy.service >/dev/null 2>&1
+    rm -rf /lib/systemd/system/iptables-proxy.service >/dev/null 2>&1
+    systemctl daemon-reload >/dev/null
+    /opt/de_GWD/iptables-proxy-down
+    rm -rf /opt/de_GWD/iptables-proxy-down
+    rm -rf /opt/de_GWD/iptables-proxy-up
+fi
+
+
+if [[ -d "/opt/de_GWD/xDNSc" ]]; then
+    systemctl disable xDNSc >/dev/null 2>&1
+    systemctl stop xDNSc >/dev/null 2>&1
+    rm -rf /etc/systemd/system/xDNSc.service
+    rm -rf /lib/systemd/system/xDNSc.service
+    systemctl daemon-reload >/dev/null
+    rm -rf /opt/de_GWD/xDNSc
+    jq 'del(.dns.xDNS)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
+if [[ -d "/opt/de_GWD/xDNSs" ]]; then
+    systemctl disable xDNSs >/dev/null 2>&1
+    systemctl stop xDNSs >/dev/null 2>&1
+    rm -rf /etc/systemd/system/xDNSs.service
+    rm -rf /lib/systemd/system/xDNSs.service
+    systemctl daemon-reload >/dev/null
+    rm -rf /opt/de_GWD/xDNSs
+    jq 'del(.FORWARD.xDNSs)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
+if [[ `dpkg -l | grep php | grep fpm | awk '{print $2}'` = "php7.3-fpm" ]] || [[ `dpkg -l | grep php | grep fpm | awk '{print $2}'` = "php8.0-fpm" ]]; then
+    rm -rf /etc/php/7.3/
+    apt --purge remove '^php7.3.*'
+    rm -rf /etc/php/8.0/
+    apt --purge remove '^php8.0.*'
+fi
+
+[[ -n $(dpkg -l | awk '{print$2}' | grep '^ipset$') ]] && apt --purge remove ipset
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/usr\/local\/bin\/.*/d' /tmp/now.cron
+sed -i '/\/var\/www\/ssl\/update_ocsp_cache/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+
+rm -rf /etc/apt/sources.list.d/unstable.list
+rm -rf /etc/apt/preferences.d/limit-unstable
+rm -rf /opt/de_GWD/chnroute.txt
+rm -rf /opt/de_GWD/Q4am
+rm -rf /opt/de_GWD/Q4H
+rm -rf /opt/de_GWD/Q2H
+rm -rf /etc/dns-over-https
+rm -rf /usr/bin/vtrui
+rm -rf /etc/vtrui
+rm -rf /opt/de_GWD/v2dns
+rm -rf /opt/de_GWD/vtrui
+rm -rf /opt/de_GWD/ttyd
+rm -rf /opt/de_GWD/IPxDNSSET
+rm -rf /opt/de_GWD/chnrouteSET
+rm -rf /opt/de_GWD/IPGlobalDNSSET
+rm -rf /opt/de_GWD/IPlistBlanSET
+rm -rf /opt/de_GWD/IPlistBSET
+rm -rf /opt/de_GWD/IPlistWlanSET
+rm -rf /opt/de_GWD/IPlistWSET
+rm -rf /opt/de_GWD/IPv2nodeSET
+rm -rf /opt/de_GWD/__MACOSX
+rm -rf /var/www/html/__MACOSX
+rm -rf /etc/ld.so.preload
+ldconfig
+}
+
+
+
+preUpdate(){
+source /etc/profile
+service cron stop
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+localaddr=$(ip -4 a | grep inet | grep -v 127.0.0 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
+
+DoG=$(jq -r '.dns.DoG' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+doh1=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | awk NR==1)
+doh2=$(jq -r '.dns.DOH[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | awk NR==2)
+
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+[[ -z $tls ]] && tls=$domain
+
+piholePW=$(jq -r '.address.PWD' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+serverName=$(jq -r '.address.serverName' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+webUIport=$(jq -r '.address.webUIport' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+updatePort=$(jq -r '.update.updatePort' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+if [[ -z $domain ]] || [[ -z $uuid ]]; then
+  cp -f /opt/de_GWD/0conf_bak /opt/de_GWD/0conf
+  red "de_GWD /opt/de_GWD/0conf recovered"
+  blue "Please update again"
+  exit
+fi
+
+echo
+blue "###################################################"
+green "DNS information"
+echo
+[[ -n $DoG ]] && blue "DoG:          $(yellow "$DoG")"
+[[ -n $doh1 ]] && blue "DoH1:         $(yellow "$doh1")"
+[[ -n $doh2 ]] && blue "DoH2:         $(yellow "$doh2")"
+echo
+green "Xray node information"
+echo
+blue "Domain:       $(yellow "$domain")"
+blue "Port:         $(yellow "$port")"
+blue "UUID:         $(yellow "$uuid")"
+blue "Path:         $(yellow "$path")"
+blue "###################################################"
+}
+
+
+
+de_GWDconnect(){
+echo
+if [[ $1 == "u" ]]; then
+white "de_GWD server connect \c"
+else
+white "\t\tde_GWD server connect\c"
+fi
+
+local serverConnect1=$(curl -Ism 5 google.com | grep 'HTTP')
+local serverConnect2=$(curl -Ism 5 youtube.com | grep 'HTTP')
+
+if [[ $1 == "u" ]]; then
+    if [[ $2 == "a" ]]; then
+        repoDL
+        [[ -z $serverConnect1 ]] || [[ -z $serverConnect2 ]] && exit
+    else
+        if [[ -n $serverConnect1 ]] && [[ -n $serverConnect2 ]] && [[ $(systemctl is-active 'v2dns') == "active" ]] && [[ $(systemctl is-active 'vtrui') == "active" ]]; then
+        green "[   OK   ]"
+        de_GWDconnect_check="OK"
+            green "================================="
+            green "[Y]: Full Update"
+            green "[*]: Any other key to Fast Update"
+            green "================================="
+            read -s -n 1 updateDebian
+            echo
+
+            if [[ $updateDebian = "Y" ]] || [[ $updateDebian = "y" ]]; then
+            updateAPT
+            fi
+
+        else
+        red   "[ Failed ]"
+        [[ $(dig @127.0.0.1 pinterst.com -p 5321 | grep "pinterst.com" | wc -l) != 6 ]] && echo -e "\c" && yellow "\t\t\tDoG / DoH may not work"
+        fi
+    fi
+else
+    if [[ -n $serverConnect1 ]] && [[ -n $serverConnect2 ]] && [[ $(systemctl is-active 'v2dns') == "active" ]] && [[ $(systemctl is-active 'vtrui') == "active" ]]; then
+        echo -e "\r\c" && echo -n "$statuSuccess" && white "de_GWD server connect"
+    else
+        echo -e "\r\c" && echo -n "$statusFailed" && white "de_GWD server connect"
+        [[ $(dig @127.0.0.1 pinterst.com -p 5321 | grep "pinterst.com" | wc -l) != 6 ]] && echo -e "\c" && yellow "\t\t\tDoG / DoH may not work"
+    fi
+
+if [[ -z $serverConnect1 ]] || [[ -z $serverConnect2 ]]; then
+cat << EOF >/etc/resolv.conf
+nameserver 119.29.29.29
+nameserver 182.254.118.118
+nameserver 114.114.114.114
+EOF
+systemctl stop v2dns >/dev/null 2>&1
+exit
+fi
+fi
+echo
+}
+
+
+
+preInstall(){
+sync; echo 3 >/proc/sys/vm/drop_caches >/dev/null 2>&1
+
+cat << EOF >/etc/apt/apt.conf.d/01InstallLess
+APT::Get::Assume-Yes "true";
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+EOF
+
+cat << EOF >/etc/apt/apt.conf.d/71debconf
+Dpkg::Options {
+   "--force-confdef";
+   "--force-confold";
+};
+EOF
+
+cat << EOF >~/.bash_profile
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+ulimit -n 1000000
+HISTCONTROL=ignoredups
+
+alias reboot="sudo systemctl reboot"
+EOF
+source ~/.bash_profile
+
+cat << EOF >/etc/security/limits.conf
+* soft nofile 1000000
+* hard nofile 1000000
+root soft nofile 1000000
+root hard nofile 1000000
+* soft nproc unlimited
+* hard nproc unlimited
+root soft nproc unlimited
+root hard nproc unlimited
+* soft core unlimited
+* hard core unlimited
+root soft core unlimited
+root hard core unlimited
+EOF
+
+dpkg --configure -a
+
+unset aptPKG
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^sudo$') ]] && aptPKG+=(sudo)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^locales$') ]] && aptPKG+=(locales)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^netcat$') ]] && aptPKG+=(netcat)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^dnsutils$') ]] && aptPKG+=(dnsutils)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^resolvconf$') ]] && aptPKG+=(resolvconf)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^net-tools$') ]] && aptPKG+=(net-tools)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^nftables$') ]] && aptPKG+=(nftables)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^wget$') ]] && aptPKG+=(wget)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^curl$') ]] && aptPKG+=(curl)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^git$') ]] && aptPKG+=(git)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^ca-certificates$') ]] && aptPKG+=(ca-certificates)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^apt-transport-https$') ]] && aptPKG+=(apt-transport-https)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^gnupg2$') ]] && aptPKG+=(gnupg2)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^unzip$') ]] && aptPKG+=(unzip)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^jq$') ]] && aptPKG+=(jq)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^bc$') ]] && aptPKG+=(bc)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^moreutils$') ]] && aptPKG+=(moreutils)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^haveged$') ]] && aptPKG+=(haveged)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^smartdns$') ]] && aptPKG+=(smartdns)
+[[ -n $aptPKG ]] && apt install $(echo ${aptPKG[@]})
+
+systemctl enable --now haveged >/dev/null 2>&1
+systemctl mask --now systemd-resolved >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+
+[[ -n $(which setenforce) ]] && setenforce 0
+[[ -f "/etc/selinux/config" ]] && sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
+if [[ -n $(dpkg -l | awk '{print$2}' | grep '^docker-ce$') ]] && [[ -n $(dpkg -l | awk '{print$2}' | grep '^containerd.io$') ]] && [[ ! -f "/etc/docker/daemon.json" ]]; then
+mkdir -p /etc/docker/
+systemctl stop docker containerd
+cat << EOF >/etc/docker/daemon.json
+{
+  "iptables": false
+}
+EOF
+systemctl restart docker
+fi
+}
+
+
+
+preConf(){
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+localeSet=`cat << EOF
+LANG=en_US.UTF-8
+LANGUAGE=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=en_US.UTF-8
+EOF
+`
+if [[ $(locale) != "$localeSet" ]]; then
+echo "$localeSet" >/etc/default/locale
+echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+locale-gen en_US.UTF-8 UTF-8
+update-locale en_US.UTF-8 UTF-8
+fi
+
+if [[ $(date +"%Z %z") != "CST +0800" ]]; then
+echo "Asia/Shanghai" >/etc/timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+fi
+
+modprobe nf_conntrack
+sed -i '/nf_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/xt_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/ip_conntrack/d' /etc/modules-load.d/modules.conf
+sed -i '/nf_nat/d' /etc/modules-load.d/modules.conf
+sed -i '/xt_nat/d' /etc/modules-load.d/modules.conf
+cat << EOF >>/etc/modules-load.d/modules.conf
+nf_conntrack
+EOF
+
+cat << EOF >/etc/sysctl.conf
+vm.overcommit_memory = 1
+vm.swappiness = 10
+vm.dirty_ratio = 10
+vm.dirty_background_ratio = 5
+fs.nr_open = 1000000
+fs.file-max = 1000000
+fs.inotify.max_user_instances = 819200
+fs.inotify.max_queued_events = 32000
+fs.inotify.max_user_watches = 64000
+net.unix.max_dgram_qlen = 1024
+net.nf_conntrack_max = 131072
+net.netfilter.nf_conntrack_acct = 0
+net.netfilter.nf_conntrack_checksum = 0
+net.netfilter.nf_conntrack_events = 1
+net.netfilter.nf_conntrack_timestamp = 1
+net.netfilter.nf_conntrack_helper = 1
+net.netfilter.nf_conntrack_max = 16384
+net.netfilter.nf_conntrack_buckets = 65536
+net.netfilter.nf_conntrack_tcp_loose = 1
+net.netfilter.nf_conntrack_tcp_be_liberal = 1
+net.netfilter.nf_conntrack_tcp_max_retrans = 3
+net.netfilter.nf_conntrack_generic_timeout = 60
+net.netfilter.nf_conntrack_tcp_timeout_unacknowledged = 30
+net.netfilter.nf_conntrack_tcp_timeout_time_wait = 2
+net.netfilter.nf_conntrack_tcp_timeout_close_wait = 15
+net.netfilter.nf_conntrack_tcp_timeout_close = 5
+net.netfilter.nf_conntrack_tcp_timeout_last_ack = 15
+net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 15
+net.netfilter.nf_conntrack_tcp_timeout_syn_recv = 15
+net.netfilter.nf_conntrack_tcp_timeout_syn_sent = 15
+net.netfilter.nf_conntrack_tcp_timeout_established = 3600
+net.netfilter.nf_conntrack_sctp_timeout_established = 3600
+net.netfilter.nf_conntrack_udp_timeout = 15
+net.netfilter.nf_conntrack_udp_timeout_stream = 45
+net.core.somaxconn = 65535
+net.core.optmem_max = 4194304
+net.core.netdev_max_backlog = 300000
+net.core.rmem_default = 4194304
+net.core.rmem_max = 4194304
+net.core.wmem_default = 4194304
+net.core.wmem_max = 4194304
+net.ipv4.conf.all.arp_accept = 0
+net.ipv4.conf.default.arp_accept = 0
+net.ipv4.conf.all.arp_announce = 2
+net.ipv4.conf.default.arp_announce = 2
+net.ipv4.conf.all.arp_ignore = 1
+net.ipv4.conf.default.arp_ignore = 1
+net.ipv4.conf.all.rp_filter = 0
+net.ipv4.conf.default.rp_filter = 0
+net.ipv4.conf.all.send_redirects = 1
+net.ipv4.conf.default.send_redirects = 1
+net.ipv4.conf.all.accept_redirects = 1
+net.ipv4.conf.default.accept_redirects = 1
+net.ipv4.conf.all.secure_redirects = 1
+net.ipv4.conf.default.secure_redirects = 1
+net.ipv4.conf.all.accept_source_route = 1
+net.ipv4.conf.default.accept_source_route = 1
+net.ipv4.ip_forward = 1
+net.ipv4.ip_local_port_range = 1024 65535
+net.ipv4.ip_no_pmtu_disc = 0
+net.ipv4.route.gc_timeout = 100
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+net.ipv4.udp_rmem_min = 16384
+net.ipv4.udp_wmem_min = 16384
+net.ipv4.tcp_mtu_probing = 1
+net.ipv4.tcp_base_mss = 1024
+net.ipv4.tcp_mtu_probe_floor = 48
+net.ipv4.tcp_min_snd_mss = 48
+net.ipv4.tcp_probe_interval = 600
+net.ipv4.tcp_probe_threshold = 8
+net.ipv4.tcp_min_tso_segs = 2
+net.ipv4.tcp_tso_win_divisor = 3
+net.ipv4.tcp_moderate_rcvbuf = 1
+net.ipv4.tcp_app_win = 31
+net.ipv4.tcp_adv_win_scale = 1
+net.ipv4.tcp_mem = 181419 241895 362838
+net.ipv4.tcp_rmem = 8192 87380 6291456
+net.ipv4.tcp_wmem = 8192 65536 4194304
+net.ipv4.tcp_max_tw_buckets = 60000
+net.ipv4.tcp_max_syn_backlog = 32768
+net.ipv4.tcp_max_orphans = 32768
+net.ipv4.tcp_abort_on_overflow = 0
+net.ipv4.tcp_window_scaling = 1
+net.ipv4.tcp_workaround_signed_windows = 0
+net.ipv4.tcp_no_metrics_save = 1
+net.ipv4.tcp_no_ssthresh_metrics_save = 1
+net.ipv4.tcp_fwmark_accept = 0
+net.ipv4.tcp_invalid_ratelimit = 500
+net.ipv4.tcp_ecn = 0
+net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_fastopen_key = 00000000-00000000-00000000-00000000
+net.ipv4.tcp_fastopen_blackhole_timeout_sec = 0
+net.ipv4.tcp_thin_linear_timeouts = 0
+net.ipv4.tcp_keepalive_time = 1800
+net.ipv4.tcp_keepalive_intvl = 15
+net.ipv4.tcp_keepalive_probes = 3
+net.ipv4.tcp_timestamps = 1
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_fin_timeout = 10
+net.ipv4.tcp_rfc1337 = 1
+net.ipv4.tcp_orphan_retries = 2
+net.ipv4.tcp_syn_retries = 3
+net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_syncookies = 0
+net.ipv4.tcp_retries1 = 3
+net.ipv4.tcp_retries2 = 8
+net.ipv4.tcp_sack = 1
+net.ipv4.tcp_dsack = 1
+net.ipv4.tcp_fack = 0
+net.ipv4.tcp_challenge_ack_limit=100000000
+net.ipv4.tcp_frto = 0
+net.ipv4.tcp_recovery = 1
+net.ipv4.tcp_reordering = 3
+net.ipv4.tcp_early_retrans = 3
+net.ipv4.tcp_retrans_collapse = 1
+net.ipv4.tcp_autocorking = 1
+net.ipv4.tcp_slow_start_after_idle = 0
+EOF
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+if [[ $(uname -r) =~ "bbrplus" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
+elif [[ $(uname -r) =~ "xanmod" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+else
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+fi
+sysctl -p >/dev/null
+systemctl restart systemd-sysctl
+
+echo -n "$statuSuccess" && white "System Config"
+}
+
+
+
+SmartDNSset(){
+rm -rf /etc/smartdns/*.conf
+cat << EOF >/etc/smartdns/smartdns.conf
+bind :5310
+bind-tcp :5310
+
+bind :5311 -no-speed-check -no-cache
+bind-tcp :5311 -no-speed-check -no-cache
+
+bind :5320 -group GlobalDNS
+bind-tcp :5320 -group GlobalDNS
+
+bind :5321 -no-speed-check -no-cache -group GlobalDNS
+bind-tcp :5321 -no-speed-check -no-cache -group GlobalDNS
+
+speed-check-mode        ping,tcp:443
+cache-size              10000
+cache-persist           no
+rr-ttl                  600
+rr-ttl-min              10
+rr-ttl-max              600
+force-AAAA-SOA          yes
+prefetch-domain         yes
+serve-expired           yes
+serve-expired-ttl       0
+serve-expired-reply-ttl 4
+ignore-ip 0.0.0.0
+ignore-ip 127.0.0.1
+
+server 114.114.114.114
+server 114.114.115.115
+server 119.29.29.29
+server 119.28.28.28
+server 182.254.118.118
+server 223.5.5.5
+server 223.6.6.6
+EOF
+
+rm -rf /run/smartdns.pid
+rm -rf /lib/systemd/system/smartdns.service
+cat << EOF >/etc/systemd/system/smartdns.service
+[Unit]
+Description=SmartDNS
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/smartdns.pid
+EnvironmentFile=/etc/default/smartdns
+ExecStart=/usr/sbin/smartdns -c /etc/smartdns/smartdns.conf -p /run/smartdns.pid
+ExecStop=/bin/kill -s STOP \$MAINPID
+ExecStopPost=$(which rm) -f /run/smartdns.pid
+KillMode=mixed
+Restart=on-failure
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-11
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/smartdns.service /lib/systemd/system/smartdns.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart smartdns
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/smartdns.service
+ln -sf /etc/systemd/system/smartdns.service /lib/systemd/system/smartdns.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart smartdns
+fi
+systemctl enable smartdns >/dev/null 2>&1
+
+[[ -n $DoG ]] && DoGdomain=$(echo $DoG | cut -d: -f1) && echo "server 127.0.0.1:5330 -exclude-default-group -group GlobalDNS" >>/etc/smartdns/smartdns.conf
+[[ -n $doh1 ]] && doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+[[ -n $doh2 ]] && doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+
+[[ -n $DoG ]] && DoGIP=$(dig @127.0.0.1 $DoGdomain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+[[ -n $doh1 ]] && doh1IP=$(dig @127.0.0.1 $doh1Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+[[ -n $doh2 ]] && doh2IP=$(dig @127.0.0.1 $doh2Domain -4p 5310 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+
+domainIP=$(dig @127.0.0.1 $domain -4p 5320 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+
+[[ -n $DoG ]] && DoGPort=$(echo $DoG | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -n $doh1 ]] && doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -n $doh2 ]] && doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+
+[[ -n $doh1 ]] && doh1PortStr=$([[ -n $doh1Port ]] && echo $doh1Port | sed 's/^/:/')
+[[ -n $doh2 ]] && doh2PortStr=$([[ -n $doh2Port ]] && echo $doh2Port | sed 's/^/:/')
+
+if [[ -n $doh1IP ]]; then
+echo "server-https https://$doh1IP$doh1PortStr/dq -host-name $doh1Domain -exclude-default-group -group GlobalDNS" >>/etc/smartdns/smartdns.conf
+fi
+
+if [[ -n $doh2IP ]]; then
+echo "server-https https://$doh2IP$doh2PortStr/dq -host-name $doh2Domain -exclude-default-group -group GlobalDNS" >>/etc/smartdns/smartdns.conf
+fi
+systemctl restart smartdns
+
+[[ -n $DoG ]] && DoGcDomain=$DoGdomain && DoGcPort=$DoGPort && DoGcIP=$DoGIP
+
+echo -n "$statusInstalled" && white "SmartDNS"
+}
+
+
+
+installNftables(){
+cat << EOF >/opt/de_GWD/nftables/SET_CHNROUTE.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set CHNROUTE {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                elements = { $(cat /opt/de_GWD/nftables/IP_CHNROUTE) }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_CHNROUTE.nft
+/opt/de_GWD/nftables/SET_CHNROUTE.nft
+
+echo $DoGIP $doh1IP $doh2IP | xargs -n1 | sort | uniq | sed 's/$/,/g' >/opt/de_GWD/nftables/IP_GlobalDNS
+cat << EOF >/opt/de_GWD/nftables/SET_GlobalDNS.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set GlobalDNS {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                elements = { $(cat /opt/de_GWD/nftables/IP_GlobalDNS) }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_GlobalDNS.nft
+/opt/de_GWD/nftables/SET_GlobalDNS.nft
+
+cat << EOF >/opt/de_GWD/nftables/SET_V2NODE.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set V2NODE {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                elements = { $domainIP }
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_V2NODE.nft
+/opt/de_GWD/nftables/SET_V2NODE.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listB 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listB_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listB) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listB.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listB {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                $IP_listB_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listB.nft
+/opt/de_GWD/nftables/SET_listB.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listW 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listW_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listW) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listW.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listW {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                $IP_listW_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listW.nft
+/opt/de_GWD/nftables/SET_listW.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listBlan 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listBlan_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listBlan) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listBlan.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listBlan {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                $IP_listBlan_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listBlan.nft
+/opt/de_GWD/nftables/SET_listBlan.nft
+
+[[ $(du -sk /opt/de_GWD/nftables/IP_listWlan 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listWlan_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listWlan) }"
+cat << EOF >/opt/de_GWD/nftables/SET_listWlan.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listWlan {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                $IP_listWlan_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listWlan.nft
+/opt/de_GWD/nftables/SET_listWlan.nft
+
+cat << EOF >/opt/de_GWD/nftables/default.nft
+#!/usr/sbin/nft -f
+table inet filter {
+        chain input {
+                type filter hook input priority 0;
+                iifname lo accept
+                ct state established,related accept
+                tcp flags != syn ct state new drop
+                tcp flags & (fin|syn) == (fin|syn) drop
+                tcp flags & (syn|rst) == (syn|rst) drop
+                tcp flags & (fin|syn|rst|psh|ack|urg) < (fin) drop
+                tcp flags & (fin|syn|rst|psh|ack|urg) == (fin|psh|urg) drop
+                ct state invalid counter drop
+                # Drop 53 in
+        }
+        chain forward {
+                type filter hook forward priority 0;
+                # WireGuard traffic
+                iifname wg0 accept
+                oifname wg0 accept
+
+                # Docker traffic
+                counter jump DOCKER-USER
+                counter jump DOCKER-ISOLATION-STAGE-1
+                oifname docker0 ct state established,related counter accept
+                oifname docker0 counter jump DOCKER
+                iifname docker0 oifname != docker0 counter accept
+                iifname docker0 oifname docker0 counter accept
+        }
+        chain output {
+                type filter hook output priority 0;
+                oifname lo accept
+        }
+        chain DOCKER {
+        }
+        chain DOCKER-USER {
+                counter return
+        }
+        chain DOCKER-ISOLATION-STAGE-1 {
+                iifname docker0 oifname != docker0 counter jump DOCKER-ISOLATION-STAGE-2
+                counter return
+        }
+        chain DOCKER-ISOLATION-STAGE-2 {
+                oifname docker0 counter drop
+                counter return
+        }
+}
+
+table ip router {
+        chain prerouting {
+                type nat hook prerouting priority 0;
+                #Docker
+                fib daddr type local counter jump DOCKER
+        }
+        chain postrouting {
+                type nat hook postrouting priority 0;
+                # Wireguard masquerade traffic
+                oifname $ethernetnum ip saddr 172.16.66.0/24 masquerade
+
+                # Docker
+                oifname != docker0 ip saddr 172.17.0.0/16 counter masquerade
+        }
+        chain input {
+                type nat hook input priority 0;
+        }
+        chain output {
+                type nat hook output priority 0;
+                ip daddr != 127.0.0.0/8 fib daddr type local counter jump DOCKER
+        }
+        chain DOCKER {
+                iifname docker0 counter return
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/default.nft
+
+localCIDR="$(echo $localaddr | rev | cut -d'.' -f2-4 | rev).0/24"
+cat << EOF >/opt/de_GWD/nftables/nftables
+#!/usr/sbin/nft -f
+
+include "/opt/de_GWD/nftables/*.nft"
+
+define RESERVED_IP = {
+        $localCIDR,
+        10.0.0.0/8,
+        100.64.0.0/10,
+        127.0.0.0/8,
+        169.254.0.0/16,
+        172.16.0.0/12,
+        192.0.0.0/24,
+        192.168.0.0/16,
+        224.0.0.0/4,
+        240.0.0.0/4,
+        255.255.255.255/32,
+        114.114.114.114/32,
+        114.114.115.115/32,
+        119.29.29.29/32,
+        119.28.28.28/32,
+        182.254.118.118/32,
+        223.5.5.5/32,
+        223.6.6.6/32
+}
+
+table ip de_GWD {
+        set CHNROUTE {
+                type ipv4_addr
+                flags interval
+                auto-merge
+        }
+        set GlobalDNS {
+                type ipv4_addr
+                flags interval
+                auto-merge
+        }
+        set V2NODE {
+                type ipv4_addr
+                flags interval
+                auto-merge
+        }
+        set listB {
+                type ipv4_addr
+                flags interval
+                auto-merge
+        }
+        set listW {
+                type ipv4_addr
+                flags interval
+                auto-merge
+        }
+        set listBlan {
+                type ipv4_addr
+                flags interval
+                auto-merge
+        }
+        set listWlan {
+                type ipv4_addr
+                flags interval
+                auto-merge
+        }
+        chain prerouting {
+                type filter hook prerouting priority mangle; policy accept;
+                tcp dport 53 return
+                udp dport 53 return
+                ip daddr @GlobalDNS return
+                ip daddr @V2NODE return
+                ip saddr @listBlan ip protocol tcp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip saddr @listBlan ip protocol udp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip saddr @listWlan return
+                ip daddr \$RESERVED_IP return
+                ip daddr @listB ip protocol tcp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip daddr @listB ip protocol udp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip daddr @listW return
+                ip daddr @CHNROUTE return
+                ip protocol tcp tproxy to 127.0.0.1:9896 meta mark set 0x9
+                ip protocol udp tproxy to 127.0.0.1:9896 meta mark set 0x9
+        }
+        chain output {
+                type route hook output priority mangle; policy accept;
+                tcp dport 53 return
+                udp dport 53 return
+                tcp dport 4711 return
+                udp dport 4711 return
+                tcp dport 5310 return
+                udp dport 5310 return
+                tcp dport 5311 return
+                udp dport 5311 return
+                tcp dport 5320 return
+                udp dport 5320 return
+                tcp dport 5321 return
+                udp dport 5321 return
+                tcp dport 5330 return
+                udp dport 5330 return
+                tcp dport 5350 return
+                udp dport 5350 return
+                ip daddr @GlobalDNS return
+                ip daddr @V2NODE return
+                ip daddr \$RESERVED_IP return
+                ip daddr @listB meta mark set 0x9
+                ip daddr @listW return
+                ip daddr @CHNROUTE return
+                meta mark 0xff return
+                ip protocol tcp meta mark set 0x9
+                ip protocol udp meta mark set 0x9
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/nftables
+
+rm -rf /lib/systemd/system/nftables.service
+cat << EOF >/etc/systemd/system/nftables.service
+[Unit]
+Description=nftables
+Wants=network-pre.target
+Before=network-pre.target shutdown.target
+Conflicts=shutdown.target
+DefaultDependencies=no
+
+[Service]
+User=root
+Type=oneshot
+RemainAfterExit=yes
+StandardInput=null
+ProtectSystem=full
+ProtectHome=true
+ExecStart=/usr/sbin/nft -f /opt/de_GWD/nftables/nftables ; $(which ip) route add local default dev lo scope host table 220 ; $(which ip) rule add fwmark 0x9 table 220 prio 100
+ExecStop=/usr/sbin/nft flush ruleset ; $(which ip) rule del table 220 ; $(which ip) route del local default dev lo table 220
+
+[Install]
+WantedBy=sysinit.target
+EOF
+ln -sf /etc/systemd/system/nftables.service /lib/systemd/system/nftables.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart nftables
+systemctl enable nftables >/dev/null 2>&1
+
+echo -n "$statusInstalled" && white "nftables"
+}
+
+
+
+installXray(){
+mkdir -p /opt/de_GWD/v2dns
+mkdir -p /opt/de_GWD/vtrui
+mkdir -p /opt/de_GWD/coredns
+
+if [[ $(unzip -tq /opt/de_GWD/.repo/vtrui.zip 2>/dev/null) =~ "No errors" ]]; then
+rm -rf /tmp/vtrui
+unzip /opt/de_GWD/.repo/vtrui.zip -d /tmp/vtrui >/dev/null
+cp -f /tmp/vtrui/xray /opt/de_GWD/v2dns/v2dns
+cp -f /tmp/vtrui/xray /opt/de_GWD/vtrui/vtrui
+cp -f /tmp/vtrui/private.dat /opt/de_GWD/vtrui/private.dat
+cp -f /tmp/vtrui/coredns /opt/de_GWD/coredns/coredns
+touch /opt/de_GWD/coredns/corefile
+chmod +x /opt/de_GWD/v2dns/v2dns
+chmod +x /opt/de_GWD/vtrui/vtrui
+chmod +x /opt/de_GWD/coredns/coredns
+rm -rf /tmp/vtrui*
+else
+rm -rf /opt/de_GWD/.repo/vtrui.zip
+red "Download Failed" && exit
+fi
+
+cat << EOF >/opt/de_GWD/v2dns/config.json
+{
+  "dns":{
+    "tag":"dnsflow",
+    "disableCache":true,
+    "servers":[{"address":"127.0.0.1","port":5321}]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
+      {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"}
+    ]
+  },
+  "inbounds":[
+    {
+      "tag":"dnsin",
+      "port":53,
+      "protocol":"dokodemo-door",
+      "settings":{"address":"127.0.0.1","network":"tcp,udp"}
+    }
+  ],
+  "outbounds":[
+    {
+      "tag":"dnsout",
+      "protocol":"dns",
+      "streamSettings":{"sockopt":{"mark":255}}
+    },
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+  ]
+}
+EOF
+
+rm -rf /lib/systemd/system/v2dns.service
+cat << EOF >/etc/systemd/system/v2dns.service
+[Unit]
+Description=v2dns Service
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/v2dns/v2dns -c /opt/de_GWD/v2dns/config.json
+Restart=on-failure
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-9
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/v2dns.service /lib/systemd/system/v2dns.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart v2dns
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/v2dns.service
+ln -sf /etc/systemd/system/v2dns.service /lib/systemd/system/v2dns.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart v2dns
+fi
+systemctl enable v2dns >/dev/null 2>&1
+
+rm -rf /etc/resolvconf/resolv.conf.d/*
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/base
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/head
+nameserver 127.0.0.1
+EOF
+if [[ -f "/etc/resolvconf/run/resolv.conf" ]]; then
+ln -sf /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+elif [[ -f "/run/resolvconf/resolv.conf" ]]; then
+ln -sf /run/resolvconf/resolv.conf /etc/resolv.conf
+fi
+resolvconf -u
+
+cat << EOF >/opt/de_GWD/vtrui/config.json
+{
+  "dns":{
+    "disableCache":true,
+    "hosts":{"$domain":"$domainIP"},
+    "servers":["localhost"]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","ip":["ext:private.dat:private"],"outboundTag":"direct"}
+    ]
+  },
+  "inbounds":[
+    {
+      "port":9896,
+      "listen":"127.0.0.1",
+      "protocol":"dokodemo-door",
+      "settings":{"network":"tcp,udp","followRedirect":true},
+      "streamSettings":{"sockopt":{"tproxy":"tproxy"}}
+    }
+  ],
+  "outbounds":[
+    {
+      "tag":"default"
+    },
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+  ]
+}
+EOF
+
+if [[ -z $path ]]; then
+OBdefault=`cat << EOF
+    {
+      "tag": "default",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "flow": "xtls-rprx-splice",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBdefault=`cat << EOF
+{
+      "tag": "default",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "encryption": "none",
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+fi
+
+jq --argjson OBdefault "$OBdefault" '.outbounds[0]=$OBdefault' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+rm -rf /lib/systemd/system/vtrui.service
+cat << EOF >/etc/systemd/system/vtrui.service
+[Unit]
+Description=vtrui
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/vtrui/vtrui -c /opt/de_GWD/vtrui/config.json
+Restart=on-failure
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+NoNewPrivileges=true
+Nice=-8
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/vtrui.service /lib/systemd/system/vtrui.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui.service
+ln -sf /etc/systemd/system/vtrui.service /lib/systemd/system/vtrui.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui
+fi
+systemctl enable vtrui >/dev/null 2>&1
+
+rm -rf /lib/systemd/system/coredns.service
+cat << "EOF" >/etc/systemd/system/coredns.service
+[Unit]
+Description=CoreDNS DNS server
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/coredns/coredns -conf /opt/de_GWD/coredns/corefile
+Restart=on-failure
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+PermissionsStartOnly=true
+NoNewPrivileges=true
+Nice=-9
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/coredns.service /lib/systemd/system/coredns.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+
+if [[ -n $DoGcIP ]]; then
+sed -i '/DoGc_START/,/DoGc_END/d' /opt/de_GWD/coredns/corefile
+cat << EOF >>/opt/de_GWD/coredns/corefile
+#DoGc_START
+.:5330 {
+  bind 127.0.0.1
+  grpc . $DoGcIP:$DoGcPort {
+    tls_servername $DoGcDomain
+  }
+  cache 30
+}
+#DoGc_END
+EOF
+systemctl restart coredns
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/coredns.service
+ln -sf /etc/systemd/system/coredns.service /lib/systemd/system/coredns.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart coredns
+fi
+systemctl enable coredns >/dev/null 2>&1
+fi
+
+echo -n "$statusInstalled" && white "v2dns && vtrui"
+}
+
+
+
+updateAPT(){
+dpkg --configure -a
+cat << EOF >/etc/apt/sources.list
+deb http://cloudfront.debian.net/debian bullseye main contrib non-free
+deb http://cloudfront.debian.net/debian bullseye-updates main contrib non-free
+deb http://cloudfront.debian.net/debian bullseye-backports main contrib non-free
+deb http://cloudfront.debian.net/debian-security bullseye-security main contrib non-free
+EOF
+
+echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" >/etc/apt/sources.list.d/php.list
+apt-key del 95BD4743 >/dev/null 2>&1
+wget --no-check-certificate -cqO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+[[ $? -ne 0 ]] && red "Download Failed"
+
+apt update --fix-missing && apt upgrade --allow-downgrades -y
+apt full-upgrade -y && apt --purge autoremove -y && apt clean -y && apt autoclean -y
+
+echo -n "$statusUpdated" && white "Debian Update"
+}
+
+
+
+installDep(){
+sed -i "/www-data/d" /etc/sudoers
+sed -i "/Allow members of group sudo to execute any command/a\www-data ALL=(root)  NOPASSWD:ALL" /etc/sudoers
+
+unset aptPKG
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-fpm$') ]] && aptPKG+=(php7.4-fpm)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-json$') ]] && aptPKG+=(php7.4-json)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-gd$') ]] && aptPKG+=(php7.4-gd)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^lighttpd$') ]] && aptPKG+=(lighttpd)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^zip$') ]] && aptPKG+=(zip)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^screen$') ]] && aptPKG+=(screen)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^ethtool$') ]] && aptPKG+=(ethtool)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^netcat$') ]] && aptPKG+=(netcat)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^socat$') ]] && aptPKG+=(socat)
+[[ -n $aptPKG ]] && apt update && apt install $(echo ${aptPKG[@]})
+
+if [[ -z $(dpkg -l | awk '{print$2}' | grep '^lighttpd-mod-deflate$') ]]; then
+[[ $(printf '%s\n' $(lighttpd -v 2>&1 | grep -Po '(\d+\.)+\d+') "1.4.42" | sort -rV | head -n 1) != "1.4.42" ]] && apt install lighttpd-mod-deflate
+fi
+
+DPKGclean=$(dpkg --list | grep "^rc" | cut -d " " -f 3)
+[[ -n $DPKGclean ]] && echo $DPKGclean | xargs sudo dpkg --purge
+
+rm -rf /var/log/journal/*
+
+sed -i "/engine =/c\engine = off" /etc/php/7.4/fpm/php.ini
+sed -i "/enable_dl =/c\enable_dl = off" /etc/php/7.4/fpm/php.ini
+sed -i "/disable_functions =/c\disable_functions =" /etc/php/7.4/fpm/php.ini
+sed -i "/disable_classes =/c\disable_classes =" /etc/php/7.4/fpm/php.ini
+sed -i "/^upload_max_filesize/c\upload_max_filesize = 10M" /etc/php/7.4/fpm/php.ini
+sed -i "/^post_max_size/c\post_max_size = 10M" /etc/php/7.4/fpm/php.ini
+sed -i "/^memory_limit/c\memory_limit = 128m" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_execution_time/c\max_execution_time = 300" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_input_vars/c\max_input_vars = 3000" /etc/php/7.4/fpm/php.ini
+sed -i "/^max_input_time/c\max_input_time = 1000" /etc/php/7.4/fpm/php.ini
+sed -i "s/^opcache/;&/" /etc/php/7.4/fpm/php.ini
+sed -i "/zend_extension/d" /etc/php/7.4/fpm/php.ini
+sed -i "/zend_extension/d" /etc/php/7.4/cli/php.ini
+
+if [[ -d "/usr/local/ioncube" ]]; then
+echo "zend_extension = /usr/local/ioncube/ioncube_loader_lin_7.4.so" >/etc/php/7.4/mods-available/ioncube.ini
+ln -sf /etc/php/7.4/mods-available/ioncube.ini /etc/php/7.4/fpm/conf.d/00-ioncube.ini
+ln -sf /etc/php/7.4/mods-available/ioncube.ini /etc/php/7.4/cli/conf.d/00-ioncube.ini
+fi
+
+cat << EOF >/etc/php/7.4/mods-available/opcache.ini
+; configuration for php opcache module
+; priority=10
+zend_extension=opcache.so
+opcache.enable=1
+opcache.enable_cli=1
+opcache.jit_buffer_size=512M
+opcache.memory_consumption=128
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=10000
+opcache.revalidate_freq=1
+opcache.fast_shutdown=1
+opcache.save_comments=1
+EOF
+
+cat << EOF >/etc/php/7.4/fpm/php-fpm.conf
+[global]
+pid = /run/php/php7.4-fpm.pid
+error_log = /var/log/php7.4-fpm.log
+
+include=/etc/php/7.4/fpm/pool.d/*.conf
+EOF
+
+cat << EOF >/etc/php/7.4/fpm/pool.d/www.conf
+[www]
+user = www-data
+group = www-data
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0666
+listen = /run/php/php7.4-fpm.sock
+
+pm = dynamic
+pm.max_children = 25
+pm.start_servers = 10
+pm.min_spare_servers = 5
+pm.max_spare_servers = 20
+pm.max_requests = 500
+
+env[HOSTNAME] = \$HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+EOF
+
+rm -rf /lib/systemd/system/php7.4-fpm.service
+cat << EOF >/etc/systemd/system/php7.4-fpm.service
+[Unit]
+Description=The PHP 7.4 FastCGI Process Manager
+After=network.target
+
+[Service]
+Type=notify
+PIDFile=/run/php7.4-fpm.pid
+ExecStart=/usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /etc/php/7.4/fpm/php-fpm.conf
+ExecStopPost=$(which rm) -f /run/php7.4-fpm.pid
+ExecReload=/bin/kill -USR2 \$MAINPID
+Restart=on-failure
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/php7.4-fpm.service /lib/systemd/system/php7.4-fpm.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart php7.4-fpm
+systemctl enable php7.4-fpm >/dev/null 2>&1
+
+echo -n "$statusUpdated" && white "Dependencies"
+}
+
+
+
+installNginx(){
+mkdir -p "/etc/nginx"
+mkdir -p "/etc/nginx/conf.d"
+mkdir -p "/var/www/html"
+mkdir -p "/var/www/ssl"
+mkdir -p "/var/log/nginx"
+mkdir -p "/var/cache/nginx/client_temp"
+mkdir -p "/var/cache/nginx/proxy_temp"
+mkdir -p "/var/cache/nginx/fastcgi_temp"
+mkdir -p "/var/cache/nginx/scgi_temp"
+mkdir -p "/var/cache/nginx/uwsgi_temp"
+
+if [[ $(unzip -tq /opt/de_GWD/.repo/nginxConf.zip 2>/dev/null) =~ "No errors" ]]; then
+rm -rf /tmp/nginxConf
+unzip /opt/de_GWD/.repo/nginxConf.zip -d /tmp >/dev/null
+mv -f /tmp/nginxConf/* /etc/nginx
+rm -rf /tmp/nginxConf
+else
+rm -rf /opt/de_GWD/.repo/nginxConf.zip
+red "Download Failed" && exit
+fi
+
+rm -rf /lib/systemd/system/nginx.service
+cat << EOF >/etc/systemd/system/nginx.service
+[Unit]
+Description=NGINX
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT \$MAINPID
+ExecStopPost=$(which rm) -f /run/nginx.pid
+KillMode=process
+Restart=on-failure
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNOFILE=1000000
+LimitNPROC=infinity
+LimitCORE=infinity
+PrivateTmp=false
+NoNewPrivileges=yes
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+mkdir -p "/etc/systemd/system/nginx.service.d"
+printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" >/etc/systemd/system/nginx.service.d/override.conf
+ln -sf /etc/systemd/system/nginx.service /lib/systemd/system/nginx.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart nginx
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/nginx.service
+ln -sf /etc/systemd/system/nginx.service /lib/systemd/system/nginx.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart nginx
+fi
+systemctl enable nginx >/dev/null 2>&1
+}
+
+
+
+nginxSet(){
+[[ -f "/etc/nginx/conf.d/merge.sh" ]] && rm -rf /etc/nginx/conf.d/0_top && rm -rf /etc/nginx/conf.d/1_serverHead && rm -rf /etc/nginx/conf.d/2_tlsParameter && rm -rf /etc/nginx/conf.d/3_reverseProxy && rm -rf /etc/nginx/conf.d/4_end && rm -rf /etc/nginx/conf.d/default.conf && rm -rf /etc/nginx/conf.d/merge.sh
+
+if [[ ! -f "/var/www/ssl/de_GWD.cer" ]] || [[ ! -f "/var/www/ssl/de_GWD.key" ]]; then
+cd /var/www/ssl
+openssl req -x509 -nodes -days 3650 \
+  -subj "/C=CA/ST=QC/O=Company, Inc./CN=localhost.com" \
+  -config <(cat /etc/ssl/openssl.cnf \
+    <(printf '[SAN]\nsubjectAltName=DNS:localhost')) \
+  -newkey rsa:2048 \
+  -keyout de_GWD.key \
+  -out de_GWD.cer
+cd ~
+fi
+
+[[ -z $serverName ]] && serverName="de_GWD"
+
+[[ -z $(echo $webUIport | grep '^[[:digit:]]*$') ]] && webUIport="443"
+jq --arg webUIport $webUIport '.address.webUIport=$webUIport' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+
+if [[ $webUIport == 443 ]]; then
+cat << EOF >/etc/nginx/conf.d/80.conf
+server {
+  listen 80;
+  server_name $serverName;
+  return 301 https://\$host\$request_uri;
+}
+EOF
+else
+rm -rf /etc/nginx/conf.d/80.conf
+fi
+
+touch /etc/nginx/conf.d/default.conf
+sed -i '/SERVER_BASE_START/,/SERVER_BASE_END/d' /etc/nginx/conf.d/default.conf
+sed -i '/PHP_START/,/PHP_END/d' /etc/nginx/conf.d/default.conf
+sed -i '/TTYD_START/,/TTYD_END/d' /etc/nginx/conf.d/default.conf
+sed -i '/NETDATA_START/,/NETDATA_END/d' /etc/nginx/conf.d/default.conf
+sed -i '$s/}$//' /etc/nginx/conf.d/default.conf
+
+until [[ $(head -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
+do
+   sed -i '1d' /etc/nginx/conf.d/default.conf
+done
+
+until [[ $(tail -1 /etc/nginx/conf.d/default.conf | cat -e) != "$" ]]
+do
+   sed -i '$d' /etc/nginx/conf.d/default.conf
+done
+
+cat << EOF >/etc/nginx/conf.d/default.conf
+#SERVER_BASE_START
+server {
+  listen $webUIport ssl http2 fastopen=128 reuseport;
+  server_name $serverName;
+  root /var/www/html;
+  index index.php index.html index.htm;
+
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers  '[ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305|ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256';
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  add_header Referrer-Policy                    "origin"            always;
+  add_header X-Content-Type-Options             "nosniff"           always;
+  add_header X-Download-Options                 "noopen"            always;
+  add_header X-Frame-Options                    "SAMEORIGIN"        always;
+  add_header X-Permitted-Cross-Domain-Policies  "none"              always;
+  add_header X-Robots-Tag                       "none"              always;
+  add_header X-XSS-Protection                   "1; mode=block"     always;
+  add_header Strict-Transport-Security          "max-age=63072000"  always;
+
+location ~ /\.(?!file).* { deny all; }
+
+#SERVER_BASE_END
+
+#PHP_START
+location ~ [^/]\.php(/|$) {
+  fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+  if (!-f \$document_root\$fastcgi_script_name) {
+      return 404;
+  }
+
+  fastcgi_pass        unix:/run/php/php7.4-fpm.sock;
+  fastcgi_index       index.php;
+  include             fastcgi_params;
+  fastcgi_param       HTTP_PROXY "";
+  fastcgi_param       FQDN true;
+}
+#PHP_END
+
+#TTYD_START
+location ~ ^/ttyd(.*)$ {
+  proxy_pass                  http://127.0.0.1:3000/\$1;
+  proxy_http_version          1.1;
+  proxy_set_header            Upgrade \$http_upgrade;
+  proxy_set_header            Connection "upgrade";
+  proxy_set_header            Host \$host;
+  proxy_set_header            X-Forwarded-Proto \$scheme;
+  proxy_set_header            X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_connect_timeout       216000;
+  proxy_send_timeout          216000;
+  proxy_read_timeout          216000;
+  proxy_redirect              off;
+  proxy_store                 off;
+  add_header                  X-Cache \$upstream_cache_status;
+  add_header                  Cache-Control no-cache;
+}
+#TTYD_END
+
+#NETDATA_START
+location = /netdata {
+  return 301 /netdata/;
+}
+
+location ~ /netdata/(?<ndpath>.*) {
+  proxy_pass                  http://netdata/\$ndpath\$is_args\$args;
+  proxy_http_version          1.1;
+  proxy_set_header            Connection "keep-alive";
+  proxy_set_header            Host \$host;
+  proxy_set_header            X-Forwarded-Host \$host;
+  proxy_set_header            X-Forwarded-Server \$host;
+  proxy_set_header            X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_pass_request_headers  on;
+  proxy_redirect              off;
+  proxy_store                 off;
+  add_header                  X-Cache \$upstream_cache_status;
+  add_header                  Cache-Control no-cache;
+}
+#NETDATA_END
+
+$(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
+}
+EOF
+
+echo -n "$statusUpdated" && white "Nginx"
+}
+
+
+
+installWebUI(){
+if [[ $(du -sk /opt/de_GWD/.repo/client.zip 2>/dev/null | awk '{print$1}') -gt 2600 ]]; then
+rm -rf /tmp/ui-script
+rm -rf /tmp/ui-web
+unzip /opt/de_GWD/.repo/client.zip -d /tmp >/dev/null 2>&1
+
+rm -rf /opt/de_GWD/ui-*
+rm -rf /opt/de_GWD/ui_*
+rm -rf /var/www/html/*.php
+rm -rf /var/www/html/*.ico
+rm -rf /var/www/html/act
+rm -rf /var/www/html/vendor
+rm -rf /var/www/html/css
+rm -rf /var/www/html/js
+
+mv -f /tmp/ui-script/* /opt/de_GWD >/dev/null
+mv -f /tmp/ui-web/* /var/www/html >/dev/null
+else
+rm -rf /opt/de_GWD/.repo/client.zip
+red "Download Failed" && exit
+fi
+
+mkdir -p /var/www/html/restore
+chown -R www-data:www-data /var/www/html
+chmod -R +x /var/www/html
+chmod +x /opt/de_GWD/*
+
+systemctl force-reload nginx >/dev/null
+
+
+
+[[ -z $(echo $updatePort | grep '^[[:digit:]]*$') ]] && updatePort="3000"
+
+rm -rf /lib/systemd/system/updateGWD.service
+cat << EOF >/etc/systemd/system/updateGWD.service
+[Unit]
+Description=updateGWD
+After=network.target
+
+[Service]
+User=root
+Type=oneshot
+ExecStartPre=/usr/bin/chmod +x /opt/de_GWD/update
+ExecStart=/usr/bin/screen -dmS updateGWD /usr/bin/ttyd -p $updatePort -o /opt/de_GWD/update
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ln -sf /etc/systemd/system/updateGWD.service /lib/systemd/system/updateGWD.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+
+if [[ $(du -sk /var/www/html/spt 2>/dev/null | awk '{print$1}') -lt 102400 ]]; then
+  dd if=/dev/zero of=/var/www/html/spt bs=1k count=100k status=progress
+fi
+
+cp -f /opt/de_GWD/.repo/version.php /var/www/html/act/version.php
+}
+
+
+
+piholeConf(){
+if [[ $(find /sys/class/net ! -type d | xargs --max-args=1 realpath | awk -F\/ '{print $NF}') =~ "wg0" ]]; then
+pihole_interfaces="$ethernetnum,wg0"
+else 
+pihole_interfaces="$ethernetnum"
+fi
+
+cat << EOF >/etc/pihole/setupVars.conf
+WEBPASSWORD=$piholePW
+PIHOLE_INTERFACE=$pihole_interfaces
+IPV4_ADDRESS=$localaddr/24
+PIHOLE_DNS_1=127.0.0.1#5350
+API_EXCLUDE_DOMAINS=www.google.com,www.baidu.com,raw.githubusercontent.com,api.cloudflare.com,www.f3322.org
+DNSMASQ_LISTENING=bind
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=true
+INSTALL_WEB_INTERFACE=true
+LIGHTTPD_ENABLED=false
+BLOCKING_ENABLED=true
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
+DNSSEC=false
+REV_SERVER=false
+EOF
+}
+
+
+
+installPihole(){
+piholeCoreRelease=$(curl -kLs "https://api.github.com/repos/pi-hole/pi-hole/releases/latest" | jq -r '.tag_name' | grep -v '^null$')
+piholeFTLRelease=$(curl -kLs "https://api.github.com/repos/pi-hole/FTL/releases/latest" | jq -r '.tag_name' | grep -v '^null$')
+piholeWebUIRelease=$(curl -kLs "https://api.github.com/repos/pi-hole/AdminLTE/releases/latest" | jq -r '.tag_name' | grep -v '^null$')
+
+[[ -z $piholeCoreRelease ]] && piholeCoreRelease=$piholeCoreRelease_reserved
+[[ -z $piholeFTLRelease ]] && piholeFTLRelease=$piholeFTLRelease_reserved
+[[ -z $piholeWebUIRelease ]] && piholeWebUIRelease=$piholeWebUIRelease_reserved
+[[ -z $piholePW ]] && piholePW="0000000000000000000000000000000000000000000000000000000000000000"
+
+piholeCoreVer=$(awk '{print$1}' /etc/pihole/localversions 2>/dev/null | grep -Po "^v(\d+\.)+\d+")
+piholeWebUIVer=$(awk '{print$2}' /etc/pihole/localversions 2>/dev/null | grep -Po "^v(\d+\.)+\d+")
+piholeFTLVer=$(awk '{print$3}' /etc/pihole/localversions 2>/dev/null | grep -Po "^v(\d+\.)+\d+")
+
+if [[ $piholeCoreVer != $piholeCoreRelease ]] || [[ $piholeFTLVer != $piholeFTLRelease ]] || [[ $piholeWebUIVer != $piholeWebUIRelease ]] || [[ $(systemctl is-active 'pihole-FTL') != "active" ]]; then
+export PIHOLE_SKIP_OS_CHECK=true
+rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin
+systemctl unmask lighttpd >/dev/null 2>&1
+systemctl unmask dhcpcd >/dev/null 2>&1
+mkdir -p /etc/pihole
+>/etc/pihole/adlists.list
+
+piholeConf
+
+git clone https://github.com/pi-hole/pi-hole /etc/.pihole
+curl -fsSL https://install.pi-hole.net | bash /dev/stdin --unattended
+chmod -R 755 /var/www/html
+usermod -aG pihole www-data
+fi
+}
+
+
+
+piholeSet(){
+rm -rf /var/www/html/index.lighttpd.orig
+systemctl disable --now lighttpd >/dev/null 2>&1
+systemctl disable --now dhcpcd >/dev/null 2>&1
+systemctl mask --now lighttpd >/dev/null 2>&1
+systemctl mask --now dhcpcd >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+
+piholeConf
+
+>/etc/pihole/dns-servers.conf
+cat << EOF >/etc/pihole/pihole-FTL.conf
+BLOCKINGMODE=NULL
+CNAME_DEEP_INSPECT=true
+BLOCK_ESNI=true
+EDNS0_ECS=true
+RATE_LIMIT=0/0
+REPLY_WHEN_BUSY=ALLOW
+
+MAXLOGAGE=24.0
+PRIVACYLEVEL=0
+IGNORE_LOCALHOST=no
+AAAA_QUERY_ANALYSIS=yes
+ANALYZE_ONLY_A_AND_AAAA=false
+SHOW_DNSSEC=true
+
+SOCKET_LISTENING=localonly
+FTLPORT=4711
+RESOLVE_IPV6=no
+RESOLVE_IPV4=yes
+PIHOLE_PTR=PI.HOLE
+DELAY_STARTUP=0
+NICE=-10
+MAXNETAGE=30
+NAMES_FROM_NETDB=true
+REFRESH_HOSTNAMES=IPV4
+PARSE_ARP_CACHE=true
+CHECK_LOAD=false
+CHECK_SHMEM=90
+CHECK_DISK=90 
+
+DBIMPORT=yes
+MAXDBDAYS=30
+DBINTERVAL=1.0
+DBFILE=/etc/pihole/pihole-FTL.db
+EOF
+
+cat << "EOF" >/opt/de_GWD/pihole_hotfix
+#!/bin/bash
+localIP=$(jq -r '.address.localIP' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
+pihole restartdns >/dev/null 2>&1
+EOF
+chmod +x /opt/de_GWD/pihole_hotfix
+
+sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix >/dev/null 2>&1 &');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
+
+/opt/pihole/updatecheck.sh
+}
+
+
+
+clearKernel(){
+mkdir -p /opt/de_GWD
+cat << "EOF" >/opt/de_GWD/clearKernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+if [[ $(uname -r) =~ "bbrplus" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
+else
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+fi
+
+sysctl -p >/dev/null
+systemctl restart systemd-sysctl
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt -y purge $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line
+do
+apt -y purge $line
+done
+EOF
+chmod +x /opt/de_GWD/clearKernel
+}
+
+
+
+postInstall(){
+/opt/de_GWD/ui_am4
+/opt/de_GWD/ui_4h
+
+echo
+rm -rf /etc/dnsmasq.conf.old
+cat << EOF >/etc/dnsmasq.conf
+conf-dir=/etc/dnsmasq.d
+dns-forward-max=1000
+EOF
+pihole restartdns
+echo
+
+echo -n "$statusUpdated" && white "Pi-hole"
+
+if [[ -n $(jq -r '.address.alias' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+  /opt/de_GWD/ui-markThis >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "off" ]]; then
+  /opt/de_GWD/ui-offDHCP
+else
+  /opt/de_GWD/ui-onDHCP
+fi
+
+  /opt/de_GWD/ui-NodeOne
+if [[ $(jq -r '.v2nodeDIV.nodeNF.display' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+  /opt/de_GWD/ui-NodeNFshow >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-NodeNFhide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.v2nodeDIV.nodeCU.display' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+  /opt/de_GWD/ui-NodeCUshow >/dev/null 2>&1
+  /opt/de_GWD/ui-NodeCUrules >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-NodeCUhide >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.v2nodeDIV.nodeDT.display' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+  /opt/de_GWD/ui-NodeDTshow >/dev/null 2>&1
+  /opt/de_GWD/ui-NodeDTip >/dev/null 2>&1
+else
+  /opt/de_GWD/ui-NodeDThide >/dev/null 2>&1
+fi
+echo -n "$statusUpdated" && white "V2 Split"
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+  /opt/de_GWD/ui-FWD0save >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+  /opt/de_GWD/ui-FWD1save >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.DoGs.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+  /opt/de_GWD/ui-DoGsSave >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.Rproxy.client.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+  /opt/de_GWD/ui-RproxyCsave >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.Rproxy.server.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+  /opt/de_GWD/ui-RproxySsave >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.block53' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+  /opt/de_GWD/ui-block53on
+else
+  /opt/de_GWD/ui-block53off
+fi
+
+systemctl restart vtrui
+
+/opt/de_GWD/ui_2h
+
+cat << EOF > /etc/rc.local
+#!/bin/bash
+if [[ \$(systemd-detect-virt) == "none" ]]; then
+find /sys/class/net ! -type d | xargs --max-args=1 realpath | awk -F\/ '/pci/{print \$NF}' | while read line
+do
+[[ \$(ethtool -g \$line | awk '/Pre-set maximums/,/Current hardware settings/' | grep 'RX:' | grep -o '[0-9]\+') -ge 2048 ]] && ethtool -G \$line rx 2048 >/dev/null 2>&1
+[[ \$(ethtool -g \$line | awk '/Pre-set maximums/,/Current hardware settings/' | grep 'TX:' | grep -o '[0-9]\+') -ge 2048 ]] && ethtool -G \$line tx 2048 >/dev/null 2>&1
+ethtool -s \$line duplex full >/dev/null 2>&1
+ethtool -K \$line tso off  gso off >/dev/null 2>&1
+done
+else
+find /sys/class/net ! -type d | xargs --max-args=1 realpath | awk -F\/ '/pci/{print \$NF}' | while read line
+do
+ethtool -s \$line duplex full >/dev/null 2>&1
+ethtool -K \$line rx off  tx off  sg off  tso off  gso off  lro off  gro off  rx-gro-hw off >/dev/null 2>&1
+done
+fi
+
+ip route change \$(ip route show | grep '^default' | head -1) initcwnd 32 initrwnd 32 >/dev/null 2>&1
+EOF
+chmod +x /etc/rc.local
+/etc/rc.local
+
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/ui_am4/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/ui_4h/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/ui_2h/d' /tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+cat << EOF >>/tmp/now.cron
+0 4 * * * /opt/de_GWD/ui_am4 u
+0 */4 * * * /opt/de_GWD/ui_4h
+0 */2 * * * /opt/de_GWD/ui_2h
+@reboot /opt/de_GWD/clearKernel
+EOF
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+service cron restart
+
+rm -rf /tmp/ui-script
+rm -rf /tmp/ui-web
+rm -rf /tmp/client.zip
+rm -rf /opt/de_GWD/update
+
+if [[ $(dpkg --list | grep linux-image | wc -l) != "1" ]]; then
+red "Kernel updated"
+fi
+}
+
+
+
+
+
+
+installBBRplus(){
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+wget --show-progress -t 5 -T 10 -cqO /tmp/linux-image.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_$architecture.deb
+[[ -f "/tmp/linux-image.deb" ]] && linux_image_sha256sumL=$(sha256sum /tmp/linux-image.deb 2>/dev/null | awk '{print$1}')
+linux_image_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-image-bbrplus_"$architecture".deb.sha256sum)
+[[ $linux_image_sha256sum != $linux_image_sha256sumL ]] && red "Download Failed" && exit
+
+wget --show-progress -t 5 -T 10 -cqO /tmp/linux-headers.deb https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_$architecture.deb
+[[ -f "/tmp/linux-headers.deb" ]] && linux_headers_sha256sumL=$(sha256sum /tmp/linux-headers.deb 2>/dev/null | awk '{print$1}')
+linux_headers_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/linux-headers-bbrplus_"$architecture".deb.sha256sum)
+[[ $linux_headers_sha256sum != $linux_headers_sha256sumL ]] && red "Download Failed" && exit
+
+dpkg -i /tmp/linux-image.deb
+dpkg -i /tmp/linux-headers.deb
+
+if [[ -n $(dpkg --list | grep 'linux-image' | grep 'bbrplus') ]]; then
+dpkg --list | awk '{print $2}' | grep 'liquorix' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  
+dpkg --list | awk '{print $2}' | grep 'xanmod' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
+do
+apt -y purge $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
+do
+apt -y purge $line
+done
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "------------------------------"
+blue  "Install BBRplus kernel [done]"
+blue "------------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "bbrplus kernel install failed"
+  exit
+fi
+}
+
+
+
+installLiquorix(){
+if [[ $architecture != "amd64" ]]; then
+  red "only work on x86_64"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+mkdir -p /etc/apt/{sources.list.d,trusted.gpg.d}
+curl -o /etc/apt/trusted.gpg.d/liquorix-keyring.gpg https://liquorix.net/liquorix-keyring.gpg
+echo "deb http://liquorix.net/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" >/etc/apt/sources.list.d/liquorix.list
+
+apt update && apt install -y linux-image-liquorix-amd64 linux-headers-liquorix-amd64
+
+if [[ -n $(dpkg --list | grep linux-image | grep liquorix) ]]; then
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed '/liquorix/d' | while read line
+do
+apt -y purge $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed '/liquorix/d' | while read line
+do
+apt -y purge $line
+done
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "------------------------------"
+blue "Install Liquorix kernel [done]"
+blue "------------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "Liquorix kernel install failed"
+  echo
+  echo -n "$statusWarning" && yellow "Installation Fallback"
+
+  dpkg --list | awk '{print $2}' | grep liquorix | while read line
+  do
+  apt -y purge $line
+  done
+
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  echo -n "$statusWarning" && yellow "Exit"
+  exit
+fi
+fi
+}
+
+
+
+installXanMod(){
+if [[ $architecture != "amd64" ]]; then
+  red "only work on x86_64"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+mkdir -p /etc/apt/{sources.list.d,trusted.gpg.d}
+curl -fsSLo- https://dl.xanmod.org/gpg.key | gpg --dearmor >/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg] http://deb.xanmod.org releases main" >/etc/apt/sources.list.d/xanmod-kernel.list
+
+apt update && apt install linux-xanmod-lts -y
+
+if [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed '/xanmod/d' | while read line
+do
+apt -y purge $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed '/xanmod/d' | while read line
+do
+apt -y purge $line
+done
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "----------------------------"
+blue "Install XanMod kernel [done]"
+blue "----------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "XanMod kernel install failed"
+  echo
+  echo -n "$statusWarning" && yellow "Installation Fallback"
+
+  dpkg --list | awk '{print $2}' | grep xanmod | while read line
+  do
+  apt -y purge $line
+  done
+
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+  echo -n "$statusWarning" && yellow "Exit"
+  exit
+fi
+fi
+}
+
+
+
+install3rdKernel(){
+    green "========================================"
+    green "[1]: Install BBRplus kernel and reboot"
+    green "[2]: Install Liquorix kernel and reboot"
+    green "[3]: Install XanMod kernel and reboot"
+    green "========================================"
+    read -s -n 1 kernelSwitch
+echo
+case $kernelSwitch in
+  "1")
+    installBBRplus
+    ;;
+  "2")
+    installLiquorix
+    ;;
+  "3")
+    installXanMod
+    ;;
+esac
+}
+
+
+
+restoreKernel(){
+    green "======================="
+    green "Restore Default Kernel"
+    green "======================="
+    green "Press [Enter] to continue:"
+    read -s -n 1 restoreKconfirm
+
+if [[ $restoreKconfirm = "" ]]; then
+
+if [[ $architecture != "amd64" ]]; then
+  red "only work on x86_64"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+apt update && apt install -y linux-image-amd64 linux-headers-amd64
+
+if [[ -n $(dpkg --list | grep 'linux-image-amd64') ]]; then
+dpkg --list | awk '{print $2}' | grep 'liquorix' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  
+dpkg --list | awk '{print $2}' | grep 'xanmod' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'bbrplus' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "-----------------------------"
+blue "Restore Default Kernel [done]"
+blue "-----------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "Default kernel install failed"
+  echo
+  echo -n "$statusWarning" && yellow "Installation Fallback"
+  echo -n "$statusWarning" && yellow "Exit"
+  exit
+fi
+fi
+fi
+}
+
+
+
+changeWP(){
+    green "==========================="
+    green " Web UI Port"
+    green "==========================="
+    read webUIport
+
+    green "==========================="
+    green " Web update Port"
+    green "==========================="
+    read updatePort
+
+serverName=$(jq -r '.address.serverName' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+nginxSet
+systemctl force-reload nginx >/dev/null
+
+sed -i "/ExecStart=/c\ExecStart=/usr/bin/ttyd -p $updatePort -o /opt/de_GWD/update" /etc/systemd/system/updateGWD.service
+ln -sf /etc/systemd/system/updateGWD.service /lib/systemd/system/updateGWD.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+
+jq --arg updatePort $updatePort '.update.updatePort=$updatePort' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+blue "------------------------------------"
+blue "Web UI Port & Web update Port [done]"
+blue "------------------------------------"
+}
+
+
+
+changePWD(){
+sudo pihole -a -p
+
+piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf 2>/dev/null | cut -d= -f2)
+
+jq --arg piholePW "$piholePW" '.address.PWD = $piholePW' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+blue "----------------------"
+blue "Change password [done]"
+blue "----------------------"
+}
+
+
+
+installGWD(){
+    green "==========================="
+    green " de_GWD local IP address"
+    green "==========================="
+    read localaddr
+
+    green "==========================="
+    green " Upstream route IP address"
+    green "==========================="
+    read gatewayaddr
+
+    green "==========================="
+    green " DoG / DoH"
+    green "==========================="
+    read DoGorDOH
+
+    green "==========================="
+    green " Domain"
+    green "==========================="
+    read v2servn
+    
+    green "==========================="
+    green " UUID"
+    green "==========================="
+    read uuid
+
+    green "==========================="
+    green " Path"
+    green "==========================="
+    read path
+
+if [[ $DoGorDOH =~ "/dq" ]]; then
+doh1=$DoGorDOH
+else
+DoG=$DoGorDOH
+fi
+
+domain=$(echo $v2servn | cut -d: -f1)
+port=$(echo $v2servn | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -z $port ]] && port="443"
+tls=$domain
+
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+
+cat << EOF >/etc/network/interfaces
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+address $localaddr
+netmask 255.255.255.0
+gateway $gatewayaddr
+EOF
+
+rm -rf /etc/resolv.conf
+cat << EOF >/etc/resolv.conf
+nameserver 119.29.29.29
+nameserver 182.254.118.118
+nameserver 114.114.114.114
+EOF
+
+[[ $architecture == "arm64" ]] && apt-mark hold $(dpkg -l | grep 'linux-image-' | awk '{print $2}')
+
+dpkg --configure -a
+
+if [[ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) == "stretch" ]]; then
+cat << EOF >/etc/apt/sources.list
+deb http://$chnAPTsource/debian buster main contrib non-free
+deb http://$chnAPTsource/debian buster-updates main contrib non-free
+deb http://$chnAPTsource/debian-security buster/updates main contrib non-free
+EOF
+
+sed -i "s/ stretch / buster /g" /etc/apt/sources.list.d/* >/dev/null 2>&1
+[[ $architecture == "arm64" ]] && echo "deb https://mirrors.tuna.tsinghua.edu.cn/armbian buster main buster-utils buster-desktop" >/etc/apt/sources.list.d/armbian.list
+apt update --fix-missing && apt upgrade --allow-downgrades -y
+apt full-upgrade -y && apt --purge autoremove -y && apt clean -y && apt autoclean -y
+fi
+
+cat << EOF >/etc/apt/sources.list
+deb http://$chnAPTsource/debian bullseye main contrib non-free
+deb http://$chnAPTsource/debian bullseye-updates main contrib non-free
+deb http://$chnAPTsource/debian bullseye-backports main contrib non-free
+deb http://$chnAPTsource/debian-security bullseye-security main contrib non-free
+EOF
+
+sed -i "s/ buster / bullseye /g" /etc/apt/sources.list.d/* >/dev/null 2>&1
+[[ $architecture == "arm64" ]] && echo "deb https://mirrors.tuna.tsinghua.edu.cn/armbian bullseye main bullseye-utils bullseye-desktop" >/etc/apt/sources.list.d/armbian.list
+apt update --fix-missing && apt upgrade --allow-downgrades -y
+apt full-upgrade -y && apt --purge autoremove -y && apt clean -y && apt autoclean -y
+
+preInstall
+
+preConf
+
+preDownload
+
+SmartDNSset
+
+installNftables
+
+installXray
+
+echo "{}" >/opt/de_GWD/0conf
+jq '.address={}' /opt/de_GWD/0conf |\
+jq '.dns={}' |\
+jq '.v2node=[]' |\
+jq '.update={}' |\
+jq --arg localIP "$localaddr" '.address.localIP=$localIP' |\
+jq --arg upstreamIP "$gatewayaddr" '.address.upstreamIP=$upstreamIP' |\
+jq --arg domain "$v2servn" '.v2node[0].domain=$domain' |\
+jq --arg name "$v2servn" '.v2node[0].name=$name' |\
+jq --arg uuid "$uuid" '.v2node[0].uuid=$uuid' |\
+jq --arg path "$path" '.v2node[0].path=$path' |\
+jq --arg updateAddr "$localaddr" '.update.updateAddr=$updateAddr' |\
+jq --arg updatePort "3000" '.update.updatePort=$updatePort' |\
+jq --arg updateCMD "$installCMD" '.update.updateCMD=$updateCMD' |\
+jq --arg domain "$domain" '.update.v2node.domain=$domain' |\
+jq --arg port "$port" '.update.v2node.port=$port' |\
+jq --arg uuid "$uuid" '.update.v2node.uuid=$uuid' |\
+jq --arg path "$path" '.update.v2node.path=$path' | sponge /opt/de_GWD/0conf
+[[ -n $DoG ]] && jq --arg DoG "$DoG" '.dns.DoG=$DoG' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+[[ -n $doh1 ]] && jq --arg doh1 "$doh1" '.dns.DOH+=[$doh1]' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+de_GWDconnect
+
+updateAPT
+
+apt --reinstall install ca-certificates
+
+installDep
+
+repoDL
+
+installNginx
+
+nginxSet
+
+installWebUI
+
+installPihole
+
+piholeSet
+
+postInstall
+blue "---------------------"
+blue "Install de_GWD [done]"
+blue "---------------------"
+}
+
+
+
+updateGWD(){
+[[ -f "/opt/de_GWD/version.php" ]] && red "this is not client" && exit
+
+if [[ $1 == "auto" ]]; then
+de_GWDconnect u a
+else
+de_GWDconnect u
+fi
+
+cleanDep
+
+preUpdate
+
+preInstall
+
+preConf
+
+preDownload
+
+SmartDNSset
+
+installNftables
+
+installXray
+
+[[ $de_GWDconnect_check != "OK" ]] && de_GWDconnect
+
+installDep
+
+repoDL
+
+installNginx
+
+nginxSet
+
+installWebUI
+
+installPihole
+
+piholeSet
+
+postInstall
+blue "--------------------"
+blue "Update de_GWD [done]"
+blue "--------------------"
+}
+
+
+
+start_menu(){
+if [[ $(systemctl is-active 'pihole-FTL') == "active" ]]; then
+    echo "[$statusGOOD] Pi-hole        [working]"
+elif [ ! -f "/usr/local/bin/pihole" ]; then
+    echo "[$statusBAD] Pi-hole        [not installed]"
+else
+    echo "[$statusBAD] Pi-hole        [start failed]"
+fi
+
+if [[ $(systemctl is-active 'smartdns') == "active" ]]; then
+    echo "[$statusGOOD] SmartDNS       [working]"
+elif [[ ! -f "/usr/sbin/smartdns" ]]; then
+    echo "[$statusBAD] SmartDNS       [not Installed]"
+else
+    echo "[$statusBAD] SmartDNS       [start failed]"
+fi
+
+if [[ $(systemctl is-active 'v2dns') == "active" ]]; then
+    echo "[$statusGOOD] V2DNS          [working]"
+elif [[ ! -d "/opt/de_GWD/v2dns" ]]; then
+    echo "[$statusBAD] V2DNS          [not Installed]"
+else
+    echo "[$statusBAD] V2DNS          [start failed]"
+fi
+
+if [[ $(systemctl is-active 'vtrui') == "active" ]]; then
+    echo "[$statusGOOD] Xray           [working]"
+elif [[ ! -d "/opt/de_GWD/vtrui" ]]; then
+    echo "[$statusBAD] Xray           [not Installed]"
+else
+    echo "[$statusBAD] Xray           [start failed]"
+fi
+
+if [[ $(systemctl is-active 'nginx') == "active" ]]; then
+    echo "[$statusGOOD] Nginx          [working]"
+elif [[ ! -f "/usr/sbin/nginx" ]]; then
+    echo "[$statusBAD] Nginx          [not installed]"
+else
+    echo "[$statusBAD] Nginx          [start failed]"
+fi
+
+if [[ $(systemctl is-active 'php7.4-fpm') == "active" ]]; then
+    echo "[$statusGOOD] php7.4-FPM     [working]"
+elif [ ! -f "/etc/php/7.4/fpm/php-fpm.conf" ]; then
+    echo "[$statusBAD] php7.4-FPM     [not installed]"
+else
+    echo "[$statusBAD] php7.4-FPM     [start failed]"
+fi
+
+if [[ -n $(crontab -l 2>&1 | grep "autoUpdate") ]] && [[ -f "/opt/de_GWD/autoUpdate" ]]; then
+    echo "[$statusGOOD] AutoUpdate     [working]"
+else
+    echo "[$statusNONE] AutoUpdate     [stopped]"
+fi
+
+white "----------------------------"
+
+if [[ $(du -sk /opt/de_GWD/v2dns/geosite.dat 2>/dev/null | awk '{print$1}') -gt 4400 ]]; then
+    echo "[$statusGOOD] GeoSite        [loaded]"
+else
+    echo "[$statusBAD] GeoSite        [incomplete]"
+fi
+
+if [[ $(du -sk /opt/de_GWD/v2dns/geoip.dat 2>/dev/null | awk '{print$1}') -ge 180 ]]; then
+    echo "[$statusGOOD] GeoIP          [loaded]"
+else
+    echo "[$statusBAD] GeoIP          [incomplete]"
+fi
+
+if [[ $(du -sk /opt/de_GWD/nftables/IP_CHNROUTE 2>/dev/null | awk '{print$1}') -gt 100 ]]; then
+    echo "[$statusGOOD] ChnrouteIP     [loaded]"
+else
+    echo "[$statusBAD] ChnrouteIP     [incomplete]"
+fi
+
+    blue  "--------------------------------------------------"
+    blue  "Debian Version:                 $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1)"
+    blue  "Kernel:                         $(uname -r)"
+    blue  "Current tcp congestion control: $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | cut -d' ' -f3) + $(sysctl net.core.default_qdisc 2>/dev/null | cut -d' ' -f3)"
+    blue  "--------------------------------------------------"
+
+    green "============CLIENT================================"
+    green "       __         _______       ______  "
+    green "  ____/ /__      / ____/ |     / / __ \ "
+    green " / __  / _ \    / / __ | | /| / / / / / "
+    green "/ /_/ /  __/   / /_/ / | |/ |/ / /_/ /  "
+    green "\__,_/\___/____\____/  |__/|__/_____/   "
+    green "         /_____/                        "
+    echo
+    green "Require: Debian (amd64 && arm64)"
+    green "Author:  JacyL4"
+    green "=================================================="
+    echo
+    green  "1. Install de_GWD"
+    green  "2. Install BBRplus-$BBRPLUS_Ver / Liquorix / XanMod kernel and reboot"
+    blue   "3. Restore default kernel and reboot"
+    yellow "8. Change Web UI port & Web update port"
+    yellow "9. Change de_GWD password"
+    yellow "0. Update de_GWD"
+    red    "CTRL+C EXIT"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installGWD
+    start_menu
+    ;;
+    2)
+    install3rdKernel
+    start_menu
+    ;;
+    3)
+    restoreKernel
+    start_menu
+    ;;
+    8)
+    changeWP
+    start_menu
+    ;;
+    9)
+    changePWD
+    start_menu
+    ;;
+    0)
+    updateGWD
+    start_menu
+    ;;
+    *)
+    clear
+    red "Wrong number"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
