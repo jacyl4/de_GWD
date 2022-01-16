@@ -1,0 +1,16 @@
+#!/bin/bash
+docker stop jellyfin
+
+rm -rf /tmp/opt
+unzip /var/www/html/restore/Jellyfin_bak.zip -d /tmp
+
+if [[ $(du -sk /tmp/opt 2>/dev/null | awk '{print$1}') -gt 1 ]]; then
+rm -rf /opt/jellyfin
+mkdir -p /opt/jellyfin
+mv -f /tmp/opt/jellyfin/* /opt/jellyfin
+fi
+
+docker restart jellyfin
+
+rm -rf /tmp/opt
+rm -rf /var/www/html/restore/Jellyfin_bak.zip
