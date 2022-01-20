@@ -1,0 +1,11 @@
+#!/bin/bash
+jq '.v2nodeDIV.nodeDT.display="off"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+jq 'del(.routing.rules[] | select(.outboundTag == "divertTraffic"))' /opt/de_GWD/vtrui/config.json |\
+jq 'del(.outbounds[] | select(.tag == "divertTraffic"))' | sponge /opt/de_GWD/vtrui/config.json
+chmod 666 /opt/de_GWD/vtrui/config.json
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi
