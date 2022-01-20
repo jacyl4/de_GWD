@@ -1,0 +1,74 @@
+#!/bin/bash
+ethernetnum=$(find /sys/class/net ! -type d | xargs --max-args=1 realpath | awk -F\/ '/pci/{print $NF}')
+
+WGaddress=$(jq -r '.wireguard.server.WGaddress' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+WGport=$(jq -r '.wireguard.server.WGport' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+sprivatekey=$(jq -r '.wireguard.server.sprivatekey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+spublickey=$(jq -r '.wireguard.server.spublickey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+clientsNUM=$(jq -r '.wireguard.clients | length' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+clientsNUMinvalid=$(jq -r '.wireguard.clients[].cprivatekey' /opt/de_GWD/0conf | grep '^undefined$' | wc -l)
+clientsNUMgood=$[$clientsNUM-$clientsNUMinvalid]
+
+rm -rf /etc/wireguard/client*.conf
+
+cat << EOF >/etc/wireguard/wg0.conf
+[Interface]
+PrivateKey = $sprivatekey
+Address = 172.16.66.1/32
+ListenPort = $WGport
+DNS = 127.0.0.1
+MTU = 1420
+EOF
+
+for ((i=0; i<$clientsNUMgood; i++))
+do
+cat << EOF >>/etc/wireguard/wg0.conf
+
+[Peer]
+PublicKey = $(jq -r --argjson i "$i" '.wireguard.clients[$i].cpublickey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+AllowedIPs = 172.16.66.$[$i+11]/32
+EOF
+
+cat << EOF >/etc/wireguard/client$[$i+1].conf
+[Interface]
+PrivateKey = $(jq -r --argjson i "$i" '.wireguard.clients[$i].cprivatekey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+Address = 172.16.66.$[$i+11]/32
+DNS = 172.16.66.1
+MTU = 1420
+
+[Peer]
+PublicKey = $spublickey
+Endpoint = $WGaddress:$WGport
+AllowedIPs = 0.0.0.0/0
+EOF
+done
+chmod 600 /etc/wireguard/wg0.conf
+chmod 600 /etc/wireguard/client*.conf
+
+rm -rf /lib/systemd/system/wg-quick@.service
+cat << "EOF" >/etc/systemd/system/wg-quick@.service
+[Unit]
+Description=WireGuard via wg-quick(8) for %I
+After=network-online.target nss-lookup.target
+Wants=network-online.target nss-lookup.target
+PartOf=wg-quick.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/wg-quick up %i
+ExecStop=/usr/bin/wg-quick down %i
+ExecReload=/bin/bash -c 'exec /usr/bin/wg syncconf %i <(exec /usr/bin/wg-quick strip %i)'
+Environment=WG_ENDPOINT_RESOLUTION_RETRIES=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ls -sf /etc/systemd/system/wg-quick@.service /lib/systemd/system/wg-quick@.service >/dev/null 2>&1
+systemctl daemon-reload >/dev/null
+systemctl restart wg-quick@wg0
+systemctl enable wg-quick@wg0 >/dev/null 2>&1
+
+sed -i "/PIHOLE_INTERFACE=/c\PIHOLE_INTERFACE=$ethernetnum,wg0" /etc/pihole/setupVars.conf
+pihole restartdns

@@ -1,0 +1,8 @@
+#!/bin/bash
+sed -i '/DoGs_START/,/DoGs_END/d' /opt/de_GWD/coredns/corefile
+if [[ $(cat /opt/de_GWD/coredns/corefile | wc -c) -le 50 ]]; then
+systemctl disable coredns >/dev/null 2>&1
+systemctl stop coredns
+else
+systemctl restart coredns
+fi
