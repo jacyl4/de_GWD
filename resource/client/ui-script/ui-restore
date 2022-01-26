@@ -1,0 +1,41 @@
+#!/bin/bash
+if [[ $(du -sk /var/www/html/restore/de_GWD_bak 2>/dev/null | awk '{print$1}') -gt 1 ]]; then
+mv -f /var/www/html/restore/de_GWD_bak /opt/de_GWD/0conf
+
+if [[ -n $(jq -r '.address.alias' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+ 	/opt/de_GWD/ui-markThis
+fi
+
+if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+	/opt/de_GWD/ui-onDHCP
+fi
+
+/opt/de_GWD/ui-NodeOne
+
+if [[ $(jq -r '.v2nodeDIV.nodeSM.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+  /opt/de_GWD/ui-NodeSM >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.v2nodeDIV.nodeCU.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+  /opt/de_GWD/ui-NodeCU >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.v2nodeDIV.nodeDT.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]]; then
+  /opt/de_GWD/ui-NodeDT >/dev/null 2>&1
+fi
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+ 	/opt/de_GWD/ui-FWD0save
+fi
+
+if [[ $(jq -r '.FORWARD.FWD1.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+ 	/opt/de_GWD/ui-FWD1save
+fi
+
+if [[ $(jq -r '.FORWARD.DoGs.status' /opt/de_GWD/0conf 2>/dev/null) == "on" ]];then
+  /opt/de_GWD/ui-DoGsSave
+fi
+
+/opt/de_GWD/ui_4h
+systemctl restart vtrui >/dev/null
+fi

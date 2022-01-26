@@ -1,0 +1,25 @@
+#!/bin/bash
+tag=$1
+IP=$2
+
+RoutingADD=`cat << EOF
+{
+        "type": "field",
+        "source": $IP,
+        "outboundTag": "$tag"
+}
+EOF
+`
+
+RoutingADDbt=`cat << EOF
+{
+        "type": "field",
+        "protocol": ["bittorrent"],
+        "outboundTag": "$tag"
+}
+EOF
+`
+
+jq --argjson RoutingADD "$RoutingADD" '.routing.rules+=[$RoutingADD]' /opt/de_GWD/vtrui/config.json |\
+jq --argjson RoutingADDbt "$RoutingADDbt" '.routing.rules+=[$RoutingADDbt]' | sponge /opt/de_GWD/vtrui/config.json
+

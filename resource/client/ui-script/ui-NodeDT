@@ -1,0 +1,29 @@
+#!/bin/bash
+jq 'del(.outbounds[] | select(.tag == "divert"))' /opt/de_GWD/vtrui/config.json |\
+jq 'del(.routing.rules[] | select(.outboundTag == "divert"))' | sponge /opt/de_GWD/vtrui/config.json
+
+tag="divert"
+nodeDTnumDivert=$(jq -r '.v2nodeDIV.nodeDT.divert' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+jq -r '.v2nodeDIV.nodeDT.ip[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' >/tmp/routingSip
+
+routingSip=$(echo $(jq -R -s -c 'split("\n")' < /tmp/routingSip) | jq -c '.[:-1]')
+
+if [[ -n $nodeDTnumDivert ]]; then
+address=$(jq -r --argjson nodecheck $nodeDTnumDivert '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $nodeDTnumDivert '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $nodeDTnumDivert '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $nodeDTnumDivert '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+fi
+
+[[ -n $(cat /tmp/routingSip) ]] && /opt/de_GWD/ui-V2routingSip $tag $routingSip
+
+jq '.v2nodeDIV.nodeDT.status="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+if [[ $1 == "r" ]]; then
+	systemctl restart vtrui >/dev/null
+fi
+
+rm -rf /tmp/routingSip

@@ -1,0 +1,10 @@
+#!/bin/bash
+jq 'del(.outbounds[] | select(.tag == "custom"))' /opt/de_GWD/vtrui/config.json |\
+jq 'del(.routing.rules[] | select(.outboundTag == "custom"))' | sponge /opt/de_GWD/vtrui/config.json
+
+jq '.v2nodeDIV.nodeCU.status="off"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+if [[ $1 == "r" ]]; then
+  systemctl restart vtrui >/dev/null
+fi
