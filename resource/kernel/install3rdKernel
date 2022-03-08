@@ -1,0 +1,252 @@
+#!/bin/bash
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+architecture=$(dpkg --print-architecture)
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+statusNONE=$(yellow "-")
+statusInstalled=$(green "[ installed ]")
+statuSuccess=$(green "[    OK     ]")
+statusFailed=$(red "[  failed   ]")
+statusWarning=$(yellow "[  warning  ]")
+statusUpdated=$(green "[  updated  ]")
+
+
+installBBRplus(){
+mkdir -p /boot/grub
+[[ -z $(which 'jq') ]] && apt install jq
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+rm -rf /tmp/linux-image*
+rm -rf /tmp/linux-headers*
+
+curl -sSL https://api.github.com/repos/UJX6N/bbrplus-5.15/releases/latest | jq -r '.assets[].browser_download_url | select(contains(. | "/Debian"))' | while read line
+do
+[[ $line =~ "linux-headers" ]] && [[ $line =~ $architecture ]] && bbrplusPath="/tmp/linux-headers.deb"
+[[ $line =~ "linux-image" ]] && [[ $line =~ $architecture ]] && bbrplusPath="/tmp/linux-image.deb"
+
+wget --show-progress -cqO $bbrplusPath $line
+done
+
+dpkg -i /tmp/linux-image.deb
+[[ $? -ne 0 ]] && red "Install Failed" && exit
+dpkg -i /tmp/linux-headers.deb
+[[ $? -ne 0 ]] && red "Install Failed" && exit
+
+if [[ -n $(dpkg --list | grep 'linux-image' | grep 'bbrplus') ]]; then
+dpkg --list | awk '{print $2}' | grep 'liquorix' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  
+dpkg --list | awk '{print $2}' | grep 'xanmod' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
+do
+apt -y purge $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line
+do
+apt -y purge $line
+done
+apt --purge autoremove -y && apt clean -y && apt autoclean -y
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "------------------------------"
+blue  "Install BBRplus kernel [done]"
+blue "------------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "bbrplus kernel install failed"
+  exit
+fi
+}
+
+
+
+installLiquorix(){
+if [[ $architecture != "amd64" ]]; then
+  red "only work on x86_64"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+mkdir -p /etc/apt/{sources.list.d,trusted.gpg.d}
+curl -sSLo /etc/apt/trusted.gpg.d/liquorix-keyring.gpg https://liquorix.net/liquorix-keyring.gpg
+echo "deb http://liquorix.net/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" >/etc/apt/sources.list.d/liquorix.list
+
+apt update && apt install -y linux-image-liquorix-amd64 linux-headers-liquorix-amd64
+
+if [[ -n $(dpkg --list | grep linux-image | grep liquorix) ]]; then
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed '/liquorix/d' | while read line
+do
+apt -y purge $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed '/liquorix/d' | while read line
+do
+apt -y purge $line
+done
+apt --purge autoremove -y && apt clean -y && apt autoclean -y
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "------------------------------"
+blue "Install Liquorix kernel [done]"
+blue "------------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "Liquorix kernel install failed"
+  echo
+  echo -n "$statusWarning" && yellow "Installation Fallback"
+
+  dpkg --list | awk '{print $2}' | grep liquorix | while read line
+  do
+  apt -y purge $line
+  done
+
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  echo -n "$statusWarning" && yellow "Exit"
+  exit
+fi
+fi
+}
+
+
+
+installXanMod(){
+if [[ $architecture != "amd64" ]]; then
+  red "only work on x86_64"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+mkdir -p /etc/apt/{sources.list.d,trusted.gpg.d}
+curl -sSLo- https://dl.xanmod.org/gpg.key | gpg --dearmor >/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg] http://deb.xanmod.org releases main" >/etc/apt/sources.list.d/xanmod-kernel.list
+
+apt update && apt install linux-xanmod-lts -y
+
+if [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed '/xanmod/d' | while read line
+do
+apt -y purge $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed '/xanmod/d' | while read line
+do
+apt -y purge $line
+done
+apt --purge autoremove -y && apt clean -y && apt autoclean -y
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "----------------------------"
+blue "Install XanMod kernel [done]"
+blue "----------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "XanMod kernel install failed"
+  echo
+  echo -n "$statusWarning" && yellow "Installation Fallback"
+
+  dpkg --list | awk '{print $2}' | grep xanmod | while read line
+  do
+  apt -y purge $line
+  done
+
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+  echo -n "$statusWarning" && yellow "Exit"
+  exit
+fi
+fi
+}
+
+
+
+    green "========================================"
+    green "[1]: Install BBRplus kernel and reboot"
+    green "[2]: Install Liquorix kernel and reboot"
+    green "[3]: Install XanMod kernel and reboot"
+    green "========================================"
+    read -s -n 1 kernelSwitch
+echo
+case $kernelSwitch in
+  "1")
+    installBBRplus
+    ;;
+  "2")
+    installLiquorix
+    ;;
+  "3")
+    installXanMod
+    ;;
+esac

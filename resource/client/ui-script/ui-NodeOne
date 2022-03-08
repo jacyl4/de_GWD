@@ -1,0 +1,70 @@
+#!/bin/bash
+tag="default"
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+address="$domain:$port"
+
+if [[ -n $(jq -r '.dns.servers[3].domains[]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$') ]]; then
+DNSdirectOFF=$(jq -r '.dns.servers[3].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com","geosite:category-games@cn"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+jq --argjson DNSdirectOFF "$DNSdirectOFF" '.dns.servers[3].domains=$DNSdirectOFF' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
+fi
+
+cat << EOF >/opt/de_GWD/vtrui/config.json
+{
+"dns":{
+  "tag":"dnsflow",
+  "disableCache":true,
+  "servers":["127.0.0.1"]
+},
+"routing":{
+  "rules":[
+    {"type":"field","ip":["ext:private.dat:private"],"outboundTag":"direct"},
+    {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"}
+  ]
+},
+"inbounds":[
+  {
+    "port":9896,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "settings":{"network":"tcp,udp","followRedirect":true},
+    "streamSettings":{"sockopt":{"tproxy":"tproxy"}},
+    "sniffing":{"enabled":true,"destOverride":["http","tls"]}
+  }
+]
+}
+EOF
+
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+
+OBdirect=`cat << EOF
+  {
+    "tag":"direct",
+    "protocol":"freedom",
+    "streamSettings":{"sockopt":{"mark":255}}
+  }
+EOF
+`
+
+jq --argjson OBdirect "$OBdirect" '.outbounds+=[$OBdirect]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD0save >/dev/null 2>&1
+fi
+
+
+if [[ $1 = "f" ]]; then
+  jq '.v2nodeDIV.nodeCU.status="off"' /opt/de_GWD/0conf |\
+  jq '.v2nodeDIV.nodeDT.status="off"' | sponge /opt/de_GWD/0conf
+  chmod 666 /opt/de_GWD/0conf
+fi
+
+if [[ $2 = "r" ]]; then
+  systemctl restart v2dns >/dev/null
+  systemctl restart vtrui >/dev/null
+fi

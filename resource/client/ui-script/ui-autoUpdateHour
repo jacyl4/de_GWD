@@ -1,0 +1,46 @@
+#!/bin/bash
+if [[ $1 = "off" ]]; then
+crontab -l 2>/dev/null > /tmp/now.cron
+sed -i '/autoUpdate/d' /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+rm -rf /opt/de_GWD/autoUpdate
+else
+cat << "EOF" >/opt/de_GWD/autoUpdate
+#!/bin/bash
+localVer=$(awk 'NR==1' /var/www/html/act/version.php)
+remoteVer=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+
+echo $localVer >/tmp/de_GWD_Ver
+echo $remoteVer >>/tmp/de_GWD_Ver
+
+VerCP=$(cat /tmp/de_GWD_Ver | sort -rV | uniq | awk NR==2)
+
+if [[ $VerCP = $localVer ]]; then
+systemctl stop php7.4-fpm
+
+rm -rf /tmp/autoUpdate
+wget -t 5 -T 10 -cqO /tmp/autoUpdate https://raw.githubusercontent.com/jacyl4/de_GWD/main/client
+
+if [[ $(du -sk /tmp/autoUpdate 2>/dev/null | awk '{print$1}') -gt 70 ]]; then
+sed -i '$d' /tmp/autoUpdate
+echo "updateGWD auto" >>/tmp/autoUpdate
+chmod +x /tmp/autoUpdate
+/tmp/autoUpdate
+rm -rf /tmp/autoUpdate
+fi
+
+systemctl restart php7.4-fpm
+fi
+
+rm -rf /tmp/de_GWD_Ver
+rm -rf /tmp/autoUpdate
+EOF
+chmod +x /opt/de_GWD/autoUpdate
+
+crontab -l 2>/dev/null > /tmp/now.cron
+sed -i '/autoUpdate/d' /tmp/now.cron
+echo "0 $1 * * *  /opt/de_GWD/autoUpdate" >> /tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi

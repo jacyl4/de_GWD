@@ -1,0 +1,27 @@
+#!/bin/bash
+ethernetnum=$(ip --oneline link show up | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+
+sed -i "/net.ipv4.ip_forward =/c\net.ipv4.ip_forward = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.rp_filter =/c\net.ipv4.conf.all.rp_filter = 1" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.rp_filter =/c\net.ipv4.conf.default.rp_filter = 1" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.send_redirects =/c\net.ipv4.conf.all.send_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.send_redirects =/c\net.ipv4.conf.default.send_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.accept_redirects =/c\net.ipv4.conf.all.accept_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.accept_redirects =/c\net.ipv4.conf.default.accept_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.secure_redirects =/c\net.ipv4.conf.all.secure_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.secure_redirects =/c\net.ipv4.conf.default.secure_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.accept_source_route =/c\net.ipv4.conf.all.accept_source_route = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.accept_source_route =/c\net.ipv4.conf.default.accept_source_route = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_tw_reuse =/c\net.ipv4.tcp_tw_reuse = 2" /etc/sysctl.conf
+sysctl -p >/dev/null 2>&1
+systemctl restart systemd-sysctl
+
+sed -i '/tcp dport 53 drop/d' /opt/de_GWD/nftables/default.nft
+sed -i '/udp dport 53 drop/d' /opt/de_GWD/nftables/default.nft
+
+addRule1="tcp dport 53 drop"
+addRule2="udp dport 53 drop"
+
+sed -i "/# Drop 53 in$/a$addRule2" /opt/de_GWD/nftables/default.nft
+sed -i "/# Drop 53 in$/a$addRule1" /opt/de_GWD/nftables/default.nft
+systemctl restart nftables

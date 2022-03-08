@@ -1,0 +1,14 @@
+#!/bin/bash
+tag=$1
+domain=$2
+
+RoutingADD=`cat << EOF
+{
+        "type": "field",
+        "domain": $domain,
+        "outboundTag": "$tag"
+}
+EOF
+`
+
+jq --argjson RoutingADD "$RoutingADD" '.routing.rules+=[$RoutingADD]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
