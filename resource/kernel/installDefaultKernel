@@ -1,0 +1,85 @@
+#!/bin/bash
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+architecture=$(dpkg --print-architecture)
+statusGOOD=$(green "✓")
+statusBAD=$(red "✕")
+statusNONE=$(yellow "-")
+statusInstalled=$(green "[ installed ]")
+statuSuccess=$(green "[    OK     ]")
+statusFailed=$(red "[  failed   ]")
+statusWarning=$(yellow "[  warning  ]")
+statusUpdated=$(green "[  updated  ]")
+
+    green "======================="
+    green "Restore Default Kernel"
+    green "======================="
+    green "Press [Enter] to continue:"
+    read -s -n 1 restoreKconfirm
+
+if [[ $restoreKconfirm = "" ]]; then
+
+if [[ $architecture != "amd64" ]]; then
+  red "only work on x86_64"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+apt update && apt install -y linux-image-amd64 linux-headers-amd64
+
+if [[ -n $(dpkg --list | grep 'linux-image-amd64') ]]; then
+dpkg --list | awk '{print $2}' | grep 'liquorix' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  
+dpkg --list | awk '{print $2}' | grep 'xanmod' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'bbrplus' | grep 'linux-' | while read line
+do
+apt -y purge $line
+done
+apt --purge autoremove -y && apt clean -y && apt autoclean -y
+
+update-initramfs -u -k all
+update-grub
+
+if [[ ! -f "/opt/de_GWD/clearKernel" ]]; then
+clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+fi
+
+blue "-----------------------------"
+blue "Restore Default Kernel [done]"
+blue "-----------------------------"
+reboot
+exit
+else
+  echo -n "$statusFailed" && red "Default kernel install failed"
+  echo
+  echo -n "$statusWarning" && yellow "Installation Fallback"
+  echo -n "$statusWarning" && yellow "Exit"
+  exit
+fi
+fi
+fi
