@@ -1,0 +1,16 @@
+#!/bin/bash
+red()    { echo -e "\033[31m\033[01m $1 \033[0m"; }
+green()  { echo -e "\033[32m\033[01m $1 \033[0m"; }
+yellow() { echo -e "\033[33m\033[01m $1 \033[0m"; }
+blue()   { echo -e "\033[34m\033[01m $1 \033[0m"; }
+cyan()   { echo -e "\033[36m\033[01m $1 \033[0m"; }
+white()  { echo -e "\033[37m\033[01m $1 \033[0m"; }
+statusUpdated=$(green "[  updated  ]")
+
+/opt/de_GWD/ui-smartDNS
+
+/opt/de_GWD/ui-DNSsplit r
+
+[[ $(systemctl is-active 'pihole-FTL') != "active" ]] && systemctl restart pihole-FTL
+
+echo -n "$statusUpdated" && white "DNS Split"
