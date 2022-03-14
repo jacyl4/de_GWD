@@ -1,0 +1,78 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+echo -e "\r\c" && echo -e "${WHITE}[${cRES}...${WHITE}]\c" && echo -e "\t${WHITE}DNS Split${cRES}\c"
+
+cat << EOF >/tmp/v2dns_config
+{
+  "dns":{
+    "tag":"dnsflow",
+    "disableCache":true,
+    "servers":[
+    {"address":"127.0.0.1","port":5320},
+    {"address":"127.0.0.1","port":5320,"skipFallback":true,"domains":[]},
+    {"address":"127.0.0.1","port":5320,"skipFallback":true,"domains":["domain:google.com"]},
+    {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["domain:baidu.com"]},
+    {"address":"127.0.0.1","port":5310,"skipFallback":true,"domains":["geosite:cn","geosite:tld-cn"],"expectIPs":["ext:geoipCN.dat:cn"]}
+    ]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"},
+      {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"}
+    ]
+  },
+  "inbounds":[
+    {
+      "tag":"dnsin",
+      "port":5350,
+      "listen":"127.0.0.1",
+      "protocol":"dokodemo-door",
+      "settings":{"address":"127.0.0.1","network":"tcp,udp"}
+    }
+  ],
+  "outbounds":[
+    {
+      "tag":"dnsout",
+      "protocol":"dns",
+      "streamSettings":{"sockopt":{"mark":255}}
+    },
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+  ]
+}
+EOF
+
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+jq -r '.dns.hosts | to_entries[] | [.value, .key] | @tsv' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | sed 's/[[:space:]][[:space:]]*/ /g' >/etc/pihole/custom.list
+
+sed -i '/Hosts_START/,/Hosts_END/d' /etc/smartdns/smartdns.conf
+echo "# Hosts_START" >>/etc/smartdns/smartdns.conf
+cat /etc/pihole/custom.list | while read line
+do
+echo "address /$(echo $line | awk '{print$2}')/$(echo $line | awk '{print$1}')" >>/etc/smartdns/smartdns.conf
+done
+echo "# Hosts_END" >>/etc/smartdns/smartdns.conf
+fi
+
+/opt/de_GWD/ui-submitListBW
+
+/opt/de_GWD/ui-saveNode
+
+/opt/de_GWD/ui-directLinkDNS
+
+[[ $1 = "r" ]] && systemctl restart smartdns && systemctl restart v2dns
+
+echo -e "\r\c" && echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}DNS Split${cRES}"

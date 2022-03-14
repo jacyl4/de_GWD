@@ -1,0 +1,9 @@
+#!/bin/bash
+systemctl restart smartdns
+>/etc/smartdns/smartdns.cache
+
+systemctl restart v2dns
+
+systemctl stop pihole-FTL
+rm -rf rm /etc/pihole/pihole-FTL.db
+pihole restartdns

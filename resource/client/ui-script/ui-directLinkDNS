@@ -1,0 +1,21 @@
+#!/bin/bash
+DNSdirectOFF1=$(jq -r '.dns.servers[2].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+DNSdirectOFF2=$(jq -r '.dns.servers[3].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com","geosite:category-games@cn"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+jq --argjson DNSdirectOFF1 "$DNSdirectOFF1" '.dns.servers[2].domains=$DNSdirectOFF1' /opt/de_GWD/v2dns/config.json |\
+jq --argjson DNSdirectOFF2 "$DNSdirectOFF2" '.dns.servers[3].domains=$DNSdirectOFF2' | sponge /opt/de_GWD/v2dns/config.json
+
+if [[ $(jq -r '.v2nodeDIV.directApple' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+jq --arg directApple "geosite:apple" '.dns.servers[3].domains+=[$directApple]' /opt/de_GWD/v2dns/config.json |\
+jq --arg directApple "geosite:apple-cn" '.dns.servers[3].domains+=[$directApple]' |\
+jq --arg directApple "domain:icloud.com" '.dns.servers[3].domains+=[$directApple]' |\
+jq --arg directApple "domain:icloud-content.com" '.dns.servers[3].domains+=[$directApple]' | sponge /opt/de_GWD/v2dns/config.json
+
+sed -i '/apple.china.conf/d' /etc/smartdns/smartdns.conf
+sed -i '1i\conf-file \/etc\/smartdns\/apple.china.conf' /etc/smartdns/smartdns.conf
+fi
+
+if [[ $(jq -r '.v2nodeDIV.directSteam' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+jq --arg directSteam "geosite:category-games@cn" '.dns.servers[3].domains+=[$directSteam]' /opt/de_GWD/v2dns/config.json | sponge /opt/de_GWD/v2dns/config.json
+fi
+
+[[ $1 = "r" ]] && systemctl restart smartdns >/dev/null && systemctl restart v2dns >/dev/null
