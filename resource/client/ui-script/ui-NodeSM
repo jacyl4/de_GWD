@@ -1,0 +1,222 @@
+#!/bin/bash
+jq 'del(.outbounds[] | select(.tag == "nodeSMyoutube"))' /opt/de_GWD/vtrui/config.json |\
+jq 'del(.outbounds[] | select(.tag == "nodeSMnetflix"))' |\
+jq 'del(.outbounds[] | select(.tag == "nodeSMhdh"))' |\
+jq 'del(.outbounds[] | select(.tag == "nodeSMtvb"))' |\
+jq 'del(.outbounds[] | select(.tag == "nodeSMbahamut"))' |\
+jq 'del(.outbounds[] | select(.tag == "nodeSMapple"))' |\
+jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMyoutube"))' |\
+jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMnetflix"))' |\
+jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMhdh"))' |\
+jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMtvb"))' |\
+jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMbahamut"))' |\
+jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMapple"))' | sponge /opt/de_GWD/vtrui/config.json
+
+
+
+if [[ -n $2 ]] && [[ $2 != "0" ]]; then
+nodeSMnumYoutube=$[$2-1]
+address=$(jq -r --argjson nodecheck $nodeSMnumYoutube '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $nodeSMnumYoutube '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $nodeSMnumYoutube '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $nodeSMnumYoutube '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+jq --arg address $address '.v2nodeDIV.nodeSM.youtube=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+tag="nodeSMyoutube"
+routingDomain='["geosite:youtube"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+elif [[ $2 = "0" ]]; then
+	jq 'del(.v2nodeDIV.nodeSM.youtube)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+else
+address=$(jq -r '.v2nodeDIV.nodeSM.youtube' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		tag="nodeSMyoutube"
+		routingDomain='["geosite:youtube"]'
+		/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+if [[ -n $3 ]] && [[ $3 != "0" ]]; then
+nodeSMnumNetflix=$[$3-1]
+address=$(jq -r --argjson nodecheck $nodeSMnumNetflix '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $nodeSMnumNetflix '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $nodeSMnumNetflix '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $nodeSMnumNetflix '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+jq --arg address $address '.v2nodeDIV.nodeSM.netflix=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+tag="nodeSMnetflix"
+routingDomain='["geosite:netflix"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+elif [[ $3 = "0" ]]; then
+	jq 'del(.v2nodeDIV.nodeSM.netflix)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+else
+address=$(jq -r '.v2nodeDIV.nodeSM.netflix' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		tag="nodeSMnetflix"
+		routingDomain='["geosite:netflix"]'
+		/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+if [[ -n $4 ]] && [[ $4 != "0" ]]; then
+nodeSMnumHDH=$[$4-1]
+address=$(jq -r --argjson nodecheck $nodeSMnumHDH '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $nodeSMnumHDH '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $nodeSMnumHDH '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $nodeSMnumHDH '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+jq --arg address $address '.v2nodeDIV.nodeSM.hdh=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+tag="nodeSMhdh"
+routingDomain='["geosite:hbo","geosite:disney","geosite:hulu"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+elif [[ $4 = "0" ]]; then
+	jq 'del(.v2nodeDIV.nodeSM.hdh)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+else
+address=$(jq -r '.v2nodeDIV.nodeSM.hdh' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		tag="nodeSMhdh"
+		routingDomain='["geosite:hbo","geosite:disney","geosite:hulu"]'
+		/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+if [[ -n $5 ]] && [[ $5 != "0" ]]; then
+nodeSMnumTVB=$[$5-1]
+address=$(jq -r --argjson nodecheck $nodeSMnumTVB '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $nodeSMnumTVB '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $nodeSMnumTVB '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $nodeSMnumTVB '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+jq --arg address $address '.v2nodeDIV.nodeSM.tvb=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+tag="nodeSMtvb"
+routingDomain='["geosite:tvb"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+elif [[ $5 = "0" ]]; then
+	jq 'del(.v2nodeDIV.nodeSM.tvb)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+else
+address=$(jq -r '.v2nodeDIV.nodeSM.tvb' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		tag="nodeSMtvb"
+		routingDomain='["geosite:tvb"]'
+		/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+if [[ -n $6 ]] && [[ $6 != "0" ]]; then
+nodeSMnumBahamut=$[$6-1]
+address=$(jq -r --argjson nodecheck $nodeSMnumBahamut '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $nodeSMnumBahamut '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $nodeSMnumBahamut '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $nodeSMnumBahamut '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+jq --arg address $address '.v2nodeDIV.nodeSM.bahamut=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+tag="nodeSMbahamut"
+routingDomain='["geosite:bahamut"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+elif [[ $6 = "0" ]]; then
+	jq 'del(.v2nodeDIV.nodeSM.bahamut)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+else
+address=$(jq -r '.v2nodeDIV.nodeSM.bahamut' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		tag="nodeSMbahamut"
+		routingDomain='["geosite:bahamut"]'
+		/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+if [[ -n $7 ]] && [[ $7 != "0" ]]; then
+sed -i '/apple.china.conf/d' /etc/smartdns/smartdns.conf && systemctl restart smartdns
+DNSdirectOn=$(jq -r '.dns.servers[2].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"] + ["geosite:apple"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+DNSdirectOFF2=$(jq -r '.dns.servers[3].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+jq --argjson DNSdirectOn "$DNSdirectOn" '.dns.servers[2].domains=$DNSdirectOn' /opt/de_GWD/v2dns/config.json |\
+jq --argjson DNSdirectOFF2 "$DNSdirectOFF2" '.dns.servers[3].domains=$DNSdirectOFF2' | sponge /opt/de_GWD/v2dns/config.json
+jq --argjson directApple '["geosite:apple"]' 'del(.routing.rules[] | select(.domain == $directApple))' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+jq '.v2nodeDIV.directApple="off"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+nodeSMnumApple=$[$7-1]
+address=$(jq -r --argjson nodecheck $nodeSMnumApple '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $nodeSMnumApple '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $nodeSMnumApple '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $nodeSMnumApple '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+jq --arg address $address '.v2nodeDIV.nodeSM.apple=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+tag="nodeSMapple"
+routingDomain='["geosite:apple"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+elif [[ $7 = "0" ]]; then
+	jq 'del(.v2nodeDIV.nodeSM.apple)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+	DNSdirectOFF1=$(jq -r '.dns.servers[2].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+	DNSdirectOFF2=$(jq -r '.dns.servers[3].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+	jq --argjson DNSdirectOFF1 "$DNSdirectOFF1" '.dns.servers[2].domains=$DNSdirectOFF1' /opt/de_GWD/v2dns/config.json |\
+	jq --argjson DNSdirectOFF2 "$DNSdirectOFF2" '.dns.servers[3].domains=$DNSdirectOFF2' | sponge /opt/de_GWD/v2dns/config.json
+	sed -i '/apple.china.conf/d' /etc/smartdns/smartdns.conf
+	sed -i '1i\conf-file \/etc\/smartdns\/apple.china.conf' /etc/smartdns/smartdns.conf && systemctl restart smartdns
+else
+address=$(jq -r '.v2nodeDIV.nodeSM.apple' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		sed -i '/apple.china.conf/d' /etc/smartdns/smartdns.conf && systemctl restart smartdns
+		DNSdirectOn=$(jq -r '.dns.servers[2].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"] + ["geosite:apple"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+		DNSdirectOFF2=$(jq -r '.dns.servers[3].domains - ["geosite:apple","geosite:apple-cn","domain:icloud.com","domain:icloud-content.com"]' /opt/de_GWD/v2dns/config.json 2>/dev/null | grep -v '^null$')
+		jq --argjson DNSdirectOn "$DNSdirectOn" '.dns.servers[2].domains=$DNSdirectOn' /opt/de_GWD/v2dns/config.json |\
+		jq --argjson DNSdirectOFF2 "$DNSdirectOFF2" '.dns.servers[3].domains=$DNSdirectOFF2' | sponge /opt/de_GWD/v2dns/config.json
+		jq --argjson directApple '["geosite:apple"]' 'del(.routing.rules[] | select(.domain == $directApple))' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		tag="nodeSMapple"
+		routingDomain='["geosite:apple"]'
+		/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+
+
+if [[ $2 = "0" ]] && [[ $3 = "0" ]] && [[ $4 = "0" ]] && [[ $5 = "0" ]] && [[ $6 = "0" ]] && [[ $7 = "0" ]]; then
+	jq '.v2nodeDIV.nodeSM.status="off"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+else
+	jq '.v2nodeDIV.nodeSM.status="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+	chmod 666 /opt/de_GWD/0conf
+fi
+
+
+if [[ $1 = "r" ]]; then
+	systemctl restart v2dns >/dev/null
+	systemctl restart vtrui >/dev/null
+fi

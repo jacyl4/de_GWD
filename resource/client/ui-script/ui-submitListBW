@@ -1,0 +1,51 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+echo -e "\r\c" && echo -e "${WHITE}[${cRES}...${WHITE}]\c" && echo -e "\t${WHITE}Collect Black and white list${cRES}\c"
+
+jq -r '.dns.listB[]' /opt/de_GWD/0conf 2>/dev/null | sort | uniq | sed '/^\s*$/d' >/tmp/listBpre
+jq -r '.dns.listW[]' /opt/de_GWD/0conf 2>/dev/null | sort | uniq | sed '/^\s*$/d' >/tmp/listWpre
+
+>/opt/de_GWD/nftables/IP_listB
+jq 'del(.dns.servers[2].domains)' /tmp/v2dns_config |\
+jq '.dns.servers[2].domains+=["domain:raw.githubusercontent.com"]' | sponge /tmp/v2dns_config
+if [[ -n $(cat /tmp/listBpre) ]]; then
+	sed -i '/listB_START/,/listB_END/d' /etc/smartdns/smartdns.conf
+	echo "# listB_START" >>/etc/smartdns/smartdns.conf
+	cat /tmp/listBpre | xargs -n 8 | while read listB; do
+		for listBdomain in $listB; do
+		jq --arg listB "domain:$listBdomain" '.dns.servers[2].domains+=[$listB]' /tmp/v2dns_config | sponge /tmp/v2dns_config && echo "nameserver /$listBdomain/GlobalDNS" >>/etc/smartdns/smartdns.conf &
+		done
+		wait
+	done
+	echo "# listB_END" >>/etc/smartdns/smartdns.conf
+fi
+
+>/opt/de_GWD/nftables/IP_listW
+jq 'del(.dns.servers[3].domains)' /tmp/v2dns_config |\
+jq '.dns.servers[3].domains+=["domain:live.com"]' | sponge /tmp/v2dns_config
+if [[ -n $(cat /tmp/listWpre) ]]; then
+	sed -i '/listW_START/,/listW_END/d' /etc/smartdns/smartdns.conf
+	echo "# listW_START" >>/etc/smartdns/smartdns.conf
+	cat /tmp/listWpre | xargs -n 8 | while read listW; do
+		for listWdomain in $listW; do
+		jq --arg listW "domain:$listWdomain" '.dns.servers[3].domains+=[$listW]' /tmp/v2dns_config | sponge /tmp/v2dns_config && echo "nameserver /$listWdomain/INTchnDNS" >>/etc/smartdns/smartdns.conf &
+		done
+		wait
+	done
+	echo "# listW_END" >>/etc/smartdns/smartdns.conf
+fi
+
+[[ -n $(cat /tmp/v2dns_config) ]] && mv -f /tmp/v2dns_config /opt/de_GWD/v2dns/config.json
+
+chmod 666 /opt/de_GWD/0conf
+
+echo -e "\r\c" && echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Collect Black and white list${cRES}"

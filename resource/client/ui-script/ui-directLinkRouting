@@ -1,0 +1,18 @@
+#!/bin/bash
+jq --argjson directApple '["geosite:apple"]' 'del(.routing.rules[] | select(.domain == $directApple))' /opt/de_GWD/vtrui/config.json |\
+jq --argjson directSteam '["geosite:category-games@cn"]' 'del(.routing.rules[] | select(.domain == $directSteam))' | sponge /opt/de_GWD/vtrui/config.json
+
+if [[ $(jq -r '.v2nodeDIV.directApple' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+tag="direct"
+routingDomain='["geosite:apple"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+jq 'del(.outbounds[] | select(.tag == "nodeSMapple"))' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+fi
+
+if [[ $(jq -r '.v2nodeDIV.directSteam' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+tag="direct"
+routingDomain='["geosite:category-games@cn"]'
+/opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+fi
+
+[[ $1 = "r" ]] && systemctl restart vtrui >/dev/null

@@ -1,0 +1,25 @@
+#!/bin/bash
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+if [[ $(uname -r) =~ "bbrplus" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
+else
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+fi
+
+sysctl -p >/dev/null
+systemctl restart systemd-sysctl
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line; do
+apt -y purge $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line; do
+apt -y purge $line
+done
