@@ -1,0 +1,96 @@
+#!/bin/bash
+tag="divert"
+
+RoutingADDbt=`cat << EOF
+{
+        "type": "field",
+        "protocol": ["bittorrent"],
+        "outboundTag": "$tag"
+}
+EOF
+`
+
+jq 'del(.outbounds[] | select(.tag == "divert"))' /opt/de_GWD/vtrui/config.json |\
+jq 'del(.routing.rules[] | select(.outboundTag == "divert"))' |\
+jq --argjson RoutingADDbt "$RoutingADDbt" '.routing.rules+=[$RoutingADDbt]' | sponge /opt/de_GWD/vtrui/config.json
+
+
+if [[ -n $2 ]]; then
+address=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+
+jq --arg address $address '.v2nodeDIV.nodeDT.address=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+else
+address=$(jq -r '.v2nodeDIV.nodeDT.address' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+        else
+                address=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+                tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+                port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+                uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+                path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+                /opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+jq -r '.v2nodeDIV.nodeDT.CHNlistProxyIP[]' /opt/de_GWD/0conf 2>/dev/null | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' >/tmp/CHNlistProxyIP
+jq -r '.v2nodeDIV.nodeDT.globalProxyIP[]' /opt/de_GWD/0conf 2>/dev/null | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | tee /tmp/globalProxyIP /opt/de_GWD/nftables/IP_listBlan >/dev/null 2>&1
+jq -r '.v2nodeDIV.nodeDT.directProxyIP[]' /opt/de_GWD/0conf 2>/dev/null | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | tee /tmp/directProxyIP /opt/de_GWD/nftables/IP_listWlan >/dev/null 2>&1
+CHNlistProxyIP=$(echo $(jq -R -s -c 'split("\n")' < /tmp/CHNlistProxyIP) | jq -c '.[:-1]')
+globalProxyIP=$(echo $(jq -R -s -c 'split("\n")' < /tmp/globalProxyIP) | jq -c '.[:-1]')
+
+[[ -n $(cat /tmp/CHNlistProxyIP) ]] && /opt/de_GWD/ui-V2routingSip $tag $CHNlistProxyIP
+[[ -n $(cat /tmp/globalProxyIP) ]] && /opt/de_GWD/ui-V2routingSip $tag $globalProxyIP
+
+jq '.v2nodeDIV.nodeDT.status="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+sed -i '/^\s*$/d' /opt/de_GWD/nftables/IP_listBlan
+sed -i 's/$/,/g' /opt/de_GWD/nftables/IP_listBlan
+[[ $(du -sk /opt/de_GWD/nftables/IP_listBlan 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listBlan_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listBlan) }"
+nft flush set ip de_GWD listBlan
+cat << EOF >/opt/de_GWD/nftables/SET_listBlan.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listBlan {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                $IP_listBlan_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listBlan.nft
+/opt/de_GWD/nftables/SET_listBlan.nft &
+
+sed -i '/^\s*$/d' /opt/de_GWD/nftables/IP_listWlan
+sed -i 's/$/,/g' /opt/de_GWD/nftables/IP_listWlan
+[[ $(du -sk /opt/de_GWD/nftables/IP_listWlan 2>/dev/null | awk '{print$1}') -gt 2 ]] && IP_listWlan_elements="elements = { $(cat /opt/de_GWD/nftables/IP_listWlan) }"
+nft flush set ip de_GWD listWlan
+cat << EOF >/opt/de_GWD/nftables/SET_listWlan.nft
+#!/usr/sbin/nft -f
+table ip de_GWD {
+        set listWlan {
+                type ipv4_addr
+                flags interval
+                auto-merge
+                $IP_listWlan_elements
+        }
+}
+EOF
+chmod +x /opt/de_GWD/nftables/SET_listWlan.nft
+/opt/de_GWD/nftables/SET_listWlan.nft &
+
+rm -rf /tmp/CHNlistProxyIP
+rm -rf /tmp/globalProxyIP
+rm -rf /tmp/directProxyIP
+
+[[ $1 = "r" ]] && systemctl restart vtrui >/dev/null

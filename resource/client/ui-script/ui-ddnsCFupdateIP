@@ -1,0 +1,23 @@
+#!/bin/bash
+CFdomain=$(jq -r '.ddns.ddnsCF.cfDomain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+CFzoneID=$(jq -r '.ddns.ddnsCF.CfZoneID' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+CFapikey=$(jq -r '.ddns.ddnsCF.cfAPIkey' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+CFemail=$(jq -r '.ddns.ddnsCF.cfEmail' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+wanIP=$(/opt/de_GWD/ui-wanIP)
+
+CFdomainip=$(dig @127.0.0.1 $CFdomain -4p 5334 +short | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+
+if [[ $wanIP != $CFdomainip ]]; then
+CFtopDomain=$(echo $CFdomain | rev | awk -F. '{print $1"."$2}' | rev)
+
+CFzoneID=$(curl -sX GET "https://api.cloudflare.com/client/v4/zones?name=$CFtopDomain" -H "X-Auth-Email: $CFemail" -H "X-Auth-Key: $CFapikey" -H "Content-Type: application/json" | jq  -r '.result[].id')
+
+CFrecordID=$(curl -sX GET "https://api.cloudflare.com/client/v4/zones/$CFzoneID/dns_records" -H "X-Auth-Email: $CFemail" -H "X-Auth-Key: $CFapikey" -H "Content-Type: application/json" | jq --arg CFdomain "$CFdomain" -r '.result[] | select(.name == $CFdomain).id')
+
+curl -sX PUT "https://api.cloudflare.com/client/v4/zones/$CFzoneID/dns_records/$CFrecordID" \
+     -H "X-Auth-Email: $CFemail" \
+     -H "X-Auth-Key: $CFapikey" \
+     -H "Content-Type: application/json" \
+     --data '{"type":"A","name":"'$CFdomain'","content":"'$wanIP'","ttl":1,"proxied":false}'
+fi
