@@ -1,0 +1,67 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+cat << EOF >/tmp/v2dns_config
+{
+  "dns":{
+    "queryStrategy":"UseIPv4",
+    "servers":[
+    {"address":"127.0.0.1","port":5334},
+    {"address":"127.0.0.1","port":5333,"skipFallback":true,"domains":[]},
+    {"address":"127.0.0.1","port":5334,"skipFallback":true,"domains":["domain:google.com"]},
+    {"address":"127.0.0.1","port":5330,"skipFallback":true,"domains":["domain:baidu.com"]},
+    {"address":"127.0.0.1","port":5331,"skipFallback":true,"domains":["geosite:cn","geosite:tld-cn"],"expectIPs":["ext:geoipCN.dat:cn"]}
+    ]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","inboundTag":["dnsin"],"outboundTag":"dnsout"}
+    ]
+  },
+  "inbounds":[
+    {
+      "tag":"dnsin",
+      "port":5341,
+      "listen":"127.0.0.1",
+      "protocol":"dokodemo-door",
+      "settings":{"address":"0.0.0.0","network":"tcp,udp"}
+    }
+  ],
+  "outbounds":[
+    {
+      "tag":"dnsout",
+      "protocol":"dns"
+    }
+  ]
+}
+EOF
+
+/opt/de_GWD/ui-submitListBW
+
+/opt/de_GWD/ui-NodeSave
+
+[[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]] && /opt/de_GWD/ui-DNShostsColl
+
+uniqaddress=$(awk '/address \//' /opt/de_GWD/smartdns/smartdns.conf | sort | uniq)
+sed -i '/address \//d' /opt/de_GWD/smartdns/smartdns.conf
+echo $uniqaddress | xargs -n 2 >>/opt/de_GWD/smartdns/smartdns.conf
+
+uniqNameserver=$(awk '/nameserver \//' /opt/de_GWD/smartdns/smartdns.conf | sort | uniq)
+sed -i '/nameserver \//d' /opt/de_GWD/smartdns/smartdns.conf
+echo $uniqNameserver | xargs -n 2 >>/opt/de_GWD/smartdns/smartdns.conf
+
+systemctl restart smartdns
+systemctl restart v2dns
+
+/opt/de_GWD/ui-DNSnftColl
+
+echo -e "\r\c" && echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}DNS Split${cRES}"

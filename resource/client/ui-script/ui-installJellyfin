@@ -1,0 +1,228 @@
+#!/bin/bash
+clear
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+jellyfinNginxConf(){
+cat << EOF >/etc/nginx/conf.d/jellyfin.conf
+server {
+  listen 8097 ssl http2 fastopen=128 reuseport;
+  root /var/www/html;
+  
+  ssl_certificate /var/www/ssl/de_GWD.cer;
+  ssl_certificate_key /var/www/ssl/de_GWD.key;
+  ssl_dhparam /var/www/ssl/dhparam.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_ecdh_curve CECPQ2:X25519:P-256;
+  ssl_prefer_server_ciphers off;
+  ssl_ciphers [ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305]:[ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305]:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256;
+  ssl_session_timeout 10m;
+  ssl_session_cache builtin:1000 shared:SSL:10m;
+  ssl_buffer_size 4k;
+
+  ssl_early_data on;
+  proxy_set_header Early-Data \$ssl_early_data;
+
+  add_header Referrer-Policy                    "no-referrer"       always;
+  add_header X-Content-Type-Options             "nosniff"           always;
+  add_header X-Download-Options                 "noopen"            always;
+  add_header X-Frame-Options                    "SAMEORIGIN"        always;
+  add_header X-Permitted-Cross-Domain-Policies  "none"              always;
+  add_header X-Robots-Tag                       "none"              always;
+  add_header X-XSS-Protection                   "1; mode=block"     always;
+  add_header Strict-Transport-Security          "max-age=63072000"  always;
+
+location = / {
+  return 302 https://\$host:8097/web/;
+}
+
+location / {
+  proxy_pass                  http://127.0.0.1:8096;
+  proxy_set_header            Host \$host;
+  proxy_set_header            X-Real-IP \$remote_addr;
+  proxy_set_header            X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header            X-Forwarded-Proto \$scheme;
+  proxy_set_header            X-Forwarded-Protocol \$scheme;
+  proxy_set_header            X-Forwarded-Host \$http_host;
+  keepalive_requests          100000;
+  keepalive_timeout           600s;
+  proxy_connect_timeout       600s;
+  proxy_read_timeout          600s;
+  proxy_send_timeout          600s;
+  proxy_redirect              off;
+  proxy_buffering             off;
+  proxy_buffer_size           8k;
+}
+
+location = /web/ {
+  proxy_pass                  http://127.0.0.1:8096/web/index.html;
+  proxy_set_header            Host \$host;
+  proxy_set_header            X-Real-IP \$remote_addr;
+  proxy_set_header            X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header            X-Forwarded-Proto \$scheme;
+  proxy_set_header            X-Forwarded-Protocol \$scheme;
+  proxy_set_header            X-Forwarded-Host \$http_host;
+  keepalive_requests          100000;
+  keepalive_timeout           600s;
+  proxy_connect_timeout       600s;
+  proxy_read_timeout          600s;
+  proxy_send_timeout          600s;
+  proxy_redirect              off;
+  proxy_buffering             off;
+  proxy_buffer_size           8k;
+}
+
+location /socket {
+  proxy_pass                  http://127.0.0.1:8096/socket;
+  proxy_http_version          1.1;
+  proxy_set_header            Upgrade \$http_upgrade;
+  proxy_set_header            Connection "upgrade";
+  proxy_set_header            Host \$host;
+  proxy_set_header            X-Real-IP \$remote_addr;
+  proxy_set_header            X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header            X-Forwarded-Proto \$scheme;
+  proxy_set_header            X-Forwarded-Protocol \$scheme;
+  proxy_set_header            X-Forwarded-Host \$http_host;
+  keepalive_requests          100000;
+  keepalive_timeout           600s;
+  proxy_connect_timeout       600s;
+  proxy_read_timeout          600s;
+  proxy_send_timeout          600s;
+  proxy_redirect              off;
+  proxy_buffering             off;
+  proxy_buffer_size           8k;
+}
+
+}
+EOF
+systemctl force-reload nginx >/dev/null
+}
+
+
+
+jellyfinDockerRun(){
+docker run -d \
+  --name jellyfin \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Asia/Shanghai \
+  -p 8096:8096 \
+  -p 8920:8920 \
+  -p 7359:7359/udp \
+  -p 1900:1900/udp \
+  --volume /opt/jellyfin/config:/config \
+  --volume /opt/jellyfin/cache:/cache \
+  --mount type=bind,source=/mnt,target=/media \
+  --restart unless-stopped \
+  nyanmisaka/jellyfin:latest
+}
+
+
+
+installJellyfin(){
+mkdir -p /opt/jellyfin/config
+mkdir -p /opt/jellyfin/cache
+
+docker pull nyanmisaka/jellyfin:latest
+
+jellyfinDockerRun
+
+jellyfinNginxConf
+
+jq '.app.jellyfin="installed"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Install Jellyfin${cRES}"
+}
+
+
+
+uninstallJellyfin(){
+docker stop jellyfin >/dev/null 2>&1
+docker rm jellyfin >/dev/null 2>&1
+docker image ls 2>/dev/null | awk '/jellyfin/{print$3}' | while read line; do
+docker rmi $line >/dev/null 2>&1
+done
+
+rm -rf /etc/nginx/conf.d/jellyfin.conf
+systemctl force-reload nginx >/dev/null
+
+rm -rf /opt/jellyfin
+jq 'del(.app.jellyfin)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Uninstall Jellyfin${cRES}"
+}
+
+
+
+updateJellyfin(){
+mkdir -p /opt/jellyfin/config
+mkdir -p /opt/jellyfin/cache
+
+docker pull nyanmisaka/jellyfin:latest
+
+docker stop jellyfin
+docker rm jellyfin
+
+jellyfinDockerRun
+
+jellyfinNginxConf
+
+docker system prune -f
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Update Jellyfin${cRES}"
+}
+
+
+
+start_menu(){
+[[ -f "/usr/share/keyrings/jellyfin-archive-keyring.gpg" ]] && rm -rf /usr/share/keyrings/jellyfin-archive-keyring.gpg
+[[ -f "/etc/apt/sources.list.d/jellyfin.list" ]] && rm -rf /etc/apt/sources.list.d/jellyfin.list
+
+unset aptPKG
+[[ -n $(dpkg -l | awk '{print$2}' | grep '^jellyfin$') ]] && aptPKG+=(jellyfin)
+[[ -n $(dpkg -l | awk '{print$2}' | grep '^jellyfin-ffmpeg$') ]] && aptPKG+=(jellyfin-ffmpeg)
+[[ -n $(dpkg -l | awk '{print$2}' | grep '^jellyfin-server$') ]] && aptPKG+=(jellyfin-server)
+[[ -n $(dpkg -l | awk '{print$2}' | grep '^jellyfin-web$') ]] && aptPKG+=(jellyfin-web)
+[[ -n $aptPKG ]] && apt update && apt autoremove --purge  $(echo ${aptPKG[@]})
+
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}         Jellyfin${cRES}"
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}1. Install Jellyfin${cRES}"
+   echo -e "${YELLOW}2. Uninstall Jellyfin${cRES}"
+    echo -e "${GREEN}0. Update Jellyfin${cRES}"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installJellyfin
+    start_menu
+    ;;
+    2)
+    uninstallJellyfin
+    start_menu
+    ;;
+    0)
+    updateJellyfin
+    start_menu
+    ;;
+    *)
+    clear
+    echo -e "${RED}Wrong number${cRES}"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu

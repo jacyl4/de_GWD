@@ -1,0 +1,20 @@
+#!/bin/bash
+DoGsPort=$(jq -r '.FORWARD.DoGs.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+sed -i '/DoGs_START/,/DoGs_END/d' /opt/de_GWD/coredns/corefile
+cat << EOF >>/opt/de_GWD/coredns/corefile
+# DoGs_START
+grpc://.:$DoGsPort {
+  tls /var/www/ssl/de_GWD.cer /var/www/ssl/de_GWD.key
+  forward . 127.0.0.1:5334 {
+    prefer_udp
+  }
+  template ANY AAAA {
+    rcode NXDOMAIN
+  }
+}
+# DoGs_END
+EOF
+
+systemctl enable coredns >/dev/null 2>&1
+systemctl restart coredns
