@@ -1,0 +1,52 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+echo -e "\r\c" && echo -e "${WHITE}[${cRES}...${WHITE}]\c" && echo -e "\t${WHITE}Collect Black and white list${cRES}\c"
+
+>/opt/de_GWD/nftables/IP_listB
+cat << EOF >/opt/de_GWD/mosdns/matchers_listB.yaml
+plugin:
+  - tag: 'domains_listB'
+    type: query_matcher
+    args:
+      domain:
+EOF
+
+jq -r '.dns.listB[]' /opt/de_GWD/0conf 2>/dev/null | sort | uniq | sed '/^\s*$/d' | xargs -n 1 | while read listB; do
+	yq eval -i ".plugin.[0].args.domain += [\"$listB\"]" /opt/de_GWD/mosdns/matchers_listB.yaml
+done
+
+
+>/opt/de_GWD/nftables/IP_listW
+cat << EOF >/opt/de_GWD/mosdns/matchers_listW.yaml
+plugin:
+  - tag: 'domains_listW'
+    type: query_matcher
+    args:
+      domain:
+EOF
+
+jq -r '.dns.listW[]' /opt/de_GWD/0conf 2>/dev/null | sort | uniq | sed '/^\s*$/d' | xargs -n 1 | while read listW; do
+	yq eval -i ".plugin.[0].args.domain += [\"$listW\"]" /opt/de_GWD/mosdns/matchers_listW.yaml
+done
+
+cat << EOF >/opt/de_GWD/mosdns/matchers_appleCN.yaml
+plugin:
+  - tag: 'domains_appleCN'
+    type: query_matcher
+    args:
+      domain:
+EOF
+
+[[ -z $(jq -r '.v2nodeDIV.nodeSM.apple' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]] && \
+yq -i '.plugin.[0].args.domain = ["ext:geosite.dat:apple-cn"]' /opt/de_GWD/mosdns/matchers_appleCN.yaml
+
+echo -e "\r\c" && echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Collect Black and white list${cRES}"

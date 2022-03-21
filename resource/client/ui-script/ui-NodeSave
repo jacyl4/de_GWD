@@ -1,0 +1,29 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+echo -e "\r\c" && echo -e "${WHITE}[${cRES}...${WHITE}]\c" && echo -e "\t${WHITE}Collect V2 node${cRES}\c"
+
+cat << EOF >/opt/de_GWD/mosdns/matchers_nodes.yaml
+plugin:
+  - tag: 'domains_nodes'
+    type: query_matcher
+    args:
+      domain:
+EOF
+
+jq -r '.v2node[].domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | cut -d: -f1 | xargs -n 1 | sort | uniq | sed '/^\s*$/d' | while read line; do
+  yq eval -i ".plugin.[0].args.domain += [\"$line\"]" /opt/de_GWD/mosdns/matchers_nodes.yaml
+done
+
+[[ $1 = "r" ]] && systemctl restart mosdns
+
+echo -e "\r\c" && echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Collect V2 node${cRES}"

@@ -1,0 +1,17 @@
+#!/bin/bash
+sed -i "/net.ipv4.ip_forward =/c\net.ipv4.ip_forward = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.accept_redirects =/c\net.ipv4.conf.all.accept_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.accept_redirects =/c\net.ipv4.conf.default.accept_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.secure_redirects =/c\net.ipv4.conf.all.secure_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.secure_redirects =/c\net.ipv4.conf.default.secure_redirects = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.all.accept_source_route =/c\net.ipv4.conf.all.accept_source_route = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.conf.default.accept_source_route =/c\net.ipv4.conf.default.accept_source_route = 0" /etc/sysctl.conf
+sed -i "/net.ipv4.tcp_tw_reuse =/c\net.ipv4.tcp_tw_reuse = 2" /etc/sysctl.conf
+sysctl -p >/dev/null 2>&1
+systemctl restart systemd-sysctl
+
+sed -i '/meta l4proto { tcp, udp } th dport 53 drop/d' /opt/de_GWD/nftables/default.nft
+sed -i "/# Drop 53 in$/a\meta l4proto { tcp, udp } th dport 53 drop" /opt/de_GWD/nftables/default.nft
+systemctl restart nftables
+
+[[ $1 = "r" ]] && /opt/de_GWD/ui-DHCPoff r

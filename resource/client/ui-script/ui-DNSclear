@@ -1,0 +1,6 @@
+#!/bin/bash
+systemctl restart mosdns
+
+systemctl stop pihole-FTL
+rm -rf rm /etc/pihole/pihole-FTL.db
+pihole restartdns
