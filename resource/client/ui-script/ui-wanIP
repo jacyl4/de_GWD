@@ -1,0 +1,17 @@
+#!/bin/bash
+unset publicIPurls
+publicIPurls+=(http://members.3322.org/dyndns/getip)
+publicIPurls+=(http://ip.3322.net)
+publicIPurls+=(http://ip.qaros.com)
+publicIPurls+=(https://v4.yinghualuo.cn/bejson)
+publicIPurls+=(http://myip.ipip.net)
+publicIPurls+=(http://cip.cc/)
+
+for (( i=0; i<10; ++i)); do
+	rand=$[$RANDOM % ${#publicIPurls[@]}]
+	wanIP=$(curl -sSLm 5 ${publicIPurls[$rand]} | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+    [[ -z $(nft get element ip de_GWD CHNROUTE { $wanIP } | grep 'Error:') ]] && break
+    sleep 1
+done
+
+echo $wanIP
