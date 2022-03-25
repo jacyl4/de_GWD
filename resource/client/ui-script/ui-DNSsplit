@@ -1,0 +1,201 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}DNS Split${cRES}\r\c"
+cat << EOF >/opt/de_GWD/mosdns/mosdns.yaml
+log:
+  level: error
+  file: ''
+
+plugin:
+  - tag: 'mosdns_forwarder'
+    type: server
+    args:
+      entry:
+        - 'de_GWD_hosts'
+        - 'de_GWD_cache'
+        - 'de_GWD_sequence'
+      server:
+        - protocol: udp
+          addr: 127.0.0.1:5341
+        - protocol: tcp
+          addr: 127.0.0.1:5341
+
+  - tag: 'de_GWD_cache'
+    type: cache
+    args:
+      redis: 'unix://:de_GWD@/dev/shm/redis-server.sock?db=0'
+      redis_timeout: 50
+      lazy_cache_ttl: 86400
+      lazy_cache_reply_ttl: 30
+      cache_everything: true
+
+  - tag: 'de_GWD_sequence'
+    type: sequence
+    args:
+      exec:
+        - if:
+            - 'domains_listB'
+          exec:
+            - 'dns_global_sequence'
+            - _return
+
+        - if:
+            - 'domains_listW'
+          exec:
+            - 'dns_chn_sequence'
+            - _return 
+
+        - if:
+            - 'domains_direct'
+          exec:
+            - 'dns_chnFB_sequence'
+            - _return 
+            
+        - if:
+            - 'domains_chn'
+          exec:
+            - 'dns_chnFB_sequence'
+            - _return 
+
+        - 'dns_global_sequence'
+
+  - tag: 'dns_global_sequence'
+    type: sequence
+    args:
+      exec:
+        - _no_ecs
+        - 'dns_global'
+        - 'ttl_c'
+
+  - tag: 'dns_chn_sequence'
+    type: sequence
+    args:
+      exec:
+        - _no_ecs
+        - 'dns_chn'
+        - 'ttl_c'
+
+  - tag: 'dns_chnFB_sequence'
+    type: sequence
+    args:
+      exec:
+        - primary:
+            - _no_ecs
+            - 'dns_chn'
+            - 'ttl_c'
+            - if:
+                - '!IPs_chn'
+              exec:
+                - _drop_response
+          secondary:
+            - _no_ecs
+            - 'dns_global'
+            - 'ttl_c'
+          fast_fallback: 200
+          always_standby: true
+
+  - tag: 'ttl_c'
+    type: ttl
+    args:
+      minimal_ttl: 300
+      maximum_ttl: 3600
+
+  - tag: 'domains_chn'
+    type: query_matcher
+    args:
+      domain:
+        - 'ext:geosite.dat:cn'
+        - 'ext:geosite.dat:tld-cn'
+
+  - tag: 'IPs_chn'
+    type: response_matcher
+    args:
+      ip:
+        - 'ext:geoip.dat:cn'
+
+include:
+  - 'matchers_hosts.yaml'
+  - 'matchers_direct.yaml'
+  - 'matchers_nodes.yaml'
+  - 'matchers_listB.yaml'
+  - 'matchers_listW.yaml'
+  - 'forwarders.yaml'
+EOF
+
+cat << EOF >/opt/de_GWD/mosdns/forwarders.yaml
+plugin:
+  - tag: 'dns_chn'
+    type: fast_forward
+    args:
+      upstream:
+        - addr: '127.0.0.1:5331'
+        - addr: 'tcp://127.0.0.1:5331'
+          trusted: true
+
+  - tag: 'dns_global'
+    type: fast_forward
+    args:
+      upstream:
+        - addr: '127.0.0.1:5332'
+        - addr: 'tcp://127.0.0.1:5332'
+          trusted: true
+EOF
+
+
+
+cat << EOF >/opt/de_GWD/mosdns/matchers_hosts.yaml
+plugin:
+  - tag: 'de_GWD_hosts'
+    type: hosts
+    args:
+      hosts:
+EOF
+
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+jq -r '.dns.hosts | to_entries[] | [.key, .value] | @tsv' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | sed 's/[[:space:]][[:space:]]*/ /g' | while read line; do
+  yq eval -i ".plugin.[0].args.hosts += [\"$line\"]" /opt/de_GWD/mosdns/matchers_hosts.yaml
+done
+fi
+
+
+
+cat << EOF >/opt/de_GWD/mosdns/matchers_direct.yaml
+plugin:
+  - tag: 'domains_direct'
+    type: query_matcher
+    args:
+      domain:
+EOF
+
+[[ -z $(jq -r '.v2nodeDIV.nodeSM.apple' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]] && \
+yq -i '.plugin.[0].args.domain = ["ext:geosite.dat:apple"]' /opt/de_GWD/mosdns/matchers_direct.yaml && \
+jq 'del(.routing.rules[] | select(.domain == ["geosite.dat:apple-cn"]))' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json && \
+/opt/de_GWD/ui-V2routingDomain 'direct' '["geosite.dat:apple-cn"]'
+
+
+
+/opt/de_GWD/ui-NodeSave
+
+/opt/de_GWD/ui-submitListBW
+
+systemctl restart smartdns
+
+systemctl restart mosdns
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/mosdns.service
+systemctl daemon-reload >/dev/null
+systemctl restart mosdns
+fi
+systemctl enable mosdns >/dev/null 2>&1
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}DNS Split${cRES}"
