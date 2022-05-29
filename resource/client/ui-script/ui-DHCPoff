@@ -1,0 +1,50 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+sed -i '/REV_SERVER=/d' /etc/pihole/setupVars.conf
+sed -i '/REV_SERVER_CIDR=/d' /etc/pihole/setupVars.conf
+sed -i '/REV_SERVER_TARGET=/d' /etc/pihole/setupVars.conf
+sed -i '/REV_SERVER_DOMAIN=/d' /etc/pihole/setupVars.conf
+if [[ $(jq -r '.FORWARD.block53' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
+cat << EOF >> /etc/pihole/setupVars.conf
+REV_SERVER=false
+EOF
+else
+upstreamIP=$(jq -r '.address.upstreamIP' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+localAddrCIDR=$(jq -r '.address.localIP' /opt/de_GWD/0conf | grep -v '^null$')
+localAddr=$(echo $localAddrCIDR | cut -d / -f1)
+netmask=$(echo $localAddrCIDR | sed -r 's/([0-9]{1,3}\.){3}[0-9]{1,3}//g')
+
+[[ -z $netmask ]] && netmask="/24" && localAddrCIDR="$localAddr$netmask"
+cat << EOF >> /etc/pihole/setupVars.conf
+REV_SERVER=true
+REV_SERVER_CIDR=$localAddrCIDR
+REV_SERVER_TARGET=$upstreamIP
+EOF
+fi
+
+pihole -a disabledhcp >/dev/null 2>&1
+
+jq '.address.dhcp="off"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+[[ -z $(lsof -i:53 | grep pihole) ]] && pihole restartdns
+
+piholeTEST(){
+if [[ -n $(lsof -i:53 | grep pihole) ]]; then
+	echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c"
+else
+	echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c"
+fi
+}
+echo
+piholeTEST && echo -e "\t${WHITE}Pi-hole online${cRES}"

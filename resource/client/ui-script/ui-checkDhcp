@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ $(ls /etc/dnsmasq.d) =~ "dhcp" ]]; then
+	echo "success"
+else
+	echo "outline-secondary"
+fi
