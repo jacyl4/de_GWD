@@ -1,0 +1,16 @@
+#!/bin/bash
+if [[ -n $1 ]] && [[ -n $2 ]]; then
+tag=$1
+IP=$2
+
+RoutingADD=`cat << EOF
+{
+        "type": "field",
+        "source": $IP,
+        "outboundTag": "$tag"
+}
+EOF
+`
+
+jq --argjson RoutingADD "$RoutingADD" '.routing.rules+=[$RoutingADD]' /opt/de_GWD/vtrui/config.json  | sponge /opt/de_GWD/vtrui/config.json
+fi
