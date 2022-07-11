@@ -1,0 +1,16 @@
+#!/bin/bash
+if [[ -f "/opt/de_GWD/vtrui1/config.json" ]]; then
+domain=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui1/config.json 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.outbounds[0].settings.vnext[0].port' /opt/de_GWD/vtrui1/config.json 2>/dev/null | grep -v '^null$')
+
+if [[ $port = "443" ]]; then
+nodecheck=$domain
+else
+nodecheck=$domain:$port
+fi
+
+jq -r --arg nodecheck $nodecheck '.v2node[] | select(.domain == $nodecheck) | .name' /opt/de_GWD/0conf
+
+echo $nodecheck | grep -v '^:'
+rm -rf /tmp/vtruiDomains
+fi
