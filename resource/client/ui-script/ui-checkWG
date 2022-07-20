@@ -1,0 +1,2 @@
+#!/bin/bash
+[[ $(ip --oneline link show up | grep -v "lo" | awk '{print $2}' | cut -d':' -f1 | cut -d'@' -f1) =~ "wg0" ]] && echo "success"
