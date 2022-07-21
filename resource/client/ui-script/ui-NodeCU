@@ -1,0 +1,40 @@
+#!/bin/bash
+tag="custom"
+
+jq 'del(.outbounds[] | select(.tag == "custom"))' /opt/de_GWD/vtrui/config.json |\
+jq 'del(.routing.rules[] | select(.outboundTag == "custom"))' | sponge /opt/de_GWD/vtrui/config.json
+
+if [[ -n $2 ]]; then
+address=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.domain' /opt/de_GWD/0conf)
+tls=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+uuid=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+path=$(jq -r --argjson nodecheck $2 '.v2node | to_entries[] | select(.key == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+
+jq --arg address $address '.v2nodeDIV.nodeCU.address=$address' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+else
+address=$(jq -r '.v2nodeDIV.nodeCU.address' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+	if [[ -n $address ]]; then
+		tls=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.tls' /opt/de_GWD/0conf)
+		uuid=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.uuid' /opt/de_GWD/0conf)
+		path=$(jq -r --arg nodecheck $address '.v2node | to_entries[] | select(.value.domain == $nodecheck) | .value.path' /opt/de_GWD/0conf)
+		/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+	fi
+fi
+
+jq -r '.v2nodeDIV.nodeCU.rulesDomain[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' >/tmp/routingDomain
+jq -r '.v2nodeDIV.nodeCU.rulesIP[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' >/tmp/routingIP
+routingDomain=$(echo $(jq -R -s -c 'split("\n")' < /tmp/routingDomain) | jq -c '.[:-1]')
+routingIP=$(echo $(jq -R -s -c 'split("\n")' < /tmp/routingIP) | jq -c '.[:-1]')
+
+[[ -n $(cat /tmp/routingDomain) ]] && /opt/de_GWD/ui-V2routingDomain $tag $routingDomain
+[[ -n $(cat /tmp/routingIP) ]] && /opt/de_GWD/ui-V2routingIP $tag $routingIP
+
+jq '.v2nodeDIV.nodeCU.status="on"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+rm -rf /tmp/routingDomain
+rm -rf /tmp/routingIP
+
+[[ $1 = "r" ]] && systemctl restart vtrui >/dev/null

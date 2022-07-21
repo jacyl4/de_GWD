@@ -1,0 +1,73 @@
+#!/bin/bash
+clear
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+installNFSsupport(){
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Install NFS${cRES}\r\c"
+unset aptPKG
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^autofs$') ]] && aptPKG+=(autofs)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^nfs-common$') ]] && aptPKG+=(nfs-common)
+[[ -n $aptPKG ]] && apt update && apt install $(echo ${aptPKG[@]})
+
+sed -i '/+auto.master/,$d' /etc/auto.master
+cat << EOF >>/etc/auto.master
++auto.master
+/net -hosts --timeout=60
+/media/misc     /etc/autofs/auto.misc     --timeout=5
+/media/net      /etc/autofs/auto.net      --timeout=60
+EOF
+
+mkdir -p '/etc/auto.master.d'
+cat << EOF >/etc/auto.master.d/nfs.autofs
+/-    /etc/auto.nfs
+EOF
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Install NFS${cRES}"
+}
+
+
+
+uninstallNFSsupport(){
+apt remove --purge autofs nfs-common
+
+rm -rf /etc/auto.master.d/nfs.autofs
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}NFS ${GREEN}Uninstalled${cRES}"
+}
+
+
+
+start_menu(){
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}         NFS support${cRES}"
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}1. Install NFS support${cRES}"
+   echo -e "${YELLOW}2. Uninstall NFS support${cRES}"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installNFSsupport
+    start_menu
+    ;;
+    2)
+    uninstallNFSsupport
+    start_menu
+    ;;
+    *)
+    clear
+    echo -e "${RED}Wrong number${cRES}"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
