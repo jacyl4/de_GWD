@@ -1,0 +1,37 @@
+#!/bin/bash
+mkdir -p /etc/pihole/migration_backup
+rm -rf /etc/pihole/migration_backup/*
+
+jq -r '.dns.regexRule[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
+	echo $line >>/etc/pihole/migration_backup/regex.list
+done
+
+jq -r '.dns.adlistsURL[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
+	echo $line >>/etc/pihole/migration_backup/adlists.list
+done
+
+jq -r '.dns.adBlistURL[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
+	echo $line >>/etc/pihole/migration_backup/blacklist.txt
+done
+
+jq -r '.dns.adWlistURL[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
+	echo $line >>/etc/pihole/migration_backup/whitelist.txt
+done
+
+if [[ -f "/etc/pihole/migration_backup/adlists.list" ]] || [[ -f "/etc/pihole/migration_backup/regex.list" ]] || [[ -f "/etc/pihole/migration_backup/blacklist.txt" ]]; then
+rm -rf /etc/pihole/gravity_old.db
+rm -rf /etc/pihole/gravity_temp.db
+rm -rf /etc/pihole/list.*
+pihole -g -r recreate
+else
+rm -rf /etc/pihole/gravity_old.db
+rm -rf /etc/pihole/gravity_temp.db
+rm -rf /etc/pihole/list.*
+sqlite3 /etc/pihole/gravity.db "DELETE FROM adlist" >/dev/null 2>&1
+sqlite3 /etc/pihole/gravity.db "DELETE FROM domainlist where type=0" >/dev/null 2>&1
+sqlite3 /etc/pihole/gravity.db "DELETE FROM domainlist where type=1" >/dev/null 2>&1
+sqlite3 /etc/pihole/gravity.db "DELETE FROM domainlist where type=3" >/dev/null 2>&1
+pihole -g
+fi
+
+[[ $1 = "r" ]] && pihole restartdns
