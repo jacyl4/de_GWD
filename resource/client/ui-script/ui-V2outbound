@@ -1,0 +1,99 @@
+#!/bin/bash
+tag=$1
+address=$2
+tls=$3
+uuid=$4
+path=$5
+
+if [[ -z $tag ]] || [[ -z $address ]] || [[ -z $uuid ]]; then
+exit
+fi
+
+domain=$(echo $address | cut -d: -f1)
+port=$(echo $address | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -z $port ]] && port="443"
+[[ -z $tls ]] && tls=$domain
+
+if [[ $tag = "default" ]]; then
+muxEnable="true"
+muxCconcurrency="8"
+else
+muxEnable="false"
+muxCconcurrency="1"
+fi
+
+if [[ -z $path ]]; then
+OBadd=`cat << EOF
+    {
+      "tag": "$tag",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "alterId": 0,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    }
+EOF
+`
+else
+OBadd=`cat << EOF
+{
+      "tag": "$tag",
+      "protocol": "vmess",
+      "mux": {
+        "enabled": $muxEnable,
+        "concurrency": $muxCconcurrency
+        },
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "alterId": 0,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+fi
+
+jq --argjson OBadd "$OBadd" '.outbounds+=[$OBadd]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json

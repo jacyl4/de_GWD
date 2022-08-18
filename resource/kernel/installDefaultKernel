@@ -1,0 +1,116 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+architecture=$(dpkg --print-architecture)
+
+
+
+mkdir -p /opt/de_GWD
+cat << "EOF" >/opt/de_GWD/clearKernel
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+if [[ $(uname -r) =~ "bbrplus" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
+elif [[ $(uname -r) =~ "liquorix" ]]; then
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+elif [[ $(uname -r) =~ "xanmod" ]]; then
+  echo "net.core.default_qdisc = fq_pie" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+else
+  echo "net.core.default_qdisc = fq_codel" >>/etc/sysctl.conf
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+fi
+sysctl -p >/dev/null && systemctl restart systemd-sysctl
+
+rm -f /var/lib/apt/lists/lock
+rm -f /var/cache/apt/archives/lock
+rm -f /var/lib/dpkg/lock
+dpkg --configure -a
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line; do
+apt -y purge $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line; do
+apt -y purge $line
+done
+EOF
+chmod +x /opt/de_GWD/clearKernel
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/@reboot /d' /tmp/now.cron
+echo '@reboot /opt/de_GWD/clearKernel' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+
+
+
+    echo -e "${GREEN}======================= ${cRES}"
+    echo -e "${GREEN}Restore Default Kernel${cRES}"
+    echo -e "${GREEN}======================= ${cRES}"
+    echo -e "${GREEN}Press [Enter] to continue: ${cRES}"
+    read -s -n 1 restoreKconfirm
+
+echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Default Kernel${cRES}\r\c"
+
+if [[ $restoreKconfirm = "" ]]; then
+
+if [[ $architecture != "amd64" ]]; then
+  echo -e "${RED}only work on x86_64${cRES}"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+rm -f /var/lib/apt/lists/lock
+rm -f /var/cache/apt/archives/lock
+rm -f /var/lib/dpkg/lock
+dpkg --configure -a
+
+apt update && apt install -y linux-image-amd64 linux-headers-amd64
+
+if [[ -n $(dpkg --list | grep 'linux-image-amd64') ]]; then
+dpkg --list | awk '{print $2}' | grep 'liquorix' | grep 'linux-' | while read line; do
+apt -y purge $line
+done
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  
+dpkg --list | awk '{print $2}' | grep 'xanmod' | grep 'linux-' | while read line; do
+apt -y purge $line
+done
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'bbrplus' | grep 'linux-' | while read line; do
+apt -y purge $line
+done
+apt autoremove --purge -y && apt clean -y && apt autoclean -y
+
+update-initramfs -u -k all
+update-grub
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Default Kernel${cRES}"
+reboot
+exit
+else
+  echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}Default kernel ${RED}Install Failed${cRES}"
+  exit
+fi
+fi
+fi

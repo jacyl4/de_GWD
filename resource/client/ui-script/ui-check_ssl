@@ -1,0 +1,2 @@
+#!/bin/bash
+openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer | sed 's/notAfter=//'
