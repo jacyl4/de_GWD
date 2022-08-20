@@ -1,0 +1,131 @@
+#!/bin/bash
+rm -rf /opt/de_GWD/RproxyS
+mkdir -p /opt/de_GWD/RproxyS
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/RproxyS/RproxyS
+chmod +x /opt/de_GWD/RproxyS/RproxyS
+
+RproxySinStatus=$(jq -r '.FORWARD.Rproxy.server.inStatus' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+RproxySmappingStatus=$(jq -r '.FORWARD.Rproxy.server.mappingStatus' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+RproxyStunnelPort=$(jq -r '.FORWARD.Rproxy.server.tunnel.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+RproxyStunnelUUID=$(jq -r '.FORWARD.Rproxy.server.tunnel.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+RproxySinUUID=$(jq -r '.FORWARD.Rproxy.server.inUUID[].RproxyS0uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+RproxySmappingList=$(jq -r '.FORWARD.Rproxy.server.mapping' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+cat << EOF >/opt/de_GWD/RproxyS/config.json
+{
+  "log": {
+    "access":"none",
+    "error":"none",
+    "loglevel":"none"
+  },
+  "dns":{
+    "queryStrategy":"UseIP",
+    "disableCache":true,
+    "disableFallback":true,
+    "disableFallbackIfMatch":true,
+    "servers":[{"address":"localhost"},{"address":"tcp+local://127.0.0.1"}]
+  },
+  "routing":{
+    "rules":[
+      {"type":"field","inboundTag":["reverseTunnel"],"domain":["full:reverse.localhost"],"outboundTag":"portal"},
+      {"type":"field","inboundTag":["reverseTunnel"],"outboundTag":"portal"}
+    ]
+  },
+  "reverse": {
+    "portals": [{
+        "tag": "portal",
+        "domain": "reverse.localhost"
+     }]
+  },
+  "inbounds": [
+    {
+      "tag": "reverseTunnel",
+      "port": $RproxyStunnelPort,
+      "protocol": "vmess",
+      "settings":{
+        "clients":[
+          {
+            "id":"$RproxyStunnelUUID",
+            "alterId": 0
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp"
+      }
+    }
+  ]
+}
+EOF
+
+
+if [[ $RproxySinStatus = "on" ]]; then
+for uuid in $RproxySinUUID; do
+uuidStr='{"id":"'$uuid'", "alterId":0}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/RproxyS/config.json | sponge /opt/de_GWD/RproxyS/config.json
+done
+
+uniqueClient=$(jq -r '.inbounds[0].settings.clients | unique' /opt/de_GWD/RproxyS/config.json 2>/dev/null | grep -v '^null$')
+jq --argjson uniqueClient "$uniqueClient" '.inbounds[0].settings.clients=$uniqueClient' /opt/de_GWD/RproxyS/config.json | sponge /opt/de_GWD/RproxyS/config.json
+fi
+
+
+if [[ $RproxySmappingStatus = "on" ]]; then
+
+len=$(echo $RproxySmappingList | jq length)
+
+for (( i=0; i<$len; i++ )); do
+port=$(echo $RproxySmappingList | jq -r --argjson i "$i" '.[$i].port')
+protocol=$(echo $RproxySmappingList | jq -r --argjson i "$i" '.[$i].protocol')
+
+RontingMapping=`cat << EOF
+      {"type":"field","inboundTag":["mapping$i"],"outboundTag":"portal"}
+EOF
+`
+
+IBmapping=`cat << EOF
+    {
+      "tag": "mapping$i",
+      "port": $port,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": $port,
+        "network": "$protocol"
+      }
+    }
+EOF
+`
+jq --argjson RontingMapping "$RontingMapping" '.routing.rules+=[$RontingMapping]' /opt/de_GWD/RproxyS/config.json |\
+jq --argjson IBmapping "$IBmapping" '.inbounds+=[$IBmapping]' | sponge /opt/de_GWD/RproxyS/config.json
+done
+fi
+
+chmod 666 /opt/de_GWD/RproxyS/config.json
+chmod 644 /var/www/ssl/*.key
+
+rm -rf /lib/systemd/system/RproxyS.service
+cat << "EOF" >/etc/systemd/system/RproxyS.service
+[Unit]
+Description=Rproxy Service
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/RproxyS/RproxyS run -config /opt/de_GWD/RproxyS/config.json
+Restart=always
+RestartSec=2
+TimeoutStopSec=5
+
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload >/dev/null
+systemctl enable RproxyS >/dev/null 2>&1
+systemctl restart RproxyS

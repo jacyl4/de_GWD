@@ -1,0 +1,34 @@
+#!/bin/bash
+ssAddress=$(jq -r '.v2nodeDIV.ss.ssAddress' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+ssPort=$(jq -r '.v2nodeDIV.ss.ssPort' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+ssMethod=$(jq -r '.v2nodeDIV.ss.ssMethod' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+ssSecure=$(jq -r '.v2nodeDIV.ss.ssSecure' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+OBss=`cat << EOF
+{
+      "tag": "ss",
+      "protocol": "shadowsocks",
+      "settings": {
+        "servers": [
+          {
+            "address": "$ssAddress",
+            "port": $ssPort,
+            "method": "$ssMethod",
+            "password": "$ssSecure",
+            "level": 1
+          }
+        ]
+      },
+      "streamSettings": {
+        "sockopt": {
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+}
+EOF
+`
+
+jq --argjson OBss "$OBss" '.outbounds[0]=$OBss' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+[[ $1 = "r" ]] && systemctl restart vtrui >/dev/null
