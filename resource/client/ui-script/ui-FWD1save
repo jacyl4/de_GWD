@@ -1,0 +1,174 @@
+#!/bin/bash
+FWD1port=$(jq -r '.FORWARD.FWD1.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+FWD1uuid=$(jq -r '.FORWARD.FWD1.uuid[].FWD1uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+FWD1upstream=$(jq -r '.FORWARD.FWD1.upstream' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+rm -rf /opt/de_GWD/vtrui1
+mkdir -p /opt/de_GWD/vtrui1
+cp -f /opt/de_GWD/vtrui/vtrui /opt/de_GWD/vtrui1/vtrui1
+cp -f /opt/de_GWD/vtrui/private.dat /opt/de_GWD/vtrui1/private.dat
+chmod +x /opt/de_GWD/vtrui1/vtrui1
+
+v2nodeID=$(jq -r --arg FWD1upstream $FWD1upstream '.v2node | to_entries[] | select(.value.domain == $FWD1upstream) | .key' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+address=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].domain" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+domain=$(echo $address | cut -d: -f1)
+port=$(echo $address | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -z $port ]] && port="443"
+[[ -z $tls ]] && tls=$domain
+
+tls=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].tls" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].uuid" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r --arg v2nodeID "$v2nodeID" ".v2node[$v2nodeID].path" /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+cat << EOF >/opt/de_GWD/vtrui1/config.json
+{
+  "log": {
+    "access":"none",
+    "error":"none",
+    "loglevel":"none"
+  },
+  "dns":{
+    "queryStrategy":"UseIP",
+    "disableCache":true,
+    "servers":[{"address":"tcp+local://127.0.0.1:5341"}]
+  },
+  "routing":{
+    "domainMatcher": "mph",
+    "rules":[
+      {"type":"field","ip":["ext:private.dat:private"],"network":"tcp,udp","outboundTag":"direct"}
+    ]
+  },
+  "inbounds":[
+    {
+      "port": $FWD1port,
+      "protocol": "vmess",
+      "settings":{
+        "clients":[]
+      },
+      "streamSettings": {
+        "network": "tcp"
+      }
+    }
+  ]
+}
+EOF
+
+if [[ -z $path ]]; then
+OBfwd=`cat << EOF
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "alterId": 0,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "sockopt": {
+          "mark": 255
+        }
+      }
+    }
+EOF
+`
+else
+OBfwd=`cat << EOF
+{
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "$domain",
+            "port": $port,
+            "users": [
+              {
+                "id": "$uuid",
+                "alterId": 0,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "$path",
+          "headers": {
+            "Host": "$tls"
+          }
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "$tls",
+          "allowInsecure": false
+        },
+        "sockopt": {
+          "mark": 255
+        }
+      }
+}
+EOF
+`
+fi
+
+OBdir=`cat << EOF
+{
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+}
+EOF
+`
+
+for uuid in $FWD1uuid; do
+uuidStr='{"id":"'$uuid'","alterId":0}'
+jq --argjson uuidStr "$uuidStr" '.inbounds[0].settings.clients+=[$uuidStr]' /opt/de_GWD/vtrui1/config.json | sponge /opt/de_GWD/vtrui1/config.json
+done
+jq '.outbounds=[]' /opt/de_GWD/vtrui1/config.json |\
+jq --argjson OBfwd "$OBfwd" '.outbounds+=[$OBfwd]' |\
+jq --argjson OBdir "$OBdir" '.outbounds+=[$OBdir]' | sponge /opt/de_GWD/vtrui1/config.json
+
+chmod 666 /opt/de_GWD/vtrui1/config.json
+chmod 644 /var/www/ssl/*.key
+
+rm -rf /lib/systemd/system/vtrui1.service
+cat << "EOF" >/etc/systemd/system/vtrui1.service
+[Unit]
+Description=vtrui1
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/opt/de_GWD/vtrui1/vtrui1 run -config /opt/de_GWD/vtrui1/config.json
+Restart=always
+RestartSec=2
+TimeoutStopSec=5
+
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+Nice=-9
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui1
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/vtrui1.service
+systemctl daemon-reload >/dev/null
+systemctl restart vtrui1
+fi
+systemctl enable vtrui1 >/dev/null 2>&1
