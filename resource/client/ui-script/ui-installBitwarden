@@ -1,0 +1,214 @@
+#!/bin/bash
+clear
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+bitwardenNginxConf (){
+cat << EOF >/etc/nginx/conf.d/bitwarden.conf
+server {
+  listen 8099 ssl http2 fastopen=256 reuseport;
+  error_page 497 https://\$host:8099\$request_uri;
+  
+  include /etc/nginx/conf.d/ssl_certificate;
+  
+  add_header X-Cache \$upstream_cache_status;
+
+  add_header Referrer-Policy                    "origin"            always;
+  add_header X-Content-Type-Options             "nosniff"           always;
+  add_header X-Download-Options                 "noopen"            always;
+  add_header X-Frame-Options                    "SAMEORIGIN"        always;
+  add_header X-Permitted-Cross-Domain-Policies  "none"              always;
+  add_header X-Robots-Tag                       "none"              always;
+  add_header X-XSS-Protection                   "1; mode=block"     always;
+  add_header Strict-Transport-Security          "max-age=31536000; includeSubDomains; preload";
+  
+location / {
+  proxy_pass                  http://127.0.0.1:8098;
+  proxy_set_header            Host \$host;
+  proxy_set_header            X-Real-IP \$remote_addr;
+  proxy_set_header            X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header            X-Forwarded-Proto \$scheme;
+  keepalive_requests          100000;
+  keepalive_timeout           600s;
+  proxy_connect_timeout       600s;
+  proxy_read_timeout          600s;
+  proxy_send_timeout          600s;
+  proxy_redirect              off;
+  proxy_buffering             off;
+  proxy_buffer_size           8k;
+  }
+  
+location /notifications/hub {
+  proxy_pass                  http://127.0.0.1:3012;
+  proxy_set_header            Upgrade \$http_upgrade;
+  proxy_set_header            Connection "upgrade";
+  keepalive_requests          100000;
+  keepalive_timeout           600s;
+  proxy_connect_timeout       600s;
+  proxy_read_timeout          600s;
+  proxy_send_timeout          600s;
+  proxy_redirect              off;
+  proxy_buffering             off;
+  proxy_buffer_size           8k;
+}
+  
+location /notifications/hub/negotiate {
+  proxy_pass                  http://127.0.0.1:8098;
+  keepalive_requests          100000;
+  keepalive_timeout           600s;
+  proxy_connect_timeout       600s;
+  proxy_read_timeout          600s;
+  proxy_send_timeout          600s;
+  proxy_redirect              off;
+  proxy_buffering             off;
+  proxy_buffer_size           8k;
+}
+}
+EOF
+systemctl force-reload nginx
+}
+
+
+
+bitwardenDockerRun(){
+docker run -d \
+  --name bitwarden \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Asia/Shanghai \
+  -p 8098:80 \
+  -v /opt/bitwarden/:/data/ \
+  --dns 1.1.1.1 \
+  --restart always \
+  --privileged=true \
+  vaultwarden/server:latest
+}
+
+
+
+installBitwarden(){
+mkdir -p /opt/bitwarden
+
+docker pull vaultwarden/server:latest
+
+bitwardenDockerRun
+
+bitwardenNginxConf
+
+cat << EOF >/etc/logrotate.d/bitwarden
+/var/log/bitwarden/*.log {
+    # 以 bitwarden 用户和群组的身份执行轮换
+    su bitwarden bitwarden
+    # 每天轮换
+    daily
+    # 当尺寸大于 5M 时轮换
+    size 5M
+    # 压缩旧的日志文件
+    compress
+    # 在删除或邮寄到 mail 指令中指定的地址之前，保留 4 个轮换的日志文件
+    rotate 4
+    # 把当前日志备份并截断
+    copytruncate
+    # 如果日志文件不存在，继续下一个操作
+    missingok
+    # 如果日志文件为空则不进行轮换
+    notifempty
+    # 在轮换的日志文件中添加数字格式的日期
+    dateext
+    # dateext 的日期格式
+    dateformat -%Y-%m-%d-%s
+}
+EOF
+jq '.app.bitwarden="installed"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Install Bitwarden${cRES}"
+}
+
+
+
+uninstallBitwarden(){
+docker stop bitwardenrs >/dev/null 2>&1
+docker rm bitwardenrs >/dev/null 2>&1
+docker image ls 2>/dev/null | awk '/bitwardenrs/{print$3}' | while read line; do
+docker rmi $line >/dev/null 2>&1
+done
+
+docker stop bitwarden >/dev/null 2>&1
+docker rm bitwarden >/dev/null 2>&1
+docker image ls 2>/dev/null | awk '/bitwarden/{print$3}' | while read line; do
+docker rmi $line >/dev/null 2>&1
+done
+
+rm -rf /opt/bitwardenrs
+rm -rf /opt/bitwarden
+rm -rf /etc/nginx/conf.d/bitwardenrs.conf
+rm -rf /etc/nginx/conf.d/bitwarden.conf
+systemctl force-reload nginx
+rm -rf /etc/logrotate.d/bitwarden
+jq 'del(.app.bitwardenrs)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+jq 'del(.app.bitwarden)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Uninstall Bitwarden${cRES}"
+}
+
+
+
+updateBitwarden(){
+docker pull vaultwarden/server:latest
+
+docker stop bitwarden
+docker rm bitwarden
+
+bitwardenDockerRun
+
+bitwardenNginxConf
+
+docker system prune -f
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Update Bitwarden${cRES}"
+}
+
+
+
+start_menu(){
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}         Bitwarden${cRES}"
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}1. Install Bitwarden${cRES}"
+   echo -e "${YELLOW}2. Uninstall Bitwarden${cRES}"
+    echo -e "${GREEN}0. Update Bitwarden${cRES}"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installBitwarden
+    start_menu
+    ;;
+    2)
+    uninstallBitwarden
+    start_menu
+    ;;
+    0)
+    updateBitwarden
+    start_menu
+    ;;
+    *)
+    clear
+    echo -e "${RED}Wrong number${cRES}"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
