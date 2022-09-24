@@ -1,0 +1,85 @@
+#!/bin/bash
+tag="default"
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+address="$domain:$port"
+
+cat << EOF >/opt/de_GWD/vtrui/config.json
+{
+"log": {
+  "access":"none",
+  "error":"none",
+  "loglevel":"none"
+},
+"dns":{
+  "tag":"dnsflow",
+  "queryStrategy":"UseIP",
+  "disableCache":true,
+  "servers":[{"address":"127.0.0.1","port":53}]
+},
+"routing":{
+  "rules":[
+    {"type":"field","ip":"127.0.0.1","outboundTag":"direct"},
+    {"type":"field","port":53,"outboundTag":"dnsout"},
+    {"type":"field","inboundTag":["dnsflow"],"outboundTag":"direct"}
+  ]
+},
+"inbounds":[
+  {
+    "port":9896,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "settings":{"network":"tcp,udp","followRedirect":true},
+    "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy"}},
+    "sniffing":{"enabled":true,"destOverride":["http","tls"]}
+  }
+]
+}
+EOF
+
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+
+OBdirect=`cat << EOF
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+EOF
+`
+OBdns=`cat << EOF
+    {
+      "tag":"dnsout",
+      "protocol":"dns",
+      "address":"127.0.0.1"
+    }
+EOF
+`
+jq --argjson OBdirect "$OBdirect" '.outbounds+=[$OBdirect]' /opt/de_GWD/vtrui/config.json |\
+jq --argjson OBdns "$OBdns" '.outbounds+=[$OBdns]' | sponge /opt/de_GWD/vtrui/config.json
+
+
+
+NODE_DOMAIN=$(jq -r '.outbounds[0].settings.vnext[0].address' /opt/de_GWD/vtrui/config.json 2>/dev/null | grep -v '^null$')
+ECS_GLOBAL=$(dig @127.0.0.1 $NODE_DOMAIN -4p 5332 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | sed '/^\s*$/d')
+[[ -n $ECS_GLOBAL ]] && jq --arg ECS_GLOBAL $ECS_GLOBAL '.dns.ECS_GLOBAL=$ECS_GLOBAL' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD0save >/dev/null 2>&1
+fi
+
+
+if [[ $1 = "f" ]]; then
+  jq '.v2nodeDIV.nodeCU.status="off"' /opt/de_GWD/0conf |\
+  jq '.v2nodeDIV.nodeDT.status="off"' | sponge /opt/de_GWD/0conf
+  chmod 666 /opt/de_GWD/0conf
+fi
+
+if [[ $2 = "r" ]]; then
+  systemctl restart vtrui
+fi
