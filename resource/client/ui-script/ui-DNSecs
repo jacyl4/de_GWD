@@ -1,0 +1,17 @@
+#!/bin/bash
+ECS_LOCAL=$(/opt/de_GWD/ui-wanIP all)
+if [[ -n $ECS_LOCAL ]]; then
+jq --arg ECS_LOCAL $ECS_LOCAL '.dns.ECS_LOCAL=$ECS_LOCAL' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+ECS_LOCAL_CIDR=$(echo $ECS_LOCAL | cut -d'.' -f1-3 | sed 's/$/.0\/24/')
+sed -i '/edns-client-subnet /d' /opt/de_GWD/smartdns/smartdns.conf
+sed -i "/serve-expired-reply-ttl 4/a\edns-client-subnet $ECS_LOCAL_CIDR" /opt/de_GWD/smartdns/smartdns.conf
+systemctl restart smartdns
+fi
+
+ECS_GLOBAL=$(/opt/de_GWD/ui-wanIPglobal)
+if [[ -n $ECS_GLOBAL ]]; then
+jq --arg ECS_GLOBAL $ECS_GLOBAL '.dns.ECS_GLOBAL=$ECS_GLOBAL' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+yq eval -i ".plugins.[0].args.ipv4 = \"$ECS_GLOBAL\"" /opt/de_GWD/mosdns/ecs.yaml
+systemctl restart mosdns
+[[ -f "/opt/de_GWD/coredns/corefile" ]] && sed -i "/rewrite edns0 local replace 0xffee/d" /opt/de_GWD/coredns/corefile && sed -i "/template ANY AAAA /i\rewrite edns0 local replace 0xffee $ECS_GLOBAL" /opt/de_GWD/coredns/corefile
+fi

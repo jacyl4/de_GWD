@@ -1,0 +1,22 @@
+#!/bin/bash
+docker stop bitwarden
+
+if [[ -n $(unzip -tq /var/www/html/restore/Bitwarden_bak.zip | grep "No errors detected in compressed data") ]]; then
+rm -rf /tmp/opt
+unzip /var/www/html/restore/Bitwarden_bak.zip -d /tmp
+
+rm -rf /opt/bitwarden
+mkdir -p /opt/bitwarden
+
+if [[ -d "/tmp/opt/bitwardenrs" ]]; then
+mv -f /tmp/opt/bitwardenrs/* /opt/bitwarden
+else
+mv -f /tmp/opt/bitwarden/* /opt/bitwarden
+fi
+
+fi
+
+docker restart bitwarden
+
+rm -rf /tmp/opt
+rm -rf /var/www/html/restore/Bitwarden_bak.zip
