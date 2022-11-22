@@ -1,0 +1,293 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}DNS Split${cRES}\r\c"
+/opt/de_GWD/ui-NodeSave
+
+/opt/de_GWD/ui-submitListBW
+
+
+
+doh1=$(jq -r '.dns.doh[0]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+doh2=$(jq -r '.dns.doh[1]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+DoG=$(jq -r '.dns.dog' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+if [[ -n $doh1 ]]; then
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh1IP=$(dig @127.0.0.1 $doh1Domain -4p 5331 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+doh1Port=$(echo $doh1 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -z $doh1Port ]] && doh1Port="443"
+fi
+
+if [[ -n $doh2 ]]; then
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+doh2IP=$(dig @127.0.0.1 $doh2Domain -4p 5331 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+doh2Port=$(echo $doh2 | cut -d/ -f1 | cut -d: -f2 | grep '^[[:digit:]]*$')
+[[ -z $doh2Port ]] && doh2Port="443"
+fi
+
+forward_doh1=`if [[ -n $doh1 ]]; then
+cat << EOF
+  - tag: forward_doh1
+    type: fast_forward
+    args:
+      upstream:
+        - addr: https://$doh1
+          dial_addr: $doh1IP:$doh1Port
+          trusted: true
+          insecure_skip_verify: true
+          so_mark: 255
+EOF
+fi
+`
+
+forward_doh2=`if [[ -n $doh2 ]]; then
+cat << EOF
+  - tag: forward_doh2
+    type: fast_forward
+    args:
+      upstream:
+        - addr: https://$doh2
+          dial_addr: $doh2IP:$doh2Port
+          trusted: true
+          insecure_skip_verify: true
+          so_mark: 255
+EOF
+fi
+`
+
+froward_dog=`if [[ -n $DoG ]]; then
+cat << EOF
+  - tag: froward_dog
+    type: fast_forward
+    args:
+      upstream:
+        - addr: 127.0.0.1:5333
+          trusted: true
+          so_mark: 255
+EOF
+fi
+`
+
+cat << EOF >/opt/de_GWD/mosdns/forwarders.yaml
+plugins:
+  - tag: forward_chn
+    type: fast_forward
+    args:
+      upstream:
+        - addr: 127.0.0.1:5331
+          trusted: true
+          so_mark: 255
+
+$forward_doh1
+
+$forward_doh2
+
+$froward_dog
+EOF
+
+cat << EOF >/opt/de_GWD/mosdns/dns_global_sequence.yaml
+plugins:
+  - tag: dns_global_sequence
+    type: sequence
+    args:
+      exec:
+        - parallel:
+EOF
+
+[[ -n $doh1IP ]] && yq eval -i '.plugins.[0].args.exec[0].parallel += [["ecs","forward_doh1","ttl_c"]]' /opt/de_GWD/mosdns/dns_global_sequence.yaml
+[[ -n $doh2IP ]] && yq eval -i '.plugins.[0].args.exec[0].parallel += [["ecs","forward_doh2","ttl_c"]]' /opt/de_GWD/mosdns/dns_global_sequence.yaml
+[[ -n $DoG ]] && yq eval -i '.plugins.[0].args.exec[0].parallel += [["ecs","froward_dog","ttl_c"]]' /opt/de_GWD/mosdns/dns_global_sequence.yaml
+
+
+
+cat << EOF >/opt/de_GWD/mosdns/matchers_hosts.yaml
+plugins:
+  - tag: hosts
+    type: hosts
+    args:
+      hosts:
+        - localhost 127.0.0.1
+EOF
+
+[[ -n $doh1IP ]] && yq eval -i ".plugins.[0].args.hosts += [\"$doh1Domain $doh1IP\"]" /opt/de_GWD/mosdns/matchers_hosts.yaml
+[[ -n $doh2IP ]] && yq eval -i ".plugins.[0].args.hosts += [\"$doh2Domain $doh2IP\"]" /opt/de_GWD/mosdns/matchers_hosts.yaml
+
+>/etc/dnsmasq.d/98-resolv.conf
+>/etc/pihole/custom.list
+
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+jq -r '.dns.hosts | to_entries[] | [.value, .key] | @tsv' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | sed 's/[[:space:]][[:space:]]*/ /g' | while read line; do
+if [[ -n $(echo $line | grep "*") ]]; then
+  hostDomain=$(echo $line | awk '{print$2}' | cut -d'.' -f2-)
+  hostIP=$(echo $line | awk '{print$1}')
+  echo "address=/$hostDomain/$hostIP" >>/etc/dnsmasq.d/98-resolv.conf
+else
+  hostDomain=$(echo $line | awk '{print$2}')
+  hostIP=$(echo $line | awk '{print$1}')
+  echo "$hostIP $hostDomain" >>/etc/pihole/custom.list
+  yq eval -i ".plugins.[0].args.hosts += [\"$hostDomain $hostIP\"]" /opt/de_GWD/mosdns/matchers_hosts.yaml
+fi
+done
+else
+>/etc/pihole/custom.list
+sed -i '/c/{p;:a;N;$!ba;d}' /opt/de_GWD/mosdns/matchers_hosts.yaml
+fi
+
+
+cat << EOF >/opt/de_GWD/mosdns/cache.yaml
+plugins:
+  - tag: cache
+    type: cache
+    args:
+      redis: 'unix://:de_GWD@/dev/shm/redis-server.sock?db=0'
+      redis_timeout: 50
+      lazy_cache_ttl: 3600
+      lazy_cache_reply_ttl: 4
+      cache_everything: true
+
+  - tag: ttl_c
+    type: ttl
+    args:
+      minimal_ttl: 60
+      maximum_ttl: 3600
+EOF
+
+
+ECS_GLOBAL=$(jq -r '.dns.ECS_GLOBAL' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+[[ -n $ECS_GLOBAL ]] && ECS_GLOBAL_str="ipv4: "$ECS_GLOBAL""
+cat << EOF >/opt/de_GWD/mosdns/ecs.yaml
+plugins:
+  - tag: ecs
+    type: ecs
+    args:
+      auto: false
+      $ECS_GLOBAL_str
+      force_overwrite: true
+      mask4: 24
+EOF
+
+
+
+cat << EOF >/opt/de_GWD/mosdns/config.yaml
+log:
+  level: error
+  file: ''
+
+data_providers:
+  - tag: geosite
+    file: ./geosite.dat
+    auto_reload: true
+  - tag: geoip
+    file: ./geoip.dat
+    auto_reload: true
+
+include:
+  - cache.yaml
+  - ecs.yaml
+  - matchers_hosts.yaml
+  - matchers_nodes.yaml
+  - matchers_listB.yaml
+  - matchers_listW.yaml
+  - forwarders.yaml
+  - dns_global_sequence.yaml
+
+plugins:
+  - tag: domains_chn
+    type: query_matcher
+    args:
+      domain:
+        - provider:geosite:cn
+        - provider:geosite:tld-cn
+
+  - tag: IPs_chn
+    type: response_matcher
+    args:
+      ip:
+        - provider:geoip:cn
+
+  - tag: dns_chn_sequence
+    type: sequence
+    args:
+      exec:
+        - _no_ecs
+        - forward_chn
+        - ttl_c
+
+  - tag: dns_chnFB_sequence
+    type: sequence
+    args:
+      exec:
+        - primary:
+            - _no_ecs
+            - forward_chn
+            - ttl_c
+            - if: ( ! IPs_chn )
+              exec:
+                - _drop_response
+          secondary:
+            - dns_global_sequence
+          stat_length: 10
+          threshold: 5
+          fast_fallback: 250
+          always_standby: true
+
+  - tag: main_sequence
+    type: sequence
+    args:
+      exec:
+        - _misc_optm
+        - hosts
+        - cache
+
+        - if: ( domains_listB )
+          exec:
+            - dns_global_sequence
+            - _return
+
+        - if: ( domains_listW )
+          exec:
+            - dns_chn_sequence
+            - _return 
+
+        - if: ( domains_nodes )
+          exec:
+            - dns_global_sequence
+            - _return
+
+        - if: ( domains_chn )
+          exec:
+            - dns_chnFB_sequence
+            - _return 
+
+        - dns_global_sequence
+
+servers:
+  - exec: main_sequence
+    timeout: 5
+    listeners:
+      - protocol: udp
+        addr: 127.0.0.1:5341
+      - protocol: tcp
+        addr: 127.0.0.1:5341
+EOF
+
+systemctl restart mosdns
+
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/mosdns.service
+systemctl daemon-reload >/dev/null
+systemctl restart mosdns
+fi
+systemctl enable mosdns >/dev/null 2>&1
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}DNS Split${cRES}"
