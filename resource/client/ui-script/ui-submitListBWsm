@@ -1,0 +1,17 @@
+#!/bin/bash
+yq -i ".plugins.[0].args.domain -= [\"provider:geosite:apple\",\"provider:geosite:apple-ads\",\"provider:geosite:apple-dev\",\"provider:geosite:apple-update\",\"provider:geosite:icloud\",\"provider:geosite:apple@cn\",\"provider:geosite:apple-cn\"]" /opt/de_GWD/mosdns/matchers_listB.yaml
+yq -i ".plugins.[0].args.domain -= [\"provider:geosite:apple\",\"provider:geosite:apple-ads\",\"provider:geosite:apple-dev\",\"provider:geosite:apple-update\",\"provider:geosite:icloud\",\"provider:geosite:apple@cn\",\"provider:geosite:apple-cn\"]" /opt/de_GWD/mosdns/matchers_listW.yaml
+
+yq -i ".plugins.[0].args.domain -= [\"provider:geosite:category-games@cn\"]" /opt/de_GWD/mosdns/matchers_listW.yaml
+
+
+
+if [[ -z $(jq -r '.v2nodeDIV.nodeSM.apple' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+yq -i ".plugins.[0].args.domain += [\"provider:geosite:apple\",\"provider:geosite:apple-ads\",\"provider:geosite:apple-dev\",\"provider:geosite:apple-update\",\"provider:geosite:icloud\",\"provider:geosite:apple@cn\",\"provider:geosite:apple-cn\"]" /opt/de_GWD/mosdns/matchers_listW.yaml
+else
+yq -i ".plugins.[0].args.domain += [\"provider:geosite:apple\",\"provider:geosite:apple-ads\",\"provider:geosite:apple-dev\",\"provider:geosite:apple-update\",\"provider:geosite:icloud\",\"provider:geosite:apple@cn\",\"provider:geosite:apple-cn\"]" /opt/de_GWD/mosdns/matchers_listB.yaml
+fi
+
+if [[ -z $(jq -r '.v2nodeDIV.nodeSM.steam' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+yq -i ".plugins.[0].args.domain += [\"provider:geosite:category-games@cn\"]" /opt/de_GWD/mosdns/matchers_listW.yaml
+fi

@@ -1,0 +1,22 @@
+#!/bin/bash
+>/etc/auto.nfs
+
+nfsNUM=$(jq -r '.app.NFS | length' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+for ((i=0; i<$nfsNUM; i++)); do
+NFSpoint=$(jq -r --argjson i "$i" '.app.NFS[$i].NFSpoint' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+NFSserver=$(jq -r --argjson i "$i" '.app.NFS[$i].NFSserver' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+NFSaddress=$(jq -r --argjson i "$i" '.app.NFS[$i].NFSaddress' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+mkdir -p $NFSpoint
+echo "$NFSpoint  -soft,rw,noatime,noresvport,nosuid,sync,timeout=0  $NFSserver:$NFSaddress" >>/etc/auto.nfs
+done
+
+awk '!i[$1]++' /etc/auto.nfs | sponge /etc/auto.nfs
+
+systemctl enable autofs
+systemctl restart autofs
+
+awk '{print$1}' /etc/auto.nfs | while read line; do
+cd $line
+done
+
