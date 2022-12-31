@@ -1,0 +1,68 @@
+#!/bin/bash
+tag="default"
+domain=$(jq -r '.update.v2node.domain' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+port=$(jq -r '.update.v2node.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+tls=$(jq -r '.update.v2node.tls' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+uuid=$(jq -r '.update.v2node.uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+path=$(jq -r '.update.v2node.path' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+address="$domain:$port"
+
+cat << EOF >/opt/de_GWD/vtrui/config.json
+{
+"log": {
+  "access":"none",
+  "error":"none",
+  "loglevel":"none"
+},
+"dns":{
+  "tag":"dnsflow",
+  "queryStrategy":"UseIP",
+  "disableCache":true,
+  "servers":["localhost"]
+},
+"routing":{
+  "rules":[
+  ]
+},
+"inbounds":[
+  {
+    "port":9896,
+    "listen":"127.0.0.1",
+    "protocol":"dokodemo-door",
+    "settings":{"network":"tcp,udp","followRedirect":true},
+    "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy"}},
+    "sniffing":{"enabled":true,"destOverride":["http","tls","quic"],"metadataOnly":false}
+  }
+]
+}
+EOF
+
+/opt/de_GWD/ui-V2outbound $tag $address $tls $uuid $path
+
+OBdirect=`cat << EOF
+    {
+      "tag":"direct",
+      "protocol":"freedom",
+      "streamSettings":{"sockopt":{"mark":255}}
+    }
+EOF
+`
+jq --argjson OBdirect "$OBdirect" '.outbounds+=[$OBdirect]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+
+
+if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
+  /opt/de_GWD/ui-FWD0save >/dev/null 2>&1
+fi
+
+
+if [[ $1 = "f" ]]; then
+  jq '.v2nodeDIV.nodeCU.status="off"' /opt/de_GWD/0conf |\
+  jq '.v2nodeDIV.nodeDT.status="off"' | sponge /opt/de_GWD/0conf
+  chmod 666 /opt/de_GWD/0conf
+fi
+
+if [[ $2 = "r" ]]; then
+  systemctl restart vtrui
+fi
