@@ -1,0 +1,15 @@
+#!/bin/bash
+jq -r '.dns.listB[]' /opt/de_GWD/0conf 2>/dev/null | sort | uniq | xargs -n 1 | sed '/^\s*$/d' >/opt/de_GWD/mosdns/domains_listB
+jq -r '.dns.listW[]' /opt/de_GWD/0conf 2>/dev/null | sort | uniq | xargs -n 1 | sed '/^\s*$/d' >/opt/de_GWD/mosdns/domains_listW
+
+
+
+if [[ -z $(jq -r '.v2nodeDIV.nodeSM.apple' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+cat /opt/de_GWD/.repo/Domains.apple.txt >>/opt/de_GWD/mosdns/domains_listW
+else
+cat /opt/de_GWD/.repo/Domains.apple.txt >>/opt/de_GWD/mosdns/domains_listB
+fi
+
+if [[ -z $(jq -r '.v2nodeDIV.nodeSM.steam' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+cat /opt/de_GWD/.repo/Domains.games.txt >>/opt/de_GWD/mosdns/domains_listW
+fi
