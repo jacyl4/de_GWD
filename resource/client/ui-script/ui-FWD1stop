@@ -1,0 +1,8 @@
+#!/bin/bash
+systemctl stop vtrui1 >/dev/null
+systemctl disable vtrui1 >/dev/null
+rm -rf /lib/systemd/system/vtrui1.service
+rm -rf /etc/systemd/system/vtrui1.service
+systemctl daemon-reload >/dev/null
+
+rm -rf /opt/de_GWD/vtrui1
