@@ -1,0 +1,10 @@
+#!/bin/bash
+systemctl stop wg-quick@wg0 >/dev/null 2>&1
+systemctl disable wg-quick@wg0 >/dev/null 2>&1
+
+ethernetnum=$(find /sys/class/net ! -type d | xargs --max-args=1 realpath | grep 'device' | xargs -n 1 | grep -v 'virtual' | grep -v 'ifb' | awk -F'/' '{print$NF}' | head -n1)
+sed -i "/PIHOLE_INTERFACE=/c\PIHOLE_INTERFACE=$ethernetnum,ifb4$ethernetnum" /etc/pihole/setupVars.conf
+sed -i "/interface=/c\interface=$ethernetnum,ifb4$ethernetnum" /etc/dnsmasq.d/01-pihole.conf
+pihole restartdns
+
+/etc/rc_online.local
