@@ -1,0 +1,190 @@
+#!/bin/bash
+clear
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+architecture=$(dpkg --print-architecture)
+
+
+
+installFileRun(){
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^mariadb-server$') ]] && echo -e "${WHITE}[ ${YELLOW}! ${WHITE}]\c" && echo -e "\t${YELLOW}Install MariaDB first${cRES}" && exit
+
+filerunDep
+
+filerunNginx
+
+rm -rf /var/www/html/filerun
+mkdir -p /var/www/html/filerun
+wget --show-progress -cqO /var/www/html/filerun/FileRun.zip https://filerun.com/download-latest
+if [[ -n $(unzip -tq /var/www/html/filerun/FileRun.zip | grep "No errors detected in compressed data") ]]; then
+unzip /var/www/html/filerun/FileRun.zip -d /var/www/html/filerun >/dev/null
+rm -f /var/www/html/filerun/FileRun.zip
+chown -R www-data:www-data /var/www/html/filerun
+
+echo -e "${BLUE}-------------------------------------------------- ${cRES}"
+echo -e "${GREEN}FileRun thumbs and previews support${cRES}"
+echo
+echo -e "${BLUE}FFmpeg:      ${YELLOW}/usr/bin/ffmpeg${cRES}"
+echo -e "${BLUE}stl-thumb:   ${YELLOW}/usr/bin/stl-thumb${cRES}"
+echo -e "${BLUE}pngquant:    ${YELLOW}/usr/bin/pngquant${cRES}"
+echo
+echo -e "${BLUE}-------------------------------------------------- ${cRES}"
+
+else
+echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}FileRun${RED} Download Failed${cRES}"
+break
+fi
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Install FileRun${cRES}"
+}
+
+
+
+filerunDep(){
+unset aptPKG
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-mysql$') ]] && aptPKG+=(php7.4-mysql)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-mbstring$') ]] && aptPKG+=(php7.4-mbstring)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-curl$') ]] && aptPKG+=(php7.4-curl)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-zip$') ]] && aptPKG+=(php7.4-zip)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-gd$') ]] && aptPKG+=(php7.4-gd)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-ldap$') ]] && aptPKG+=(php7.4-ldap)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-xml$') ]] && aptPKG+=(php7.4-xml)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-json$') ]] && aptPKG+=(php7.4-json)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-opcache$') ]] && aptPKG+=(php7.4-opcache)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-imagick$') ]] && aptPKG+=(php7.4-imagick)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-memcached$') ]] && aptPKG+=(php7.4-memcached)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^imagemagick$') ]] && aptPKG+=(imagemagick)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^memcached$') ]] && aptPKG+=(memcached)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^libmemcached-tools$') ]] && aptPKG+=(libmemcached-tools)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^libvips-tools$') ]] && aptPKG+=(libvips-tools)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^pngquant$') ]] && aptPKG+=(pngquant)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^ffmpeg$') ]] && aptPKG+=(ffmpeg)
+[[ -n $aptPKG ]] && apt update && apt install $(echo ${aptPKG[@]})
+[[ $? -ne 0 ]] && rm -rf /var/lib/apt/lists/lock
+
+ghREPO="unlimitedbacon/stl-thumb"
+ghPackage="_$architecture.deb"
+curl -sSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'browser_download_url' | grep 'stl-thumb_' | grep $ghPackage | cut -d '"' -f 4 | wget --show-progress -qi - -O /tmp/stl-thumb.deb
+[[ $? -ne 0 ]] && echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}stl-thumb${RED} Download Failed${cRES}" && exit
+dpkg -i /tmp/stl-thumb.deb
+
+case "$architecture" in
+  amd64)
+  ioncube_loaders="ioncube_loaders_lin_x86-64.zip"
+  ;;
+  arm64)
+  ioncube_loaders="ioncube_loaders_lin_aarch64.zip"
+  ;;
+esac
+
+wget --show-progress -cqO /tmp/ioncube_loaders_lin.zip https://downloads.ioncube.com/loader_downloads/$ioncube_loaders
+if [[ -n $(unzip -tq /tmp/ioncube_loaders_lin.zip | grep "No errors detected in compressed data") ]]; then
+rm -rf /usr/local/ioncube
+unzip /tmp/ioncube_loaders_lin.zip -d /usr/local >/dev/null 2>&1
+
+echo "zend_extension = /usr/local/ioncube/ioncube_loader_lin_7.4.so" >/etc/php/7.4/mods-available/ioncube.ini
+ln -sf /etc/php/7.4/mods-available/ioncube.ini /etc/php/7.4/fpm/conf.d/00-ioncube.ini
+ln -sf /etc/php/7.4/mods-available/ioncube.ini /etc/php/7.4/cli/conf.d/00-ioncube.ini
+systemctl restart php7.4-fpm
+else
+echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}ioncube_loader${RED} Download Failed${cRES}" && exit
+fi
+}
+
+
+
+filerunNginx(){
+cat << EOF >/etc/nginx/conf.d/filerun.conf
+server {
+  listen 10501 ssl http2 fastopen=500 reuseport;
+  root /var/www/html/filerun;
+  index index.php index.html index.htm;
+  error_page 497 https://\$host:10501\$request_uri;
+
+  include /etc/nginx/conf.d/.HSTS;
+
+  add_header Referrer-Policy                    "no-referrer"       always;
+  add_header Pragma                             "no-cache"          always;
+
+  include /etc/nginx/conf.d/.ssl_certs;
+
+location ~ [^/]\.php(/|$) {
+  fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+  if (!-f \$document_root\$fastcgi_script_name) {
+      return 404;
+  }
+
+  include               fastcgi_params;
+  fastcgi_param         SCRIPT_FILENAME   \$document_root\$fastcgi_script_name;
+  fastcgi_pass          unix:/run/php/php7.4-fpm.sock;
+  fastcgi_index         index.php;
+}
+}
+EOF
+
+systemctl force-reload nginx
+}
+
+
+
+uninstallFileRun(){
+rm -rf /var/www/html/filerun
+
+rm -rf /etc/nginx/conf.d/filerun.conf
+
+sed -i "/zend_extension/d" /etc/php/7.4/fpm/php.ini
+sed -i "/zend_extension/d" /etc/php/7.4/cli/php.ini
+rm -rf /usr/local/ioncube
+
+dpkg -r stl-thumb
+
+apt remove --purge libdrm-dev libosmesa6 libosmesa6-dev libpthread-stubs0-dev libx11-dev libxau-dev libxcb1-dev libxdmcp-dev x11proto-core-dev x11proto-dev xorg-sgml-doctools xtrans-dev mesa-common-dev
+
+apt remove --purge && apt clean && apt autoclean
+
+cat << "EOF" >/tmp/filerunRestart
+#!/bin/bash
+systemctl restart php7.4-fpm
+systemctl force-reload nginx
+rm -rf /tmp/filerunRestart
+EOF
+chmod +x /tmp/filerunRestart
+tmux new -ds filerunRestart '/tmp/filerunRestart'
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Uninstall FileRun${cRES}"
+}
+
+
+
+start_menu(){
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}         FileRun${cRES}"
+    echo -e "${GREEN}=============================== ${cRES}"
+    echo -e "${GREEN}1. Install FileRun${cRES}"
+   echo -e "${YELLOW}2. Uninstall FileRun${cRES}"
+    echo ""
+    read -p "Select:" num
+    case "$num" in
+    1)
+    installFileRun
+    start_menu
+    ;;
+    2)
+    uninstallFileRun
+    start_menu
+    ;;
+    *)
+    clear
+    echo -e "${RED}Wrong number${cRES}"
+    sleep 1s
+    start_menu
+    ;;
+    esac
+}
+
+start_menu
