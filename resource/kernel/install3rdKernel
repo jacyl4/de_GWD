@@ -1,0 +1,298 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+architecture=$(dpkg --print-architecture)
+
+
+
+mkdir -p /opt/de_GWD
+cat << "EOF" >/etc/rc_kernel.local
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
+
+if [[ $(uname -r) =~ "bbrplus" ]]; then
+  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
+else
+  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+fi
+sysctl -p >/dev/null 2>&1
+
+rm -f /var/cache/apt/archives/lock
+rm -f /var/lib/apt/lists/lock
+rm -f /var/lib/dpkg/lock
+rm -f /var/lib/dpkg/lock-frontend
+dpkg --configure -a
+
+dpkg --list | grep linux-image | awk '{print $2}' | grep -Fv $(uname -r) | while read line; do
+apt autoremove --purge  -y $line
+done
+
+dpkg --list | grep linux-headers | awk '{print $2}' | grep -Fv $(uname -r) | while read line; do
+apt autoremove --purge  -y $line
+done
+EOF
+chmod +x /etc/rc_kernel.local
+
+crontab -l 2>/dev/null >/tmp/now.cron
+sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
+sed -i '/\/etc\/rc_kernel.local/d' /tmp/now.cron
+echo '@reboot sleep 10 && /etc/rc_kernel.local' >>/tmp/now.cron
+crontab /tmp/now.cron
+rm -rf /tmp/now.cron
+
+
+installBBRplus(){
+echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}BBRplus kernel${cRES}\r\c"
+mkdir -p /boot/grub
+rm -rf /var/lib/dpkg/info/grub-pc.postinst
+[[ -z $(which 'jq') ]] && apt install jq
+[[ -z $(which 'curl') ]] && apt install curl
+[[ -z $(which 'zstd') ]] && apt install zstd
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+rm -rf /tmp/linux-image*
+rm -rf /tmp/linux-headers*
+
+curl -sSL https://api.github.com/repos/UJX6N/bbrplus-6.x_Mainline/releases/latest | jq -r '.assets[].browser_download_url | select(contains(. | "/Debian"))' | while read line; do
+[[ $line =~ "linux-headers" ]] && [[ $line =~ $architecture ]] && bbrplusPath="/tmp/linux-headers.deb"
+[[ $line =~ "linux-image" ]] && [[ $line =~ $architecture ]] && bbrplusPath="/tmp/linux-image.deb"
+
+wget --show-progress -cqO $bbrplusPath $line
+done
+
+rm -f /var/cache/apt/archives/lock
+rm -f /var/lib/apt/lists/lock
+rm -f /var/lib/dpkg/lock
+rm -f /var/lib/dpkg/lock-frontend
+dpkg --configure -a
+
+dpkg -i /tmp/linux-image.deb
+[[ $? -ne 0 ]] && echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}BBRplus linux-image.deb ${RED}Install Failed${cRES}" && exit
+dpkg -i /tmp/linux-headers.deb
+[[ $? -ne 0 ]] && echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}BBRplus linux-headers.deb ${RED}Install Failed${cRES}" && exit
+
+if [[ -n $(dpkg --list | grep 'linux-image' | grep 'bbrplus') ]]; then
+dpkg --list | awk '{print $2}' | grep 'liquorix' | grep 'linux-' | while read line; do
+apt autoremove --purge  -y $line
+done
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  
+dpkg --list | awk '{print $2}' | grep 'xanmod' | grep 'linux-' | while read line; do
+apt autoremove --purge  -y $line
+done
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line; do
+apt autoremove --purge  -y $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed "/$BBRPLUS_Ver-bbrplus/d" | while read line; do
+apt autoremove --purge  -y $line
+done
+apt autoremove --purge -y && apt clean -y && apt autoclean -y
+
+chmod -x /etc/grub.d/30_os-prober
+update-initramfs -u -k all
+update-grub
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}BBRplus kernel${cRES}"
+reboot
+exit
+else
+  echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}bbrplus kernel ${RED}Install Failed${cRES}"
+  exit
+fi
+}
+
+
+
+installLiquorix(){
+echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Liquorix kernel${cRES}\r\c"
+if [[ $architecture != "amd64" ]]; then
+  echo -e "${RED}only work on x86_64${cRES}"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+rm -rf /var/lib/dpkg/info/grub-pc.postinst
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+rm -f /var/cache/apt/archives/lock
+rm -f /var/lib/apt/lists/lock
+rm -f /var/lib/dpkg/lock
+rm -f /var/lib/dpkg/lock-frontend
+dpkg --configure -a
+
+mkdir -p /etc/apt/{sources.list.d,trusted.gpg.d}
+curl -sSLo /etc/apt/trusted.gpg.d/liquorix-keyring.gpg https://liquorix.net/liquorix-keyring.gpg
+echo "deb http://liquorix.net/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" >/etc/apt/sources.list.d/liquorix.list
+
+apt update && apt install -y linux-image-liquorix-amd64 linux-headers-liquorix-amd64
+
+if [[ -n $(dpkg --list | grep linux-image | grep liquorix) ]]; then
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed '/liquorix/d' | while read line; do
+apt autoremove --purge  -y $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed '/liquorix/d' | while read line; do
+apt autoremove --purge  -y $line
+done
+apt autoremove --purge -y && apt clean -y && apt autoclean -y
+
+chmod -x /etc/grub.d/30_os-prober
+update-initramfs -u -k all
+update-grub
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Liquorix kernel${cRES}"
+reboot
+exit
+else
+  echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}Liquorix kernel ${RED}Install Failed${cRES}"
+
+  dpkg --list | awk '{print $2}' | grep liquorix | while read line; do
+  apt autoremove --purge  -y $line
+  done
+
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+  echo -e "${WHITE}[ ${YELLOW}! ${WHITE}]\c" && echo -e "\t${YELLOW}Clear up & Exit${cRES}"
+  exit
+fi
+fi
+}
+
+
+
+installXanMod(){
+echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}XanMod kernel${cRES}\r\c"
+if [[ $architecture != "amd64" ]]; then
+  echo -e "${RED}only work on x86_64${cRES}"
+elif [[ $architecture == "amd64" ]]; then
+mkdir -p /boot/grub
+rm -rf /var/lib/dpkg/info/grub-pc.postinst
+[[ -z $(which 'update-grub') ]] && [[ -d "/sys/firmware/efi" ]] && apt update && apt install -y grub-efi && grub-mkconfig -o /boot/grub/grub.cfg
+[[ -z $(which 'update-grub') ]] && [[ ! -d "/sys/firmware/efi" ]] && apt update && apt install -y grub2-common && grub-mkconfig -o /boot/grub/grub.cfg
+
+rm -f /var/cache/apt/archives/lock
+rm -f /var/lib/apt/lists/lock
+rm -f /var/lib/dpkg/lock
+rm -f /var/lib/dpkg/lock-frontend
+dpkg --configure -a
+
+mkdir -p /etc/apt/{sources.list.d,trusted.gpg.d}
+cat << EOF >/tmp/xanmod.gpg.key
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v2
+
+mQENBFhxW04BCAC61HuxBVf1XJiQjXu/DSAtVcnuK38geDoDjcqFtHskFy32NgJG
+X118EFNym6noF+oibaSftI9yjHthWvMnYZ/+DPwd7YZhbAjBvxMIQCsP6cFVxrgc
+VV8g+uh4TCfbpalDBFoncRhQCgkmDN9Vd4kIWRh6BHJuzpKB/h2KxUHZVEKgWlK2
+dR1xUtbrc+kp8gLwPbxTgC3tZ4x2uMMMlnbyCMSRa5oJ/AvoW4W1XphKL9ivsFHM
+PSQkUBDvgv2RPw+0XBxPy8SYE0r0onx0ZIpjJRTODt3bSV6/0owwlpNogV9bT8HY
+kl3+w3mTwax6S1akHZuJtLkZS0uUBz1BHt5bABEBAAG0IVhhbk1vZCBLZXJuZWwg
+PGtlcm5lbEB4YW5tb2Qub3JnPokBNwQTAQgAIQUCWHFbTgIbAwULCQgHAgYVCAkK
+CwIEFgIDAQIeAQIXgAAKCRCG99Ce5zTmIwTmB/9/S4rmwU6efDgEaBDwBDbOfLBA
+P2+kDpabjG4K+V4NSvDqlPN49KrI7C21jHghAa2VuTPbSZVQ9ziUd5DjX9OuXov8
+CYVG+rrlG1UadHS8SBpgw0gNylEvo9/U6u0hl8mrbVOlpzu+eE+e4cMTHax2y580
+fC2xmnM8wKgyRFEyVc6ilWU+UNTAeUFlg0YfU3cV1Ut4DzVFfamtNYg0p7Q/9MSy
+VgFpt5C2U5prk4wi++51OgrtaNhMrUhzYXLINWVF6IrXhQ+mkI/FWXUZ0oyVo55v
++dQzuds/gos90q+tKyE514pYAmwQSftSjf+RmHOMpPQyMZZKSywrz4vlfveDuQEN
+BFhxW04BCACs5bXq73MDb2+AsvNL2XkkbnzmE4K3k0gejB9OxrO+puAZn3wWyYIk
+b0Op8qVUh+/FIiW/uFfmdFD8BypC3YkCNfg6e74f5TT3qQciccpMGy62teo3jfhT
+T8E1OL1i76ALq7eNbByJKiKLBrTUDM6BDIeRZBWXQMase4+aqUAP47Kd/ByPsmCh
+/pzb6yPdDPKwkspELssdPXYI7enddjQsCPoBko0j8CTPgKqMTeCuKMXCtD2gtRBN
+eoVj4cbjZoZvBh8oJktzbYA8FX8eKdxIXhSP9MoVOPSWhxIQdwzkzUPK+0vUV8jA
+NBTnGOkrRJPOHGPJWFWnTUGrzvcwi7czABEBAAGJAR8EGAEIAAkFAlhxW04CGwwA
+CgkQhvfQnuc05iMIswgAmzSpCHFGKdkFLdC673FidJcL8adKFTO5Mpyholc5N8vG
+ROJbpso+DpssF14NKoBfBWqPRgHxYzHakxHiNf0R2+EEwXH3rblzpx3PXzB0OgNe
+T9T0UStrGgc9nZ8nZVURHZZ2z5zakEWS+rB2TiSxz3YArR3wiTHQW49G09uZvfp6
+5Mim2w+eUxbQ689eT0DlDI1d2eDP/j5lrv1elsg3kBE2Awzdvi8DdGUpMFrSsYJw
+WS85uZrwbeAs/nPO62wNIvAbbRsWnDg3AV3vc02eRvy52tTBY1W/67N02M4AxgPd
+ukDDFZMifwa03yTHD/a57O4dFOnzsEVojBnbzQ7W7w==
+=HKlF
+-----END PGP PUBLIC KEY BLOCK-----
+EOF
+cat /tmp/xanmod.gpg.key | gpg --dearmor >/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/xanmod-kernel-archive-keyring.gpg] http://deb.xanmod.org releases main" >/etc/apt/sources.list.d/xanmod-kernel.list
+
+apt update && apt install linux-xanmod-edge-x64v2 -y
+
+if [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
+  apt-key del 2FB2CD80 >/dev/null 2>&1
+  apt-key del 33F8024D >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/liquorix.list
+  rm -rf /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+
+dpkg --list | awk '{print $2}' | grep 'linux-image' | sed '/xanmod/d' | while read line; do
+apt autoremove --purge  -y $line
+done
+
+dpkg --list | awk '{print $2}' | grep 'linux-headers' | sed '/xanmod/d' | while read line; do
+apt autoremove --purge  -y $line
+done
+apt autoremove --purge -y && apt clean -y && apt autoclean -y
+
+chmod -x /etc/grub.d/30_os-prober
+update-initramfs -u -k all
+update-grub
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}XanMod kernel${cRES}"
+reboot
+exit
+else
+  echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}XanMod kernel ${RED}Install Failed${cRES}"
+
+  dpkg --list | awk '{print $2}' | grep xanmod | while read line; do
+  apt autoremove --purge  -y $line
+  done
+
+  apt-key del E734E623 >/dev/null 2>&1
+  rm -rf /etc/apt/sources.list.d/xanmod-kernel.list
+  rm -rf /usr/share/keyrings/xanmod-kernel-archive-keyring.gpg
+  echo -e "${WHITE}[ ${YELLOW}! ${WHITE}]\c" && echo -e "\t${YELLOW}Clear up & Exit${cRES}"
+  exit
+fi
+fi
+}
+
+
+
+    echo -e "${GREEN}======================================== ${cRES}"
+    echo -e "${GREEN}[1]: Install BBRplus kernel and reboot${cRES}"
+    echo -e "${GREEN}[2]: Install Liquorix kernel and reboot${cRES}"
+    echo -e "${GREEN}[3]: Install XanMod kernel and reboot${cRES}"
+    echo -e "${GREEN}======================================== ${cRES}"
+    read -s -n 1 kernelSwitch
+
+case $kernelSwitch in
+  "1")
+    installBBRplus
+    ;;
+  "2")
+    installLiquorix
+    ;;
+  "3")
+    installXanMod
+    ;;
+esac
