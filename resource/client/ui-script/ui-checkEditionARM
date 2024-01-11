@@ -1,0 +1,2 @@
+#!/bin/bash
+[[ $(dpkg --print-architecture) = "arm64" ]] && echo "ARM"
