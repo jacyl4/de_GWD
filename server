@@ -329,17 +329,10 @@ rm -f /var/lib/dpkg/lock-frontend
 dpkg --configure -a
 
 cat << EOF >/etc/apt/sources.list
-deb http://deb.debian.org/debian bookworm main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm main non-free-firmware
-
-deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware
-deb-src http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware
-
-deb http://deb.debian.org/debian bookworm-updates main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm-updates main non-free-firmware
-
-deb http://deb.debian.org/debian bookworm-backports main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm-backports main non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm-backports main contrib non-free non-free-firmware
 EOF
 
 apt update --fix-missing && apt upgrade --allow-downgrades -y
@@ -1077,7 +1070,7 @@ ocspStapling(){
 cat << "EOF" >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
 if [[ -n $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 86400 | grep ' not ') ]]; then
-[[ ! -f "/var/www/ssl/intermediate.pem" ]] && wget --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+[[ ! -f "/var/www/ssl/intermediate.pem" ]] && wget --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/2024/e5-cross.pem
 [[ ! -f "/var/www/ssl/root.pem" ]] && wget --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
 
 [[ ! -f "/var/www/ssl/bundle.pem" ]] && cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem && cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
@@ -1087,7 +1080,7 @@ openssl ocsp -no_nonce \
     -cert    /var/www/ssl/*.cer \
     -CAfile  /var/www/ssl/bundle.pem \
     -VAfile  /var/www/ssl/bundle.pem \
-    -url     http://r3.o.lencr.org \
+    -url     http://e5.o.lencr.org \
     -respout /var/www/ssl/ocsp.resp
 
 chmod 644 /var/www/ssl/*.key

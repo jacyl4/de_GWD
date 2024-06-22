@@ -215,17 +215,10 @@ sysctl -p >/dev/null 2>&1
 
 dpkg --configure -a
 cat << EOF >/etc/apt/sources.list
-deb http://deb.debian.org/debian bookworm main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm main non-free-firmware
-
-deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware
-deb-src http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware
-
-deb http://deb.debian.org/debian bookworm-updates main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm-updates main non-free-firmware
-
-deb http://deb.debian.org/debian bookworm-backports main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm-backports main non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm-backports main contrib non-free non-free-firmware
 EOF
 apt update --fix-missing && apt upgrade --allow-downgrades -y
 apt full-upgrade -y && apt --purge autoremove -y && apt clean -y && apt autoclean -y

@@ -1586,17 +1586,10 @@ echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Deploy nftable
 updateAPT(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Debian Updated${cRES}\r\c"
 cat << EOF >/etc/apt/sources.list
-deb http://deb.debian.org/debian bookworm main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm main non-free-firmware
-
-deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware
-deb-src http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware
-
-deb http://deb.debian.org/debian bookworm-updates main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm-updates main non-free-firmware
-
-deb http://deb.debian.org/debian bookworm-backports main non-free-firmware
-deb-src http://deb.debian.org/debian bookworm-backports main non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://cloudfront.debian.net/debian bookworm-backports main contrib non-free non-free-firmware
 EOF
 
 echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" >/etc/apt/sources.list.d/php.list
