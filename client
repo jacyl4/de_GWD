@@ -2156,6 +2156,14 @@ postInstall(){
 /opt/de_GWD/ui-NodeOne
 /opt/de_GWD/ui_4am
 /opt/de_GWD/ui_4h
+systemctl restart smartdns
+systemctl restart mosdns
+if [[ $? -ne 0 ]]; then
+sed -i '/Nice=/d' /etc/systemd/system/mosdns.service
+systemctl daemon-reload >/dev/null
+systemctl restart mosdns
+fi
+systemctl enable mosdns >/dev/null 2>&1
 
 if [[ $(jq -r '.FORWARD.block53' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
   /opt/de_GWD/ui-block53on

@@ -135,7 +135,19 @@ if [[ -n $DoGcIP ]]; then
 echo "server-tcp 127.0.0.1:5333" >>/opt/de_GWD/smartdns/smartdns.conf
 fi
 
+doh1re_origin=$(jq -r '.dns.doh1re' /opt/de_GWD/0conf)
+if [[ $doh1re_origin != $doh1IP ]]; then
+jq --arg doh1re "$doh1IP" '.dns.doh1re=$doh1re' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
+doh2re_origin=$(jq -r '.dns.doh2re' /opt/de_GWD/0conf)
+if [[ $doh2re_origin != $doh2IP ]]; then
+jq --arg doh2re "$doh2IP" '.dns.doh2re=$doh2re' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+fi
+
+if [[ $doh1re_origin != $doh1IP ]] || [[ $doh2re_origin != $doh2IP ]]; then
 systemctl restart smartdns
+fi
 
 if [[ -n $DoGcIP ]] || [[ -n $doh1IP ]] || [[ -n $doh2IP ]]; then
 echo $DoGcIP $doh1IP $doh2IP | xargs -n1 | sort | uniq | sed 's/$/,/g' >/opt/de_GWD/nftables/IP_GlobalDNS

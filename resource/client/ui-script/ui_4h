@@ -14,5 +14,5 @@ cRES='\E[0m'
 
 /opt/de_GWD/ui-DNSsplit
 
-[[ $1 = "r" ]] && pihole restartdns
+[[ $1 = "r" ]] && systemctl restart smartdns && systemctl restart mosdns && pihole restartdns
 [[ $1 = "n" ]] && systemctl restart nftables
