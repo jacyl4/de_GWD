@@ -26,8 +26,8 @@ cat << EOF >/var/www/ssl/update_ocsp_cache
 #!/bin/bash
 ocsp_uri=$(openssl x509 -noout -ocsp_uri -in /var/www/ssl/*.cer)
 intermediate_no=$(echo $ocsp_uri | cut -d/ -f3 | cut -d. -f1)
-[[ ! -f "/var/www/ssl/intermediate.pem" ]] && wget --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/2024/$intermediate_no-cross.pem
-[[ ! -f "/var/www/ssl/root.pem" ]] && wget --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
+wget --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/2024/$intermediate_no-cross.pem
+wget --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
 
 cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem
 cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
