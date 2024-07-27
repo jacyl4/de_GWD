@@ -21,6 +21,7 @@ done
 
 sed -i '/^\s*$/d' /opt/de_GWD/nftables/IP_V2NODE
 sed -i 's/$/,/g' /opt/de_GWD/nftables/IP_V2NODE
+sort -n /opt/de_GWD/nftables/IP_V2NODE | uniq | sponge /opt/de_GWD/nftables/IP_V2NODE
 nft flush set ip de_GWD V2NODE
 cat << EOF >/opt/de_GWD/nftables/SET_V2NODE.nft
 #!/usr/sbin/nft -f
