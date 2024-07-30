@@ -266,23 +266,23 @@ sed -i '/ulimit -v/d' /etc/profile
 sed -i '/HISTCONTROL=/d' /etc/profile
 sed -i '/alias reboot=/d' /etc/profile
 cat << EOF >>/etc/profile
-ulimit -SHn 1000000
-ulimit -c unlimited
-ulimit -d unlimited
+ulimit -SHn 65535
+ulimit -c 65535
+ulimit -d 65535
+ulimit -t 65535
+ulimit -u 65535
 ulimit -f unlimited
-ulimit -m unlimited
 ulimit -s unlimited
-ulimit -t unlimited
-ulimit -u 1000000
+ulimit -m unlimited
 ulimit -v unlimited
 
 HISTCONTROL=ignoredups
 alias reboot="sudo systemctl reboot"
 EOF
-sed -i '/pam_limits.so/d' /etc/pam.d/common-session
-echo "session required	pam_limits.so" >>/etc/pam.d/common-session
 source /etc/profile
 
+sed -i '/pam_limits.so/d' /etc/pam.d/common-session
+echo "session required	pam_limits.so" >>/etc/pam.d/common-session
 cat << EOF >/etc/security/limits.conf
 root     soft   nofile    1000000
 root     hard   nofile    1000000
@@ -607,7 +607,6 @@ net.ipv4.tcp_mtu_probe_floor = 48
 net.ipv4.tcp_base_mss = 1024
 net.ipv4.tcp_no_metrics_save = 0
 net.ipv4.tcp_no_ssthresh_metrics_save = 1
-net.ipv4.tcp_available_ulp = espintcp mptcp
 net.ipv4.tcp_sack = 1
 net.ipv4.tcp_dsack = 1
 net.ipv4.tcp_frto = 0
