@@ -678,7 +678,7 @@ ethernet_FT=$(echo ${interface_FT[@]} | sed -e 's/[ ]/, /g')
 if [[ $(echo $ethernet_FT | xargs -n1 | sort | uniq | wc -l) = "1" ]]; then
 echo "define flowtable_eth = { $ethernet_FT, ifb0};" >/opt/de_GWD/nftables/flowtable.eth
 else
-echo "define flowtable_eth = { $ethernet_FT };" >/opt/de_GWD/nftables/flowtable.eth
+echo "define flowtable_eth = { $ethernet_FT, lo };" >/opt/de_GWD/nftables/flowtable.eth
 fi
 EOF
 chmod +x /opt/de_GWD/nftables/flowtable_eth.sh
