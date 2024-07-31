@@ -1364,12 +1364,16 @@ table inet filter {
                 type filter hook input priority 0; policy accept;
                 iifname ifb4lo accept
                 iifname lo accept
+                iifname "ifb4wg0" accept
+                iifname "wg0" accept
+                iifname "ifb4docker0" accept
+                iifname "docker0" accept
                 ct state established,related accept
                 tcp flags != syn ct state new drop
                 tcp flags & (fin|syn) == (fin|syn) drop
                 tcp flags & (syn|rst) == (syn|rst) drop
-                tcp flags & (fin|syn|rst|psh|ack|urg) < (fin) drop
-                tcp flags & (fin|syn|rst|psh|ack|urg) == (fin|psh|urg) drop
+                tcp flags & (fin|syn|rst|psh|ack|urg) == 0 drop
+                tcp flags & (fin|psh|urg) == (fin|psh|urg) drop
                 ct state invalid counter drop
                 # Drop 53 in
         }
@@ -1418,14 +1422,6 @@ table inet router {
                 # Docker
                 fib daddr type local counter jump DOCKER
         }
-        chain POSTROUTING {
-                type nat hook postrouting priority -100; policy accept;
-                # Wireguard masquerade traffic
-                oifname $ethernetnum ip saddr 172.16.66.0/24 masquerade
-
-                # Docker
-                oifname != "docker0" ip saddr 172.17.0.0/16 counter masquerade
-        }
         chain INPUT {
                 type nat hook input priority -100; policy accept;
         }
@@ -1436,6 +1432,14 @@ table inet router {
         chain DOCKER {
                 iifname "ifb4docker0" counter accept
                 iifname "docker0" counter accept
+        }
+        chain POSTROUTING {
+                type nat hook postrouting priority 100; policy accept;
+                # Wireguard masquerade traffic
+                oifname $ethernetnum ip saddr 172.16.66.0/24 masquerade
+
+                # Docker
+                oifname != "docker0" ip saddr 172.17.0.0/16 counter masquerade
         }
 }
 EOF
