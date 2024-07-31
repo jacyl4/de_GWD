@@ -492,9 +492,9 @@ sed -i '/alias reboot=/d' /etc/profile
 cat << EOF >>/etc/profile
 ulimit -SHn 65535
 ulimit -c 65535
-ulimit -d 65535
 ulimit -t 65535
 ulimit -u 65535
+ulimit -d unlimited
 ulimit -f unlimited
 ulimit -s unlimited
 ulimit -m unlimited
