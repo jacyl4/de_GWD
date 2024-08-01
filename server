@@ -425,33 +425,29 @@ server:
     forward-first: no
 EOF
 
-chmod +x /etc/resolvconf/update.d/unbound
-
 rm -rf /lib/systemd/system/unbound.service
 cat << "EOF" >/etc/systemd/system/unbound.service
 [Unit]
 Description=Unbound DNS server
 After=network.target
-Before=network-online.target nss-lookup.target
 
 [Service]
-Type=notify
+Type=simple
 Restart=on-failure
-EnvironmentFile=-/etc/default/unbound
-ExecStartPre=-/usr/libexec/unbound-helper chroot_setup
-ExecStartPre=-/usr/libexec/unbound-helper root_trust_anchor_update
-ExecStart=/usr/sbin/unbound -d -p $DAEMON_OPTS
-ExecStopPost=-/usr/libexec/unbound-helper chroot_teardown
-ExecReload=+/bin/kill -HUP $MAINPID
+ReadOnlyPaths=/etc/unbound
+ExecStart=/usr/sbin/unbound -d
+ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target
 EOF
+systemctl daemon-reload >/dev/null
+systemctl restart unbound >/dev/null 2>&1
+systemctl enable unbound >/dev/null 2>&1
+
+rm -rf /etc/resolvconf/update.d/unbound >/dev/null 2>&1
 rm -rf /etc/systemd/resolved.conf >/dev/null 2>&1
 systemctl mask --now systemd-resolved >/dev/null 2>&1
-systemctl daemon-reload >/dev/null
-systemctl enable unbound >/dev/null 2>&1
-systemctl restart unbound >/dev/null 2>&1
 
 rm -rf /etc/resolvconf/resolv.conf.d/*
 >/etc/resolvconf/resolv.conf.d/original
