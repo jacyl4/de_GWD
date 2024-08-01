@@ -425,6 +425,8 @@ server:
     forward-first: no
 EOF
 
+chmod +x /etc/resolvconf/update.d/unbound
+
 rm -rf /lib/systemd/system/unbound.service
 cat << "EOF" >/etc/systemd/system/unbound.service
 [Unit]
