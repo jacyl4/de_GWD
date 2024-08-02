@@ -1354,7 +1354,7 @@ table inet filter {
         chain FORWARD {
                 type filter hook forward priority 0; policy accept;
                 counter packets 0 bytes 0
-                tcp flags & (syn|rst) == syn counter tcp option maxseg size set 1440
+                tcp flags & (syn|rst) == syn counter tcp option maxseg size set rt mtu
                 # WireGuard traffic
                 iifname "ifb4wg0" accept
                 iifname "wg0" accept
