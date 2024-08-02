@@ -1329,33 +1329,11 @@ chmod +x /opt/de_GWD/nftables/SET_listWlan.nft
 /opt/de_GWD/nftables/SET_listWlan.nft
 
 
-cat << "EOF" >/opt/de_GWD/nftables/flowtable_eth.sh
-#!/bin/bash
-unset interface_FT
-interface_all=$(find /sys/class/net ! -type d | xargs --max-args=1 realpath | grep 'device')
-interface_FT=(${interface_FT[@]} $(echo $interface_all | xargs -n1 | grep -v 'virtual' | awk -F'/' '{print$NF}'))
-interface_FT=(${interface_FT[@]} $(echo $interface_all | xargs -n1 | awk -F'/' '{print$NF}' | grep '^docker'))
-interface_FT=(${interface_FT[@]} $(echo $interface_all | xargs -n1 | awk -F'/' '{print$NF}' | grep '^wg'))
-interface_FT=(${interface_FT[@]} $(echo $interface_all | xargs -n1 | awk -F'/' '{print$NF}' | grep '^ifb4'))
-ethernet_FT=$(echo ${interface_FT[@]} | sed -e 's/[ ]/, /g')
-
-if [[ $(echo $ethernet_FT | xargs -n1 | sort | uniq | wc -l) = "1" ]]; then
-echo "define flowtable_eth = { $ethernet_FT, ifb0};" >/opt/de_GWD/nftables/flowtable.eth
-else
-echo "define flowtable_eth = { $ethernet_FT, lo };" >/opt/de_GWD/nftables/flowtable.eth
-fi
-EOF
-chmod +x /opt/de_GWD/nftables/flowtable_eth.sh
 
 cat << EOF >/opt/de_GWD/nftables/default.nft
 #!/usr/sbin/nft -f
 
-include "/opt/de_GWD/nftables/flowtable.eth"
-
 table inet filter {
-        flowtable Acceleration {
-                hook ingress priority -200; devices = \$flowtable_eth;
-        }
         chain INPUT {
                 type filter hook input priority 0; policy accept;
                 iifname ifb4lo accept
@@ -1376,7 +1354,6 @@ table inet filter {
         chain FORWARD {
                 type filter hook forward priority 0; policy accept;
                 counter packets 0 bytes 0
-                ip protocol { tcp, udp } flow add @Acceleration
                 tcp flags & (syn|rst) == syn counter tcp option maxseg size set 1440
                 # WireGuard traffic
                 iifname "ifb4wg0" accept
@@ -1413,6 +1390,10 @@ table inet filter {
 }
 
 table inet router {
+        chain DOCKER {
+                iifname "ifb4docker0" counter accept
+                iifname "docker0" counter accept
+        }
         chain PREROUTING {
                 type nat hook prerouting priority -100; policy accept;
                 # Docker
@@ -1425,10 +1406,6 @@ table inet router {
                 type nat hook output priority -100; policy accept;
                 tcp flags syn tcp option maxseg size set rt mtu
                 ip daddr != 127.0.0.0/8 fib daddr type local counter jump DOCKER
-        }
-        chain DOCKER {
-                iifname "ifb4docker0" counter accept
-                iifname "docker0" counter accept
         }
         chain POSTROUTING {
                 type nat hook postrouting priority 100; policy accept;
@@ -1568,7 +1545,7 @@ RemainAfterExit=yes
 StandardInput=null
 ProtectSystem=full
 ProtectHome=true
-ExecStart=/bin/bash -c '/opt/de_GWD/nftables/flowtable_eth.sh' ; /usr/sbin/nft -f /opt/de_GWD/nftables/nftables ; $(which ip) route add local default dev lo scope host table 220 ; $(which ip) rule add fwmark 0x9 table 220 prio 100
+ExecStart=/usr/sbin/nft -f /opt/de_GWD/nftables/nftables ; $(which ip) route add local default dev lo scope host table 220 ; $(which ip) rule add fwmark 0x9 table 220 prio 100
 ExecStop=/usr/sbin/nft flush ruleset ; $(which ip) rule del table 220 ; $(which ip) route del local default dev lo table 220
 
 [Install]
