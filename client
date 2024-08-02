@@ -1436,7 +1436,7 @@ table inet router {
                 oifname $ethernetnum ip saddr 172.16.66.0/24 masquerade
 
                 # Docker
-                oifname != "docker0" ip saddr 172.17.0.0/16 counter masquerade
+                oifname != "docker0" ip saddr 172.0.0.0/8 counter masquerade
         }
 }
 EOF
