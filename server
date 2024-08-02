@@ -266,14 +266,13 @@ sed -i '/ulimit -v/d' /etc/profile
 sed -i '/HISTCONTROL=/d' /etc/profile
 sed -i '/alias reboot=/d' /etc/profile
 cat << EOF >>/etc/profile
-ulimit -SHn 65536
-ulimit -c 65536
+ulimit -SHn 1000000
 ulimit -t 65536
 ulimit -u 65536
+ulimit -c 65536
 ulimit -d unlimited
 ulimit -f unlimited
 ulimit -s unlimited
-ulimit -m unlimited
 ulimit -v unlimited
 
 HISTCONTROL=ignoredups
