@@ -351,7 +351,7 @@ done
 echo \$NIC_device | xargs -n 1 | grep -v 'virtual' | awk -F'/' '{print\$NF}' | while read line; do
 MTU_NUM=\$(< /sys/class/net/\$line/mtu)
 ifb4eth=\$(echo "ifb4\$line" | cut -c 1-15)
-$(which ip) link set \$line qlen 1000 mtu \$MTU_NUM
+$(which ip) link set \$line qlen 4096 mtu \$MTU_NUM
 $(which tc) qdisc del dev \$line root >/dev/null 2>&1
 $(which tc) qdisc add dev \$line root cake unlimited metro diffserv4 dual-srchost nonat nowash no-split-gso ack-filter-aggressive ethernet egress
 
