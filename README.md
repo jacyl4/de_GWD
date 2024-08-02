@@ -2,6 +2,9 @@
 * 具备流量整形加速的旁路网关
 * 仅供学习与研究，不支持机场的双端自建方案
 
+* 基于性能考量，尽量避免使用虚拟交换
+
+
 [![Telegram](https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg)](https://t.me/de_GWD_DQ)  
 
 
