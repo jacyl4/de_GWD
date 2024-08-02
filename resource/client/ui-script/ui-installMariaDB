@@ -62,7 +62,7 @@ datadir      = /var/lib/mysql
 tmpdir       = /tmp
 lc_messages_dir   = /usr/share/mysql
 lc_messages       = en_US
-open_files_limit  = 65535
+open_files_limit  = 65536
 skip-external-locking
 
 max_allowed_packet      = 32M

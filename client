@@ -490,10 +490,10 @@ sed -i '/ulimit -v/d' /etc/profile
 sed -i '/HISTCONTROL=/d' /etc/profile
 sed -i '/alias reboot=/d' /etc/profile
 cat << EOF >>/etc/profile
-ulimit -SHn 65535
-ulimit -c 65535
-ulimit -t 65535
-ulimit -u 65535
+ulimit -SHn 65536
+ulimit -c 65536
+ulimit -t 65536
+ulimit -u 65536
 ulimit -d unlimited
 ulimit -f unlimited
 ulimit -s unlimited
@@ -685,7 +685,7 @@ net.netfilter.nf_conntrack_checksum = 0
 net.netfilter.nf_conntrack_events = 1
 net.netfilter.nf_conntrack_timestamp = 0
 net.netfilter.nf_conntrack_max = 1048576
-net.netfilter.nf_conntrack_buckets = 65535
+net.netfilter.nf_conntrack_buckets = 65536
 net.netfilter.nf_conntrack_tcp_loose = 1
 net.netfilter.nf_conntrack_tcp_be_liberal = 1
 net.netfilter.nf_conntrack_tcp_max_retrans = 3
@@ -702,7 +702,7 @@ net.netfilter.nf_conntrack_tcp_timeout_established = 3600
 net.netfilter.nf_conntrack_sctp_timeout_established = 3600
 net.netfilter.nf_conntrack_udp_timeout = 15
 net.netfilter.nf_conntrack_udp_timeout_stream = 45
-net.core.somaxconn = 65535
+net.core.somaxconn = 65536
 net.core.netdev_max_backlog = 262144
 net.core.optmem_max = 8388608
 net.core.rmem_default = 8388608
@@ -1424,6 +1424,7 @@ table inet router {
         }
         chain OUTPUT {
                 type nat hook output priority -100; policy accept;
+                tcp flags syn tcp option maxseg size set rt mtu
                 ip daddr != 127.0.0.0/8 fib daddr type local counter jump DOCKER
         }
         chain DOCKER {
@@ -2230,7 +2231,7 @@ echo madvise >/sys/kernel/mm/transparent_hugepage/enabled
 
 $(which ip) route show table local | grep ' dev lo ' | while read line; do
 line=\$(echo \$line | awk -F' mtu ' '{print\$1}')
-$(which ip) route change \$line mtu 9088 initcwnd 1000 initrwnd 1000 fastopen_no_cookie 1 congctl lock cubic
+$(which ip) route change \$line mtu 65536 initcwnd 1000 initrwnd 1000 fastopen_no_cookie 1 congctl lock cubic
 done
 
 NIC_local=\$($(which ip) route | grep -v 'scope link' | awk -F' dev ' '{print\$2}' | cut -d' ' -f1)
@@ -2252,7 +2253,7 @@ $(which ip) link set \$ifb down
 $(which ip) link delete \$ifb
 done
 
-$(which ip) link set lo qlen 4096 mtu 9088
+$(which ip) link set lo qlen 1000000 mtu 65536
 $(which tc) qdisc del dev lo root >/dev/null 2>&1
 $(which tc) qdisc add dev lo root cake unlimited rtt 1us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw egress
 
@@ -2261,7 +2262,7 @@ $(which tc) qdisc del dev lo ingress >/dev/null 2>&1
 $(which tc) qdisc add dev lo handle ffff: ingress
 $(which tc) qdisc del dev ifb4lo root >/dev/null 2>&1
 $(which tc) qdisc add dev ifb4lo root cake unlimited rtt 1us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw ingress
-$(which ip) link set ifb4lo qlen 4096 mtu 9088
+$(which ip) link set ifb4lo qlen 1000000 mtu 65536
 $(which ip) link set ifb4lo up
 $(which tc) filter add dev lo parent ffff: matchall action mirred egress redirect dev ifb4lo
 
@@ -2285,7 +2286,7 @@ done
 echo \$NIC_device | xargs -n 1 | grep -v 'virtual' | awk -F'/' '{print\$NF}' | while read line; do
 MTU_NUM=\$(< /sys/class/net/\$line/mtu)
 ifb4eth=\$(echo "ifb4\$line" | cut -c 1-15)
-$(which ip) link set \$line qlen 4096 mtu \$MTU_NUM
+$(which ip) link set \$line qlen 1000 mtu \$MTU_NUM
 $(which tc) qdisc del dev \$line root >/dev/null 2>&1
 $(which tc) qdisc add dev \$line root cake unlimited metro diffserv4 dual-srchost nonat nowash no-split-gso ack-filter-aggressive ethernet egress
 
