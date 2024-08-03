@@ -333,7 +333,7 @@ rm -rf /var/www/html/__MACOSX
 rm -rf /var/log/smartdns.log
 rm -rf /etc/dnsmasq.d/00-wg.conf
 rm -rf /etc/dnsmasq.d/99-extra.conf
-[[ -f "/etc/rc.local" ]] && [[ -n $(grep 'tc qdisc' /etc/rc.local) ]] && rm -rf /etc/rc.local
+[[ -f "/etc/rc.local" ]] &&  rm -rf /etc/rc.local
 
 echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Clean-up${cRES}"
 }
@@ -1336,12 +1336,11 @@ cat << EOF >/opt/de_GWD/nftables/default.nft
 table inet filter {
         chain INPUT {
                 type filter hook input priority 0; policy accept;
-                iifname ifb4lo accept
                 iifname lo accept
-                iifname "ifb4wg0" accept
                 iifname "wg0" accept
-                iifname "ifb4docker0" accept
                 iifname "docker0" accept
+                iifname ifb4lo accept
+                iifname "ifb4wg0" accept
                 ct state established,related accept
                 tcp flags != syn ct state new drop
                 tcp flags & (fin|syn) == (fin|syn) drop
@@ -1353,7 +1352,6 @@ table inet filter {
         }
         chain FORWARD {
                 type filter hook forward priority 0; policy accept;
-                counter packets 0 bytes 0
                 tcp flags & (syn|rst) == syn counter tcp option maxseg size set rt mtu
                 # WireGuard traffic
                 iifname "ifb4wg0" accept
@@ -1363,10 +1361,8 @@ table inet filter {
                 # Docker traffic
                 counter jump DOCKER-USER
                 counter jump DOCKER-ISOLATION-STAGE-1
-                oifname "docker0" ct state established,related counter accept
+                oifname "docker0" ct state related,established counter accept
                 oifname "docker0" counter jump DOCKER
-                iifname "ifb4docker0" oifname != "docker0" counter accept
-                iifname "ifb4docker0" oifname "docker0" counter accept
                 iifname "docker0" oifname != "docker0" counter accept
                 iifname "docker0" oifname "docker0" counter accept
         }
@@ -1379,25 +1375,18 @@ table inet filter {
                 counter accept
         }
         chain DOCKER-ISOLATION-STAGE-1 {
-                iifname "ifb4docker0" oifname != "docker0" counter jump DOCKER-ISOLATION-STAGE-2
                 iifname "docker0" oifname != "docker0" counter jump DOCKER-ISOLATION-STAGE-2
-                counter accept
+                counter return
         }
         chain DOCKER-ISOLATION-STAGE-2 {
                 oifname "docker0" counter drop
-                counter accept
+                counter return
         }
 }
 
 table inet router {
         chain DOCKER {
-                iifname "ifb4docker0" counter accept
                 iifname "docker0" counter accept
-        }
-        chain PREROUTING {
-                type nat hook prerouting priority -100; policy accept;
-                # Docker
-                fib daddr type local counter jump DOCKER
         }
         chain INPUT {
                 type nat hook input priority -100; policy accept;
@@ -1407,13 +1396,18 @@ table inet router {
                 tcp flags syn tcp option maxseg size set rt mtu
                 ip daddr != 127.0.0.0/8 fib daddr type local counter jump DOCKER
         }
+        chain PREROUTING {
+                type nat hook prerouting priority dstnat; policy accept;
+                # Docker
+                fib daddr type local counter jump DOCKER
+        }
         chain POSTROUTING {
-                type nat hook postrouting priority 100; policy accept;
+                type nat hook postrouting priority srcnat; policy accept;
                 # Wireguard masquerade traffic
                 oifname $ethernetnum ip saddr 172.16.66.0/24 masquerade
 
                 # Docker
-                oifname != "docker0" ip saddr 172.0.0.0/8 counter masquerade
+                oifname != "docker0" ip saddr 172.17.0.0/16 counter masquerade
         }
 }
 EOF
@@ -1552,8 +1546,8 @@ ExecStop=/usr/sbin/nft flush ruleset ; $(which ip) rule del table 220 ; $(which 
 WantedBy=sysinit.target
 EOF
 systemctl daemon-reload >/dev/null
-systemctl enable nftables >/dev/null 2>&1
 systemctl restart nftables
+systemctl enable nftables >/dev/null 2>&1
 
 echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Deploy nftables${cRES}"
 }
@@ -2231,29 +2225,29 @@ done
 
 $(which ip) link set lo qlen 1000000 mtu 65536
 $(which tc) qdisc del dev lo root >/dev/null 2>&1
-$(which tc) qdisc add dev lo root cake unlimited rtt 1us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw egress
+$(which tc) qdisc add dev lo root cake unlimited rtt 10us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw egress
 
 $(which ip) link add name ifb4lo type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev lo ingress >/dev/null 2>&1
 $(which tc) qdisc add dev lo handle ffff: ingress
 $(which tc) qdisc del dev ifb4lo root >/dev/null 2>&1
-$(which tc) qdisc add dev ifb4lo root cake unlimited rtt 1us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw ingress
+$(which tc) qdisc add dev ifb4lo root cake unlimited rtt 10us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw ingress
 $(which ip) link set ifb4lo qlen 1000000 mtu 65536
 $(which ip) link set ifb4lo up
 $(which tc) filter add dev lo parent ffff: matchall action mirred egress redirect dev ifb4lo
 
-echo \$NIC_device | xargs -n 1 | grep 'virtual' | grep -v 'ifb' | awk -F'/' '{print\$NF}' | grep -v '^lo\$' | while read line; do
+echo \$NIC_device | xargs -n 1 | grep 'virtual' | awk -F'/' '{print\$NF}' | grep -v 'docker' | grep -v 'ifb' | grep -v '^lo\$' | while read line; do
 MTU_NUM=\$(< /sys/class/net/\$line/mtu)
 ifb4eth=\$(echo "ifb4\$line" | cut -c 1-15)
 $(which ip) link set \$line qlen 4096 mtu \$MTU_NUM
 $(which tc) qdisc del dev \$line root >/dev/null 2>&1
-$(which tc) qdisc add dev \$line root cake unlimited metro diffserv4 dual-srchost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 egress
+$(which tc) qdisc add dev \$line root cake unlimited rtt 10us diffserv4 dual-srchost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 egress
 
 $(which ip) link add name \$ifb4eth type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev \$line ingress >/dev/null 2>&1
 $(which tc) qdisc add dev \$line handle ffff: ingress
 $(which tc) qdisc del dev \$ifb4eth root >/dev/null 2>&1
-$(which tc) qdisc add dev \$ifb4eth root cake unlimited metro diffserv4 dual-dsthost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 ingress
+$(which tc) qdisc add dev \$ifb4eth root cake unlimited rtt 10us diffserv4 dual-dsthost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 ingress
 $(which ip) link set \$ifb4eth qlen 4096 mtu \$MTU_NUM
 $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
@@ -2334,8 +2328,8 @@ cat << EOF >>/tmp/now.cron
 0 4 * * * /opt/de_GWD/ui_4am u
 0 */4 * * * /opt/de_GWD/ui_4h
 0 */2 * * * /opt/de_GWD/ui_2h
-@reboot sleep 10 && /etc/rc_kernel.local
-@reboot sleep 30 && /etc/rc_online.local
+@reboot sleep 10 && /etc/rc_online.local
+@reboot sleep 15 && /etc/rc_kernel.local
 EOF
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron

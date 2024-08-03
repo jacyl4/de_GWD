@@ -47,7 +47,7 @@ chmod +x /etc/rc_kernel.local
 crontab -l 2>/dev/null >/tmp/now.cron
 sed -i '/\/opt\/de_GWD\/clearKernel/d' /tmp/now.cron
 sed -i '/\/etc\/rc_kernel.local/d' /tmp/now.cron
-echo '@reboot sleep 10 && /etc/rc_kernel.local' >>/tmp/now.cron
+echo '@reboot sleep 15 && /etc/rc_kernel.local' >>/tmp/now.cron
 crontab /tmp/now.cron
 rm -rf /tmp/now.cron
 
