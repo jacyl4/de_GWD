@@ -725,9 +725,8 @@ table inet router {
         }
         chain OUTPUT {
                 type nat hook output priority -100; policy accept;
-                tcp flags syn tcp option maxseg size set rt mtu
                 ip daddr != 127.0.0.0/8 fib daddr type local counter jump DOCKER
-        }        
+        }
         chain PREROUTING {
                 type nat hook prerouting priority dstnat; policy accept;
                 # Docker
