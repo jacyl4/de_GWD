@@ -765,7 +765,7 @@ net.ipv4.tcp_fastopen_key = 00000000-00000000-00000000-00000000
 net.ipv4.tcp_keepalive_time = 7200
 net.ipv4.tcp_keepalive_intvl = 75
 net.ipv4.tcp_keepalive_probes = 9
-net.ipv4.tcp_timestamps = 1
+net.ipv4.tcp_timestamps = 2
 net.ipv4.tcp_syncookies = 0
 net.ipv4.tcp_tw_reuse = 2
 net.ipv4.tcp_syn_retries = 3
@@ -2211,7 +2211,7 @@ done
 
 $(which ip) route | grep " dev \$NIC_local " | while read line; do
 line=\$(echo \$line | awk -F' mtu ' '{print\$1}')
-$(which ip) route change \$line mtu 1500 advmss 1440 initcwnd 32 initrwnd 39 fastopen_no_cookie 1 congctl lock $(sysctl net.ipv4.tcp_congestion_control | awk -F' = ' '{print$2}')
+$(which ip) route change \$line mtu 1500 initcwnd 32 initrwnd 39 fastopen_no_cookie 1 congctl lock $(sysctl net.ipv4.tcp_congestion_control | awk -F' = ' '{print$2}')
 done
 
 
@@ -2240,13 +2240,13 @@ MTU_NUM=\$(< /sys/class/net/\$line/mtu)
 ifb4eth=\$(echo "ifb4\$line" | cut -c 1-15)
 $(which ip) link set \$line qlen 4096 mtu \$MTU_NUM
 $(which tc) qdisc del dev \$line root >/dev/null 2>&1
-$(which tc) qdisc add dev \$line root cake unlimited rtt 10us diffserv4 dual-srchost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 egress
+$(which tc) qdisc add dev \$line root cake unlimited rtt 10us diffserv4 dual-dsthost dual-srchost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 noatm egress
 
 $(which ip) link add name \$ifb4eth type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev \$line ingress >/dev/null 2>&1
 $(which tc) qdisc add dev \$line handle ffff: ingress
 $(which tc) qdisc del dev \$ifb4eth root >/dev/null 2>&1
-$(which tc) qdisc add dev \$ifb4eth root cake unlimited rtt 10us diffserv4 dual-dsthost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 ingress
+$(which tc) qdisc add dev \$ifb4eth root cake unlimited rtt 10us diffserv4 dual-srchost dual-dsthost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 noatm ingress
 $(which ip) link set \$ifb4eth qlen 4096 mtu \$MTU_NUM
 $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
@@ -2257,13 +2257,13 @@ MTU_NUM=\$(< /sys/class/net/\$line/mtu)
 ifb4eth=\$(echo "ifb4\$line" | cut -c 1-15)
 $(which ip) link set \$line qlen 4096 mtu \$MTU_NUM
 $(which tc) qdisc del dev \$line root >/dev/null 2>&1
-$(which tc) qdisc add dev \$line root cake unlimited metro diffserv4 dual-srchost nonat nowash no-split-gso ack-filter-aggressive ethernet egress
+$(which tc) qdisc add dev \$line root cake unlimited lan diffserv4 dual-dsthost dual-srchost nonat wash no-split-gso ack-filter-aggressive ethernet egress
 
 $(which ip) link add name \$ifb4eth type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev \$line ingress >/dev/null 2>&1
 $(which tc) qdisc add dev \$line handle ffff: ingress
 $(which tc) qdisc del dev \$ifb4eth root >/dev/null 2>&1
-$(which tc) qdisc add dev \$ifb4eth root cake unlimited regional diffserv4 dual-dsthost nonat nowash no-split-gso ack-filter-aggressive ethernet ingress
+$(which tc) qdisc add dev \$ifb4eth root cake unlimited lan diffserv4 dual-srchost dual-dsthost nonat nowash no-split-gso ack-filter-aggressive ethernet ingress
 $(which ip) link set \$ifb4eth qlen 4096 mtu \$MTU_NUM
 $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth

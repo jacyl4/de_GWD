@@ -1,4 +1,4 @@
-v1.25.22
+v1.25.23
 -
 <?php
 $str= file_get_contents('https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php');
