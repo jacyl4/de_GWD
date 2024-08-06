@@ -91,7 +91,7 @@ modprobe ifb
 modprobe sch_cake
 
 cat << EOF >/etc/sysctl.conf
-vm.overcommit_memory = 10
+vm.overcommit_memory = 1
 vm.swappiness = 10
 vm.dirty_ratio = 10
 vm.dirty_background_ratio = 5
@@ -185,7 +185,7 @@ net.ipv4.tcp_fastopen_key = 00000000-00000000-00000000-00000000
 net.ipv4.tcp_keepalive_time = 7200
 net.ipv4.tcp_keepalive_intvl = 75
 net.ipv4.tcp_keepalive_probes = 9
-net.ipv4.tcp_timestamps = 0
+net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_syncookies = 0
 net.ipv4.tcp_tw_reuse = 2
 net.ipv4.tcp_syn_retries = 3
@@ -345,13 +345,13 @@ done
 
 $(which ip) link set lo qlen 1000000 mtu 65536
 $(which tc) qdisc del dev lo root >/dev/null 2>&1
-$(which tc) qdisc add dev lo root cake unlimited rtt 10us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw egress
+$(which tc) qdisc add dev lo root cake unlimited rtt 1us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw egress
 
 $(which ip) link add name ifb4lo type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev lo ingress >/dev/null 2>&1
 $(which tc) qdisc add dev lo handle ffff: ingress
 $(which tc) qdisc del dev ifb4lo root >/dev/null 2>&1
-$(which tc) qdisc add dev ifb4lo root cake unlimited rtt 10us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw ingress
+$(which tc) qdisc add dev ifb4lo root cake unlimited rtt 1us diffserv4 triple-isolate nonat nowash no-split-gso no-ack-filter raw ingress
 $(which ip) link set ifb4lo qlen 1000000 mtu 65536
 $(which ip) link set ifb4lo up
 $(which tc) filter add dev lo parent ffff: matchall action mirred egress redirect dev ifb4lo
@@ -390,7 +390,7 @@ $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
 
 $(which ethtool) -s \$line duplex full >/dev/null 2>&1
-$(which ethtool) -K \$line rx on tx on sg off tso off gso off gro off lro off >/dev/null 2>&1
+$(which ethtool) -K \$line rx on tx on sg on tso on gso on gro on lro on >/dev/null 2>&1
 done
 
 $(which ip) tcp_metrics flush
