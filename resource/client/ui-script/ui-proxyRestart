@@ -1,0 +1,33 @@
+#!/bin/bash
+sed -i '/PIHOLE_DNS_.*/d' /etc/pihole/setupVars.conf
+cat << EOF >>/etc/pihole/setupVars.conf
+PIHOLE_DNS_1=127.0.0.1#5341
+EOF
+
+sed -i '/server=/d' /etc/dnsmasq.d/01-pihole.conf
+cat << EOF >>/etc/dnsmasq.d/01-pihole.conf
+server=127.0.0.1#5341
+EOF
+kill -9 $(ps -e | grep 'pihole' | awk '{print$1}') >/dev/null 2>&1
+systemctl restart pihole-FTL
+
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+nameserver 127.0.0.1
+EOF
+if [[ -f "/etc/resolvconf/run/resolv.conf" ]]; then
+ln -sf /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+elif [[ -f "/run/resolvconf/resolv.conf" ]]; then
+ln -sf /run/resolvconf/resolv.conf /etc/resolv.conf
+fi
+sed -i '/dns-nameservers /d' /etc/network/interfaces
+resolvconf -u
+
+systemctl restart samrtdns
+systemctl restart mosdns
+systemctl restart vtrui
+systemctl restart nftables

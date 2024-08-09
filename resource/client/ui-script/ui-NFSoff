@@ -1,0 +1,9 @@
+#!/bin/bash
+NFSpoint=$(echo "$1" | sed 's/\//\\\//g')
+sed -i "/$NFSpoint/d" /etc/auto.nfs
+
+systemctl restart autofs
+
+awk '{print$1}' /etc/auto.nfs | while read line; do
+cd $line
+done
