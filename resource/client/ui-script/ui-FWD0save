@@ -1,0 +1,27 @@
+#!/bin/bash
+FWD0port=$(jq -r '.FORWARD.FWD0.port' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+FWD0uuid=$(jq -r '.FORWARD.FWD0.uuid[].FWD0uuid' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+FWD0in=`cat << EOF
+    {
+      "tag": "forward0",
+      "port": $FWD0port,
+      "protocol": "vmess",
+      "settings":{
+        "clients":[]
+      },
+      "streamSettings": {
+        "network": "tcp"
+      }
+    }
+EOF
+`
+jq --argjson FWD0in "$FWD0in" '.inbounds[1]=$FWD0in' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+
+for uuid in $FWD0uuid; do
+uuidStr='{"id":"'$uuid'","alterId":0}'
+jq --argjson uuidStr1 "$uuidStr" '.inbounds[1].settings.clients+=[$uuidStr1]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
+done
+chmod 644 /var/www/ssl/*.key
+
+[[ $1 = "r" ]] && systemctl restart vtrui >/dev/null
