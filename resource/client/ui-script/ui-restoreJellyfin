@@ -1,0 +1,16 @@
+#!/bin/bash
+docker stop jellyfin
+
+if [[ -n $(unzip -tq /var/www/html/restore/Jellyfin_bak.zip | grep "No errors detected in compressed data") ]]; then
+rm -rf /tmp/opt
+unzip /var/www/html/restore/Jellyfin_bak.zip -d /tmp
+
+rm -rf /opt/jellyfin
+mkdir -p /opt/jellyfin
+mv -f /tmp/opt/jellyfin/* /opt/jellyfin
+fi
+
+docker restart jellyfin
+
+rm -rf /tmp/opt
+rm -rf /var/www/html/restore/Jellyfin_bak.zip

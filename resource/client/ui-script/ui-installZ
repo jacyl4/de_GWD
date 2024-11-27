@@ -1,0 +1,10 @@
+#!/bin/bash
+rm -rf /opt/de_GWD/update
+
+kill $(ps -e | grep 'ttyd' | awk '{print$1}') >/dev/null 2>&1
+
+[[ -n $(cat /etc/resolv.conf | grep -v '127.0.0.1') ]] && resolvconf -u
+
+ps -aux | grep 'ui-install' | sed '/grep/d' | awk '{print$2}' | while read line; do
+kill $line >/dev/null 2>&1
+done
