@@ -1,0 +1,3 @@
+#!/bin/bash
+sed -i '/meta l4proto { tcp, udp } th dport 53 drop/d' /opt/de_GWD/nftables/default.nft
+systemctl restart nftables
