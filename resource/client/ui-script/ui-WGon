@@ -75,11 +75,4 @@ net.ipv4.conf.all.forwarding = 1
 net.ipv4.conf.default.forwarding = 1' /etc/sysctl.conf
 sysctl -p >/dev/null 2>&1
 
-piholeInterface=$(find /sys/class/net ! -type d | xargs --max-args=1 realpath | grep 'device' | awk -F'/' '{print$NF}' | grep -v 'lo' | grep -v '^ifb')
-sed -i '/interface=/d' /etc/dnsmasq.d/01-pihole.conf
-echo "interface=$(echo $piholeInterface | tr ' ' ',')" >>/etc/dnsmasq.d/01-pihole.conf
-sed -i '/PIHOLE_INTERFACE=/d' /etc/dnsmasq.d/01-pihole.conf
-echo "PIHOLE_INTERFACE=$(echo $piholeInterface | tr ' ' ',')" >>/etc/pihole/setupVars.conf
-pihole restartdns
-
 /etc/rc_online.local

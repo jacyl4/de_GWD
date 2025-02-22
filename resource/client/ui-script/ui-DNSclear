@@ -1,5 +1,2 @@
 #!/bin/bash
-[[ -n "$(ps -e | grep 'pihole-FTL' )" ]] && systemctl stop pihole-FTL
-kill -9 $(ps -e | grep 'pihole' | awk '{print$1}') >/dev/null 2>&1
-rm -rf rm /etc/pihole/pihole-FTL.db
-systemctl restart pihole-FTL
+docker restart pihole

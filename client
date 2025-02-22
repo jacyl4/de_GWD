@@ -70,7 +70,13 @@ unset aptPKG
 }
 
 pkgDEP2(){
+[[ ! -f "/usr/share/keyrings/docker-ce-archive-keyring.gpg" ]] && \
+curl -sSLo- https://download.docker.com/linux/debian/gpg | gpg --dearmor >/usr/share/keyrings/docker-ce-archive-keyring.gpg
+[[ ! -f "/etc/apt/sources.list.d/docker.list" ]] && \
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-ce-archive-keyring.gpg] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" >/etc/apt/sources.list.d/docker.list
+
 unset aptPKG
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^python3-toml$') ]] && aptPKG+=(python3-toml)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^psmisc$') ]] && aptPKG+=(psmisc)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^dns-root-data$') ]] && aptPKG+=(dns-root-data)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^idn2$') ]] && aptPKG+=(idn2)
@@ -78,7 +84,7 @@ unset aptPKG
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^tmux$') ]] && aptPKG+=(tmux)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^socat$') ]] && aptPKG+=(socat)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^zip$') ]] && aptPKG+=(zip)
-[[ -z $(dpkg -l | awk '{print$2}' | grep '^lighttpd$') ]] && aptPKG+=(lighttpd)
+[[ -z $(dpkg -l | awk '{print$2}' | grep '^docker-ce$') ]] && aptPKG+=(docker-ce)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-fpm$') ]] && aptPKG+=(php7.4-fpm)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-cgi$') ]] && aptPKG+=(php7.4-cgi)
 [[ -z $(dpkg -l | awk '{print$2}' | grep '^php7.4-sqlite3$') ]] && aptPKG+=(php7.4-sqlite3)
@@ -265,6 +271,13 @@ if [[ -f "/etc/systemd/system/iptables-proxy.service" ]] || [[ -f "/lib/systemd/
     rm -rf /opt/de_GWD/iptables-proxy-up
 fi
 
+if [[ -f "/etc/systemd/system/pihole-FTL.service" ]] || [[ -f "/lib/systemd/system/pihole-FTL.service" ]]; then
+    systemctl disable pihole-FTL >/dev/null 2>&1
+    systemctl stop pihole-FTL >/dev/null 2>&1
+    rm -rf /etc/systemd/system/pihole-FTL.service >/dev/null 2>&1
+    rm -rf /lib/systemd/system/pihole-FTL.service >/dev/null 2>&1
+    rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin /var/log/pihole* /etc/dnsmasq.d/*
+fi
 
 if [[ -d "/opt/de_GWD/xDNSc" ]]; then
     systemctl disable xDNSc >/dev/null 2>&1
@@ -303,6 +316,8 @@ rm -rf /etc/systemd/system/v2dns.service && \
 rm -rf /opt/de_GWD/v2dns
 [[ -n $(dpkg -l | awk '{print$2}' | grep '^haveged$') ]] && apt remove --purge haveged
 [[ -n $(dpkg -l | awk '{print$2}' | grep '^subversion$') ]] && apt remove --purge subversion
+[[ -n $(dpkg -l | awk '{print$2}' | grep '^lighttpd$') ]] && apt remove --purge lighttpd
+[[ -n $(dpkg -l | awk '{print$2}' | grep '^lighttpd-mod-deflate$') ]] && apt remove --purge lighttpd-mod-deflate
 
 rm -rf /etc/pihole/migration_backup
 rm -rf /etc/dnsmasq.d/89-bogus-nxdomain.china.conf
@@ -642,9 +657,7 @@ ip route del local default dev lo table 220 >/dev/null 2>&1
 
 [[ -n $(systemctl cat nftables 2>/dev/null) ]] && systemctl stop nftables >/dev/null 2>&1
 [[ -n $(systemctl cat vtrui 2>/dev/null) ]] && systemctl stop vtrui >/dev/null 2>&1
-
-[[ -n "$(ps -e | grep 'pihole-FTL' )" ]] && systemctl stop pihole-FTL
-kill -9 $(ps -e | grep 'pihole' | awk '{print$1}') >/dev/null 2>&1
+[[ $(docker inspect -f '{{.State.Running}}' pihole 2>/dev/null) = "true" ]] && docker stop pihole >/dev/null 2>&1
 
 cat << EOF >/etc/resolv.conf
 nameserver 119.29.29.29
@@ -687,6 +700,9 @@ fi
 [[ $(date +"%Z %z") != "CST +0800" ]] && timedatectl set-timezone "Asia/Shanghai"
 timedatectl set-local-rtc 0 >/dev/null 2>&1
 timedatectl set-ntp true
+
+[[ -f "/etc/ld.so.preload" ]] && sed -i "/libjemalloc/d" /etc/ld.so.preload
+ldconfig
 
 sed -i '/nf_conntrack/d' /etc/modules-load.d/modules.conf
 sed -i '/ifb/d' /etc/modules-load.d/modules.conf
@@ -1750,15 +1766,6 @@ pkgDEP1
 
 pkgDEP2
 
-[[ -f "/etc/ld.so.preload" ]] && sed -i "/libjemalloc/d" /etc/ld.so.preload
-ldconfig
-
-
-
-if [[ -z $(dpkg -l | awk '{print$2}' | grep '^lighttpd-mod-deflate$') ]]; then
-[[ $(printf '%s\n' $(lighttpd -v 2>&1 | grep -Po '(\d+\.)+\d+') "1.4.42" | sort -rV | head -n 1) != "1.4.42" ]] && apt install lighttpd-mod-deflate
-fi
-
 DPKGclean=$(dpkg --list | grep "^rc" | cut -d " " -f 3)
 [[ -n $DPKGclean ]] && echo $DPKGclean | xargs sudo dpkg --purge
 
@@ -2158,62 +2165,24 @@ cp -f /opt/de_GWD/.repo/version.php /var/www/html/act/version.php
 
 
 
-piholeConf(){
-rm -rf /etc/pihole/setupVars*
-cat << EOF >/etc/pihole/setupVars.conf
-PIHOLE_INTERFACE=$ethernetnum
-IPV4_ADDRESS=$localAddrCIDR
-WEBPASSWORD=$piholePW
-API_EXCLUDE_DOMAINS=www.google.com,www.baidu.com,raw.githubusercontent.com,api.cloudflare.com,myip.ipip.net,v4.yinghualuo.cn,www.f3322.org,*.in-addr.arpa,*._udp.lan
-INSTALL_WEB_SERVER=true
-INSTALL_WEB_INTERFACE=true
-LIGHTTPD_ENABLED=false
-CACHE_SIZE=10000
-QUERY_LOGGING=true
-BLOCKING_ENABLED=true
-DNS_FQDN_REQUIRED=true
-DNS_BOGUS_PRIV=true
-DNSMASQ_LISTENING=single
-DNSSEC=false
-REV_SERVER=false
-PIHOLE_DNS_1=127.0.0.1#5341
-EOF
-}
-
-
-
 installPihole(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Install Pi-hole${cRES}\r\c"
-piholeCoreVer=$(pihole -v 2>/dev/null | awk -F'is ' '{print$2}' | awk 'NR==1{print$1}')
-piholeWebUIVer=$(pihole -v 2>/dev/null | awk -F'is ' '{print$2}' | awk 'NR==2{print$1}')
-piholeFTLVer=$(pihole -v 2>/dev/null | awk -F'is ' '{print$2}' | awk 'NR==3{print$1}')
+docker pull pihole/pihole:latest
 
-piholeCoreRelease=$(curl -sSLI "https://github.com/pi-hole/pi-hole/releases/latest" | grep "location:" | awk -F'/' 'END{print$NF}' | tr -cd "[:print:]\n")
-piholeWebUIRelease=$(curl -sSLI "https://github.com/pi-hole/AdminLTE/releases/latest" | grep "location:" | awk -F'/' 'END{print$NF}' | tr -cd "[:print:]\n")
-piholeFTLRelease=$(curl -sSLI "https://github.com/pi-hole/FTL/releases/latest" | grep "location:" | awk -F'/' 'END{print$NF}' | tr -cd "[:print:]\n")
+[[ -z $newPW ]] && newPW="admin" 
 
-[[ -z $piholePW ]] && piholePW="0000000000000000000000000000000000000000000000000000000000000000"
-
-[[ $piholeCoreVer == $piholeCoreRelease ]] && [[ $piholeFTLVer == $piholeFTLRelease ]] && [[ $piholeWebUIVer == $piholeWebUIRelease ]] && return
-
-[[ -n "$(ps -e | grep 'pihole-FTL' )" ]] && systemctl stop pihole-FTL
-kill -9 $(ps -e | grep 'pihole' | awk '{print$1}') >/dev/null 2>&1
-rm -rf /etc/.pihole /etc/pihole /opt/pihole /usr/bin/pihole-FTL /usr/local/bin/pihole /var/www/html/pihole /var/www/html/admin /var/log/pihole* /etc/dnsmasq.d/*
-systemctl unmask lighttpd >/dev/null 2>&1
-systemctl unmask dhcpcd >/dev/null 2>&1
-
-mkdir -p /etc/.pihole
-mkdir -p /etc/pihole
-cat << EOF >/etc/pihole/adlists.list
-https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/master/youtubelist.txt
-EOF
-
-piholeConf
-
-git clone https://github.com/pi-hole/pi-hole /etc/.pihole
-cat "/etc/.pihole/automated install/basic-install.sh" | PIHOLE_SKIP_OS_CHECK=true bash /dev/stdin --unattended
-chmod -R 755 /var/www/html
-usermod -aG pihole www-data
+mkdir -p /opt/de_GWD/pihole
+docker run -d \
+--name=pihole \
+--cap-add NET_ADMIN \
+--cap-add SYS_TIME \
+--cap-add SYS_NICE \
+--restart=always \
+--net=host \
+-v /etc/localtime:/etc/localtime \
+-v /opt/de_GWD/pihole:/etc/pihole \
+-e FTLCONF_webserver_api_password=$newPW \
+pihole/pihole:latest
 
 PIHOLE_UPDATE="true"
 }
@@ -2221,92 +2190,27 @@ PIHOLE_UPDATE="true"
 
 
 piholeSet(){
-systemctl disable --now lighttpd >/dev/null 2>&1
 systemctl disable --now dhcpcd >/dev/null 2>&1
-systemctl mask --now lighttpd >/dev/null 2>&1
 systemctl mask --now dhcpcd >/dev/null 2>&1
 systemctl daemon-reload >/dev/null
 
-rm -rf /var/www/html/index.lighttpd.orig
 update-rc.d -f dhcpd remove >/dev/null 2>&1
 
-cat << EOF >/etc/hosts
-127.0.0.1       localhost
-$localAddr      $(hostname).local       $(hostname)
+python3 <<EOF
+import toml
+with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
+ data = toml.load(f)
 
-# The following lines are desirable for IPv6 capable hosts
-::1     localhost ip6-localhost ip6-loopback
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
+data["dns"]["upstreams"] = ["127.0.0.1#5341"]
+data["dns"]["port"] = 5399
+data["webserver"]["port"] = "8053"
+data["ntp"]["sync"]["active"] = False
+
+with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
+    toml.dump(data, f)
 EOF
-
-piholeConf
-
->/etc/pihole/dns-servers.conf
-cat << EOF >/etc/pihole/pihole-FTL.conf
-BLOCKINGMODE=NULL
-CNAME_DEEP_INSPECT=true
-BLOCK_ESNI=true
-EDNS0_ECS=false
-RATE_LIMIT=0/0
-REPLY_WHEN_BUSY=ALLOW
-MOZILLA_CANARY=true
-BLOCK_ICLOUD_PR=false
-
-MAXLOGAGE=24.0
-PRIVACYLEVEL=0
-IGNORE_LOCALHOST=no
-AAAA_QUERY_ANALYSIS=no
-SHOW_DNSSEC=false
-
-SOCKET_LISTENING=localonly
-FTLPORT=4711
-RESOLVE_IPV6=no
-RESOLVE_IPV4=yes
-PIHOLE_PTR=PI.HOLE
-DELAY_STARTUP=0
-NICE=-10
-MAXNETAGE=3
-NAMES_FROM_NETDB=true
-REFRESH_HOSTNAMES=IPV4
-PARSE_ARP_CACHE=true
-CHECK_LOAD=false
-
-DBIMPORT=yes
-MAXDBDAYS=3
-DBINTERVAL=10.0
-EOF
-
-cat << EOF >/etc/dnsmasq.d/00-extra.conf
-dns-forward-max=10000
-edns-packet-max=1280
-EOF
-
-rm -rf /etc/dnsmasq.d/00-interface
-
-sed -i '/server=/d' /etc/dnsmasq.d/01-pihole.conf
-awk '/PIHOLE_DNS_/' /etc/pihole/setupVars.conf | cut -d = -f 2 | sed 's/^/server=/g' >>/etc/dnsmasq.d/01-pihole.conf
-
-piholeInterface=$(find /sys/class/net ! -type d | xargs --max-args=1 realpath | grep 'device' | awk -F'/' '{print$NF}' | grep -v 'lo' | grep -v '^ifb')
-sed -i '/interface=/d' /etc/dnsmasq.d/01-pihole.conf
-echo "interface=$(echo $piholeInterface | tr ' ' ',')" >>/etc/dnsmasq.d/01-pihole.conf
-sed -i '/PIHOLE_INTERFACE=/d' /etc/dnsmasq.d/01-pihole.conf
-echo "PIHOLE_INTERFACE=$(echo $piholeInterface | tr ' ' ',')" >>/etc/pihole/setupVars.conf
-
-cat << "EOF" >/opt/de_GWD/pihole_hotfix
-#!/bin/bash
-localIP=$(jq -r '.address.localIP' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-sed -i "/dhcp-option=/c\dhcp-option=6,$localIP,$localIP" /etc/dnsmasq.d/02-pihole-dhcp.conf
-systemctl restart pihole-FTL
-EOF
-chmod +x /opt/de_GWD/pihole_hotfix
-
-sed -i '/pihole_hotfix/d' /var/www/html/admin/scripts/pi-hole/php/savesettings.php
-sed -i "/sudo pihole -a enabledhcp/a\exec('sudo /opt/de_GWD/pihole_hotfix >/dev/null 2>&1');" /var/www/html/admin/scripts/pi-hole/php/savesettings.php
 
 [[ $PIHOLE_UPDATE = "true" ]] && /opt/de_GWD/ui-submitADList
-
-systemctl restart pihole-FTL
 
 echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Pi-hole Config ${cRES}"
 }
@@ -2329,21 +2233,18 @@ systemctl enable mosdns >/dev/null 2>&1
 if [[ $(jq -r '.FORWARD.block53' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
   /opt/de_GWD/ui-block53on
 fi
-
 echo
 
-rm -rf /etc/dnsmasq.conf*
-cat << EOF >/etc/dnsmasq.conf
-conf-dir=/etc/dnsmasq.d
-listen-address=127.0.0.1
-port=53
-EOF
+python3 <<EOF
+import toml
+with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
+ data = toml.load(f)
 
-if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
-  /opt/de_GWD/ui-DHCPon
-else
-  /opt/de_GWD/ui-DHCPoff
-fi
+data["dns"]["port"] = 53
+
+with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
+    toml.dump(data, f)
+EOF
 
 if [[ -n $(jq -r '.address.alias' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
   /opt/de_GWD/ui-markThis >/dev/null 2>&1
@@ -2478,10 +2379,14 @@ echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Web UI Port & 
 
 
 changePWD(){
-sudo pihole -a -p
+    echo -e "${GREEN}=========================== ${cRES}"
+    echo -e "${GREEN} New Password${cRES}"
+    echo -e "${GREEN}=========================== ${cRES}"
+    read newPW
 
-piholePW=$(awk '/WEBPASSWORD/' /etc/pihole/setupVars.conf 2>/dev/null | cut -d= -f2)
+installPihole
 
+piholePW=$(php -r "echo hash('sha256', hash('sha256', "$newPW")) . PHP_EOL;")
 jq --arg piholePW "$piholePW" '.address.PWD = $piholePW' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 chmod 666 /opt/de_GWD/0conf
 
@@ -2732,7 +2637,7 @@ else
   echo -e "${WHITE} mosdns         \c" && echo -e "${WHITE}[ ${RED}✕ ${WHITE}]${cRES}"
 fi
 
-if [[ $(systemctl is-active 'pihole-FTL') = "active" ]]; then
+if [[ $(docker inspect -f '{{.State.Running}}' pihole 2>/dev/null) = "true" ]]; then
   echo -e "${WHITE} Pi-hole        \c" && echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]${cRES}"
 elif [[ ! -x "/usr/local/bin/pihole" ]]; then
   echo -e "${WHITE} Pi-hole        \c" && echo -e "${WHITE}[ ${YELLOW}! ${WHITE}]${cRES}"

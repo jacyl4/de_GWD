@@ -22,8 +22,6 @@ iface $ethernetnum inet static
     address $localAddrCIDR
     gateway $gatewayaddr
 EOF
-
-sed -i "/IPV4_ADDRESS=/c\IPV4_ADDRESS=$localAddrCIDR" /etc/pihole/setupVars.conf
 fi
 
 jq --arg localAddrCIDR "$localAddrCIDR" '.address.localIP=$localAddrCIDR' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf

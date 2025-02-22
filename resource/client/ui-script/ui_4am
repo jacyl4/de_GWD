@@ -96,16 +96,6 @@ wget --show-progress -cqO /tmp/Domains.games.txt https://raw.githubusercontent.c
   fi
 fi
 
-if [[ $(checkSum /etc/dnsmasq.d/99-bogus-nxdomain.china.conf $bogusNxdomain_sha256sum) = "false" ]]; then
-rm -rf /tmp/99-bogus-nxdomain.china.conf
-wget --show-progress -cqO /tmp/99-bogus-nxdomain.china.conf https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/99-bogus-nxdomain.china.conf
-  if [[ $(checkSum /tmp/99-bogus-nxdomain.china.conf $bogusNxdomain_sha256sum) = "true" ]]; then
-    mv -f /tmp/99-bogus-nxdomain.china.conf /etc/dnsmasq.d/99-bogus-nxdomain.china.conf
-  else
-    echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}bogus-nxdomain.china.conf${RED} Download Failed${cRES}"
-  fi
-fi
-
 
 
 if [[ $(checkSum /opt/de_GWD/.repo/geosite.dat $geosite_sha256sum) = "true" ]]; then

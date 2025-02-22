@@ -108,9 +108,6 @@ local-ttl 60
 serve-expired yes
 serve-expired-ttl 3600
 serve-expired-reply-ttl 3
-
-dnsmasq-lease-file /etc/pihole/dhcp.leases
-
 EOF
 
 if [[ -z $(jq -r '.dns.china' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then

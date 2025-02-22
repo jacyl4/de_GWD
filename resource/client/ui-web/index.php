@@ -874,48 +874,7 @@ foreach(array_unique($dnsClist[0]) as $k => $v){
           </div>
           </div>
 
-        <!-- DHCP -->
-          <div class="col-md-6">
-        <div class="card mb-3">
-          <div class="card-header">
-            <i class="fas fa-network-wired"></i>
-            DHCP
-          <span class="float-right mt-n1 mb-n2">
-                <a class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;" href="admin/settings.php?tab=piholedhcp" target="_blank">详情</a>
-              <div class="btn-group">
-                <button id="buttonOffDHCP" type="button" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0px;">
-                  <span id="buttonOffDHCPloading"></span>
-                  <span>关闭</span>
-                </button>
-                <button id="buttonOnDHCP" type="button" class="btn btn-<?php passthru('sudo /opt/de_GWD/ui-checkDhcp');?> btn-sm mt-1 border-left-0" style="border-radius: 0px;">
-                  <span id="buttonOnDHCPloading"></span>
-                  <span>应用</span>
-                </button>
-              </div>
-          </span>
-          </div>
-          <div class="card-body">
-                <div class="form-row">
-                <div class="col-md-6">
-                <div class="input-group my-2">
-                  <input id="dhcpStart" type="text" class="form-control" placeholder="起始IP" required="required" value="<?php echo $de_GWDconf->address->dhcpStart; ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">起始</span>
-                </div>
-                </div>
-                </div>
-                <div class="col-md-6">
-                <div class="input-group my-2">
-                  <input id="dhcpEnd" type="text" class="form-control" placeholder="结束IP" required="required" value="<?php echo $de_GWDconf->address->dhcpEnd; ?>">
-                <div class="input-group-append">
-                  <span class="input-group-text text-secondary">结束</span>
-                </div>
-                </div>
-                </div>
-                </div>
-          </div>
-          </div>
-          </div>
+
         </div>
 
 

@@ -8,10 +8,6 @@ fi
 
 /opt/de_GWD/ui-NodeOne
 
-if [[ $(jq -r '.address.dhcp' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
-	/opt/de_GWD/ui-DHCPon
-fi
-
 if [[ $(jq -r '.v2nodeDIV.nodeSM.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
   /opt/de_GWD/ui-NodeSM >/dev/null 2>&1
 fi
