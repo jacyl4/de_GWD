@@ -2197,7 +2197,6 @@ docker run -d \
 -v /opt/de_GWD/pihole:/etc/pihole \
 pihole/pihole:latest
 fi
-PIHOLE_UPDATE="true"
 }
 
 
@@ -2222,8 +2221,6 @@ data["ntp"]["sync"]["active"] = False
 with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)
 EOF
-
-[[ $PIHOLE_UPDATE = "true" ]] && /opt/de_GWD/ui-submitADList
 
 echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Pi-hole Config ${cRES}"
 }

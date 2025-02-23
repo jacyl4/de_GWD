@@ -556,40 +556,6 @@ EOT;
   </div>
 </div>
 
-<div id="editADlists" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body">
-        <h5 class="row col-12 justify-content-center mt-3">ADlist订阅:</h5>
-        <button id="adlistLoad" type="button" class="btn btn-secondary btn-sm col-12 justify-content-center" style="border-Radius: 0px;">加载预置</button>
-        <textarea id="adlists" class="form-control" style="border-Radius: 0px;" rows="6" placeholder="adlists"><?php print(implode("\n", $de_GWDconf->dns->adlists)) ?></textarea>
-
-        <h5 class="row col-12 justify-content-center mt-3">黑名单域名:</h5>
-        <button id="adBlistLoad" type="button" class="btn btn-secondary btn-sm col-12 justify-content-center" style="border-Radius: 0px;">清空内容</button>
-        <textarea id="adBlist" class="form-control" style="border-Radius: 0px;" rows="4" placeholder="屏蔽解析域名"><?php print(implode("\n", $de_GWDconf->dns->adBlist)) ?></textarea>
-
-        <h5 class="row col-12 justify-content-center mt-3">黑名单正则:</h5>
-        <button id="adBregexLoad" type="button" class="btn btn-secondary btn-sm col-12 justify-content-center" style="border-Radius: 0px;">加载预置</button>
-        <textarea id="adBregex" class="form-control" style="border-Radius: 0px;" rows="6" placeholder="屏蔽解析正则"><?php print(implode("\n", $de_GWDconf->dns->adBregex)) ?></textarea>
-
-        <h5 class="row col-12 justify-content-center mt-3">白名单域名:</h5>
-        <button id="adWlistLoad" type="button" class="btn btn-secondary btn-sm col-12 justify-content-center" style="border-Radius: 0px;">加载预置</button>
-        <textarea id="adWlist" class="form-control" style="border-Radius: 0px;" rows="4" placeholder="允许解析域名"><?php print(implode("\n", $de_GWDconf->dns->adWlist)) ?></textarea>
-
-        <h5 class="row col-12 justify-content-center mt-3">白名单正则:</h5>
-        <button id="adWregexLoad" type="button" class="btn btn-secondary btn-sm col-12 justify-content-center" style="border-Radius: 0px;">加载预置</button>
-        <textarea id="adWregex" class="form-control" style="border-Radius: 0px;" rows="6" placeholder="允许解析正则"><?php print(implode("\n", $de_GWDconf->dns->adWregex)) ?></textarea>
-      </div>
-      <div class="modal-footer">
-        <button id="buttonadlists" type="button" class="btn btn-outline-secondary btn-sm">
-          <span id="buttonadlistsloading"></span>
-          <span>Pi-hole 规则写入</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="reboot" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="reboot" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
@@ -738,10 +704,6 @@ EOT;
           <span class="float-right mt-n1 mb-n2">
                 <button type="button" class="btn btn-secondary btn-sm mt-1 mr-2" style="border-radius: 0px;" data-toggle="modal" data-target="#editListBW">
                   <span>黑白名单</span>
-                </button>
-
-                <button type="button" class="btn btn-secondary btn-sm mt-1 mr-2" style="border-radius: 0px;" data-toggle="modal" data-target="#editADlists">
-                  <span>ADlists</span>
                 </button>
 
                 <div class="btn-group">
@@ -1234,11 +1196,6 @@ $.get("./act/submitListBW.php", {listB:listB, listW:listW}, function(result){
 })
 })
 
-$('#adlistLoad').click(function(){
-var adlistLoadDefault=$.ajax({url:"/act/adlistsDefault",async:false,cache:false})
-$("#adlists").val(adlistLoadDefault.responseText)
-})
-
 $('#adBlistLoad').click(function(){
 $("#adBlist").val("")
 })
@@ -1256,19 +1213,6 @@ $("#adWlist").val(adWlistLoadDefault.responseText)
 $('#adWregexLoad').click(function(){
 var adWregexLoadDefault=$.ajax({url:"/act/adWregexDefault",async:false,cache:false})
 $("#adWregex").val(adWregexLoadDefault.responseText)
-})
-
-$('#buttonadlists').click(function(){
-$("#buttonadlistsloading").attr("class", "spinner-border spinner-border-sm")
-adlists=$('#adlists').val()
-adBlist=$('#adBlist').val()
-adBregex=$('#adBregex').val()
-adWlist=$('#adWlist').val()
-adWregex=$('#adWregex').val()
-$.get("./act/submitADList.php", {adlists:adlists, adBlist:adBlist, adBregex:adBregex, adWlist:adWlist, adWregex:adWregex}, function(result){
-  $("#buttonadlistsloading").removeClass()
-  $("#editADlists").modal('hide')
-})
 })
 
 $('#buttonDNSclear').click(function(){
