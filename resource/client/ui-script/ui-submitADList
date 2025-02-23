@@ -28,7 +28,3 @@ done
 for line in $(jq -r '.dns.adBregex[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$'); do
 	pihole --regex "$line" --comment "Regex blacklist by de_GWD"
 done
-
-
-pihole -g
-[[ $1 = "r" ]] && pihole restartdns
