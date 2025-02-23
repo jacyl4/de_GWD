@@ -14,7 +14,6 @@ port=$(echo $address | cut -d: -f2 | grep '^[[:digit:]]*$')
 [[ -z $port ]] && port="443"
 [[ -z $tls ]] && tls=$domain
 
-
 if [[ $tag = "default" ]]; then
 muxEnable="true"
 muxCconcurrency="8"
@@ -22,7 +21,6 @@ else
 muxEnable="false"
 muxCconcurrency="1"
 fi
-
 
 if [[ -z $path ]]; then
 OBadd=`cat << EOF

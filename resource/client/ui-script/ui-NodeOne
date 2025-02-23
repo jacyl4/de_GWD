@@ -61,7 +61,6 @@ EOF
 jq --argjson OBdirect "$OBdirect" '.outbounds+=[$OBdirect]' /opt/de_GWD/vtrui/config.json | sponge /opt/de_GWD/vtrui/config.json
 
 
-
 if [[ $(jq -r '.FORWARD.FWD0.status' /opt/de_GWD/0conf 2>/dev/null) = "on" ]];then
   /opt/de_GWD/ui-FWD0save >/dev/null 2>&1
 fi
