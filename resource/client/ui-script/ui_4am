@@ -106,8 +106,6 @@ if [[ $(checkSum /opt/de_GWD/.repo/geoip.dat $geoip_sha256sum) = "true" ]]; then
     cp -f /opt/de_GWD/.repo/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 fi
 
-
-
 if [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $IPchnroute_sha256sum) = "true" ]]; then
 cp -f /opt/de_GWD/.repo/IPchnroute /opt/de_GWD/nftables/IP_CHNROUTE
 sed -i '/^\s*$/d' /opt/de_GWD/nftables/IP_CHNROUTE
