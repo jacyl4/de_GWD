@@ -4,9 +4,6 @@ if [[ $(du -sk /opt/de_GWD/update 2>/dev/null | awk '{print$1}') -le 1 ]]; then
 updateCMDaddr=$(jq -r '.update.updateCMD' /opt/de_GWD/0conf 2>/dev/null | grep -oP "https://\K[^']+" | sed s'/.$//')
 systemctl stop nftables
 
-[[ -n "$(ps -e | grep 'pihole-FTL' )" ]] && systemctl stop pihole-FTL
-kill -9 $(ps -e | grep 'pihole' | awk '{print$1}') >/dev/null 2>&1
-
 rm -rf /etc/resolv.conf
 cat << EOF >/etc/resolv.conf
 nameserver 119.29.29.29

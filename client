@@ -2183,11 +2183,15 @@ cp -f /opt/de_GWD/.repo/version.php /var/www/html/act/version.php
 installPihole(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Install Pi-hole${cRES}\r\c"
 docker pull pihole/pihole:latest
+docker rm -f pihole >/dev/null 2>&1
 
-if [[ -n $(docker ps -a --format '{{.Names}}' | grep -wq "pihole") ]]; then
+[[ -z "$newPW" ]] && newPW="admin"
+
 mkdir -p /opt/de_GWD/pihole
 docker run -d \
 --name=pihole \
+--cap-add CAP_NET_BIND_SERVICE \
+--cap-add NET_RAW \
 --cap-add NET_ADMIN \
 --cap-add SYS_TIME \
 --cap-add SYS_NICE \
@@ -2195,8 +2199,8 @@ docker run -d \
 --net=host \
 -v /etc/localtime:/etc/localtime \
 -v /opt/de_GWD/pihole:/etc/pihole \
+-e FTLCONF_webserver_api_password="$newPW" \
 pihole/pihole:latest
-fi
 }
 
 
@@ -2215,6 +2219,7 @@ with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
 
 data["dns"]["upstreams"] = ["127.0.0.1#5341"]
 data["dns"]["port"] = 5399
+data["dns"]["listeningMode"] = "ALL"
 data["webserver"]["port"] = "8053"
 data["ntp"]["sync"]["active"] = False
 
@@ -2222,6 +2227,8 @@ with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)
 EOF
 
+chown -R pihole:pihole /opt/de_GWD/pihole
+chmod -R 644 /opt/de_GWD/pihole
 echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Pi-hole Config ${cRES}"
 }
 
@@ -2395,7 +2402,7 @@ changePWD(){
     echo -e "${GREEN}=========================== ${cRES}"
     read newPW
 
-docker exec pihole pihole setpassword $newPW
+installPihole
 
 piholePW=$(php -r "echo hash('sha256', hash('sha256', '$newPW'));")
 jq --arg piholePW "$piholePW" '.address.PWD = $piholePW' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
