@@ -79,17 +79,8 @@
       </li>
       
       <li class="nav-item no-arrow mx-1">
-        <a class="nav-link" href="javascript:void(0)" onclick="openAdminPage()">
-          <script>
-              function openAdminPage() {
-                  let currentOrigin = location.origin;
-                  if (currentOrigin.startsWith('https://')) {
-                      currentOrigin = currentOrigin.replace('https://', 'http://');
-                  }
-                  const targetUrl = currentOrigin + ':8053/admin';
-                  window.open(targetUrl);
-              }
-          </script>          <i class="fab fa-raspberry-pi"></i>
+        <a class="nav-link" href="/admin/" onclick="javascript:event.target.port=location.port" target="_blank">
+          <i class="fab fa-raspberry-pi"></i>
           <span>Pi-Hole</span>
         </a>
       </li>
