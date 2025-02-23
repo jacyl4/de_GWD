@@ -944,7 +944,7 @@ echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}System Config$
 
 installSmartDNS(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Proxy Components Prepared${cRES}\r\c"
-docker stop pihole 2>/dev/null
+docker stop pihole >/dev/null 2>&1
 
 if [[ -n $(unzip -tq /opt/de_GWD/.repo/de_GWD.zip | grep "No errors detected in compressed data") ]]; then
 rm -rf /opt/de_GWD/smartdns
