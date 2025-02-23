@@ -1,14 +1,4 @@
 #!/bin/bash
-rm -rf /etc/pihole/gravity_*.db
-rm -rf /etc/pihole/list.*
-[[ ! -f "/etc/pihole/gravity.db" ]] && pihole -g
-sqlite3 /etc/pihole/gravity.db "DELETE FROM adlist"
-sqlite3 /etc/pihole/gravity.db "DELETE FROM domainlist where type=0"
-sqlite3 /etc/pihole/gravity.db "DELETE FROM domainlist where type=1"
-sqlite3 /etc/pihole/gravity.db "DELETE FROM domainlist where type=2"
-sqlite3 /etc/pihole/gravity.db "DELETE FROM domainlist where type=3"
-
-
 jq -r '.dns.adlists[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
 	pihole -a adlist add "$line" "adlists by de_GWD"
 done

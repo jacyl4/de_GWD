@@ -2184,6 +2184,7 @@ installPihole(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Install Pi-hole${cRES}\r\c"
 docker pull pihole/pihole:latest
 
+if [[ -n $(docker ps -a --format '{{.Names}}' | grep -wq "pihole") ]]; then
 [[ -z $newPW ]] && newPW="admin" 
 
 mkdir -p /opt/de_GWD/pihole
@@ -2196,9 +2197,9 @@ docker run -d \
 --net=host \
 -v /etc/localtime:/etc/localtime \
 -v /opt/de_GWD/pihole:/etc/pihole \
--e FTLCONF_webserver_api_password=$newPW \
+-e FTLCONF_webserver_api_password="$newPW" \
 pihole/pihole:latest
-
+fi
 PIHOLE_UPDATE="true"
 }
 
@@ -2260,6 +2261,7 @@ data["dns"]["port"] = 53
 with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)
 EOF
+docker restart pihole >/dev/null 2>&1
 
 if [[ -n $(jq -r '.address.alias' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
   /opt/de_GWD/ui-markThis >/dev/null 2>&1
