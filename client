@@ -2190,11 +2190,15 @@ cp -f /opt/de_GWD/.repo/version.php /var/www/html/act/version.php
 
 
 
-installPihole(){
+pullpihole(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Install Pi-hole${cRES}\r\c"
 docker pull pihole/pihole:latest
-docker rm -f pihole >/dev/null 2>&1
+}
 
+
+
+installPihole(){
+docker rm -f pihole >/dev/null 2>&1
 [[ -z "$newPW" ]] && newPW="admin"
 
 mkdir -p /opt/de_GWD/pihole
@@ -2230,6 +2234,8 @@ with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
 data["dns"]["upstreams"] = ["127.0.0.1#5341"]
 data["dns"]["port"] = 5399
 data["dns"]["listeningMode"] = "ALL"
+data["dns"]["rateLimit"]["rateLimit"] = 100000
+data["resolver"]["resolveIPv6"] = False
 data["webserver"]["port"] = "8053"
 data["ntp"]["sync"]["active"] = False
 
@@ -2554,6 +2560,8 @@ nginxSet
 
 installWebUI
 
+pullpihole
+
 installPihole
 
 piholeSet
@@ -2604,6 +2612,8 @@ installXray
 
 installNftables
 
+pullpihole
+
 installPihole
 
 piholeSet
@@ -2637,6 +2647,8 @@ installNginx
 nginxSet
 
 installWebUI
+
+pullpihole
 
 installPihole
 
