@@ -747,7 +747,7 @@ EOT;
       <footer class="sticky-footer">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright © de_GWD by JacyL4 2017 ~ 2023</span>
+            <span>Copyright © de_GWD by JacyL4 2017 ~ 2025</span>
           </div>
         </div>
       </footer>
