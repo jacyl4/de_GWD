@@ -2234,7 +2234,7 @@ with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
 data["dns"]["upstreams"] = ["127.0.0.1#5341"]
 data["dns"]["port"] = 5399
 data["dns"]["listeningMode"] = "ALL"
-data["dns"]["rateLimit"]["rateLimit"] = 10000
+data["dns"]["rateLimit"]["count"] = 10000
 data["resolver"]["resolveIPv6"] = False
 data["webserver"]["port"] = "8053"
 data["ntp"]["sync"]["active"] = False
@@ -2242,6 +2242,7 @@ data["ntp"]["sync"]["active"] = False
 with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)
 EOF
+docker exec pihole pihole --regex ".*;querytype=HTTPS" >/dev/null 2>&1
 
 chown -R pihole:pihole /opt/de_GWD/pihole
 chmod -R 644 /opt/de_GWD/pihole
@@ -2267,6 +2268,11 @@ if [[ $(jq -r '.FORWARD.block53' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
   /opt/de_GWD/ui-block53on
 fi
 echo
+
+sed -i '/## Start of bogus-nxdomain/,/## End of bogus-nxdomain/d' /opt/de_GWD/pihole/dnsmasq.conf
+echo "## Start of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
+cat /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf >> /opt/de_GWD/pihole/dnsmasq.conf
+echo "## End of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
 
 python3 <<EOF
 import toml
