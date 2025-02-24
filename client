@@ -2234,7 +2234,7 @@ with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
 data["dns"]["upstreams"] = ["127.0.0.1#5341"]
 data["dns"]["port"] = 5399
 data["dns"]["listeningMode"] = "ALL"
-data["dns"]["rateLimit"]["rateLimit"] = 100000
+data["dns"]["rateLimit"]["rateLimit"] = 10000
 data["resolver"]["resolveIPv6"] = False
 data["webserver"]["port"] = "8053"
 data["ntp"]["sync"]["active"] = False
