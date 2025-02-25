@@ -14,7 +14,7 @@ jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMbahamut"))' |\
 jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMopenai"))' |\
 jq 'del(.routing.rules[] | select(.outboundTag == "nodeSMapple"))' |\
 jq 'del(.routing.rules[] | select(.domain == ["geosite:apple","geosite:apple-ads","geosite:apple-dev","geosite:apple-update","geosite:icloud","geosite:apple@cn","geosite:apple-cn"]))' |\
-jq 'del(.routing.rules[] | select(.domain == ["geosite:category-games@cn"]))' | sponge /opt/de_GWD/vtrui/config.json
+jq 'del(.routing.rules[] | select(.domain == ["domain:steamserver.net","geosite:steam@cn","geosite:category-games@cn"]))' | sponge /opt/de_GWD/vtrui/config.json
 
 
 
@@ -207,10 +207,10 @@ if [[ -n $9 ]] && [[ $9 != "0" ]]; then
 jq '.v2nodeDIV.nodeSM.steam="proxy"' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
 elif [[ $9 = "0" ]]; then
 	jq 'del(.v2nodeDIV.nodeSM.steam)' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
-	/opt/de_GWD/ui-V2routingDomain 'direct' '["geosite:category-games@cn"]'
+	/opt/de_GWD/ui-V2routingDomain 'direct' '["domain:steamserver.net","geosite:steam@cn","geosite:category-games@cn"]'
 else
 	if [[ -z $(jq -r '.v2nodeDIV.nodeSM.steam' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
-		/opt/de_GWD/ui-V2routingDomain 'direct' '["geosite:category-games@cn"]'
+		/opt/de_GWD/ui-V2routingDomain 'direct' '["domain:steamserver.net","geosite:steam@cn","geosite:category-games@cn"]'
 	fi
 fi
 
