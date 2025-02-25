@@ -2199,7 +2199,19 @@ docker pull pihole/pihole:latest
 
 installPihole(){
 docker rm -f pihole >/dev/null 2>&1
-[[ -z "$newPW" ]] && newPW="admin"
+
+if [[ -f "/opt/de_GWD/pihole/pihole.toml" ]]; then
+piholePW=$(python3 <<EOF
+import toml
+with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
+ data = toml.load(f)
+
+print(f"{data['webserver']['api']['pwhash']}")
+EOF
+)
+else
+piholePW='$BALLOON-SHA256$v=1$s=1024,t=32$LwoqshC8cGQ60io+j+h3yQ==$/zfv150BWOgSihODqM1TDSJYydjRp4lH2mf9AOB3oe0='
+fi
 
 mkdir -p /opt/de_GWD/pihole
 docker run -d \
@@ -2213,8 +2225,18 @@ docker run -d \
 --net=host \
 -v /etc/localtime:/etc/localtime \
 -v /opt/de_GWD/pihole:/etc/pihole \
--e FTLCONF_webserver_api_password="$newPW" \
 pihole/pihole:latest
+
+python3 <<EOF
+import toml
+with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
+ data = toml.load(f)
+
+data['webserver']['api']['pwhash'] = "$piholePW"
+
+with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
+    toml.dump(data, f)
+EOF
 }
 
 
@@ -2424,7 +2446,7 @@ changePWD(){
     echo -e "${GREEN}=========================== ${cRES}"
     read newPW
 
-installPihole
+docker exec pihole pihole setpassword "$newPW"
 
 piholePW=$(php -r "echo hash('sha256', hash('sha256', '$newPW'));")
 jq --arg piholePW "$piholePW" '.address.PWD = $piholePW' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
