@@ -1292,9 +1292,9 @@ location /dq {
   proxy_store                 off;
   proxy_cache                 off;
   proxy_buffering             off;
-  proxy_buffer_size           16k;
-  proxy_busy_buffers_size     24k;
-  proxy_buffers               64 4k;
+  proxy_buffer_size           4k;
+  proxy_busy_buffers_size     16k;
+  proxy_buffers               4 16k;
   add_header Cache-Control no-cache;
 }
 # DOH_END
@@ -1318,9 +1318,9 @@ location $path {
   proxy_store                 off;
   proxy_cache                 off;
   proxy_buffering             off;
-  proxy_buffer_size           16k;
-  proxy_busy_buffers_size     24k;
-  proxy_buffers               64 4k;
+  proxy_buffer_size           4k;
+  proxy_busy_buffers_size     16k;
+  proxy_buffers               4 16k;
   add_header Cache-Control no-cache;
 }
 # V2_END
