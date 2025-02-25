@@ -2108,7 +2108,6 @@ location ~ [^/]\.php(/|$) {
 location ~ ^/ttyd(.*)$ {
   proxy_pass                  http://127.0.0.1:3000/\$1;
   proxy_http_version          1.1;
-  proxy_set_header            Accept-Encoding "br, gzip, deflate";
   proxy_set_header            Host \$host;
   proxy_set_header            Upgrade \$http_upgrade;
   proxy_set_header            Connection "upgrade";
