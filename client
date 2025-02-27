@@ -2290,11 +2290,6 @@ if [[ $(jq -r '.FORWARD.block53' /opt/de_GWD/0conf 2>/dev/null) = "on" ]]; then
 fi
 echo
 
-sed -i '/## Start of bogus-nxdomain/,/## End of bogus-nxdomain/d' /opt/de_GWD/pihole/dnsmasq.conf
-echo "## Start of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
-cat /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf >> /opt/de_GWD/pihole/dnsmasq.conf
-echo "## End of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
-
 python3 <<EOF
 import toml
 with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
@@ -2306,6 +2301,11 @@ with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)
 EOF
 docker restart pihole >/dev/null 2>&1
+
+sed -i '/## Start of bogus-nxdomain/,/## End of bogus-nxdomain/d' /opt/de_GWD/pihole/dnsmasq.conf
+echo "## Start of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
+cat /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf >> /opt/de_GWD/pihole/dnsmasq.conf
+echo "## End of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
 
 if [[ -n $(jq -r '.address.alias' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
   /opt/de_GWD/ui-markThis >/dev/null 2>&1

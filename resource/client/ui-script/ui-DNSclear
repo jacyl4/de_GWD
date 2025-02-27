@@ -1,2 +1,7 @@
 #!/bin/bash
-docker restart pihole
+docker exec pihole pihole flush
+
+sed -i '/## Start of bogus-nxdomain/,/## End of bogus-nxdomain/d' /opt/de_GWD/pihole/dnsmasq.conf
+echo "## Start of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
+cat /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf >> /opt/de_GWD/pihole/dnsmasq.conf
+echo "## End of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
