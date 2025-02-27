@@ -101,22 +101,24 @@ rm -rf /tmp/99-bogus-nxdomain.china.conf
 wget --show-progress -cqO /tmp/99-bogus-nxdomain.china.conf https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/99-bogus-nxdomain.china.conf
   if [[ $(checkSum /tmp/99-bogus-nxdomain.china.conf $bogusNxdomain_sha256sum) = "true" ]]; then
     mv -f /tmp/99-bogus-nxdomain.china.conf /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf
-    sed -i '/## Start of bogus-nxdomain/,/## End of bogus-nxdomain/d' /opt/de_GWD/pihole/dnsmasq.conf
-    echo "## Start of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
-    cat /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf >> /opt/de_GWD/pihole/dnsmasq.conf
-    echo "## End of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
   else
     echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}bogus-nxdomain.china.conf${RED} Download Failed${cRES}"
   fi
 fi
 
+if [[ $(checkSum /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf $bogusNxdomain_sha256sum) = "true" ]]; then
+  sed -i '/## Start of bogus-nxdomain/,/## End of bogus-nxdomain/d' /opt/de_GWD/pihole/dnsmasq.conf
+  echo "## Start of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
+  cat /opt/de_GWD/.repo/99-bogus-nxdomain.china.conf >> /opt/de_GWD/pihole/dnsmasq.conf
+  echo "## End of bogus-nxdomain" >> /opt/de_GWD/pihole/dnsmasq.conf
+fi
 
 if [[ $(checkSum /opt/de_GWD/.repo/geosite.dat $geosite_sha256sum) = "true" ]]; then
   cp -f /opt/de_GWD/.repo/geosite.dat /opt/de_GWD/vtrui/geosite.dat
 fi
 
 if [[ $(checkSum /opt/de_GWD/.repo/geoip.dat $geoip_sha256sum) = "true" ]]; then
-    cp -f /opt/de_GWD/.repo/geoip.dat /opt/de_GWD/vtrui/geoip.dat
+  cp -f /opt/de_GWD/.repo/geoip.dat /opt/de_GWD/vtrui/geoip.dat
 fi
 
 if [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $IPchnroute_sha256sum) = "true" ]]; then
