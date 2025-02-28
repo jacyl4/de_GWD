@@ -2256,6 +2256,7 @@ data["dns"]["upstreams"] = ["127.0.0.1#5341"]
 data["dns"]["port"] = 5399
 data["dns"]["listeningMode"] = "ALL"
 data["dns"]["rateLimit"]["count"] = 10000
+data["dns"]["specialDomains"]["iCloudPrivateRelay"] = False
 data["resolver"]["resolveIPv6"] = False
 data["webserver"]["port"] = "8053"
 data["ntp"]["sync"]["active"] = False
