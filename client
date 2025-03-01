@@ -2255,11 +2255,18 @@ with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
 data["dns"]["upstreams"] = ["127.0.0.1#5341"]
 data["dns"]["port"] = 5399
 data["dns"]["listeningMode"] = "ALL"
+data["dns"]["EDNS0ECS"] = False
+data["dns"]["dnssec"] = False
+data["dns"]["showDNSSEC"] = False
+data["dns"]["domainNeeded"] = True
 data["dns"]["rateLimit"]["count"] = 10000
 data["dns"]["specialDomains"]["iCloudPrivateRelay"] = False
 data["resolver"]["resolveIPv6"] = False
 data["webserver"]["port"] = "8053"
+data["ntp"]["ipv4"]["active"] = False
+data["ntp"]["ipv6"]["active"] = False
 data["ntp"]["sync"]["active"] = False
+data["ntp"]["sync"]["rtc"]["utc"] = False
 
 with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)
