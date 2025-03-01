@@ -532,6 +532,7 @@ modprobe ifb
 modprobe sch_cake
 
 cat << EOF >/etc/sysctl.conf
+kernel.sysrq = 438
 vm.overcommit_memory = 1
 vm.swappiness = 5
 vm.dirty_ratio = 10
@@ -577,8 +578,8 @@ net.ipv4.conf.all.arp_announce = 2
 net.ipv4.conf.default.arp_announce = 2
 net.ipv4.conf.all.arp_ignore = 1
 net.ipv4.conf.default.arp_ignore = 1
-net.ipv4.conf.all.rp_filter = 0
-net.ipv4.conf.default.rp_filter = 0
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
 net.ipv4.conf.all.send_redirects = 0
 net.ipv4.conf.default.send_redirects = 0
 net.ipv4.conf.all.accept_redirects = 0
@@ -628,7 +629,7 @@ net.ipv4.tcp_keepalive_time = 7200
 net.ipv4.tcp_keepalive_intvl = 75
 net.ipv4.tcp_keepalive_probes = 9
 net.ipv4.tcp_timestamps = 1
-net.ipv4.tcp_syncookies = 0
+net.ipv4.tcp_syncookies = 1
 net.ipv4.tcp_tw_reuse = 2
 net.ipv4.tcp_syn_retries = 2
 net.ipv4.tcp_synack_retries = 2
