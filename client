@@ -21,7 +21,6 @@ bash <(wget --no-check-certificate -qO- https://ghproxy.net/https://raw.githubus
 EOF
 `
 
-
 if [[ $architecture = "arm64" ]];then
 chnAPTsource="mirrors.tuna.tsinghua.edu.cn"
 elif [[ $architecture = "amd64" ]]; then
