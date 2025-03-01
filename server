@@ -741,7 +741,7 @@ $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
 
 $(which ethtool) -s \$line duplex full >/dev/null 2>&1
-$(which ethtool) -K \$line rx on rx-all on rx-gro on tx on sg on tso on gso on gro on >/dev/null 2>&1
+$(which ethtool) -K \$line rx on rx-all on rx-gro off tx on sg on tso on gso on gro off >/dev/null 2>&1
 done
 
 $(which ip) tcp_metrics flush
