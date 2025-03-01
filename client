@@ -823,15 +823,10 @@ net.ipv4.tcp_challenge_ack_limit = 100000
 net.ipv4.tcp_slow_start_after_idle = 0
 net.ipv4.tcp_autocorking = 0
 net.ipv4.tcp_rfc1337 = 1
+net.ipv4.tcp_congestion_control = bbr
 net.core.default_qdisc = cake
 EOF
 
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-if [[ $(uname -r) =~ "bbrplus" ]]; then
-  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
-else
-  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
-fi
 sync
 sysctl -p >/dev/null 2>&1
 
@@ -2354,18 +2349,6 @@ cat << "EOF" >/etc/rc_kernel.local
 #!/bin/bash
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
-sed -i "/net.core.default_qdisc/d" /etc/sysctl.conf
-sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-
-echo "net.core.default_qdisc = cake" >>/etc/sysctl.conf
-
-if [[ $(uname -r) =~ "bbrplus" ]]; then
-  echo "net.ipv4.tcp_congestion_control = bbrplus" >>/etc/sysctl.conf
-else
-  echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
-fi
-sysctl -p >/dev/null 2>&1
-
 rm -f /var/cache/apt/archives/lock
 rm -f /var/lib/apt/lists/lock
 rm -f /var/lib/dpkg/lock
@@ -2411,12 +2394,8 @@ fi
 
 
 
-install3rdKernel(){
-bash <(wget --show-progress -cqO- https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/kernel/install3rdKernel)
-}
-
-restoreKernel(){
-bash <(wget --show-progress -cqO- https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/kernel/installDefaultKernel)
+installkernel(){
+bash <(wget --show-progress -cqO- https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/kernel/installkernel)
 }
 
 
@@ -2788,8 +2767,7 @@ fi
  echo -e "${GREEN}================================================================ ${cRES}"
  echo
  echo -e "${GREEN}1. Install de_GWD${cRES}"
- echo -e "${GREEN}2. Install BBRplus / Liquorix / XanMod kernel and reboot${cRES}"
-  echo -e "${BLUE}3. Restore default kernel and reboot${cRES}"
+ echo -e "${GREEN}2. Install new kernel and reboot${cRES}"
 echo -e "${YELLOW}8. Change Web UI port & Web update port${cRES}"
 echo -e "${YELLOW}9. Change de_GWD password${cRES}"
 echo -e "${YELLOW}0. Update de_GWD${cRES}"
@@ -2802,11 +2780,7 @@ read -p "Select:" num
     start_menu
     ;;
     2)
-    install3rdKernel
-    start_menu
-    ;;
-    3)
-    restoreKernel
+    installkernel
     start_menu
     ;;
     8)

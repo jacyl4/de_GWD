@@ -48,7 +48,6 @@ chmod +x client
 * [ mmotti/pihole-regex ](https://github.com/mmotti/pihole-regex)
 * [ Loyalsoldier/v2ray-rules-dat ](https://github.com/Loyalsoldier/v2ray-rules-dat)
 * [ makotom/cfspeed ](https://github.com/makotom/cfspeed)
-* [ UJX6N/bbrplus-6.x ](https://github.com/UJX6N/bbrplus-6.x_Mainline)
 * [ mzz2017/lkl-haproxy ](https://github.com/mzz2017/lkl-haproxy)
 * [ xanmod/linux ](https://github.com/xanmod/linux)
 * [ tsl0922/ttyd ](https://github.com/tsl0922/ttyd)
