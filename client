@@ -70,7 +70,7 @@ unset aptPKG
 
 pkgDEP2(){
 [[ ! -f "/usr/share/keyrings/docker-ce-archive-keyring.gpg" ]] && \
-curl -sSLo- https://download.docker.com/linux/debian/gpg | gpg --dearmor >/usr/share/keyrings/docker-ce-archive-keyring.gpg
+curl -fsSLo- https://download.docker.com/linux/debian/gpg | gpg --dearmor >/usr/share/keyrings/docker-ce-archive-keyring.gpg
 [[ ! -f "/etc/apt/sources.list.d/docker.list" ]] && \
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-ce-archive-keyring.gpg] https://download.docker.com/linux/debian $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) stable" >/etc/apt/sources.list.d/docker.list
 
@@ -111,7 +111,7 @@ preDL(){
 mkdir -p /opt/de_GWD
 mkdir -p /opt/de_GWD/.repo
 
-sha256sum_IPchnroute=$(curl -ksSLo- https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
+sha256sum_IPchnroute=$(curl -fsSLo- https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
 if [[ -n $sha256sum_IPchnroute ]] && [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $sha256sum_IPchnroute) = "false" ]] ; then
 rm -rf /tmp/IPchnroute
 wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
@@ -122,7 +122,7 @@ fi
 if [[ -f "./de_GWD_$architecture.zip" ]]; then
     mv -f ./de_GWD_$architecture.zip /opt/de_GWD/.repo/de_GWD.zip
 else
-    sha256sum_de_GWD=$(curl -ksSLo- https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/de_GWD/main/de_GWD_"$architecture".zip.sha256sum)
+    sha256sum_de_GWD=$(curl -fsSLo- https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/de_GWD/main/de_GWD_"$architecture".zip.sha256sum)
     if [[ -n $sha256sum_de_GWD ]] && [[ $(checkSum /opt/de_GWD/.repo/de_GWD.zip $sha256sum_de_GWD) = "false" ]]; then
     rm -rf /tmp/de_GWD.zip
     wget --no-check-certificate --show-progress -cqO /tmp/de_GWD.zip https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/de_GWD/main/de_GWD_"$architecture".zip
@@ -150,9 +150,9 @@ chmod +x /opt/de_GWD/tcpTime
 
 repoDL(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Repo Download${cRES}\r\c"
-sha256sum_nginx=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginx_"$architecture".sha256sum)
-sha256sum_nginxConf=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginxConf.zip.sha256sum)
-sha256sum_client=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip.sha256sum)
+sha256sum_nginx=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginx_"$architecture".sha256sum)
+sha256sum_nginxConf=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginxConf.zip.sha256sum)
+sha256sum_client=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/client/Archive.zip.sha256sum)
 
 if [[ $(checkSum /usr/sbin/nginx $sha256sum_nginx) = "false" ]]; then
 rm -rf /tmp/nginx
@@ -182,7 +182,7 @@ wget --show-progress -cqO /tmp/client.zip https://raw.githubusercontent.com/jacy
 fi
 
 localVer=$(awk 'NR==1' /opt/de_GWD/.repo/version.php 2>/dev/null)
-remoteVer=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+remoteVer=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
 
 if [[ $localVer != $remoteVer ]] || [[ ! -f '/opt/de_GWD/.repo/version.php' ]]; then
 rm -rf /opt/de_GWD/.repo/version.php
@@ -777,7 +777,7 @@ net.ipv4.conf.default.accept_source_route = 0
 net.ipv4.conf.all.route_localnet = 1
 net.ipv4.route.flush = 1
 net.ipv4.ip_local_port_range = 1024 65535
-net.ipv4.ip_local_reserved_ports = 3000
+net.ipv4.ip_local_reserved_ports = 53,5331,5331,5341,3000
 net.ipv4.ip_forward = 1
 net.ipv4.conf.all.forwarding = 1
 net.ipv4.conf.default.forwarding = 1
@@ -801,7 +801,7 @@ net.ipv4.tcp_mtu_probing = 0
 net.ipv4.tcp_mtu_probe_floor = 48
 net.ipv4.tcp_base_mss = 1460
 net.ipv4.tcp_no_metrics_save = 0
-net.ipv4.tcp_no_ssthresh_metrics_save = 1
+net.ipv4.tcp_no_ssthresh_metrics_save = 0
 net.ipv4.tcp_sack = 1
 net.ipv4.tcp_dsack = 1
 net.ipv4.tcp_frto = 0
@@ -814,8 +814,8 @@ net.ipv4.tcp_fin_timeout = 10
 net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_fastopen_blackhole_timeout_sec = 0
 net.ipv4.tcp_fastopen_key = 00000000-00000000-00000000-00000000
-net.ipv4.tcp_keepalive_time = 7200
-net.ipv4.tcp_keepalive_intvl = 75
+net.ipv4.tcp_keepalive_time = 3600
+net.ipv4.tcp_keepalive_intvl = 60
 net.ipv4.tcp_keepalive_probes = 9
 net.ipv4.tcp_timestamps = 1
 net.ipv4.tcp_syncookies = 0
@@ -827,6 +827,7 @@ net.ipv4.tcp_retries2 = 8
 net.ipv4.tcp_orphan_retries = 0
 net.ipv4.tcp_challenge_ack_limit = 100000
 net.ipv4.tcp_slow_start_after_idle = 0
+net.ipv4.tcp_retrans_collapse = 0
 net.ipv4.tcp_autocorking = 0
 net.ipv4.tcp_rfc1337 = 1
 net.ipv4.tcp_congestion_control = bbr

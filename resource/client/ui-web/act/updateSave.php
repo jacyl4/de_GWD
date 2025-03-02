@@ -17,7 +17,7 @@ $updateURL = strpos($updateCMD,"https");
 $updateURL = substr($updateCMD, $updateURL);
 $updateURL = substr($updateURL, 0, strlen($updateURL)-1);
 
-exec("sudo curl -sSL -o /opt/de_GWD/update $updateURL &");
+exec("sudo curl -fsSL -o /opt/de_GWD/update $updateURL &");
 
 exec("sudo /opt/de_GWD/ui-updateSave &");
 

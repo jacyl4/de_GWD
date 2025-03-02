@@ -69,7 +69,7 @@ unset aptPKG
 
 ghREPO="unlimitedbacon/stl-thumb"
 ghPackage="_$architecture.deb"
-curl -sSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'browser_download_url' | grep 'stl-thumb_' | grep $ghPackage | cut -d '"' -f 4 | wget --show-progress -qi - -O /tmp/stl-thumb.deb
+curl -fsSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'browser_download_url' | grep 'stl-thumb_' | grep $ghPackage | cut -d '"' -f 4 | wget --show-progress -qi - -O /tmp/stl-thumb.deb
 [[ $? -ne 0 ]] && echo -e "${WHITE}[ ${RED}✕ ${WHITE}]\c" && echo -e "\t${WHITE}stl-thumb${RED} Download Failed${cRES}" && exit
 dpkg -i /tmp/stl-thumb.deb
 

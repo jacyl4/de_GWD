@@ -77,11 +77,11 @@ fi
 
 repoDL(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}Repository${cRES}\r\c"
-sha256sum_de_GWD=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/de_GWD_"$architecture".zip.sha256sum)
-sha256sum_don_server=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/doh/doh_s_"$architecture".sha256sum)
-sha256sum_nginx=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginx_"$architecture".sha256sum)
-sha256sum_nginxConf=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginxConf.zip.sha256sum)
-sha256sum_sample=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/server/sample.zip.sha256sum)
+sha256sum_de_GWD=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/de_GWD_"$architecture".zip.sha256sum)
+sha256sum_don_server=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/doh/doh_s_"$architecture".sha256sum)
+sha256sum_nginx=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginx_"$architecture".sha256sum)
+sha256sum_nginxConf=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/nginx/nginxConf.zip.sha256sum)
+sha256sum_sample=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/$branch/resource/server/sample.zip.sha256sum)
 
 if [[ $(checkSum /opt/de_GWD/doh-server $sha256sum_don_server) = "false" ]]; then
 rm -rf /tmp/doh-server
@@ -119,7 +119,7 @@ wget --show-progress -cqO /tmp/sample.zip https://raw.githubusercontent.com/jacy
 fi
 
 localVer=$(awk 'NR==1' /opt/de_GWD/version.php 2>/dev/null)
-remoteVer=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+remoteVer=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
 
 if [[ $localVer != $remoteVer ]]; then
 rm -rf /tmp/version.php
@@ -595,6 +595,7 @@ net.ipv4.conf.default.accept_source_route = 0
 net.ipv4.conf.all.route_localnet = 1
 net.ipv4.route.flush = 1
 net.ipv4.ip_local_port_range = 1024 65535
+net.ipv4.ip_local_reserved_ports = 53
 net.ipv4.ip_forward = 1
 net.ipv4.conf.all.forwarding = 1
 net.ipv4.conf.default.forwarding = 1
@@ -616,7 +617,7 @@ net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_workaround_signed_windows = 0
 net.ipv4.tcp_mtu_probing = 0
 net.ipv4.tcp_mtu_probe_floor = 48
-net.ipv4.tcp_base_mss = 1024
+net.ipv4.tcp_base_mss = 1428
 net.ipv4.tcp_no_metrics_save = 1
 net.ipv4.tcp_no_ssthresh_metrics_save = 1
 net.ipv4.tcp_sack = 1
@@ -631,10 +632,10 @@ net.ipv4.tcp_fin_timeout = 10
 net.ipv4.tcp_fastopen = 3
 net.ipv4.tcp_fastopen_blackhole_timeout_sec = 0
 net.ipv4.tcp_fastopen_key = 00000000-00000000-00000000-00000000
-net.ipv4.tcp_keepalive_time = 7200
-net.ipv4.tcp_keepalive_intvl = 75
-net.ipv4.tcp_keepalive_probes = 9
-net.ipv4.tcp_timestamps = 1
+net.ipv4.tcp_keepalive_time = 300
+net.ipv4.tcp_keepalive_intvl = 30
+net.ipv4.tcp_keepalive_probes = 5
+net.ipv4.tcp_timestamps = 0
 net.ipv4.tcp_syncookies = 0
 net.ipv4.tcp_tw_reuse = 2
 net.ipv4.tcp_syn_retries = 2
@@ -642,11 +643,11 @@ net.ipv4.tcp_synack_retries = 2
 net.ipv4.tcp_retries1 = 3
 net.ipv4.tcp_retries2 = 8
 net.ipv4.tcp_orphan_retries = 0
-net.ipv4.tcp_challenge_ack_limit = 100000
+net.ipv4.tcp_challenge_ack_limit = 10000
 net.ipv4.tcp_slow_start_after_idle = 0
-net.ipv4.tcp_retrans_collapse = 0
+net.ipv4.tcp_retrans_collapse = 1
 net.ipv4.tcp_autocorking = 0
-net.ipv4.tcp_rfc1337 = 1
+net.ipv4.tcp_rfc1337 = 0
 net.ipv4.tcp_congestion_control = bbr
 net.core.default_qdisc = cake
 EOF
@@ -1670,7 +1671,7 @@ unset aptPKG
 
 ghREPO="ViRb3/wgcf"
 ghPackage="linux_$architecture"
-curl -sSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'browser_download_url' | grep $ghPackage | cut -d '"' -f 4 | wget --show-progress -qi - -O /tmp/wgcf
+curl -fsSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'browser_download_url' | grep $ghPackage | cut -d '"' -f 4 | wget --show-progress -qi - -O /tmp/wgcf
 [[ $(du -sk /tmp/wgcf 2>/dev/null | awk '{print$1}') -gt 8000 ]] && mv /tmp/wgcf /usr/local/bin/wgcf && chmod +x /usr/local/bin/wgcf
 
 if [[ -x "/usr/local/bin/wgcf" ]]; then
@@ -2071,7 +2072,7 @@ enableAutoUpdate(){
 cat << "EOF" >/opt/de_GWD/autoUpdate
 #!/bin/bash
 localVer=$(awk 'NR==1' /opt/de_GWD/version.php)
-remoteVer=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
+remoteVer=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/de_GWD/main/version.php | head -n 1)
 
 echo $localVer >/tmp/de_GWD_Ver
 echo $remoteVer >>/tmp/de_GWD_Ver
@@ -2138,9 +2139,9 @@ CFspeedTest(){
 ghREPO="makotom/cfspeed"
 ghPackage="linux-$architecture.tar.gz"
 
-if [[ $(/var/www/html/cfspeed -v 2>/dev/null | awk '{print$2}') != $(curl -sSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'tag_name' | cut -d '"' -f 4) ]]; then
+if [[ $(/var/www/html/cfspeed -v 2>/dev/null | awk '{print$2}') != $(curl -fsSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'tag_name' | cut -d '"' -f 4) ]]; then
 rm -rf /tmp/cfspeed*
-curl -sSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'browser_download_url' | grep $ghPackage | cut -d '"' -f 4 | wget --show-progress -qi - -O /tmp/cfspeed.tar.gz
+curl -fsSL https://api.github.com/repos/${ghREPO}/releases/latest | grep -E 'browser_download_url' | grep $ghPackage | cut -d '"' -f 4 | wget --show-progress -qi - -O /tmp/cfspeed.tar.gz
 
 tar -zxvf /tmp/cfspeed.tar.gz -C /tmp >/dev/null 2>&1
 mv -f /tmp/cfspeed /var/www/html/cfspeed >/dev/null 2>&1

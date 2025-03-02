@@ -28,13 +28,13 @@ elif [[ $sha256sumL != $2 ]]; then
 fi
 }
 
-geosite_sha256sum=$(curl -sSLo- https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat.sha256sum | awk '{print$1}')
-geoip_sha256sum=$(curl -sSLo- https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip.dat.sha256sum | awk '{print$1}')
-IPchnroute_sha256sum=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
-DomainsChn_sha256sum=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/Domains.chn.txt.sha256sum)
-DomainsApple_sha256sum=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/Domains.apple.txt.sha256sum)
-DomainsGames_sha256sum=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/Domains.games.txt.sha256sum)
-bogusNxdomain_sha256sum=$(curl -sSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/99-bogus-nxdomain.china.conf.sha256sum)
+geosite_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat.sha256sum | awk '{print$1}')
+geoip_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip.dat.sha256sum | awk '{print$1}')
+IPchnroute_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
+DomainsChn_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/Domains.chn.txt.sha256sum)
+DomainsApple_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/Domains.apple.txt.sha256sum)
+DomainsGames_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/Domains.games.txt.sha256sum)
+bogusNxdomain_sha256sum=$(curl -fsSLo- https://raw.githubusercontent.com/jacyl4/chnroute/main/mosdns_chnlist/99-bogus-nxdomain.china.conf.sha256sum)
 
 if [[ $(checkSum /opt/de_GWD/.repo/geosite.dat $geosite_sha256sum) = "false" ]]; then
 rm -rf /tmp/geosite.dat
