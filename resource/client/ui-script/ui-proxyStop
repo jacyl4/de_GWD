@@ -1,0 +1,33 @@
+#!/bin/bash
+python3 <<EOF
+import toml
+with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
+ data = toml.load(f)
+
+data["dns"]["upstreams"] = ["127.0.0.1#5331"]
+
+with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
+    toml.dump(data, f)
+EOF
+
+>/etc/resolvconf/resolv.conf.d/head
+>/etc/resolvconf/resolv.conf.d/original
+>/etc/resolvconf/resolv.conf.d/tail
+rm -rf /etc/resolv.conf
+rm -rf /run/resolvconf/interface
+cat << EOF >/etc/resolvconf/resolv.conf.d/base
+nameserver 127.0.0.1
+EOF
+if [[ -f "/etc/resolvconf/run/resolv.conf" ]]; then
+ln -sf /etc/resolvconf/run/resolv.conf /etc/resolv.conf
+elif [[ -f "/run/resolvconf/resolv.conf" ]]; then
+ln -sf /run/resolvconf/resolv.conf /etc/resolv.conf
+fi
+sed -i '/dns-nameservers /d' /etc/network/interfaces
+resolvconf -u
+
+systemctl stop nftables
+ip rule del table 220 >/dev/null 2>&1
+ip route flush table 220 >/dev/null 2>&1
+ip route flush cache >/dev/null 2>&1
+ip route del local default dev lo table 220 >/dev/null 2>&1
