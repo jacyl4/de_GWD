@@ -1,0 +1,173 @@
+#!/bin/bash
+RED='\E[1;31m'
+GREEN='\E[1;32m'
+YELLOW='\E[1;33m'
+BLUE='\E[1;34m'
+PURPLE='\E[1;35m'
+CYAN='\E[1;36m'
+WHITE='\E[1;37m'
+cRES='\E[0m'
+
+
+
+echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}DNS Split${cRES}\r\c"
+/opt/de_GWD/ui-NodeSave
+/opt/de_GWD/ui-submitListBW
+
+doh1=$(jq -r '.dns.doh[0]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+doh2=$(jq -r '.dns.doh[1]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+dog=$(jq -r '.dns.dog' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$')
+
+cat << EOF >/opt/de_GWD/mosdns/forwarders.yaml
+plugins:
+  - tag: forward_global
+    type: forward
+    args:
+      concurrent: 2
+      upstreams:
+        - addr: 127.0.0.1:5332
+        - addr: tcp://127.0.0.1:5332
+
+  - tag: forward_chn
+    type: forward
+    args:
+      concurrent: 2
+      upstreams:
+        - addr: 127.0.0.1:5331
+        - addr: tcp://127.0.0.1:5331
+EOF
+
+cat << EOF >/opt/de_GWD/mosdns/hosts.yaml
+plugins:
+  - tag: hosts
+    type: hosts
+    args:
+      entries:
+        - localhost 127.0.0.1
+EOF
+
+if [[ -n $doh1IP ]]; then
+doh1Domain=$(echo $doh1 | cut -d/ -f1 | cut -d: -f1)
+doh1IP=$(dig @127.0.0.1 $doh1Domain -4p 5331 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+yq eval -i ".plugins.[0].args.entries += [\"$doh1Domain $doh1IP\"]" /opt/de_GWD/mosdns/hosts.yaml
+fi
+
+if [[ -n $doh2IP ]]; then
+doh2Domain=$(echo $doh2 | cut -d/ -f1 | cut -d: -f1)
+doh2IP=$(dig @127.0.0.1 $doh2Domain -4p 5331 +short  | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | grep -v "127.0.0.1" | xargs -n 1 | awk NR==1)
+yq eval -i ".plugins.[0].args.entries += [\"$doh2Domain $doh2IP\"]" /opt/de_GWD/mosdns/hosts.yaml
+fi
+
+if [[ -n $(jq -r '.dns.hosts' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$') ]]; then
+hoststxt=$(jq -r '.dns.hosts | to_entries[] | [.value, .key] | @tsv' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | sed 's/[[:space:]][[:space:]]*/ /g')
+echo $hoststxt | while read line; do
+  hostDomain=$(echo $line | awk '{print$2}')
+  hostIP=$(echo $line | awk '{print$1}')
+  yq eval -i ".plugins.[0].args.entries += [\"$hostDomain $hostIP\"]" /opt/de_GWD/mosdns/hosts.yaml
+done
+hoststoml=$(echo "$hoststxt" | tr ' ' '\n' | awk 'NR%2==1 {line=$0} NR%2==0 {print "    \x27" line " " $0 "\x27,"}' | sed '$ s/,$//')
+python3 <<EOF
+import toml
+with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
+ data = toml.load(f)
+
+data["dns"]["hosts"] = [
+$hoststoml
+]
+
+with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
+    toml.dump(data, f)
+EOF
+else
+python3 <<EOF
+import toml
+with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
+ data = toml.load(f)
+
+data["dns"]["hosts"] = []
+
+with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
+    toml.dump(data, f)
+EOF
+sed -i '/c/{p;:a;N;$!ba;d}' /opt/de_GWD/mosdns/hosts.yaml
+fi
+
+
+
+cat << "EOF" >/opt/de_GWD/mosdns/config.yaml
+log:
+  level: error
+
+include:
+  - hosts.yaml
+  - forwarders.yaml
+
+plugins:
+  - tag: chn_sequence
+    type: sequence
+    args:
+      - exec: $forward_chn
+      - matches: resp_ip &/opt/de_GWD/.repo/IPchnroute
+        exec: accept
+      - exec: drop_resp
+
+  - tag: global_sequence
+    type: sequence
+    args:
+      - exec: $forward_global
+      - exec: accept
+
+  - tag: fallback
+    type: fallback
+    args:
+      primary: chn_sequence
+      secondary: global_sequence
+      threshold: 100
+      always_standby: true
+
+  - tag: has_resp_sequence
+    type: sequence
+    args:
+      - matches: has_resp
+        exec: accept
+
+  - tag: main_sequence
+    type: sequence
+    args:
+      - exec: $hosts
+      - exec: jump has_resp_sequence
+
+      - matches: qname &/opt/de_GWD/mosdns/domains_listB
+        exec: goto global_sequence
+
+      - matches: qname &/opt/de_GWD/mosdns/domains_listW
+        exec: $forward_chn
+      - exec: jump has_resp_sequence
+
+      - matches: qname &/opt/de_GWD/mosdns/domains_nodes
+        exec: goto global_sequence
+
+      - matches: qname &/opt/de_GWD/.repo/Domains.chn.txt
+        exec: $fallback
+      - exec: jump has_resp_sequence
+
+      - exec: goto global_sequence
+
+  - type: udp_server
+    args:
+      entry: main_sequence
+      listen: 127.0.0.1:5341
+
+  - type: tcp_server
+    args:
+      entry: main_sequence
+      listen: 127.0.0.1:5341
+EOF
+
+doh1re_origin=$(jq -r '.dns.doh1re' /opt/de_GWD/0conf)
+doh2re_origin=$(jq -r '.dns.doh2re' /opt/de_GWD/0conf)
+if [[ $doh1re_origin != $doh1IP ]] || [[ $doh2re_origin != $doh2IP ]]; then
+systemctl restart mosdns
+fi
+
+echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}DNS Split${cRES}"
