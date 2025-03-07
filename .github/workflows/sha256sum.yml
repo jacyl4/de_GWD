@@ -1,0 +1,28 @@
+name: checkSUM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: sha256sum
+      run: |
+        chmod +x sha256sum
+        ./sha256sum
+        
+    - name: Commit
+      run: |
+        git config --global user.email jacyl4@gmail.com
+        git config --global user.name jacyl4
+        git add ./resource
+        git commit -am "Auto sha256sum"
+        
+    - name: Push
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}

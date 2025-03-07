@@ -1,0 +1,20 @@
+#!/bin/bash
+jq -r '.dns.adlists[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
+	pihole -a adlist add "$line" "adlists by de_GWD"
+done
+
+jq -r '.dns.adWlist[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
+	pihole -w "$line" --comment "Whitelist by de_GWD"
+done
+
+jq -r '.dns.adBlist[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$' | while read line; do
+	pihole -b "$line" --comment "Blacklist by de_GWD"
+done
+
+for line in $(jq -r '.dns.adWregex[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$'); do
+	pihole --white-regex $line --comment "Regex whitelist by de_GWD"
+done
+
+for line in $(jq -r '.dns.adBregex[]' /opt/de_GWD/0conf 2>/dev/null | grep -v '^null$'); do
+	pihole --regex "$line" --comment "Regex blacklist by de_GWD"
+done

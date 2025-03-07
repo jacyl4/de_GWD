@@ -1,0 +1,31 @@
+#!/bin/bash
+#!/bin/bash
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+ethernetnum=$(ip link show | grep -v "lo" | awk '{print$2;exit}' | cut -d':' -f1 | cut -d'@' -f1)
+gatewayaddr=$(jq -r '.address.upstreamIP' /opt/de_GWD/0conf | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+localAddrCIDR=$(jq -r '.address.localIP' /opt/de_GWD/0conf | grep -v '^null$')
+localAddr=$(echo $localAddrCIDR | cut -d / -f1)
+netmask=$(echo $localAddrCIDR | sed -r 's/([0-9]{1,3}\.){3}[0-9]{1,3}//g')
+
+[[ -z $netmask ]] && netmask="/24" && localAddrCIDR="$localAddr$netmask"
+
+if [[ -n $localAddr ]] && [[ -n $gatewayaddr ]]; then
+cat << EOF >/etc/network/interfaces
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto $ethernetnum
+iface $ethernetnum inet static
+    address $localAddrCIDR
+    gateway $gatewayaddr
+EOF
+fi
+
+jq --arg localAddrCIDR "$localAddrCIDR" '.address.localIP=$localAddrCIDR' /opt/de_GWD/0conf | sponge /opt/de_GWD/0conf
+chmod 666 /opt/de_GWD/0conf
+
+sleep 1
+reboot
