@@ -4,7 +4,7 @@ import toml
 with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
  data = toml.load(f)
 
-data["dns"]["upstreams"] = ["127.0.0.1#5341"]
+data["dns"]["upstreams"] = ["127.0.0.1#5341","127.0.0.1#5341"]
 
 with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)

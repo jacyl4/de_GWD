@@ -4,7 +4,7 @@ import toml
 with open("/opt/de_GWD/pihole/pihole.toml", "r") as f:
  data = toml.load(f)
 
-data["dns"]["upstreams"] = ["127.0.0.1#5331"]
+data["dns"]["upstreams"] = ["127.0.0.1#5331","127.0.0.1#5331"]
 
 with open("/opt/de_GWD/pihole/pihole.toml", "w") as f:
     toml.dump(data, f)
@@ -26,8 +26,12 @@ fi
 sed -i '/dns-nameservers /d' /etc/network/interfaces
 resolvconf -u
 
+systemctl stop vtrui
+systemctl stop mosdns
 systemctl stop nftables
 ip rule del table 220 >/dev/null 2>&1
 ip route flush table 220 >/dev/null 2>&1
 ip route flush cache >/dev/null 2>&1
 ip route del local default dev lo table 220 >/dev/null 2>&1
+
+systemctl restart smartdns
