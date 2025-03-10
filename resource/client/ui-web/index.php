@@ -717,7 +717,7 @@ EOT;
 
           <div class="card-body">
             <div class="form-row">
-              <div class="col-md-8">
+              <div class="col-md-5">
               <div class="input-group my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text" style="min-width: 75px">DoH 1</span>
@@ -755,7 +755,7 @@ EOT;
               </div>
               </div>
 
-                <div class="input-group col-md-4 my-2">
+                <div class="input-group col-md-3 my-2">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
                   DNS<br>
@@ -783,6 +783,15 @@ foreach(array_unique($dnsClist[0]) as $k => $v){
 ?></textarea>
                 </div>
 
+                <div class="input-group col-md-4 my-2">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                  hosts<br>
+                  静态<br>
+                  </span>
+                </div>
+                  <textarea id="hostsCustomize" class="form-control" aria-label="hostsCustomize" rows="6" placeholder="IP 空格 abc.com &#10;IP 空格 *.abc.com"><?php passthru("sudo /opt/de_GWD/ui-hostsCustomize"); ?></textarea>
+                </div>
             </div>
 
           </div>
@@ -1208,7 +1217,8 @@ DoGc=$('#DoGc').val()
 doh1txt=$('#DoH1').val()
 doh2txt=$('#DoH2').val()
 dnsChina=$("#dnsChina").val()
-$.get("./act/DNSsave.php", {DoGc:DoGc, DoH1:doh1txt, DoH2:doh2txt, dnsChina:dnsChina}, function(result){
+hostsCustomize=$("#hostsCustomize").val()
+$.get("./act/DNSsave.php", {DoGc:DoGc, DoH1:doh1txt, DoH2:doh2txt, dnsChina:dnsChina, hostsCustomize:hostsCustomize}, function(result){
   $("#buttonDNSsubmitloading").removeClass()
   window.location.reload()
 })
