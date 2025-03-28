@@ -621,8 +621,8 @@ net.ipv4.tcp_workaround_signed_windows = 0
 net.ipv4.tcp_mtu_probing = 0
 net.ipv4.tcp_mtu_probe_floor = 48
 net.ipv4.tcp_base_mss = 1460
-net.ipv4.tcp_no_metrics_save = 0
-net.ipv4.tcp_no_ssthresh_metrics_save = 0
+net.ipv4.tcp_no_metrics_save = 1
+net.ipv4.tcp_no_ssthresh_metrics_save = 1
 net.ipv4.tcp_sack = 1
 net.ipv4.tcp_dsack = 1
 net.ipv4.tcp_frto = 0
@@ -650,7 +650,7 @@ net.ipv4.tcp_challenge_ack_limit = 10000
 net.ipv4.tcp_slow_start_after_idle = 0
 net.ipv4.tcp_retrans_collapse = 0
 net.ipv4.tcp_autocorking = 0
-net.ipv4.tcp_rfc1337 = 0
+net.ipv4.tcp_rfc1337 = 1
 net.ipv4.tcp_congestion_control = bbr
 net.core.default_qdisc = cake
 EOF
@@ -1403,7 +1403,8 @@ XrayOutboundDirect(){
 OBdir=`cat << EOF
     {
       "tag":"direct",
-      "protocol":"freedom"
+      "protocol":"freedom",
+      "mux":{"enabled":false,"concurrency":-1,"xudpConcurrency":-1}
     }
 EOF
 `
