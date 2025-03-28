@@ -89,9 +89,8 @@ OBmapping=`cat << EOF
     {
       "tag": "mapping$i",
       "protocol": "freedom",
-      "settings": {
-        "redirect": "$intIP:$intPort"
-      }
+      "settings": {"redirect": "$intIP:$intPort"},
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
     }
 EOF
 `
@@ -110,7 +109,8 @@ EOF
 OBout=`cat << EOF
     {
       "tag": "directOut",
-      "protocol": "freedom"
+      "protocol": "freedom",
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
     }
 EOF
 `

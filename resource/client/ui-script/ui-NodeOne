@@ -41,7 +41,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     "listen":"127.0.0.1",
     "protocol":"dokodemo-door",
     "settings":{"network":"tcp,udp","followRedirect":true},
-    "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy","mark":255}},
+    "streamSettings":{"sockopt":{"tproxy":"tproxy","mark":255,"tcpFastOpen":true,"tcpMptcp":true}},
     "sniffing":{"enabled":true,"destOverride":["http","tls","quic"],"routeOnly":true,"metadataOnly":false}
   }
 ]
@@ -54,7 +54,7 @@ OBdirect=`cat << EOF
     {
       "tag":"direct",
       "protocol":"freedom",
-      "streamSettings":{"sockopt":{"mark":255}}
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
     }
 EOF
 `

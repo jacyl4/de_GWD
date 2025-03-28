@@ -1375,7 +1375,8 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
           "path":"$path"
         },
         "sockopt": {
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpMptcp": true
         }
       },
       "sniffing": {
@@ -1404,7 +1405,7 @@ OBdir=`cat << EOF
     {
       "tag":"direct",
       "protocol":"freedom",
-      "mux":{"enabled":false,"concurrency":-1,"xudpConcurrency":-1}
+      "streamSettings":{"sockopt":{"tcpFastOpen":true}}
     }
 EOF
 `

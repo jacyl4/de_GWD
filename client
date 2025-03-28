@@ -1229,7 +1229,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
       "listen":"127.0.0.1",
       "protocol":"dokodemo-door",
       "settings":{"network":"tcp,udp","followRedirect":true},
-      "streamSettings":{"sockopt":{"tcpFastOpen":true,"tproxy":"tproxy","mark":255}}
+      "streamSettings":{"sockopt":{"tproxy":"tproxy","mark":255,"tcpFastOpen":true,"tcpMptcp":true}}
     }
   ],
   "outbounds":[
@@ -1239,7 +1239,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     {
       "tag":"direct",
       "protocol":"freedom",
-      "streamSettings":{"sockopt":{"mark":255}}
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
     }
   ]
 }

@@ -44,7 +44,7 @@ OBdefault=`cat << EOF
           "tcpFastOpen": true
         }
       },
-      "mux":{"enabled":false,"concurrency":-1,"xudpConcurrency":-1}
+      "mux":{"enabled":true,"concurrency":8,"xudpConcurrency":16,"xudpProxyUDP443":"skip"}
     }
 EOF
 `
@@ -86,7 +86,7 @@ OBdefault=`cat << EOF
           "tcpFastOpen": true
         }
       },
-      "mux":{"enabled":false,"concurrency":-1,"xudpConcurrency":-1}
+      "mux":{"enabled":true,"concurrency":8,"xudpConcurrency":16,"xudpProxyUDP443":"skip"}
     }
 EOF
 `
