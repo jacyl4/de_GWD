@@ -54,7 +54,7 @@ OBdirect=`cat << EOF
     {
       "tag":"direct",
       "protocol":"freedom",
-      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true,"tcpNoDelay":true}}
     }
 EOF
 `

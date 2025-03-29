@@ -1405,7 +1405,7 @@ OBdir=`cat << EOF
     {
       "tag":"direct",
       "protocol":"freedom",
-      "streamSettings":{"sockopt":{"tcpFastOpen":true}}
+      "streamSettings":{"sockopt":{"tcpFastOpen":true,"tcpNoDelay":true}}
     }
 EOF
 `

@@ -44,7 +44,8 @@ OBadd=`cat << EOF
         "network": "tcp",
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       },
       "mux": {
@@ -88,7 +89,8 @@ OBadd=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       },
       "mux": {

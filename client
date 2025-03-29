@@ -1239,7 +1239,7 @@ cat << EOF >/opt/de_GWD/vtrui/config.json
     {
       "tag":"direct",
       "protocol":"freedom",
-      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true,"tcpNoDelay":true}}
     }
   ]
 }
@@ -1269,7 +1269,8 @@ OBdefault=`cat << EOF
         "network": "tcp",
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       }
     }
@@ -1310,7 +1311,8 @@ OBdefault=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       }
 }
@@ -2030,9 +2032,9 @@ EOF
 
 if [[ -f "/var/www/ssl/ocsp.resp" ]] && [[ -f "/var/www/ssl/bundle.pem" ]]; then
 cat << EOF >>/etc/nginx/conf.d/.ssl_certs
-ssl_stapling on;
-ssl_stapling_verify on;
-ssl_stapling_file /var/www/ssl/ocsp.resp;
+#ssl_stapling on;
+#ssl_stapling_verify on;
+#ssl_stapling_file /var/www/ssl/ocsp.resp;
 ssl_trusted_certificate /var/www/ssl/bundle.pem;
 ssl_early_data on;
 proxy_set_header Early-Data \$ssl_early_data;

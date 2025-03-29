@@ -96,9 +96,9 @@ sed -i '/ssl_stapling_file/d' /etc/nginx/conf.d/.ssl_certs
 sed -i '/ssl_early_data/d' /etc/nginx/conf.d/.ssl_certs
 sed -i '/proxy_set_header/d' /etc/nginx/conf.d/.ssl_certs
 cat << EOF >>/etc/nginx/conf.d/.ssl_certs
-ssl_stapling on;
-ssl_stapling_verify on;
-ssl_stapling_file /var/www/ssl/ocsp.resp;
+#ssl_stapling on;
+#ssl_stapling_verify on;
+#ssl_stapling_file /var/www/ssl/ocsp.resp;
 ssl_trusted_certificate /var/www/ssl/bundle.pem;
 ssl_early_data on;
 proxy_set_header Early-Data \$ssl_early_data;

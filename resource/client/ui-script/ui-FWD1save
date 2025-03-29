@@ -75,7 +75,8 @@ OBfwd=`cat << EOF
         "network": "tcp",
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       }
     }
@@ -115,7 +116,8 @@ OBfwd=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       }
 }

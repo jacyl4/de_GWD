@@ -41,7 +41,8 @@ OBdefault=`cat << EOF
         "network": "tcp",
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       },
       "mux":{"enabled":true,"concurrency":8,"xudpConcurrency":16,"xudpProxyUDP443":"skip"}
@@ -83,7 +84,8 @@ OBdefault=`cat << EOF
         },
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       },
       "mux":{"enabled":true,"concurrency":8,"xudpConcurrency":16,"xudpProxyUDP443":"skip"}

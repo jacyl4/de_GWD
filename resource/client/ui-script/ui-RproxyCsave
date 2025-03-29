@@ -61,7 +61,8 @@ cat << EOF >/opt/de_GWD/RproxyC/config.json
         "network": "tcp",
         "sockopt": {
           "mark": 255,
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       }
     }
@@ -90,7 +91,7 @@ OBmapping=`cat << EOF
       "tag": "mapping$i",
       "protocol": "freedom",
       "settings": {"redirect": "$intIP:$intPort"},
-      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true,"tcpNoDelay":true}}
     }
 EOF
 `
@@ -110,7 +111,7 @@ OBout=`cat << EOF
     {
       "tag": "directOut",
       "protocol": "freedom",
-      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true}}
+      "streamSettings":{"sockopt":{"mark":255,"tcpFastOpen":true,"tcpNoDelay":true}}
     }
 EOF
 `
