@@ -36,7 +36,7 @@ chmod +x client
 ![de_GWD 5](https://raw.githubusercontent.com/jacyl4/de_GWD/main/resource/screenshot/5.png)
 
 ## Manual:
-没有文档    
+[Deepwiki 自动生成的文档](https://deepwiki.com/jacyl4/de_GWD)    
 
 ## Thanks to
 * [ XTLS/Xray-core ](https://github.com/XTLS/Xray-core)
