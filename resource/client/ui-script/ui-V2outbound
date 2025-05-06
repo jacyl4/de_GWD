@@ -15,9 +15,9 @@ port=$(echo $address | cut -d: -f2 | grep '^[[:digit:]]*$')
 [[ -z $tls ]] && tls=$domain
 
 if [[ $tag = "default" ]]; then
-muxSet='"enabled":true,"concurrency":8,"xudpConcurrency":16,"xudpProxyUDP443":"skip"'
+muxSet='"enabled":true,"concurrency":1,"xudpConcurrency":1,"xudpProxyUDP443":"skip"'
 else
-muxSet='"enabled":true,"concurrency":4,"xudpConcurrency":8,"xudpProxyUDP443":"reject"'
+muxSet='"enabled":true,"concurrency":1,"xudpConcurrency":1,"xudpProxyUDP443":"reject"'
 fi
 
 if [[ -z $path ]]; then
