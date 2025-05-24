@@ -204,7 +204,7 @@ net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_workaround_signed_windows = 0
 net.ipv4.tcp_mtu_probing = 0
 net.ipv4.tcp_mtu_probe_floor = 48
-net.ipv4.tcp_base_mss = 1460
+net.ipv4.tcp_base_mss = 1380
 net.ipv4.tcp_no_metrics_save = 0
 net.ipv4.tcp_no_ssthresh_metrics_save = 0
 net.ipv4.tcp_sack = 1
@@ -434,7 +434,7 @@ $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
 
 $(which ethtool) -s \$line duplex full >/dev/null 2>&1
-$(which ethtool) -K \$line rx on tx on sg on tso on gso on gro off >/dev/null 2>&1
+$(which ethtool) -K \$line rx on tx on sg off tso off gso off gro off tx-gso-partial off >/dev/null 2>&1
 done
 
 $(which ip) tcp_metrics flush

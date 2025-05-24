@@ -806,7 +806,7 @@ net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_workaround_signed_windows = 0
 net.ipv4.tcp_mtu_probing = 0
 net.ipv4.tcp_mtu_probe_floor = 48
-net.ipv4.tcp_base_mss = 1460
+net.ipv4.tcp_base_mss = 1380
 net.ipv4.tcp_no_metrics_save = 0
 net.ipv4.tcp_no_ssthresh_metrics_save = 0
 net.ipv4.tcp_sack = 1
@@ -930,7 +930,7 @@ $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
 
 $(which ethtool) -s \$line duplex full >/dev/null 2>&1
-$(which ethtool) -K \$line rx on tx on sg on tso on gso on gro off >/dev/null 2>&1
+$(which ethtool) -K \$line rx on tx on sg off tso off gso off gro off tx-gso-partial off >/dev/null 2>&1
 done
 
 $(which ip) tcp_metrics flush
@@ -2028,18 +2028,9 @@ ssl_session_tickets off;
 ssl_session_cache shared:SSL:10m;
 ssl_session_timeout 6h;
 ssl_buffer_size 4k;
-EOF
-
-if [[ -f "/var/www/ssl/ocsp.resp" ]] && [[ -f "/var/www/ssl/bundle.pem" ]]; then
-cat << EOF >>/etc/nginx/conf.d/.ssl_certs
-#ssl_stapling on;
-#ssl_stapling_verify on;
-#ssl_stapling_file /var/www/ssl/ocsp.resp;
-ssl_trusted_certificate /var/www/ssl/bundle.pem;
 ssl_early_data on;
 proxy_set_header Early-Data \$ssl_early_data;
 EOF
-fi
 
 cat << EOF >/etc/nginx/conf.d/default.conf
 # SERVER_BASE_START
@@ -2113,17 +2104,11 @@ location ~ ^/ttyd(.*)$ {
 $(cat /etc/nginx/conf.d/default.conf 2>/dev/null)
 }
 EOF
-systemctl restart nginx >/dev/null 2>&1
-
-if [[ -f "/var/www/ssl/ocsp.resp" ]] && [[ $(systemctl is-active 'nginx') != "active" ]]; then
 sed -i '/ssl_trusted_certificate/d' /etc/nginx/conf.d/.ssl_certs
 sed -i '/ssl_stapling/d' /etc/nginx/conf.d/.ssl_certs
 sed -i '/ssl_stapling_verify/d' /etc/nginx/conf.d/.ssl_certs
 sed -i '/ssl_stapling_file/d' /etc/nginx/conf.d/.ssl_certs
-sed -i '/ssl_early_data/d' /etc/nginx/conf.d/.ssl_certs
-sed -i '/proxy_set_header/d' /etc/nginx/conf.d/.ssl_certs
-systemctl restart nginx
-fi
+systemctl restart nginx >/dev/null 2>&1
 
 echo -e "${WHITE}[ ${GREEN}✓ ${WHITE}]\c" && echo -e "\t${WHITE}Nginx${cRES}"
 }

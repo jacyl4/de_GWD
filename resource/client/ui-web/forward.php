@@ -38,7 +38,7 @@
 <?php $checkFileRun = file_exists('/var/www/html/filerun'); ?>
 <?php $checkBitwarden = $de_GWDconf->app->bitwarden; ?>
 
-<?php $checkCer = file_exists('/var/www/ssl/ocsp.resp'); ?>
+<?php $checkCer = file_exists('/var/www/ssl/de_GWD.cer'); ?>
 
 <?php $checkcoredns = exec('sudo systemctl is-active coredns'); ?>
 <?php $DoGsConf = strpos(file_get_contents('/opt/de_GWD/coredns/corefile'),'grpc://.:');?>

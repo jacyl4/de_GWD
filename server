@@ -620,7 +620,7 @@ net.ipv4.tcp_window_scaling = 1
 net.ipv4.tcp_workaround_signed_windows = 0
 net.ipv4.tcp_mtu_probing = 0
 net.ipv4.tcp_mtu_probe_floor = 48
-net.ipv4.tcp_base_mss = 1460
+net.ipv4.tcp_base_mss = 1380
 net.ipv4.tcp_no_metrics_save = 1
 net.ipv4.tcp_no_ssthresh_metrics_save = 1
 net.ipv4.tcp_sack = 1
@@ -745,7 +745,7 @@ $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
 
 $(which ethtool) -s \$line duplex full >/dev/null 2>&1
-$(which ethtool) -K \$line rx on tx on sg on tso on gso on gro off >/dev/null 2>&1
+$(which ethtool) -K \$line rx on tx on sg off tso off gso off gro off tx-gso-partial off >/dev/null 2>&1
 done
 
 $(which ip) tcp_metrics flush
@@ -1099,11 +1099,7 @@ fi
 
 rm -rf /var/www/ssl/*.cer
 rm -rf /var/www/ssl/*.key
-if [[ -f "/var/www/ssl/bundle.pem" ]]; then
-  ls /var/www/ssl/*.pem | xargs -n 1 | grep -v "dhparam.pem" | while read line; do
-  rm -rf $line
-  done
-fi
+find /var/www/ssl/*.pem | grep -v "dhparam.pem" | xargs -I {} rm -rf {}
 
 curl https://get.acme.sh | sh
 "/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
@@ -1153,9 +1149,7 @@ fi
 
 rm -rf /var/www/ssl/*.cer
 rm -rf /var/www/ssl/*.key
-if [[ -f "/var/www/ssl/bundle.pem" ]]; then
-  find /var/www/ssl/*.pem | grep -v "dhparam.pem" | xargs -I {} rm -rf {}
-fi
+find /var/www/ssl/*.pem | grep -v "dhparam.pem" | xargs -I {} rm -rf {}
 
 curl https://get.acme.sh | sh
 "/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
@@ -1168,35 +1162,6 @@ curl https://get.acme.sh | sh
                --ecc
 
 chmod 644 /var/www/ssl/*.key
-}
-
-
-ocspStapling(){
-cat << "EOF" >/var/www/ssl/update_ocsp_cache
-#!/bin/bash
-if [[ -n $(openssl x509 -enddate -noout -in /var/www/ssl/de_GWD.cer -checkend 86400 | grep ' not ') ]]; then
-ocsp_uri=$(openssl x509 -noout -ocsp_uri -in /var/www/ssl/*.cer)
-intermediate_no=$(echo $ocsp_uri | cut -d/ -f3 | cut -d. -f1)
-[[ ! -f "/var/www/ssl/intermediate.pem" ]] && wget --show-progress -cqO /var/www/ssl/intermediate.pem https://letsencrypt.org/certs/2024/$intermediate_no-cross.pem
-[[ ! -f "/var/www/ssl/root.pem" ]] && wget --show-progress -cqO /var/www/ssl/root.pem https://letsencrypt.org/certs/isrgrootx1.pem
-
-[[ ! -f "/var/www/ssl/bundle.pem" ]] && cat /var/www/ssl/intermediate.pem >/var/www/ssl/bundle.pem && cat /var/www/ssl/root.pem >>/var/www/ssl/bundle.pem
-
-openssl ocsp -no_nonce \
-    -issuer  /var/www/ssl/intermediate.pem \
-    -cert    /var/www/ssl/*.cer \
-    -CAfile  /var/www/ssl/bundle.pem \
-    -VAfile  /var/www/ssl/bundle.pem \
-    -url     $ocsp_uri \
-    -respout /var/www/ssl/ocsp.resp
-
-chmod 644 /var/www/ssl/*.key
-systemctl force-reload nginx >/dev/null
-fi
-EOF
-
-chmod +x /var/www/ssl/update_ocsp_cache
-/var/www/ssl/update_ocsp_cache
 }
 
 
@@ -1254,10 +1219,8 @@ ssl_session_cache shared:SSL:10m;
 ssl_session_timeout 6h;
 ssl_buffer_size 4k;
 
-ssl_stapling on;
-ssl_stapling_verify on;
-ssl_stapling_file /var/www/ssl/ocsp.resp;
-ssl_trusted_certificate /var/www/ssl/bundle.pem;
+ssl_stapling off;
+ssl_stapling_verify off;
 ssl_early_data on;
 proxy_set_header Early-Data \$ssl_early_data;
 EOF
@@ -1475,8 +1438,6 @@ cp -f "/root/.acme.sh"/$sslFolder/*.key /var/www/ssl/de_GWD.key
 
 chmod 644 /var/www/ssl/*.key
 fi
-
-/var/www/ssl/update_ocsp_cache
 EOF
 chmod +x /opt/de_GWD/Qday
 
@@ -1597,7 +1558,6 @@ path=$(jq -r '.inbounds[0].streamSettings.wsSettings.path' /opt/de_GWD/vtrui/con
 if [[ $port = "443" ]]; then
 makeSSL_W
 
-ocspStapling
 else
     echo -e "${GREEN}=============================== ${cRES}"
     echo -e "${GREEN} Cloudflare API KEY${cRES}"
@@ -1610,8 +1570,6 @@ else
     read CFemail
 
 makeSSL_D
-
-ocspStapling
 fi
 
 nginxWebConf
@@ -2026,8 +1984,6 @@ makeSSL_W
 else
 makeSSL_D
 fi
-
-ocspStapling
 
 nginxWebConf
 
