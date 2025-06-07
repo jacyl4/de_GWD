@@ -428,8 +428,33 @@ else
 echo -e "\t${WHITE}de_GWD server connect${cRES}\r\c"
 fi
 
-local serverConnect1=$(curl -Is -m 3 --retry 3 google.com)
-local serverConnect2=$(curl -Is -m 3 --retry 3 youtube.com)
+try_connect() {
+    local url=$1
+    local attempts=3
+    local timeout=3
+    local attempt=1
+    local response
+
+    while [ $attempt -le $attempts ]; do
+        echo "Attempt $attempt to connect to $url"
+        response=$(curl -Is -m $timeout "$url")
+        if [ $? -eq 0 ]; then
+            echo "Successfully connected to $url"
+            echo "$response"
+            return 0
+        else
+            echo "Failed to connect to $url"
+            ((attempt++))
+            [ $attempt -le $attempts ] && sleep 1
+        fi
+    done
+    echo "Failed to connect to $url after $attempts attempts"
+    return 1
+}
+
+# Execute connections
+serverConnect1=$(try_connect "google.com")
+serverConnect2=$(try_connect "1.1.1.1")
 
 if [[ $1 = "u" ]]; then
     if [[ $2 = "a" ]]; then
@@ -839,6 +864,9 @@ net.ipv4.tcp_autocorking = 0
 net.ipv4.tcp_rfc1337 = 1
 net.ipv4.tcp_congestion_control = bbr
 net.core.default_qdisc = cake
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
 EOF
 
 sync
