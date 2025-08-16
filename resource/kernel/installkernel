@@ -201,58 +201,35 @@ fi
 
 
 get_cpu_arch_level() {
-    # Read flags once and build a set
+    # Read flags once
     local flags_line
     flags_line=$(awk -F: '/^flags/{print $2; exit}' /proc/cpuinfo)
 
-    local -A has
-    local f
-    for f in $flags_line; do
-        has[$f]=1
-    done
-
-    # Required flags per level
-    local -a v1=(lm cmov cx8 fpu fxsr mmx syscall sse2)
-    local -a v2=(cx16 lahf popcnt sse4_1 sse4_2 ssse3)
-    local -a v3=(avx avx2 bmi1 bmi2 f16c fma abm movbe xsave)
-    local -a v4=(avx512f avx512bw avx512cd avx512dq avx512vl)
-
-    # Helper: all flags of a level present?
-    local level_ok
-    level_ok() {
+    # Helper: check all flags of a level using bash pattern matching
+    local has_all
+    has_all() {
         local -n req=$1
         local r
         for r in "${req[@]}"; do
-            [[ ${has[$r]+y} ]] || return 1
+            [[ " $flags_line " == *" $r "* ]] || return 1
         done
         return 0
     }
 
-    local supported=0
+    # Required flags for v3 and v4 only
+    local -a v3=(avx avx2 bmi1 bmi2 f16c fma abm movbe xsave)
+    local -a v4=(avx512f avx512bw avx512cd avx512dq avx512vl)
 
-    if level_ok v1; then
-        supported=1
-    else
-        CPU_LEVEL="v1"; return 0
+    CPU_LEVEL="v2"
+
+    # Check highest first for quick early exit on capable CPUs
+    if has_all v4; then
+        CPU_LEVEL="v4"; return 0
     fi
-
-    if level_ok v2; then
-        supported=2
-    else
-        CPU_LEVEL="v${supported}"; return 0
+    if has_all v3; then
+        CPU_LEVEL="v3"; return 0
     fi
-
-    if level_ok v3; then
-        supported=3
-    else
-        CPU_LEVEL="v${supported}"; return 0
-    fi
-
-    if level_ok v4; then
-        supported=4
-    fi
-
-    CPU_LEVEL="v${supported}"
+    # Otherwise remains v2
 }
 
 
