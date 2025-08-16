@@ -201,35 +201,25 @@ fi
 
 
 get_cpu_arch_level() {
-    # Read flags once
     local flags_line
     flags_line=$(awk -F: '/^flags/{print $2; exit}' /proc/cpuinfo)
 
-    # Helper: check all flags of a level using bash pattern matching
     local has_all
     has_all() {
         local -n req=$1
         local r
         for r in "${req[@]}"; do
-            [[ " $flags_line " == *" $r "* ]] || return 1
+            [[ " $flags_line " == *" $r "* ]]
         done
-        return 0
     }
 
-    # Required flags for v3 and v4 only
     local -a v3=(avx avx2 bmi1 bmi2 f16c fma abm movbe xsave)
-    local -a v4=(avx512f avx512bw avx512cd avx512dq avx512vl)
 
     CPU_LEVEL="v2"
 
-    # Check highest first for quick early exit on capable CPUs
-    if has_all v4; then
-        CPU_LEVEL="v4"; return 0
-    fi
     if has_all v3; then
-        CPU_LEVEL="v3"; return 0
+        CPU_LEVEL="v3"
     fi
-    # Otherwise remains v2
 }
 
 
