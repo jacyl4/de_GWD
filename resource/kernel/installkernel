@@ -200,11 +200,69 @@ fi
 
 
 
+get_cpu_arch_level() {
+    # Read flags once and build a set
+    local flags_line
+    flags_line=$(awk -F: '/^flags/{print $2; exit}' /proc/cpuinfo)
+
+    local -A has
+    local f
+    for f in $flags_line; do
+        has[$f]=1
+    done
+
+    # Required flags per level
+    local -a v1=(lm cmov cx8 fpu fxsr mmx syscall sse2)
+    local -a v2=(cx16 lahf popcnt sse4_1 sse4_2 ssse3)
+    local -a v3=(avx avx2 bmi1 bmi2 f16c fma abm movbe xsave)
+    local -a v4=(avx512f avx512bw avx512cd avx512dq avx512vl)
+
+    # Helper: all flags of a level present?
+    local level_ok
+    level_ok() {
+        local -n req=$1
+        local r
+        for r in "${req[@]}"; do
+            [[ ${has[$r]+y} ]] || return 1
+        done
+        return 0
+    }
+
+    local supported=0
+
+    if level_ok v1; then
+        supported=1
+    else
+        CPU_LEVEL="v1"; return 0
+    fi
+
+    if level_ok v2; then
+        supported=2
+    else
+        CPU_LEVEL="v${supported}"; return 0
+    fi
+
+    if level_ok v3; then
+        supported=3
+    else
+        CPU_LEVEL="v${supported}"; return 0
+    fi
+
+    if level_ok v4; then
+        supported=4
+    fi
+
+    CPU_LEVEL="v${supported}"
+}
+
+
+
 installXanMod(){
 echo -e "${WHITE}[...]\c" && echo -e "\t${WHITE}XanMod kernel${cRES}\r\c"
 if [[ $architecture != "amd64" ]]; then
   echo -e "${RED}only work on x86_64${cRES}"
 elif [[ $architecture == "amd64" ]]; then
+get_cpu_arch_level
 cat << EOF >/tmp/xanmod.gpg.key
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v2
@@ -240,7 +298,7 @@ EOF
 cat /tmp/xanmod.gpg.key | gpg --dearmor >/etc/apt/keyrings/xanmod.gpg
 echo "deb [signed-by=/etc/apt/keyrings/xanmod.gpg] http://deb.xanmod.org releases main" >/etc/apt/sources.list.d/xanmod-kernel.list
 
-apt update && apt install linux-xanmod-edge-x64v3
+apt update && apt install linux-xanmod-x64$CPU_LEVEL
 
 if [[ -n $(dpkg --list | grep linux-image | grep xanmod) ]]; then
   # 清理旧内核

@@ -1,7 +1,5 @@
 #!/bin/bash
 unset publicIPurls
-publicIPurls+=(http://members.3322.org/dyndns/getip)
-publicIPurls+=(http://ip.3322.net)
 publicIPurls+=(https://v4.yinghualuo.cn/bejson)
 publicIPurls+=(http://myip.ipip.net)
 publicIPurls+=(http://cip.cc)
