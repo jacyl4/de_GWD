@@ -1759,9 +1759,9 @@ deb http://cloudfront.debian.net/debian bookworm-updates main contrib non-free n
 deb http://cloudfront.debian.net/debian bookworm-backports main contrib non-free non-free-firmware
 EOF
 
-echo "deb https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" >/etc/apt/sources.list.d/php.list
+echo "deb [signed-by=/etc/apt/keyrings/deb.sury.org.gpg] https://packages.sury.org/php/ $(cat /etc/os-release | grep VERSION= | cut -d'(' -f2 | cut -d')' -f1) main" >/etc/apt/sources.list.d/php.list
 apt-key del 95BD4743 >/dev/null 2>&1
-wget --no-check-certificate -cqO /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+curl -sSLo /etc/apt/keyrings/deb.sury.org.gpg https://packages.sury.org/php/apt.gpg
 [[ $? -ne 0 ]] && echo -e "${WHITE}PHP apt key${RED} Download Failed${cRES}"
 
 apt update --fix-missing && apt upgrade --allow-downgrades -y
