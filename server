@@ -693,13 +693,13 @@ done
 
 $(which ip) link set lo qlen 10000 mtu 65520
 $(which tc) qdisc del dev lo root >/dev/null 2>&1
-$(which tc) qdisc add dev lo root cake unlimited rtt 10us diffserv4 dual-srchost no-split-gso no-ack-filter raw egress
+$(which tc) qdisc add dev lo root cake unlimited rtt 10us diffserv4 dual-srchost no-split-gso ack-filter-aggressive raw egress
 
 $(which ip) link add name ifb4lo type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev lo ingress >/dev/null 2>&1
 $(which tc) qdisc add dev lo handle ffff: ingress
 $(which tc) qdisc del dev ifb4lo root >/dev/null 2>&1
-$(which tc) qdisc add dev ifb4lo root cake unlimited rtt 10us diffserv4 dual-dsthost no-split-gso no-ack-filter raw ingress
+$(which tc) qdisc add dev ifb4lo root cake unlimited rtt 10us diffserv4 dual-dsthost no-split-gso ack-filter-aggressive raw ingress
 $(which ip) link set ifb4lo qlen 10000 mtu 65520
 $(which ip) link set ifb4lo up
 $(which tc) filter add dev lo parent ffff: matchall action mirred egress redirect dev ifb4lo
@@ -715,7 +715,7 @@ $(which ip) link add name \$ifb4eth type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev \$line ingress >/dev/null 2>&1
 $(which tc) qdisc add dev \$line handle ffff: ingress
 $(which tc) qdisc del dev \$ifb4eth root >/dev/null 2>&1
-$(which tc) qdisc add dev \$ifb4eth root cake unlimited rtt 10us diffserv4 dual-dsthost nonat nowash no-split-gso no-ack-filter raw overhead 18 mpu 64 noatm ingress
+$(which tc) qdisc add dev \$ifb4eth root cake unlimited rtt 10us diffserv4 dual-dsthost nonat nowash no-split-gso ack-filter raw overhead 18 mpu 64 noatm ingress
 $(which ip) link set \$ifb4eth qlen 10001 mtu \$MTU_NUM
 $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
@@ -732,7 +732,7 @@ $(which ip) link add name \$ifb4eth type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev \$line ingress >/dev/null 2>&1
 $(which tc) qdisc add dev \$line handle ffff: ingress
 $(which tc) qdisc del dev \$ifb4eth root >/dev/null 2>&1
-$(which tc) qdisc add dev \$ifb4eth root cake unlimited diffserv4 dual-dsthost nonat nowash no-split-gso no-ack-filter ethernet ingress
+$(which tc) qdisc add dev \$ifb4eth root cake unlimited diffserv4 dual-dsthost nonat nowash no-split-gso ack-filter ethernet ingress
 $(which ip) link set \$ifb4eth qlen 10001 mtu \$MTU_NUM
 $(which ip) link set \$ifb4eth up
 $(which tc) filter add dev \$line parent ffff: matchall action mirred egress redirect dev \$ifb4eth
