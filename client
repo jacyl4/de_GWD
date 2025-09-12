@@ -905,7 +905,7 @@ done
 
 $(which ip) link set lo qlen 10000 mtu 65520
 $(which tc) qdisc del dev lo root >/dev/null 2>&1
-$(which tc) qdisc add dev lo root cake unlimited rtt 10us diffserv4 dual-srchost no-split-gso ack-filter-aggressive raw egress
+$(which tc) qdisc add dev lo root cake unlimited rtt 10us diffserv4 dual-srchost no-split-gso no-ack-filter raw egress
 
 $(which ip) link add name ifb4lo type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev lo ingress >/dev/null 2>&1
@@ -938,7 +938,7 @@ MTU_NUM=\$(< /sys/class/net/\$line/mtu)
 ifb4eth=\$(echo "ifb4\$line" | cut -c 1-15)
 $(which ip) link set \$line qlen 10001 mtu \$MTU_NUM
 $(which tc) qdisc del dev \$line root >/dev/null 2>&1
-$(which tc) qdisc add dev \$line root cake unlimited diffserv4 dual-srchost nonat nowash no-split-gso ack-filter ethernet egress
+$(which tc) qdisc add dev \$line root cake unlimited diffserv4 dual-srchost nonat nowash no-split-gso no-ack-filter ethernet egress
 
 $(which ip) link add name \$ifb4eth type ifb >/dev/null 2>&1
 $(which tc) qdisc del dev \$line ingress >/dev/null 2>&1
